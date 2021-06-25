@@ -139,7 +139,7 @@ DEPENDENCIES = [
     'jsmin~=2.2.2',
     'jsondiff==1.2.0',
     'packaging~=20.9',
-    'PyGithub==1.38',
+    'PyGithub~=1.38',
     'PyNaCl~=1.4.0',
     'pytz==2019.1',
     'scp~=0.13.2',
