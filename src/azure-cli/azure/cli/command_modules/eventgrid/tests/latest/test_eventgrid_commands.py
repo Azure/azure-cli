@@ -984,8 +984,8 @@ class EventGridTests(ScenarioTest):
         # self.cmd('az eventgrid event-subscription delete  --source-resource-id {source_resource_id} --name {event_subscription_name4}')
         self.cmd('az storage account delete -y -g {rg} -n {sa}')
 
-    @ResourceGroupPreparer(name_prefix='clieventgridrg', location='centraluseuap')
-    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='clieventgridrg', location='eastus2euap')
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='eastus2euap')
     def test_create_event_subscriptions_with_20200101_features(self, resource_group):
         event_subscription_name1 = 'CliTestEventGridEventsubscription1'
         event_subscription_name2 = 'CliTestEventGridEventsubscription2'
@@ -1017,7 +1017,7 @@ class EventGridTests(ScenarioTest):
             'endpoint_baseurl_for_validation': endpoint_baseurl_for_validation,
             'azure_active_directory_tenant_id': azure_active_directory_tenant_id,
             'azure_active_directory_application_id_or_uri': azure_active_directory_application_id_or_uri,
-            'location': 'centraluseuap'
+            'location': 'eastus2euap'
         })
 
         self.kwargs['source_resource_id'] = self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']

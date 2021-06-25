@@ -186,20 +186,35 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Expiration period in days of the Key Policy assigned to the storage account'
     )
 
-    t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
-                               resource_type=ResourceType.DATA_STORAGE_BLOB)
-
     allow_cross_tenant_replication_type = CLIArgumentType(
         arg_type=get_three_state_flag(), options_list=['--allow-cross-tenant-replication', '-r'], min_api='2021-04-01',
         help='Allow or disallow cross AAD tenant object replication. The default interpretation is true for this '
         'property.')
 
-    t_share_permission = self.get_models('DefaultSharePermission', resource_type=ResourceType.MGMT_STORAGE)
     default_share_permission_type = CLIArgumentType(
         options_list=['--default-share-permission', '-d'],
-        arg_type=get_enum_type(t_share_permission), min_api='2020-08-01-preview',
+        arg_type=get_enum_type(['None', 'StorageFileDataSmbShareContributor',
+                                'StorageFileDataSmbShareElevatedContributor',
+                                'StorageFileDataSmbShareReader']),
+        min_api='2020-08-01-preview',
         arg_group='Azure Files Identity Based Authentication',
         help='Default share permission for users using Kerberos authentication if RBAC role is not assigned.')
+
+    t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
+                               resource_type=ResourceType.DATA_STORAGE_BLOB)
+    t_rehydrate_priority = self.get_sdk('_generated.models._azure_blob_storage_enums#RehydratePriority',
+                                        resource_type=ResourceType.DATA_STORAGE_BLOB)
+    tier_type = CLIArgumentType(
+        arg_type=get_enum_type(t_blob_tier), min_api='2019-02-02',
+        help='The tier value to set the blob to. For page blob, the tier correlates to the size of the blob '
+             'and number of allowed IOPS. Possible values are P10, P15, P20, P30, P4, P40, P50, P6, P60, P70, P80 '
+             'and this is only applicable to page blobs on premium storage accounts; For block blob, possible '
+             'values are Archive, Cool and Hot. This is only applicable to block blobs on standard storage accounts.'
+    )
+    rehydrate_priority_type = CLIArgumentType(
+        arg_type=get_enum_type(t_rehydrate_priority), options_list=('--rehydrate-priority', '-r'),
+        min_api='2019-02-02',
+        help='Indicate the priority with which to rehydrate an archived blob.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -245,8 +260,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind, t_tls_version, t_share_permission = \
-            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DefaultSharePermission',
+        t_account_type, t_sku_name, t_kind, t_tls_version = \
+            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion',
                             resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
@@ -964,13 +979,37 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Name of the destination blob. If the exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
 
-    with self.argument_context('storage blob copy start') as c:
-        from azure.cli.command_modules.storage._validators import validate_source_uri
+    with self.argument_context('storage blob copy start', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        from ._validators import validate_source_url
 
-        c.register_source_uri_arguments(validator=validate_source_uri)
-        c.argument('requires_sync', arg_type=get_three_state_flag(),
-                   help='Enforce that the service will not return a response until the copy is complete.'
-                   'Not support for standard page blob.')
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.register_precondition_options(prefix='source_')
+        c.register_source_uri_arguments(validator=validate_source_url)
+
+        c.ignore('incremental_copy')
+        c.argument('if_match', options_list=['--destination-if-match'])
+        c.argument('if_modified_since', options_list=['--destination-if-modified-since'])
+        c.argument('if_none_match', options_list=['--destination-if-none-match'])
+        c.argument('if_unmodified_since', options_list=['--destination-if-unmodified-since'])
+        c.argument('if_tags_match_condition', options_list=['--destination-tags-condition'])
+
+        c.argument('blob_name', options_list=['--destination-blob', '-b'], required=True,
+                   help='Name of the destination blob. If the exists, it will be overwritten.')
+        c.argument('container_name', options_list=['--destination-container', '-c'], required=True,
+                   help='The container name.')
+        c.extra('destination_lease', options_list='--destination-lease-id',
+                help='The lease ID specified for this header must match the lease ID of the estination blob. '
+                'If the request does not include the lease ID or it is not valid, the operation fails with status '
+                'code 412 (Precondition Failed).')
+        c.extra('source_lease', options_list='--source-lease-id', arg_group='Copy Source',
+                help='Specify this to perform the Copy Blob operation only if the lease ID given matches the '
+                'active lease ID of the source blob.')
+        c.extra('rehydrate_priority', rehydrate_priority_type)
+        c.extra('requires_sync', arg_type=get_three_state_flag(),
+                help='Enforce that the service will not return a response until the copy is complete.')
+        c.extra('tier', tier_type)
+        c.extra('tags', tags_type)
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
@@ -1256,10 +1295,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Metadata in space-separated key=value pairs that is associated with the share. '
                             'This overwrites any existing metadata',
                        validator=validate_metadata)
-            c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols), is_preview=True,
+            c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols),
                        min_api='2019-06-01', help='Immutable property for file shares protocol. NFS protocol will be '
                        'only available for premium file shares (file shares in the FileStorage account type).')
-            c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
+            c.argument('root_squash', arg_type=get_enum_type(t_root_squash),
                        min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
             c.argument('access_tier', arg_type=get_enum_type(t_access_tier), min_api='2019-06-01',
                        help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '

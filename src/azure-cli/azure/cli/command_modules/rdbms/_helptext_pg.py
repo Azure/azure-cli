@@ -44,7 +44,7 @@ examples:
   - name: Create a PostgreSQL flexible server using already existing virtual network and subnet. If provided virtual network and subnet does not exists then virtual network and subnet with default address prefix will be created.
     text: |
       az postgres flexible-server create --vnet myVnet --subnet mySubnet
-  - name: Create a PostgreSQL flexible server using already existing virtual network, subnet, and using the subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforMySQL/flexibleServers, if not already delegated.
+  - name: Create a PostgreSQL flexible server using already existing virtual network, subnet, and using the subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers, if not already delegated.
     text: |
       az postgres flexible-server create --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName}
   - name: Create a PostgreSQL flexible server using new virtual network, subnet with non-default address prefix.
@@ -176,6 +176,59 @@ examples:
     text: az postgres flexible-server list --resource-group testGroup
 """
 
+helps['postgres flexible-server migration'] = """
+type: group
+short-summary: Manage migration workflows for PostgreSQL Flexible Servers.
+"""
+
+helps['postgres flexible-server migration create'] = """
+type: command
+short-summary: Create a new migration workflow for a flexible server.
+examples:
+  - name: Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file.
+    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --properties @"migrationConfig.json"
+"""
+
+helps['postgres flexible-server migration list'] = """
+type: command
+short-summary: List the migrations of a flexible server.
+examples:
+  - name: List the currently active migrations of a target flexible server.
+    text: az postgres flexible-server migration list --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --filter Active
+  - name: List all (Active/Completed) migrations of a target flexible server.
+    text: az postgres flexible-server migration list --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --filter All
+"""
+
+helps['postgres flexible-server migration show'] = """
+type: command
+short-summary: Get the details of a specific migration.
+examples:
+  - name: Get the details of a specific migration of a target flexible server.
+    text: az postgres flexible-server migration show --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+"""
+
+helps['postgres flexible-server migration update'] = """
+type: command
+short-summary: Update a specific migration.
+examples:
+  - name: Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --setup-replication
+  - name: Space-separated list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate more DBs concurrently using additional migrations. Note that each additional DB affects the performance of the source server.
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --db-names db1 db2
+  - name: Allow the migration workflow to overwrite the DB on the target.
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --overwrite-dbs
+  - name: Cutover the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --cutover
+"""
+
+helps['postgres flexible-server migration delete'] = """
+type: command
+short-summary: Delete a specific migration.
+examples:
+  - name: Cancel/delete the migration workflow. The migration workflows can be canceled/deleted at any point.
+    text: az postgres flexible-server migration delete --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+"""
+
 helps['postgres flexible-server parameter'] = """
 type: group
 short-summary: Commands for managing server parameter values for flexible server.
@@ -298,4 +351,27 @@ short-summary: Show the connection strings for a PostgreSQL flexible-server data
 examples:
   - name: Show connection strings for cmd and programming languages.
     text: az postgres flexible-server show-connection-string -s testServer -u username -p password -d databasename
+"""
+
+helps['postgres flexible-server deploy'] = """
+type: group
+short-summary: Enable and run github action workflow for PostgreSQL server
+"""
+
+helps['postgres flexible-server deploy setup'] = """
+type: command
+short-summary: Create github action workflow file for PostgreSQL server.
+examples:
+  - name: Create github action workflow file for PostgreSQL server.
+    text: az postgres flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
+  - name: Create github action workflow file for PostgreSQL server and push it to the remote repository
+    text: az postgres flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
+"""
+
+helps['postgres flexible-server deploy run'] = """
+type: command
+short-summary: Run an existing workflow in your github repository
+examples:
+  - name: Run an existing workflow in your github repository
+    text: az postgres flexible-server deploy run --action-name testAction --branch userBranch
 """

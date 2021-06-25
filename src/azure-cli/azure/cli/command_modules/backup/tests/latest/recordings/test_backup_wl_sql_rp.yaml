@@ -13,40 +13,24 @@ interactions:
       ParameterSetName:
       - -v -g --backup-management-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupProtectionContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectionContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8895","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8895","lastUpdatedTime":"2019-10-30T12:06:54.5910168Z","extendedInfo":{"hostServerName":"pstestvm8895","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
-        Backup service is not able to connect to the SQL instance.","recommendations":["Please
-        refer to the general troubleshooting information about SQL connection failures.
-        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
-        Backup service is not able to connect to the SQL instance.","recommendations":["Please
-        refer to the general troubleshooting information about SQL connection failures.
-        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
-        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
-        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8895","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestvm8896","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestvm8896","lastUpdatedTime":"2019-10-31T05:49:36.6718285Z","extendedInfo":{"hostServerName":"pstestvm8896","inquiryInfo":{"status":"Success","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
-        Backup service is not able to connect to the SQL instance.","recommendations":["Please
-        refer to the general troubleshooting information about SQL connection failures.
-        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"inquiryDetails":[{"type":"SQL","itemCount":0,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOpeningSQLConnection","message":"Azure
-        Backup service is not able to connect to the SQL instance.","recommendations":["Please
-        refer to the general troubleshooting information about SQL connection failures.
-        For troubleshooting instructions, see https://aka.ms/AB-usererroropeningsqlconnection"]},"additionalDetail":"SQLPlugin:
-        Exception while Opening SQL Connection:Data Source=.;Integrated Security=True;Pooling=True;Application
-        Name=AzureWorkloadBackup Exception:Login failed for user ''NT AUTHORITY\\SYSTEM''."}}]}},"friendlyName":"pstestvm8896","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","name":"VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8","lastUpdatedTime":"2021-01-12T07:20:11.8845026Z","extendedInfo":{"hostServerName":"pstestwlvm1bca8","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"pstestwlvm1bca8","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm","name":"VMAppContainer;Compute;bksql;sqlvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","lastUpdatedTime":"2021-04-29T10:02:02.4682499Z","extendedInfo":{"hostServerName":"sqlvm","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":8,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"sqlvm","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4879'
+      - '1073'
       content-type:
       - application/json
       date:
-      - Tue, 12 Jan 2021 08:56:37 GMT
+      - Mon, 10 May 2021 09:50:07 GMT
       expires:
       - '-1'
       pragma:
@@ -62,7 +46,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '148'
       x-powered-by:
       - ASP.NET
     status:
@@ -82,27 +66,33 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --query
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/protectedItems/SQLDataBase%3BMSSQLSERVER%3Btestdb?api-version=2020-10-01
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectedItems?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemType%20eq%20%27SQLDataBase%27
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/SQLDataBase;mssqlserver;testdb","name":"SQLDataBase;mssqlserver;testdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"testdb","serverName":"pstestwlvm1bca8","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2021-01-12T08:54:25.092628Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;master","name":"SQLDataBase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"master","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"ProtectionStopped","lastBackupStatus":"IRPending","lastBackupTime":"2021-04-30T07:12:44.7097104Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
         Azure Backup encountered an internal error.","recommendations":["Wait for
         a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"70370422553281","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;pstestwlrg1bca8;pstestwlvm1bca8","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupPolicies/HourlyLogBackup"}}'
+        contact Microsoft support."]},"protectedItemDataSourceId":"369436335590262","protectedItemHealthStatus":"NotReachable","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;bktest1","name":"SQLDataBase;MSSQLSERVER;bktest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"bktest1","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-04-30T10:34:58.975074Z","protectedItemDataSourceId":"369436384058891","protectedItemHealthStatus":"NotReachable","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;Compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest3","name":"SQLDataBase;mssqlserver;sqltest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest3","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T08:55:59.4701938Z","protectedItemDataSourceId":"369436411027462","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest4","name":"SQLDataBase;mssqlserver;sqltest4","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"sqltest4","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"ProtectionStopped","lastBackupStatus":"IRPending","lastBackupTime":"2021-05-10T08:00:47.6137004Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
+        Azure Backup encountered an internal error.","recommendations":["Wait for
+        a few minutes and then try the operation again. If the issue persists, please
+        contact Microsoft support."]},"protectedItemDataSourceId":"369436722049723","protectedItemHealthStatus":"IRPending","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","deferredDeleteTimeInUTC":"2021-05-10T08:03:26.2026225Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"13.22:13:16.6654208","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest2","name":"SQLDataBase;mssqlserver;sqltest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest2","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T08:52:58.9301493Z","protectedItemDataSourceId":"369436844523983","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest","name":"SQLDataBase;mssqlserver;sqltest","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T08:55:59.2453048Z","protectedItemDataSourceId":"369436961546352","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;msdb","name":"SQLDataBase;MSSQLSERVER;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]},"RestoreOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"msdb","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"IRPending","lastBackupTime":"2021-05-10T02:54:58.9215615Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
+        Azure Backup encountered an internal error.","recommendations":["Wait for
+        a few minutes and then try the operation again. If the issue persists, please
+        contact Microsoft support."]},"protectedItemDataSourceId":"369437594861959","protectedItemHealthStatus":"IRPending","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;Compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;model","name":"SQLDataBase;MSSQLSERVER;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"model","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T09:31:03.6018335Z","protectedItemDataSourceId":"369437840876323","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;Compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1693'
+      - '11806'
       content-type:
       - application/json
       date:
-      - Tue, 12 Jan 2021 08:56:37 GMT
+      - Mon, 10 May 2021 09:50:08 GMT
       expires:
       - '-1'
       pragma:
@@ -118,7 +108,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '148'
       x-powered-by:
       - ASP.NET
     status:
@@ -138,24 +128,24 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --query
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bpstestwlrg1bca8%3Bpstestwlvm1bca8/protectedItems/SQLDataBase%3Bmssqlserver%3Btestdb/recoveryPoints?api-version=2020-10-01
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest4/recoveryPoints?api-version=2020-10-01
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/SQLDataBase;mssqlserver;testdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest4/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '590'
+      - '554'
       content-type:
       - application/json
       date:
-      - Tue, 12 Jan 2021 08:56:39 GMT
+      - Mon, 10 May 2021 09:50:09 GMT
       expires:
       - '-1'
       pragma:
@@ -171,7 +161,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '147'
       x-powered-by:
       - ASP.NET
     status:
@@ -191,136 +181,33 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/protectedItems/SQLDataBase%3BMSSQLSERVER%3Btestdb?api-version=2020-10-01
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectedItems?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemType%20eq%20%27SQLDataBase%27
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/SQLDataBase;mssqlserver;testdb","name":"SQLDataBase;mssqlserver;testdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"testdb","serverName":"pstestwlvm1bca8","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2021-01-12T08:54:25.092628Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;master","name":"SQLDataBase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"master","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"ProtectionStopped","lastBackupStatus":"IRPending","lastBackupTime":"2021-04-30T07:12:44.7097104Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
         Azure Backup encountered an internal error.","recommendations":["Wait for
         a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"70370422553281","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;pstestwlrg1bca8;pstestwlvm1bca8","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupPolicies/HourlyLogBackup"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1693'
-      content-type:
-      - application/json
-      date:
-      - Tue, 12 Jan 2021 08:56:40 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup recoverypoint show-log-chain
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --workload-type
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bpstestwlrg1bca8%3Bpstestwlvm1bca8/protectedItems/SQLDataBase%3Bmssqlserver%3Btestdb/recoveryPoints?api-version=2020-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
-  response:
-    body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/SQLDataBase;mssqlserver;testdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '590'
-      content-type:
-      - application/json
-      date:
-      - Tue, 12 Jan 2021 08:56:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup recoverypoint show-log-chain
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --workload-type
-      User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BpstestwlRG1bca8%3Bpstestwlvm1bca8/protectedItems/SQLDataBase%3BMSSQLSERVER%3Btestdb?api-version=2020-10-01
-  response:
-    body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/SQLDataBase;mssqlserver;testdb","name":"SQLDataBase;mssqlserver;testdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"testdb","serverName":"pstestwlvm1bca8","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2021-01-12T08:54:25.092628Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
+        contact Microsoft support."]},"protectedItemDataSourceId":"369436335590262","protectedItemHealthStatus":"NotReachable","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;bktest1","name":"SQLDataBase;MSSQLSERVER;bktest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"bktest1","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-04-30T10:34:58.975074Z","protectedItemDataSourceId":"369436384058891","protectedItemHealthStatus":"NotReachable","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;Compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest3","name":"SQLDataBase;mssqlserver;sqltest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest3","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T08:55:59.4701938Z","protectedItemDataSourceId":"369436411027462","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest4","name":"SQLDataBase;mssqlserver;sqltest4","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"sqltest4","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"ProtectionStopped","lastBackupStatus":"IRPending","lastBackupTime":"2021-05-10T08:00:47.6137004Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
         Azure Backup encountered an internal error.","recommendations":["Wait for
         a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"70370422553281","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;pstestwlrg1bca8;pstestwlvm1bca8","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupPolicies/HourlyLogBackup"}}'
+        contact Microsoft support."]},"protectedItemDataSourceId":"369436722049723","protectedItemHealthStatus":"IRPending","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","deferredDeleteTimeInUTC":"2021-05-10T08:03:26.2026225Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"13.22:13:13.9020021","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest2","name":"SQLDataBase;mssqlserver;sqltest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest2","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T08:52:58.9301493Z","protectedItemDataSourceId":"369436844523983","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest","name":"SQLDataBase;mssqlserver;sqltest","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T08:55:59.2453048Z","protectedItemDataSourceId":"369436961546352","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;msdb","name":"SQLDataBase;MSSQLSERVER;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]},"RestoreOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"msdb","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"IRPending","lastBackupTime":"2021-05-10T02:54:58.9215615Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
+        Azure Backup encountered an internal error.","recommendations":["Wait for
+        a few minutes and then try the operation again. If the issue persists, please
+        contact Microsoft support."]},"protectedItemDataSourceId":"369437594861959","protectedItemHealthStatus":"IRPending","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;Compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;model","name":"SQLDataBase;MSSQLSERVER;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"model","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T09:31:03.6018335Z","protectedItemDataSourceId":"369437840876323","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;Compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1693'
+      - '11806'
       content-type:
       - application/json
       date:
-      - Tue, 12 Jan 2021 08:56:42 GMT
+      - Mon, 10 May 2021 09:50:12 GMT
       expires:
       - '-1'
       pragma:
@@ -356,24 +243,86 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bpstestwlrg1bca8%3Bpstestwlvm1bca8/protectedItems/SQLDataBase%3Bmssqlserver%3Btestdb/recoveryPoints?api-version=2020-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest4/recoveryPoints?api-version=2020-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlrg1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/SQLDataBase;mssqlserver;testdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest4/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '590'
+      - '554'
       content-type:
       - application/json
       date:
-      - Tue, 12 Jan 2021 08:56:43 GMT
+      - Mon, 10 May 2021 09:50:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectedItems?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemType%20eq%20%27SQLDataBase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;master","name":"SQLDataBase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"master","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"ProtectionStopped","lastBackupStatus":"IRPending","lastBackupTime":"2021-04-30T07:12:44.7097104Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
+        Azure Backup encountered an internal error.","recommendations":["Wait for
+        a few minutes and then try the operation again. If the issue persists, please
+        contact Microsoft support."]},"protectedItemDataSourceId":"369436335590262","protectedItemHealthStatus":"NotReachable","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;bktest1","name":"SQLDataBase;MSSQLSERVER;bktest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"bktest1","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-04-30T10:34:58.975074Z","protectedItemDataSourceId":"369436384058891","protectedItemHealthStatus":"NotReachable","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;Compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest3","name":"SQLDataBase;mssqlserver;sqltest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest3","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T08:55:59.4701938Z","protectedItemDataSourceId":"369436411027462","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest4","name":"SQLDataBase;mssqlserver;sqltest4","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"sqltest4","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"ProtectionStopped","lastBackupStatus":"IRPending","lastBackupTime":"2021-05-10T08:00:47.6137004Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
+        Azure Backup encountered an internal error.","recommendations":["Wait for
+        a few minutes and then try the operation again. If the issue persists, please
+        contact Microsoft support."]},"protectedItemDataSourceId":"369436722049723","protectedItemHealthStatus":"IRPending","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","deferredDeleteTimeInUTC":"2021-05-10T08:03:26.2026225Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"13.22:13:12.1788242","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest2","name":"SQLDataBase;mssqlserver;sqltest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest2","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T08:52:58.9301493Z","protectedItemDataSourceId":"369436844523983","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest","name":"SQLDataBase;mssqlserver;sqltest","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T08:55:59.2453048Z","protectedItemDataSourceId":"369436961546352","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;msdb","name":"SQLDataBase;MSSQLSERVER;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]},"RestoreOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"msdb","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"IRPending","lastBackupTime":"2021-05-10T02:54:58.9215615Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
+        Azure Backup encountered an internal error.","recommendations":["Wait for
+        a few minutes and then try the operation again. If the issue persists, please
+        contact Microsoft support."]},"protectedItemDataSourceId":"369437594861959","protectedItemHealthStatus":"IRPending","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;Compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;model","name":"SQLDataBase;MSSQLSERVER;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"model","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-10T09:31:03.6018335Z","protectedItemDataSourceId":"369437840876323","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;Compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","isArchiveEnabled":false}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '11806'
+      content-type:
+      - application/json
+      date:
+      - Mon, 10 May 2021 09:50:13 GMT
       expires:
       - '-1'
       pragma:
@@ -390,6 +339,59 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest4/recoveryPoints?api-version=2020-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest4/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '554'
+      content-type:
+      - application/json
+      date:
+      - Mon, 10 May 2021 09:50:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
       x-powered-by:
       - ASP.NET
     status:

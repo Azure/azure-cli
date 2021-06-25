@@ -56,7 +56,6 @@ short-summary: Place the CLI in a waiting state until an operation is complete.
 helps['hdinsight create'] = """
 type: command
 short-summary: Create a new cluster.
-long-summary: 'Create a new cluster. Incoming BREAKING CHANGE: The default value "large" of parameters `--workernode-size` and `--headnode-size` will be removed in the next CLI version.'
 examples:
   - name: Create a cluster with an existing storage account.
     text: |-
@@ -158,6 +157,24 @@ examples:
         --enable-compute-isolation --workernode-size "Standard_E8S_V3" --headnode-size "Standard_E8S_V3"
 """
 
+helps['hdinsight resize'] = """
+type: command
+short-summary: Resize the specified HDInsight cluster to the specified size.
+examples:
+  - name: Resize the cluster's workernode.
+    text: |-
+        az hdinsight resize --name MyCluster --resource-group rg --workernode-count 5
+"""
+
+helps['hdinsight update'] = """
+type: command
+short-summary: Update the tags of the specified HDInsight cluster.
+examples:
+  - name: Update the tags.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --tags key=value
+"""
+
 helps['hdinsight list'] = """
 type: command
 short-summary: List HDInsight clusters in a resource group or subscription.
@@ -165,20 +182,40 @@ short-summary: List HDInsight clusters in a resource group or subscription.
 
 helps['hdinsight monitor'] = """
 type: group
-short-summary: Manage Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Manage Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor disable'] = """
 type: command
-short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Disable the Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor enable'] = """
 type: command
-short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Enable the Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor show'] = """
+type: command
+short-summary: Get the status of Classic Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor'] = """
+type: group
+short-summary: Manage Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor disable'] = """
+type: command
+short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor enable'] = """
+type: command
+short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor show'] = """
 type: command
 short-summary: Get the status of Azure Monitor logs integration on an HDInsight cluster.
 """
@@ -313,7 +350,7 @@ short-summary: Update a schedule condition.
 examples:
   - name: Update a schedule condition.
     text: |-
-        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0\\
+        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0 \\
         --time 10:00 --workernode-count 5
 """
 

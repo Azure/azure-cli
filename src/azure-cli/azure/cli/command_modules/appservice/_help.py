@@ -1458,10 +1458,10 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a java|11|Java SE|8 runtime using '|' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using '|' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|8"
-  - name: Create a web app with a java|11|Java SE|8 runtime using ':' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using ':' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:8"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.

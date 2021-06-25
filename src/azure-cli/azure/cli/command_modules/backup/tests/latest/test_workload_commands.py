@@ -10,28 +10,28 @@ import json
 import os
 
 
-id_sql = '/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8'
+id_sql = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm'
 id_hana = '/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy'
-item_id_sql = '/Subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/sqldatabase;mssqlserver;testdb'
+item_id_sql = '/Subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;bktest1'
 item_id_hana = '/Subscriptions/e3d2d341-4ddb-4c5d-9121-69b7e719485e/resourceGroups/IDCDemo/providers/Microsoft.RecoveryServices/vaults/IDCDemoVault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;IDCDemo;HANADemoIDC3/protectedItems/SAPHanaDatabase;h22;h22'
-sub_sql = 'da364f0f-307b-41c9-9d47-b7413ec45535'
+sub_sql = '0b1f6471-1bf0-4dda-aec3-cb9272f09590'
 sub_hana = 'da364f0f-307b-41c9-9d47-b7413ec45535'
-rg_sql = 'pstestwlRG1bca8'
+rg_sql = 'bksql'
 rg_hana = 'akneema'
-vault_sql = 'pstestwlRSV1bca8'
+vault_sql = 'sqlvault'
 vault_hana = 'akneema-vault-ccy'
-container_sql = 'VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8'
+container_sql = 'VMAppContainer;Compute;bksql;sqlvm'
 container_hana = 'VMAppContainer;Compute;akneema;akneema-hana-ccy'
-container_friendly_sql = 'pstestwlvm1bca8'
+container_friendly_sql = 'sqlvm'
 container_friendly_hana = 'akneema-hana-ccy'
 item_auto_sql = 'SQLInstance;mssqlserver'
 item_auto_hana = 'SAPHanaSystem;H22'
-item1_sql = 'SQLDataBase;MSSQLSERVER;testdb'
+item1_sql = 'SQLDataBase;MSSQLSERVER;bktest1'
 item2_sql = 'msdb'
 item1_hana = 'SAPHanaDatabase;H22;h22'
 item2_hana = 'SYSTEMDB'
 backup_entity_friendly_name_hana = 'H22/H22 [HANADemoIDC3]'
-backup_entity_friendly_name_sql = 'MSSQLSERVER/testdb1 [pstestwlvm1bca8]'
+backup_entity_friendly_name_sql = 'MSSQLSERVER/sqltest5'
 item_id_hana_2 = '/Subscriptions/e3d2d341-4ddb-4c5d-9121-69b7e719485e/resourceGroups/IDCDemo/providers/Microsoft.RecoveryServices/vaults/IDCDemoVault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;IDCDemo;HANADemoIDC3/protectedItems/SAPHanaDatabase;h22;h22_restored_sarath'
 
 
@@ -49,7 +49,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'id': id_sql
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+        # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id} ')
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
@@ -82,15 +82,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
-    def test_backup_wl_hana_container(self, container_name1=container_hana, container_name2=container_friendly_hana,
-                                      resource_group=rg_hana, vault_name=vault_hana, workload_type='SAPHANA',
-                                      subscription=sub_hana, id=id_hana):
+    def test_backup_wl_hana_container(self):
 
         self.kwargs.update({
             'vault': vault_hana,
@@ -102,8 +100,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'id': id_hana
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
-
+        # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
@@ -134,11 +131,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
-
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        # self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_sql_policy(self):
@@ -158,7 +154,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'pit': 'SQLDataBase',
             'policy_new': self.create_random_name('clitest-policy', 24)
         })
-
+        self.kwargs['id'] = self.cmd('vm list --resource-group {rg} --query [0].id').get_output_in_json()
         self.kwargs['policy1_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy}', checks=[
             self.check('name', '{policy}'),
             self.check('resourceGroup', '{rg}')
@@ -262,18 +258,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_backup_wl_sql_item(self):
 
         self.kwargs.update({
-            'vault': "sarath-vault",
-            'name': "VMAppContainer;Compute;sarath-rg;sarathvm",
-            'fname': "sarathvm",
+            'vault': vault_sql,
+            'name': container_sql,
+            'fname': container_friendly_sql,
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
             'sub': sub_sql,
             'default': 'HourlyLogBackup',
-            'rg': "sarath-rg",
-            'item': "sqldatabase;mssqlserver;msdb",
-            'fitem': "msdb",
+            'rg': rg_sql,
+            'item': 'sqldatabase;mssqlserver;sqltest4',
+            'fitem': 'sqltest4',
             'id': id_sql,
-            'item_id': item_id_sql,
+            'item_id': '/Subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;sqltest4',
             'pit': 'SQLDataBase'
         })
 
@@ -292,9 +288,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
-        self.assertIn("sarath-vault", item1_json['id'].lower())
-        self.assertIn("sarathvm", item1_json['properties']['containerName'].lower())
-        self.assertIn("sarathvm", item1_json['properties']['sourceResourceId'].lower())
+        self.assertIn("sqlvault", item1_json['id'].lower())
+        self.assertIn("sqlvm", item1_json['properties']['containerName'].lower())
+        self.assertIn("sqlvm", item1_json['properties']['sourceResourceId'].lower())
         self.assertIn(self.kwargs['default'].lower(), item1_json['properties']['policyId'].lower())
 
         self.kwargs['container1_fullname'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
@@ -318,17 +314,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.cmd('backup item list -g {rg} -v {vault} -c {container1} --backup-management-type AzureWorkload --workload-type SQLDataBase', checks=[
-            self.check("length(@)", 3),
+            self.check("length(@)", 8),
             self.check("length([?properties.friendlyName == '{fitem}'])", 1)
         ])
 
         self.cmd('backup item list -g {rg} -v {vault} -c {container1_fullname} --backup-management-type AzureWorkload --workload-type SQLDataBase', checks=[
-            self.check("length(@)", 3),
+            self.check("length(@)", 8),
             self.check("length([?properties.friendlyName == '{fitem}'])", 1)
         ])
 
         self.cmd('backup item list -g {rg} -v {vault} --backup-management-type AzureWorkload --workload-type SQLDataBase', checks=[
-            self.check("length(@)", 3),
+            self.check("length(@)", 8),
             self.check("length([?properties.friendlyName == '{fitem}'])", 1)
         ])
 
@@ -442,15 +438,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'sub': sub_sql,
             'default': 'HourlyLogBackup',
             'rg': rg_sql,
-            'item': item1_sql,
+            'item': 'sqldatabase;mssqlserver;sqltest4',
             'id': id_sql,
-            'item_id': item_id_sql,
+            'item_id': '/Subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;sqltest4',
             'pit': 'SQLDataBase',
-            'protectable_item_name': 'testdb',
+            'protectable_item_name1': 'MSSQLSERVER',
+            'protectable_item_name2': 'msdb_restored_5_10_2021_1527',
             'pit_hana': 'SAPHanaDatabase'
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+        # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
@@ -458,20 +455,20 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --query properties.friendlyName --backup-management-type AzureWorkload').get_output_in_json()
 
         self.cmd('backup protectable-item list -g {rg} --vault-name {vault} --workload-type {wt}', checks=[
-            self.check("length([?properties.friendlyName == '{protectable_item_name}'])", 1)
+            self.check("length([?properties.friendlyName == '{protectable_item_name1}'])", 1)
         ])
 
-        self.cmd('backup protectable-item show -g {rg} --vault-name {vault} --name {protectable_item_name} --workload-type {wt} --protectable-item-type {pit} --server-name {fname}', checks=[
-            self.check('properties.friendlyName', '{protectable_item_name}'),
+        self.cmd('backup protectable-item show -g {rg} --vault-name {vault} --name {protectable_item_name2} --workload-type {wt} --protectable-item-type {pit} --server-name {fname}', checks=[
+            self.check('properties.friendlyName', '{protectable_item_name2}'),
             self.check('properties.protectableItemType', '{pit}'),
             self.check('properties.serverName', '{fname}'),
             self.check('resourceGroup', '{rg}')
         ])
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        # self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_hana_protectable_item(self):
@@ -527,7 +524,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
             'sub': sub_sql,
-            'item': item1_sql,
+            'item': 'sqltest4',
             'pit': 'SQLDatabase',
             'item_id': item_id_sql,
             'id': id_sql
@@ -585,20 +582,20 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_backup_wl_sql_protection(self):
 
         self.kwargs.update({
-            'vault': "sarath-vault",
-            'name': "VMAppContainer;Compute;sarath-rg;sarathvm",
-            'fname': "sarathvm",
+            'vault': "sqlvault",
+            'name': "VMAppContainer;Compute;bksql;sqlvm",
+            'fname': "sqlvm",
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
             'sub': sub_sql,
             'default': 'HourlyLogBackup',
-            'rg': "sarath-rg",
-            'item': "sqldatabase;mssqlserver;msdb",
-            'fitem': "msdb",
+            'rg': rg_sql,
+            'item': "sqldatabase;mssqlserver;sqltest6",
+            'fitem': "sqltest6",
             'id': id_sql,
-            'item_id': item_id_sql,
+            'item_id': '/Subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;sqltest6',
             'pit': "SQLDataBase",
-            'entityFriendlyName': 'msdb [sarathvm]'
+            'entityFriendlyName': 'sqltest6'
         })
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
@@ -728,7 +725,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'entityFriendlyName': backup_entity_friendly_name_sql
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+        # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
@@ -737,10 +734,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection auto-disable-for-azurewl -v {vault} -g {rg} --item-name {item}')
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        # self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_hana_restore(self):
@@ -845,20 +842,20 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @record_only()
     def test_backup_wl_sql_restore(self):
         self.kwargs.update({
-            'vault': "sarath-vault",
-            'name': "VMAppContainer;Compute;sarath-rg;sarathvm",
-            'fname': "sarathvm",
+            'vault': "sqlvault",
+            'name': "VMAppContainer;Compute;bksql;sqlvm",
+            'fname': "sqlvm",
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
             'sub': sub_sql,
             'default': 'HourlyLogBackup',
-            'rg': "sarath-rg",
-            'item': "sqldatabase;mssqlserver;msdb",
-            'fitem': "msdb",
+            'rg': "bksql",
+            'item': "sqldatabase;mssqlserver;sqltest2",
+            'fitem': "sqltest2",
             'id': id_sql,
-            'item_id': item_id_sql,
+            'item_id': '/Subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm/protectedItems/SQLDataBase;MSSQLSERVER;sqltest2',
             'pit': 'SQLDataBase',
-            'entityFriendlyName': 'msdb',
+            'entityFriendlyName': 'sqltest2',
             'tpit': 'SQLInstance',
             'titem': 'MSSQLSERVER'
         })
@@ -915,12 +912,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @record_only()
     def test_backup_wl_sql_restore_as_files(self):
         self.kwargs.update({
-            'vault': "iaasvmsqlworkloadexistingvault1",
-            'name': "VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win",
+            'vault': "sqlvault",
+            'name': "VMAppContainer;compute;bksql;sqlvm",
             'wt': 'MSSQL',
-            'sub': "38304e13-357e-405e-9e9a-220351dcce8c",
-            'rg': "iaasvmsqlworkload.existing.vaults",
-            'item': "SQLDataBase;mssqlserver;navigate-testdb2"
+            'sub': "0b1f6471-1bf0-4dda-aec3-cb9272f09590",
+            'rg': "bksql",
+            'item': "SQLDataBase;mssqlserver;sqltest"
         })
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
