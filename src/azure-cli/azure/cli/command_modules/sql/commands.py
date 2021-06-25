@@ -141,6 +141,7 @@ def load_command_table(self, _):
                   supports_no_wait=True)
         g.generic_update_command('update',
                                  custom_func_name='db_update',
+                                 setter_name='begin_create_or_update',
                                  supports_no_wait=True,
                                  transform=database_lro_transform,
                                  table_transformer=db_table_format)
