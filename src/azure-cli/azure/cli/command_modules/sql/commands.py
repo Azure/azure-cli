@@ -136,7 +136,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'db_list',
                          transform=db_list_transform,
                          table_transformer=db_table_format)
-        g.command('delete', 'delete',
+        g.command('delete', 'begin_delete',
                   confirmation=True,
                   supports_no_wait=True)
         g.generic_update_command('update',
