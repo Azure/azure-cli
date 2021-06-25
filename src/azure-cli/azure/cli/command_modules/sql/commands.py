@@ -182,7 +182,7 @@ def load_command_table(self, _):
                        transform=db_transform)
         g.custom_command('list', 'dw_list',
                          transform=db_list_transform)
-        g.command('delete', 'delete',
+        g.command('delete', 'begin_delete',
                   confirmation=True,
                   supports_no_wait=True)
         g.custom_command('pause', 'dw_pause')
@@ -313,7 +313,7 @@ def load_command_table(self, _):
 
         g.show_command('show', 'get')
         g.custom_command('list', 'list_long_term_retention_backups')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('sql db ltr-backup',
                             database_operations,
@@ -335,7 +335,7 @@ def load_command_table(self, _):
 
         g.command('list', 'list_current_by_database')
         g.custom_show_command('show', 'db_sensitivity_label_show')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('update', 'db_sensitivity_label_update')
 
     with self.command_group('sql db classification recommendation',
@@ -385,7 +385,7 @@ def load_command_table(self, _):
                          supports_no_wait=True,
                          transform=elastic_pool_lro_transform,
                          table_transformer=elastic_pool_table_format)
-        g.command('delete', 'delete',
+        g.command('delete', 'begin_delete',
                   supports_no_wait=True)
         g.show_command('show', 'get',
                        transform=elastic_pool_transform,
@@ -435,7 +435,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_server')
         g.custom_command('create', 'failover_group_create')
         g.generic_update_command('update', custom_func_name='failover_group_update')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('set-primary', 'failover_group_failover')
 
     ###############################################
@@ -451,7 +451,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'instance_pool_list',
                          table_transformer=instance_pool_table_format)
         g.command('update', 'update')
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('create', 'instance_pool_create',
                          supports_no_wait=True, table_transformer=instance_pool_table_format)
         g.wait_command('wait')
@@ -471,7 +471,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'server_create',
                          table_transformer=server_table_format,
                          supports_no_wait=True)
-        g.command('delete', 'delete',
+        g.command('delete', 'begin_delete',
                   confirmation=True)
         g.custom_show_command('show', 'server_get',
                               table_transformer=server_table_format)
@@ -501,7 +501,7 @@ def load_command_table(self, _):
                          table_transformer=firewall_rule_table_format)
         g.custom_command('update', 'firewall_rule_update',
                          table_transformer=firewall_rule_table_format)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get',
                        table_transformer=firewall_rule_table_format)
         g.command('list', 'list_by_server',
@@ -516,7 +516,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_server_azure_ad_administrators_operations) as g:
         g.custom_command('create', 'server_ad_admin_set')
         g.command('list', 'list_by_server')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.generic_update_command('update',
                                  custom_func_name='server_ad_admin_update',
                                  setter_arg_name='parameters')
@@ -557,7 +557,7 @@ def load_command_table(self, _):
                   validator=validate_subnet)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.generic_update_command('update')
 
     server_connection_policies_operations = CliCommandType(
@@ -634,7 +634,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_instances_operations) as g:
 
         g.custom_command('create', 'managed_instance_create', transform=mi_transform, supports_no_wait=True)
-        g.command('delete', 'delete', transform=mi_transform, confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', transform=mi_transform, confirmation=True, supports_no_wait=True)
         g.custom_show_command('show', 'managed_instance_get', transform=mi_transform)
         g.custom_command('list', 'managed_instance_list', transform=mi_list_transform)
         g.generic_update_command('update', custom_func_name='managed_instance_update', transform=mi_transform, supports_no_wait=True)
@@ -705,7 +705,7 @@ def load_command_table(self, _):
         g.custom_command('restore', 'managed_db_restore', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
 
     managed_backup_short_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedBackupShortTermRetentionPoliciesOperations.{}',
@@ -786,7 +786,7 @@ def load_command_table(self, _):
                             virtual_clusters_operations,
                             client_factory=get_sql_virtual_clusters_operations) as g:
 
-        g.command('delete', 'delete', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'virtual_cluster_list')
 
@@ -801,5 +801,5 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('create', 'instance_failover_group_create')
         g.generic_update_command('update', custom_func_name='instance_failover_group_update')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('set-primary', 'instance_failover_group_failover')
