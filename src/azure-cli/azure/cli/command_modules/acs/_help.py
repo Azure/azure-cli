@@ -440,6 +440,9 @@ parameters:
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
+  - name: --enable-ultra-ssd
+    type: bool
+    short-summary: Enable UltraSSD, default value is false.
   - name: --enable-azure-rbac
     type: bool
     short-summary: Enable Azure RBAC to control authorization checks on cluster.
@@ -482,6 +485,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
   - name: Create a kubernetes cluster with EncryptionAtHost enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-encryption-at-host
+  - name: Create a kubernetes cluster with UltraSSD enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-ultra-ssd
   - name: Create a kubernetes cluster with Azure RBAC enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
 """
@@ -821,11 +826,16 @@ parameters:
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
+  - name: --enable-ultra-ssd
+    type: bool
+    short-summary: Enable UltraSSD, default value is false.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
   - name: Create a nodepool with EncryptionAtHost enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
+  - name: Create a nodepool with UltraSSD enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-ultra-ssd
 """
 
 helps['aks nodepool delete'] = """
