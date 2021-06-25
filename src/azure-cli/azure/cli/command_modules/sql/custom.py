@@ -3557,7 +3557,7 @@ def server_ad_admin_set(
 
     kwargs['tenant_id'] = _get_tenant_id()
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
@@ -3997,7 +3997,7 @@ def managed_instance_create(
         tenant_id=_get_tenant_id())
 
     # Create
-    return client.create_or_update(
+    return client.begin_create_or_update(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
@@ -4292,7 +4292,7 @@ def managed_db_create(
         resource_group_name=resource_group_name)
 
     # Create
-    return client.create_or_update(
+    return client.begin_create_or_update(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
@@ -4343,7 +4343,7 @@ def managed_db_restore(
             managed_instance_name,
             database_name)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         database_name=target_managed_database_name,
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
@@ -4800,7 +4800,7 @@ def failover_group_create(
         add_db,
         [])
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         failover_group_name=failover_group_name,
@@ -4964,7 +4964,7 @@ def instance_failover_group_create(
     if failover_policy == FailoverPolicyType.manual.value:
         grace_period = None
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         location_name=primary_server.location,
         failover_group_name=failover_group_name,
