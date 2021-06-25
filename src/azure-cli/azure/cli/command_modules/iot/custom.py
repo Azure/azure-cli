@@ -412,6 +412,9 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    retention_day=1,
                    c2d_ttl=1,
                    c2d_max_delivery_count=10,
+                   disable_local_auth=None,
+                   disable_device_sas=None,
+                   disable_module_sas=None,
                    feedback_lock_duration=5,
                    feedback_ttl=1,
                    feedback_max_delivery_count=10,
@@ -478,7 +481,10 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                                   messaging_endpoints=msg_endpoint_dic,
                                   storage_endpoints=storage_endpoint_dic,
                                   cloud_to_device=cloud_to_device_properties,
-                                  min_tls_version=min_tls_version)
+                                  min_tls_version=min_tls_version,
+                                  disable_local_auth=disable_local_auth,
+                                  disable_device_sas=disable_device_sas,
+                                  disable_module_sas=disable_module_sas)
     properties.enable_file_upload_notifications = enable_fileupload_notifications
 
     hub_description = IotHubDescription(location=location,
@@ -535,6 +541,9 @@ def update_iot_hub_custom(instance,
                           retention_day=None,
                           c2d_ttl=None,
                           c2d_max_delivery_count=None,
+                          disable_local_auth=None,
+                          disable_device_sas=None,
+                          disable_module_sas=None,
                           feedback_lock_duration=None,
                           feedback_ttl=None,
                           feedback_max_delivery_count=None,
@@ -608,6 +617,14 @@ def update_iot_hub_custom(instance,
         fileupload_storage_container_uri,
         fileupload_storage_identity,
     )
+
+    # sas token authentication switches
+    if hasattr(instance.properties, 'disable_local_auth') and disable_local_auth is not None:
+        instance.properties.disable_local_auth = disable_local_auth
+    if hasattr(instance.properties, 'disable_device_sas') and disable_device_sas is not None:
+        instance.properties.disable_device_sas = disable_device_sas
+    if hasattr(instance.properties, 'disable_module_sas') and disable_module_sas is not None:
+        instance.properties.disable_module_sas = disable_module_sas
 
     instance.properties.storage_endpoints['$default'] = default_storage_endpoint
 

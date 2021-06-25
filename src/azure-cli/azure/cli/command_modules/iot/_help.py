@@ -405,6 +405,9 @@ examples:
   - name: Create an IoT Hub with a system-assigned managed identity, and assign a role and scope to a storage account for the created identity.
     text: >
         az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --mi-system-assigned --role "Storage Blob Data Contributor" --scopes {resourceId}
+  - name: Create an IoT Hub with local authentication, device SAS keys, and module SAS keys all disabled
+    text: >
+        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --disable-local-auth --disable-device-sas --disable-module-sas
 """
 
 helps['iot hub delete'] = """
@@ -830,6 +833,9 @@ examples:
     text: >
         az iot hub update -n MyIoTHub --fileupload-notification-max-delivery-count 50
         --fileupload-notification-ttl 48 --fileupload-notifications --fileupload-notification-lock-duration 10
+  - name: Update the IoT Hub local authentication, device SAS, and module SAS settings
+    text: >
+        az iot hub update -n MyIoTHub --disable-local-auth --disable-device-sas false --disable-module-sas true
 """
 
 helps['iot central'] = """
