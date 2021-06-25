@@ -22,9 +22,10 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'VM': 'VM',
                      'AzureFileShare': 'AzureFileShare'}
 
-tier_type_map = {'VaultStandard': 'HardenedRP', 
-                 'VaultArchive': 'ArchivedRP', 
+tier_type_map = {'VaultStandard': 'HardenedRP',
+                 'VaultArchive': 'ArchivedRP',
                  'Snapshot': 'InstantRP'}
+
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
                    status="Registered", use_secondary_region=None):

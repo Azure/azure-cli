@@ -25,7 +25,9 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
 
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError 
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
+    MutuallyExclusiveArgumentError
+
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
@@ -549,15 +551,18 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
         client = recovery_points_crr_cf(cmd.cli_ctx)
 
     if recommended_for_archive:
+        if is_ready_for_move is False:
+            raise InvalidArgumentValueError("All the recommended archivable recovery points are by default ready for \
+            move. Please provide the correct value for --is-ready-for-move.")
+
         client = recovery_points_recommended_cf(cmd.cli_ctx)
         recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri)
-        paged_recovery_points = _get_list_from_paged_response(recovery_points)
 
     else:
         recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
                                       filter_string)
-        paged_recovery_points = _get_list_from_paged_response(recovery_points)
 
+    paged_recovery_points = _get_list_from_paged_response(recovery_points)
     common.fetch_tier(paged_recovery_points)
 
     recovery_point_list = common.check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move)
@@ -570,8 +575,6 @@ def move_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_nam
 
     container_uri = _get_protection_container_uri_from_id(item_name.id)
     item_uri = _get_protected_item_uri_from_id(item_name.id)
-
-    
 
     if source_tier not in common.tier_type_map.keys():
         raise InvalidArgumentValueError('This source tier-type is not accepted by move command at present.')

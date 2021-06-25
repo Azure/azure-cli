@@ -10,7 +10,8 @@ import azure.cli.command_modules.backup.custom_common as common
 import azure.cli.command_modules.backup.custom_wl as custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
     backup_protection_containers_cf, backup_protectable_items_cf
-from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
+    MutuallyExclusiveArgumentError
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -80,6 +81,10 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
 
     if isinstance(item, list):
         raise ValidationError("Multiple items found. Please give native names instead.")
+
+    if (use_secondary_region and (is_ready_for_move is not None or target_tier is not None or tier is not None or
+                                  recommended_for_archive is not None)):
+        raise MutuallyExclusiveArgumentError("Archive functionality is not supported in secondary region.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date, end_date,
