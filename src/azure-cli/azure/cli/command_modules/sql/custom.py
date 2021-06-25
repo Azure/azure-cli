@@ -38,7 +38,7 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
-    ServerPublicNetworkAccess,
+    ServerNetworkAccessFlag,
     ServerInfo,
     EncryptionProtector,
     ManagedInstanceEncryptionProtector,
@@ -3474,8 +3474,8 @@ def server_create(
 
     if enable_public_network is not None:
         kwargs['public_network_access'] = (
-            ServerPublicNetworkAccess.enabled if enable_public_network
-            else ServerPublicNetworkAccess.disabled)
+            ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
 
     kwargs['key_id'] = key_id
 
@@ -3568,8 +3568,8 @@ def server_update(
 
     if enable_public_network is not None:
         instance.public_network_access = (
-            ServerPublicNetworkAccess.enabled if enable_public_network
-            else ServerPublicNetworkAccess.disabled)
+            ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
 
     instance.primary_user_assigned_identity_id = (
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
