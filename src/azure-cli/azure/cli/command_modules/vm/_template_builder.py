@@ -268,7 +268,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
-def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
+def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_values=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None, authentication_type=None,
@@ -279,7 +279,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-        enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None):
+        enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -524,6 +524,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
     if platform_fault_domain is not None:
         vm_properties['platformFaultDomain'] = platform_fault_domain
+
+    if user_data:
+        vm_properties['userData'] = b64encode(user_data)
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -772,7 +775,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None,
                         max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
-                        enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None):
+                        enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
+                        user_data=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -930,15 +934,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     vmss_properties = {
         'overprovision': overprovision,
         'upgradePolicy': {
-            'mode': upgrade_policy_mode,
-            'rollingUpgradePolicy': {
-                'maxBatchInstancePercent': max_batch_instance_percent,
-                'maxUnhealthyInstancePercent': max_unhealthy_instance_percent,
-                'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
-                'pauseTimeBetweenBatches': pause_time_between_batches,
-                'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
-                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
-            }
+            'mode': upgrade_policy_mode
         },
         'virtualMachineProfile': {
             'storageProfile': storage_properties,
@@ -947,6 +943,31 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             }
         }
     }
+
+    if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = {}
+        rolling_upgrade_policy = vmss_properties['upgradePolicy']['rollingUpgradePolicy']
+
+        if max_batch_instance_percent is not None:
+            rolling_upgrade_policy['maxBatchInstancePercent'] = max_batch_instance_percent
+
+        if max_unhealthy_instance_percent is not None:
+            rolling_upgrade_policy['maxUnhealthyInstancePercent'] = max_unhealthy_instance_percent
+
+        if max_unhealthy_upgraded_instance_percent is not None:
+            rolling_upgrade_policy['maxUnhealthyUpgradedInstancePercent'] = max_unhealthy_upgraded_instance_percent
+
+        if pause_time_between_batches is not None:
+            rolling_upgrade_policy['pauseTimeBetweenBatches'] = pause_time_between_batches
+
+        if enable_cross_zone_upgrade is not None:
+            rolling_upgrade_policy['enableCrossZoneUpgrade'] = enable_cross_zone_upgrade
+
+        if prioritize_unhealthy_instances is not None:
+            rolling_upgrade_policy['prioritizeUnhealthyInstances'] = prioritize_unhealthy_instances
+
+        if not rolling_upgrade_policy:
+            del rolling_upgrade_policy
 
     if not specialized:
         vmss_properties['virtualMachineProfile']['osProfile'] = os_profile
@@ -1005,6 +1026,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if encryption_at_host:
         vmss_properties['virtualMachineProfile']['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+
+    if user_data:
+        vmss_properties['virtualMachineProfile']['userData'] = b64encode(user_data)
 
     if host_group:
         vmss_properties['hostGroup'] = {'id': host_group}

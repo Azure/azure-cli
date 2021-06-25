@@ -15,9 +15,9 @@ from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
-from .flexible_server_custom_common import user_confirmation, create_firewall_rule
+from .flexible_server_custom_common import create_firewall_rule
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, parse_public_access_input, \
-    generate_password, parse_maintenance_window, get_postgres_list_skus_info, DEFAULT_LOCATION_PG
+    generate_password, parse_maintenance_window, get_postgres_list_skus_info
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
 from .validators import pg_arguments_validator, validate_server_name
 
@@ -42,8 +42,9 @@ def flexible_server_create(cmd, client,
                            vnet_address_prefix=None, subnet_address_prefix=None,
                            private_dns_zone_arguments=None):
     # validator
-    if location is None:
-        location = DEFAULT_LOCATION_PG
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                             server_name, 'postgres')
+
     sku_info, single_az = get_postgres_list_skus_info(cmd, location)
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
     storage_mb *= 1024
@@ -65,9 +66,6 @@ def flexible_server_create(cmd, client,
 
     server_result = firewall_id = subnet_id = None
 
-    # Populate desired parameters
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                             server_name, 'postgres')
     server_name = server_name.lower()
     validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 

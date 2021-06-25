@@ -3,6 +3,18 @@
 Release History
 ===============
 
+2.25.0
+++++++
+* Fix #18360 and #18262: Write to stderr issue (#18414)
+
+2.24.2
+++++++
+* No changes
+
+2.24.1
+++++++
+* No changes
+
 2.24.0
 ++++++
 * Fix issue #16798: Azure CLI output is corrupted! (#18065)
