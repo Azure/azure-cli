@@ -192,8 +192,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  supports_no_wait=True)
         g.custom_show_command('show', 'get_streaming_endpoint',
                               custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
-        g.command('delete', 'delete')
-        g.command('scale', 'scale')
+        g.command('delete', 'begin_delete')
+        g.command('scale', 'begin_scale')
         g.wait_command('wait')
 
     with self.command_group('ams streaming-endpoint akamai', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:
@@ -220,7 +220,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          supports_no_wait=True)
         g.custom_show_command('show', 'get_live_event',
                               custom_command_type=get_custom_sdk('live_event', get_live_events_client))
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.command('list', 'list')
         g.generic_update_command('update',
                                  setter_name='update_live_event_setter',
@@ -235,7 +235,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_show_command('show', 'get_live_output',
                               custom_command_type=get_custom_sdk('live_output', get_live_outputs_client))
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
 
     with self.command_group('ams account-filter', get_sdk('AccountFilters', get_account_filters_client)) as g:
         g.custom_command('create', 'create_account_filter',

@@ -5,7 +5,7 @@
 
 from knack.util import CLIError
 
-from azure.mgmt.media.models import (ApiErrorException, MediaService, MediaServiceIdentity, StorageAccount)
+from azure.mgmt.media.models import (ApiError, MediaService, MediaServiceIdentity, StorageAccount, CheckNameAvailabilityInput)
 
 
 def get_mediaservice(client, account_name, resource_group_name=None):
@@ -79,7 +79,7 @@ def mediaservice_update_getter(client, resource_group_name, account_name):
 
     try:
         return client.get(resource_group_name, account_name)
-    except ApiErrorException as ex:
+    except ApiError as ex:
         raise CLIError(ex.message)
 
 
@@ -94,8 +94,8 @@ def update_mediaservice(instance, tags=None):
 
 
 def check_name_availability(client, location, account_name):
-    availability = client.check_name_availability(location_name=location, name=account_name,
-                                                  type='MICROSOFT.MEDIA/MEDIASERVICES')
+    parameters = CheckNameAvailabilityInput(name=account_name, type='MICROSOFT.MEDIA/MEDIASERVICES')
+    availability = client.check_name_availability(location_name=location, parameters=parameters)
 
     if availability.name_available:
         return 'Name available.'

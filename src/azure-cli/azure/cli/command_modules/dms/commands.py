@@ -15,9 +15,9 @@ from azure.cli.core.commands import CliCommandType
 
 def dms_api_exception_handler(ex):
     from knack.util import CLIError
-    from azure.mgmt.datamigration.models import ApiErrorException
+    from azure.mgmt.datamigration.models import ApiError
 
-    if isinstance(ex, ApiErrorException):
+    if isinstance(ex, ApiError):
         raise CLIError(ex)
     raise ex
 

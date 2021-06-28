@@ -7,7 +7,7 @@
 
 from azure.cli.core.azclierror import BadRequestError
 from azure.mgmt.media.models import (MediaService, AccountEncryption, KeyVaultProperties,
-                                     ApiErrorException)
+                                     ApiError)
 
 
 def get_encryption(client, resource_group_name, account_name):
@@ -31,7 +31,7 @@ def set_encryption(client, resource_group_name, account_name, key_type=None,
                                      storage_accounts=account_info.storage_accounts, encryption=encryption)
 
         return client.create_or_update(resource_group_name, account_name, media_service)
-    except ApiErrorException as ex:
+    except ApiError as ex:
         recommendation = ''
         if ex.message == '(BadRequest) Access to the Customer Key was forbidden.':
             recommendation = 'Please use the Azure Portal to grant the key vault access to the media account.'\
