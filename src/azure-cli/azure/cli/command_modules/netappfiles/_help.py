@@ -822,7 +822,7 @@ parameters:
   - name: --service-level
     short-summary: The service level
   - name: --usage-threshold
-    short-summary: The maximum storage quota allowed for a file system as integer number of GiB. Min 100 GiB, max 100TiB"
+    short-summary: The maximum storage quota allowed for a file system as integer number of GiB. Min 100 GiB, max 100TiB
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
   - name: --backup-enabled
