@@ -5656,3 +5656,47 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         # Cancel log replay service
         self.cmd('sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --yes',
                  checks=NoneCheck())
+
+class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ResourceGroupPreparer()
+    @SqlServerPreparer(location='westcentralus')
+    def test_sql_ledger(self, resource_group, server):
+        db_name = self.create_random_name("sqlledgerdb", 20)
+        endpoint = "https://test.confidential-ledger.azure.com"
+
+        # create database
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(resource_group, server, db_name))
+
+        # validate ledger digest uploads is disabled by default
+        self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
+                 .format(resource_group, server, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])
+
+        # enable uploads to ACL dummy instance
+        self.cmd('sql db ledger-digest-uploads enable -g {} -s {} --name {} --endpoint {}'
+                 .format(resource_group, server, db_name, endpoint))
+
+        sleep(2)
+
+        # validate setting through show command 
+        self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
+                 .format(resource_group, server, db_name),
+                 checks=[JMESPathCheck('state', 'Enabled'),
+                        JMESPathCheck('digestStorageEndpoint', endpoint)])
+
+        # disable ledger digest uploads
+        self.cmd('sql db ledger-digest-uploads disable -g {} -s {} --name {}'
+                 .format(resource_group, server, db_name))
+
+        sleep(2)
+
+        # validate setting through show command 
+        self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
+                 .format(resource_group, server, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])

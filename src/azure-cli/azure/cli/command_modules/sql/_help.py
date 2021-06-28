@@ -1526,7 +1526,7 @@ examples:
 
 helps['sql db ledger-digest-uploads'] = """
 type: group
-short-summary: Manage database ledger digest uploads.
+short-summary: Manage ledger digest upload settings.
 """
 
 helps['sql db ledger-digest-uploads enable'] = """
