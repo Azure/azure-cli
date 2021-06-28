@@ -13,24 +13,24 @@ interactions:
       ParameterSetName:
       - -n -v -g --backup-management-type --query
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bbksql%3Bsqlvm?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm","name":"VMAppContainer;Compute;bksql;sqlvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","lastUpdatedTime":"2021-04-29T10:02:02.4682499Z","extendedInfo":{"hostServerName":"sqlvm","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":9,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"sqlvm","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;iaasvmsqlworkload.existing;iaassqlext-win","name":"VMAppContainer;Compute;iaasvmsqlworkload.existing;iaassqlext-win","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing/providers/Microsoft.Compute/virtualMachines/iaassqlext-win","lastUpdatedTime":"2018-08-24T08:51:53.6746573Z","extendedInfo":{"hostServerName":"iaassqlext-win","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":38,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"iaassqlext-win","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1061'
+      - '1221'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:16 GMT
+      - Tue, 22 Jun 2021 04:39:58 GMT
       expires:
       - '-1'
       pragma:
@@ -66,24 +66,27 @@ interactions:
       ParameterSetName:
       - -g -v -c -n --backup-management-type
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win/protectedItems/SQLDataBase%3Bmssqlserver%3Bnavigate-testdb2?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest","name":"SQLDataBase;mssqlserver;sqltest","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-11T06:55:59.5945638Z","protectedItemDataSourceId":"369436961546352","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-05-10T03:55:43Z","recoveryPointCount":12,"policyState":"Consistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2021-05-11T06:55:11Z","isArchiveEnabled":false}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2","name":"SQLDataBase;mssqlserver;navigate-testdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"TransientDegraded","resourceHealthDetails":[{"code":520123,"title":"UserErrorRestoreFailedTargetFileAlreadyExists","message":"Restore
+        as files failed because one or more files with the same name already exist
+        in the target folder.","recommendations":["Specify a different target folder
+        or move the existing files to a different location."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"navigate-testdb2","serverName":"iaassqlext-win","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-06-22T03:40:59.8901219Z","protectedItemDataSourceId":"1622960563","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-05-22T16:40:11Z","recoveryPointCount":763,"policyState":"Inconsistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing/providers/Microsoft.Compute/virtualMachines/iaassqlext-win","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2021-06-22T03:40:11Z","isArchiveEnabled":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1596'
+      - '2218'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:18 GMT
+      - Tue, 22 Jun 2021 04:40:00 GMT
       expires:
       - '-1'
       pragma:
@@ -119,24 +122,27 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --query
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win/protectedItems/SQLDataBase%3Bmssqlserver%3Bnavigate-testdb2?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest","name":"SQLDataBase;mssqlserver;sqltest","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-11T06:55:59.5945638Z","protectedItemDataSourceId":"369436961546352","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-05-10T03:55:43Z","recoveryPointCount":12,"policyState":"Consistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2021-05-11T06:55:11Z","isArchiveEnabled":false}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2","name":"SQLDataBase;mssqlserver;navigate-testdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"TransientDegraded","resourceHealthDetails":[{"code":520123,"title":"UserErrorRestoreFailedTargetFileAlreadyExists","message":"Restore
+        as files failed because one or more files with the same name already exist
+        in the target folder.","recommendations":["Specify a different target folder
+        or move the existing files to a different location."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"navigate-testdb2","serverName":"iaassqlext-win","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-06-22T03:40:59.8901219Z","protectedItemDataSourceId":"1622960563","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-05-22T16:40:11Z","recoveryPointCount":763,"policyState":"Inconsistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing/providers/Microsoft.Compute/virtualMachines/iaassqlext-win","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2021-06-22T03:40:11Z","isArchiveEnabled":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1596'
+      - '2218'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:18 GMT
+      - Tue, 22 Jun 2021 04:40:00 GMT
       expires:
       - '-1'
       pragma:
@@ -152,7 +158,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '148'
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
@@ -172,24 +178,117 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --query
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest/recoveryPoints?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win/protectedItems/SQLDataBase%3Bmssqlserver%3Bnavigate-testdb2/recoveryPoints?api-version=2021-01-01
   response:
     body:
-      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest/recoveryPoints/509357296932186","name":"509357296932186","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-11T03:55:42Z","type":"Full"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest/recoveryPoints/498946553353386","name":"498946553353386","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-10T03:55:43Z","type":"Full"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[{"startTime":"2021-05-11T03:55:39Z","endTime":"2021-05-11T06:55:11Z"},{"startTime":"2021-05-10T03:55:41Z","endTime":"2021-05-10T10:55:11Z"}],"type":"Log"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/15296745805334","name":"15296745805334","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-21T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/16719375093265","name":"16719375093265","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-20T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/13631400492985","name":"13631400492985","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-19T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/11564104817699","name":"11564104817699","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-18T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/927139998578","name":"927139998578","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-17T17:03:55Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/1315738850800","name":"1315738850800","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-16T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/5973803051770","name":"5973803051770","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-15T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/1582035557805","name":"1582035557805","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-14T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/11982228175643","name":"11982228175643","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-13T17:03:55Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/1441245033123","name":"1441245033123","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-12T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/7829151638791","name":"7829151638791","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-11T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/16758522289313","name":"16758522289313","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-10T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/13142806161442","name":"13142806161442","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-09T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/10340613927891","name":"10340613927891","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-08T17:03:55Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/10891898502917","name":"10891898502917","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-07T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/5537170820829","name":"5537170820829","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-06T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/9699909917932","name":"9699909917932","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-05T17:03:55Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/10315603442720","name":"10315603442720","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-04T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/5284150882288","name":"5284150882288","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-03T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/2021052706612","name":"2021052706612","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-02T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/15309175754051","name":"15309175754051","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-06-01T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/7625816151251","name":"7625816151251","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-31T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/4755746320394","name":"4755746320394","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-30T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/3397565341474","name":"3397565341474","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-29T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/1307355413023","name":"1307355413023","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-28T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/3366159847375","name":"3366159847375","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-27T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/10909419040088","name":"10909419040088","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-26T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/1589964114806","name":"1589964114806","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-25T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/3618838048619","name":"3618838048619","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-24T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/12126490460609","name":"12126490460609","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-23T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/5371311374301","name":"5371311374301","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2021-05-22T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[{"startTime":"2021-05-23T04:40:02.7516499Z","endTime":"2021-06-22T03:40:11Z"}],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1780'
+      - '30721'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:20 GMT
+      - Tue, 22 Jun 2021 04:40:01 GMT
       expires:
       - '-1'
       pragma:
@@ -226,24 +325,24 @@ interactions:
       - --vault-name -g --restore-mode --rp-name --filepath --target-container-name
         --item-name --container-name --workload-type
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bbksql%3Bsqlvm?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm","name":"VMAppContainer;Compute;bksql;sqlvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","lastUpdatedTime":"2021-04-29T10:02:02.4682499Z","extendedInfo":{"hostServerName":"sqlvm","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":9,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"sqlvm","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;iaasvmsqlworkload.existing;iaassqlext-win","name":"VMAppContainer;Compute;iaasvmsqlworkload.existing;iaassqlext-win","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing/providers/Microsoft.Compute/virtualMachines/iaassqlext-win","lastUpdatedTime":"2018-08-24T08:51:53.6746573Z","extendedInfo":{"hostServerName":"iaassqlext-win","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":38,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"iaassqlext-win","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1061'
+      - '1221'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:21 GMT
+      - Tue, 22 Jun 2021 04:40:02 GMT
       expires:
       - '-1'
       pragma:
@@ -280,24 +379,27 @@ interactions:
       - --vault-name -g --restore-mode --rp-name --filepath --target-container-name
         --item-name --container-name --workload-type
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win/protectedItems/SQLDataBase%3Bmssqlserver%3Bnavigate-testdb2?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest","name":"SQLDataBase;mssqlserver;sqltest","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-11T06:55:59.5945638Z","protectedItemDataSourceId":"369436961546352","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-05-10T03:55:43Z","recoveryPointCount":12,"policyState":"Consistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2021-05-11T06:55:11Z","isArchiveEnabled":false}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2","name":"SQLDataBase;mssqlserver;navigate-testdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"TransientDegraded","resourceHealthDetails":[{"code":520123,"title":"UserErrorRestoreFailedTargetFileAlreadyExists","message":"Restore
+        as files failed because one or more files with the same name already exist
+        in the target folder.","recommendations":["Specify a different target folder
+        or move the existing files to a different location."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"navigate-testdb2","serverName":"iaassqlext-win","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-06-22T03:40:59.8901219Z","protectedItemDataSourceId":"1622960563","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-05-22T16:40:11Z","recoveryPointCount":763,"policyState":"Inconsistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing/providers/Microsoft.Compute/virtualMachines/iaassqlext-win","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2021-06-22T03:40:11Z","isArchiveEnabled":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1596'
+      - '2218'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:22 GMT
+      - Tue, 22 Jun 2021 04:40:03 GMT
       expires:
       - '-1'
       pragma:
@@ -313,7 +415,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '147'
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
@@ -334,24 +436,27 @@ interactions:
       - --vault-name -g --restore-mode --rp-name --filepath --target-container-name
         --item-name --container-name --workload-type
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win/protectedItems/SQLDataBase%3Bmssqlserver%3Bnavigate-testdb2?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest","name":"SQLDataBase;mssqlserver;sqltest","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"sqltest","serverName":"sqlvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-05-11T06:55:59.5945638Z","protectedItemDataSourceId":"369436961546352","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-05-10T03:55:43Z","recoveryPointCount":12,"policyState":"Consistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;bksql;sqlvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2021-05-11T06:55:11Z","isArchiveEnabled":false}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2","name":"SQLDataBase;mssqlserver;navigate-testdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"TransientDegraded","resourceHealthDetails":[{"code":520123,"title":"UserErrorRestoreFailedTargetFileAlreadyExists","message":"Restore
+        as files failed because one or more files with the same name already exist
+        in the target folder.","recommendations":["Specify a different target folder
+        or move the existing files to a different location."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"navigate-testdb2","serverName":"iaassqlext-win","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-06-22T03:40:59.8901219Z","protectedItemDataSourceId":"1622960563","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-05-22T16:40:11Z","recoveryPointCount":763,"policyState":"Inconsistent","recoveryModel":"FULL"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing/providers/Microsoft.Compute/virtualMachines/iaassqlext-win","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2021-06-22T03:40:11Z","isArchiveEnabled":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1596'
+      - '2218'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:24 GMT
+      - Tue, 22 Jun 2021 04:40:03 GMT
       expires:
       - '-1'
       pragma:
@@ -367,7 +472,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '148'
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
@@ -388,24 +493,80 @@ interactions:
       - --vault-name -g --restore-mode --rp-name --filepath --target-container-name
         --item-name --container-name --workload-type
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest/recoveryPoints/509357296932186?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win/protectedItems/SQLDataBase%3Bmssqlserver%3Bnavigate-testdb2/recoveryPoints/15296745805334?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest/recoveryPoints/509357296932186","name":"509357296932186","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","extendedInfo":{"dataDirectoryTimeInUTC":"2021-05-11T03:55:42Z","dataDirectoryPaths":[{"type":"Data","path":"F:\\data\\sqltest.mdf","logicalName":"sqltest"},{"type":"Log","path":"G:\\log\\sqltest_log.ldf","logicalName":"sqltest_log"}]},"recoveryPointTimeInUTC":"2021-05-11T03:55:42Z","type":"Full"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/recoveryPoints/15296745805334","name":"15296745805334","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","extendedInfo":{"dataDirectoryTimeInUTC":"2021-06-21T17:03:54Z","dataDirectoryPaths":[{"type":"Data","path":"F:\\Data\\navigate-testdb2.mdf","logicalName":"navigate-testdb2"},{"type":"Log","path":"F:\\Log\\navigate-testdb2_log.ldf","logicalName":"navigate-testdb2_log"}]},"recoveryPointTimeInUTC":"2021-06-21T17:03:54Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery
+        point cannot be moved to Archive tier due to insufficient retention duration
+        specified in policy.. Update policy on the protected item with appropriate
+        retention setting and try again."}}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '779'
+      - '1240'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:26 GMT
+      - Tue, 22 Jun 2021 04:40:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --vault-name -g --recovery-config
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win?api-version=2021-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;iaasvmsqlworkload.existing;iaassqlext-win","name":"VMAppContainer;Compute;iaasvmsqlworkload.existing;iaassqlext-win","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing/providers/Microsoft.Compute/virtualMachines/iaassqlext-win","lastUpdatedTime":"2018-08-24T08:51:53.6746573Z","extendedInfo":{"hostServerName":"iaassqlext-win","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":38,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"iaassqlext-win","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1221'
+      content-type:
+      - application/json
+      date:
+      - Tue, 22 Jun 2021 04:40:04 GMT
       expires:
       - '-1'
       pragma:
@@ -430,9 +591,10 @@ interactions:
 - request:
     body: '{"properties": {"objectType": "AzureWorkloadSQLRestoreRequest", "recoveryType":
       "AlternateLocation", "targetInfo": {"overwriteOption": "Overwrite", "containerId":
-      "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm",
-      "targetDirectoryForFileRestore": "C:"}, "recoveryMode": "FileRecovery", "shouldUseAlternateTargetLocation":
-      true, "isNonRecoverable": false}}'
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;iaasvmsqlworkload.existing;iaassqlext-win",
+      "targetDirectoryForFileRestore": "C:"}, "recoveryMode": "FileRecovery", "targetVirtualMachineId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing/providers/Microsoft.Compute/virtualMachines/iaassqlext-win",
+      "shouldUseAlternateTargetLocation": true, "isNonRecoverable": false}}'
     headers:
       Accept:
       - application/json
@@ -443,34 +605,34 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '509'
+      - '772'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - --vault-name -g --recovery-config
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bbksql%3Bsqlvm/protectedItems/SQLDataBase%3Bmssqlserver%3Bsqltest/recoveryPoints/509357296932186/restore?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Biaasvmsqlworkload.existing%3Biaassqlext-win/protectedItems/SQLDataBase%3Bmssqlserver%3Bnavigate-testdb2/recoveryPoints/15296745805334/restore?api-version=2021-01-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest/operationsStatus/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/operationsStatus/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 11 May 2021 07:44:27 GMT
+      - Tue, 22 Jun 2021 04:40:05 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;bksql;sqlvm/protectedItems/SQLDataBase;mssqlserver;sqltest/operationResults/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win/protectedItems/SQLDataBase;mssqlserver;navigate-testdb2/operationResults/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -478,7 +640,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -498,24 +660,24 @@ interactions:
       ParameterSetName:
       - --vault-name -g --recovery-config
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupOperations/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupOperations/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","status":"Succeeded","startTime":"2021-05-11T07:44:27.8480836Z","endTime":"2021-05-11T07:44:27.8480836Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"189c40ae-c32a-487a-89a5-f8450d94ab59"}}'
+      string: '{"id":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '304'
+      - '188'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:28 GMT
+      - Tue, 22 Jun 2021 04:40:06 GMT
       expires:
       - '-1'
       pragma:
@@ -551,32 +713,29 @@ interactions:
       ParameterSetName:
       - --vault-name -g --recovery-config
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupOperations/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT3.362163S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
-        data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
-        as files"}},"isUserTriggered":true,"entityFriendlyName":"sqltest [sqlvm]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-05-11T07:44:27.8480836Z","activityId":"b5be6b88-b22c-11eb-86b4-b07b250bf939"}}'
+      string: '{"id":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","status":"Succeeded","startTime":"2021-06-22T04:40:06.0672247Z","endTime":"2021-06-22T04:40:06.0672247Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"e86e8912-2b22-4280-9c4b-4a70a8747b0b"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '775'
+      - '304'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:31 GMT
+      - Tue, 22 Jun 2021 04:40:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -601,32 +760,33 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup job wait
+      - backup restore restore-azurewl
       Connection:
       - keep-alive
       ParameterSetName:
-      - -v -g -n
+      - --vault-name -g --recovery-config
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT5.1078872S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT2.6626113S","extendedInfo":{"tasksList":[{"taskId":"Transfer
         data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
-        as files"}},"isUserTriggered":true,"entityFriendlyName":"sqltest [sqlvm]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-05-11T07:44:27.8480836Z","activityId":"b5be6b88-b22c-11eb-86b4-b07b250bf939"}}'
+        as files"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '776'
+      - '845'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:32 GMT
+      - Tue, 22 Jun 2021 04:40:08 GMT
       expires:
       - '-1'
       pragma:
@@ -663,26 +823,84 @@ interactions:
       ParameterSetName:
       - -v -g -n
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT5.4969183S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT2.9584153S","extendedInfo":{"tasksList":[{"taskId":"Transfer
         data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
-        as files"}},"isUserTriggered":true,"entityFriendlyName":"sqltest [sqlvm]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-05-11T07:44:27.8480836Z","activityId":"b5be6b88-b22c-11eb-86b4-b07b250bf939"}}'
+        as files"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '776'
+      - '845'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:44:33 GMT
+      - Tue, 22 Jun 2021 04:40:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT3.1434248S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
+        as files"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '845'
+      content-type:
+      - application/json
+      date:
+      - Tue, 22 Jun 2021 04:40:08 GMT
       expires:
       - '-1'
       pragma:
@@ -719,26 +937,27 @@ interactions:
       ParameterSetName:
       - -v -g -n
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT35.9467759S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT33.3682539S","extendedInfo":{"tasksList":[{"taskId":"Transfer
         data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
-        as files"}},"isUserTriggered":true,"entityFriendlyName":"sqltest [sqlvm]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-05-11T07:44:27.8480836Z","activityId":"b5be6b88-b22c-11eb-86b4-b07b250bf939"}}'
+        as files"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '777'
+      - '846'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:45:03 GMT
+      - Tue, 22 Jun 2021 04:40:38 GMT
       expires:
       - '-1'
       pragma:
@@ -775,26 +994,27 @@ interactions:
       ParameterSetName:
       - -v -g -n
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT1M6.4065205S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT1M3.5886135S","extendedInfo":{"tasksList":[{"taskId":"Transfer
         data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
-        as files"}},"isUserTriggered":true,"entityFriendlyName":"sqltest [sqlvm]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-05-11T07:44:27.8480836Z","activityId":"b5be6b88-b22c-11eb-86b4-b07b250bf939"}}'
+        as files"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '778'
+      - '847'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:45:33 GMT
+      - Tue, 22 Jun 2021 04:41:09 GMT
       expires:
       - '-1'
       pragma:
@@ -831,26 +1051,27 @@ interactions:
       ParameterSetName:
       - -v -g -n
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT1M36.8038953S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT1M33.8139819S","extendedInfo":{"tasksList":[{"taskId":"Transfer
         data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
-        as files"}},"isUserTriggered":true,"entityFriendlyName":"sqltest [sqlvm]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-05-11T07:44:27.8480836Z","activityId":"b5be6b88-b22c-11eb-86b4-b07b250bf939"}}'
+        as files"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '779'
+      - '848'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:46:03 GMT
+      - Tue, 22 Jun 2021 04:41:39 GMT
       expires:
       - '-1'
       pragma:
@@ -887,26 +1108,27 @@ interactions:
       ParameterSetName:
       - -v -g -n
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT2M7.196939S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT2M4.048534S","extendedInfo":{"tasksList":[{"taskId":"Transfer
         data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
-        as files"}},"isUserTriggered":true,"entityFriendlyName":"sqltest [sqlvm]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-05-11T07:44:27.8480836Z","activityId":"b5be6b88-b22c-11eb-86b4-b07b250bf939"}}'
+        as files"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '777'
+      - '846'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:46:34 GMT
+      - Tue, 22 Jun 2021 04:42:09 GMT
       expires:
       - '-1'
       pragma:
@@ -943,26 +1165,27 @@ interactions:
       ParameterSetName:
       - -v -g -n
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT2M37.6224669S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT2M34.2515302S","extendedInfo":{"tasksList":[{"taskId":"Transfer
         data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
-        as files"}},"isUserTriggered":true,"entityFriendlyName":"sqltest [sqlvm]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-05-11T07:44:27.8480836Z","activityId":"b5be6b88-b22c-11eb-86b4-b07b250bf939"}}'
+        as files"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '779'
+      - '848'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:47:05 GMT
+      - Tue, 22 Jun 2021 04:42:39 GMT
       expires:
       - '-1'
       pragma:
@@ -999,28 +1222,27 @@ interactions:
       ParameterSetName:
       - -v -g -n
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
   response:
     body:
-      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupJobs/189c40ae-c32a-487a-89a5-f8450d94ab59","name":"189c40ae-c32a-487a-89a5-f8450d94ab59","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT3M4.5259662S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
-        data from vault","status":"Completed"}],"propertyBag":{"Data Transferred (in
-        MB)":"20.0845","Job Type":"Restore as files","RestoreRecoveryPointTime":"2021-05-11
-        03:55:42Z","RestoreDestination":"C:"}},"isUserTriggered":true,"entityFriendlyName":"sqltest
-        [sqlvm]","backupManagementType":"AzureWorkload","operation":"Restore (Full)","status":"Completed","startTime":"2021-05-11T07:44:27.8480836Z","endTime":"2021-05-11T07:47:32.3740498Z","activityId":"b5be6b88-b22c-11eb-86b4-b07b250bf939"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT3M4.50535S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","status":"InProgress"}],"propertyBag":{"Job Type":"Restore
+        as files"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2021-06-22T04:40:06.0672247Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '937'
+      - '845'
       content-type:
       - application/json
       date:
-      - Tue, 11 May 2021 07:47:35 GMT
+      - Tue, 22 Jun 2021 04:43:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1038,6 +1260,65 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '142'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.25.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b?api-version=2021-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/iaasvmsqlworkload.existing.vaults/providers/Microsoft.RecoveryServices/vaults/iaasvmsqlworkloadexistingvault1/backupJobs/e86e8912-2b22-4280-9c4b-4a70a8747b0b","name":"e86e8912-2b22-4280-9c4b-4a70a8747b0b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":[1],"workloadType":"SQLDataBase","duration":"PT3M2.7593643S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","status":"Completed"}],"propertyBag":{"Data Transferred (in
+        MB)":"4.0825","Job Type":"Restore as files","RestoreRecoveryPointTime":"2021-06-21
+        17:03:54Z","RestoreDestination":"C:"}},"isUserTriggered":true,"entityFriendlyName":"navigate-testdb2
+        [iaassqlext-win]","backupManagementType":"AzureWorkload","operation":"Restore
+        (Full)","status":"Completed","startTime":"2021-06-22T04:40:06.0672247Z","endTime":"2021-06-22T04:43:08.826589Z","activityId":"e9e675c8-d313-11eb-b2de-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1004'
+      content-type:
+      - application/json
+      date:
+      - Tue, 22 Jun 2021 04:43:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
