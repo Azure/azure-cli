@@ -6989,6 +6989,7 @@ def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, n
 def create_virtual_hub(cmd, client,
                        resource_group_name,
                        virtual_hub_name,
+                       public_ip_address=None,
                        hosted_subnet=None,
                        location=None,
                        tags=None):
@@ -7012,7 +7013,10 @@ def create_virtual_hub(cmd, client,
     vhub_poller = client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
-    ip_config = HubIpConfiguration(subnet=SubResource(id=hosted_subnet))
+    ip_config = HubIpConfiguration(
+        subnet=SubResource(id=hosted_subnet),
+        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+    )
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
         vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(
