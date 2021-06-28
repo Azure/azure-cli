@@ -557,13 +557,13 @@ parameters:
   - name: --ldap-enabled
     short-summary: Specifies whether LDAP is enabled or not for a given NFS volume
   - name: --chown-mode
-    short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include: "Restricted", "Unrestricted". Default value: "Restricted".
+    short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include- Restricted, Unrestricted. Default value- Restricted.
   - name: --cool-access
     short-summary: Specifies whether Cool Access(tiering) is enabled for the volume.
   - name: --coolness-period
     short-summary: Specifies the number of days after which data that is not accessed by clients will be tiered.
   - name: --unix-permissions
-    short-summary: UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file: read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users.
+    short-summary: UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file- read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users.
 examples:
   - name: Create an ANF volume
     text: >
