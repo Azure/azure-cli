@@ -37,16 +37,18 @@ item_id_hana_2 = '/Subscriptions/e3d2d341-4ddb-4c5d-9121-69b7e719485e/resourceGr
 
 class BackupTests(ScenarioTest, unittest.TestCase):
     # SQL workload tests start here
-    # Please make sure you have th following setup in place before running the tests -
+    # Please make sure you have the following setup in place before running the tests -
 
     # For the tests using pstestwlvm1bca8 and pstestwlRSV1bca8 -
     # Each test will register the container at the start and unregister at the end of the test
     # Make sure that the container is not already registered since the start of the test
 
-    # For the tests using sarathvm and sarath-vault -
+    # For the tests using sarathvm[msdb] and sarath-vault -
     # Container is already registered to the vault
     # Each test will enable backup at the start and disable backup at the end of the test
     # Make sure that the backup is not already enabled since the start of the test
+
+    # Note: SQL RAF test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
     @record_only()
     def test_backup_wl_sql_container(self):
 
@@ -558,7 +560,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
         self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
-    
 
     @record_only()
     def test_workload_archive_sql (self):
@@ -625,11 +626,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                 self.check("properties.status", "InProgress"),
                 self.check("resourceGroup", '{rg}')
             ]).get_output_in_json()
-        
-
 
     # SAP HANA workload tests start here
-    # Please make sure you have th following setup in place before running the tests -
+    # Please make sure you have the following setup in place before running the tests -
 
     # For the tests using akneema-hana-ccy and akneema-vault-ccy -
     # Each test will register the container at the start and unregister at the end of the test
@@ -699,8 +698,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                 self.check("properties.status", "InProgress"),
                 self.check("resourceGroup", '{rg}')
             ]).get_output_in_json()
-
-
 
     @record_only()
     def test_backup_wl_hana_container(self):

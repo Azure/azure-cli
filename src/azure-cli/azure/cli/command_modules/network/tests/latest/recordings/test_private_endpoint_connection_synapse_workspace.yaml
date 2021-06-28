@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --storage-account --file-system -p -u
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_private_endpoint_connection_synapse_workspace000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001","name":"test_private_endpoint_connection_synapse_workspace000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-05-28T08:04:36Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001","name":"test_private_endpoint_connection_synapse_workspace000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-06-03T03:11:26Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:05:11 GMT
+      - Thu, 03 Jun 2021 03:11:55 GMT
       expires:
       - '-1'
       pragma:
@@ -42,10 +42,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"defaultDataLakeStorage": {"accountUrl":
-      "https://testpesyn000002.dfs.core.windows.net", "filesystem": "file-000"}, "sqlAdministratorLoginPassword":
-      "123-xyz-456", "sqlAdministratorLogin": "synapse1230"}, "identity": {"type":
-      "SystemAssigned"}}'
+    body: '{"location": "westus", "identity": {"type": "SystemAssigned"}, "properties":
+      {"defaultDataLakeStorage": {"accountUrl": "https://testpesyn000002.dfs.core.windows.net",
+      "filesystem": "file-000"}, "sqlAdministratorLoginPassword": "123-xyz-456", "sqlAdministratorLogin":
+      "synapse1230"}}'
     headers:
       Accept:
       - application/json
@@ -58,30 +58,27 @@ interactions:
       Content-Length:
       - '291'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --storage-account --file-system -p -u
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007?api-version=2021-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Synapse/workspaces","properties":{"provisioningState":"Provisioning","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f0b1f6471-1bf0-4dda-aec3-cb9272f09590%2fresourceGroups%2ftest_private_endpoint_connection_synapse_workspace000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fcli-test-resource-000007","dev":"https://cli-test-resource-000007.dev.azuresynapse.net","sqlOnDemand":"cli-test-resource-000007-ondemand.sql.azuresynapse.net","sql":"cli-test-resource-000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-d5ccb056-e94e-49a9-aec8-b45258efe4be","defaultDataLakeStorage":{"accountUrl":"https://testpesyn000002.dfs.core.windows.net","filesystem":"file-000"},"privateEndpointConnections":[],"workspaceUID":"ae39c8e4-1b79-4f4c-af58-963d42e16213","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"encryption":{"doubleEncryptionEnabled":false}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007","location":"westus","name":"cli-test-resource-000007","identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"20ebb888-24c0-4373-b157-7451ae09ba12"}}'
+      string: '{"type":"Microsoft.Synapse/workspaces","properties":{"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Provisioning","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f0b1f6471-1bf0-4dda-aec3-cb9272f09590%2fresourceGroups%2ftest_private_endpoint_connection_synapse_workspace000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fcli-test-resource-000007","dev":"https://cli-test-resource-000007.dev.azuresynapse.net","sqlOnDemand":"cli-test-resource-000007-ondemand.sql.azuresynapse.net","sql":"cli-test-resource-000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-7662b701-86f9-4465-84ba-d0cdde896522","defaultDataLakeStorage":{"accountUrl":"https://testpesyn000002.dfs.core.windows.net","filesystem":"file-000"},"privateEndpointConnections":[],"workspaceUID":"8d25b583-0fde-47ae-9b5f-9bceb965f290","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007","location":"westus","name":"cli-test-resource-000007","identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"87c3efe5-e0ac-48d2-882f-1fc0920cb52e"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/98c1536b-a2dc-4f93-8013-1c8a0ee61378?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/42e908aa-7777-4c58-85a2-4647018d651a?api-version=2021-03-01
       cache-control:
       - no-cache
       content-length:
-      - '1394'
+      - '1426'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:05:23 GMT
+      - Thu, 03 Jun 2021 03:12:10 GMT
       expires:
       - '-1'
       pragma:
@@ -93,7 +90,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -101,7 +98,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -111,10 +108,9 @@ interactions:
       ParameterSetName:
       - -g -n --storage-account --file-system -p -u
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/98c1536b-a2dc-4f93-8013-1c8a0ee61378?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/42e908aa-7777-4c58-85a2-4647018d651a?api-version=2021-03-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -126,7 +122,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:05:55 GMT
+      - Thu, 03 Jun 2021 03:12:40 GMT
       expires:
       - '-1'
       pragma:
@@ -148,7 +144,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -158,10 +154,9 @@ interactions:
       ParameterSetName:
       - -g -n --storage-account --file-system -p -u
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/98c1536b-a2dc-4f93-8013-1c8a0ee61378?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/42e908aa-7777-4c58-85a2-4647018d651a?api-version=2021-03-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -173,7 +168,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:06:25 GMT
+      - Thu, 03 Jun 2021 03:13:11 GMT
       expires:
       - '-1'
       pragma:
@@ -195,7 +190,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -205,10 +200,9 @@ interactions:
       ParameterSetName:
       - -g -n --storage-account --file-system -p -u
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/98c1536b-a2dc-4f93-8013-1c8a0ee61378?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/42e908aa-7777-4c58-85a2-4647018d651a?api-version=2021-03-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -220,7 +214,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:06:56 GMT
+      - Thu, 03 Jun 2021 03:13:42 GMT
       expires:
       - '-1'
       pragma:
@@ -242,7 +236,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -252,10 +246,9 @@ interactions:
       ParameterSetName:
       - -g -n --storage-account --file-system -p -u
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/98c1536b-a2dc-4f93-8013-1c8a0ee61378?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/42e908aa-7777-4c58-85a2-4647018d651a?api-version=2021-03-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -267,7 +260,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:07:26 GMT
+      - Thu, 03 Jun 2021 03:14:12 GMT
       expires:
       - '-1'
       pragma:
@@ -289,7 +282,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -299,10 +292,9 @@ interactions:
       ParameterSetName:
       - -g -n --storage-account --file-system -p -u
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/98c1536b-a2dc-4f93-8013-1c8a0ee61378?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/42e908aa-7777-4c58-85a2-4647018d651a?api-version=2021-03-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -314,7 +306,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:07:56 GMT
+      - Thu, 03 Jun 2021 03:14:43 GMT
       expires:
       - '-1'
       pragma:
@@ -336,7 +328,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -346,57 +338,9 @@ interactions:
       ParameterSetName:
       - -g -n --storage-account --file-system -p -u
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/98c1536b-a2dc-4f93-8013-1c8a0ee61378?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 28 May 2021 08:08:27 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse workspace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --storage-account --file-system -p -u
-      User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/98c1536b-a2dc-4f93-8013-1c8a0ee61378?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/42e908aa-7777-4c58-85a2-4647018d651a?api-version=2021-03-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -408,7 +352,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:08:57 GMT
+      - Thu, 03 Jun 2021 03:15:13 GMT
       expires:
       - '-1'
       pragma:
@@ -430,7 +374,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -440,22 +384,21 @@ interactions:
       ParameterSetName:
       - -g -n --storage-account --file-system -p -u
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007?api-version=2021-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Synapse/workspaces","properties":{"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f0b1f6471-1bf0-4dda-aec3-cb9272f09590%2fresourceGroups%2ftest_private_endpoint_connection_synapse_workspace000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fcli-test-resource-000007","dev":"https://cli-test-resource-000007.dev.azuresynapse.net","sqlOnDemand":"cli-test-resource-000007-ondemand.sql.azuresynapse.net","sql":"cli-test-resource-000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-d5ccb056-e94e-49a9-aec8-b45258efe4be","defaultDataLakeStorage":{"accountUrl":"https://testpesyn000002.dfs.core.windows.net","filesystem":"file-000"},"sqlAdministratorLogin":"synapse1230","privateEndpointConnections":[],"workspaceUID":"ae39c8e4-1b79-4f4c-af58-963d42e16213","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"encryption":{"doubleEncryptionEnabled":false}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007","location":"westus","name":"cli-test-resource-000007","identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"20ebb888-24c0-4373-b157-7451ae09ba12"}}'
+      string: '{"type":"Microsoft.Synapse/workspaces","properties":{"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f0b1f6471-1bf0-4dda-aec3-cb9272f09590%2fresourceGroups%2ftest_private_endpoint_connection_synapse_workspace000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fcli-test-resource-000007","dev":"https://cli-test-resource-000007.dev.azuresynapse.net","sqlOnDemand":"cli-test-resource-000007-ondemand.sql.azuresynapse.net","sql":"cli-test-resource-000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-7662b701-86f9-4465-84ba-d0cdde896522","defaultDataLakeStorage":{"accountUrl":"https://testpesyn000002.dfs.core.windows.net","filesystem":"file-000"},"sqlAdministratorLogin":"synapse1230","privateEndpointConnections":[],"workspaceUID":"8d25b583-0fde-47ae-9b5f-9bceb965f290","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007","location":"westus","name":"cli-test-resource-000007","identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"87c3efe5-e0ac-48d2-882f-1fc0920cb52e"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1429'
+      - '1461'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:08:57 GMT
+      - Thu, 03 Jun 2021 03:15:13 GMT
       expires:
       - '-1'
       pragma:
@@ -487,24 +430,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.24.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007?api-version=2021-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Synapse/workspaces","properties":{"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f0b1f6471-1bf0-4dda-aec3-cb9272f09590%2fresourceGroups%2ftest_private_endpoint_connection_synapse_workspace000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fcli-test-resource-000007","dev":"https://cli-test-resource-000007.dev.azuresynapse.net","sqlOnDemand":"cli-test-resource-000007-ondemand.sql.azuresynapse.net","sql":"cli-test-resource-000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-d5ccb056-e94e-49a9-aec8-b45258efe4be","defaultDataLakeStorage":{"accountUrl":"https://testpesyn000002.dfs.core.windows.net","filesystem":"file-000"},"sqlAdministratorLogin":"synapse1230","privateEndpointConnections":[],"workspaceUID":"ae39c8e4-1b79-4f4c-af58-963d42e16213","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"encryption":{"doubleEncryptionEnabled":false}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007","location":"westus","name":"cli-test-resource-000007","identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"20ebb888-24c0-4373-b157-7451ae09ba12"}}'
+      string: '{"type":"Microsoft.Synapse/workspaces","properties":{"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f0b1f6471-1bf0-4dda-aec3-cb9272f09590%2fresourceGroups%2ftest_private_endpoint_connection_synapse_workspace000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fcli-test-resource-000007","dev":"https://cli-test-resource-000007.dev.azuresynapse.net","sqlOnDemand":"cli-test-resource-000007-ondemand.sql.azuresynapse.net","sql":"cli-test-resource-000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-7662b701-86f9-4465-84ba-d0cdde896522","defaultDataLakeStorage":{"accountUrl":"https://testpesyn000002.dfs.core.windows.net","filesystem":"file-000"},"sqlAdministratorLogin":"synapse1230","privateEndpointConnections":[],"workspaceUID":"8d25b583-0fde-47ae-9b5f-9bceb965f290","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007","location":"westus","name":"cli-test-resource-000007","identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"87c3efe5-e0ac-48d2-882f-1fc0920cb52e"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1429'
+      - '1461'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:08:59 GMT
+      - Thu, 03 Jun 2021 03:15:14 GMT
       expires:
       - '-1'
       pragma:
@@ -536,7 +476,7 @@ interactions:
       ParameterSetName:
       - --name -g --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateLinkResources?api-version=2019-06-01-preview
   response:
@@ -550,7 +490,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:03 GMT
+      - Thu, 03 Jun 2021 03:15:16 GMT
       expires:
       - '-1'
       pragma:
@@ -582,12 +522,12 @@ interactions:
       ParameterSetName:
       - -n -g --subnet-name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_private_endpoint_connection_synapse_workspace000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001","name":"test_private_endpoint_connection_synapse_workspace000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-05-28T08:04:36Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001","name":"test_private_endpoint_connection_synapse_workspace000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-06-03T03:11:26Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -596,7 +536,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:04 GMT
+      - Thu, 03 Jun 2021 03:15:16 GMT
       expires:
       - '-1'
       pragma:
@@ -631,21 +571,21 @@ interactions:
       ParameterSetName:
       - -n -g --subnet-name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"f73ba510-b3e1-4fbf-8029-31bd2545120a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"733bcb52-0b4d-460e-b8ed-c4ac3ca3049a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"600970ba-cd78-46a0-9741-3528e0c6e9ff\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"f1b28f6d-9741-40cd-a088-ab830c9753f7\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"f73ba510-b3e1-4fbf-8029-31bd2545120a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"733bcb52-0b4d-460e-b8ed-c4ac3ca3049a\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -656,7 +596,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4d56f4ee-60ab-4bdc-b1b1-253396b89ba0?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ec60d835-b375-41ba-b1e8-3c9b282c9bda?api-version=2021-02-01
       cache-control:
       - no-cache
       content-length:
@@ -664,7 +604,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:10 GMT
+      - Thu, 03 Jun 2021 03:15:22 GMT
       expires:
       - '-1'
       pragma:
@@ -677,9 +617,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b5d4dbe4-d5a2-43c3-9e0f-5eac8edeccd8
+      - a376b26c-f00b-4d5d-9ad5-780732da12e5
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -697,9 +637,9 @@ interactions:
       ParameterSetName:
       - -n -g --subnet-name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4d56f4ee-60ab-4bdc-b1b1-253396b89ba0?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ec60d835-b375-41ba-b1e8-3c9b282c9bda?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -711,7 +651,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:13 GMT
+      - Thu, 03 Jun 2021 03:15:26 GMT
       expires:
       - '-1'
       pragma:
@@ -728,7 +668,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4b36d3f1-650c-4ed2-8ab1-a6d4c5eaa6aa
+      - e0e9b41f-d3c0-498b-a3c1-6b522f8f6e25
     status:
       code: 200
       message: OK
@@ -746,21 +686,21 @@ interactions:
       ParameterSetName:
       - -n -g --subnet-name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"c1fdcd6c-e651-4da9-b481-9dcacc443c10\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8737cefd-aab2-487b-bf01-764cc56e0bcf\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"600970ba-cd78-46a0-9741-3528e0c6e9ff\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"f1b28f6d-9741-40cd-a088-ab830c9753f7\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"c1fdcd6c-e651-4da9-b481-9dcacc443c10\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8737cefd-aab2-487b-bf01-764cc56e0bcf\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -775,9 +715,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:14 GMT
+      - Thu, 03 Jun 2021 03:15:26 GMT
       etag:
-      - W/"c1fdcd6c-e651-4da9-b481-9dcacc443c10"
+      - W/"8737cefd-aab2-487b-bf01-764cc56e0bcf"
       expires:
       - '-1'
       pragma:
@@ -794,7 +734,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e590ca21-ad79-4df8-96d7-fc9c113d85e1
+      - bf5f0d65-b0af-48bc-a547-d103bf5ce8f6
     status:
       code: 200
       message: OK
@@ -812,13 +752,13 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"c1fdcd6c-e651-4da9-b481-9dcacc443c10\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"8737cefd-aab2-487b-bf01-764cc56e0bcf\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -831,9 +771,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:14 GMT
+      - Thu, 03 Jun 2021 03:15:27 GMT
       etag:
-      - W/"c1fdcd6c-e651-4da9-b481-9dcacc443c10"
+      - W/"8737cefd-aab2-487b-bf01-764cc56e0bcf"
       expires:
       - '-1'
       pragma:
@@ -850,7 +790,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ce1f329a-75b2-42ae-a7a6-47a4a7e2b9cf
+      - 05619ac5-894f-4bba-b38e-2ad56d79bf65
     status:
       code: 200
       message: OK
@@ -875,20 +815,20 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"7b6feb33-1201-4bba-a0b1-fe3a904242a3\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"60fefcdb-c6dc-4e40-9002-f90bb5a13d01\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b14bb3ae-f830-4abf-b748-17e6beef94c7?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/497f3cfb-a92e-4188-9949-982819ad9adf?api-version=2021-02-01
       cache-control:
       - no-cache
       content-length:
@@ -896,7 +836,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:15 GMT
+      - Thu, 03 Jun 2021 03:15:28 GMT
       expires:
       - '-1'
       pragma:
@@ -913,9 +853,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 62b83fe4-aecc-4d1a-9524-0e117862bbbd
+      - d847c300-5add-4506-b32c-31ec84af4970
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -933,9 +873,9 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b14bb3ae-f830-4abf-b748-17e6beef94c7?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/497f3cfb-a92e-4188-9949-982819ad9adf?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -947,7 +887,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:18 GMT
+      - Thu, 03 Jun 2021 03:15:31 GMT
       expires:
       - '-1'
       pragma:
@@ -964,7 +904,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6510c044-cc5e-481f-87d7-f1de7061ec12
+      - 2befceca-9bff-4476-9a5e-bb8e6088c6af
     status:
       code: 200
       message: OK
@@ -982,13 +922,13 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"bbaf87eb-1ffb-4f1b-b330-fcf7c2d87bf6\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"cce4ab43-e9c4-449a-8bb2-222cc83dfd16\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -1001,9 +941,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:18 GMT
+      - Thu, 03 Jun 2021 03:15:31 GMT
       etag:
-      - W/"bbaf87eb-1ffb-4f1b-b330-fcf7c2d87bf6"
+      - W/"cce4ab43-e9c4-449a-8bb2-222cc83dfd16"
       expires:
       - '-1'
       pragma:
@@ -1020,7 +960,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 03ac73ad-7181-4d36-b941-23b1f2595040
+      - b8659534-0615-4ffd-b88e-8f29b239c9a9
     status:
       code: 200
       message: OK
@@ -1039,12 +979,12 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_private_endpoint_connection_synapse_workspace000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001","name":"test_private_endpoint_connection_synapse_workspace000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-05-28T08:04:36Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001","name":"test_private_endpoint_connection_synapse_workspace000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-06-03T03:11:26Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1053,7 +993,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:20 GMT
+      - Thu, 03 Jun 2021 03:15:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1090,18 +1030,18 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"ab0f07d5-105c-4d23-a634-2ad4b735eb2c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5f0d4844-cb3d-4db8-8604-54b3fc0fe89b\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"2df6ee1a-c4f6-4623-b4a8-0572d676db01\",\r\n    \"privateLinkServiceConnections\":
+        \"6670d39f-01b7-4c07-a6d5-e072caa7fbce\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
-        \       \"etag\": \"W/\\\"ab0f07d5-105c-4d23-a634-2ad4b735eb2c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5f0d4844-cb3d-4db8-8604-54b3fc0fe89b\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007\",\r\n
         \         \"groupIds\": [\r\n            \"Sql\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -1110,13 +1050,13 @@ interactions:
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
         \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
         \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.f1177925-1a97-4f3b-9deb-041235fe8f6e\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.2528c4bb-447c-4e64-836b-ccb8a9d9457f\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2e078397-a148-4e87-b7b0-0b271c78302e?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/25dc59c3-9a51-4607-ad63-3e940402bddc?api-version=2021-02-01
       cache-control:
       - no-cache
       content-length:
@@ -1124,7 +1064,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:26 GMT
+      - Thu, 03 Jun 2021 03:15:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1137,7 +1077,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7d84b797-f26b-4a85-b81f-7f4be92e89b8
+      - e9a836b2-48d9-427f-b90b-5df09400a437
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1158,9 +1098,9 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2e078397-a148-4e87-b7b0-0b271c78302e?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/25dc59c3-9a51-4607-ad63-3e940402bddc?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1172,7 +1112,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:37 GMT
+      - Thu, 03 Jun 2021 03:15:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1189,7 +1129,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2e45212b-f054-4abe-ab8f-69a8229d92b7
+      - 94996924-61df-41ad-8a7a-42063439f5f4
     status:
       code: 200
       message: OK
@@ -1208,9 +1148,59 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2e078397-a148-4e87-b7b0-0b271c78302e?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/25dc59c3-9a51-4607-ad63-3e940402bddc?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 03 Jun 2021 03:16:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 38749400-fea0-4742-9c7e-4bc69dfa1a01
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/25dc59c3-9a51-4607-ad63-3e940402bddc?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1222,7 +1212,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:57 GMT
+      - Thu, 03 Jun 2021 03:16:20 GMT
       expires:
       - '-1'
       pragma:
@@ -1239,7 +1229,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 13c453cf-5f8a-4299-ae1a-a079178b399c
+      - 70ca535b-c33e-4e5b-80db-f1040cbc2067
     status:
       code: 200
       message: OK
@@ -1258,18 +1248,18 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"1bb6c6c5-2921-46a2-9a45-fa7400ea11f3\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"2fdec083-f88d-4f85-95d9-74196f978143\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"2df6ee1a-c4f6-4623-b4a8-0572d676db01\",\r\n    \"privateLinkServiceConnections\":
+        \"6670d39f-01b7-4c07-a6d5-e072caa7fbce\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
-        \       \"etag\": \"W/\\\"1bb6c6c5-2921-46a2-9a45-fa7400ea11f3\\\"\",\r\n
+        \       \"etag\": \"W/\\\"2fdec083-f88d-4f85-95d9-74196f978143\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007\",\r\n
         \         \"groupIds\": [\r\n            \"Sql\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -1278,7 +1268,7 @@ interactions:
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
         \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
         \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.f1177925-1a97-4f3b-9deb-041235fe8f6e\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.2528c4bb-447c-4e64-836b-ccb8a9d9457f\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
         \"cli-test-resource-000007.sql.azuresynapse.net\",\r\n        \"ipAddresses\":
         [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -1290,9 +1280,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:09:57 GMT
+      - Thu, 03 Jun 2021 03:16:20 GMT
       etag:
-      - W/"1bb6c6c5-2921-46a2-9a45-fa7400ea11f3"
+      - W/"2fdec083-f88d-4f85-95d9-74196f978143"
       expires:
       - '-1'
       pragma:
@@ -1309,7 +1299,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - afe3abb9-7b83-4088-bb6f-cbfbb69a73dc
+      - 3c815949-e7db-47f6-8503-866e39ba2d39
     status:
       code: 200
       message: OK
@@ -1327,12 +1317,12 @@ interactions:
       ParameterSetName:
       - --name -g --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"value":[{"name":"cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}]}'
+      string: '{"value":[{"name":"cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}]}'
     headers:
       cache-control:
       - no-cache
@@ -1341,7 +1331,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:00 GMT
+      - Thu, 03 Jun 2021 03:16:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1373,12 +1363,12 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
+      string: '{"name":"cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
     headers:
       cache-control:
       - no-cache
@@ -1387,7 +1377,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:01 GMT
+      - Thu, 03 Jun 2021 03:16:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1406,8 +1396,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "cli-pe-000005-c449c783-6428-494c-b303-c8572efae567", "type":
-      "Microsoft.Synapse/workspaces/privateEndpointConnections", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567",
+    body: '{"name": "cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f", "type":
+      "Microsoft.Synapse/workspaces/privateEndpointConnections", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f",
       "properties": {"provisioningState": "Succeeded", "privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},
       "privateLinkServiceConnectionState": {"status": "Approved", "description": null}}}'
     headers:
@@ -1426,12 +1416,12 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
+      string: '{"name":"cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
     headers:
       cache-control:
       - no-cache
@@ -1440,7 +1430,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:03 GMT
+      - Thu, 03 Jun 2021 03:16:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1474,12 +1464,12 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
+      string: '{"name":"cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
     headers:
       cache-control:
       - no-cache
@@ -1488,7 +1478,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:14 GMT
+      - Thu, 03 Jun 2021 03:16:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1520,12 +1510,12 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
+      string: '{"name":"cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
     headers:
       cache-control:
       - no-cache
@@ -1534,7 +1524,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:15 GMT
+      - Thu, 03 Jun 2021 03:16:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1566,12 +1556,12 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
+      string: '{"name":"cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved"}}}'
     headers:
       cache-control:
       - no-cache
@@ -1580,7 +1570,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:17 GMT
+      - Thu, 03 Jun 2021 03:16:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1599,8 +1589,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "cli-pe-000005-c449c783-6428-494c-b303-c8572efae567", "type":
-      "Microsoft.Synapse/workspaces/privateEndpointConnections", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567",
+    body: '{"name": "cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f", "type":
+      "Microsoft.Synapse/workspaces/privateEndpointConnections", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f",
       "properties": {"provisioningState": "Succeeded", "privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},
       "privateLinkServiceConnectionState": {"status": "Rejected", "description": null}}}'
     headers:
@@ -1619,15 +1609,15 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","properties":{"provisioningState":"Provisioning","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected"}}}'
+      string: '{"name":"cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","properties":{"provisioningState":"Provisioning","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected"}}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/12c34296-150f-44e9-850c-16d7a481d649?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/69a7457b-7af1-43e8-aed9-7e395bbf57ff?api-version=2019-06-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1635,7 +1625,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:18 GMT
+      - Thu, 03 Jun 2021 03:16:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1647,7 +1637,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1665,12 +1655,12 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","properties":{"provisioningState":"Provisioning","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected"}}}'
+      string: '{"name":"cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","properties":{"provisioningState":"Provisioning","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected"}}}'
     headers:
       cache-control:
       - no-cache
@@ -1679,7 +1669,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:29 GMT
+      - Thu, 03 Jun 2021 03:16:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1711,12 +1701,12 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"name":"cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected"}}}'
+      string: '{"name":"cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","type":"Microsoft.Synapse/workspaces/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected"}}}'
     headers:
       cache-control:
       - no-cache
@@ -1725,7 +1715,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:40 GMT
+      - Thu, 03 Jun 2021 03:17:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1759,9 +1749,9 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type -y
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19043-SP0) AZURECLI/2.24.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-c449c783-6428-494c-b303-c8572efae567?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/privateEndpointConnections/cli-pe-000005-f7e4fc92-8a26-4fbc-82f8-028a9c70b75f?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -1771,7 +1761,7 @@ interactions:
       access-control-expose-headers:
       - Location
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/ba6b87c8-3e15-4c12-8eb3-45c671d84036?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationStatuses/1e9789d2-c9c3-4c61-b30a-dbc4b9afc7e0?api-version=2019-06-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1779,11 +1769,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 28 May 2021 08:10:42 GMT
+      - Thu, 03 Jun 2021 03:17:04 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationResults/ba6b87c8-3e15-4c12-8eb3-45c671d84036?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_synapse_workspace000001/providers/Microsoft.Synapse/workspaces/cli-test-resource-000007/operationResults/1e9789d2-c9c3-4c61-b30a-dbc4b9afc7e0?api-version=2019-06-01-preview
       pragma:
       - no-cache
       server:

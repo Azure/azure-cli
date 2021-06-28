@@ -386,7 +386,7 @@ def load_arguments(self, _):
         c.argument('job_name', arg_type=name_type, help='The Spark job name.')
         c.argument('reference_files', nargs='+',
                    help='Additional files used for reference in the main definition file.')
-        c.argument('configuration', type=get_json_object, help='The configuration of Spark job.')
+        c.argument('configuration', type=shell_safe_json_parse, help='The configuration of Spark job.')
         c.argument('executors', help='The number of executors.')
         c.argument('executor_size', arg_type=get_enum_type(['Small', 'Medium', 'Large']), help='The executor size')
         c.argument('tags', arg_type=tags_type)

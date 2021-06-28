@@ -441,7 +441,7 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
 
         self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, 'Vnet' + server[6:], 'Subnet' + server[6:]))
+                             self.get_subscription_id(), resource_group, 'Vnet' + server, 'Subnet' + server))
 
         if database_engine == 'postgres':
             self.assertIn('testdnsname.private.postgres.database.azure.com', show_result['privateDnsZoneArguments']['privateDnsZoneArmResourceId'])
@@ -457,7 +457,7 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
 
         self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, 'Vnet' + server[6:], 'Subnet' + server[6:]))
+                             self.get_subscription_id(), resource_group, 'Vnet' + server, 'Subnet' + server))
 
     def _test_flexible_server_vnet_server_update_scale_up(self, database_engine, resource_group, server):
 
@@ -842,7 +842,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         # create vnet and subnet. When vnet name is supplied, the subnet created will be given the default name.
         vnet_result = self.cmd('network vnet create -n {} -g {} -l {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
-                               .format(vnet_name, resource_group, location, address_prefix, 'Subnet' + servers[0][6:], subnet_prefix_1)).get_output_in_json()
+                               .format(vnet_name, resource_group, location, address_prefix, 'Subnet' + servers[0], subnet_prefix_1)).get_output_in_json()
 
         # create server - Delegation should be added.
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} -l {}'
@@ -861,11 +861,11 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         self.assertEqual(show_result_1['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, vnet_name, 'Subnet' + servers[0][6:]))
+                             self.get_subscription_id(), resource_group, vnet_name, 'Subnet' + servers[0]))
 
         self.assertEqual(show_result_2['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + servers[1][6:]))
+                             self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + servers[1]))
 
         # delete all servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[0]),
@@ -914,7 +914,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         self.assertEqual(show_result_2['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + servers[1][6:]))
+                             self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + servers[1]))
 
         # delete all servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[0]),

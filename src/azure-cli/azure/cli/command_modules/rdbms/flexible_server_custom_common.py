@@ -283,7 +283,6 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
     if allow_push:
         logger.warning("Pushing the created action file to origin %s branch", branch)
         run_subprocess("git push origin {}".format(branch))
-        github_actions_run(action_name, branch)
     else:
         logger.warning('You did not set --allow-push parameter. Please push the prepared file %s to your remote repo and run "deploy run" command to activate the workflow.', action_path)
 
@@ -291,7 +290,7 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
 def github_actions_run(action_name, branch):
 
     gitcli_check_and_login()
-    logger.warning("Created event for %s.yml in branch %s", action_name, branch)
+    logger.warning("Created an event for %s.yml in branch %s", action_name, branch)
     run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
 
 

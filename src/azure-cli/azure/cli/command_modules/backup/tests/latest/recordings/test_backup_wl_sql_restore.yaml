@@ -135,7 +135,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '113'
       x-powered-by:
       - ASP.NET
     status:
@@ -299,7 +299,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '110'
       x-powered-by:
       - ASP.NET
     status:
@@ -1478,6 +1478,7 @@ interactions:
       - no-cache
       server:
       - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1602,7 +1603,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"properties": {"objectType": "AzureWorkloadBackupRequest", "backupType":
+      "Full", "enableCompression": false, "recoveryPointExpiryTimeInUTC": "2021-07-21T15:39:35.944019Z"}}'
     headers:
       Accept:
       - application/json
@@ -1612,6 +1614,10 @@ interactions:
       - backup protection enable-for-azurewl
       Connection:
       - keep-alive
+      Content-Length:
+      - '173'
+      Content-Type:
+      - application/json; charset=utf-8
       ParameterSetName:
       - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
       User-Agent:
@@ -1626,6 +1632,8 @@ interactions:
     body:
       string: '{"id":"9e81ebff-39ba-45a1-b8e2-11b814cce914","name":"9e81ebff-39ba-45a1-b8e2-11b814cce914","status":"InProgress","startTime":"2021-06-23T12:00:16.0803691Z","endTime":"0001-01-01T00:00:00"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;msdb/operationsStatus/8a7a532f-852b-4cbc-9d69-92fce46d4075?api-version=2021-01-01
       cache-control:
       - no-cache
       content-length:
@@ -1636,16 +1644,14 @@ interactions:
       - Wed, 23 Jun 2021 12:00:48 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;msdb/operationResults/8a7a532f-852b-4cbc-9d69-92fce46d4075?api-version=2021-01-01
       pragma:
       - no-cache
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -1653,8 +1659,8 @@ interactions:
       x-powered-by:
       - ASP.NET
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -2439,7 +2445,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1627'
       content-type:
       - application/json
       date:
@@ -2493,7 +2499,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1627'
       content-type:
       - application/json
       date:
@@ -2547,7 +2553,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1251'
       content-type:
       - application/json
       date:
@@ -2601,7 +2607,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '784'
       content-type:
       - application/json
       date:
@@ -2655,7 +2661,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '1096'
       content-type:
       - application/json
       date:
@@ -2682,7 +2688,16 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"properties": {"objectType": "AzureWorkloadSQLRestoreRequest", "recoveryType":
+      "AlternateLocation", "sourceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm",
+      "targetInfo": {"overwriteOption": "Overwrite", "containerId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;sarath-rg;sarathvm",
+      "databaseName": "MSSQLSERVER/MSSQLSERVER"}, "targetVirtualMachineId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm",
+      "shouldUseAlternateTargetLocation": true, "isNonRecoverable": false, "alternateDirectoryPaths":
+      [{"mappingType": "Data", "sourceLogicalName": "MSDBData", "sourcePath": "C:\\Program
+      Files\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\DATA\\MSDBData.mdf",
+      "targetPath": "F:\\data\\MSDBData_1624290136.mdf"}, {"mappingType": "Log", "sourceLogicalName":
+      "MSDBLog", "sourcePath": "C:\\Program Files\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\DATA\\MSDBLog.ldf",
+      "targetPath": "G:\\log\\MSDBLog_1624290136.ldf"}]}}'
     headers:
       Accept:
       - application/json
@@ -2692,6 +2707,10 @@ interactions:
       - backup protection enable-for-azurewl
       Connection:
       - keep-alive
+      Content-Length:
+      - '1260'
+      Content-Type:
+      - application/json; charset=utf-8
       ParameterSetName:
       - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
       User-Agent:
@@ -2706,26 +2725,22 @@ interactions:
     body:
       string: '{"id":"9e81ebff-39ba-45a1-b8e2-11b814cce914","name":"9e81ebff-39ba-45a1-b8e2-11b814cce914","status":"InProgress","startTime":"2021-06-23T12:00:16.0803691Z","endTime":"0001-01-01T00:00:00"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;msdb/operationsStatus/0eaadfe9-8995-41e7-bb08-67abbcc08dae?api-version=2021-01-01
       cache-control:
       - no-cache
       content-length:
-      - '188'
-      content-type:
-      - application/json
+      - '0'
       date:
       - Wed, 23 Jun 2021 12:01:13 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;msdb/operationResults/0eaadfe9-8995-41e7-bb08-67abbcc08dae?api-version=2021-01-01
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -2733,8 +2748,8 @@ interactions:
       x-powered-by:
       - ASP.NET
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -2817,7 +2832,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '304'
       content-type:
       - application/json
       date:
@@ -2871,7 +2886,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '801'
       content-type:
       - application/json
       date:
@@ -2881,6 +2896,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -2925,7 +2941,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '801'
       content-type:
       - application/json
       date:
@@ -2935,6 +2951,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -2979,7 +2996,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '801'
       content-type:
       - application/json
       date:
@@ -2989,6 +3006,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -3033,7 +3051,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '802'
       content-type:
       - application/json
       date:
@@ -3043,6 +3061,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -3087,7 +3106,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '803'
       content-type:
       - application/json
       date:
@@ -3097,6 +3116,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -3141,7 +3161,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '803'
       content-type:
       - application/json
       date:
@@ -3151,6 +3171,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -3195,7 +3216,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '803'
       content-type:
       - application/json
       date:
@@ -3205,6 +3226,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -3249,7 +3271,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '804'
       content-type:
       - application/json
       date:
@@ -3259,6 +3281,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -5795,6 +5818,7 @@ interactions:
       - no-cache
       server:
       - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -5980,7 +6004,9 @@ interactions:
       code: 202
       message: Accepted
 - request:
-    body: null
+    body: '{"properties": {"objectType": "AzureWorkloadSQLRestoreRequest", "recoveryType":
+      "OriginalLocation", "shouldUseAlternateTargetLocation": true, "isNonRecoverable":
+      false}}'
     headers:
       Accept:
       - application/json
@@ -5990,6 +6016,10 @@ interactions:
       - backup restore restore-azurewl
       Connection:
       - keep-alive
+      Content-Length:
+      - '169'
+      Content-Type:
+      - application/json; charset=utf-8
       ParameterSetName:
       - --vault-name -g --recovery-config
       User-Agent:
@@ -6004,26 +6034,22 @@ interactions:
     body:
       string: '{"id":"662f848b-705a-41af-acf7-f64feb79aaea","name":"662f848b-705a-41af-acf7-f64feb79aaea","status":"InProgress","startTime":"2021-06-23T12:08:58.0022167Z","endTime":"0001-01-01T00:00:00"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;msdb/operationsStatus/a4a3d0a2-1187-4688-a049-554fc1529af9?api-version=2021-01-01
       cache-control:
       - no-cache
       content-length:
-      - '188'
-      content-type:
-      - application/json
+      - '0'
       date:
       - Wed, 23 Jun 2021 12:08:58 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;msdb/operationResults/a4a3d0a2-1187-4688-a049-554fc1529af9?api-version=2021-01-01
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6031,8 +6057,8 @@ interactions:
       x-powered-by:
       - ASP.NET
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -6792,11 +6818,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup protection disable
+      - backup job wait
       Connection:
       - keep-alive
       ParameterSetName:
-      - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
+      - -v -g -n
       User-Agent:
       - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
         azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
@@ -6822,6 +6848,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -6901,6 +6928,8 @@ interactions:
       - backup protection disable
       Connection:
       - keep-alive
+      Content-Length:
+      - '0'
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
@@ -6915,26 +6944,22 @@ interactions:
     body:
       string: '{"id":"79151dd4-8f72-43f6-a55b-d2a434d356c3","name":"79151dd4-8f72-43f6-a55b-d2a434d356c3","status":"InProgress","startTime":"2021-06-23T12:14:06.2886671Z","endTime":"0001-01-01T00:00:00"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/3bdd3255-8fd2-4a83-a71c-0bded40ce7d6?api-version=2021-01-01
       cache-control:
       - no-cache
       content-length:
-      - '188'
-      content-type:
-      - application/json
+      - '0'
       date:
       - Wed, 23 Jun 2021 12:14:05 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperationResults/3bdd3255-8fd2-4a83-a71c-0bded40ce7d6?api-version=2021-01-01
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -6942,8 +6967,8 @@ interactions:
       x-powered-by:
       - ASP.NET
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:

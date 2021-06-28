@@ -295,7 +295,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '148'
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
@@ -6153,6 +6153,7 @@ interactions:
       - no-cache
       server:
       - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -6275,7 +6276,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"properties": {"objectType": "AzureFileShareBackupRequest", "recoveryPointExpiryTimeInUTC":
+      "2021-07-21T00:00:00.000Z"}}'
     headers:
       Accept:
       - application/json
@@ -6285,6 +6287,10 @@ interactions:
       - backup protection enable-for-azurefileshare
       Connection:
       - keep-alive
+      Content-Length:
+      - '121'
+      Content-Type:
+      - application/json; charset=utf-8
       ParameterSetName:
       - -g -v --azure-file-share --storage-account -p
       User-Agent:
@@ -6298,6 +6304,8 @@ interactions:
     body:
       string: '{"id":"475f25f0-4eee-433b-803e-4766229c4b60","name":"475f25f0-4eee-433b-803e-4766229c4b60","status":"InProgress","startTime":"2021-06-18T07:08:07.0837897Z","endTime":"0001-01-01T00:00:00"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;4d38ed9fdffda0f26dd0b3779d41252d0e121b06b3245eabba318a844a758fed/operationsStatus/6201853a-51a2-40fe-b932-de2e55d9745a?api-version=2021-01-01
       cache-control:
       - no-cache
       content-length:
@@ -6416,26 +6424,21 @@ interactions:
       - Fri, 18 Jun 2021 07:08:49 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;4d38ed9fdffda0f26dd0b3779d41252d0e121b06b3245eabba318a844a758fed/operationResults/6201853a-51a2-40fe-b932-de2e55d9745a?api-version=2021-01-01
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -6580,6 +6583,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -6847,7 +6851,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1550'
+      - '864'
       content-type:
       - application/json
       date:
@@ -7026,7 +7030,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '147'
       x-powered-by:
       - ASP.NET
     status:
@@ -7139,7 +7143,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"properties": {"objectType": "AzureFileShareBackupRequest", "recoveryPointExpiryTimeInUTC":
+      "2021-07-21T00:00:00.000Z"}}'
     headers:
       Accept:
       - application/json
@@ -7149,6 +7154,10 @@ interactions:
       - backup protection backup-now
       Connection:
       - keep-alive
+      Content-Length:
+      - '121'
+      Content-Type:
+      - application/json; charset=utf-8
       ParameterSetName:
       - -g -v -c -i --retain-until --backup-management-type --query
       User-Agent:
@@ -7162,6 +7171,8 @@ interactions:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;599f76c8394efbc661c1431bf8c8a723a60a98cf5728c75253051ad9ff0dfc6d","name":"AzureFileShare;599f76c8394efbc661c1431bf8c8a723a60a98cf5728c75253051ad9ff0dfc6d","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"clitest-item000004","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2021-06-18T07:08:51.7887313Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;clitest.rg000001;clitest000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.storage/storageAccounts/clitest000003","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","isArchiveEnabled":false}}]}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;4d38ed9fdffda0f26dd0b3779d41252d0e121b06b3245eabba318a844a758fed/operationsStatus/a172c5bc-a73a-4d95-b049-161b09ca753d?api-version=2021-01-01
       cache-control:
       - no-cache
       content-length:
@@ -7172,16 +7183,14 @@ interactions:
       - Fri, 18 Jun 2021 07:09:57 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;4d38ed9fdffda0f26dd0b3779d41252d0e121b06b3245eabba318a844a758fed/operationResults/a172c5bc-a73a-4d95-b049-161b09ca753d?api-version=2021-01-01
       pragma:
       - no-cache
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -7189,8 +7198,8 @@ interactions:
       x-powered-by:
       - ASP.NET
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: '{"properties": {"objectType": "AzureFileShareBackupRequest", "recoveryPointExpiryTimeInUTC":
       "2021-07-18T00:00:00.000Z"}}'
@@ -7283,6 +7292,7 @@ interactions:
       - no-cache
       server:
       - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -7335,6 +7345,7 @@ interactions:
       pragma:
       - no-cache
       server:
+      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -7457,7 +7468,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
+      - '144'
       x-powered-by:
       - ASP.NET
     status:
@@ -7513,7 +7524,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '148'
+      - '147'
       x-powered-by:
       - ASP.NET
     status:
@@ -7569,7 +7580,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '147'
+      - '148'
       x-powered-by:
       - ASP.NET
     status:
@@ -7639,6 +7650,8 @@ interactions:
       - backup recoverypoint list
       Connection:
       - keep-alive
+      Content-Length:
+      - '0'
       ParameterSetName:
       - -g -v -c -i --backup-management-type
       User-Agent:
@@ -7652,6 +7665,8 @@ interactions:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;599f76c8394efbc661c1431bf8c8a723a60a98cf5728c75253051ad9ff0dfc6d/recoveryPoints/14102375131830","name":"14102375131830","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureFileShareRecoveryPoint","recoveryPointType":"FileSystemConsistent","recoveryPointTime":"2021-06-18T07:09:59Z","fileShareSnapshotUri":"https://clitest000003.file.core.windows.net/clitest-item000004?sharesnapshot=2021-06-18T07:09:59.0000000Z","recoveryPointSizeInGB":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;599f76c8394efbc661c1431bf8c8a723a60a98cf5728c75253051ad9ff0dfc6d/recoveryPoints/3876478750721","name":"3876478750721","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureFileShareRecoveryPoint","recoveryPointType":"FileSystemConsistent","recoveryPointTime":"2021-06-18T07:08:52Z","fileShareSnapshotUri":"https://clitest000003.file.core.windows.net/clitest-item000004?sharesnapshot=2021-06-18T07:08:52.0000000Z","recoveryPointSizeInGB":0}}]}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/a843e6e9-013e-4af8-8eca-ecc6df5ae620?api-version=2021-01-01
       cache-control:
       - no-cache
       content-length:
@@ -7662,16 +7677,12 @@ interactions:
       - Fri, 18 Jun 2021 07:11:01 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/a843e6e9-013e-4af8-8eca-ecc6df5ae620?api-version=2021-01-01
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -7679,8 +7690,8 @@ interactions:
       x-powered-by:
       - ASP.NET
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -7812,7 +7823,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -7865,7 +7876,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -7918,7 +7929,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -7971,7 +7982,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -8024,7 +8035,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -8077,7 +8088,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -8130,7 +8141,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -8183,7 +8194,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -8236,7 +8247,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -8289,7 +8300,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '187'
       content-type:
       - application/json
       date:
@@ -8671,6 +8682,7 @@ interactions:
       - no-cache
       server:
       - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -8750,6 +8762,8 @@ interactions:
       - backup protection disable
       Connection:
       - keep-alive
+      Content-Length:
+      - '0'
       ParameterSetName:
       - -g -v -c -i --backup-management-type --delete-backup-data --yes
       User-Agent:
