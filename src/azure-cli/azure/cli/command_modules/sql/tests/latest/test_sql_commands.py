@@ -613,6 +613,46 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readScale', 'Enabled'),
                      JMESPathCheck('highAvailabilityReplicaCount', '2')])
 
+    @ResourceGroupPreparer(location='westcentralus')
+    @SqlServerPreparer(location='westcentralus')
+    def test_sql_db_ledger(self, resource_group, resource_group_location, server):
+        database_name_one = "cliautomationdb01"
+        database_name_two = "cliautomationdb02"
+
+        # test sql db is created with ledger off by default
+        self.cmd('sql db create -g {} --server {} --name {} --yes'
+                       .format(resource_group, server, database_name_one),
+                       checks=[
+                           JMESPathCheck('resourceGroup', resource_group),
+                           JMESPathCheck('name', database_name_one),
+                           JMESPathCheck('location', resource_group_location),
+                           JMESPathCheck('ledgerOn', False)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                           JMESPathCheck('resourceGroup', resource_group),
+                           JMESPathCheck('name', database_name_one),
+                           JMESPathCheck('location', resource_group_location),
+                           JMESPathCheck('ledgerOn', False)])
+
+        # test sql db with ledger on
+        self.cmd('sql db create -g {} --server {} --name {} --ledger-on --yes'
+                       .format(resource_group, server, database_name_two),
+                       checks=[
+                           JMESPathCheck('resourceGroup', resource_group),
+                           JMESPathCheck('name', database_name_two),
+                           JMESPathCheck('location', resource_group_location),
+                           JMESPathCheck('ledgerOn', True)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                           JMESPathCheck('resourceGroup', resource_group),
+                           JMESPathCheck('name', database_name_two),
+                           JMESPathCheck('location', resource_group_location),
+                           JMESPathCheck('ledgerOn', True)])
+
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
