@@ -562,7 +562,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
 
     @record_only()
-    def test_workload_archive_sql (self):
+    def test_backup_wl_sql_archive (self):
         self.kwargs.update({
             'vault': "archiveccyvault1",
             'rg': "ArchiveResourceGroup",
@@ -635,7 +635,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # Make sure that the container is not already registered since the start of the test
 
     @record_only()
-    def test_workload_archive_hana (self):
+    def test_backup_wl_hana_archive (self):
         self.kwargs.update({
             'vault': "archiveccyvault1",
             'rg': "ArchiveResourceGroup",
