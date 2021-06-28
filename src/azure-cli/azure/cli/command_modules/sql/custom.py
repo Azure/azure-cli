@@ -1401,7 +1401,7 @@ def db_export(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.export(
+    return client.begin_export(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1818,7 +1818,7 @@ def server_ms_support_audit_policy_set(
     Set server Microsoft support operations audit policy
     '''
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         dev_ops_auditing_settings_name='default',
@@ -2689,7 +2689,7 @@ def update_long_term_retention(
 
     kwargs['week_of_year'] = week_of_year
 
-    policy = client.create_or_update(
+    policy = client.begin_create_or_update(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -3081,7 +3081,7 @@ def dw_pause(
 
     # Pause, but DO NOT return the result. Long-running POST operation
     # results are not returned correctly by SDK.
-    client.pause(
+    client.begin_pause(
         server_name=server_name,
         resource_group_name=resource_group_name,
         database_name=database_name).wait()
@@ -3182,7 +3182,7 @@ def elastic_pool_create(
         maintenance_configuration_id)
 
     # Create
-    return client.create_or_update(
+    return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
         elastic_pool_name=elastic_pool_name,
@@ -3671,7 +3671,7 @@ def server_key_create(
 
     key_name = _get_server_key_name_from_uri(kid)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         key_name=key_name,
@@ -3764,7 +3764,7 @@ def server_dns_alias_set(
         quote(original_server_name),
         quote(dns_alias_name))
 
-    return client.acquire(
+    return client.begin_acquire(
         resource_group_name=resource_group_name,
         server_name=server_name,
         dns_alias_name=dns_alias_name,
