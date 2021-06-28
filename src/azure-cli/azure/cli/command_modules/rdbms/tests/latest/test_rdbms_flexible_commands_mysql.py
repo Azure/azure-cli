@@ -176,57 +176,6 @@ class MySqlFlexibleServerIopsMgmtScenarioTest(FlexibleServerIopsMgmtScenarioTest
         self.cmd('az group delete --name {} --yes --no-wait'.format(self.resource_group))
 
 
-class MySqlFlexibleServerVnetServerMgmtScenarioTest(FlexibleServerVnetServerMgmtScenarioTest):
-
-    def __init__(self, method_name):
-        super(MySqlFlexibleServerVnetServerMgmtScenarioTest, self).__init__(method_name)
-        self.location = mysql_location
-        self.resource_group = self.create_random_name(RG_NAME_PREFIX, RG_NAME_MAX_LENGTH)
-        self.server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        self.server_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
-        self.restore_server = 'restore-' + self.server[:55]
-        self.restore_server_2 = 'restore-' + self.server_2[:55]
-
-    @pytest.mark.order(1)
-    def test_mysql_flexible_server_vnet_server_prepare(self):
-        self.cmd('az group create --location {} --name {}'.format(mysql_location, self.resource_group))
-
-    @AllowLargeResponse()
-    @pytest.mark.order(2)
-    def test_mysql_flexible_server_vnet_server_create(self):
-        self._test_flexible_server_vnet_server_create('mysql', self.resource_group, self.server)
-
-    @AllowLargeResponse()
-    @pytest.mark.order(3)
-    def test_mysql_flexible_server_vnet_server_update_scale_up(self):
-        self._test_flexible_server_vnet_server_update_scale_up('mysql', self.resource_group, self.server)
-
-    @AllowLargeResponse()
-    @pytest.mark.order(4)
-    def test_mysql_flexible_server_vnet_server_restore(self):
-        self._test_flexible_server_vnet_server_restore('mysql', self.resource_group, self.server, self.restore_server)
-
-    @AllowLargeResponse()
-    @pytest.mark.order(5)
-    def test_mysql_flexible_server_vnet_ha_server_create(self):
-        self._test_flexible_server_vnet_ha_server_create('mysql', self.resource_group, self.server_2)
-
-    @AllowLargeResponse()
-    @pytest.mark.order(6)
-    def test_mysql_flexible_server_vnet_ha_server_update_scale_up(self):
-        self._test_flexible_server_vnet_server_update_scale_up('mysql', self.resource_group, self.server_2)
-
-    @AllowLargeResponse()
-    @pytest.mark.order(7)
-    def test_mysql_flexible_server_vnet_ha_server_delete(self):
-        self._test_flexible_server_vnet_server_delete('mysql', self.resource_group, self.server_2)
-
-    @AllowLargeResponse()
-    @pytest.mark.order(8)
-    def test_mysql_flexible_server_vnet_server_delete(self):
-        self._test_flexible_server_vnet_server_delete('mysql', self.resource_group, self.server, self.restore_server)
-
-
 class MySqlFlexibleServerProxyResourceMgmtScenarioTest(FlexibleServerProxyResourceMgmtScenarioTest):
 
     mysql_location = mysql_location

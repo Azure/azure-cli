@@ -204,7 +204,7 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
     result = client.trigger(vault_name, resource_group_name, fabric_name,
                             container_uri, item_uri, rp_name,
-                            trigger_restore_request, raw=True)
+                            trigger_restore_request, raw=True, polling=False).result()
 
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 

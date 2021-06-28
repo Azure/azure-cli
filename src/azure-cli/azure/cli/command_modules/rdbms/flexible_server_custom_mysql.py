@@ -20,7 +20,7 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     generate_password, parse_maintenance_window, get_mysql_list_skus_info
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network
-from .validators import mysql_arguments_validator, validate_server_name
+from .validators import mysql_arguments_validator, validate_server_name, validate_auto_grow_update, validate_mysql_ha_enabled
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -35,7 +35,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                            administrator_login_password=None, version=None,
                            backup_retention=None, tags=None, public_access=None, database_name=None,
                            subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
-                           vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None, iops=None):
+                           vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None, iops=None, auto_grow=None):
 
     # Populate desired parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -95,7 +95,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                                    sku_name, tier, storage_mb, administrator_login,
                                    administrator_login_password,
                                    version, tags, delegated_subnet_arguments, assign_identity, public_access,
-                                   high_availability, zone, iops)
+                                   high_availability, zone, iops, auto_grow)
 
     # Adding firewall rule
     if public_access is not None and str(public_access).lower() != 'none':
@@ -175,6 +175,7 @@ def flexible_server_update_custom_func(cmd, instance,
                                        assign_identity=False,
                                        replication_role=None,
                                        maintenance_window=None,
+                                       ha_enabled=None,
                                        iops=None):
     # validator
     location = ''.join(instance.location.lower().split())
@@ -208,7 +209,11 @@ def flexible_server_update_custom_func(cmd, instance,
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
 
+    if ha_enabled:
+        validate_mysql_ha_enabled(instance)
+
     if auto_grow:
+        validate_auto_grow_update(instance, auto_grow)
         instance.storage_profile.storage_autogrow = auto_grow
 
     if subnet_arm_resource_id:
@@ -246,6 +251,7 @@ def flexible_server_update_custom_func(cmd, instance,
                              ssl_enforcement=ssl_enforcement,
                              delegated_subnet_arguments=instance.delegated_subnet_arguments,
                              tags=tags,
+                             ha_enabled=ha_enabled,
                              replication_role=replication_role)
 
     if assign_identity:
@@ -367,7 +373,7 @@ def flexible_list_skus(cmd, client, location):
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    storage_mb, administrator_login, administrator_login_password, version, tags,
                    delegated_subnet_arguments,
-                   assign_identity, public_network_access, ha_enabled, availability_zone, iops):
+                   assign_identity, public_network_access, ha_enabled, availability_zone, iops, auto_grow):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -385,7 +391,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         storage_profile=mysql_flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
             storage_mb=storage_mb,
-            storage_iops=iops),
+            storage_iops=iops,
+            storage_autogrow=auto_grow),
         location=location,
         create_mode="Default",
         delegated_subnet_arguments=delegated_subnet_arguments,
@@ -534,7 +541,7 @@ def _determine_iops(storage_gb, iops_info, iops_input, tier, sku_name):
     if iops_input and iops_input > free_iops:
         iops = min(iops_input, max_supported_iops)
 
-    logger.warning("IOPS is set to %d which is either your input or free/maximum IOPS supported for your storage size and SKU.", iops)
+    logger.warning("IOPS is %d which is either your input or free(maximum) IOPS supported for your storage size and SKU.", iops)
     return iops
 
 
