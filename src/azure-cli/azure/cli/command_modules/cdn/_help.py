@@ -1040,7 +1040,7 @@ examples:
 
 helps['afd'] = """
 type: group
-short-summary: Manage Azure Front Door
+short-summary: Manage Azure Front Door.
 """
 
 helps['afd profile'] = """
