@@ -570,7 +570,8 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
 
     if use_secondary_region:
         paged_recovery_points = [item for item in paged_recovery_points if item.properties.recovery_point_tier_details
-                                 is not None and item.tier_type != 'VaultArchive']
+                                 is None or (item.properties.recovery_point_tier_details is not None and
+                                             item.tier_type != 'VaultArchive')]
 
     recovery_point_list = common.check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move)
     recovery_point_list = common.filter_rp_based_on_tier(recovery_point_list, tier)
