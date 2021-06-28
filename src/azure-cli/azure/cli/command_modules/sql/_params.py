@@ -987,6 +987,15 @@ def load_arguments(self, _):
                    help='Status of the transparent data encryption.',
                    arg_type=get_enum_type(TransparentDataEncryptionStatus))
 
+    #####
+    #           sql db ledger-digest-uploads
+    ######
+    with self.argument_context('sql db ledger-digest-uploads enable') as c:
+        c.argument('endpoint',
+                   options_list=['--endpoint'],
+                   help='The endpoint of a digest storage, '
+                   'which can be either an Azure Blob storage or a ledger in Azure Confidential Ledger.')
+
     ###############################################
     #                sql db ltr                   #
     ###############################################
