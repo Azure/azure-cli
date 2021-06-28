@@ -784,8 +784,9 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
 
 
 def _get_user_assigned_identity_resource_id_regular_expression():
-    return re.compile(r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)',
-    flags=re.IGNORECASE)
+    return re.compile(
+        r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)',
+        flags=re.IGNORECASE)
 
 
 def _get_user_assigned_identity(cli_ctx, resource_id):
