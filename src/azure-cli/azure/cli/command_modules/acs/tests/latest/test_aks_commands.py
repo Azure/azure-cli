@@ -4485,9 +4485,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    @live_only()
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_custom_kubelet_identity(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         control_plane_identity_name = self.create_random_name('cliakstest', 16)
