@@ -132,7 +132,7 @@ def load_arguments(self, _):
         c.argument('api_version', arg_group='API', help='Describes the Version of the Api. If you add a version to a non-versioned API, an Original version will be automatically created and will respond on the default URL')
         c.argument('api_version_set_id', arg_group='API', help='Describes the Version Set to be used with the API')
         c.argument('service_url', arg_group='API', help='Absolute URL of the backend service implementing this API. Cannot be more than 2000 characters long.')
-        c.argument('protocols', arg_group='API', arg_type=get_enum_type(API_PROTOCOLS), nargs='+', help='Describes on which protocols the operations in this API can be invoked.')
+        c.argument('protocols', arg_group='API', arg_type=get_enum_type(API_PROTOCOLS), nargs='+', help='Describes on which protocols(one or more) the operations in this API can be invoked.')
         c.argument('api_type', arg_group='API', arg_type=get_enum_type(API_TYPES), help='The type of the API.')
         c.argument('subscription_required', arg_group='API', arg_type=get_three_state_flag(), help='If true, the API requires a subscription key on requests.')
         c.argument('display_name', arg_group='API', help='Display name of this API.')
