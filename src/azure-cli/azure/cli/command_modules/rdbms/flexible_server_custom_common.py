@@ -205,8 +205,8 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
                        "If your parameter persistence is turned OFF, consider passing them explicitly.")
     if not yes:
         user_confirmation(
-            "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
-                                                                                              resource_group_name), yes=yes)
+            "Are you sure you want to delete the database '{0}' of server '{1}'".format(database_name,
+                                                                                        server_name), yes=yes)
 
     try:
         result = client.begin_delete(resource_group_name, server_name, database_name)
