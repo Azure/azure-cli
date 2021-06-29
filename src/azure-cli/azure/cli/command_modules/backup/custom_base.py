@@ -11,7 +11,7 @@ import azure.cli.command_modules.backup.custom_wl as custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
     backup_protection_containers_cf, backup_protectable_items_cf
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
-    MutuallyExclusiveArgumentError
+    MutuallyExclusiveArgumentError, ArgumentUsageError
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -150,7 +150,7 @@ def move_recovery_points(cmd, resource_group_name, vault_name, container_name, i
         return custom_wl.move_wl_recovery_points(cmd, resource_group_name, vault_name, item, rp_name,
                                                  source_tier, destination_tier)
 
-    raise InvalidArgumentValueError('This command is not supported for --backup-management-type AzureStorage.')
+    raise ArgumentUsageError('This command is not supported for --backup-management-type AzureStorage.')
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_until=None, container_name=None,

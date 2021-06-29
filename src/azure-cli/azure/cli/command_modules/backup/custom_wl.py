@@ -31,7 +31,7 @@ from azure.cli.command_modules.backup._client_factory import backup_workload_ite
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
-    ResourceNotFoundError
+    ResourceNotFoundError, ArgumentUsageError
 
 
 fabric_name = "Azure"
@@ -328,7 +328,7 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, 
                             tier=None, recommended_for_archive=None):
 
     if recommended_for_archive is not None:
-        raise InvalidArgumentValueError("""--recommended-for-archive is supported by AzureIaasVM backup management
+        raise ArgumentUsageError("""--recommended-for-archive is supported by AzureIaasVM backup management
         type only.""")
 
     # Get container and item URIs
@@ -589,11 +589,12 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     rp_list = [recovery_point]
     common.fetch_tier(rp_list)
 
-    if rp_list[0].tier_type == 'VaultArchive' and rehydration_priority is None:
+    if (rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive' and
+            rehydration_priority is None):
         raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
         parameters of rehydration duration and rehydration priority.""")
 
-    if rp_list[0].tier_type == 'VaultArchive':
+    if rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive':
         # Construct trigger restore request object
         trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority)
 

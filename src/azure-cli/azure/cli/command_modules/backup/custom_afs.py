@@ -18,7 +18,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
     resources_cf, backup_protected_items_cf
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
 
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
@@ -220,11 +220,11 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
             """)
 
     if is_ready_for_move is not None or target_tier is not None or tier is not None:
-        raise InvalidArgumentValueError("""Invalid argument has been passed. --is-ready-for-move true, --target-tier
+        raise ArgumentUsageError("""Invalid argument has been passed. --is-ready-for-move true, --target-tier
         and --tier flags are not supported for --backup-management-type AzureStorage.""")
 
     if recommended_for_archive is not None:
-        raise InvalidArgumentValueError("""--recommended-for-archive is supported by AzureIaasVM backup management
+        raise ArgumentUsageError("""--recommended-for-archive is supported by AzureIaasVM backup management
         type only.""")
 
     if cmd.name.split()[2] == 'show-log-chain':
