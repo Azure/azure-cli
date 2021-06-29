@@ -630,11 +630,7 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     source_resource_id, target_rg_id,
                                     use_original_storage_account, restore_disk_lun_list,
-                                    rehydration_duration, rehydration_priority, rp_list):
-    tier = None
-    if rp_list[0].properties.recovery_point_tier_details is not None:
-        tier = rp_list[0].tier_type
-
+                                    rehydration_duration, rehydration_priority, tier):
     if tier == 'VaultArchive':
         rehyd_duration = 'P' + str(rehydration_duration) + 'D'
         rehydration_info = RecoveryPointRehydrationInfo(rehydration_retention_duration=rehyd_duration,
@@ -742,7 +738,10 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     trigger_restore_properties = _get_trigger_restore_properties(rp_name, vault_location, _storage_account_id,
                                                                  _source_resource_id, target_rg_id,
                                                                  use_original_storage_account, restore_disk_lun_list,
-                                                                 rehydration_duration, rehydration_priority, rp_list)
+                                                                 rehydration_duration, rehydration_priority,
+                                                                 None if rp_list[0].
+                                                                 properties.recovery_point_tier_details is None else
+                                                                 rp_list[0].tier_type)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     if use_secondary_region:
