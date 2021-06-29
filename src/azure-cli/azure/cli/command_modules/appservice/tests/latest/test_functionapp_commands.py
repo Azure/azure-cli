@@ -476,8 +476,6 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
                      JMESPathCheck('kind', 'functionapp,linux'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
-        content_share_prefix = functionapp_name.lower()[0:50]
-
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell'),
             JMESPathPatternCheck("[?name=='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'].value|[0]", ".+" + storage_account + "{1}.+"),
