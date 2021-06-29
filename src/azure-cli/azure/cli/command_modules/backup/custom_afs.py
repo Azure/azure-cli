@@ -213,7 +213,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
                          use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
                          recommended_for_archive=None):
     if use_secondary_region:
-        raise InvalidArgumentValueError(
+        raise ArgumentUsageError(
             """
             --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
             Please either remove the flag or query for any other backup-management-type.
