@@ -47,7 +47,6 @@ from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (ResourceNotFoundError,
-                                       ArgumentUsageError,
                                        ClientRequestError,
                                        ArgumentUsageError,
                                        InvalidArgumentValueError,
@@ -2312,6 +2311,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     identity_profile = None
     if assign_kubelet_identity:
         if not assign_identity:
+            # pylint: disable=line-too-long
             raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
         kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
         identity_profile = {
