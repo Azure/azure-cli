@@ -4748,4 +4748,4 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cli_ctx, cluster_ide
     if not _add_role_assignment(cli_ctx, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
                                 is_service_principal=False, scope=scope):
         raise UnauthorizedError('Could not grant Managed Identity Operator '
-                       'permission to cluster identity at scope {}'.format(scope))
+                                'permission to cluster identity at scope {}'.format(scope))
