@@ -124,7 +124,7 @@ def load_arguments(self, _):
     with self.argument_context('apim api import') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
         c.argument('path', arg_group='API', help='Required. Relative URL uniquely identifying this API and all of its resource paths within the API Management service instance.', required=True)
-        c.argument('specification_format', arg_type=get_enum_type(ImportFormat), help='Specify the format of the imported API.', required=True)
+        c.argument('specification_format', arg_type=get_enum_type(ImportFormat), help='Specify the format of the imported API.')
         c.argument('description', arg_group='API', help='Description of the API. May include HTML formatting tags.')
         c.argument('subscription_key_header_name', arg_group='API', help='Specifies the subscription key header name.')
         c.argument('subscription_key_query_param_name', arg_group='API', help='Specifies the subscription key query string parameter name.')
