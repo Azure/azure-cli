@@ -18,7 +18,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
     resources_cf, backup_protected_items_cf
-from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
+from azure.cli.core.azclierror import ArgumentUsageError
 
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
@@ -213,7 +213,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
                          use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
                          recommended_for_archive=None):
     if use_secondary_region:
-        raise InvalidArgumentValueError(
+        raise ArgumentUsageError(
             """
             --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
             Please either remove the flag or query for any other backup-management-type.
@@ -228,7 +228,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
         type only.""")
 
     if cmd.name.split()[2] == 'show-log-chain':
-        raise InvalidArgumentValueError("show-log-chain is supported by AzureWorkload backup management type only.")
+        raise ArgumentUsageError("show-log-chain is supported by AzureWorkload backup management type only.")
 
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)
