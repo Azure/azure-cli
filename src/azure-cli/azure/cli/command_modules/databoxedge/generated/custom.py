@@ -11,6 +11,7 @@
 # pylint: disable=unused-argument
 
 from azure.cli.core.util import sdk_no_wait
+from azure.mgmt.databoxedge.models import Sku
 
 
 def databoxedge_device_list(client,
@@ -44,7 +45,7 @@ def databoxedge_device_create(client,
     data_box_edge_device = {}
     data_box_edge_device['location'] = location
     data_box_edge_device['tags'] = tags
-    data_box_edge_device['sku'] = sku
+    data_box_edge_device['sku'] = Sku(name=sku)
     data_box_edge_device['etag'] = etag
     data_box_edge_device['data_box_edge_device_status'] = data_box_edge_device_status
     data_box_edge_device['description'] = description
