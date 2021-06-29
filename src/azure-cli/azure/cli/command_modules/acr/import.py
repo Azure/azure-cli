@@ -38,7 +38,7 @@ def acr_import(cmd,
                repository=None,
                force=False,
                no_wait=False):
-               
+
     if source_registry_username and not source_registry_password:
         raise CLIError(CREDENTIALS_INVALID)
 
@@ -109,10 +109,10 @@ def acr_import(cmd,
             return LongRunningOperation(cmd.cli_ctx, 'Importing image...')(result_poller)
 
     except CLIError as e:
-        _handle_result(e, cmd, source_registry, source_image, registry)
+        _handle_exception(e, cmd, source_registry, source_image, registry)
 
 
-def _handle_result(e, cmd, source_registry, source_image, registry):
+def _handle_exception(e, cmd, source_registry, source_image, registry):
     from msrestazure.azure_exceptions import ClientException
     try:
         # if command fails, it might be because user specified registry twice in --source and --registry
@@ -126,10 +126,10 @@ def _handle_result(e, cmd, source_registry, source_image, registry):
 
             if registry.login_server.lower() in source_image.lower():
                 logger.warning("Import from source failed.\n\tsource image: '%s'\n"
-                                "Attention: When source registry is specified with `--registry`, "
-                                "`--source` is considered to be a source image name. "
-                                "Do not prefix `--source` with the registry login server name.", "{}/{}"
-                                .format(registry.login_server, source_image))
+                               "Attention: When source registry is specified with `--registry`, "
+                               "`--source` is considered to be a source image name. "
+                               "Do not prefix `--source` with the registry login server name.", "{}/{}"
+                               .format(registry.login_server, source_image))
     except (ClientException, CLIError) as unexpected_ex:  # raise exception
         logger.debug("Unexpected exception: %s", unexpected_ex)
 
