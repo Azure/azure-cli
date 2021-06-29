@@ -1215,7 +1215,7 @@ def iot_central_app_create(
               sku=appSku,
               template=template)
 
-    return sdk_no_wait(no_wait, client.apps.create_or_update, resource_group_name, app_name, app)
+    return sdk_no_wait(no_wait, client.apps.begin_create_or_update, resource_group_name, app_name, app)
 
 
 def iot_central_app_get(client, app_name, resource_group_name=None):
@@ -1225,7 +1225,7 @@ def iot_central_app_get(client, app_name, resource_group_name=None):
 
 
 def iot_central_app_delete(client, app_name, resource_group_name, no_wait=False):
-    return sdk_no_wait(no_wait, client.apps.delete, resource_group_name, app_name)
+    return sdk_no_wait(no_wait, client.apps.begin_delete, resource_group_name, app_name)
 
 
 def iot_central_app_list(client, resource_group_name=None):
@@ -1235,7 +1235,7 @@ def iot_central_app_list(client, resource_group_name=None):
 
 
 def iot_central_app_update(client, app_name, parameters, resource_group_name):
-    return client.apps.update(resource_group_name, app_name, parameters)
+    return client.apps.begin_update(resource_group_name, app_name, parameters)
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):
