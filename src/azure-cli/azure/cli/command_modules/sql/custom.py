@@ -4476,7 +4476,7 @@ def update_long_term_retention_mi(
 
     kwargs['week_of_year'] = week_of_year
 
-    policy = client.create_or_update(
+    policy = client.begin_create_or_update(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
