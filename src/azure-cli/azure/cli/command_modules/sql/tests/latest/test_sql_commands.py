@@ -866,7 +866,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'restore-dest-cli'
+            'dest_database_name': 'restore-dest-cli-temp'
         })
 
         self.cmd(
