@@ -53,7 +53,11 @@ from azure.mgmt.cosmosdb.models import (
     PeriodicModeBackupPolicy,
     PeriodicModeProperties,
     SqlRoleAssignmentCreateUpdateParameters,
-    SqlRoleDefinitionCreateUpdateParameters
+    SqlRoleDefinitionCreateUpdateParameters,
+    RestoreParameters,
+    ContinuousModeBackupPolicy,
+    ContinuousBackupRestoreLocation,
+    CreateMode
 )
 
 logger = get_logger(__name__)
@@ -108,13 +112,13 @@ def cli_cosmosdb_create(cmd, client,
                         backup_interval=None,
                         backup_retention=None,
                         assign_identity=None,
-                        default_identity=None):
+                        default_identity=None,
+                        backup_policy_type=None,
+                        databases_to_restore=None,
+                        is_restore_request=None,
+                        restore_source=None,
+                        restore_timestamp=None):
     """Create a new Azure Cosmos DB database account."""
-    consistency_policy = None
-    if default_consistency_level is not None:
-        consistency_policy = ConsistencyPolicy(default_consistency_level=default_consistency_level,
-                                               max_staleness_prefix=max_staleness_prefix,
-                                               max_interval_in_seconds=max_interval)
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -123,9 +127,90 @@ def cli_cosmosdb_create(cmd, client,
     rg = resource_client.resource_groups.get(resource_group_name)
     resource_group_location = rg.location  # pylint: disable=no-member
 
+    restore_timestamp_utc = None
+    if restore_timestamp is not None:
+        restore_timestamp_utc = _convert_to_utc_timestamp(
+            restore_timestamp).isoformat()
+
+    return _create_database_account(client=client,
+                                    resource_group_name=resource_group_name,
+                                    account_name=account_name,
+                                    locations=locations,
+                                    tags=tags,
+                                    kind=kind,
+                                    default_consistency_level=default_consistency_level,
+                                    max_staleness_prefix=max_staleness_prefix,
+                                    max_interval=max_interval,
+                                    ip_range_filter=ip_range_filter,
+                                    enable_automatic_failover=enable_automatic_failover,
+                                    capabilities=capabilities,
+                                    enable_virtual_network=enable_virtual_network,
+                                    virtual_network_rules=virtual_network_rules,
+                                    enable_multiple_write_locations=enable_multiple_write_locations,
+                                    disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
+                                    key_uri=key_uri,
+                                    enable_public_network=enable_public_network,
+                                    enable_analytical_storage=enable_analytical_storage,
+                                    enable_free_tier=enable_free_tier,
+                                    server_version=server_version,
+                                    network_acl_bypass=network_acl_bypass,
+                                    network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
+                                    is_restore_request=is_restore_request,
+                                    restore_source=restore_source,
+                                    restore_timestamp=restore_timestamp_utc,
+                                    backup_policy_type=backup_policy_type,
+                                    backup_interval=backup_interval,
+                                    assign_identity=assign_identity,
+                                    default_identity=default_identity,
+                                    backup_retention=backup_retention,
+                                    databases_to_restore=databases_to_restore,
+                                    arm_location=resource_group_location)
+
+
+# pylint: disable=too-many-statements
+def _create_database_account(client,
+                             resource_group_name,
+                             account_name,
+                             locations=None,
+                             tags=None,
+                             kind=DatabaseAccountKind.global_document_db.value,
+                             default_consistency_level=None,
+                             max_staleness_prefix=100,
+                             max_interval=5,
+                             ip_range_filter=None,
+                             enable_automatic_failover=None,
+                             capabilities=None,
+                             enable_virtual_network=None,
+                             virtual_network_rules=None,
+                             enable_multiple_write_locations=None,
+                             disable_key_based_metadata_write_access=None,
+                             key_uri=None,
+                             enable_public_network=None,
+                             enable_analytical_storage=None,
+                             enable_free_tier=None,
+                             server_version=None,
+                             network_acl_bypass=None,
+                             network_acl_bypass_resource_ids=None,
+                             backup_interval=None,
+                             backup_retention=None,
+                             assign_identity=None,
+                             default_identity=None,
+                             backup_policy_type=None,
+                             databases_to_restore=None,
+                             is_restore_request=None,
+                             restore_source=None,
+                             restore_timestamp=None,
+                             arm_location=None):
+
+    consistency_policy = None
+    if default_consistency_level is not None:
+        consistency_policy = ConsistencyPolicy(default_consistency_level=default_consistency_level,
+                                               max_staleness_prefix=max_staleness_prefix,
+                                               max_interval_in_seconds=max_interval)
+
     if not locations:
         locations = []
-        locations.append(Location(location_name=resource_group_location, failover_priority=0, is_zone_redundant=False))
+        locations.append(Location(location_name=arm_location, failover_priority=0, is_zone_redundant=False))
 
     public_network_access = None
     if enable_public_network is not None:
@@ -145,7 +230,20 @@ def cli_cosmosdb_create(cmd, client,
         raise CLIError('server-version is a valid argument only when kind is MongoDB.')
 
     backup_policy = None
-    if backup_interval is not None or backup_retention is not None:
+    if backup_policy_type is not None:
+        if backup_policy_type.lower() == 'periodic':
+            backup_policy = PeriodicModeBackupPolicy()
+            if backup_interval is not None or backup_retention is not None:
+                periodic_mode_properties = PeriodicModeProperties(
+                    backup_interval_in_minutes=backup_interval,
+                    backup_retention_interval_in_hours=backup_retention
+                )
+            backup_policy.periodic_mode_properties = periodic_mode_properties
+        elif backup_policy_type.lower() == 'continuous':
+            backup_policy = ContinuousModeBackupPolicy()
+        else:
+            raise CLIError('backup-policy-type argument is invalid.')
+    elif backup_interval is not None or backup_retention is not None:
         backup_policy = PeriodicModeBackupPolicy()
         periodic_mode_properties = PeriodicModeProperties(
             backup_interval_in_minutes=backup_interval,
@@ -153,8 +251,24 @@ def cli_cosmosdb_create(cmd, client,
         )
         backup_policy.periodic_mode_properties = periodic_mode_properties
 
+    create_mode = CreateMode.restore.value if is_restore_request else CreateMode.default.value
+    params = None
+    restore_parameters = None
+    if create_mode == 'Restore':
+        if restore_source is None or restore_timestamp is None:
+            raise CLIError('restore-source and restore-timestamp should be provided for a restore request.')
+
+        restore_parameters = RestoreParameters(
+            restore_mode='PointInTime',
+            restore_source=restore_source,
+            restore_timestamp_in_utc=restore_timestamp
+        )
+
+        if databases_to_restore is not None:
+            restore_parameters.databases_to_restore = databases_to_restore
+
     params = DatabaseAccountCreateUpdateParameters(
-        location=resource_group_location,
+        location=arm_location,
         locations=locations,
         tags=tags,
         kind=kind,
@@ -175,7 +289,10 @@ def cli_cosmosdb_create(cmd, client,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
         backup_policy=backup_policy,
         identity=system_assigned_identity,
-        default_identity=default_identity)
+        default_identity=default_identity,
+        create_mode=create_mode,
+        restore_parameters=restore_parameters
+    )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -206,7 +323,8 @@ def cli_cosmosdb_update(client,
                         server_version=None,
                         backup_interval=None,
                         backup_retention=None,
-                        default_identity=None):
+                        default_identity=None,
+                        backup_policy_type=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -240,6 +358,8 @@ def cli_cosmosdb_update(client,
     backup_policy = None
     if backup_interval is not None or backup_retention is not None:
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
+            if backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
+                raise CLIError('backup-interval and backup-retention can only be set with periodic backup policy.')
             periodic_mode_properties = PeriodicModeProperties(
                 backup_interval_in_minutes=backup_interval,
                 backup_retention_interval_in_hours=backup_retention
@@ -249,6 +369,9 @@ def cli_cosmosdb_update(client,
         else:
             raise CLIError(
                 'backup-interval and backup-retention can only be set for accounts with periodic backup policy.')
+    elif backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
+        if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
+            backup_policy = ContinuousModeBackupPolicy()
 
     params = DatabaseAccountUpdateParameters(
         locations=locations,
@@ -475,7 +598,6 @@ def cli_cosmosdb_sql_stored_procedure_create_update(client,
                                                     container_name,
                                                     stored_procedure_name,
                                                     stored_procedure_body):
-
     """Creates or Updates an Azure Cosmos DB SQL stored procedure """
     sql_stored_procedure_resource = SqlStoredProcedureResource(id=stored_procedure_name)
     sql_stored_procedure_resource.body = stored_procedure_body
@@ -499,7 +621,6 @@ def cli_cosmosdb_sql_user_defined_function_create_update(client,
                                                          container_name,
                                                          user_defined_function_name,
                                                          user_defined_function_body):
-
     """Creates or Updates an Azure Cosmos DB SQL user defined function """
     sql_user_defined_function_resource = SqlUserDefinedFunctionResource(id=user_defined_function_name)
     sql_user_defined_function_resource.body = user_defined_function_body
@@ -545,7 +666,6 @@ def cli_cosmosdb_sql_trigger_create(client,
                                     trigger_body,
                                     trigger_type=None,
                                     trigger_operation=None):
-
     """Creates an Azure Cosmos DB SQL trigger """
     if trigger_operation is None:
         trigger_operation = "All"
@@ -579,7 +699,6 @@ def cli_cosmosdb_sql_trigger_update(client,
                                     trigger_body=None,
                                     trigger_type=None,
                                     trigger_operation=None):
-
     """Updates an Azure Cosmos DB SQL trigger """
     logger.debug('reading SQL trigger')
     sql_trigger = client.get_sql_trigger(resource_group_name, account_name, database_name, container_name, trigger_name)
@@ -1453,11 +1572,158 @@ def _get_options(throughput=None, max_throughput=None):
     return options
 
 
+# pylint: disable=too-many-statements
+def cli_cosmosdb_restore(cmd,
+                         client,
+                         resource_group_name,
+                         account_name,
+                         target_database_account_name,
+                         restore_timestamp,
+                         location,
+                         databases_to_restore=None):
+    from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
+    restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
+    restorable_database_accounts = restorable_database_accounts_client.list()
+    restorable_database_accounts_list = list(restorable_database_accounts)
+    target_restorable_account = None
+    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
+
+    # If restore timestamp is timezone aware, get the utcnow as timezone aware as well
+    from datetime import datetime, timezone
+    current_dateTime = datetime.utcnow()
+    if restore_timestamp_datetime_utc.tzinfo is not None and restore_timestamp_datetime_utc.tzinfo.utcoffset(restore_timestamp_datetime_utc) is not None:
+        current_dateTime = datetime.now(timezone.utc)
+
+    # Fail if provided restoretimesamp is greater than current timestamp
+    if restore_timestamp_datetime_utc > current_dateTime:
+        raise CLIError("Restore timestamp {} should be less than current timestamp {}".format(restore_timestamp_datetime_utc, current_dateTime))
+
+    for account in restorable_database_accounts_list:
+        if account.account_name == account_name:
+            if account.deletion_time is not None:
+                if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
+                    target_restorable_account = account
+                    break
+            else:
+                if restore_timestamp_datetime_utc >= account.creation_time:
+                    target_restorable_account = account
+                    break
+
+    if target_restorable_account is None:
+        raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+
+    # Validate if source account is empty
+    restorable_resources = None
+    if target_restorable_account.api_type.lower() == "sql":
+        try:
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_resources
+            restorable_sql_resources_client = cf_restorable_sql_resources(cmd.cli_ctx, [])
+            restorable_resources = restorable_sql_resources_client.list(
+                target_restorable_account.location,
+                target_restorable_account.name,
+                location,
+                restore_timestamp_datetime_utc)
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
+    elif target_restorable_account.api_type.lower() == "mongodb":
+        try:
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_resources
+            restorable_mongodb_resources_client = cf_restorable_mongodb_resources(cmd.cli_ctx, [])
+            restorable_resources = restorable_mongodb_resources_client.list(
+                target_restorable_account.location,
+                target_restorable_account.name,
+                location,
+                restore_timestamp_datetime_utc)
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
+    else:
+        raise CLIError("Provided API Type {} is not supported for account {}".format(target_restorable_account.api_type, account_name))
+
+    if restorable_resources is None or not any(restorable_resources):
+        raise CLIError("Database account {} contains no restorable resources in location {} at given restore timestamp {}".format(target_restorable_account, location, restore_timestamp_datetime_utc))
+
+    # Trigger restore
+    locations = []
+    locations.append(Location(location_name=location, failover_priority=0))
+
+    return _create_database_account(client,
+                                    resource_group_name=resource_group_name,
+                                    account_name=target_database_account_name,
+                                    locations=locations,
+                                    is_restore_request=True,
+                                    restore_source=target_restorable_account.id,
+                                    restore_timestamp=restore_timestamp_datetime_utc.isoformat(),
+                                    databases_to_restore=databases_to_restore,
+                                    arm_location=target_restorable_account.location)
+
+
+def _convert_to_utc_timestamp(timestamp_string):
+    import dateutil
+    import datetime
+    import dateutil.parser
+    timestamp_datetime = dateutil.parser.parse(timestamp_string)
+    timestamp_datetime_utc = None
+    # Convert to utc only if timezone aware
+    if timestamp_datetime.tzinfo is not None and timestamp_datetime.tzinfo.utcoffset(timestamp_datetime) is not None:
+        timestamp_datetime_utc = timestamp_datetime.astimezone(datetime.timezone.utc)
+    else:
+        timestamp_datetime_utc = timestamp_datetime
+    return timestamp_datetime_utc
+
+
+def cli_cosmosdb_restorable_database_account_list(client,
+                                                  location=None,
+                                                  account_name=None):
+    restorable_database_accounts = None
+    if location is not None:
+        restorable_database_accounts = client.list_by_location(location)
+    else:
+        restorable_database_accounts = client.list()
+
+    if account_name is None:
+        return restorable_database_accounts
+
+    matching_restorable_accounts = []
+    restorable_database_accounts_list = list(restorable_database_accounts)
+    for account in restorable_database_accounts_list:
+        if account.account_name == account_name:
+            matching_restorable_accounts.append(account)
+    return matching_restorable_accounts
+
+
+def cli_retrieve_latest_backup_time(client,
+                                    resource_group_name,
+                                    account_name,
+                                    database_name,
+                                    container_name,
+                                    location):
+    try:
+        client.get_sql_database(resource_group_name, account_name, database_name)
+    except ResourceNotFoundError:
+        raise CLIError("Cannot find a database with name {}".format(database_name))
+
+    try:
+        client.get_sql_container(resource_group_name, account_name, database_name, container_name)
+    except ResourceNotFoundError:
+        raise CLIError("Cannot find a container with name {} under database {}".format(container_name, database_name))
+
+    restoreLocation = ContinuousBackupRestoreLocation(
+        location=location
+    )
+
+    asyc_backupInfo = client.begin_retrieve_continuous_backup_information(resource_group_name,
+                                                                          account_name,
+                                                                          database_name,
+                                                                          container_name,
+                                                                          restoreLocation)
+    return asyc_backupInfo.result()
+
 ######################
 # data plane APIs
 ######################
 
 # database operations
+
 
 def _get_database_link(database_id):
     return 'dbs/{}'.format(database_id)
