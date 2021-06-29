@@ -42,7 +42,7 @@ class FunctionappACRScenarioTest(ScenarioTest):
             resource_group, acr_registry_name))
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'.format(
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime {}'.format(
             resource_group, functionapp, storage_account, plan, runtime))
         creds = self.cmd('acr credential show -n {} -g {}'.format(
             acr_registry_name, resource_group)).get_output_in_json()
@@ -95,7 +95,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         password = acr_creds['passwords'][0]['value']
         self.cmd(
             'functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime {}'
                  ' --deployment-container-image-name {}.azurecr.io/image-name:latest --docker-registry-server-user {}'
                  ' --docker-registry-server-password {}'.format(resource_group, functionapp, storage_account, plan, runtime,
                                                                 acr_registry_name, username, password))
@@ -141,7 +141,7 @@ class FunctionappACRDeploymentScenarioTest(ScenarioTest):
             resource_group, acr_registry_name))
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'.format(
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime {}'.format(
             resource_group, functionapp, storage_account, plan, runtime))
         creds = self.cmd('acr credential show -g {} -n {}'.format(
             resource_group, acr_registry_name)).get_output_in_json()
@@ -433,7 +433,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionapplinuxconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime node'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --functions-version 3 --runtime node'
                  .format(resource_group, functionapp_name, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -509,7 +509,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --runtime node'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 3 --runtime node'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -947,7 +947,7 @@ class FunctionAppSlotTests(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp, plan,
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp, plan,
                                                                                         storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
@@ -975,7 +975,7 @@ class FunctionAppSlotTests(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp,
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp,
                                                                                         plan,
                                                                                         storage_account), checks=[
             JMESPathCheck('name', functionapp)
