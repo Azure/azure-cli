@@ -46,10 +46,14 @@ import requests
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
-from azure.cli.core.azclierror import (ArgumentUsageError,
+from azure.cli.core.azclierror import (ResourceNotFoundError,
+                                       ArgumentUsageError,
+                                       ClientRequestError,
+                                       ArgumentUsageError,
                                        InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
-                                       ValidationError)
+                                       ValidationError,
+                                       UnauthorizedError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -803,10 +807,10 @@ def _get_user_assigned_identity(cli_ctx, resource_id):
                                                                resource_name=identity_name)
         except CloudError as ex:
             if 'was not found' in ex.message:
-                raise CLIError("Identity {} not found.".format(resource_id))
-            raise CLIError(ex.message)
+                raise ResourceNotFoundError("Identity {} not found.".format(resource_id))
+            raise ClientRequestError(ex.message)
         return identity
-    raise CLIError(
+    raise InvalidArgumentValueError(
         "Cannot parse identity name from provided resource id {}.".format(resource_id))
 
 
@@ -2308,7 +2312,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     identity_profile = None
     if assign_kubelet_identity:
         if not assign_identity:
-            raise CLIError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
+            raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
         kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
         identity_profile = {
             'kubeletidentity': ManagedClusterPropertiesIdentityProfileValue(
@@ -4743,5 +4747,5 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cli_ctx, cluster_ide
 
     if not _add_role_assignment(cli_ctx, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
                                 is_service_principal=False, scope=scope):
-        raise CLIError('Could not grant Managed Identity Operator '
+        raise UnauthorizedError('Could not grant Managed Identity Operator '
                        'permission to cluster identity at scope {}'.format(scope))
