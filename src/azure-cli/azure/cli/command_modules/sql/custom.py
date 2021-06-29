@@ -4380,13 +4380,13 @@ def update_short_term_retention_mi(
                 cmd.cli_ctx,
                 None)
 
-        policy = client.create_or_update(
+        policy = client.begin_create_or_update(
             restorable_dropped_database_id=database_name,
             managed_instance_name=managed_instance_name,
             resource_group_name=resource_group_name,
             retention_days=retention_days)
     else:
-        policy = client.create_or_update(
+        policy = client.begin_create_or_update(
             database_name=database_name,
             managed_instance_name=managed_instance_name,
             resource_group_name=resource_group_name,
@@ -4682,7 +4682,7 @@ def delete_long_term_retention_mi_backup(
         database_name = resources_dict['longTermRetentionDatabases']
         backup_name = resources_dict['longTermRetentionManagedInstanceBackups']
 
-    return client.delete(
+    return client.begin_delete(
         location_name=location_name,
         managed_instance_name=managed_instance_name,
         database_name=database_name,
@@ -4717,7 +4717,7 @@ def restore_long_term_retention_mi_backup(
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         database_name=target_managed_database_name,
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
@@ -4754,7 +4754,7 @@ def managed_db_log_replay_start(
     kwargs['storageContainerSasToken'] = storage_container_sas_token
 
     # Create
-    return client.create_or_update(
+    return client.begin_create_or_update(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
