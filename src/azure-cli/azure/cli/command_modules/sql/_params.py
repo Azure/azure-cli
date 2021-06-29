@@ -213,7 +213,7 @@ maintenance_configuration_id_param_type = CLIArgumentType(
 
 ledger_on_param_type = CLIArgumentType(
     options_list=['--ledger-on'],
-    help='Creates a ledger database, in which the integrity of all data is protected by the ledger feature. '
+    help='Create a ledger database, in which the integrity of all data is protected by the ledger feature. '
          'All tables in the ledger database must be ledger tables. '
          'Note: the value of this property cannot be changed after the database has been created. ',
     arg_type=get_three_state_flag("Enabled", "Disabled", False, False))
