@@ -26,7 +26,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
-    MutuallyExclusiveArgumentError
+    MutuallyExclusiveArgumentError, ArgumentUsageError
 
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
@@ -535,7 +535,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
                          recommended_for_archive=None):
 
     if cmd.name.split()[2] == 'show-log-chain':
-        raise InvalidArgumentValueError("show-log-chain is supported by AzureWorkload backup management type only.")
+        raise ArgumentUsageError("show-log-chain is supported by AzureWorkload backup management type only.")
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
