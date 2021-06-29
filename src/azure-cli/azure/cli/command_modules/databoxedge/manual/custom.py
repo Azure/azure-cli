@@ -37,7 +37,7 @@ def databoxedge_device_create(client,
         data_box_edge_device['sku'] = {}
         data_box_edge_device['sku']['name'] = sku
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        device_name=device_name,
                        resource_group_name=resource_group_name,
                        data_box_edge_device=data_box_edge_device)
@@ -112,7 +112,7 @@ def databoxedge_order_create(client,
     order['contact_information']['phone'] = phone
     order['contact_information']['email_list'] = email_list
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        device_name=device_name,
                        resource_group_name=resource_group_name,
                        order=order)

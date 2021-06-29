@@ -51,7 +51,7 @@ def databoxedge_device_create(client,
     data_box_edge_device['model_description'] = model_description
     data_box_edge_device['friendly_name'] = friendly_name
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        device_name=device_name,
                        resource_group_name=resource_group_name,
                        data_box_edge_device=data_box_edge_device)
@@ -71,7 +71,7 @@ def databoxedge_device_delete(client,
                               resource_group_name,
                               no_wait=False):
     return sdk_no_wait(no_wait,
-                       client.delete,
+                       client.begin_delete,
                        device_name=device_name,
                        resource_group_name=resource_group_name)
 
@@ -160,7 +160,7 @@ def databoxedge_bandwidth_schedule_create(client,
     parameters['rate_in_mbps'] = rate_in_mbps
     parameters['days'] = days
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        device_name=device_name,
                        name=name,
                        resource_group_name=resource_group_name,
@@ -193,7 +193,7 @@ def databoxedge_bandwidth_schedule_delete(client,
                                           resource_group_name,
                                           no_wait=False):
     return sdk_no_wait(no_wait,
-                       client.delete,
+                       client.begin_delete,
                        device_name=device_name,
                        name=name,
                        resource_group_name=resource_group_name)
@@ -264,7 +264,7 @@ def databoxedge_order_create(client,
     order['contact_information']['phone'] = phone
     order['contact_information']['email_list'] = email_list
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        device_name=device_name,
                        resource_group_name=resource_group_name,
                        order=order)
@@ -321,7 +321,7 @@ def databoxedge_order_delete(client,
                              resource_group_name,
                              no_wait=False):
     return sdk_no_wait(no_wait,
-                       client.delete,
+                       client.begin_delete,
                        device_name=device_name,
                        resource_group_name=resource_group_name)
 
