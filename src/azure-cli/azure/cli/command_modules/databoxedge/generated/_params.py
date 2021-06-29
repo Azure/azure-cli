@@ -39,17 +39,16 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
                    validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
-        c.argument('sku', options_list=['--sku'],help='The SKU type.')
+        c.argument('sku', options_list=['--sku'], help='The SKU type.')
         c.argument('etag', options_list=['--etag'], type=str, help='The etag for the devices.')
-        c.argument('data_box_edge_device_status', options_list=['--status'],arg_type=get_enum_type([
-                    'ReadyToSetup',
-                    'Online',
-                    'Offline',
-                    'NeedsAttention',
-                    'Disconnected',
-                    'PartiallyDisconnected',
-                    'Maintenance']),
-                   help='The status of the Data Box Edge/Gateway device.')
+        c.argument('data_box_edge_device_status', options_list=['--status'], arg_type=get_enum_type([
+            'ReadyToSetup',
+            'Online',
+            'Offline',
+            'NeedsAttention',
+            'Disconnected',
+            'PartiallyDisconnected',
+            'Maintenance']), help='The status of the Data Box Edge/Gateway device.')
         c.argument('description', options_list=['--description'], type=str,
                    help='The Description of the Data Box Edge/Gateway device.')
         c.argument('model_description', options_list=['--model-description'], type=str,
@@ -177,11 +176,11 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('status', options_list=['--status'],
                    arg_type=get_enum_type(['Untracked', 'AwaitingFulfilment', 'AwaitingPreparation',
-                                                     'AwaitingShipment', 'Shipped', 'Arriving', 'Delivered',
-                                                     'ReplacementRequested', 'LostDevice', 'Declined',
-                                                     'ReturnInitiated', 'AwaitingReturnShipment', 'ShippedBack',
-                                                     'CollectedAtMicrosoft']), help='Status of the order as per the '
-                   'allowed status types.', arg_group='Current Status')
+                                           'AwaitingShipment', 'Shipped', 'Arriving', 'Delivered',
+                                           'ReplacementRequested', 'LostDevice', 'Declined',
+                                           'ReturnInitiated', 'AwaitingReturnShipment', 'ShippedBack',
+                                           'CollectedAtMicrosoft']),
+                   help='Status of the order as per the allowed status types.', arg_group='Current Status')
         c.argument('comments', options_list=['--comments'], type=str,
                    help='Comments related to this status change.', arg_group='Current Status')
         c.argument('address_line1', options_list=['--address-line1'], type=str,
@@ -213,11 +212,11 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('status', options_list=['--status'],
                    arg_type=get_enum_type(['Untracked', 'AwaitingFulfilment', 'AwaitingPreparation',
-                                                     'AwaitingShipment', 'Shipped', 'Arriving', 'Delivered',
-                                                     'ReplacementRequested', 'LostDevice', 'Declined',
-                                                     'ReturnInitiated', 'AwaitingReturnShipment', 'ShippedBack',
-                                                     'CollectedAtMicrosoft']), help='Status of the order as per the '
-                   'allowed status types.', arg_group='Current Status')
+                                           'AwaitingShipment', 'Shipped', 'Arriving', 'Delivered',
+                                           'ReplacementRequested', 'LostDevice', 'Declined',
+                                           'ReturnInitiated', 'AwaitingReturnShipment', 'ShippedBack',
+                                           'CollectedAtMicrosoft']),
+                   help='Status of the order as per the allowed status types.', arg_group='Current Status')
         c.argument('comments', options_list=['--comments'], type=str,
                    help='Comments related to this status change.', arg_group='Current Status')
         c.argument('address_line1', options_list=['--address-line1'], type=str,
