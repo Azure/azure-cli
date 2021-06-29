@@ -3098,7 +3098,7 @@ def dw_resume(
 
     # Resume, but DO NOT return the result. Long-running POST operation
     # results are not returned correctly by SDK.
-    client.resume(
+    client.begin_resume(
         server_name=server_name,
         resource_group_name=resource_group_name,
         database_name=database_name).wait()
