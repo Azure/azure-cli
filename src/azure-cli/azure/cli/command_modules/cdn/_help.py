@@ -1038,6 +1038,11 @@ examples:
         az cdn waf policy rate-limit-rule show -g group --policy-name policy -n ratelimitrule
 """
 
+helps['afd'] = """
+type: group
+short-summary: Manage Azure Front Door.
+"""
+
 helps['afd profile'] = """
 type: group
 short-summary: Manage AFD profiles.
