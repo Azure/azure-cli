@@ -1517,7 +1517,8 @@ def process_vmss_create_namespace(cmd, namespace):
         return
 
     # Uniform mode
-    namespace.disable_overprovision = False
+    if namespace.disable_overprovision is None:
+        namespace.disable_overprovision = False
     validate_tags(namespace)
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
