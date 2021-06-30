@@ -35,19 +35,21 @@ class ApimScenarioTest(ScenarioTest):
             'sku_name': 'Developer',
             'skucapacity': 1,
             'enable_cert': True,
+            'enable_managed_identity': True,
             'tag': "foo=boo"
         })
 
         self.cmd('apim check-name -n {service_name} -o json',
                  checks=[self.check('nameAvailable', True)])
 
-        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert}',
+        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert} --enable-managed-identity {enable_managed_identity}',
                  checks=[self.check('name', '{service_name}'),
                          self.check('location', '{rg_loc_displayName}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('provisioningState', 'Succeeded'),
                          # expect None for Developer sku, even though requested value was True - only works with Consumption sku
                          self.check('enableClientCertificate', None),
+                         self.check('identity.type', 'SystemAssigned'),
                          self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
 

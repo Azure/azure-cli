@@ -152,6 +152,11 @@ def db_transform(result):
     result.edition = result.sku.tier
     result.elastic_pool_name = _last_segment(result.elastic_pool_id)
 
+    # rename ledger setting name
+    if hasattr(result, 'is_ledger_on'):
+        result.ledger_on = result.is_ledger_on
+        del result.is_ledger_on
+
     if hasattr(result, 'storage_account_type'):
         result.backupStorageRedundancy = _get_external_backup_storage_redundancy(result.storage_account_type)
         del result.storage_account_type
