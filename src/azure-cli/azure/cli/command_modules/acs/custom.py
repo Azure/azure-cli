@@ -2487,6 +2487,15 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
         credentialResults = client.list_cluster_user_credentials(
             resource_group_name, name)
 
+    # Check if KUBECONFIG environmental variable is set
+    path = os.environ.get(
+        "KUBECONFIG",
+        os.path.join(
+            os.path.expanduser('~'),
+            '.kube',
+            'config'
+        )
+    )
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
     try:
