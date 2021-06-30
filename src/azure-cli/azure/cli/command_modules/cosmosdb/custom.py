@@ -54,7 +54,7 @@ from azure.mgmt.cosmosdb.models import (
     PeriodicModeProperties,
     SqlRoleAssignmentCreateUpdateParameters,
     SqlRoleDefinitionCreateUpdateParameters,
-    AnalyticalStorageConfiguration
+    AnalyticalStorageConfiguration,
     RestoreParameters,
     ContinuousModeBackupPolicy,
     ContinuousBackupRestoreLocation,
