@@ -41,15 +41,15 @@ tity/userAssignedIdentities/identityName\\":{}}" --kind "Gen2" --disable-local-a
 --linked-resources id="/subscriptions/21a9967a-e8a9-4656-a70b-96ff1c4d05a0/resourceGroups/myResourceGroup/providers/Mic\
 rosoft.Storage/accounts/mystorageacc" unique-name="myBatchStorageAccount" --linked-resources \
 id="/subscriptions/21a9967a-e8a9-4656-a70b-96ff1c4d05a0/resourceGroups/myResourceGroup/providers/Microsoft.Storage/acco\
-unts/mystorageacc" unique-name="myBlobDataSource" --name "G2" --tags test="true" --account-name "myMapsAccount" \
+unts/mystorageacc" unique-name="myBlobDataSource" --tags test="true" --account-name "myMapsAccount" \
 --resource-group "myResourceGroup" --sku "S0"
       - name: Create Gen1 Account
         text: |-
-               az maps account create --kind "Gen1" --disable-local-auth false --name "S0" --tags \
+               az maps account create --kind "Gen1" --disable-local-auth false --tags \
 test="true" --account-name "myMapsAccount" --resource-group "myResourceGroup" --sku "S0"
       - name: Create Gen2 Account
         text: |-
-               az maps account create --kind "Gen2" --disable-local-auth true --name "G2" --tags \
+               az maps account create --kind "Gen2" --disable-local-auth true --tags \
 test="true" --account-name "myMapsAccount" --resource-group "myResourceGroup" --sku "S0"
 """
 
@@ -122,18 +122,18 @@ me}/providers/Microsoft.Storage/accounts/{storageName}'.
 "{\\"/subscriptions/21a9967a-e8a9-4656-a70b-96ff1c4d05a0/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIden\
 tity/userAssignedIdentities/identityName\\":{}}" --kind "Gen2" --linked-resources id="/subscriptions/{subscriptionId}/r\
 esourceGroups/{resourceGroupName}/providers/Microsoft.Storage/accounts/{storageName}" unique-name="myBatchStorageAccoun\
-t" --name "G2" --account-name "myMapsAccount" --resource-group "myResourceGroup" --sku "S1"
+t" --account-name "myMapsAccount" --resource-group "myResourceGroup" --sku "S1"
       - name: Update Account Tags
         text: |-
                az maps account update --tags specialTag="true" --account-name "myMapsAccount" --resource-group \
 "myResourceGroup" --sku "S0"
       - name: Update to Gen1 Account
         text: |-
-               az maps account update --kind "Gen1" --name "S1" --account-name "myMapsAccount" --resource-group \
+               az maps account update --kind "Gen1" --account-name "myMapsAccount" --resource-group \
 "myResourceGroup" --sku "S0"
       - name: Update to Gen2 Account
         text: |-
-               az maps account update --kind "Gen2" --name "G2" --account-name "myMapsAccount" --resource-group \
+               az maps account update --kind "Gen2" --account-name "myMapsAccount" --resource-group \
 "myResourceGroup" --sku "S0"
 """
 

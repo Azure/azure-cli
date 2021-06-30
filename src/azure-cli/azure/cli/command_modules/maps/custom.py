@@ -50,15 +50,19 @@ def maps_account_create(client,
     if disable_local_auth is None:
         disable_local_auth = False
     maps_account = {}
-    maps_account['tags'] = tags
+    if tags is not None:
+        maps_account['tags'] = tags
     maps_account['location'] = ACCOUNT_LOCATION
     maps_account['kind'] = "Gen1" if kind is None else kind
     maps_account['properties'] = {}
     maps_account['properties']['disable_local_auth'] = False if disable_local_auth is None else disable_local_auth
-    maps_account['properties']['linked_resources'] = linked_resources
+    if linked_resources is not None:
+        maps_account['properties']['linked_resources'] = linked_resources
     maps_account['identity'] = {}
-    maps_account['identity']['type'] = type_
-    maps_account['identity']['user_assigned_identities'] = user_assigned_identities
+    if type_ is not None:
+        maps_account['identity']['type'] = type_
+    if user_assigned_identities is not None:
+        maps_account['identity']['user_assigned_identities'] = user_assigned_identities
     maps_account['sku'] = {}
     maps_account['sku']['name'] = name
     return client.create_or_update(resource_group_name=resource_group_name,
@@ -96,13 +100,17 @@ def maps_account_update(client,
     if disable_local_auth is None:
         disable_local_auth = False
     maps_account_update_parameters = {}
-    maps_account_update_parameters['tags'] = tags
+    if tags is not None:
+        maps_account_update_parameters['tags'] = tags
     maps_account_update_parameters['kind'] = "Gen1" if kind is None else kind
     maps_account_update_parameters['disable_local_auth'] = False if disable_local_auth is None else disable_local_auth
-    maps_account_update_parameters['linked_resources'] = linked_resources
+    if linked_resources is not None:
+        maps_account_update_parameters['linked_resources'] = linked_resources
     maps_account_update_parameters['identity'] = {}
-    maps_account_update_parameters['identity']['type'] = type_
-    maps_account_update_parameters['identity']['user_assigned_identities'] = user_assigned_identities
+    if type_ is not None:
+        maps_account_update_parameters['identity']['type'] = type_
+    if user_assigned_identities is not None:
+        maps_account_update_parameters['identity']['user_assigned_identities'] = user_assigned_identities
     maps_account_update_parameters['sku'] = {}
     maps_account_update_parameters['sku']['name'] = name
     return client.update(resource_group_name=resource_group_name,
@@ -163,7 +171,8 @@ def maps_creator_create(client,
                         storage_units,
                         tags=None):
     creator_resource = {}
-    creator_resource['tags'] = tags
+    if tags is not None:
+        creator_resource['tags'] = tags
     creator_resource['location'] = location
     creator_resource['properties'] = {}
     creator_resource['properties']['storage_units'] = storage_units
@@ -180,7 +189,8 @@ def maps_creator_update(client,
                         tags=None,
                         storage_units=None):
     creator_update_parameters = {}
-    creator_update_parameters['tags'] = tags
+    if tags is not None:
+        creator_update_parameters['tags'] = tags
     creator_update_parameters['storage_units'] = storage_units
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
