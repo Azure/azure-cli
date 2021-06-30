@@ -49,8 +49,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
                  '--assign-identity --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
-                         self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded')])
+                         self.check('sku.name', '{sku}')])
         self.cmd('az cognitiveservices account update -n {sname} -g {rg} --storage {storageIds}').get_output_in_json()
         account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
 
@@ -69,8 +68,8 @@ class CognitiveServicesByoxTests(ScenarioTest):
 
         self.kwargs.update({
             'sname': sname,
-            'kind': 'Face',
-            'sku': 'E0',
+            'kind': 'FormRecognizer',
+            'sku': 'S0',
             'location': 'centraluseuap',
             'encryption': '{\\\"keySource\\\":\\\"Microsoft.CognitiveServices\\\"}'
         })

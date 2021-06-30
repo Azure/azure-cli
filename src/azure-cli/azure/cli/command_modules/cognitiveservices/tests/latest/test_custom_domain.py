@@ -16,9 +16,9 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
 
         self.kwargs.update({
             'sname': sname,
-            'kind': 'Face',
+            'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'westus',
+            'location': 'centraluseuap',
             'customdomain': customdomain,
         })
 
@@ -28,7 +28,6 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded'),
                          self.check('properties.customSubDomainName', '{customdomain}')])
 
         # delete the cognitive services account
@@ -44,15 +43,13 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
         self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
-                         self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded')])
+                         self.check('sku.name', '{sku}')])
 
         # test to create cognitive services account
         self.cmd('az cognitiveservices account update -n {sname} -g {rg} --custom-domain {customdomain}',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded'),
                          self.check('properties.customSubDomainName', '{customdomain}')])
 
         # delete the cognitive services account

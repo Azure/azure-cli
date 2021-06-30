@@ -20,7 +20,7 @@ def register_providers():
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
     # "Microsoft.Batch/batchAccounts", "2020-03-01", True
     # "Microsoft.Cache/redisEnterprise", "2021-03-01", True
-    _register_one_provider('Microsoft.CognitiveServices/accounts', '2017-04-18', True)
+    _register_one_provider('Microsoft.CognitiveServices/accounts', '2021-04-30', True)
     _register_one_provider('Microsoft.Compute/diskAccesses', '2020-09-30', True)
     _register_one_provider('Microsoft.ContainerRegistry/registries', '2019-12-01-preview', True)
     _register_one_provider('Microsoft.DBforMySQL/servers', '2018-06-01', False, '2017-12-01-preview')

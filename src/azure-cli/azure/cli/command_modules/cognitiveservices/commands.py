@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
+from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus,\
+    cf_deleted_accounts
 
 
 def load_command_table(self, _):
@@ -19,6 +20,16 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('update', 'update')
         g.custom_command('list', 'list_resources')
+        g.show_command('show-deleted', 'get',
+                       operations_tmpl='azure.mgmt.cognitiveservices.operations#DeletedAccountsOperations.{}',
+                       client_factory=cf_deleted_accounts)
+        g.command('list-deleted', 'list',
+                  operations_tmpl='azure.mgmt.cognitiveservices.operations#DeletedAccountsOperations.{}',
+                  client_factory=cf_deleted_accounts)
+        g.command('purge', 'begin_purge',
+                  operations_tmpl='azure.mgmt.cognitiveservices.operations#DeletedAccountsOperations.{}',
+                  client_factory=cf_deleted_accounts)
+        g.custom_command('recover', 'recover')
         g.custom_command('list-skus', 'list_skus')
         g.custom_command('list-usage', 'list_usages')
         g.custom_command('list-kinds', 'list_kinds', client_factory=cf_resource_skus)
