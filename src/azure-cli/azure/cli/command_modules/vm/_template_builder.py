@@ -65,7 +65,7 @@ def build_output_deployment_resource(key, property_name, property_provider, prop
     return deployment
 
 
-def build_storage_account_resource(_, name, location, tags, sku):
+def build_storage_account_resource(_, name, location, tags, sku, edge_zone=None):
     storage_account = {
         'type': 'Microsoft.Storage/storageAccounts',
         'name': name,
@@ -75,10 +75,16 @@ def build_storage_account_resource(_, name, location, tags, sku):
         'dependsOn': [],
         'properties': {'accountType': sku}
     }
+
+    if edge_zone:
+        storage_account['apiVersion'] = '2021-04-01'
+        storage_account['extendedLocation'] = edge_zone
+
     return storage_account
 
 
-def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, count=None):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, count=None,
+                             edge_zone=None):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -109,12 +115,17 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
 
     if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
+
+    if edge_zone:
+        public_ip['apiVersion'] = '2021-02-01'
+        public_ip['extendedLocation'] = edge_zone
+
     return public_ip
 
 
 def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_address=None,
                        nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None,
-                       count=None):
+                       count=None, edge_zone=None):
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     ip_config_properties = {
         'privateIPAllocationMethod': private_ip_allocation,
@@ -172,6 +183,10 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
             'count': count
         }
 
+    if edge_zone:
+        nic['extendedLocation'] = edge_zone
+        nic['apiVersion'] = '2021-02-01'
+
     return nic
 
 
@@ -213,7 +228,7 @@ def build_nsg_resource(_, name, location, tags, nsg_rule):
 
 
 def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
-                        subnet_prefix=None, dns_servers=None):
+                        subnet_prefix=None, dns_servers=None, edge_zone=None):
     vnet = {
         'name': name,
         'type': 'Microsoft.Network/virtualNetworks',
@@ -236,6 +251,10 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
                 'addressPrefix': subnet_prefix
             }
         }]
+    if edge_zone:
+        vnet['extendedLocation'] = edge_zone
+        vnet['apiVersion'] = '2021-02-01'
+
     return vnet
 
 
@@ -675,7 +694,7 @@ def build_application_gateway_resource(_, name, location, tags, backend_pool_nam
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, nat_pool_name,
                                  backend_port, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
-                                 private_ip_allocation, sku, instance_count, disable_overprovision):
+                                 private_ip_allocation, sku, instance_count, disable_overprovision, edge_zone=None):
     lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
 
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
@@ -736,10 +755,15 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
                     "idleTimeoutInMinutes": 5,
                 }
             }]
+
+    if edge_zone:
+        lb['apiVersion'] = '2021-02-01'
+        lb['extendedLocation'] = edge_zone
+
     return lb
 
 
-def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, storage_sku):
+def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, storage_sku, edge_zone=None):
 
     storage_resource = {
         'type': 'Microsoft.Storage/storageAccounts',
@@ -755,6 +779,11 @@ def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, stora
             'accountType': storage_sku
         }
     }
+
+    if edge_zone:
+        storage_resource['apiVersion'] = '2021-04-01'
+        storage_resource['extendedLocation'] = edge_zone
+
     return storage_resource
 
 
