@@ -252,6 +252,8 @@ def load_arguments(self, _):
         c.argument('aci_subnet_name')
         c.argument('enable_encryption_at_host', options_list=[
                    '--enable-encryption-at-host'], action='store_true')
+        c.argument('enable_ultra_ssd', options_list=[
+                   '--enable-ultra-ssd'], action='store_true')
         c.argument('appgw_name', options_list=[
                    '--appgw-name'], arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', options_list=[
@@ -400,6 +402,8 @@ def load_arguments(self, _):
                 [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]))
             c.argument('enable_encryption_at_host', options_list=[
                        '--enable-encryption-at-host'], action='store_true')
+            c.argument('enable_ultra_ssd', options_list=[
+                       '--enable-ultra-ssd'], action='store_true')
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:

@@ -1958,6 +1958,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_watch_namespace=None,
                enable_sgxquotehelper=False,
                enable_encryption_at_host=False,
+               enable_ultra_ssd=False,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
@@ -2034,6 +2035,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         enable_node_public_ip=enable_node_public_ip,
         node_public_ip_prefix_id=node_public_ip_prefix_id,
         enable_encryption_at_host=enable_encryption_at_host,
+        enable_ultra_ssd=enable_ultra_ssd,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -3801,6 +3803,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       max_surge=None,
                       mode="User",
                       enable_encryption_at_host=False,
+                      enable_ultra_ssd=False,
                       no_wait=False):
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -3854,6 +3857,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         node_taints=taints_array,
         upgrade_settings=upgradeSettings,
         enable_encryption_at_host=enable_encryption_at_host,
+        enable_ultra_ssd=enable_ultra_ssd,
         mode=mode
     )
 
