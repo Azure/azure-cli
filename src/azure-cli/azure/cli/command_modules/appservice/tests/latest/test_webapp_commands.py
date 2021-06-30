@@ -1626,8 +1626,16 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {}'.format(
             resource_group, webapp_name, namespace_name, hyco_name))
+        self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
         self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {} --slot {}'.format(
             resource_group, webapp_name, namespace_name, hyco_name, slot_webapp_name))
+        self.cmd(
+            'webapp hybrid-connection list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name),
+            checks=[
+                JMESPathCheck('length(@)', 0)
+            ])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
