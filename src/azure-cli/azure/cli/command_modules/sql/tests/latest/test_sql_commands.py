@@ -4931,7 +4931,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
         s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
 
-        failover_group_name = "fgclitest16578"
+        failover_group_name = "fgclitest16578-lulu"
 
         database_name = "db1"
 
@@ -5050,7 +5050,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         # Fail back to original server
-        self.cmd('sql failover-group set-primary --allow-data-loss -g {} -s {} -n {}'
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
                  .format(s1.group, s1.name, failover_group_name))
 
         # The failover operation is completed when new primary is promoted to primary role
