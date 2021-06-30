@@ -884,7 +884,6 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
     def test_sql_mi_operation_mgmt(self):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
@@ -922,22 +921,6 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
             'proxy_override': "Proxy",
             'delegations': "Microsoft.Sql/managedInstances"
         })
-
-        # # Create and prepare VNet and subnet for new virtual cluster
-        # self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
-        # self.cmd('network route-table show -g {resource_group} -n {route_table_name}')
-        # self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        # self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        # self.cmd('network vnet update -g {resource_group} -n {vnet_name} --address-prefix 10.0.0.0/16')
-        # self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        # self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} ')
-        # subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-
-        # print('Creating subnet...\n')
-
-        # self.kwargs.update({
-        #     'subnet_id': subnet['id']
-        # })
 
         print('Creating MI...\n')
 
@@ -4043,7 +4026,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_sql_managed_instance_mgmt(self):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
@@ -4263,9 +4245,8 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
                  expect_failure=True)
 
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
-    #@record_only()
+    @record_only()
     def test_sql_instance_pool(self):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         print("Starting instance pool tests")
         instance_pool_name_1 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
         instance_pool_name_2 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
@@ -4275,9 +4256,6 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         edition = 'GeneralPurpose'
         family = 'Gen5'
         resource_group = 'billingPools'
-        vnet_name = 'vnet-billingPool1'
-        subnet_name = 'InstancePool'
-        # subnet = self.cmd('network vnet subnet show -g {} --vnet-name {} -n {}'.format(resource_group, vnet_name, subnet_name)).get_output_in_json()['id']
 
         location = 'westcentralus'
         resource_group = 'autobot-managed-instance-v12'
@@ -4490,7 +4468,6 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_db_short_retention(self, resource_group, resource_group_location):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         resource_prefix = 'MIDBShortTermRetention'
 
         loc = 'westcentralus'
@@ -4597,7 +4574,7 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
 class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
     def test_sql_managed_db_long_term_retention(
             self):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        
         self.kwargs.update({
             'rg': 'westcentralus',
             'loc': 'autobot-managed-instance-v12',
@@ -4711,7 +4688,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
     #@ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_deleted_db_restore(self):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        
         resource_prefix = 'MIRestoreDeletedDB'
 
         loc = 'westcentralus'
@@ -4742,14 +4719,6 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
             'retention_days_inc': 14,
             'retention_days_dec': 7
         })
-
-        # Create and prepare VNet and subnet for new virtual cluster
-        # self.cmd('network route-table create -g {rg} -n {route_table_name} -l {loc}')
-        # self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        # self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        # self.cmd('network vnet update -g {rg} -n {vnet_name} --address-prefix 10.0.0.0/16')
-        # self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        # subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         self.kwargs.update({
             'subnet_id': subnet
@@ -4810,7 +4779,7 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
     def test_sql_managed_db_mgmt(self):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        
         database_name = "cliautomationdb01"
         database_name_restored = "restoredcliautomationdb01"
 
@@ -5178,8 +5147,6 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
     def test_sql_virtual_cluster_mgmt(self):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
-        
         loc = 'westcentralus'
         resource_group = 'autobot-managed-instance-v12'
         subnet = '/subscriptions/4b9746e4-d324-4e1d-be53-ec3c8f3a0c18/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet'
@@ -5205,15 +5172,6 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
             'delegations': "Microsoft.Sql/managedInstances"
         })
 
-        # Create and prepare VNet and subnet for new virtual cluster
-        # self.cmd('network route-table create -g {rg} -n {route_table_name} -l {loc}')
-        # self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        # self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        # self.cmd('network vnet update -g {rg} -n {vnet_name} --address-prefix 10.0.0.0/16')
-        # self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        # self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} ')
-        # subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-
         self.kwargs.update({
             'subnet_id': subnet
         })
@@ -5237,6 +5195,11 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
                      self.check('collation', '{collation}'),
                      self.check('proxyOverride', '{proxy_override}'),
                      self.check('publicDataEndpointEnabled', 'True')])
+
+        if not (self.in_recording or self.is_live):
+            self.kwargs.update({
+                'subnet_id':  subnet.replace("4b9746e4-d324-4e1d-be53-ec3c8f3a0c18", "00000000-0000-0000-0000-000000000000")
+            })
 
         # test list sql virtual cluster in the subscription, should be at least 1
         virtual_clusters = self.cmd('sql virtual-cluster list',
@@ -5270,13 +5233,6 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
         # delete sql managed instance
         self.cmd('sql mi delete -g {rg} -n {managed_instance_name} --yes', checks=NoneCheck())
-
-        # test delete sql virtual cluster
-        self.cmd('sql virtual-cluster delete -g {rg} -n {vc_name}', checks=NoneCheck())
-
-        # test show sql virtual cluster doesn't return anything
-        self.cmd('sql virtual-cluster show -g {rg} -n {vc_name}', expect_failure=True)
-
 
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
     def test_sql_instance_failover_group_mgmt(self):
@@ -5575,7 +5531,7 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
     def test_sql_mi_failover_mgmt(self):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
@@ -5613,17 +5569,6 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
             'proxy_override': "Proxy"
         })
 
-        # Create and prepare VNet and subnet for new virtual cluster
-        # self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
-        # self.cmd('network route-table show -g {resource_group} -n {route_table_name}')
-        # self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        # self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        # self.cmd('network vnet update -g {resource_group} -n {vnet_name} --address-prefix 10.0.0.0/16')
-        # self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name} --delegations Microsoft.Sql/managedInstances',
-        #          checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
-
-        # subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-
         self.kwargs.update({
             'subnet_id': subnet
         })
@@ -5658,7 +5603,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
     @AllowLargeResponse()
     #@ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='westcentralus')
     def test_sql_midb_logreplay_mgmt(self):
-        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         account = self.cmd('account show').get_output_in_json()
 
@@ -5688,21 +5633,6 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             'proxy_override': "Proxy",
             'subscription_id': account['id']
         })
-
-        # Create and prepare VNet and subnet for new virtual cluster
-        # self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
-        # self.cmd('network route-table show -g {resource_group} -n {route_table_name}')
-        # self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        # self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        # self.cmd('network vnet create -g {resource_group} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
-        # # Create network security group
-        # self.cmd('network nsg create --resource-group {resource_group} --name {nsg}')
-        # # Create subnet and set properties needed
-        # self.cmd('network vnet subnet create -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        # self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name} --delegations Microsoft.Sql/managedInstances --network-security-group {nsg}',
-        #          checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
-
-        # subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         self.kwargs.update({
             'subnet_id': subnet
