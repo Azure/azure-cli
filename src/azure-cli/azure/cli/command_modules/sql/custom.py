@@ -38,7 +38,7 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
-    ServerPublicNetworkAccess,
+    ServerNetworkAccessFlag,
     ServerInfo,
     EncryptionProtector,
     ManagedInstanceEncryptionProtector,
@@ -952,7 +952,7 @@ def _db_dw_create(
         kwargs['maintenance_configuration_id'])
 
     # Create
-    return sdk_no_wait(no_wait, client.create_or_update,
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=dest_db.server_name,
                        resource_group_name=dest_db.resource_group_name,
                        database_name=dest_db.database_name,
@@ -1401,7 +1401,7 @@ def db_export(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.export(
+    return client.begin_export(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1818,7 +1818,7 @@ def server_ms_support_audit_policy_set(
     Set server Microsoft support operations audit policy
     '''
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         dev_ops_auditing_settings_name='default',
@@ -2689,7 +2689,7 @@ def update_long_term_retention(
 
     kwargs['week_of_year'] = week_of_year
 
-    policy = client.create_or_update(
+    policy = client.begin_create_or_update(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -3081,7 +3081,7 @@ def dw_pause(
 
     # Pause, but DO NOT return the result. Long-running POST operation
     # results are not returned correctly by SDK.
-    client.pause(
+    client.begin_pause(
         server_name=server_name,
         resource_group_name=resource_group_name,
         database_name=database_name).wait()
@@ -3098,7 +3098,7 @@ def dw_resume(
 
     # Resume, but DO NOT return the result. Long-running POST operation
     # results are not returned correctly by SDK.
-    client.resume(
+    client.begin_resume(
         server_name=server_name,
         resource_group_name=resource_group_name,
         database_name=database_name).wait()
@@ -3182,7 +3182,7 @@ def elastic_pool_create(
         maintenance_configuration_id)
 
     # Create
-    return client.create_or_update(
+    return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
         elastic_pool_name=elastic_pool_name,
@@ -3364,7 +3364,7 @@ def instance_pool_create(
     kwargs['sku'] = _find_instance_pool_sku_from_capabilities(
         cmd.cli_ctx, kwargs['location'], sku)
 
-    return sdk_no_wait(no_wait, client.create_or_update,
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
                        instance_pool_name=instance_pool_name,
                        resource_group_name=resource_group_name,
                        parameters=kwargs)
@@ -3436,8 +3436,8 @@ def server_create(
 
     if enable_public_network is not None:
         kwargs['public_network_access'] = (
-            ServerPublicNetworkAccess.enabled if enable_public_network
-            else ServerPublicNetworkAccess.disabled)
+            ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
 
     kwargs['key_id'] = key_id
 
@@ -3459,7 +3459,7 @@ def server_create(
         tenant_id=tenant_id)
 
     # Create
-    return sdk_no_wait(no_wait, client.create_or_update,
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=server_name,
                        resource_group_name=resource_group_name,
                        parameters=kwargs)
@@ -3534,8 +3534,8 @@ def server_update(
 
     if enable_public_network is not None:
         instance.public_network_access = (
-            ServerPublicNetworkAccess.enabled if enable_public_network
-            else ServerPublicNetworkAccess.disabled)
+            ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
 
     instance.primary_user_assigned_identity_id = (
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
@@ -3561,7 +3561,7 @@ def server_ad_admin_set(
 
     kwargs['tenant_id'] = _get_tenant_id()
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
@@ -3671,7 +3671,7 @@ def server_key_create(
 
     key_name = _get_server_key_name_from_uri(kid)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         key_name=key_name,
@@ -3764,7 +3764,7 @@ def server_dns_alias_set(
         quote(original_server_name),
         quote(dns_alias_name))
 
-    return client.acquire(
+    return client.begin_acquire(
         resource_group_name=resource_group_name,
         server_name=server_name,
         dns_alias_name=dns_alias_name,
@@ -3875,7 +3875,7 @@ def server_trust_group_create(
         no_wait=False):
 
     members = [ServerInfo(server_id=member) for member in group_member]
-    return sdk_no_wait(no_wait, client.create_or_update,
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        location_name=location,
                        server_trust_group_name=name,
@@ -3890,7 +3890,7 @@ def server_trust_group_delete(
         location,
         no_wait=False):
 
-    return sdk_no_wait(no_wait, client.delete,
+    return sdk_no_wait(no_wait, client.begin_delete,
                        resource_group_name=resource_group_name,
                        location_name=location,
                        server_trust_group_name=name)
@@ -4029,7 +4029,7 @@ def managed_instance_create(
         tenant_id=tenant_id)
 
     # Create
-    return client.create_or_update(
+    return client.begin_create_or_update(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
@@ -4324,7 +4324,7 @@ def managed_db_create(
         resource_group_name=resource_group_name)
 
     # Create
-    return client.create_or_update(
+    return client.begin_create_or_update(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
@@ -4375,7 +4375,7 @@ def managed_db_restore(
             managed_instance_name,
             database_name)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         database_name=target_managed_database_name,
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
@@ -4404,13 +4404,13 @@ def update_short_term_retention_mi(
                 cmd.cli_ctx,
                 None)
 
-        policy = client.create_or_update(
+        policy = client.begin_create_or_update(
             restorable_dropped_database_id=database_name,
             managed_instance_name=managed_instance_name,
             resource_group_name=resource_group_name,
             retention_days=retention_days)
     else:
-        policy = client.create_or_update(
+        policy = client.begin_create_or_update(
             database_name=database_name,
             managed_instance_name=managed_instance_name,
             resource_group_name=resource_group_name,
@@ -4500,7 +4500,7 @@ def update_long_term_retention_mi(
 
     kwargs['week_of_year'] = week_of_year
 
-    policy = client.create_or_update(
+    policy = client.begin_create_or_update(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
@@ -4706,7 +4706,7 @@ def delete_long_term_retention_mi_backup(
         database_name = resources_dict['longTermRetentionDatabases']
         backup_name = resources_dict['longTermRetentionManagedInstanceBackups']
 
-    return client.delete(
+    return client.begin_delete(
         location_name=location_name,
         managed_instance_name=managed_instance_name,
         database_name=database_name,
@@ -4741,7 +4741,7 @@ def restore_long_term_retention_mi_backup(
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         database_name=target_managed_database_name,
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
@@ -4778,7 +4778,7 @@ def managed_db_log_replay_start(
     kwargs['storageContainerSasToken'] = storage_container_sas_token
 
     # Create
-    return client.create_or_update(
+    return client.begin_create_or_update(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
@@ -4832,7 +4832,7 @@ def failover_group_create(
         add_db,
         [])
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         failover_group_name=failover_group_name,
@@ -4996,7 +4996,7 @@ def instance_failover_group_create(
     if failover_policy == FailoverPolicyType.manual.value:
         grace_period = None
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         location_name=primary_server.location,
         failover_group_name=failover_group_name,

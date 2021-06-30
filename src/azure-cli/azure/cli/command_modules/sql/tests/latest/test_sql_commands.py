@@ -742,8 +742,8 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='southeastasia')
-    @SqlServerPreparer(location='southeastasia')
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
     def test_sql_db_operation_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
         update_service_objective = 'GP_Gen5_8'
@@ -884,7 +884,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
     def test_sql_mi_operation_mgmt(self):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
@@ -1080,10 +1080,10 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
 
 
 class SqlServerDbCopyScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group_1', location='southeastasia')
-    @ResourceGroupPreparer(parameter_name='resource_group_2', location='southeastasia')
-    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1', location='southeastasia')
-    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2', location='southeastasia')
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
+    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1', location='westeurope')
+    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2', location='westeurope')
     @AllowLargeResponse()
     def test_sql_db_copy(self, resource_group_1, resource_group_2,
                          resource_group_location,
@@ -1270,8 +1270,8 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
 
 
 class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='southeastasia')
-    @SqlServerPreparer(location='southeastasia')
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
     @AllowLargeResponse()
     def test_sql_db_restore_deleted(self, resource_group, resource_group_location, server):
         database_name = 'cliautomationdb01'
@@ -2206,19 +2206,19 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='southeastasia')
+                           location='westeurope')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2",
-                           location='southeastasia')
+                           location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='southeastasia')
+                       location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1",
-                       location='southeastasia')
+                       location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2",
-                       location='southeastasia')
+                       location='westeurope')
     @AllowLargeResponse()
     def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,
@@ -2789,8 +2789,8 @@ class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
         super(SqlElasticPoolOperationMgmtScenarioTest, self).__init__(method_name)
         self.pool_name = "operationtestep1"
 
-    @ResourceGroupPreparer(location='southeastasia')
-    @SqlServerPreparer(location='southeastasia')
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
     @AllowLargeResponse()
     def test_sql_elastic_pool_operation_mgmt(self, resource_group, resource_group_location, server):
         edition = 'Premium'
@@ -3868,7 +3868,7 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westeurope', name_prefix='clitest')
     def test_sql_server_trust_groups(self):
-        self.skipTest("Skipping based on discussion with owning team - Matija Bojovic")
+        # self.skipTest("Skipping based on discussion with owning team - Matija Bojovic")
 
         resource_prefix = 'sqlstg'
 
@@ -3983,7 +3983,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_sql_managed_instance_mgmt(self):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
@@ -4226,7 +4226,7 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     @record_only()
     def test_sql_instance_pool(self):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         print("Starting instance pool tests")
         instance_pool_name_1 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
         instance_pool_name_2 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
@@ -4447,7 +4447,7 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_db_short_retention(self, resource_group, resource_group_location):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         resource_prefix = 'MIDBShortTermRetention'
 
         self.kwargs.update({
@@ -4550,7 +4550,7 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
 class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
     def test_sql_managed_db_long_term_retention(
             self):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         self.kwargs.update({
             'rg': 'v-urmila',
             'loc': 'westeurope',
@@ -4664,7 +4664,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_deleted_db_restore(self, resource_group, resource_group_location):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         resource_prefix = 'MIRestoreDeletedDB'
 
         self.kwargs.update({
@@ -4759,7 +4759,7 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
     def test_sql_managed_db_mgmt(self):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         database_name = "cliautomationdb01"
         database_name_restored = "restoredcliautomationdb01"
 
@@ -5127,7 +5127,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
     def test_sql_virtual_cluster_mgmt(self):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         self.kwargs.update({
             'rg': 'DejanDuVnetRG',
             'loc': 'westeurope',
@@ -5364,7 +5364,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
     @StorageAccountPreparer(location='eastus2')
     def test_sql_db_sensitivity_classifications(self, resource_group, resource_group_location, server, storage_account):
         from azure.mgmt.sql.models import SampleName
-        self.skipTest("Skipping based on discussion with owning team - ranisha")
+        # self.skipTest("Skipping based on discussion with owning team - ranisha")
         database_name = "sensitivityclassificationsdb01"
 
         # create db
@@ -5519,7 +5519,7 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
     def test_sql_mi_failover_mgmt(self):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
@@ -5591,7 +5591,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='westcentralus')
     def test_sql_midb_logreplay_mgmt(self, resource_group, resource_group_location):
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
+        # self.skipTest("Skipping based on discussion with owning team - mibrkic")
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         account = self.cmd('account show').get_output_in_json()
 
