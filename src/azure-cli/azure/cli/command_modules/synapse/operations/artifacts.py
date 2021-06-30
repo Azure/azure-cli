@@ -211,18 +211,6 @@ def delete_data_flow(cmd, workspace_name, data_flow_name, no_wait=False):
 def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_name, spark_pool_name=None,
                               executor_size="Small", executor_count=2, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
-    # Only extract properties from imported file
-    for key in list(definition_file.keys()):
-        if 'properties' == key:
-            definition_file = definition_file['properties']
-    for key in list(definition_file.keys()):
-        if 'bigDataPool' == key or 'big_data_pool' == key or 'sessionProperties' == key or \
-                'session_properties' == key:
-            definition_file.pop(key)
-        elif 'metadata' == key:
-            for elementkey in list(definition_file['metadata'].keys()):
-                if 'a365ComputeOptions' == elementkey:
-                    definition_file['metadata'].pop(elementkey)
     spark_pool_client = cf_synapse_spark_pool(cmd.cli_ctx, workspace_name)
     if spark_pool_name is not None:
         endpoint = '{}{}{}'.format("https://", workspace_name, cmd.cli_ctx.cloud.suffixes.synapse_analytics_endpoint)
@@ -270,16 +258,55 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     def write_to_file(notebook, path):
         try:
             notebook_properties = notebook.properties.as_dict()
+            livyStatementMetaOutputContentType = 'application/vnd.livy.statement-meta+json'
+            synapseWidgetViewOutputContentType = 'application/vnd.synapse.widget-view+json'
+            synapseWidgetNotebookMetadataVersion = '0.1'
+            notebook_result= {}
+            metadata= {}
+            displayedWidgets = []
+
+            for cell in notebook_properties['cells']:
+                if cell['cell_type'] == 'code' and cell['outputs']:
+                     for output in cell['outputs']:
+                         if output['output_type'] == 'display_data' and \
+                                 synapseWidgetViewOutputContentType in output['data']:
+                             displayedWidgets.append(output["data"]["application/vnd.synapse.widget-view+json"])
+
             for key in list(notebook_properties.keys()):
-                if 'bigDataPool' == key or 'big_data_pool' == key  or 'sessionProperties' == key or \
-                        'session_properties' == key:
-                    notebook_properties.pop(key)
-                elif 'metadata' == key:
+                if key == 'metadata':
                     for elementkey in list(notebook_properties['metadata'].keys()):
-                        if 'a365ComputeOptions' == elementkey:
-                            notebook_properties['metadata'].pop(elementkey)
+                        if elementkey == 'language_info':
+                            if 'codemirror_mode' in notebook_properties['metadata']['language_info']:
+                                notebook_properties.pop(['metadata']['language_info']['codemirror_mode'])
+                            metadata['language_info'] = notebook_properties['metadata']['language_info']
+                        if elementkey == 'description':
+                            metadata['description'] = notebook_properties['metadata']['description']
+                        if elementkey == 'saveOutput':
+                            metadata['save_output'] = notebook_properties['metadata']['saveOutput']
+                        if elementkey == 'kernelspec':
+                            metadata['kernelspec'] = notebook_properties['metadata']['kernelspec']
+                        if elementkey == 'synapse_widget' and 'state' in  notebook_properties['metadata']['synapse_widget']:
+                            for ekey in list(notebook_properties['metadata']['synapse_widget']['state'].keys()):
+                                for i in reversed(range(len(displayedWidgets))):
+                                    if displayedWidgets[i]['widget_id'] == ekey:
+                                        displayedWidgets.pop(i)
+                            metadata['synapse_widget'] = notebook_properties['metadata']['synapse_widget']
+                            metadata['synapse_widget']['version'] = synapseWidgetNotebookMetadataVersion
+
+            if len(displayedWidgets) > 0:
+                 print('Detected widget with missing data.')
+
+            for cell in notebook_properties['cells']:
+                if cell['cell_type'] == 'code' and cell['outputs']:
+                     for output in cell['outputs']:
+                         if output['output_type'] == 'display_data' and output['data'] and \
+                                 livyStatementMetaOutputContentType in output['data']:
+                            output['data'].pop(livyStatementMetaOutputContentType)
+
+            notebook_result['metadata'] = metadata
+            notebook_result['cells'] = notebook_properties['cells']
             with open(path, 'w') as f:
-                json.dump(notebook_properties, f, indent=4)
+                json.dump(notebook_result, f, indent=4)
         except IOError:
             raise CLIError('Unable to export to file: {}'.format(path))
 
