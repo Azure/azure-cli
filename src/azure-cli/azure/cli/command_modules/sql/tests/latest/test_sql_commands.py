@@ -4014,19 +4014,20 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                       '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
                                       '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}"',
                                       checks=[
-                                          JMESPathCheck('resourceGroup', '{rg}'),
-                                          JMESPathCheck('name', '{managed_instance_name}'),
-                                          JMESPathCheck('administratorLogin', '{username}'),
-                                          JMESPathCheck('licenseType', '{license_type}'),
-                                          JMESPathCheck('vCores', '{v_cores}'),
-                                          JMESPathCheck('storageSizeInGb', '{storage_size_in_gb}'),
-                                          JMESPathCheck('sku.tier', '{edition}'),
-                                          JMESPathCheck('sku.family', '{familie}'),
-                                          JMESPathCheck('collation', '{collation}'),
-                                          JMESPathCheck('proxyOverride', '{proxy_override}'),
-                                          JMESPathCheck('publicDataEndpointEnabled', 'True'),
-                                          JMESPathCheck('timezoneId', '{timezone_id}'),
-                                          JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MMI1))]).get_output_in_json()
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}'),
+                                        self.check('identity', None),
+                                        self.check('collation', '{collation}'),
+                                        self.check('proxyOverride', '{proxy_override}'),
+                                        self.check('publicDataEndpointEnabled', 'True'),
+                                        self.check('maintenanceConfigurationId', self._get_full_maintenance_id(self.MMI1))]).get_output_in_json()
 
         # test delete sql managed instance 2
         self.cmd('sql mi delete --ids {} --yes'
