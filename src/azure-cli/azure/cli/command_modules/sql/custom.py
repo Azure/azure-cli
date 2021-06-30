@@ -3837,6 +3837,30 @@ def server_aad_only_enable(
     )
 
 ###############################################
+#           sql server ledger                 #
+###############################################
+
+
+def ledger_digest_uploads_enable(
+        client,
+        resource_group_name,
+        server_name,
+        database_name,
+        endpoint):
+    '''
+    Enables ledger storage target
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        ledger_digest_uploads='current',
+        digest_storage_endpoint=endpoint
+    )
+
+
+###############################################
 #           sql server trust groups           #
 ###############################################
 

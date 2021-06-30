@@ -68,7 +68,8 @@ from ._util import (
     get_sql_subscription_usages_operations,
     get_sql_virtual_clusters_operations,
     get_sql_virtual_network_rules_operations,
-    get_sql_instance_failover_groups_operations
+    get_sql_instance_failover_groups_operations,
+    get_sql_database_ledger_digest_uploads_operations
 )
 
 from ._validators import (
@@ -288,6 +289,18 @@ def load_command_table(self, _):
                                  getter_type=CliCommandType(operations_tmpl='azure.cli.command_modules.sql.custom#{}'),
                                  supports_no_wait=True)
         g.custom_wait_command('wait', 'server_ms_support_audit_policy_get')
+
+    ledger_digest_uploads_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#LedgerDigestUploadsOperations.{}',
+        client_factory=get_sql_database_ledger_digest_uploads_operations)
+
+    with self.command_group('sql db ledger-digest-uploads',
+                            ledger_digest_uploads_operations,
+                            client_factory=get_sql_database_ledger_digest_uploads_operations) as g:
+
+        g.show_command('show', 'get')
+        g.custom_command('enable', 'ledger_digest_uploads_enable')
+        g.command('disable', 'disable')
 
     database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionPoliciesOperations.{}',

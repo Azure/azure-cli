@@ -1523,3 +1523,32 @@ examples:
   - name: Disable sensitivity recommendations for a given column.
     text: az sql db classification recommendation disable -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
 """
+
+helps['sql db ledger-digest-uploads'] = """
+type: group
+short-summary: Manage ledger digest upload settings.
+"""
+
+helps['sql db ledger-digest-uploads enable'] = """
+type: command
+short-summary: Enable uploading ledger digests to an Azure Storage account or to Azure Confidential Ledger. If uploading ledger digests is already enabled, the cmdlet resets the digest storage endpoint to a new value.
+examples:
+  - name: Enable uploading ledger digests to an Azure Blob storage.
+    text: az sql db ledger-digest-uploads enable --name mydb --resource-group MyResourceGroup --server myserver --endpoint https://mystorage.blob.core.windows.net
+"""
+
+helps['sql db ledger-digest-uploads disable'] = """
+type: command
+short-summary: Disable uploading ledger digests.
+examples:
+  - name: Disable uploading ledger digests.
+    text: az sql db ledger-digest-uploads disable --name mydb --resource-group MyResourceGroup --server myserver
+"""
+
+helps['sql db ledger-digest-uploads show'] = """
+type: command
+short-summary: Show the current ledger digest settings.
+examples:
+  - name: Show the settings for uploading ledger digests.
+    text: az sql db ledger-digest-uploads show --name mydb --resource-group MyResourceGroup --server myserver
+"""
