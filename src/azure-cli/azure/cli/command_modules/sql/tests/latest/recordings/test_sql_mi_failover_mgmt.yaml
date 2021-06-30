@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 13:20:03 GMT
+      - Wed, 30 Jun 2021 16:02:54 GMT
       expires:
       - '-1'
       pragma:
@@ -83,7 +83,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 13:20:11 GMT
+      - Wed, 30 Jun 2021 16:03:03 GMT
       expires:
       - '-1'
       pragma:
@@ -127,7 +127,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 13:21:11 GMT
+      - Wed, 30 Jun 2021 16:04:04 GMT
       expires:
       - '-1'
       pragma:
@@ -173,53 +173,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 13:21:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.20f99a1b7737.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"20f99a1b7737","publicDataEndpointEnabled":false,"timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1148'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 13:22:11 GMT
+      - Wed, 30 Jun 2021 16:04:35 GMT
       expires:
       - '-1'
       pragma:
@@ -265,7 +219,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 13:22:41 GMT
+      - Wed, 30 Jun 2021 16:05:05 GMT
       expires:
       - '-1'
       pragma:
@@ -304,20 +258,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/failover?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"error":{"code":"ManagedInstanceFailoverFullBackupMissing","message":"Managed
-        Instance Failover cannot be initiated. Automated backup needs to complete
-        the first full backup for a new database. Please try again later."}}'
+      string: '{"operation":"FailoverManagedServerAsync","startTime":"2021-06-30T16:10:06.073Z"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/1d44ba12-91f2-48eb-9941-c5d7c6c0023c?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '221'
+      - '81'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 13:22:43 GMT
+      - Wed, 30 Jun 2021 16:10:06 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceOperationResults/1d44ba12-91f2-48eb-9941-c5d7c6c0023c?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -329,6 +285,234 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
-      code: 409
-      message: Conflict
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi failover
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/1d44ba12-91f2-48eb-9941-c5d7c6c0023c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"1d44ba12-91f2-48eb-9941-c5d7c6c0023c","status":"InProgress","startTime":"2021-06-30T16:10:06.073Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Jun 2021 16:10:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi failover
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/1d44ba12-91f2-48eb-9941-c5d7c6c0023c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"1d44ba12-91f2-48eb-9941-c5d7c6c0023c","status":"Succeeded","startTime":"2021-06-30T16:10:06.073Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Jun 2021 16:10:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi failover
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceOperationResults/1d44ba12-91f2-48eb-9941-c5d7c6c0023c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 30 Jun 2021 16:10:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"operation":"DropManagedServer","startTime":"2021-06-30T16:10:40.003Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/9add2d98-cbcb-4938-b9e1-3ee9a787a2db?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '72'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Jun 2021 16:10:39 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceOperationResults/9add2d98-cbcb-4938-b9e1-3ee9a787a2db?api-version=2020-11-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/9add2d98-cbcb-4938-b9e1-3ee9a787a2db?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"9add2d98-cbcb-4938-b9e1-3ee9a787a2db","status":"Succeeded","startTime":"2021-06-30T16:10:40.003Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Jun 2021 16:10:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

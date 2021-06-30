@@ -5589,7 +5589,7 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         resource_group = "DejanDuVnetRG"
         user = admin_login
 
-        
+        # override
         loc = 'westcentralus'
         resource_group = 'autobot-managed-instance-v12'
         subnet = '/subscriptions/4b9746e4-d324-4e1d-be53-ec3c8f3a0c18/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet'
