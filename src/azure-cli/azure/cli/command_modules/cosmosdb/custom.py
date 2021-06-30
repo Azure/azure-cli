@@ -256,10 +256,10 @@ def _create_database_account(client,
         backup_policy.periodic_mode_properties = periodic_mode_properties
 
     analytical_storage_configuration = None
-    if (analytical_storage_schema_type is not None):
+    if analytical_storage_schema_type is not None:
         analytical_storage_configuration = AnalyticalStorageConfiguration()
         analytical_storage_configuration.schema_type = analytical_storage_schema_type
-        
+
     create_mode = CreateMode.restore.value if is_restore_request else CreateMode.default.value
     params = None
     restore_parameters = None
@@ -385,7 +385,7 @@ def cli_cosmosdb_update(client,
             backup_policy = ContinuousModeBackupPolicy()
 
     analytical_storage_configuration = None
-    if (analytical_storage_schema_type is not None):
+    if analytical_storage_schema_type is not None:
         analytical_storage_configuration = AnalyticalStorageConfiguration()
         analytical_storage_configuration.schema_type = analytical_storage_schema_type
 
