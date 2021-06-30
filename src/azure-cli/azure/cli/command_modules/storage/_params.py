@@ -21,7 +21,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
-                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator)
+                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
@@ -216,6 +216,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         min_api='2019-02-02',
         help='Indicate the priority with which to rehydrate an archived blob.')
 
+    action_type = CLIArgumentType(
+        help='The action of virtual network rule. Possible value is Allow.'
+    )
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -332,6 +335,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
+        c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
+                   help='NFS 3.0 protocol support enabled if sets to true.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -424,6 +429,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Bypass traffic for space-separated uses.')
             c.argument('default_action', arg_type=get_enum_type(t_default_action),
                        help='Default action to apply when no rule matches.')
+            c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+            c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
+            c.argument('action', action_type)
 
     with self.argument_context('storage account show-connection-string') as c:
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
@@ -489,12 +497,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
-        from ._validators import validate_subnet
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
-        c.argument('action', help='The action of virtual network rule.')
+        c.argument('action', action_type)
         c.argument('resource_id', help='The resource id to add in network rule.', arg_group='Resource Access Rule',
                    min_api='2020-08-01-preview')
         c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
@@ -563,8 +570,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Indicate the number of days that the deleted item should be retained. The minimum specified '
                    'value can be 1 and the maximum value can be 365.')
         c.argument('enable_smb_multichannel', options_list=['--enable-smb-multichannel', '--mc'],
-                   arg_type=get_three_state_flag(), min_api='2020-08-01-preview',
+                   arg_type=get_three_state_flag(), min_api='2020-08-01-preview', arg_group='SMB Setting',
                    help='Set SMB Multichannel setting for file service. Applies to Premium FileStorage only.')
+        c.argument('versions', arg_group='SMB Setting', min_api='2020-08-01-preview',
+                   help="SMB protocol versions supported by server. Valid values are SMB2.1, SMB3.0, "
+                        "SMB3.1.1. Should be passed as a string with delimiter ';'.")
+        c.argument('authentication_methods', options_list='--auth-methods', arg_group='SMB Setting',
+                   min_api='2020-08-01-preview',
+                   help="SMB authentication methods supported by server. Valid values are NTLMv2, Kerberos. "
+                        "Should be passed as a string with delimiter ';'.")
+        c.argument('kerberos_ticket_encryption', options_list=['--kerb-ticket-encryption', '-k'],
+                   arg_group='SMB Setting', min_api='2020-08-01-preview',
+                   help="Kerberos ticket encryption supported by server. Valid values are RC4-HMAC, AES-256. "
+                        "Should be passed as a string with delimiter ';'.")
+        c.argument('channel_encryption', arg_group='SMB Setting', min_api='2020-08-01-preview',
+                   help="SMB channel encryption supported by server. Valid values are AES-128-CCM, AES-128-GCM, "
+                        "AES-256-GCM. Should be passed as a string with delimiter ';' ")
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')

@@ -293,7 +293,30 @@ def _valid_range(addr_range):
 
 
 def validate_server_name(client, server_name, type_):
+    if len(server_name) < 3 or len(server_name) > 63:
+        raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
+
     result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 
     if not result.name_available:
-        raise ValidationError("The name is already in use. Please provide a different name.")
+        raise ValidationError(result.message)
+
+
+def validate_auto_grow_update(server, auto_grow):
+    # if replica, cannot be disabled
+    if server.replication_role != 'None' and auto_grow.lower() == 'disabled':
+        raise ValidationError("Auto grow feature for replica server cannot be disabled.")
+    # if ha, cannot be disabled
+    if server.ha_state != 'NotEnabled' and auto_grow.lower() == 'disabled':
+        raise ValidationError("Auto grow feature for high availability server cannot be disabled.")
+
+
+def validate_private_dns_zone(cmd, server_name, private_dns_zone):
+    postgresql_server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
+    if private_dns_zone == server_name + postgresql_server_endpoint:
+        raise ValidationError("private dns zone name cannot be same as the server's fully qualified domain name")
+
+
+def validate_mysql_ha_enabled(server):
+    if server.storage_profile.storage_autogrow == "Disabled":
+        raise ValidationError("You need to enable auto grow first to enable high availability.")

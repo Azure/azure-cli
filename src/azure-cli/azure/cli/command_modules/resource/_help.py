@@ -1893,6 +1893,16 @@ examples:
         az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
 """
 
+helps['provider permission'] = """
+type: group
+short-summary: Manage permissions for a provider.
+"""
+
+helps['provider permission list'] = """
+type: command
+short-summary: List permissions from a provider.
+"""
+
 helps['provider operation'] = """
 type: group
 short-summary: Get provider operations metadatas.
