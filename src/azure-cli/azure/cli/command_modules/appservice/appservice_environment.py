@@ -27,6 +27,7 @@ from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource
 
 VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"
+VERSION_2021_01_01 = "2021-01-01"
 
 logger = get_logger(__name__)
 
@@ -79,7 +80,8 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
     elif kind == 'ASEv3':
         _ensure_subnet_delegation(cmd.cli_ctx, subnet_id, 'Microsoft.Web/hostingEnvironments')
         ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
-                                                                     subnet_id=subnet_id, kind='ASEv3')
+                                                                     subnet_id=subnet_id, kind='ASEv3',
+                                                                     virtual_ip_type=virtual_ip_type)
     logger.info('Create App Service Environment...')
     deployment_client = _get_resource_client_factory(cmd.cli_ctx).deployments
     return sdk_no_wait(no_wait, deployment_client.begin_create_or_update,
@@ -117,13 +119,13 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
 
 
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2021_01_01)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase = ase_client.get(resource_group_name, name)
     if ase.kind.lower() == 'asev3':
-        raise CommandNotFoundError('list-addresses is currently not supported for ASEv3. '
-                                   'Inbound IP is associated with the private endpoint.')
+        return ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
+        #raise CommandNotFoundError('list-addresses is currently not supported for ASEv3.')
     return ase_client.get_vip_info(resource_group_name, name)
 
 
@@ -135,44 +137,30 @@ def list_appserviceenvironment_plans(cmd, name, resource_group_name=None):
 
 
 def create_ase_inbound_services(cmd, resource_group_name, name, subnet, vnet_name=None, skip_dns=False):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2021_01_01)
     ase = ase_client.get(resource_group_name, name)
     if not ase:
         raise ResourceNotFoundError("App Service Environment '{}' not found.".format(name))
 
+    if ase.internal_load_balancing_mode == 'None':
+        raise ValidationError('Private DNS Zone is not relevant for External ASE.')
+
     inbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
     inbound_vnet_id = _get_vnet_id_from_subnet(cmd.cli_ctx, inbound_subnet_id)
-    if ase.kind.lower() == 'asev3':
-        _ensure_subnet_private_endpoint_network_policy(cmd.cli_ctx, inbound_subnet_id, False)
-        network_client = _get_network_client_factory(cmd.cli_ctx)
-        pls_connection = PrivateLinkServiceConnection(private_link_service_id=ase.id,
-                                                      group_ids=['hostingEnvironments'],
-                                                      request_message='Link from CLI',
-                                                      name='{}-private-connection'.format(name))
-        private_endpoint = PrivateEndpoint(location=ase.location, tags=None, subnet=Subnet(id=inbound_subnet_id))
-        private_endpoint.private_link_service_connections = [pls_connection]
-        poller = network_client.private_endpoints.begin_create_or_update(resource_group_name,
-                                                                         '{}-private-endpoint'.format(name),
-                                                                         private_endpoint)
-        LongRunningOperation(cmd.cli_ctx)(poller)
-        ase_pe = poller.result()
-        nic_name = parse_resource_id(ase_pe.network_interfaces[0].id)['name']
-        nic = network_client.network_interfaces.get(resource_group_name, nic_name)
-        inbound_ip_address = nic.ip_configurations[0].private_ip_address
-    elif ase.kind.lower() == 'asev2':
-        if ase.internal_load_balancing_mode == 0:
-            raise ValidationError('Private DNS Zone is not relevant for External ASEv2.')
-        ase_vip_info = ase_client.get_vip_info(resource_group_name, name)
-        inbound_ip_address = ase_vip_info.internal_ip_address
+    ase_vip_info = ase_client.get_vip_info(resource_group_name, name)
+    inbound_ip_address = ase_vip_info.internal_ip_address
 
     if not skip_dns:
         _ensure_ase_private_dns_zone(cmd.cli_ctx, resource_group_name=resource_group_name, name=name,
                                      inbound_vnet_id=inbound_vnet_id, inbound_ip_address=inbound_ip_address)
+    else:
+        logger.warning('Parameter --skip-dns is deprecated.')
 
 
 def _get_ase_client_factory(cli_ctx, api_version=None):
     client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient).app_service_environments
     if api_version:
+        logger.warning(api_version)
         client.api_version = api_version
     else:
         client.api_version = VERSION_2019_08_01
@@ -286,29 +274,6 @@ def _validate_subnet_size(cli_ctx, subnet_id):
         validation_error = ValidationError(err_msg)
         validation_error.set_recommendation(rec_msg)
         raise validation_error
-
-
-def _ensure_subnet_private_endpoint_network_policy(cli_ctx, subnet_id, network_policy_enabled):
-    network_client = _get_network_client_factory(cli_ctx)
-    subnet_id_parts = parse_resource_id(subnet_id)
-    vnet_resource_group = subnet_id_parts['resource_group']
-    vnet_name = subnet_id_parts['name']
-    subnet_name = subnet_id_parts['resource_name']
-    subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-    target_state = 'Enabled' if network_policy_enabled else 'Disabled'
-
-    if subnet_obj.private_endpoint_network_policies != target_state:
-        subnet_obj.private_endpoint_network_policies = target_state
-        try:
-            poller = network_client.subnets.begin_create_or_update(
-                vnet_resource_group, vnet_name, subnet_name, subnet_parameters=subnet_obj)
-            LongRunningOperation(cli_ctx)(poller)
-        except Exception:
-            err_msg = 'Subnet must have Private Endpoint Network Policy {}.'.format(target_state)
-            rec_msg = 'Use: az network vnet subnet update --disable-private-endpoint-network-policies'
-            validation_error = ValidationError(err_msg)
-            validation_error.set_recommendation(rec_msg)
-            raise validation_error
 
 
 def _ensure_subnet_delegation(cli_ctx, subnet_id, delegation_service_name):
@@ -555,15 +520,15 @@ def _ensure_ase_private_dns_zone(cli_ctx, resource_group_name, name, inbound_vne
     private_dns_client = _get_private_dns_client_factory(cli_ctx)
     zone_name = '{}.appserviceenvironment.net'.format(name)
     zone = PrivateZone(location='global', tags=None)
-    poller = private_dns_client.private_zones.create_or_update(resource_group_name, zone_name, zone)
+    poller = private_dns_client.private_zones.begin_create_or_update(resource_group_name, zone_name, zone)
     LongRunningOperation(cli_ctx)(poller)
 
     link_name = '{}_link'.format(name)
     link = VirtualNetworkLink(location='global', tags=None)
     link.virtual_network = SubResource(id=inbound_vnet_id)
     link.registration_enabled = False
-    private_dns_client.virtual_network_links.create_or_update(resource_group_name, zone_name,
-                                                              link_name, link, if_none_match='*')
+    private_dns_client.virtual_network_links.begin_create_or_update(resource_group_name, zone_name,
+                                                                    link_name, link, if_none_match='*')
     ase_record = ARecord(ipv4_address=inbound_ip_address)
     record_set = RecordSet(ttl=3600)
     record_set.a_records = [ase_record]
