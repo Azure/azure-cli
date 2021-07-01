@@ -175,6 +175,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
             self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {} --yes'.format(name, group))
+            self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
 
     def _get_resource_group(self, **kwargs):
         try:

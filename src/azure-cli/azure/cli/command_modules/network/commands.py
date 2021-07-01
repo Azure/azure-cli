@@ -936,6 +936,12 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_lb_backend_address_pool_address')
         g.custom_command('list', 'list_lb_backend_address_pool_address')
 
+    with self.command_group('network lb address-pool tunnel-interface', network_lb_backend_pool_sdk, min_api='2021-02-01', is_preview=True) as g:
+        g.custom_command('add', 'add_lb_backend_address_pool_tunnel_interface')
+        g.custom_command('update', 'update_lb_backend_address_pool_tunnel_interface')
+        g.custom_command('remove', 'remove_lb_backend_address_pool_tunnel_interface')
+        g.custom_command('list', 'list_lb_backend_address_pool_tunnel_interface')
+
     with self.command_group('network lb rule', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_rule')
         g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
@@ -1369,6 +1375,11 @@ def load_command_table(self, _):
         g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
         g.custom_show_command('show', 'show_vnet_gateway_aad')
         g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
+
+    with self.command_group('network vnet-gateway nat-rule', network_vgw_sdk, min_api='2021-02-01', is_preview=True) as g:
+        g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
+        g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
+        g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
     # endregion
 
     # region VirtualNetworkGatewayConnections

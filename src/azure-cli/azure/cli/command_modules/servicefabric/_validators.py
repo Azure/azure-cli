@@ -109,6 +109,14 @@ def validate_create_managed_cluster(cmd, namespace):
         if namespace.client_cert_common_name is None:
             raise CLIError("--client-cert-issuer-thumbprint should be used with --client-cert-common-name.")
 
+    if namespace.upgrade_mode is None or namespace.upgrade_mode == 'Automatic':
+        if namespace.code_version is not None:
+            raise CLIError("--code-version should only be used whe --upgrade-mode is set to 'Manual'.")
+
+    if namespace.upgrade_cadence is not None:
+        if namespace.upgrade_mode == 'Manual':
+            raise CLIError("--upgrade-cadence should only be used whe --upgrade-mode is set to 'Automatic'.")
+
 
 def validate_create_managed_service(namespace):
     if namespace.service_type is None:

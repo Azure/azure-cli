@@ -17,13 +17,17 @@ class Clients(str, Enum):
     private_endpoint_connections = 'private_endpoint_connections'
     private_link_resources = 'private_link_resources'
     managed_hsms = 'managed_hsms'
+    mhsm_private_endpoint_connections = 'mhsm_private_endpoint_connections'
+    mhsm_private_link_resources = 'mhsm_private_link_resources'
 
 
 OPERATIONS_NAME = {
     Clients.vaults: 'VaultsOperations',
     Clients.private_endpoint_connections: 'PrivateEndpointConnectionsOperations',
     Clients.private_link_resources: 'PrivateLinkResourcesOperations',
-    Clients.managed_hsms: 'ManagedHsmsOperations'
+    Clients.managed_hsms: 'ManagedHsmsOperations',
+    Clients.mhsm_private_endpoint_connections: 'MHSMPrivateEndpointConnectionsOperations',
+    Clients.mhsm_private_link_resources: 'MHSMPrivateLinkResourcesOperations'
 }
 
 KEYVAULT_TEMPLATE_STRINGS = {
@@ -125,7 +129,7 @@ def keyvault_mgmt_client_factory(resource_type, client_name):
     return _keyvault_mgmt_client_factory
 
 
-def keyvault_data_plane_factory(cli_ctx, _):
+def keyvault_data_plane_factory(cli_ctx, *_):
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.util import should_disable_connection_verify
 
@@ -134,7 +138,8 @@ def keyvault_data_plane_factory(cli_ctx, _):
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
         try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
+            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
+                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
         except adal.AdalError as err:
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and
@@ -170,7 +175,8 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
         try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
+            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
+                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
         except adal.AdalError as err:
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and

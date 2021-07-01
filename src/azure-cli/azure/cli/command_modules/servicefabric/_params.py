@@ -23,7 +23,10 @@ from azure.mgmt.servicefabricmanagedclusters.models import (FailureAction,
                                                             MoveCost,
                                                             PartitionScheme,
                                                             RollingUpgradeMode,
-                                                            ServiceKind)
+                                                            ServiceKind,
+                                                            DiskType,
+                                                            ClusterUpgradeMode,
+                                                            ClusterUpgradeCadence)
 from knack.arguments import CLIArgumentType
 
 
@@ -66,7 +69,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_output_folder', options_list=['--certificate-output-folder', '--cert-out-folder'], help='The folder of the new certificate file to be created.')
         c.argument('certificate_password', help='The password of the certificate file.')
         c.argument('certificate_subject_name', options_list=['--certificate-subject-name', '--cert-subject-name'], help='The subject name of the certificate to be created.')
-        c.argument('vault_resource_group_name', options_list=['--vault-resource-group'], help='Key vault resource group name, if not given it will be cluster resource group name')
+        c.argument('vault_resource_group_name', options_list=['--vault-rg', c.deprecate(target='--vault-resource-group', redirect='--vault-rg', hide=True)],
+                   help='Key vault resource group name, if not given it will be cluster resource group name')
         c.argument('vault_name', help='Azure key vault name, it not given it will be the cluster resource group name')
         c.argument('cluster_size', options_list=['--cluster-size', '-s'], help='The number of nodes in the cluster. Default are 5 nodes')
         c.argument('vm_sku', help='VM Sku')
@@ -93,9 +97,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_common_name', help='client certificate common name.')
         c.argument('admin_client_thumbprints', options_list=['--admin-client-thumbprints', '--admin-client-tps'], nargs='+', help='Space-separated list of client certificate thumbprint that only has admin permission, ')
         c.argument('certificate_issuer_thumbprint', options_list=['--certificate-issuer-thumbprint', '--cert-issuer-tp'], help='client certificate issuer thumbprint.')
-
-    with self.argument_context('sf cluster certificate') as c:
-        c.argument('thumbprint', help='The cluster certificate thumbprint to be removed')
 
     with self.argument_context('sf cluster client-certificate') as c:
         c.argument('is_admin', help='Client authentication type.')
@@ -248,6 +249,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('client_cert_thumbprint', options_list=['--client-cert-thumbprint', '--cert-thumbprint'], help='Client certificate thumbprint.')
         c.argument('client_cert_common_name', options_list=['--client-cert-common-name', '--cert-common-name'], help='Client certificate common name.')
         c.argument('client_cert_issuer_thumbprint', options_list=['--client-cert-issuer-thumbprint', '--cert-issuer-thumbprint', '--cert-issuer-tp'], nargs='+', help='Space-separated list of issuer thumbprints.')
+        c.argument('upgrade_mode', arg_type=get_enum_type(ClusterUpgradeMode), options_list=['--cluster-upgrade-mode', '--upgrade-mode'],
+                   help='The upgrade mode of the cluster when new Service Fabric runtime version is available '
+                   'Automatic: The cluster will be automatically upgraded to the latest Service Fabric runtime version, upgrade_cadence will determine when the upgrade starts after the new version becomes available.'
+                   'Manual: The cluster will not be automatically upgraded to the latest Service Fabric runtime version. The cluster is upgraded by setting the code_version property in the cluster resource.')
+        c.argument('upgrade_cadence', arg_type=get_enum_type(ClusterUpgradeCadence), options_list=['--cluster-upgrade-cadence', '--upgrade-cadence'],
+                   help='The upgrade mode of the cluster when new Service Fabric runtime version is available '
+                   'Wave0: Cluster upgrade starts immediately after a new version is rolled out. Recommended for Test/Dev clusters.'
+                   'Wave1: Cluster upgrade starts 7 days after a new version is rolled out. Recommended for Pre-prod clusters.'
+                   'Wave2: Cluster upgrade starts 14 days after a new version is rolled out. Recommended for Production clusters.')
+        c.argument('code_version', options_list=['--cluster-code-version', '--code-version'],
+                   help='Cluster service fabric code version. Only use if upgrade mode is Manual.')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('sf managed-cluster update') as c:
@@ -286,7 +298,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('node_type_name', options_list=['-n', '--name', '--node-type-name'], help='node type name.')
         c.argument('instance_count', help='essage = "The number of nodes in the node type.')
         c.argument('primary', arg_type=get_three_state_flag(), help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
-        c.argument('disk_size', help='Disk size for each vm in the node type in GBs.', default=100)
+        c.argument('disk_size', type=int, options_list=['--disk-size', '--data-disk-size'], help='Disk size for each vm in the node type in GBs.', default=100)
+        c.argument('disk_type', arg_type=get_enum_type(DiskType), options_list=['--disk-type', '--data-disk-type'],
+                   help='Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://docs.microsoft.com/en-us/azure/virtual-machines/disks-types. Default StandardSSD_LRS'
+                   'Standard_LRS: Standard HDD locally redundant storage. Best for backup, non-critical, and infrequent access.'
+                   'StandardSSD_LRS: Standard SSD locally redundant storage. Best for web servers, lightly used enterprise applications and dev/test.'
+                   'Premium_LRS: Premium SSD locally redundant storage. Best for production and performance sensitive workloads.')
         c.argument('application_start_port', options_list=['--application-start-port', '--app-start-port'], help='Application start port of a range of ports.')
         c.argument('application_end_port', options_list=['--application-end-port', '--app-end-port'], help='Application End port of a range of ports.')
         c.argument('ephemeral_start_port', help='Ephemeral start port of a range of ports.')
@@ -298,6 +315,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('vm_image_version', help='The version of the Azure Virtual Machines Marketplace image. ', default='latest')
         c.argument('capacity', arg_type=capacity)
         c.argument('placement_property', arg_type=placement_property)
+        c.argument('is_stateless', arg_type=get_three_state_flag(), help='Indicates if the node type can only host Stateless workloads.', default=False)
+        c.argument('multiple_placement_groups', options_list=['--multiple-placement-groups', '--multi-place-groups'], arg_type=get_three_state_flag(),
+                   help='Indicates if scale set associated with the node type can be composed of multiple placement groups.', default=False)
 
     with self.argument_context('sf managed-node-type node') as c:
         c.argument('node_name', nargs='+', help='list of target nodes to perform the operation.')
@@ -406,8 +426,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Specify the default cost for a move. Higher costs make it less likely that the Cluster Resource Manager will move the replica when trying to balance the cluster.')
         c.argument('placement_constraints',
                    help='Specify the placement constraints as a string. Placement constraints are boolean expressions on node properties and allow for restricting a service to particular nodes based on the service requirements. For example, to place a service on nodes where NodeType is blue specify the following: \"NodeColor == blue)\".')
-        c.argument('service_dns_name', options_list=['--service-dns-name', '--dns-name'],
-                   help='Specify the DNS name of the service. It requires the DNS system service to be enabled in Service Fabric cluster.')
         c.argument('service_package_activation_mode', options_list=['--service-package-activation-mode', '--package-activation-mode', '--activation-mode'],
                    help='Specify the activation mode of the service package.')
         c.argument('state', arg_type=get_enum_type(ServiceKind), help='Specify if the service is stateless or stateful.')
@@ -416,8 +434,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('target_replica_set_size', options_list=['--target-replica-set-size', '--target-replica'], help='Specify the target replica set size for the stateful service.')
         c.argument('has_persisted_state', arg_type=get_three_state_flag(),
                    help='Determines whether this is a persistent service which stores states on the local disk. If it is then the value of this property is true, if not it is false.')
-        c.argument('drop_source_replica_on_move', options_list=['--drop-source-replica-on-move', '--drop-source'],
-                   help='Determines whether to drop source Secondary replica even if the target replica has not finished build. If desired behavior is to drop it as soon as possible the value of this property is true, if not it is false.')
         c.argument('service_placement_time_limit', options_list=['--service-placement-time-limit', '--plcmt-time-limit'],
                    help='Specify the duration for which replicas can stay InBuild before reporting that build is stuck, represented in ISO 8601 format "hh:mm:ss".')
         c.argument('stand_by_replica_keep_duration', options_list=['--stand-by-replica-keep-duration', '--stand-by-keep-duration', '--keep-duration'],
@@ -431,8 +447,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('min_instance_count', help='Specify the minimum number of instances that must be up to meet the EnsureAvailability safety check during operations like upgrade or deactivate node. The actual number that is used is max( MinInstanceCount, ceil( MinInstancePercentage/100.0 * InstanceCount) ). Note, if InstanceCount is set to -1, during MinInstanceCount computation -1 is first converted into the number of nodes on which the instances are allowed to be placed according to the placement constraints on the service.')
         c.argument('min_instance_percentage', options_list=['--min-instance-percentage', '--min-inst-pct'],
                    help='Specify the minimum percentage of InstanceCount that must be up to meet the EnsureAvailability safety check during operations like upgrade or deactivate node. The actual number that is used is max( MinInstanceCount, ceil( MinInstancePercentage/100.0 * InstanceCount) ). Note, if InstanceCount is set to -1, during MinInstancePercentage computation, -1 is first converted into the number of nodes on which the instances are allowed to be placed according to the placement constraints on the service. Allowed values are from 0 to 100.')
-        c.argument('instance_close_delay_duration', options_list=['--instance-close-delay-duration', '--instance-close-duration', '--close-duration'],
-                   help='Specify the duration in seconds, to wait before a stateless instance is closed, to allow the active requests to drain gracefully. This would be effective when the instance is closing during the application/cluster upgrade and disabling node. The endpoint exposed on this instance is removed prior to starting the delay, which prevents new connections to this instance.')
         # Partition arguments
         c.argument('partition_scheme', arg_type=get_enum_type(PartitionScheme),
                    help='Specify what partition scheme to use. '
@@ -455,8 +469,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # Stateful arguments
         c.argument('min_replica_set_size', options_list=['--min-replica-set-size', '--min-replica'], help='Specify the min replica set size for the stateful service.')
         c.argument('target_replica_set_size', options_list=['--target-replica-set-size', '--target-replica'], help='Specify the target replica set size for the stateful service.')
-        c.argument('drop_source_replica_on_move', options_list=['--drop-source-replica-on-move', '--drop-source'],
-                   help='Determines whether to drop source Secondary replica even if the target replica has not finished build. If desired behavior is to drop it as soon as possible the value of this property is true, if not it is false.')
         c.argument('service_placement_time_limit', options_list=['--service-placement-time-limit', '--plcmt-time-limit'],
                    help='Specify the duration for which replicas can stay InBuild before reporting that build is stuck, represented in ISO 8601 format "hh:mm:ss".')
         c.argument('stand_by_replica_keep_duration', options_list=['--stand-by-replica-keep-duration', '--stand-by-keep-duration', '--keep-duration'],
@@ -470,8 +482,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('min_instance_count', help='Specify the minimum number of instances that must be up to meet the EnsureAvailability safety check during operations like upgrade or deactivate node. The actual number that is used is max( MinInstanceCount, ceil( MinInstancePercentage/100.0 * InstanceCount) ). Note, if InstanceCount is set to -1, during MinInstanceCount computation -1 is first converted into the number of nodes on which the instances are allowed to be placed according to the placement constraints on the service.')
         c.argument('min_instance_percentage', options_list=['--min-instance-percentage', '--min-inst-pct'],
                    help='Specify the minimum percentage of InstanceCount that must be up to meet the EnsureAvailability safety check during operations like upgrade or deactivate node. The actual number that is used is max( MinInstanceCount, ceil( MinInstancePercentage/100.0 * InstanceCount) ). Note, if InstanceCount is set to -1, during MinInstancePercentage computation, -1 is first converted into the number of nodes on which the instances are allowed to be placed according to the placement constraints on the service. Allowed values are from 0 to 100.')
-        c.argument('instance_close_delay_duration', options_list=['--instance-close-delay-duration', '--instance-close-duration', '--close-duration'],
-                   help='Specify the duration in seconds, to wait before a stateless instance is closed, to allow the active requests to drain gracefully. This would be effective when the instance is closing during the application/cluster upgrade and disabling node. The endpoint exposed on this instance is removed prior to starting the delay, which prevents new connections to this instance.')
 
     with self.argument_context('sf managed-service correlation-scheme create', validator=validate_create_managed_service_correlation) as c:
         c.argument('correlated_service_name', options_list=['--correlated-service-name', '--correlated-name'],

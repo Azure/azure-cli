@@ -8,6 +8,11 @@ import time
 LOCATION = "southcentralusstage"
 VNET_LOCATION = "southcentralus"
 
+# No tidy up of tests required. The resource group is automatically removed
+
+# As a refactoring consideration for the future, consider use of authoring patterns described here
+# https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md#sample-5-get-more-from-resourcegrouppreparer
+
 
 class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
@@ -85,10 +90,11 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name)
 
+        # assert backup is returned in list account backups
         backup_list = self.cmd("az netappfiles account backup list -g {rg} -a %s" % account_name).get_output_in_json()
+        assert backup_list[len(backup_list) - 1]['name'] == account_name + "/" + backup_name
 
-        assert len(backup_list) == 1
-
+        # clean up
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
 
@@ -101,11 +107,12 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name)
 
+        # assert backup is returned in show account backup
         backup = self.cmd("az netappfiles account backup show -g {rg} -a %s --backup-name %s" %
                           (account_name, backup_name)).get_output_in_json()
-
         assert backup['name'] == account_name + "/" + backup_name
 
+        # clean up
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
 
@@ -118,15 +125,17 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name)
 
+        # make sure the backup is created
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         backup_list = self.cmd("az netappfiles account backup list -g {rg} -a %s" % account_name).get_output_in_json()
-        assert len(backup_list) == 1
+        assert backup_list[len(backup_list) - 1]['name'] == account_name + "/" + backup_name
 
+        # delete volume first to be able to call delete account backup
         self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s" %
                  (account_name, pool_name, volume_name))
         self.cmd("az netappfiles account backup delete -g {rg} -a %s --backup-name %s -y" % (account_name, backup_name))
 
+        # assert the account backup is deleted
         backup_list = self.cmd("az netappfiles account backup list -g {rg} -a %s" % account_name).get_output_in_json()
-
-        for backup in backup_list['value']:
+        for backup in backup_list:
             assert backup['name'] != account_name + "/" + backup_name

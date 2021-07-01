@@ -16,6 +16,7 @@ from azure.mgmt.privatedns.models import SubResource
 from azure.mgmt.privatedns.models import VirtualNetworkLink
 from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import get_id_components, check_existence
+from .validators import validate_private_dns_zone
 
 logger = get_logger(__name__)
 DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
@@ -53,7 +54,7 @@ def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet,
 
         elif _check_if_resource_name(vnet) and is_valid_resource_name(vnet):
             logger.warning("You have supplied a Vnet name. Verifying its existence...")
-            subnet_result = _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group_name, vnet, 'Subnet' + server_name[6:],
+            subnet_result = _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group_name, vnet, 'Subnet' + server_name,
                                                            location, server_name, vnet_address_pref, subnet_address_pref)
         else:
             raise ValidationError("Incorrectly formed Vnet ID or Vnet name")
@@ -69,7 +70,7 @@ def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet,
             raise ValidationError("If you pass both --vnet and --subnet, consider passing names instead of IDs. If you want to use an existing subnet, please provide the subnet Id only (not vnet Id).")
 
     elif subnet is None and vnet is None:
-        subnet_result = _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group_name, 'Vnet' + server_name[6:], 'Subnet' + server_name[6:],
+        subnet_result = _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group_name, 'Vnet' + server_name, 'Subnet' + server_name,
                                                        location, server_name, vnet_address_pref, subnet_address_pref)
     else:
         return None
@@ -82,7 +83,7 @@ def address_private_network_with_id_input(cmd, rid, nw_client, resource_client, 
     nw_client, resource_client = _change_client_with_different_subscription(cmd, id_subscription, nw_client, resource_client)
     _resource_group_verify_and_create(resource_client, id_resource_group, location)
     if id_subnet is None:
-        id_subnet = 'Subnet' + server_name[6:]
+        id_subnet = 'Subnet' + server_name
 
     return _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, id_resource_group, id_vnet, id_subnet,
                                           location, server_name, vnet_address_pref, subnet_address_pref)
@@ -214,8 +215,10 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
     elif _check_if_resource_name(private_dns_zone) and private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
         raise ValidationError('The suffix of the private DNS zone should be in "{}" format'.format(private_dns_zone_suffix))
 
+    validate_private_dns_zone(cmd, server_name=server_name, private_dns_zone=private_dns_zone)
+
     link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet.id))
-    link.registration_enabled = True
+    link.registration_enabled = False
 
     # check existence DNS zone and change resource group
     zone_exist_flag = False

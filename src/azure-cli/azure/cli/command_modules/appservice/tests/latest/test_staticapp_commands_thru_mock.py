@@ -200,7 +200,7 @@ class TestStaticAppCommands(unittest.TestCase):
                              resource_group_name=self.rg1)
 
         create_staticsites_mock.assert_called_once_with(self.mock_cmd, self.rg1, self.name1, self.location1,
-                                                        self.source1, self.branch1, self.token1, no_wait=False)
+                                                        self.source1, self.branch1, self.token1, login_with_github=False, no_wait=False)
 
     @mock.patch('azure.cli.command_modules.appservice.static_sites.create_staticsites', autospec=True)
     def test_reconnect_staticapp_without_resourcegroup(self, create_staticsites_mock):
@@ -209,7 +209,7 @@ class TestStaticAppCommands(unittest.TestCase):
         reconnect_staticsite(self.mock_cmd, self.name1, self.source1, self.branch1, self.token1)
 
         create_staticsites_mock.assert_called_once_with(self.mock_cmd, self.rg1, self.name1, self.location1,
-                                                        self.source1, self.branch1, self.token1, no_wait=False)
+                                                        self.source1, self.branch1, self.token1, login_with_github=False, no_wait=False)
 
     def test_list_staticsite_environments_with_resourcegroup(self):
         list_staticsite_environments(self.mock_cmd, self.name1, self.rg1)
