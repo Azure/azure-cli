@@ -83,7 +83,8 @@ def build_storage_account_resource(_, name, location, tags, sku, edge_zone=None)
     return storage_account
 
 
-def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, count=None):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, count=None,
+                             edge_zone=None):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -115,11 +116,10 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
     if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
 
-    # TODO There is a NetworkingInternalOperationError when VM and public IP are created in edge zone at the same time
-    # After the service team finds out the cause, it also needs to support edge_zone
-    # if edge_zone:
-    #     public_ip['apiVersion'] = '2021-02-01'
-    #     public_ip['extendedLocation'] = edge_zone
+        # The edge zones are only built out using Standard SKU Public IPs
+        if edge_zone and sku.lower() == 'standard':
+            public_ip['apiVersion'] = '2021-02-01'
+            public_ip['extendedLocation'] = edge_zone
 
     return public_ip
 
