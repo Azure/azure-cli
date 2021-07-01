@@ -11,7 +11,6 @@ from knack.util import CLIError
 
 from azure.mgmt.datamigration.models import (DataMigrationService,
                                              NameAvailabilityRequest,
-                                             MigrateMySqlAzureDbForMySqlSyncTaskProperties,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties,
                                              MigrateSqlServerSqlDbTaskProperties,
                                              MigrateSyncCompleteCommandInput,

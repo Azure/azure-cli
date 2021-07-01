@@ -8,9 +8,7 @@ from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigrationValidationOptions,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncTaskInput,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseInput,
-                                             MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseTableInput,
-                                             MigrateMySqlAzureDbForMySqlSyncTaskInput,
-                                             MigrateMySqlAzureDbForMySqlSyncDatabaseInput)
+                                             MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseTableInput)
 
 
 def get_migrate_sql_to_sqldb_offline_input(database_options_json,
