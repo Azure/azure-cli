@@ -107,25 +107,21 @@ long-summary: |
   The following project configurations are supported:
     -) source -> target
     1) SQL -> SQLDB
-    2) MySQL -> AzureDbForMySQL
-    3) PostgreSQL -> AzureDbForPostgreSQL
+    2) PostgreSQL -> AzureDbForPostgreSQL
 
 parameters:
   - name: --source-platform
     type: string
     short-summary: >
-        The type of server for the source database. The supported types are: SQL, MySQL, PostgreSQL.
+        The type of server for the source database. The supported types are: SQL, PostgreSQL.
   - name: --target-platform
     type: string
     short-summary: >
-        The type of service for the target database. The supported types are: SQLDB, AzureDbForMySQL, AzureDbForPostgreSQL.
+        The type of service for the target database. The supported types are: SQLDB, AzureDbForPostgreSQL.
 examples:
   - name: Create a SQL to SQLDB project for a DMS instance.
     text: >
         az dms project create -l westus -n sqlproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
-  - name: Create a MySQL to AzureDbForMySql project for a DMS instance.
-    text: >
-        az dms project create -l westus -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySQL --tags tagName1=tagValue1 tagWithNoValue
   - name: Create a PostgreSql to AzureDbForPostgreSql project for a DMS instance.
     text: >
         az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags tagName1=tagValue1 tagWithNoValue
