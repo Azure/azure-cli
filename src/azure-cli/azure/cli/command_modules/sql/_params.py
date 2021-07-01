@@ -1086,6 +1086,30 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type)
 
     ###############################################
+    #                sql db str                   #
+    ###############################################
+    with self.argument_context('sql db str-policy set') as c:
+        create_args_for_complex_type(
+            c, 'parameters', Database, [
+                'retention_days',
+                'diffbackup_hours'
+            ])
+
+        c.argument(
+            'retention_days',
+            options_list=['--retention-days'],
+            required=True,
+            help='New backup short term retention policy retention in days.'
+            'Valid retention days for live database of (DTU) Basic can be 1-7 days; Rest models can be 1-35 days.')
+
+        c.argument(
+            'diffbackup_hours',
+            options_list=['--diffbackup-hours'],
+            required=True,
+            help='New backup short term retention policy differential backup interval in hours.'
+            'Valid differential backup interval for live database can be 12 or 24 hours.')
+
+    ###############################################
     #                sql dw                       #
     ###############################################
     with self.argument_context('sql dw') as c:
