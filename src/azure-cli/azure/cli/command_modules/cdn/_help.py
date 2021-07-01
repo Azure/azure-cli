@@ -240,7 +240,7 @@ examples:
         az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
         --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTP
         --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
-  - name: Create a rule to distriute requests with "/test1" in its URL path to origin group with name "origingroup1".
+  - name: Create a rule to distribute requests with "/test1" in its URL path to origin group with name "origingroup1".
     text: >
         az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
         --rule-name "origin-groupo-verride" --match-variable UrlPath --operator Contains --match-values /test1
