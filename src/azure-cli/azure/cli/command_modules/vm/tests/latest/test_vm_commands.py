@@ -19,7 +19,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer, JMESPathCheck, StringContainCheck)
+    StorageAccountPreparer, JMESPathCheck, StringContainCheck, VirtualNetworkPreparer)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -5205,7 +5205,7 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
 class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='westus')
-    def test_vmss_orchestration_mode(self, resource_group):
+    def test_vmss_simple_orchestration_mode(self, resource_group):
         self.kwargs.update({
             'ppg': 'ppg1',
             'vmss': 'vmss1',
@@ -5214,7 +5214,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
         self.cmd('ppg create -g {rg} -n {ppg}')
         self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
-                 '--ppg {ppg} --platform-fault-domain-count 3 --generate-ssh-keys',
+                 '--ppg {ppg} --platform-fault-domain-count 3 ',
                  checks=[
                      self.check('vmss.singlePlacementGroup', False),
                      self.check('vmss.platformFaultDomainCount', 3)
@@ -5223,6 +5223,140 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm} --image centos --platform-fault-domain 0 --vmss {vmss} --generate-ssh-keys --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('platformFaultDomain', 0)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='eastus2euap')
+    @VirtualNetworkPreparer(location='eastus2euap', parameter_name='virtual_network')
+    def test_vmss_complex_orchestration_mode(self, resource_group, virtual_network):
+
+        self.kwargs.update({
+            'vmss0': self.create_random_name(prefix='vmss0', length=10),
+            'vmss1': self.create_random_name(prefix='vmss1', length=10),
+            'vnet_name': virtual_network,
+            'vmss2': self.create_random_name(prefix='vmss2', length=10),
+            'vmss3': self.create_random_name(prefix='vmss3', length=10),
+            'vmss4': self.create_random_name(prefix='vmss4', length=10),
+            'vmss5': self.create_random_name(prefix='vmss5', length=10),
+            'ssh_key': TEST_SSH_KEY_PUB
+        })
+
+        # test without authentication info
+        self.cmd('vmss create -n {vmss0} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss ')
+
+        self.cmd('vmss show -g {rg} -n {vmss0}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with password
+        self.cmd('vmss create -g {rg} -n {vmss1} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --admin-username testvmss '
+                 '--admin-password This!s@Terr!bleP@ssw0rd --computer-name-prefix testvmss --image debian '
+                 '--vnet-name {vnet_name} --subnet default --network-api-version 2020-11-01')
+
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux'),
+        ])
+
+        # test with ssh
+        self.cmd('vmss create -n {vmss2} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --generate-ssh-keys ')
+
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with ssh path
+        self.cmd('vmss create -n {vmss3} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --generate-ssh-keys ')
+
+        self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with ssh value
+        self.cmd('vmss create -n {vmss4} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --ssh-key-value \'{ssh_key}\' ')
+
+        self.cmd('vmss show -g {rg} -n {vmss4}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with authentication type
+        self.cmd('vmss create -n {vmss5} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --authentication-type ssh ')
+
+        self.cmd('vmss show -g {rg} -n {vmss5}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
         ])
 
 
@@ -5244,7 +5378,7 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
         self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
-            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-keys --subscription {aux_sub}')
         self.cmd(
             'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
         time.sleep(70)
