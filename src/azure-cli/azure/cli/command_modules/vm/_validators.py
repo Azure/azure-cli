@@ -793,6 +793,12 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
         if not publisher:
             return
         publisher, offer, sku = publisher.lower(), offer.lower(), sku.lower()
+
+        if publisher == 'coreos' or offer == 'coreos':
+            from azure.cli.core.parser import InvalidArgumentValueError
+            raise InvalidArgumentValueError("As CoreOS is deprecated and there is no image in the marketplace any more,"
+                                            " please use Flatcar linux instead of it.")
+
         distros = [('canonical', 'UbuntuServer', '^16.04|^18.04'),
                    ('suse', 'sles', '^12-sp3'), ('redhat', 'rhel', '^7.4'),
                    ('openlogic', 'centos', '^7.4'), ('kinvolk', 'flatcar-container-linux-free', None),
