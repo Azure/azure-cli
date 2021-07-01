@@ -2704,19 +2704,21 @@ def update_short_term_retention(
         server_name,
         resource_group_name,
         retention_days,
-        diffbackup_hours):
+        diffbackup_hours, 
+        no_wait=False):
     '''
     Updates short term retention for live database
     '''
 
-    policy = client.create_or_update(
+    return sdk_no_wait(
+        no_wait, 
+        client.create_or_update,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
         retention_days=retention_days,
         diff_backup_interval_in_hours=diffbackup_hours)
 
-    return policy
 
 
 def get_short_term_retention(
