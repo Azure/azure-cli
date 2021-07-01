@@ -6989,8 +6989,8 @@ def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, n
 def create_virtual_hub(cmd, client,
                        resource_group_name,
                        virtual_hub_name,
+                       hosted_subnet,
                        public_ip_address=None,
-                       hosted_subnet=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -7020,12 +7020,12 @@ def create_virtual_hub(cmd, client,
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
         vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(
-            resource_group_name, virtual_hub_name, 'ipconfig1', ip_config)
+            resource_group_name, virtual_hub_name, 'Default', ip_config)
         LongRunningOperation(cmd.cli_ctx)(vhub_ip_poller)
     except Exception as ex:
         logger.error(ex)
         try:
-            vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'ipconfig1')
+            vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
         except HttpResponseError:
             pass
         client.begin_delete(resource_group_name, virtual_hub_name)
