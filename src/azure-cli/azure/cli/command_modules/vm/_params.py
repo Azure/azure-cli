@@ -41,6 +41,7 @@ def load_arguments(self, _):
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
+    GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -101,6 +102,13 @@ def load_arguments(self, _):
         help='The name of edge zone.',
         min_api='2020-12-01',
         is_preview=True
+    )
+
+    t_shared_to = self.get_models('SharedToValues', operation_group='shared_galleries')
+    shared_to_type = CLIArgumentType(
+        arg_type=get_enum_type(t_shared_to),
+        help='The query parameter to decide what shared galleries to fetch when doing listing operations. '
+             'If not specified, list by subscription id.'
     )
 
     # region MixedScopes
@@ -917,6 +925,32 @@ def load_arguments(self, _):
             c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
             c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
 
+    with self.argument_context('sig list-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('shared_to', shared_to_type)
+
+    with self.argument_context('sig show-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+
+    for scope in ['sig share add', 'sig share remove']:
+        with self.argument_context(scope) as c:
+            c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
+            c.argument('subscription_ids', nargs='+', help='A list of subscription ids to share the gallery.')
+            c.argument('tenant_ids', nargs='+', help='A list of tenant ids to share the gallery.')
+
+    with self.argument_context('sig share add') as c:
+        c.argument('op_type', default='Add', deprecate_info=c.deprecate(hide=True),
+                   help='distinguish add operation and remove operation')
+
+    with self.argument_context('sig share remove') as c:
+        c.argument('op_type', default='Remove', deprecate_info=c.deprecate(hide=True),
+                   help='distinguish add operation and remove operation')
+
+    with self.argument_context('sig share reset') as c:
+        c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
+
     with self.argument_context('sig image-definition create') as c:
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
@@ -940,10 +974,31 @@ def load_arguments(self, _):
         c.argument('disallowed_disk_types', nargs='*', help='disk types which would not work with the image, e.g., Standard_LRS')
         c.argument('features', help='A list of gallery image features. E.g. "IsSecureBootSupported=true IsMeasuredBootSupported=false"')
 
+    with self.argument_context('sig image-definition list-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('shared_to', shared_to_type)
+
+    with self.argument_context('sig image-definition show-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
+                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
+                   id_part='child_name_2')
+
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
+        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
+                   min_api='2020-09-30', is_experimental=True,
+                   help='This property allows you to specify the permission of sharing gallery.')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
+        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
+                   min_api='2020-09-30', is_experimental=True,
+                   help='This property allows you to specify the permission of sharing gallery.')
+
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:
@@ -975,8 +1030,29 @@ def load_arguments(self, _):
         c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
         c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
 
+    with self.argument_context('sig image-version list-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
+                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
+                   id_part='child_name_2')
+        c.argument('shared_to', shared_to_type)
+
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
+
+    with self.argument_context('sig image-version show-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
+                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
+                   id_part='child_name_2')
+        c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e'], type=str, help='The '
+                   'name of the gallery image version to be created. Needs to follow semantic version name pattern: '
+                   'The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. '
+                   'Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
 
     for scope in ['sig image-version create', 'sig image-version update']:
         with self.argument_context(scope) as c:

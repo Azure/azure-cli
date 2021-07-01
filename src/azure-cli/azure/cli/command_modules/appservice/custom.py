@@ -1099,7 +1099,7 @@ def url_validator(url):
 def _get_linux_multicontainer_decoded_config(cmd, resource_group_name, name, slot=None):
     from base64 import b64decode
     linux_fx_version = _get_fx_version(cmd, resource_group_name, name, slot)
-    if not any([linux_fx_version.startswith(s) for s in MULTI_CONTAINER_TYPES]):
+    if not any(linux_fx_version.startswith(s) for s in MULTI_CONTAINER_TYPES):
         raise CLIError("Cannot decode config that is not one of the"
                        " following types: {}".format(','.join(MULTI_CONTAINER_TYPES)))
     return b64decode(linux_fx_version.split('|')[1].encode('utf-8'))

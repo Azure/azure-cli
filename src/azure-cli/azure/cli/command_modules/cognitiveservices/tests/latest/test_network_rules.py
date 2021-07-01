@@ -17,9 +17,9 @@ class CognitiveServicesNetworkRulesTests(ScenarioTest):
         self.kwargs.update({
             'sname': sname,
             'vnetname': sname,
-            'kind': 'Face',
+            'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'westus',
+            'location': 'centraluseuap',
             'customdomain': customdomain,
         })
 
@@ -34,8 +34,7 @@ class CognitiveServicesNetworkRulesTests(ScenarioTest):
                  ' --custom-domain {customdomain} --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
-                         self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded')])
+                         self.check('sku.name', '{sku}')])
 
         rules = self.cmd('az cognitiveservices account network-rule list -n {sname} -g {rg}').get_output_in_json()
         self.assertEqual(len(rules['ipRules']), 0)

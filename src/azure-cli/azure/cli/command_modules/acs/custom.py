@@ -47,12 +47,14 @@ from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (ResourceNotFoundError,
-                                       ArgumentUsageError,
                                        ClientRequestError,
+                                       ArgumentUsageError,
                                        InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
-                                       ValidationError)
+                                       ValidationError,
+                                       UnauthorizedError)
 from azure.cli.core._profile import Profile
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
@@ -66,34 +68,6 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ResourceAccess, RequiredResourceAccess)
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
-
-from azure.mgmt.containerservice.v2021_03_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2021_03_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2021_03_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2021_03_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterIdentity
-from azure.mgmt.containerservice.v2021_03_01.models import AgentPool
-from azure.mgmt.containerservice.v2021_03_01.models import AgentPoolUpgradeSettings
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterSKU
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterWindowsProfile
-from azure.mgmt.containerservice.v2021_03_01.models import (
-    Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties)
-from azure.mgmt.containerservice.v2021_03_01.models import RunCommandRequest
-
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterIdentityProvider
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAADIdentityProvider
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedCluster
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftRouterProfile
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAuthProfile
-from azure.mgmt.containerservice.v2019_09_30_preview.models import NetworkProfile
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterMonitorProfile
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -127,9 +101,9 @@ from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLE
 from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
 from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM
+from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
 
 logger = get_logger(__name__)
-
 
 # pylint:disable=too-many-lines,unused-argument
 
@@ -812,10 +786,16 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
     return properties
 
 
-def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    pattern = '/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'  # pylint: disable=line-too-long
+def _get_user_assigned_identity_resource_id_regular_expression():
+    return re.compile(
+        r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)',
+        flags=re.IGNORECASE)
+
+
+def _get_user_assigned_identity(cli_ctx, resource_id):
     resource_id = resource_id.lower()
-    match = re.search(pattern, resource_id)
+    _re_user_assigned_identity_resource_id = _get_user_assigned_identity_resource_id_regular_expression()
+    match = _re_user_assigned_identity_resource_id.search(resource_id)
     if match:
         subscription_id = match.group(1)
         resource_group_name = match.group(2)
@@ -826,12 +806,19 @@ def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
                                                                resource_name=identity_name)
         except CloudError as ex:
             if 'was not found' in ex.message:
-                raise ResourceNotFoundError(
-                    "Identity {} not found.".format(resource_id))
+                raise ResourceNotFoundError("Identity {} not found.".format(resource_id))
             raise ClientRequestError(ex.message)
-        return identity.client_id
+        return identity
     raise InvalidArgumentValueError(
         "Cannot parse identity name from provided resource id {}.".format(resource_id))
+
+
+def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
+    return _get_user_assigned_identity(cli_ctx, resource_id).client_id
+
+
+def _get_user_assigned_identity_object_id(cli_ctx, resource_id):
+    return _get_user_assigned_identity(cli_ctx, resource_id).principal_id
 
 
 # pylint: disable=too-many-locals
@@ -1071,8 +1058,6 @@ def load_service_principals(config_path):
 
 def _invoke_deployment(cmd, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
-
-    from azure.cli.core.profiles import ResourceType
     DeploymentProperties = cmd.get_models(
         'DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(
@@ -1453,7 +1438,7 @@ def create_role_assignment(cli_ctx, role, assignee, is_service_principal, resour
 
 def _create_role_assignment(cli_ctx, role, assignee,
                             resource_group_name=None, scope=None, resolve_assignee=True):
-    from azure.cli.core.profiles import ResourceType, get_sdk
+    from azure.cli.core.profiles import get_sdk
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -1654,6 +1639,9 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
 # pylint: disable=too-many-statements,too-many-branches
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                listen_address='127.0.0.1', listen_port='8001'):
+    ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
+                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                operation_group='managed_clusters')
     # verify the kube-dashboard addon was not disabled
     instance = client.get(resource_group_name, name)
     addon_profiles = instance.addon_profiles or {}
@@ -1985,9 +1973,52 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_watch_namespace=None,
                enable_sgxquotehelper=False,
                enable_encryption_at_host=False,
+               assign_kubelet_identity=None,
+               enable_ultra_ssd=False,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
+    ManagedClusterWindowsProfile = cmd.get_models('ManagedClusterWindowsProfile',
+                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                  operation_group='managed_clusters')
+    ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
+                                       resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                       operation_group='managed_clusters')
+    ContainerServiceNetworkProfile = cmd.get_models('ContainerServiceNetworkProfile',
+                                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                    operation_group='managed_clusters')
+    ContainerServiceLinuxProfile = cmd.get_models('ContainerServiceLinuxProfile',
+                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                  operation_group='managed_clusters')
+    ManagedClusterServicePrincipalProfile = cmd.get_models('ManagedClusterServicePrincipalProfile',
+                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                           operation_group='managed_clusters')
+    ContainerServiceSshConfiguration = cmd.get_models('ContainerServiceSshConfiguration',
+                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                      operation_group='managed_clusters')
+    ContainerServiceSshPublicKey = cmd.get_models('ContainerServiceSshPublicKey',
+                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                  operation_group='managed_clusters')
+    ManagedClusterAADProfile = cmd.get_models('ManagedClusterAADProfile',
+                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                              operation_group='managed_clusters')
+    ManagedClusterAgentPoolProfile = cmd.get_models('ManagedClusterAgentPoolProfile',
+                                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                    operation_group='managed_clusters')
+    ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
+                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                            operation_group='managed_clusters')
+    ManagedClusterPropertiesIdentityProfileValue = cmd.get_models('ManagedClusterPropertiesIdentityProfileValue',
+                                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                                  operation_group='managed_clusters')
+    ManagedCluster = cmd.get_models('ManagedCluster',
+                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                    operation_group='managed_clusters')
+    Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = cmd.get_models(
+        'Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group='managed_clusters')
+
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if dns_name_prefix and fqdn_subdomain:
@@ -2023,6 +2054,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         enable_node_public_ip=enable_node_public_ip,
         node_public_ip_prefix_id=node_public_ip_prefix_id,
         enable_encryption_at_host=enable_encryption_at_host,
+        enable_ultra_ssd=enable_ultra_ssd,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -2127,6 +2159,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                'Are you an Owner on this subscription?')
 
     load_balancer_profile = create_load_balancer_profile(
+        cmd,
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
@@ -2249,6 +2282,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         raise CLIError("Please use standard load balancer for private cluster")
     if api_server_authorized_ip_ranges or enable_private_cluster:
         api_server_access_profile = _populate_api_server_access_profile(
+            cmd,
             api_server_authorized_ip_ranges,
             enable_private_cluster=enable_private_cluster
         )
@@ -2276,6 +2310,25 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             user_assigned_identities=user_assigned_identity
         )
 
+    identity_profile = None
+    if assign_kubelet_identity:
+        if not assign_identity:
+            # pylint: disable=line-too-long
+            raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
+        kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
+        identity_profile = {
+            'kubeletidentity': ManagedClusterPropertiesIdentityProfileValue(
+                resource_id=assign_kubelet_identity,
+                client_id=kubelet_identity.client_id,
+                object_id=kubelet_identity.principal_id
+            )
+        }
+        cluster_identity_object_id = _get_user_assigned_identity_object_id(cmd.cli_ctx, assign_identity)
+        # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
+        _ensure_cluster_identity_permission_on_kubelet_identity(
+            cmd.cli_ctx,
+            cluster_identity_object_id)
+
     mc = ManagedCluster(
         location=location,
         tags=tags,
@@ -2292,7 +2345,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         auto_scaler_profile=cluster_autoscaler_profile,
         api_server_access_profile=api_server_access_profile,
         identity=identity,
-        disk_encryption_set_id=node_osdisk_diskencryptionset_id
+        disk_encryption_set_id=node_osdisk_diskencryptionset_id,
+        identity_profile=identity_profile
     )
 
     use_custom_private_dns_zone = False
@@ -2506,6 +2560,9 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                            aad_client_app_id=None,
                            aad_tenant_id=None,
                            no_wait=False):
+    ManagedClusterServicePrincipalProfile = cmd.get_models('ManagedClusterServicePrincipalProfile',
+                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                           operation_group='managed_clusters')
     if bool(reset_service_principal) == bool(reset_aad):
         raise CLIError(
             'usage error: --reset-service-principal | --reset-aad-profile')
@@ -2585,6 +2642,19 @@ def aks_update(cmd, client, resource_group_name, name,
                no_wait=False,
                enable_azure_rbac=False,
                disable_azure_rbac=False):
+    ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
+                                       resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                       operation_group='managed_clusters')
+    ManagedClusterAADProfile = cmd.get_models('ManagedClusterAADProfile',
+                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                              operation_group='managed_clusters')
+    ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
+                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                            operation_group='managed_clusters')
+    Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = cmd.get_models(
+        'Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group='managed_clusters')
     update_autoscaler = enable_cluster_autoscaler + \
         disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -2730,6 +2800,7 @@ def aks_update(cmd, client, resource_group_name, name,
 
     if update_lb_profile:
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
+            cmd,
             load_balancer_managed_outbound_ip_count,
             load_balancer_outbound_ips,
             load_balancer_outbound_ip_prefixes,
@@ -2741,6 +2812,7 @@ def aks_update(cmd, client, resource_group_name, name,
     if api_server_authorized_ip_ranges is not None:
         instance.api_server_access_profile = \
             _populate_api_server_access_profile(
+                cmd,
                 api_server_authorized_ip_ranges, instance=instance)
 
     if enable_aad:
@@ -2955,7 +3027,8 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
 
     if not command_string:
         raise ValidationError('Command cannot be empty.')
-
+    RunCommandRequest = cmd.get_models('RunCommandRequest', resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                       operation_group='managed_clusters')
     request_payload = RunCommandRequest(command=command_string)
     request_payload.context = _get_command_context(command_files)
 
@@ -3143,6 +3216,9 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    appgw_watch_namespace=None,
                    enable_sgxquotehelper=False,
                    no_wait=False):
+    ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
+                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                operation_group='managed_clusters')
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
@@ -3269,6 +3345,9 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
                         appgw_subnet_id=None,
                         appgw_watch_namespace=None,
                         enable_sgxquotehelper=False):
+    ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
+                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                operation_group='managed_clusters')
     if not addon_profiles:
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
@@ -3555,8 +3634,6 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         # TODO: track2/replace create_or_update with begin_create_or_update, depends on 'azure.mgmt.resource.resources'
         resource_groups.create_or_update(default_workspace_resource_group, {
                                          'location': workspace_region})
-
-    from azure.cli.core.profiles import ResourceType
     GenericResource = cmd.get_models(
         'GenericResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     generic_resource = GenericResource(location=workspace_region, properties={
@@ -3765,7 +3842,14 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       max_surge=None,
                       mode="User",
                       enable_encryption_at_host=False,
+                      enable_ultra_ssd=False,
                       no_wait=False):
+    AgentPool = cmd.get_models('AgentPool',
+                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                               operation_group='agent_pools')
+    AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
+                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                              operation_group='agent_pools')
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
         if agentpool_profile.name == nodepool_name:
@@ -3812,6 +3896,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         node_taints=taints_array,
         upgrade_settings=upgradeSettings,
         enable_encryption_at_host=enable_encryption_at_host,
+        enable_ultra_ssd=enable_ultra_ssd,
         mode=mode
     )
 
@@ -3868,6 +3953,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           node_image_only=False,
                           max_surge=None,
                           no_wait=False):
+    AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
     if kubernetes_version != '' and node_image_only:
         raise CLIError(
             'Conflicting flags. Upgrading the Kubernetes version will also '
@@ -3910,7 +3996,9 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          max_surge=None,
                          mode=None,
                          no_wait=False):
-
+    AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
+                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                              operation_group='agent_pools')
     update_autoscaler = enable_cluster_autoscaler + \
         disable_cluster_autoscaler + update_cluster_autoscaler
 
@@ -4063,13 +4151,17 @@ def _ensure_aks_service_principal(cli_ctx,
     }
 
 
-def _ensure_osa_aad(cli_ctx,
+def _ensure_osa_aad(cmd,
+                    cli_ctx,
                     aad_client_app_id=None,
                     aad_client_app_secret=None,
                     aad_tenant_id=None,
                     identifier=None,
                     name=None, create=False,
                     customer_admin_group_id=None):
+    OpenShiftManagedClusterAADIdentityProvider = cmd.get_models('OpenShiftManagedClusterAADIdentityProvider',
+                                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                                operation_group='open_shift_managed_clusters')
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if create:
         # This reply_url is temporary set since Azure need one to create the AAD.
@@ -4367,6 +4459,30 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      no_wait=False,
                      workspace_id=None,
                      customer_admin_group_id=None):
+    OpenShiftManagedClusterAgentPoolProfile = cmd.get_models('OpenShiftManagedClusterAgentPoolProfile',
+                                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                             operation_group='open_shift_managed_clusters')
+    OpenShiftAgentPoolProfileRole = cmd.get_models('OpenShiftAgentPoolProfileRole',
+                                                   resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                   operation_group='open_shift_managed_clusters')
+    OpenShiftManagedClusterIdentityProvider = cmd.get_models('OpenShiftManagedClusterIdentityProvider',
+                                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                             operation_group='open_shift_managed_clusters')
+    OpenShiftManagedCluster = cmd.get_models('OpenShiftManagedCluster',
+                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                             operation_group='open_shift_managed_clusters')
+    OpenShiftRouterProfile = cmd.get_models('OpenShiftRouterProfile',
+                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                            operation_group='open_shift_managed_clusters')
+    NetworkProfile = cmd.get_models('NetworkProfile',
+                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                    operation_group='open_shift_managed_clusters')
+    OpenShiftManagedClusterAuthProfile = cmd.get_models('OpenShiftManagedClusterAuthProfile',
+                                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                        operation_group='open_shift_managed_clusters')
+    OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
+                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                           operation_group='open_shift_managed_clusters')
     logger.warning('Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     if location is None:
@@ -4412,7 +4528,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
             create_aad = True
 
-    osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
+    osa_aad_identity = _ensure_osa_aad(cmd,
+                                       cmd.cli_ctx,
                                        aad_client_app_id=aad_client_app_id,
                                        aad_client_app_secret=aad_client_app_secret,
                                        aad_tenant_id=aad_tenant_id, identifier=None,
@@ -4463,7 +4580,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                              resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
         result = LongRunningOperation(cmd.cli_ctx)(result)
         instance = client.get(resource_group_name, name)
-        _ensure_osa_aad(cmd.cli_ctx,
+        _ensure_osa_aad(cmd,
+                        cmd.cli_ctx,
                         aad_client_app_id=osa_aad_identity.client_id,
                         aad_client_app_secret=osa_aad_identity.secret,
                         aad_tenant_id=osa_aad_identity.tenant_id, identifier=instance.public_hostname,
@@ -4507,6 +4625,9 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
 
 
 def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
+    OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
+                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                           operation_group='open_shift_managed_clusters')
     logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     instance = client.get(resource_group_name, name)
@@ -4519,6 +4640,9 @@ def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_i
 
 
 def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
+    OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
+                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                           operation_group='open_shift_managed_clusters')
     logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     instance = client.get(resource_group_name, name)
@@ -4609,3 +4733,23 @@ def _put_managed_cluster_ensuring_permission(
                               headers=headers)
 
     return cluster
+
+
+def _ensure_cluster_identity_permission_on_kubelet_identity(cli_ctx, cluster_identity_object_id, scope):
+    factory = get_auth_management_client(cli_ctx, scope)
+    assignments_client = factory.role_assignments
+
+    for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
+        if i.scope.lower() != scope.lower():
+            continue
+        if not i.role_definition_id.lower().endswith(CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID):
+            continue
+        if i.principal_id.lower() != cluster_identity_object_id.lower():
+            continue
+        # already assigned
+        return
+
+    if not _add_role_assignment(cli_ctx, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
+                                is_service_principal=False, scope=scope):
+        raise UnauthorizedError('Could not grant Managed Identity Operator '
+                                'permission to cluster identity at scope {}'.format(scope))

@@ -55,9 +55,9 @@ DEPENDENCIES = [
     'msal>=1.10.0,<2.0.0',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
-    'PyJWT==1.7.1',
+    'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'requests~=2.22',
+    'requests~=2.25.1',
     'six~=1.12',
     'urllib3[secure]>=1.26.5',
 ]
@@ -72,14 +72,12 @@ TESTS_REQUIRE = [
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
-with open('HISTORY.rst', 'r', encoding='utf-8') as f:
-    HISTORY = f.read()
 
 setup(
     name='azure-cli-core',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Core Module',
-    long_description=README + '\n\n' + HISTORY,
+    long_description=README,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',

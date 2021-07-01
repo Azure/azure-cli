@@ -18,7 +18,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
     resources_cf, backup_protected_items_cf
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import ArgumentUsageError
 
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
@@ -204,22 +204,31 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
     result = client.trigger(vault_name, resource_group_name, fabric_name,
                             container_uri, item_uri, rp_name,
-                            trigger_restore_request, raw=True)
+                            trigger_restore_request, raw=True, polling=False).result()
 
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
-                         use_secondary_region=None):
+                         use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
+                         recommended_for_archive=None):
     if use_secondary_region:
-        raise InvalidArgumentValueError(
+        raise ArgumentUsageError(
             """
             --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
             Please either remove the flag or query for any other backup-management-type.
             """)
 
+    if is_ready_for_move is not None or target_tier is not None or tier is not None:
+        raise ArgumentUsageError("""Invalid argument has been passed. --is-ready-for-move true, --target-tier
+        and --tier flags are not supported for --backup-management-type AzureStorage.""")
+
+    if recommended_for_archive is not None:
+        raise ArgumentUsageError("""--recommended-for-archive is supported by AzureIaasVM backup management
+        type only.""")
+
     if cmd.name.split()[2] == 'show-log-chain':
-        raise InvalidArgumentValueError("show-log-chain is supported by AzureWorkload backup management type only.")
+        raise ArgumentUsageError("show-log-chain is supported by AzureWorkload backup management type only.")
 
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)

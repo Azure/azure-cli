@@ -24,7 +24,11 @@ SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
 
 
 def acr_check_name(client, registry_name):
-    return client.check_name_availability(registry_name)
+    registry = {
+        'name': registry_name,
+        'type': 'Microsoft.ContainerRegistry/registries'
+    }
+    return client.check_name_availability(registry)
 
 
 def acr_list(client, resource_group_name=None):
@@ -69,7 +73,7 @@ def acr_create(cmd,
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
 
-    lro_poller = client.create(resource_group_name, registry_name, registry)
+    lro_poller = client.begin_create(resource_group_name, registry_name, registry)
 
     if workspace:
         from msrestazure.tools import is_valid_resource_id, resource_id
@@ -91,7 +95,7 @@ def acr_create(cmd,
 def acr_delete(cmd, client, registry_name, resource_group_name=None, yes=False):
     user_confirmation("Are you sure you want to delete the registry '{}'?".format(registry_name), yes)
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    return client.delete(resource_group_name, registry_name)
+    return client.begin_delete(resource_group_name, registry_name)
 
 
 def acr_show(cmd, client, registry_name, resource_group_name=None):
@@ -168,7 +172,7 @@ def acr_update_set(cmd,
 
     validate_sku_update(cmd, registry.sku.name, parameters.sku)
 
-    return client.update(resource_group_name, registry_name, parameters)
+    return client.begin_update(resource_group_name, registry_name, parameters)
 
 
 def acr_show_endpoints(cmd,
@@ -461,7 +465,7 @@ def assign_identity(cmd, client, registry_name, identities, resource_group_name=
             r = _ensure_identity_resource_id(subscription_id, resource_group_name, r)
             registry.identity.user_assigned_identities[r] = {}
 
-    return client.update(resource_group_name, registry_name, registry)
+    return client.begin_update(resource_group_name, registry_name, registry)
 
 
 def show_identity(cmd, client, registry_name, resource_group_name=None):
@@ -480,10 +484,10 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         raise CLIError("The registry {} has no system or user assigned identities.".format(registry_name))
 
     if remove_system_identity:
-        if registry.identity.type == ResourceIdentityType.user_assigned:
+        if registry.identity.type.lower() == ResourceIdentityType.user_assigned.lower():
             raise CLIError("The registry does not have a system identity assigned.")
         registry.identity.type = (ResourceIdentityType.none
-                                  if registry.identity.type == ResourceIdentityType.system_assigned
+                                  if registry.identity.type.lower() == ResourceIdentityType.system_assigned.lower()
                                   else ResourceIdentityType.user_assigned)
         # if we have no system assigned identitiy then set identity object to none
         registry.identity.principal_id = None
@@ -514,11 +518,11 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         if not registry.identity.user_assigned_identities:
             registry.identity.user_assigned_identities = None  # required for put
             registry.identity.type = (ResourceIdentityType.none
-                                      if registry.identity.type == ResourceIdentityType.user_assigned
+                                      if registry.identity.type.lower() == ResourceIdentityType.user_assigned.lower()
                                       else ResourceIdentityType.system_assigned)
 
     # this method should be named create_or_update as it calls the PUT method
-    return client.create(resource_group_name, registry_name, registry)
+    return client.begin_create(resource_group_name, registry_name, registry)
 
 
 def show_encryption(cmd, client, registry_name, resource_group_name=None):
@@ -548,7 +552,7 @@ def rotate_key(cmd, client, registry_name, identity=None, key_encryption_key=Non
 
         registry.encryption.key_vault_properties.identity = client_id
 
-    return client.update(resource_group_name, registry_name, registry)
+    return client.begin_update(resource_group_name, registry_name, registry)
 
 
 def _analyze_identities(identities):
