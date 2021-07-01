@@ -146,6 +146,10 @@ def recovery_points_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).recovery_points
 
 
+def recovery_points_recommended_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).recovery_points_recommended_for_move
+
+
 def recovery_points_crr_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).recovery_points_crr
 
