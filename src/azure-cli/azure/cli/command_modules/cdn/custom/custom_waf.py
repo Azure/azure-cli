@@ -21,8 +21,6 @@ def show_endpoint_waf_policy_link(client: EndpointsOperations,
                                   profile_name: str,
                                   endpoint_name: str):
 
-    from azure.mgmt.cdn.models import (EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink)
-
     link = client.get(resource_group_name, profile_name, endpoint_name).web_application_firewall_policy_link
     if link is not None:
         return link
@@ -54,7 +52,7 @@ def set_endpoint_waf_policy_link(client: EndpointsOperations,
     endpoint.web_application_firewall_policy_link = \
         EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=waf_policy_id)
 
-    result = client.create(resource_group_name, profile_name, endpoint_name, endpoint).result()
+    result = client.begin_create(resource_group_name, profile_name, endpoint_name, endpoint).result()
     if result.web_application_firewall_policy_link is not None:
         return result.web_application_firewall_policy_link
     return EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=None)
@@ -67,7 +65,7 @@ def remove_endpoint_waf_policy_link(client: EndpointsOperations,
 
     endpoint = client.get(resource_group_name, profile_name, endpoint_name)
     endpoint.web_application_firewall_policy_link = None
-    client.create(resource_group_name, profile_name, endpoint_name, endpoint).wait()
+    client.begin_create(resource_group_name, profile_name, endpoint_name, endpoint).wait()
 
 
 def list_waf_managed_rule_set(client):
@@ -95,7 +93,8 @@ def set_waf_policy(client,
                    block_response_body=None,
                    block_response_status_code=None,
                    tags=None):
-    from azure.mgmt.cdn.models import (PolicySettings, ErrorResponseException, Sku)
+    from azure.core.exceptions import ResourceNotFoundError
+    from azure.mgmt.cdn.models import (PolicySettings, Sku)
     policy = CdnWebApplicationFirewallPolicy(
         tags=tags,
         sku=Sku(name=sku),
@@ -114,17 +113,11 @@ def set_waf_policy(client,
         policy.custom_rules = existing.custom_rules
         policy.rate_limit_rules = existing.rate_limit_rules
         policy.managed_rules = existing.managed_rules
-    except ErrorResponseException as e:
-        # If the error isn't a 404, rethrow it.
-        props = getattr(e.inner_exception, 'additional_properties', {})
-        if not isinstance(props, dict) or not isinstance(props.get('error'), dict):
-            raise e
-        props = props['error']
-        if props.get('code') != 'ResourceNotFound':
-            raise e
+    except ResourceNotFoundError:
+        pass
         # 404 error means it's a new policy, nothing to copy.
 
-    return client.create_or_update(resource_group_name, name, policy)
+    return client.begin_create_or_update(resource_group_name, name, policy)
 
 
 def _find_policy_managed_rule_set(policy, rule_set_type, rule_set_version):
@@ -152,7 +145,7 @@ def add_waf_policy_managed_rule_set(client,
     # Add the managed rule set to the policy.
     policy.managed_rules.managed_rule_sets.append(ManagedRuleSet(rule_set_type=rule_set_type,
                                                                  rule_set_version=rule_set_version))
-    result = client.create_or_update(resource_group_name, policy_name, policy).result()
+    result = client.begin_create_or_update(resource_group_name, policy_name, policy).result()
 
     # Return the new managed rule set from the updated policy.
     updated = _find_policy_managed_rule_set(result, rule_set_type, rule_set_version)
@@ -178,7 +171,7 @@ def remove_waf_policy_managed_rule_set(client,
 
     # Remove the managed rule set from the policy.
     policy.managed_rules.managed_rule_sets.remove(existing)
-    client.create_or_update(resource_group_name, policy_name, policy).wait()
+    client.begin_create_or_update(resource_group_name, policy_name, policy).wait()
 
 
 def list_waf_policy_managed_rule_sets(client,
@@ -216,7 +209,7 @@ def set_waf_managed_rule_group_override(client,
 
     rulegroup = ManagedRuleGroupOverride(rule_group_name=name, rules=rule_overrides)
     upsert_to_collection(ruleset, 'rule_group_overrides', rulegroup, 'rule_group_name')
-    policy = client.create_or_update(resource_group_name, policy_name, policy).result()
+    policy = client.begin_create_or_update(resource_group_name, policy_name, policy).result()
     ruleset = _find_policy_managed_rule_set(policy, rule_set_type, rule_set_version)
     return find_child_item(ruleset, name, path='rule_group_overrides', key_path='rule_group_name')
 
@@ -235,7 +228,7 @@ def delete_waf_managed_rule_group_override(client,
 
     override = find_child_item(ruleset, name, path='rule_group_overrides', key_path='rule_group_name')
     ruleset.rule_group_overrides.remove(override)
-    client.create_or_update(resource_group_name, policy_name, policy).wait()
+    client.begin_create_or_update(resource_group_name, policy_name, policy).wait()
 
 
 def list_waf_policy_managed_rule_group_overrides(client,
@@ -283,7 +276,7 @@ def set_waf_custom_rule(client,
 
     policy = client.get(resource_group_name, policy_name)
     upsert_to_collection(policy.custom_rules, 'rules', rule, 'name')
-    policy = client.create_or_update(resource_group_name, policy_name, policy).result()
+    policy = client.begin_create_or_update(resource_group_name, policy_name, policy).result()
     return find_child_item(policy.custom_rules, name, path='rules', key_path='name')
 
 
@@ -295,7 +288,7 @@ def delete_waf_custom_rule(client,
     policy = client.get(resource_group_name, policy_name)
     rule = find_child_item(policy.custom_rules, name, path='rules', key_path='name')
     policy.custom_rules.rules.remove(rule)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, policy_name, policy)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, policy_name, policy)
 
 
 def show_waf_custom_rule(client, resource_group_name, policy_name, name):
@@ -331,7 +324,7 @@ def set_waf_rate_limit_rule(client,
 
     policy = client.get(resource_group_name, policy_name)
     upsert_to_collection(policy.rate_limit_rules, 'rules', rule, 'name')
-    updated = client.create_or_update(resource_group_name, policy_name, policy).result()
+    updated = client.begin_create_or_update(resource_group_name, policy_name, policy).result()
     return find_child_item(updated.rate_limit_rules, name, path='rules', key_path='name')
 
 
@@ -343,7 +336,7 @@ def delete_waf_rate_limit_rule(client,
     policy = client.get(resource_group_name, policy_name)
     rule = find_child_item(policy.rate_limit_rules, name, path='rules', key_path='name')
     policy.rate_limit_rules.rules.remove(rule)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, policy_name, policy)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, policy_name, policy)
 
 
 def show_waf_rate_limit_rule(client, resource_group_name, policy_name, name):

@@ -5,18 +5,22 @@
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
+from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
+from azure.cli.core.profiles import ResourceType
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_postgres_versions,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers)
 
-
+# pylint: disable=raise-missing-from
 logger = get_logger(__name__)
 
 
+# pylint: disable=import-outside-toplevel, raise-missing-from
 def _get_resource_group_from_server_name(cli_ctx, server_name):
     """
     Fetch resource group from server name
@@ -24,8 +28,6 @@ def _get_resource_group_from_server_name(cli_ctx, server_name):
     :return: resource group name or None
     :rtype: str
     """
-    from azure.cli.core.profiles import ResourceType
-    from msrestazure.tools import parse_resource_id
 
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RDBMS).servers
     for server in client.list():
@@ -81,8 +83,6 @@ def retention_validator(ns):
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
 
     subnet = namespace.virtual_network_subnet_id
     subnet_is_id = is_valid_resource_id(subnet)
@@ -145,9 +145,10 @@ def _mysql_storage_validator(storage_mb, sku_info, tier, instance):
                 raise CLIError('Updating storage cannot be smaller than the '
                                'original storage size {} GiB.'.format(original_size))
         storage_sizes = get_mysql_storage_size(sku_info, tier)
-        if not storage_sizes[0] <= int(storage_mb) <= storage_sizes[1]:
+        min_mysql_storage = 20
+        if not max(min_mysql_storage, storage_sizes[0]) <= int(storage_mb) <= storage_sizes[1]:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
-                           .format(storage_sizes[0], storage_sizes[1]))
+                           .format(max(min_mysql_storage, storage_sizes[0]), storage_sizes[1]))
 
 
 def _mysql_tier_validator(tier, sku_info):
@@ -289,3 +290,33 @@ def _valid_range(addr_range):
     if 0 <= addr_range <= 255:
         return True
     return False
+
+
+def validate_server_name(client, server_name, type_):
+    if len(server_name) < 3 or len(server_name) > 63:
+        raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
+
+    result = client.execute(name_availability_request={'name': server_name, 'type': type_})
+
+    if not result.name_available:
+        raise ValidationError(result.message)
+
+
+def validate_auto_grow_update(server, auto_grow):
+    # if replica, cannot be disabled
+    if server.replication_role != 'None' and auto_grow.lower() == 'disabled':
+        raise ValidationError("Auto grow feature for replica server cannot be disabled.")
+    # if ha, cannot be disabled
+    if server.ha_state != 'NotEnabled' and auto_grow.lower() == 'disabled':
+        raise ValidationError("Auto grow feature for high availability server cannot be disabled.")
+
+
+def validate_private_dns_zone(cmd, server_name, private_dns_zone):
+    postgresql_server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
+    if private_dns_zone == server_name + postgresql_server_endpoint:
+        raise ValidationError("private dns zone name cannot be same as the server's fully qualified domain name")
+
+
+def validate_mysql_ha_enabled(server):
+    if server.storage_profile.storage_autogrow == "Disabled":
+        raise ValidationError("You need to enable auto grow first to enable high availability.")

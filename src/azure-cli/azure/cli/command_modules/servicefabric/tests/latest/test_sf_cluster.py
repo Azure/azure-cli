@@ -16,48 +16,16 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class ServiceFabricClusterTests(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_cluster_certs(self):
+    def test_create_cluster_with_separate_kv(self):
         self.kwargs.update({
             'kv_name': self.create_random_name('sfrp-cli-kv-', 24),
             'loc': 'westus',
             'cert_name': self.create_random_name('sfrp-cli-', 24),
-            'cert_name2': self.create_random_name('sfrp-cli-cert2', 24),
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': "Pass123!@#",
             'policy_path': os.path.join(TEST_DIR, 'policy.json')
         })
         _create_cluster_with_separate_kv(self, self.kwargs)
-        _wait_for_cluster_state_ready(self, self.kwargs)
-
-        primary_cert = self.cmd('keyvault certificate show --vault-name {kv_name} -n {cert_name}').get_output_in_json()
-        primary_cert_tp = primary_cert['x509ThumbprintHex']
-        self.kwargs.update({'primary_cert_tp': primary_cert_tp})
-
-        # add secondary cert
-        self.cmd('keyvault certificate create --vault-name {kv_name} -n {cert_name2} -p @"{policy_path}"')
-
-        while True:
-            cert2 = self.cmd('keyvault certificate show --vault-name {kv_name} -n {cert_name2}').get_output_in_json()
-            if cert2:
-                break
-        assert cert2['sid'] is not None
-        secondary_cert = cert2
-        secondary_cert_secret_id = secondary_cert['sid']
-        secondary_cert_tp = secondary_cert['x509ThumbprintHex']
-        self.kwargs.update({'secondary_cert_secret_id': secondary_cert_secret_id})
-        self.cmd('sf cluster certificate add --resource-group {rg} --cluster-name {cluster_name} --secret-identifier {secondary_cert_secret_id}',
-                 checks=[self.check('certificate.thumbprintSecondary', secondary_cert_tp)])
-
-        _wait_for_cluster_state_ready(self, self.kwargs)
-
-        self.cmd('vmss show --resource-group {rg} --name nt1vm',
-                 checks=[self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.certificateSecondary.thumbprint', secondary_cert_tp),
-                         self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.certificate.thumbprint', primary_cert_tp)])
-
-        # remove primary cert
-        self.cmd('sf cluster certificate remove --resource-group {rg} --cluster-name {cluster_name} --thumbprint {primary_cert_tp}',
-                 checks=[self.check('certificate.thumbprint', secondary_cert_tp)])
-
         _wait_for_cluster_state_ready(self, self.kwargs)
 
     @unittest.skip('no quota, disable temporarily')

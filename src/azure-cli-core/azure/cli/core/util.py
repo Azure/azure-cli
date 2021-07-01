@@ -352,10 +352,10 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
         print(val, file=output)
 
     def _get_version_string(name, version_dict):
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
         local = version_dict['local']
         pypi = version_dict.get('pypi', None)
-        if pypi and LooseVersion(pypi) > LooseVersion(local):
+        if pypi and parse(pypi) > parse(local):
             return name.ljust(25) + local.rjust(15) + ' *'
         return name.ljust(25) + local.rjust(15)
 
@@ -379,9 +379,9 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
             else:
                 _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
         _print()
-    _print("Python location '{}'".format(sys.executable))
-    _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     import os
+    _print("Python location '{}'".format(os.path.abspath(sys.executable)))
+    _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
         _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))
     if DEV_EXTENSION_SOURCES:
@@ -510,11 +510,25 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
         try:
             import ast
             return ast.literal_eval(json_or_dict_string)
-        except SyntaxError:
-            raise CLIError(json_ex)
-        except ValueError as ex:
+        except Exception as ex:
             logger.debug(ex)  # log the exception which could be a python dict parsing error.
-            raise CLIError(json_ex)  # raise json_ex error which is more readable and likely.
+
+            # Echo the JSON received by CLI
+            msg = "Failed to parse JSON: {}\nError detail: {}".format(json_or_dict_string, json_ex)
+
+            # Recommendation for all shells
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            recommendation = "The JSON may have been parsed by the shell. See " \
+                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#quoting-issues"
+
+            # Recommendation especially for PowerShell
+            parent_proc = get_parent_proc_name().lower()
+            if parent_proc in ("powershell.exe", "pwsh.exe"):
+                recommendation += "\nPowerShell requires additional quoting rules. See " \
+                                  "https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md"
+
+            # Raise from json_ex error which is more likely to be the original error
+            raise InvalidArgumentValueError(msg, recommendation=recommendation) from json_ex
 
 
 def b64encode(s):
@@ -643,7 +657,7 @@ def open_page_in_browser(url):
         try:
             # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
-            return subprocess.call(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
+            return subprocess.Popen(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
@@ -769,7 +783,7 @@ def find_child_collection(parent, *args, **kwargs):
     return collection
 
 
-def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
+def check_connectivity(url='https://azure.microsoft.com', max_retries=5, timeout=1):
     import requests
     import timeit
     start = timeit.default_timer()
@@ -1166,11 +1180,11 @@ def handle_version_update():
     """
     try:
         from azure.cli.core._session import VERSIONS
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
         from azure.cli.core import __version__
         if not VERSIONS['versions']:
             get_cached_latest_versions()
-        elif LooseVersion(VERSIONS['versions']['core']['local']) != LooseVersion(__version__):
+        elif parse(VERSIONS['versions']['core']['local']) != parse(__version__):
             logger.debug("Azure CLI has been updated.")
             logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
             VERSIONS['versions'] = {}
@@ -1208,8 +1222,12 @@ def scopes_to_resource(scopes):
     :rtype: str
     """
     scope = scopes[0]
-    if scope.endswith("/.default"):
-        scope = scope[:-len("/.default")]
+
+    suffixes = ['/.default', '/user_impersonation']
+
+    for s in suffixes:
+        if scope.endswith(s):
+            return scope[:-len(s)]
 
     return scope
 
@@ -1218,7 +1236,8 @@ def _get_parent_proc_name():
     # Un-cached function to get parent process name.
     try:
         import psutil
-    except ImportError:
+    except ImportError as ex:
+        logger.debug(ex)
         return None
 
     import os
@@ -1247,3 +1266,9 @@ def get_parent_proc_name():
         parent_proc_name = _get_parent_proc_name()
         setattr(get_parent_proc_name, "return_value", parent_proc_name)
     return getattr(get_parent_proc_name, "return_value")
+
+
+def is_modern_terminal():
+    """In addition to knack.util.is_modern_terminal, detect Cloud Shell."""
+    import knack.util
+    return knack.util.is_modern_terminal() or in_cloud_console()

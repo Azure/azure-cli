@@ -12,14 +12,21 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.util import get_json_object, shell_safe_json_parse
 from ._validators import validate_storage_account, validate_statement_language
 from ._completers import get_role_definition_name_completion_list
-from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnectionClientType, \
-    SqlPoolConnectionClientAuthenticationType
+from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnectionClientType, PrincipalType, \
+    SqlPoolConnectionClientAuthenticationType, ItemType
 from .action import AddFilters, AddOrderBy
 
 workspace_name_arg_type = CLIArgumentType(help='The workspace name.',
                                           completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
 assignee_arg_type = CLIArgumentType(
-    help='Represent a user, group, or service principal. Supported format: object id, user sign-in name, or service principal name.')
+    help='Represent a user or service principal. Supported format: object id, user sign-in name, or service principal name.')
+
+assignee_object_id_arg_type = CLIArgumentType(
+    help="Use this parameter instead of '--assignee' to bypass Graph API invocation in case of insufficient privileges. "
+         "This parameter only works with object ids for users, groups, service principals, and "
+         "managed identities. For managed identities use the principal id. For service principals, "
+         "use the object id and not the app id.")
+
 role_arg_type = CLIArgumentType(help='The role name/id that is assigned to the principal.',
                                 completer=get_role_definition_name_completion_list)
 definition_file_arg_type = CLIArgumentType(options_list=['--file'], completer=FilesCompleter(),
@@ -225,10 +232,13 @@ def load_arguments(self, _):
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
         c.argument('status', arg_type=get_enum_type(TransparentDataEncryptionStatus),
                    required=True, help='Status of the transparent data encryption.')
+        c.argument('transparent_data_encryption_name', options_list=['--transparent-data-encryption-name', '-d'], help='Name of the transparent data encryption.')
 
     # synapse sql pool threat-policy
     with self.argument_context('synapse sql pool threat-policy') as c:
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
+        c.argument('security_alert_policy_name', options_list=['--security-alert-policy-name', '-s'],
+                   help='Name of the security alert policy.')
 
     with self.argument_context('synapse sql pool threat-policy update') as c:
         _configure_security_or_audit_policy_storage_params(c)
@@ -258,6 +268,12 @@ def load_arguments(self, _):
     # synapse sql pool audit-policy
     with self.argument_context('synapse sql pool audit-policy') as c:
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
+        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
+                   help='Name of the blob auditing policy name.')
+
+    with self.argument_context('synapse sql pool audit-policy show') as c:
+        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
+                   help='Name of the blob auditing policy name.')
 
     for scope in ['synapse sql pool audit-policy', 'synapse sql audit-policy']:
         with self.argument_context(scope + ' update') as c:
@@ -286,9 +302,15 @@ def load_arguments(self, _):
                        help='The number of days to retain audit logs.')
 
     with self.argument_context('synapse sql audit-policy update') as c:
+        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
+                   help='Name of the blob auditing policy name.')
         c.argument('queue_delay_milliseconds', type=int,
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
+
+    with self.argument_context('synapse sql audit-policy') as c:
+        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
+                   help='Name of the blob auditing policy name.')
 
     with self.argument_context('synapse sql ad-admin') as c:
         c.argument('workspace_name', help='The workspace name.')
@@ -364,7 +386,7 @@ def load_arguments(self, _):
         c.argument('job_name', arg_type=name_type, help='The Spark job name.')
         c.argument('reference_files', nargs='+',
                    help='Additional files used for reference in the main definition file.')
-        c.argument('configuration', type=get_json_object, help='The configuration of Spark job.')
+        c.argument('configuration', type=shell_safe_json_parse, help='The configuration of Spark job.')
         c.argument('executors', help='The number of executors.')
         c.argument('executor_size', arg_type=get_enum_type(['Small', 'Medium', 'Large']), help='The executor size')
         c.argument('tags', arg_type=tags_type)
@@ -410,6 +432,18 @@ def load_arguments(self, _):
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('role', arg_type=role_arg_type)
             c.argument('assignee', arg_type=assignee_arg_type)
+            c.argument('assignee_object_id', arg_type=assignee_object_id_arg_type)
+            c.argument('scope', help='A scope defines the resources or artifacts that the access applies to. Synapse supports hierarchical scopes. '
+                                     'Permissions granted at a higher-level scope are inherited by objects at a lower level. '
+                                     'In Synapse RBAC, the top-level scope is a workspace. '
+                                     'Assigning a role with workspace scope grants permissions to all applicable objects in the workspace.')
+            c.argument('item', help='Item granted access in the workspace. Using with --item-type to combine the scope of assignment')
+            c.argument('item_type', arg_type=get_enum_type(ItemType), help='Item type granted access in the workspace. Using with --item to combine the scope of assignment.')
+
+    with self.argument_context('synapse role assignment create') as c:
+        c.argument('assignee_principal_type', options_list=['--assignee-principal-type', '--assignee-type'], arg_type=get_enum_type(PrincipalType),
+                   help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')
+        c.argument('assignment_id', help='Custom role assignment id in guid format, if not specified, assignment id will be randomly generated.')
 
     with self.argument_context('synapse role assignment show') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
@@ -420,14 +454,30 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('role', arg_type=role_arg_type)
         c.argument('assignee', arg_type=assignee_arg_type)
+        c.argument('assignee_object_id', arg_type=assignee_object_id_arg_type)
+        c.argument('scope', help='A scope defines the resources or artifacts that the access applies to. Synapse supports hierarchical scopes. '
+                                 'Permissions granted at a higher-level scope are inherited by objects at a lower level. '
+                                 'In Synapse RBAC, the top-level scope is a workspace. '
+                                 'Using az role assignment with filter condition before executing delete operation '
+                                 'to be clearly aware of which assignments will be deleted.')
         c.argument('ids', nargs='+',
                    help='space-separated role assignment ids. You should not provide --role or --assignee when --ids is provided.')
+        c.argument('item', help='Item granted access in the workspace. Using with --item-type to combine the scope of assignment.'
+                                'Using az role assignment with filter condition before executing delete operation '
+                                'to be clearly aware of which assignments will be deleted.')
+        c.argument('item_type', arg_type=get_enum_type(ItemType), help='Item type granted access in the workspace. Using with --item to combine the scope of assignment.'
+                                                                       'Using az role assignment with filter condition before executing delete operation '
+                                                                       'to be clearly aware of which assignments will be deleted.')
 
     with self.argument_context('synapse role definition show') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('role', arg_type=role_arg_type)
 
     with self.argument_context('synapse role definition list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('is_built_in', arg_type=get_three_state_flag(), help='Is a Synapse Built-In Role or not.')
+
+    with self.argument_context('synapse role scope list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     # synapse artifacts linked-service
@@ -678,3 +728,7 @@ def load_arguments(self, _):
     with self.argument_context('synapse integration-runtime-node update') as c:
         c.argument('concurrent_jobs_limit', options_list=['--concurrent-jobs'], help='The number of concurrent jobs permitted to '
                    'run on the integration runtime node. Values between 1 and maxConcurrentJobs are allowed.')
+        c.argument('auto_update', arg_type=get_enum_type(['On', 'Off']),
+                   help='Enable or disable the self-hosted integration runtime auto-update.')
+        c.argument('update_delay_offset',
+                   help='The time of the day for the self-hosted integration runtime auto-update.')

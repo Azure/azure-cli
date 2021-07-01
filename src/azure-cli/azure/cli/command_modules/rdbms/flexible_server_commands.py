@@ -128,6 +128,16 @@ def load_flexibleserver_command_table(self, _):
                                  custom_func_name='flexible_firewall_rule_update_custom_func',
                                  custom_func_type=flexible_server_custom_common)
 
+    with self.command_group('postgres flexible-server migration', postgres_flexible_firewall_rule_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_firewall_rules,
+                            is_experimental=True) as g:
+        g.custom_command('create', 'migration_create_func', custom_command_type=flexible_server_custom_common)
+        g.custom_show_command('show', 'migration_show_func', custom_command_type=flexible_server_custom_common)
+        g.custom_command('list', 'migration_list_func', custom_command_type=flexible_server_custom_common)
+        g.custom_command('update', 'migration_update_func', custom_command_type=flexible_server_custom_common)
+        g.custom_command('delete', 'migration_delete_func', custom_command_type=flexible_server_custom_common)
+
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_config,
@@ -151,6 +161,13 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('delete', 'database_delete_func')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
+
+    with self.command_group('postgres flexible-server deploy', postgres_flexible_servers_sdk,
+                            custom_command_type=flexible_server_custom_common,
+                            client_factory=cf_postgres_flexible_servers,
+                            is_preview=True) as g:
+        g.custom_command('setup', 'github_actions_setup')
+        g.custom_command('run', 'github_actions_run')
 
     # MySQL commands
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
@@ -221,3 +238,10 @@ def load_flexibleserver_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
         g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
+
+    with self.command_group('mysql flexible-server deploy', mysql_flexible_servers_sdk,
+                            custom_command_type=flexible_server_custom_common,
+                            client_factory=cf_mysql_flexible_servers,
+                            is_preview=True) as g:
+        g.custom_command('setup', 'github_actions_setup')
+        g.custom_command('run', 'github_actions_run')

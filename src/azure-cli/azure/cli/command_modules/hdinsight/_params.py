@@ -93,8 +93,12 @@ def load_arguments(self, _):
                    help='SSH public key for the cluster nodes.')
 
         # Node
-        c.argument('headnode_size', arg_type=node_size_type)
-        c.argument('workernode_size', arg_type=node_size_type)
+        c.argument('headnode_size', arg_type=node_size_type,
+                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
+        c.argument('workernode_size', arg_type=node_size_type,
+                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_data_disks_per_node', arg_group='Node',
                    help='The number of data disks to use per worker node.')
         c.argument('workernode_data_disk_storage_account_type', arg_group='Node',
@@ -282,6 +286,16 @@ def load_arguments(self, _):
 
         # Monitoring
         with self.argument_context('hdinsight monitor') as c:
+            c.argument('workspace', validator=validate_workspace,
+                       completer=get_resource_name_completion_list_under_subscription(
+                           'Microsoft.OperationalInsights/workspaces'),
+                       help='The name, resource ID or workspace ID of Log Analytics workspace.')
+            c.argument('primary_key', help='The certificate for the Log Analytics workspace. '
+                                           'Required when workspace ID is provided.')
+            c.ignore('workspace_type')
+
+        # Azure Monitor
+        with self.argument_context('hdinsight azure-monitor') as c:
             c.argument('workspace', validator=validate_workspace,
                        completer=get_resource_name_completion_list_under_subscription(
                            'Microsoft.OperationalInsights/workspaces'),

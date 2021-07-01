@@ -633,7 +633,7 @@ examples:
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with both a git commit and pull request trigger enabled. Note that this task does not use Source Registry (MyRegistry), so we can explicitly set Auth mode as None for it.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry  -f Dockerfile \\
-            --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git \\
+            --no-push true --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git \\
             --pull-request-trigger-enabled true --git-access-token 000000000000000000000000000000000
   - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture with only base image trigger enabled.
     text: |
@@ -1326,6 +1326,21 @@ examples:
   - name: Prints the values in json format requiered to activate a connected registry and the newly generated sync token credentials.
     text: >
         az acr connected-registry install renew-credentials -r mycloudregistry -n myconnectedregistry
+"""
+
+helps['acr connected-registry repo'] = """
+type: command
+short-summary: Updates all the necessary connected registry sync scope maps repository permissions.
+examples:
+  - name: Adds permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
+    text: >
+        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --add repo1 repo2
+  - name: Removes permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
+    text: >
+        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
+  - name: Removes permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
+    text: >
+        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
 """
 # endregion
 

@@ -318,3 +318,26 @@ examples:
   - name: Show connection strings for cmd and programming languages.
     text: az mysql flexible-server show-connection-string -s testServer -u username -p password -d databasename
 """
+
+helps['mysql flexible-server deploy'] = """
+type: group
+short-summary: Enable and run github action workflow for MySQL server
+"""
+
+helps['mysql flexible-server deploy setup'] = """
+type: command
+short-summary: Create github action workflow file for MySQL server.
+examples:
+  - name: Create github action workflow file for MySQL server.
+    text: az mysql flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
+  - name: Create github action workflow file for MySQL server and push it to the remote repository
+    text: az mysql flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
+"""
+
+helps['mysql flexible-server deploy run'] = """
+type: command
+short-summary: Run an existing workflow in your github repository
+examples:
+  - name: Run an existing workflow in your github repository
+    text: az mysql flexible-server deploy run --action-name testAction --branch userBranch
+"""

@@ -144,6 +144,10 @@ examples:
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
   - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --priority 800 --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureCloud
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
 """
 
 helps['functionapp config access-restriction remove'] = """
@@ -154,6 +158,8 @@ examples:
     text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
   - name: Remove Access Restriction named internal_agents from the scm site.
     text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
+  - name: Remove Access Restriction with service tag AzureFrontDoor.Backend from the main site.
+    text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --service-tag AzureFrontDoor.Backend
 """
 
 helps['functionapp config access-restriction set'] = """
@@ -1015,6 +1021,10 @@ examples:
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
   - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --priority 800 --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureCloud
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
 """
 
 helps['webapp config access-restriction remove'] = """
@@ -1025,6 +1035,8 @@ examples:
     text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
   - name: Remove Access Restriction named internal_agents from the scm site.
     text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
+  - name: Remove Access Restriction with service tag AzureFrontDoor.Backend from the main site.
+    text: az webapp config access-restriction remove -g ResourceGroup -n AppName --service-tag AzureFrontDoor.Backend
 """
 
 helps['webapp config access-restriction set'] = """
@@ -1080,7 +1092,7 @@ parameters:
   - name: --settings
     short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
   - name: --slot-settings
-    short-summary: Space-separated slot appsettings in KEY=VALUE format. Use @{file} to load from a file.
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 """
 
 helps['webapp config backup'] = """
@@ -1446,10 +1458,10 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a java|11|Java SE|8 runtime using '|' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using '|' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|8"
-  - name: Create a web app with a java|11|Java SE|8 runtime using ':' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using ':' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:8"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
@@ -1466,7 +1478,7 @@ examples:
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i myregistry.azurecr.io/docker-image:tag
   - name: create a WebApp using shared App Service Plan that is in a different resource group.
     text: >
-        AppServicePlanID=$(az appservice plan show -n SharedAppServicePlan -g MyResourceGroup --query "id" --out tsv)
+        AppServicePlanID=$(az appservice plan show -n SharedAppServicePlan -g MyASPRG --query "id" --out tsv)
         az webapp create -g MyResourceGroup -p "$AppServicePlanID" -n MyUniqueAppName
 """
 
@@ -1833,7 +1845,6 @@ examples:
 helps['webapp log tail'] = """
 type: command
 short-summary: Start live log tracing for a web app.
-long-summary: This command may not work with web apps running on Linux.
 """
 
 helps['webapp log deployment'] = """
@@ -2282,12 +2293,12 @@ helps['staticwebapp list'] = """
       text: az staticwebapp list
 """
 
-helps['staticwebapp browse'] = """
+helps['staticwebapp show'] = """
     type: command
     short-summary: Show details of a static app.
     examples:
     - name: Show static app in a subscription.
-      text: az staticwebapp browse -n MyStaticAppName
+      text: az staticwebapp show -n MyStaticAppName
 """
 
 helps['staticwebapp create'] = """
@@ -2296,7 +2307,18 @@ helps['staticwebapp create'] = """
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
-       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master -t MyAccessToken
+    - name: Create static app in a subscription, retrieving token interactively
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master --login-with-github
+"""
+
+helps['staticwebapp update'] = """
+    type: command
+    short-summary: Update a static app. Return the app updated.
+    examples:
+    - name: Update static app to standard sku.
+      text: az staticwebapp update -n MyStaticAppName --sku Standard
 """
 
 helps['staticwebapp disconnect'] = """
@@ -2313,6 +2335,8 @@ helps['staticwebapp reconnect'] = """
     examples:
     - name: Connect a repo and branch to static app.
       text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --token MyAccessToken
+    - name: Connect a repo and branch to static app, retrieving token interactively
+      text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --login-with-github
 """
 
 helps['staticwebapp delete'] = """

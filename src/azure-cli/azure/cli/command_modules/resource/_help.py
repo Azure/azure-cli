@@ -1521,6 +1521,15 @@ examples:
         az policy assignment create --name myPolicy --policy {PolicyName} --enforcement-mode 'DoNotEnforce'
 """
 
+helps['policy assignment update'] = """
+type: command
+short-summary: Update a resource policy assignment.
+examples:
+  - name: Update a resource policy assignment's description.
+    text: |
+        az policy assignment update --name myPolicy --description 'My policy description'
+"""
+
 helps['policy assignment delete'] = """
 type: command
 short-summary: Delete a resource policy assignment.
@@ -1561,6 +1570,44 @@ examples:
     text: |
         az policy assignment identity show --name MyPolicyAssignment --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup'
     crafted: true
+"""
+
+helps['policy assignment non-compliance-message'] = """
+type: group
+short-summary: Manage a policy assignment's non-compliance messages.
+"""
+
+helps['policy assignment non-compliance-message create'] = """
+type: command
+short-summary: Add a non-compliance message to a policy assignment.
+examples:
+  - name: Add a non-compliance message to a policy assignment.
+    text: >
+        az policy assignment non-compliance-message create -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+  - name: Add a non-compliance message for a specific policy in an assigned policy set definition.
+    text: >
+        az policy assignment non-compliance-message create -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
+"""
+
+helps['policy assignment non-compliance-message list'] = """
+type: command
+short-summary: List the non-compliance messages for a policy assignment.
+examples:
+  - name: List the non-compliance messages for a policy assignment.
+    text: >
+        az policy assignment non-compliance-message list -g MyResourceGroup -n MyPolicyAssignment
+"""
+
+helps['policy assignment non-compliance-message delete'] = """
+type: command
+short-summary: Remove one or more non-compliance messages from a policy assignment.
+examples:
+  - name: Remove non-compliance messages from a policy assignment that contain a specific message and no policy definition reference ID.
+    text: >
+        az policy assignment non-compliance-message delete -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+  - name: Remove non-compliance messages from a policy assignment that contain a specific message and a specific policy definition reference ID.
+    text: >
+        az policy assignment non-compliance-message delete -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
 """
 
 helps['policy assignment list'] = """
@@ -1760,6 +1807,79 @@ examples:
             --definition-groups "[{ \\"name\\": \\"CostSaving\\" }, { \\"name\\": \\"Organizational\\" } ]"
 """
 
+helps['policy exemption'] = """
+type: group
+short-summary: Manage resource policy exemptions.
+"""
+
+helps['policy exemption create'] = """
+type: command
+short-summary: Create a policy exemption.
+examples:
+  - name: Create a policy exemption in default subscription.
+    text: |
+        az policy exemption create -n exemptTestVM \\
+            --policy-assignment "/subscriptions/mySubId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+            --exemption-category "Waiver"
+  - name: Create a policy exemption in the resource group.
+    text: |
+        az policy exemption create -n exemptTestVM \\
+            --policy-assignment "/subscriptions/mySubId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+            --exemption-category "Waiver" \\
+            --resource-group "myResourceGroup"
+  - name: Create a policy exemption in a management group.
+    text: |
+        az policy exemption create -n exemptTestVM \\
+            --policy-assignment "/providers/Microsoft.Management/managementGroups/myMG/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+            --exemption-category "Waiver" \\
+            --scope "/providers/Microsoft.Management/managementGroups/myMG"
+"""
+
+helps['policy exemption delete'] = """
+type: command
+short-summary: Delete a policy exemption.
+examples:
+  - name: Delete a policy exemption.
+    text: |
+        az policy exemption delete --name MyPolicyExemption --resource-group "myResourceGroup"
+    crafted: true
+"""
+
+helps['policy exemption list'] = """
+type: command
+short-summary: List policy exemptions.
+"""
+
+helps['policy exemption show'] = """
+type: command
+short-summary: Show a policy exemption.
+examples:
+  - name: Show a policy exemption.
+    text: |
+        az policy exemption show --name MyPolicyExemption --resource-group "myResourceGroup"
+    crafted: true
+"""
+
+helps['policy exemption update'] = """
+type: command
+short-summary: Update a policy exemption.
+examples:
+  - name: Update a policy exemption.
+    text: |
+        az policy exemption update -n exemptTestVM \\
+            --exemption-category "Mitigated"
+  - name: Update a policy exemption in the resource group.
+    text: |
+        az policy exemption update -n exemptTestVM \\
+            --exemption-category "Mitigated" \\
+            --resource-group "myResourceGroup"
+  - name: Update a policy exemption in a management group.
+    text: |
+        az policy exemption update -n exemptTestVM \\
+            --exemption-category "Mitigated" \\
+            --scope "/providers/Microsoft.Management/managementGroups/myMG"
+"""
+
 helps['provider'] = """
 type: group
 short-summary: Manage resource providers.
@@ -1771,6 +1891,16 @@ examples:
   - name: Display all resource types for the network resource provider.
     text: >
         az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
+"""
+
+helps['provider permission'] = """
+type: group
+short-summary: Manage permissions for a provider.
+"""
+
+helps['provider permission list'] = """
+type: command
+short-summary: List permissions from a provider.
 """
 
 helps['provider operation'] = """
@@ -2258,7 +2388,7 @@ examples:
   - name: Update the description of a template spec version with no prompt.
     text: az ts update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description" --yes
   - name: Update all the properties of a template spec version.
-    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description"
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description" --ui-form-definition formDefinition.json
   - name: Remove tag(s) from template spec version with no prompt.
     text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --tags --yes
 
@@ -2334,26 +2464,24 @@ short-summary: Upgrade Bicep CLI to the latest version.
 
 helps['bicep build'] = """
 type: command
-short-summary: Build one or more Bicep files.
+short-summary: Build a Bicep file.
 examples:
   - name: Build a Bicep file.
-    text: az bicep build --files {bicep_file}
-  - name: Build multiple Bicep files.
-    text: az bicep build --files {bicep_file1} {bicep_file2}
-  - name: Build a Bicep file and prints all output to stdout.
-    text: az bicep build --files {bicep_file} --stdout
-  - name: Build multiple Bicep files and prints all output to stdout.
-    text: az bicep build --files {bicep_file1} {bicep_file2} --stdout
+    text: az bicep build --file {bicep_file}
+  - name: Build a Bicep file and print all output to stdout.
+    text: az bicep build --file {bicep_file} --stdout
+  - name: Build a Bicep file and save the result to the specified directory.
+    text: az bicep build --file {bicep_file} --outdir {out_dir}
+  - name: Build a Bicep file and save the result to the specified file.
+    text: az bicep build --file {bicep_file} --outfile {out_file}
 """
 
 helps['bicep decompile'] = """
 type: command
-short-summary: Attempt to decompile one or more ARM template files to Bicep files
+short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
-    text: az bicep decompile --files {json_template_file}
-  - name: Decompile multiple ARM template files.
-    text: az bicep decompile --files {json_template_file1} {json_template_file2}
+    text: az bicep decompile --file {json_template_file}
 """
 
 helps['bicep version'] = """

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-lines
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
@@ -30,7 +30,7 @@ from azure.cli.command_modules.monitor.validators import validate_metric_dimensi
 from azure.cli.command_modules.monitor.actions import get_period_type
 
 
-# pylint: disable=too-many-statements, too-many-branches, too-many-locals
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals, too-many-lines
 def load_arguments(self, _):
     # Model imports
     StorageAccountTypes = self.get_models('StorageAccountTypes')
@@ -40,6 +40,8 @@ def load_arguments(self, _):
     HyperVGenerationTypes, HyperVGeneration = self.get_models('HyperVGenerationTypes', 'HyperVGeneration')
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
+    RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
+    GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -96,6 +98,19 @@ def load_arguments(self, _):
         help='Specify the scale-in policy (space delimited) that decides which virtual machines are chosen for removal when a Virtual Machine Scale Set is scaled-in.'
     )
 
+    edge_zone_type = CLIArgumentType(
+        help='The name of edge zone.',
+        min_api='2020-12-01',
+        is_preview=True
+    )
+
+    t_shared_to = self.get_models('SharedToValues', operation_group='shared_galleries')
+    shared_to_type = CLIArgumentType(
+        arg_type=get_enum_type(t_shared_to),
+        help='The query parameter to decide what shared galleries to fetch when doing listing operations. '
+             'If not specified, list by subscription id.'
+    )
+
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
         with self.argument_context(scope) as c:
@@ -148,6 +163,9 @@ def load_arguments(self, _):
         c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/en-us/pricing/details/managed-disks/. Does not apply to Ultra disks.')
+        c.argument('edge_zone', edge_zone_type)
+        c.argument('security_type', choices=['TrustedLaunch'], help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
+        c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
     # endregion
 
     # region Snapshots
@@ -157,6 +175,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=snapshot_sku)
         c.argument('incremental', arg_type=get_three_state_flag(), min_api='2019-03-01',
                    help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed')
+        c.argument('edge_zone', edge_zone_type)
     # endregion
 
     # region Images
@@ -178,6 +197,7 @@ def load_arguments(self, _):
                    help="Storage caching type for the image's data disk.")
         c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, min_api="2019-03-01", help='The hypervisor generation of the Virtual Machine created from the image.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
+        c.argument('edge_zone', edge_zone_type, )
     # endregion
 
     # region Image Templates
@@ -359,6 +379,7 @@ def load_arguments(self, _):
                    help='Enable secure boot. It is part of trusted launch.')
         c.argument('enable_vtpm', arg_type=get_three_state_flag(), min_api='2020-12-01',
                    help='Enable vTPM. It is part of trusted launch.')
+        c.argument('user_data', help='UserData for the VM. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -379,11 +400,30 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('show_details', action='store_true', options_list=['--show-details', '-d'], help='show public ip address, FQDN, and power states. command will run slow')
 
+    for scope in ['vm show', 'vmss show']:
+        with self.argument_context(scope) as c:
+            c.argument('include_user_data', action='store_true', options_list=['--include-user-data', '-u'], help='Include the user data properties in the query result.', min_api='2021-03-01')
+
+    for scope in ['vm get-instance-view', 'vm wait', 'vmss wait']:
+        with self.argument_context(scope) as c:
+            c.ignore('include_user_data')
+
     with self.argument_context('vm diagnostics') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'])
 
     with self.argument_context('vm diagnostics set') as c:
         c.argument('storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+
+    with self.argument_context('vm install-patches') as c:
+        c.argument('maximum_duration', type=str, help='Specify the maximum amount of time that the operation will run. It must be an ISO 8601-compliant duration string such as PT4H (4 hours)')
+        c.argument('reboot_setting', arg_type=get_enum_type(RebootSetting), help='Define when it is acceptable to reboot a VM during a software update operation.')
+        c.argument('classifications_to_include_win', nargs='+', arg_type=get_enum_type(VMGuestPatchClassificationWindows), help='Space-separated list of classifications to include for Windows VM.')
+        c.argument('classifications_to_include_linux', nargs='+', arg_type=get_enum_type(VMGuestPatchClassificationLinux), help='Space-separated list of classifications to include for Linux VM.')
+        c.argument('kb_numbers_to_include', nargs='+', help='Space-separated list of KBs to include in the patch operation. Applicable to Windows VM only')
+        c.argument('kb_numbers_to_exclude', nargs='+', help='Space-separated list of KBs to exclude in the patch operation. Applicable to Windows VM only')
+        c.argument('exclude_kbs_requiring_reboot', arg_type=get_three_state_flag(), help="Filter out KBs that don't have a reboot behavior of 'NeverReboots' when this is set. Applicable to Windows VM only")
+        c.argument('package_name_masks_to_include', nargs='+', help='Space-separated list of packages to include in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
+        c.argument('package_name_masks_to_exclude', nargs='+', help='Space-separated list of packages to exclude in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
 
     with self.argument_context('vm disk') as c:
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
@@ -546,8 +586,9 @@ def load_arguments(self, _):
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
-    with self.argument_context('vmss create') as c:
+    with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
+
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules. Defaults to 22 on Linux and 3389 on Windows.')
         c.argument('single_placement_group', arg_type=get_three_state_flag(), help="Limit the scale set to a single placement group."
@@ -569,6 +610,11 @@ def load_arguments(self, _):
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
+        c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
+        c.argument('network_api_version', is_preview=True, min_api='2021-03-01',
+                   help="Specify the Microsoft.Network API version used when creating networking resources in the Network "
+                        "Interface Configurations for Virtual Machine Scale Set with orchestration mode 'Flexible'. Possible "
+                        "value is 2020-11-01.")
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -598,6 +644,7 @@ def load_arguments(self, _):
                    help='Enable terminate notification')
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
+        c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
@@ -610,6 +657,18 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('terminate_notification_time', min_api='2019-03-01',
                        help='Length of time (in minutes, between 5 and 15) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
+            c.argument('max_batch_instance_percent', type=int, min_api='2020-12-01',
+                       help='The maximum percent of total virtual machine instances that will be upgraded simultaneously by the rolling upgrade in one batch. Default: 20%')
+            c.argument('max_unhealthy_instance_percent', type=int, min_api='2020-12-01',
+                       help='The maximum percentage of the total virtual machine instances in the scale set that can be simultaneously unhealthy. Default: 20%')
+            c.argument('max_unhealthy_upgraded_instance_percent', type=int, min_api='2020-12-01',
+                       help='The maximum percentage of upgraded virtual machine instances that can be found to be in an unhealthy state. Default: 20%')
+            c.argument('pause_time_between_batches', min_api='2020-12-01',
+                       help='The wait time between completing the update for all virtual machines in one batch and starting the next batch. Default: 0 seconds')
+            c.argument('enable_cross_zone_upgrade', arg_type=get_three_state_flag(), min_api='2020-12-01',
+                       help='Set this Boolean property will allow VMSS to ignore AZ boundaries when constructing upgrade batches, and only consider Update Domain and maxBatchInstancePercent to determine the batch size')
+            c.argument('prioritize_unhealthy_instances', arg_type=get_three_state_flag(), min_api='2020-12-01',
+                       help='Set this Boolean property will lead to all unhealthy instances in a scale set getting upgraded before any healthy instances')
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
@@ -703,6 +762,7 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
+            c.argument('edge_zone', edge_zone_type)
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -746,6 +806,11 @@ def load_arguments(self, _):
             c.argument('data_disk_mbps', min_api='2019-07-01', nargs='+', type=int, help='Specify the bandwidth in MB per second (space delimited) for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS. If not specified, a default value would be assigned based on diskSizeGB.')
             c.argument('specialized', arg_type=get_three_state_flag(), help='Indicate whether the source image is specialized.')
             c.argument('encryption_at_host', arg_type=get_three_state_flag(), help='Enable Host Encryption for the VM or VMSS. This will enable the encryption for all the disks including Resource/Temp disk at host itself.')
+            c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2021-03-01',
+                       help='Specify the behavior of the managed disk when the VM gets deleted i.e whether the managed disk is deleted or detached.')
+            c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', '--data-delete-option'],
+                       nargs='+', min_api='2021-03-01',
+                       help='Specify whether data disk should be deleted or detached upon VM deletion.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -760,6 +825,10 @@ def load_arguments(self, _):
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
                 PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
                 c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default.', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
+            c.argument('nic_delete_option', nargs='+', min_api='2021-03-01',
+                       help='Specify what happens to the network interface when the VM is deleted. Use a singular '
+                       'value to apply on all resources, or use <Name>=<Value> to configure '
+                       'the delete behavior for individual resources. Possible options are Delete and Detach.')
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
@@ -844,6 +913,7 @@ def load_arguments(self, _):
     with self.argument_context('vm update') as c:
         c.argument('license_type', help=license_msg, arg_type=get_enum_type(
             ['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_ELS_6', 'None']))
+        c.argument('user_data', help='UserData for the VM. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
 
     with self.argument_context('vmss create') as c:
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01',
@@ -859,6 +929,32 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
             c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
+
+    with self.argument_context('sig list-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('shared_to', shared_to_type)
+
+    with self.argument_context('sig show-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+
+    for scope in ['sig share add', 'sig share remove']:
+        with self.argument_context(scope) as c:
+            c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
+            c.argument('subscription_ids', nargs='+', help='A list of subscription ids to share the gallery.')
+            c.argument('tenant_ids', nargs='+', help='A list of tenant ids to share the gallery.')
+
+    with self.argument_context('sig share add') as c:
+        c.argument('op_type', default='Add', deprecate_info=c.deprecate(hide=True),
+                   help='distinguish add operation and remove operation')
+
+    with self.argument_context('sig share remove') as c:
+        c.argument('op_type', default='Remove', deprecate_info=c.deprecate(hide=True),
+                   help='distinguish add operation and remove operation')
+
+    with self.argument_context('sig share reset') as c:
+        c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
 
     with self.argument_context('sig image-definition create') as c:
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
@@ -883,10 +979,31 @@ def load_arguments(self, _):
         c.argument('disallowed_disk_types', nargs='*', help='disk types which would not work with the image, e.g., Standard_LRS')
         c.argument('features', help='A list of gallery image features. E.g. "IsSecureBootSupported=true IsMeasuredBootSupported=false"')
 
+    with self.argument_context('sig image-definition list-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('shared_to', shared_to_type)
+
+    with self.argument_context('sig image-definition show-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
+                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
+                   id_part='child_name_2')
+
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
+        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
+                   min_api='2020-09-30', is_experimental=True,
+                   help='This property allows you to specify the permission of sharing gallery.')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
+        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
+                   min_api='2020-09-30', is_experimental=True,
+                   help='This property allows you to specify the permission of sharing gallery.')
+
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:
@@ -897,7 +1014,7 @@ def load_arguments(self, _):
         c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
 
-    with self.argument_context('sig image-version create') as c:
+    with self.argument_context('sig image-version create', resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
         c.argument('description', help='the description of the gallery image version')
@@ -912,9 +1029,35 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS", "Premium_LRS"]), min_api='2019-03-01')
         c.argument('target_region_encryption', nargs='+',
                    help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. Format for each region: `<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>`. Use "null" as a placeholder.')
+        c.argument('os_vhd_uri', help='Source VHD URI of OS disk')
+        c.argument('os_vhd_storage_account', help='Name or ID of storage account of source VHD URI of OS disk')
+        c.argument('data_vhds_uris', nargs='+', help='Source VHD URIs (space-delimited) of data disks')
+        c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
+        c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
+
+    with self.argument_context('sig image-version list-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
+                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
+                   id_part='child_name_2')
+        c.argument('shared_to', shared_to_type)
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
+
+    with self.argument_context('sig image-version show-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
+                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
+                   id_part='child_name_2')
+        c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e'], type=str, help='The '
+                   'name of the gallery image version to be created. Needs to follow semantic version name pattern: '
+                   'The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. '
+                   'Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
 
     for scope in ['sig image-version create', 'sig image-version update']:
         with self.argument_context(scope) as c:
@@ -987,6 +1130,9 @@ def load_arguments(self, _):
                    help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
+        c.argument('enable_auto_key_rotation', arg_type=get_three_state_flag(), min_api='2020-12-01',
+                   options_list=['--enable-auto-key-rotation', '--auto-rotation'],
+                   help='Enable automatic rotation of keys.')
     # endregion
 
     # region DiskAccess

@@ -13,7 +13,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, record_only)
 
 from knack.util import CLIError
 
@@ -746,6 +746,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
         self.cmd('network express-route auth list --resource-group {rg} --circuit-name {er}', checks=self.is_empty())
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route')
     def test_network_express_route(self, resource_group):
 
@@ -803,6 +804,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
     def test_network_express_route_ipv6_peering(self, resource_group):
 

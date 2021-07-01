@@ -3,6 +3,16 @@
 Release History
 ===============
 
+0.12.0 (4/15/2021)
+++++++
+
+* Add job databoxedge and synapse
+
+0.11.0 (1/18/2021)
+++++++
+
+* Add a job to automatically detect modules that have regression.
+
 0.10.0 (12/30/2020)
 ++++++
 

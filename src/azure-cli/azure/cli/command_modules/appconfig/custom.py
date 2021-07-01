@@ -7,6 +7,7 @@
 
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.util import user_confirmation
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
@@ -16,7 +17,7 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 KeyVaultProperties,
                                                 RegenerateKeyParameters)
 
-from ._utils import resolve_store_metadata, user_confirmation
+from ._utils import resolve_store_metadata
 
 
 logger = get_logger(__name__)

@@ -41,9 +41,10 @@ class MockLoader(object):
 
 
 class MockCmd(object):
-    def __init__(self, ctx):
+    def __init__(self, ctx, arguments={}):
         self.cli_ctx = ctx
         self.loader = MockLoader(self.cli_ctx)
+        self.arguments = arguments
 
     def get_models(self, *attr_args, **kwargs):
         return get_sdk(self.cli_ctx, ResourceType.DATA_STORAGE, *attr_args, **kwargs)

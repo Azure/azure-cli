@@ -3,11 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.util import user_confirmation
 from ._stream_utils import stream_logs
-from ._utils import (
-    user_confirmation,
-    validate_managed_registry
-)
+from ._utils import validate_managed_registry
 
 
 TASKRUN_NOT_SUPPORTED = 'TaskRun is only supported for managed registries.'
@@ -43,7 +41,7 @@ def acr_taskrun_delete(cmd,
         cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
 
     user_confirmation("Are you sure you want to delete the taskrun '{}' ".format(taskrun_name), yes)
-    return client.delete(resource_group_name, registry_name, taskrun_name)
+    return client.begin_delete(resource_group_name, registry_name, taskrun_name)
 
 
 def acr_taskrun_logs(cmd,

@@ -182,7 +182,7 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 2))
+                 checks=self.check('length(aRecords)', 2))
 
         # test list vs. list type
         self.cmd('network dns record-set list -g {rg} -z {zone}',
@@ -195,7 +195,7 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 1))
+                 checks=self.check('length(aRecords)', 1))
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
@@ -252,7 +252,7 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 2))
+                 checks=self.check('length(aRecords)', 2))
 
         # test list vs. list type
         self.cmd('network dns record-set list -g {rg} -z {zone}',
@@ -265,7 +265,7 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 1))
+                 checks=self.check('length(aRecords)', 1))
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 

@@ -359,6 +359,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.show_command('show', 'acr_connected_registry_show')
         g.command('deactivate', 'acr_connected_registry_deactivate')
         g.command('update', 'acr_connected_registry_update')
+        g.command('repo', 'acr_connected_registry_repo')
         g.command('install info', 'acr_connected_registry_install_info')
         g.command('install renew-credentials', 'acr_connected_registry_install_renew_credentials')
         g.command('list', 'acr_connected_registry_list',

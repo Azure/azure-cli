@@ -53,6 +53,14 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
+def normalize_sku_for_staticapp(sku):
+    if sku.lower() == 'free':
+        return 'Free'
+    if sku.lower() == 'standard':
+        return 'Standard'
+    raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
+
+
 def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
     def decorate(func):
         def call(*args, **kwargs):

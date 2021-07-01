@@ -5,11 +5,11 @@
 
 import base64
 import datetime
-import json
-import re
-import os
-import uuid
 import itertools
+import json
+import os
+import re
+import uuid
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
@@ -19,7 +19,7 @@ from msrestazure.azure_exceptions import CloudError
 from knack.log import get_logger
 from knack.util import CLIError, todict
 
-from azure.cli.core.profiles import ResourceType, get_api_version
+from azure.cli.core.profiles import ResourceType
 from azure.graphrbac.models import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
@@ -33,7 +33,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpda
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 
-CREDENTIAL_WARNING_MESSAGE = (
+CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
@@ -41,6 +41,9 @@ ROLE_ASSIGNMENT_CREATE_WARNING = (
     "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
     "If needed, use the --role argument to explicitly create a role assignment."
 )
+
+NAME_DEPRECATION_WARNING = \
+    "'name' property in the output is deprecated and will be removed in the future. Use 'appId' instead."
 
 logger = get_logger(__name__)
 
@@ -154,10 +157,12 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
     if condition_version and not condition:
         raise CLIError('usage error: When --condition-version is set, --condition must be set as well.')
 
+    object_id, principal_type = _resolve_assignee_object(cmd.cli_ctx, assignee, assignee_object_id,
+                                                         assignee_principal_type)
+
     try:
-        return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
-                                       resolve_assignee=(not assignee_object_id),
-                                       assignee_principal_type=assignee_principal_type, description=description,
+        return _create_role_assignment(cmd.cli_ctx, role, object_id, resource_group_name, scope, resolve_assignee=False,
+                                       assignee_principal_type=principal_type, description=description,
                                        condition=condition, condition_version=condition_version)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
@@ -280,6 +285,9 @@ def update_role_assignment(cmd, role_assignment):
     if (assignment.condition_version and original_assignment.condition_version and
             original_assignment.condition_version.startswith('2.') and assignment.condition_version.startswith('1.')):
         raise CLIError("Condition version cannot be downgraded to '1.X'.")
+
+    if not assignment.principal_type:
+        assignment.principal_type = original_assignment.principal_type
 
     return assignments_client.create(scope, name, parameters=assignment)
 
@@ -588,7 +596,7 @@ def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_fi
 
     result = client.applications.list(filter=(' and '.join(sub_filters)))
     if sub_filters or include_all:
-        return result
+        return list(result)
 
     result = list(itertools.islice(result, 101))
     if len(result) == 101:
@@ -1395,35 +1403,20 @@ def create_service_principal_for_rbac(
     role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
     scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
     years = years or 1
-    sp_oid = None
     _RETRY_TIMES = 36
-    app_display_name, existing_sps = None, None
-    if name:
-        if '://' not in name:
-            prefix = "http://"
-            app_display_name = name
-            # replace space, /, \ with - to make it a valid URI
-            name = name.replace(' ', '-').replace('/', '-').replace('\\', '-')
-            logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
-                           ' used for service principal names', name, prefix, name)
-            name = prefix + name  # normalize be a valid graph service principal name
-        else:
-            app_display_name = name.split('://', 1)[-1]
+    existing_sps = None
 
-    if name:
-        query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
+    if not name:
+        # No name is provided, create a new one
+        app_display_name = 'azure-cli-' + datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
+    else:
+        app_display_name = name
+        # patch existing app with the same displayName to make the command idempotent
+        query_exp = "displayName eq '{}'".format(name)
         existing_sps = list(graph_client.service_principals.list(filter=query_exp))
-        if existing_sps:
-            app_display_name = existing_sps[0].display_name
-            name = existing_sps[0].service_principal_names[0]
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
-
-    app_display_name = app_display_name or ('azure-cli-' +
-                                            app_start_date.strftime('%Y-%m-%d-%H-%M-%S'))
-    if name is None:
-        name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
         _process_service_principal_creds(cmd.cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
@@ -1432,12 +1425,8 @@ def create_service_principal_for_rbac(
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
 
-    # replace space, /, \ with - to make it a valid URI
-    homepage = 'https://' + app_display_name.replace(' ', '-').replace('/', '-').replace('\\', '-')
     aad_application = create_application(cmd,
                                          display_name=app_display_name,
-                                         homepage=homepage,
-                                         identifier_uris=[name],
                                          available_to_other_tenants=False,
                                          password=password,
                                          key_value=public_cert_string,
@@ -1455,15 +1444,19 @@ def create_service_principal_for_rbac(
                 aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
                 break
             except Exception as ex:  # pylint: disable=broad-except
+                err_msg = str(ex)
                 if retry_time < _RETRY_TIMES and (
-                        ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
+                        ' does not reference ' in err_msg or
+                        ' does not exist ' in err_msg or
+                        'service principal being created must in the local tenant' in err_msg):
+                    logger.warning("Creating service principal failed with error '%s'. Retrying: %s/%s",
+                                   err_msg, retry_time + 1, _RETRY_TIMES)
                     time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
                 else:
                     logger.warning(
-                        "Creating service principal failed for appid '%s'. Trace followed:\n%s",
-                        name, ex.response.headers if hasattr(ex,
-                                                             'response') else ex)  # pylint: disable=no-member
+                        "Creating service principal failed for '%s'. Trace followed:\n%s",
+                        app_id, ex.response.headers
+                        if hasattr(ex, 'response') else ex)  # pylint: disable=no-member
                     raise
     sp_oid = aad_sp.object_id
 
@@ -1476,7 +1469,8 @@ def create_service_principal_for_rbac(
             logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
             for retry_time in range(0, _RETRY_TIMES):
                 try:
-                    _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
+                    _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False,
+                                            assignee_principal_type='ServicePrincipal')
                     break
                 except Exception as ex:
                     if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
@@ -1484,18 +1478,19 @@ def create_service_principal_for_rbac(
                         logger.warning('  Retrying role assignment creation: %s/%s', retry_time + 1,
                                        _RETRY_TIMES)
                         continue
-                    elif _error_caused_by_role_assignment_exists(ex):
+                    if _error_caused_by_role_assignment_exists(ex):
                         logger.warning('  Role assignment already exists.\n')
                         break
-                    else:
-                        # dump out history for diagnoses
-                        logger.warning('  Role assignment creation failed.\n')
-                        if getattr(ex, 'response', None) is not None:
-                            logger.warning('  role assignment response headers: %s\n',
-                                           ex.response.headers)  # pylint: disable=no-member
+
+                    # dump out history for diagnoses
+                    logger.warning('  Role assignment creation failed.\n')
+                    if getattr(ex, 'response', None) is not None:
+                        logger.warning('  role assignment response headers: %s\n',
+                                       ex.response.headers)  # pylint: disable=no-member
                     raise
 
-    logger.warning(CREDENTIAL_WARNING_MESSAGE)
+    logger.warning(CREDENTIAL_WARNING)
+    logger.warning(NAME_DEPRECATION_WARNING)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1509,7 +1504,7 @@ def create_service_principal_for_rbac(
     result = {
         'appId': app_id,
         'password': password,
-        'name': name,
+        'name': app_id,
         'displayName': app_display_name,
         'tenant': graph_client.config.tenant_id
     }
@@ -1529,14 +1524,8 @@ def _get_signed_in_user_object_id(graph_client):
 
 
 def _get_keyvault_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
-
-    return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-locals
@@ -1767,7 +1756,7 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     if cert_file:
         result['fileWithCertAndPrivateKey'] = cert_file
 
-    logger.warning(CREDENTIAL_WARNING_MESSAGE)
+    logger.warning(CREDENTIAL_WARNING)
     return result
 
 
@@ -1775,6 +1764,45 @@ def _encode_custom_key_description(key_description):
     # utf16 is used by AAD portal. Do not change it to other random encoding
     # unless you know what you are doing.
     return key_description.encode('utf-16')
+
+
+def _resolve_assignee_object(cli_ctx, assignee, assignee_object_id, assignee_principal_type):
+    client = _graph_client_factory(cli_ctx)
+    result = None
+
+    # resolve assignee (same as _resolve_object_id)
+    if assignee:
+        if assignee.find('@') >= 0:  # looks like a user principal name
+            result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
+        if not result:
+            result = list(client.service_principals.list(
+                filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
+        if not result and is_guid(assignee):  # assume an object id, let us verify it
+            result = _get_object_stubs(client, [assignee])
+
+        # 2+ matches should never happen, so we only check 'no match' here
+        if not result:
+            raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
+                           "If the assignee is an appId, make sure the corresponding service principal is created "
+                           "with 'az ad sp create --id {assignee}'.".format(assignee=assignee))
+
+        return result[0].object_id, result[0].object_type
+
+    # try to resolve assignee object id
+    try:
+        result = _get_object_stubs(client, [assignee_object_id])
+        if result:
+            return result[0].object_id, result[0].object_type
+    except CloudError:
+        pass
+
+    # If failed to verify assignee object id, DO NOT raise exception
+    # since --assignee-object-id is exposed to bypass Graph API
+    if not assignee_principal_type:
+        logger.warning('Failed to query --assignee-principal-type for %s by invoking Graph API.\n'
+                       'RBAC server might reject creating role assignment without --assignee-principal-type '
+                       'in the future. Better to specify --assignee-principal-type manually.', assignee_object_id)
+    return assignee_object_id, assignee_principal_type
 
 
 def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):

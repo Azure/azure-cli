@@ -40,14 +40,14 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     from azure.cli.core import __version__ as local_version
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     from azure.cli.core.extension import get_extensions, WheelExtension
-    from distutils.version import LooseVersion
+    from packaging.version import parse
     from knack.util import CLIError
 
     update_cli = True
     from azure.cli.core.util import get_latest_from_github
     try:
         latest_version = get_latest_from_github()
-        if latest_version and LooseVersion(latest_version) <= LooseVersion(local_version):
+        if latest_version and parse(latest_version) <= parse(local_version):
             logger.warning("You already have the latest azure-cli version: %s", local_version)
             update_cli = False
             if not update_all:
@@ -192,17 +192,17 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     print_styled_text()
 
     print_styled_text("[Available styles]\n")
-    placeholder = '{:19s}: {}\n'
+    placeholder = '████ {:8s}: {}\n'
     styled_text = [
         (Style.PRIMARY, placeholder.format("White", "Primary text color")),
-        (Style.SECONDARY, placeholder.format("Bright Black", "Secondary text color")),
-        (Style.IMPORTANT, placeholder.format("Bright/Dark Magent", "Important text color")),
+        (Style.SECONDARY, placeholder.format("Grey", "Secondary text color")),
+        (Style.IMPORTANT, placeholder.format("Magenta", "Important text color")),
         (Style.ACTION, placeholder.format(
-            "Bright/Dark Blue", "Commands, parameters, and system inputs. (White in legacy powershell terminal.)")),
-        (Style.HYPERLINK, placeholder.format("Bright/Dark Cyan", "Hyperlink")),
-        (Style.ERROR, placeholder.format("Bright/Dark Red", "Error message indicator")),
-        (Style.SUCCESS, placeholder.format("Bright/Dark Green", "Success message indicator")),
-        (Style.WARNING, placeholder.format("Bright/Dark Yellow", "Warning message indicator")),
+            "Blue", "Commands, parameters, and system inputs (White in legacy powershell terminal)")),
+        (Style.HYPERLINK, placeholder.format("Cyan", "Hyperlink")),
+        (Style.ERROR, placeholder.format("Red", "Error message indicator")),
+        (Style.SUCCESS, placeholder.format("Green", "Success message indicator")),
+        (Style.WARNING, placeholder.format("Yellow", "Warning message indicator")),
     ]
     print_styled_text(styled_text)
 
@@ -260,6 +260,15 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
         (Style.PRIMARY, ". To switch to another subscription, run "),
         (Style.ACTION, "az account set --subscription"),
         (Style.PRIMARY, " <subscription ID>\n"),
-        (Style.WARNING, "WARNING: The subscription has been disabled!")
+        (Style.WARNING, "WARNING: The subscription has been disabled!\n")
     ]
     print_styled_text(styled_text)
+
+    print_styled_text("[logs]\n")
+
+    # Print logs
+    logger.debug("This is a debug log entry.")
+    logger.info("This is a info log entry.")
+    logger.warning("This is a warning log entry.")
+    logger.error("This is a error log entry.")
+    logger.critical("This is a critical log entry.")

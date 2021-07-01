@@ -154,12 +154,12 @@ short-summary: Manage Azure Kubernetes Services.
 
 helps["aks check-acr"] = """
 type: command
-short-summary: Validate an ACR is accesible from an AKS cluster.
+short-summary: Validate an ACR is accessible from an AKS cluster.
 parameters:
   - name: --acr
     short-summary: The FQDN of the ACR.
 examples:
-  - name: Validate the ACR is accesible from the AKS cluster.
+  - name: Validate the ACR is accessible from the AKS cluster.
     text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
     crafted: true
 """
@@ -233,10 +233,28 @@ parameters:
     short-summary: User account to create on node VMs for SSH access.
   - name: --windows-admin-username
     type: string
-    short-summary: Username to create on Windows node VMs.
+    short-summary: User account to create on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-username:
+          - restriction: Cannot end in "."
+          - Disallowed values: "administrator", "admin", "user", "user1", "test", "user2", "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm", "admin2", "aspnet", "backup", "console", "david", "guest", "john", "owner", "root", "server", "sql", "support", "support_388945a0", "sys", "test2", "test3", "user4", "user5".
+          - Minimum-length: 1 character
+          - Max-length: 20 characters
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminusername?view=azure-dotnet
   - name: --windows-admin-password
     type: string
-    short-summary: Password to create on Windows node VMs.
+    short-summary: User account password to use on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-password:
+          - Minimum-length: 14 characters
+          - Max-length: 123 characters
+          - Complexity requirements: 3 out of 4 conditions below need to be fulfilled
+            * Has lower characters
+            * Has upper characters
+            * Has a digit
+            * Has a special character (Regex match [\\W_])
+          - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
   - name: --enable-ahub
     type: bool
     short-summary: Enable Azure Hybrid User Benefits (AHUB) for Windows VMs.
@@ -379,6 +397,13 @@ parameters:
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
+  - name: --private-dns-zone
+    type: string
+    short-summary: Private dns zone mode for private cluster.
+    long-summary: Allowed values are "system" or custom private dns zone resource id. If not set, defaults to type system. Requires --enable-private-cluster to be used.
+  - name: --fqdn-subdomain
+    type: string
+    short-summary: Prefix for FQDN that is created for private cluster with custom private dns zone scenario.
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
@@ -388,6 +413,9 @@ parameters:
   - name: --assign-identity
     type: string
     short-summary: Specify an existing user assigned identity for control plane's usage in order to manage cluster resource group.
+  - name: --assign-kubelet-identity
+    type: string
+    short-summary: Specify an existing user assigned identity for kubelet's usage, which is typically used to pull image from ACR.
   - name: --node-osdisk-diskencryptionset-id -d
     type: string
     short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
@@ -412,6 +440,15 @@ parameters:
   - name: --enable-sgxquotehelper
     type: bool
     short-summary: Enable SGX quote helper for confcom addon.
+  - name: --enable-encryption-at-host
+    type: bool
+    short-summary: Enable EncryptionAtHost, default value is false.
+  - name: --enable-ultra-ssd
+    type: bool
+    short-summary: Enable UltraSSD, default value is false.
+  - name: --enable-azure-rbac
+    type: bool
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -449,6 +486,14 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
   - name: Create a kubernetes cluster with ephemeral OS enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a kubernetes cluster with EncryptionAtHost enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-encryption-at-host
+  - name: Create a kubernetes cluster with UltraSSD enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-ultra-ssd
+  - name: Create a kubernetes cluster with Azure RBAC enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
+  - name: Create a kubernetes cluster with custom control plane identity and kubelet identity.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --assign-identity <control-plane-identity-resource-id> --assign-kubelet-identity <kubelet-identity-resource-id>
 """
 
 helps['aks update'] = """
@@ -520,6 +565,32 @@ parameters:
   - name: --disable-ahub
     type: bool
     short-summary: Disable Azure Hybrid User Benefits (AHUB) feature for cluster.
+  - name: --windows-admin-password
+    type: string
+    short-summary: User account password to use on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-password:
+          - Minimum-length: 14 characters
+          - Max-length: 123 characters
+          - Complexity requirements: 3 out of 4 conditions below need to be fulfilled
+            * Has lower characters
+            * Has upper characters
+            * Has a digit
+            * Has a special character (Regex match [\\W_])
+          - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
+  - name: --enable-managed-identity
+    type: bool
+    short-summary: Update current cluster to use managed identity to manage cluster resource group.
+  - name: --assign-identity
+    type: string
+    short-summary: Specify an existing user assigned identity to manage cluster resource group.
+  - name: --enable-azure-rbac
+    type: bool
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
+  - name: --disable-azure-rbac
+    type: bool
+    short-summary: Disable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -545,6 +616,18 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-ahub
   - name: Disable Azure Hybrid User Benefits featture for a kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
+  - name: Update Windows password of a kubernetes cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --windows-admin-password "Repl@cePassw0rd12345678"
+  - name: Update the cluster to use system assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
+  - name: Update the cluster to use user assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
+  - name: Update a non managed AAD AKS cluster to use Azure RBAC
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
+  - name: Update a managed AAD AKS cluster to use Azure RBAC
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-rbac
+  - name: Disable Azure RBAC in a managed AAD AKS cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-rbac
 """
 
 helps['aks delete'] = """
@@ -745,9 +828,19 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --enable-encryption-at-host
+    type: bool
+    short-summary: Enable EncryptionAtHost, default value is false.
+  - name: --enable-ultra-ssd
+    type: bool
+    short-summary: Enable UltraSSD, default value is false.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a nodepool with EncryptionAtHost enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
+  - name: Create a nodepool with UltraSSD enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-ultra-ssd
 """
 
 helps['aks nodepool delete'] = """
@@ -975,6 +1068,32 @@ helps['aks rotate-certs'] = """
     type: command
     short-summary: Rotate certificates and keys on a managed Kubernetes cluster
     long-summary: Kubernetes will be unavailable during cluster certificate rotation.
+"""
+
+helps['aks command'] = """
+    type: group
+    short-summary: See detail usage in 'az aks command invoke', 'az aks command result'.
+"""
+
+helps['aks command invoke'] = """
+    type: command
+    short-summary: Run a shell command (with kubectl, helm) on your aks cluster, support attaching files as well.
+    parameters:
+        - name: --command -c
+          type: string
+          short-summary: Command or shell script you want to run.
+        - name: --file -f
+          type: string
+          short-summary: Files to be used by the command, use '.' to attach the current folder.
+"""
+
+helps['aks command result'] = """
+    type: command
+    short-summary: Fetch result from previously triggered 'aks command invoke'.
+    parameters:
+        - name: --command-id -i
+          type: string
+          short-summary: commandId returned from 'aks command invoke'.
 """
 
 helps['openshift'] = """

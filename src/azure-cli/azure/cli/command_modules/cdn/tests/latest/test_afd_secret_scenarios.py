@@ -7,6 +7,7 @@ from azure.cli.testsdk import ScenarioTest, record_only
 from .afdx_scenario_mixin import CdnAfdScenarioMixin
 
 
+# This tests relies on a specific subscription with existing resources
 class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     def test_afd_secret_specific_version_crud(self, resource_group):
@@ -20,8 +21,8 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
-        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc/certificates/localdev-multi"
-        secret_version = "3528eb888f114c20930edbd56c7ed57c"
+        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/certificates/localdev-multi"
+        secret_version = "aab1df2865274378a04592e4f1233797"
 
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
@@ -70,8 +71,8 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
-        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc/certificates/localdev-multi"
-        latest_version = "8191a537d089481d91f20dc0b1e59e0a"
+        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/certificates/localdev-multi"
+        latest_version = "5f652542f6ef46ef9fc4ed8af07c54f1"
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
                                    profile_name,

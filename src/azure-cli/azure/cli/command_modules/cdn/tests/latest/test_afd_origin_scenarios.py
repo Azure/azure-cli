@@ -21,12 +21,12 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                          "--sample-size 4 --successful-samples-required 3 --additional-latency-in-milliseconds 50")
 
         origin_name = self.create_random_name(prefix='origin', length=16)
-        create_options = "--host-name huaiyiztesthost1.blob.core.chinacloudapi.cn " \
-                         + "--origin-host-header huaiyiztesthost1.blob.core.chinacloudapi.cn " \
+        create_options = "--host-name plstestcli.blob.core.windows.net " \
+                         + "--origin-host-header plstestcli.blob.core.windows.net " \
                          + "--priority 1 --weight 1000 --http-port 80 --https-port 443 --enabled-state Enabled"
 
         create_checks = [JMESPathCheck('name', origin_name),
-                         JMESPathCheck('hostName', "huaiyiztesthost1.blob.core.chinacloudapi.cn"),
+                         JMESPathCheck('hostName', "plstestcli.blob.core.windows.net"),
                          JMESPathCheck('httpPort', 80),
                          JMESPathCheck('httpsPort', 443),
                          JMESPathCheck('priority', 1),
@@ -66,7 +66,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         self.afd_origin_list_cmd(resource_group, profile_name, origin_group_name, checks=list_checks)
 
         update_checks = [JMESPathCheck('name', origin_name),
-                         JMESPathCheck('hostName', "huaiyiztesthost1.blob.core.chinacloudapi.cn"),
+                         JMESPathCheck('hostName', "plstestcli.blob.core.windows.net"),
                          JMESPathCheck('httpPort', 8080),
                          JMESPathCheck('httpsPort', 443),
                          JMESPathCheck('priority', 1),
@@ -82,19 +82,19 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                    checks=update_checks)
 
         update_checks = [JMESPathCheck('name', origin_name),
-                         JMESPathCheck('hostName', "huaiyiztesthost1.blob.core.chinacloudapi.cn"),
+                         JMESPathCheck('hostName', "plstestcli.blob.core.windows.net"),
                          JMESPathCheck('httpPort', 80),
                          JMESPathCheck('httpsPort', 443),
                          JMESPathCheck('priority', 1),
                          JMESPathCheck('weight', 58),
                          JMESPathCheck('enabledState', "Enabled"),
-                         JMESPathCheck('sharedPrivateLinkResource.privateLink.id', f"/subscriptions/{self.get_subscription_id()}/resourceGroups/AFDX-Portal-BugBash/providers/Microsoft.Storage/storageAccounts/plstest"),
+                         JMESPathCheck('sharedPrivateLinkResource.privateLink.id', f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.Storage/storageAccounts/plstestcli"),
                          JMESPathCheck('sharedPrivateLinkResource.groupId', "blob"),
                          JMESPathCheck('sharedPrivateLinkResource.privateLinkLocation', "eastus"),
                          JMESPathCheck('sharedPrivateLinkResource.requestMessage', "Private link service from AFD"),
                          JMESPathCheck('provisioningState', 'Succeeded')]
         options = '--http-port 80 --enable-private-link --private-link-resource ' \
-                  + f' /subscriptions/{self.get_subscription_id()}/resourceGroups/AFDX-Portal-BugBash/providers/Microsoft.Storage/storageAccounts/plstest' \
+                  + f' /subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.Storage/storageAccounts/plstestcli' \
                   + ' --private-link-sub-resource blob' \
                   + ' --private-link-location eastus' \
                   + ' --private-link-request-message "Private link service from AFD"'
@@ -106,13 +106,13 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                    checks=update_checks)
 
         update_checks = [JMESPathCheck('name', origin_name),
-                         JMESPathCheck('hostName', "huaiyiztesthost1.blob.core.chinacloudapi.cn"),
+                         JMESPathCheck('hostName', "plstestcli.blob.core.windows.net"),
                          JMESPathCheck('httpPort', 80),
                          JMESPathCheck('httpsPort', 443),
                          JMESPathCheck('priority', 1),
                          JMESPathCheck('weight', 58),
                          JMESPathCheck('enabledState', "Enabled"),
-                         JMESPathCheck('sharedPrivateLinkResource.privateLink.id', f"/subscriptions/{self.get_subscription_id()}/resourceGroups/AFDX-Portal-BugBash/providers/Microsoft.Storage/storageAccounts/plstest"),
+                         JMESPathCheck('sharedPrivateLinkResource.privateLink.id', f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.Storage/storageAccounts/plstestcli"),
                          JMESPathCheck('sharedPrivateLinkResource.groupId', "table"),
                          JMESPathCheck('sharedPrivateLinkResource.privateLinkLocation', "eastus"),
                          JMESPathCheck('sharedPrivateLinkResource.requestMessage', "Private link service from AFD"),
@@ -126,7 +126,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                    checks=update_checks)
 
         update_checks = [JMESPathCheck('name', origin_name),
-                         JMESPathCheck('hostName', "huaiyiztesthost1.blob.core.chinacloudapi.cn"),
+                         JMESPathCheck('hostName', "plstestcli.blob.core.windows.net"),
                          JMESPathCheck('httpPort', 80),
                          JMESPathCheck('httpsPort', 443),
                          JMESPathCheck('priority', 1),

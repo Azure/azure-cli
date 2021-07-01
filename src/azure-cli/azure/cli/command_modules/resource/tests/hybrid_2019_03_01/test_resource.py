@@ -272,7 +272,8 @@ class ProviderRegistrationTest(ScenarioTest):
 
     def test_provider_registration(self):
 
-        self.kwargs.update({'prov': 'TrendMicro.DeepSecurity'})
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
+
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
             self.cmd('provider register -n {prov}')

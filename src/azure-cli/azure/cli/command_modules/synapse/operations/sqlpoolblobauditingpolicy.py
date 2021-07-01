@@ -20,7 +20,8 @@ def sqlpool_blob_auditing_policy_update(
         is_storage_secondary_key_in_use=None,
         retention_days=None,
         audit_actions_and_groups=None,
-        is_azure_monitor_target_enabled=None):
+        is_azure_monitor_target_enabled=None,
+        blob_auditing_policy_name=None):
     """
     Updates a sql pool blob auditing policy. Custom update function to apply parameters to instance.
     """
@@ -43,7 +44,8 @@ def sqlserver_blob_auditing_policy_update(
         storage_account_subscription_id=None,
         is_storage_secondary_key_in_use=None,
         is_azure_monitor_target_enabled=None,
-        queue_delay_milliseconds=None):
+        queue_delay_milliseconds=None,
+        blob_auditing_policy_name=None):
     _audit_policy_update(cmd, instance, state, storage_account, storage_endpoint, storage_account_access_key,
                          storage_account_subscription_id, is_storage_secondary_key_in_use, retention_days,
                          audit_actions_and_groups, is_azure_monitor_target_enabled)

@@ -30,6 +30,9 @@ class StorageScenarioMixin:
         return self.cmd('storage account show-connection-string -n {} -g {} '
                         '--query connectionString -otsv'.format(name, group)).output.strip()
 
+    def get_account_id(self, group, name):
+        return self.cmd('storage account show -n {} -g {} --query id -otsv'.format(name, group)).output.strip()
+
     def get_account_info(self, group, name):
         """Returns the storage account name and key in a tuple"""
         return name, self.get_account_key(group, name)

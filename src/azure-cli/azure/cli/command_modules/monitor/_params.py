@@ -110,6 +110,9 @@ def load_arguments(self, _):
         c.argument('end_time', arg_type=get_datetime_type(help='End time of the query. Defaults to the current time.'))
         c.argument('offset', type=get_period_type(as_timedelta=True))
         c.argument('interval', arg_group='Time', type=get_period_type())
+
+    with self.argument_context('monitor metrics list-namespaces', arg_group='Time') as c:
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
     # endregion
 
     # region MetricAlerts

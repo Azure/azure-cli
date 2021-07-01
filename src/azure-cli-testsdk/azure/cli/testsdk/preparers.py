@@ -68,6 +68,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if self.dev_setting_name:
+            self.test_class_instance.kwargs[self.key] = self.dev_setting_name
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
 
@@ -174,6 +175,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
             self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {} --yes'.format(name, group))
+            self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
 
     def _get_resource_group(self, **kwargs):
         try:

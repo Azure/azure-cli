@@ -8,6 +8,7 @@
 
 import unittest
 import os
+import requests
 
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
@@ -380,6 +381,8 @@ class WebAppUpE2ETests(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "python|3.7"'.format(resource_group, webapp_name, plan))
+        requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+        self.cmd('webapp up -n {}'.format(webapp_name))
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),

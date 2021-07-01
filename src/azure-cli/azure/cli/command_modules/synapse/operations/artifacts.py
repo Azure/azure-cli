@@ -7,14 +7,11 @@ import json
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
-                                            Notebook)
+                                            NotebookResource)
 from azure.cli.core.util import sdk_no_wait, CLIError
-from .sparkpool import get_spark_pool
-from .workspace import get_resource_group_by_workspace_name
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
-                               cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_client_bigdatapool_factory,
-                               cf_synapse_client_workspace_factory)
+                               cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
@@ -214,13 +211,10 @@ def delete_data_flow(cmd, workspace_name, data_flow_name, no_wait=False):
 def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_name, spark_pool_name=None,
                               executor_size="Small", executor_count=2, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
+    spark_pool_client = cf_synapse_spark_pool(cmd.cli_ctx, workspace_name)
     if spark_pool_name is not None:
         endpoint = '{}{}{}'.format("https://", workspace_name, cmd.cli_ctx.cloud.suffixes.synapse_analytics_endpoint)
-        resource_group_name = get_resource_group_by_workspace_name(cmd,
-                                                                   cf_synapse_client_workspace_factory(cmd.cli_ctx),
-                                                                   workspace_name)
-        spark_pool_info = get_spark_pool(cmd, cf_synapse_client_bigdatapool_factory(cmd.cli_ctx), resource_group_name,
-                                         workspace_name, spark_pool_name)
+        spark_pool_info = spark_pool_client.get(spark_pool_name)
         metadata = definition_file['metadata']
         options = {}
         options['auth'] = {'type': 'AAD',
@@ -245,7 +239,7 @@ def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_nam
                                                                          executor_memory=options['memory'],
                                                                          executor_cores=options['cores'],
                                                                          num_executors=executor_count)
-    properties = Notebook.from_dict(definition_file)
+    properties = NotebookResource(name=notebook_name, properties=definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_notebook,
                        notebook_name, properties, polling=True)
 
