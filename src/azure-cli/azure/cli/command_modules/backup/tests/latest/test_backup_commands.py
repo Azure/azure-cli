@@ -987,15 +987,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['key2_id'] = self.cmd('keyvault key show --vault-name {keyvault} --name {key2} --query key.kid').get_output_in_json()
 
         policy1_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {identity1_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
-        identity1_has_access = 0
+        identity1_has_access = False
 
         access_policy1 = policy1_json['properties']['accessPolicies']
         for element in access_policy1:
             if element['objectId'] == self.kwargs['identity1_principalid']:
                 access_policy1 = element
-                identity1_has_access = 1
+                identity1_has_access = True
             
-        self.assertEqual(identity1_has_access, 1)
+        self.assertEqual(identity1_has_access, True)
         key_permissions = access_policy1['permissions']['keys']
         self.assertIn("list", key_permissions)
         self.assertIn("wrapKey", key_permissions)
@@ -1003,15 +1003,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("unwrapKey", key_permissions)
 
         policy2_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {identity2_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
-        identity2_has_access = 0
+        identity2_has_access = False
 
         access_policy2 = policy2_json['properties']['accessPolicies']
         for element in access_policy2:
             if element['objectId'] == self.kwargs['identity2_principalid']:
                 access_policy2 = element
-                identity2_has_access = 1
+                identity2_has_access = True
             
-        self.assertEqual(identity2_has_access, 1)
+        self.assertEqual(identity2_has_access, True)
         key_permissions = access_policy2['permissions']['keys']
         self.assertIn("list", key_permissions)
         self.assertIn("wrapKey", key_permissions)

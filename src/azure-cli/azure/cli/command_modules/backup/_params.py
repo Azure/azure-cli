@@ -47,7 +47,7 @@ target_container_name_help = """The target container to which the DB recovery po
 target_tier_help = """ The destination/target tier to which a particular recovery point has to be moved."""
 tier_help = """ Provide 'tier' parameter to filter recovery points."""
 rehyd_priority_type_help = """The type of priority to be maintained while rehydrating a recovery point """
-infrastructure_encryption_type_help = """Infrastructure encryption must be enabled when configuring encryption of the vault for the first time. Once enabled, infrastructure encryption cannot be disabled. Allowed values: Enabled, Disabled"""
+infrastructure_encryption_type_help = """Use this parameter to Enable/Disable Infrastructure encryption. This must be set when configuring encryption of the vault for the first time. Once Enabled/Disabled, infrastructure encryption setting cannot be changed. Default value: Disabled. Allowed values: Enabled /Disabled"""
 
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
@@ -73,9 +73,9 @@ from_full_rp_type = CLIArgumentType(options_list=['--from-full-rp-name'], help="
 target_tier_type = CLIArgumentType(help=target_tier_help, arg_type=get_enum_type(allowed_target_tier_type_chk_archivable), options_list=['--target-tier'])
 tier_type = CLIArgumentType(help=tier_help, arg_type=get_enum_type(allowed_tier_type), options_list=['--tier'])
 rehyd_priority_type = CLIArgumentType(help=rehyd_priority_type_help, arg_type=get_enum_type(allowed_rehyd_priority_type), options_list=['--rehydration-priority'])
-identity_type = CLIArgumentType(options_list=['--identity-type'], arg_type=get_enum_type(allowed_identity_types), help="The identity type to be enabled for this vault, whether it is systemassigned, user-assigned or none")
-identity_id_type = CLIArgumentType(nargs='+', options_list=['--identity-id'], help="Space-separated list of user assigned identities. This will be applicable only for user-assigned identity type")
-user_assigned_identity_id_type = CLIArgumentType(options_list=['--identity-id'], help="This will be applicable only for user-assigned identity type")
+identity_type = CLIArgumentType(options_list=['--identity-type'], arg_type=get_enum_type(allowed_identity_types), help="The identity type to be enabled for this vault, whether it is systemassigned, userassigned or none")
+identity_id_type = CLIArgumentType(nargs='+', options_list=['--identity-id'], help="Space-separated list of userassigned identities. This will be applicable only for userassigned identity type")
+user_assigned_identity_id_type = CLIArgumentType(options_list=['--identity-id'], help="UserAssigned Identity Id to be used for CMK encryption, this will be applicable for encryption using userassigned identity")
 encryption_key_id_type = CLIArgumentType(options_list=['--encryption-key-id'], help="The encryption key id you want to use for encryption")
 infrastructure_encryption_type = CLIArgumentType(options_list=['--infrastructure-encryption'], arg_type=get_enum_type(['Enabled', 'Disabled']), help=infrastructure_encryption_type_help)
 
@@ -336,7 +336,7 @@ def load_arguments(self, _):
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
         c.argument('rehydration_duration', type=int, help='Set the maximum time, in days (between 10-30, both inclusive) for which the recovery point stays in hydrated state. Default: 15')
         c.argument('rehydration_priority', rehyd_priority_type)
-        c.argument('disk_encryption_set_id', options_list=['--disk-encryption-set-id'], help='The disk encryption set id is used for encrypting restored disks. Please ensure access to disk encryption set id is specified here.')
+        c.argument('disk_encryption_set_id', options_list=['--disk-encryption-set-id'], help='The disk encryption set id is used for encrypting restored disks. Please ensure access to disk encryption set id that is specified here.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
