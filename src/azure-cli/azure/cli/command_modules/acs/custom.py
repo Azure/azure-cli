@@ -2488,14 +2488,11 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
             resource_group_name, name)
 
     # Check if KUBECONFIG environmental variable is set
-    path = os.environ.get(
-        "KUBECONFIG",
-        os.path.join(
-            os.path.expanduser('~'),
-            '.kube',
-            'config'
-        )
-    )
+    # If path is different than default then that means -f/--file is passed
+    # in which case we ignore the KUBECONFIG variable
+    if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
+        path = os.environ["KUBECONFIG"]
+
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
     try:
