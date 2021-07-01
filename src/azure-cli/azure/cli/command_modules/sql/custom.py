@@ -454,11 +454,7 @@ def _get_identity_object_from_type(
                 identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value,
                                                   user_assigned_identities=umiDict)
     elif assignIdentityIsPresent:
-        if existingResourceIdentity is not None:
-            identityResult = existingResourceIdentity
-            identityResult.type = ResourceIdType.system_assigned.value
-        else:
-            identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
+        identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
 
     if assignIdentityIsPresent is False and existingResourceIdentity is not None:
         identityResult = existingResourceIdentity
