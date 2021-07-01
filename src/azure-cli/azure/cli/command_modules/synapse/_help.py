@@ -1438,7 +1438,7 @@ examples:
   - name: Create a notebook.
     text: |-
         az synapse notebook create --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
+          --name testnotebook --file @path/notebook.ipynb
 """
 
 helps['synapse notebook set'] = """
@@ -1448,7 +1448,7 @@ examples:
   - name: Set an exist notebook.
     text: |-
         az synapse notebook set --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
+          --name testnotebook --file @path/notebook.ipynb
 """
 
 helps['synapse notebook import'] = """
@@ -1458,7 +1458,7 @@ examples:
   - name: Import a notebook.
     text: |-
         az synapse notebook import --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
+          --name testnotebook --file @path/notebook.ipynb
 """
 
 helps['synapse notebook show'] = """

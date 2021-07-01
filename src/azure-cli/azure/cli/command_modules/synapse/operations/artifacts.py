@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import json
+import logging
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
@@ -265,6 +266,8 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
             metadata= {}
             displayedWidgets = []
 
+            notebook_result['nbformat'] = 4
+            notebook_result['nbformat_minor'] = 2
             for cell in notebook_properties['cells']:
                 if cell['cell_type'] == 'code' and cell['outputs']:
                      for output in cell['outputs']:
@@ -294,7 +297,7 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
                             metadata['synapse_widget']['version'] = synapseWidgetNotebookMetadataVersion
 
             if len(displayedWidgets) > 0:
-                 print('Detected widget with missing data.')
+                logging.info('Detected widget with missing data.')
 
             for cell in notebook_properties['cells']:
                 if cell['cell_type'] == 'code' and cell['outputs']:
