@@ -1104,15 +1104,12 @@ class SynapseScenarioTests(ScenarioTest):
             expect_failure=True)
 
     @record_only()
-    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_pipeline(self):
         self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
             'name': 'pipeline',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'pipeline.json')
         })
-
-        # create a workspace
-        self._create_workspace()
 
         # create pipeline
         self.cmd(
@@ -1173,6 +1170,7 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_trigger(self):
         self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
             'name': 'trigger',
             'event-trigger': 'EventTrigger',
             'tumbling-window-trigger': 'TumblingWindowTrigger',
