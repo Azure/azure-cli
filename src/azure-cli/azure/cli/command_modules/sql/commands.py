@@ -303,7 +303,7 @@ def load_command_table(self, _):
                             ledger_digest_uploads_operations,
                             client_factory=get_sql_database_ledger_digest_uploads_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_command('show', 'ledger_digest_uploads_show')
         g.custom_command('enable', 'ledger_digest_uploads_enable')
         g.custom_command('disable', 'ledger_digest_uploads_disable')
 
@@ -590,7 +590,7 @@ def load_command_table(self, _):
                             server_connection_policies_operations,
                             client_factory=get_sql_server_connection_policies_operations) as c:
 
-        c.show_command('show', 'get')
+        c.custom_command('show', 'conn_policy_show')
         c.generic_update_command('update')
 
     server_dns_aliases_operations = CliCommandType(
@@ -617,7 +617,7 @@ def load_command_table(self, _):
 
         g.custom_command('disable', 'server_aad_only_disable')
         g.custom_command('enable', 'server_aad_only_enable')
-        g.show_command('get', 'get')
+        g.custom_command('get', 'server_aad_only_get')
 
     ###############################################
     #           sql server trust groups           #

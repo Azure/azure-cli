@@ -15,14 +15,18 @@ from azure.cli.core.util import (
 )
 
 from azure.mgmt.sql.models import (
+    AdministratorName,
+    AuthenticationName,
     BlobAuditingPolicyState,
     CapabilityGroup,
     CapabilityStatus,
     CreateMode,
+    ConnectionPolicyName,
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
     LedgerDigestUploadsName,
+    LongTermRetentionPolicyName,
     PartnerInfo,
     PerformanceLevelUnit,
     FailoverGroupReplicationRole,
@@ -495,7 +499,7 @@ def _get__user_assigned_identity(
 _DEFAULT_SERVER_VERSION = "12.0"
 
 
-def failover_group_update_common(
+def _failover_group_update_common(
         instance,
         failover_policy=None,
         grace_period=None,):
@@ -2696,7 +2700,7 @@ def update_long_term_retention(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
-        policy_name="default",
+        policy_name=LongTermRetentionPolicyName.DEFAULT,
         parameters=kwargs)
 
     return policy
@@ -3568,6 +3572,7 @@ def server_ad_admin_set(
     return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY,
         parameters=kwargs)
 
 
@@ -3814,35 +3819,72 @@ def encryption_protector_update(
 def server_aad_only_disable(
         client,
         resource_group_name,
-        server_name):
+        server_name,
+        **kwargs):
     '''
     Disables a servers aad-only setting
     '''
 
-    return client.create_or_update(
+    kwargs['azure_ad_only_authentication'] = False
+
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        azure_ad_only_authentication=False
-    )
+        authentication_name=AuthenticationName.DEFAULT,
+        parameters=kwargs)
 
 
 def server_aad_only_enable(
         client,
         resource_group_name,
-        server_name):
+        server_name,
+        **kwargs):
     '''
     Enables a servers aad-only setting
     '''
 
-    return client.create_or_update(
+    kwargs['azure_ad_only_authentication'] = True
+
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        azure_ad_only_authentication=True
-    )
+        authentication_name=AuthenticationName.DEFAULT,
+        parameters=kwargs)
+
+
+def server_aad_only_get(
+        client,
+        resource_group_name,
+        server_name,
+        **kwargs):
+    '''
+    Shows a servers aad-only setting
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        authentication_name=AuthenticationName.DEFAULT)
+
 
 ###############################################
 #           sql server ledger                 #
 ###############################################
+
+def ledger_digest_uploads_show(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Shows ledger storage target
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        ledger_digest_uploads=LedgerDigestUploadsName.CURRENT)
 
 
 def ledger_digest_uploads_enable(
@@ -3850,10 +3892,13 @@ def ledger_digest_uploads_enable(
         resource_group_name,
         server_name,
         database_name,
+        endpoint,
         **kwargs):
     '''
     Enables ledger storage target
     '''
+
+    kwargs['digest_storage_endpoint'] = endpoint
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -3869,7 +3914,7 @@ def ledger_digest_uploads_disable(
         server_name,
         database_name):
     '''
-    Enables ledger storage target
+    Disables ledger storage target
     '''
 
     return client.disable(
@@ -4878,7 +4923,7 @@ def failover_group_update(
     Updates the failover group.
     '''
 
-    failover_group_update_common(
+    _failover_group_update_common(
         instance,
         failover_policy,
         grace_period)
@@ -5077,3 +5122,18 @@ def instance_failover_group_failover(
         resource_group_name=resource_group_name,
         failover_group_name=failover_group_name,
         location_name=location_name)
+
+
+###############################################
+#              sql server conn-policy         #
+###############################################
+
+def conn_policy_show(
+        client,
+        resource_group_name,
+        server_name):
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        connection_policy_name=ConnectionPolicyName.DEFAULT)
