@@ -2982,12 +2982,11 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     if consumption_plan_location is None and not is_plan_elastic_premium(cmd, plan_info):
         site_config.always_on = True
 
-    # If plan is elastic premium or windows consumption, we need these app settings
-    is_windows_consumption = consumption_plan_location is not None and not is_linux
-    if is_plan_elastic_premium(cmd, plan_info) or is_windows_consumption:
+    # If plan is elastic premium or consumption, we need these app settings
+    if is_plan_elastic_premium(cmd, plan_info) or consumption_plan_location is not None:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
                                                       value=con_string))
-        site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=name.lower()))
+        site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=_get_content_share_name(name)))
 
     create_app_insights = False
 
@@ -3115,6 +3114,14 @@ def _get_runtime_version_functionapp(version_string, is_linux):
         return float(version_string)
     except ValueError:
         return 0
+
+
+def _get_content_share_name(app_name):
+    # content share name should be up to 63 characters long, lowercase letter and digits, and random
+    # so take the first 50 characters of the app name and add the last 12 digits of a random uuid
+    share_name = app_name[0:50]
+    suffix = str(uuid.uuid4()).split('-')[-1]
+    return share_name.lower() + suffix
 
 
 def try_create_application_insights(cmd, functionapp):
