@@ -1,0 +1,50 @@
+interactions:
+- request:
+    body: '{"properties": {"weeklyRetention": "P1W", "monthlyRetention": "P1M", "yearlyRetention":
+      "P2M", "weekOfYear": 12}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db ltr-policy set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '113'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -s -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Sql/servers/mysqlserver-x/databases/testLtr/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
+        ''myResourceGroup'' could not be found."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 01 Jul 2021 06:49:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+version: 1

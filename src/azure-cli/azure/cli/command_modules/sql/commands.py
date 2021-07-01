@@ -305,7 +305,7 @@ def load_command_table(self, _):
 
         g.show_command('show', 'get')
         g.custom_command('enable', 'ledger_digest_uploads_enable')
-        g.command('disable', 'disable')
+        g.custom_command('disable', 'ledger_digest_uploads_disable')
 
     database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionPoliciesOperations.{}',

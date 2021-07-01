@@ -22,6 +22,7 @@ from azure.mgmt.sql.models import (
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
+    LedgerDigestUploadsName,
     PartnerInfo,
     PerformanceLevelUnit,
     FailoverGroupReplicationRole,
@@ -2695,6 +2696,7 @@ def update_long_term_retention(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
+        policy_name="default",
         parameters=kwargs)
 
     return policy
@@ -3848,7 +3850,7 @@ def ledger_digest_uploads_enable(
         resource_group_name,
         server_name,
         database_name,
-        endpoint):
+        **kwargs):
     '''
     Enables ledger storage target
     '''
@@ -3857,9 +3859,24 @@ def ledger_digest_uploads_enable(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
-        ledger_digest_uploads='current',
-        digest_storage_endpoint=endpoint
-    )
+        ledger_digest_uploads=LedgerDigestUploadsName.CURRENT,
+        parameters=kwargs)
+
+
+def ledger_digest_uploads_disable(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Enables ledger storage target
+    '''
+
+    return client.disable(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        ledger_digest_uploads=LedgerDigestUploadsName.CURRENT)
 
 
 ###############################################
