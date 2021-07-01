@@ -1151,21 +1151,23 @@ def db_rename(
         database_name,
         server_name,
         resource_group_name,
-        new_name):
+        new_name,
+        **kwargs):
     '''
     Renames a DB.
     '''
+    kwargs['id'] = DatabaseIdentity(
+        cmd.cli_ctx,
+        new_name,
+        server_name,
+        resource_group_name
+    ).id()
 
     client.rename(
         resource_group_name,
         server_name,
         database_name,
-        id=DatabaseIdentity(
-            cmd.cli_ctx,
-            new_name,
-            server_name,
-            resource_group_name
-        ).id())
+        parameters=kwargs)
 
     return client.get(
         resource_group_name,
