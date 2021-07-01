@@ -3412,12 +3412,13 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
                           send_key_name="defaultSender",
                           send_key_value=hy_co_keys.primary_key,
                           service_bus_suffix=".servicebus.windows.net")
+
     if slot is None:
         return_hc = web_client.web_apps.create_or_update_hybrid_connection(resource_group_name, name, namespace,
                                                                            hybrid_connection, hc)
     else:
         return_hc = web_client.web_apps.create_or_update_hybrid_connection_slot(resource_group_name, name, namespace,
-                                                                                hybrid_connection, hc, slot)
+                                                                                hybrid_connection, slot, hc)
 
     # reformats hybrid connection, to prune unnecessary fields
     resourceGroup = return_hc.id.split("/")
@@ -3607,13 +3608,8 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
 
     swiftVnet = SwiftVirtualNetwork(subnet_resource_id=subnet_resource_id,
                                     swift_supported=True)
-
-    if slot is None:
-        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection(resource_group_name, name,
-                                                                                        swiftVnet)
-    else:
-        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection_slot(resource_group_name, name,
-                                                                                             swiftVnet, slot)
+    return_vnet = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                          'create_or_update_swift_virtual_network_connection', slot, swiftVnet)
 
     # reformats the vnet entry, removing unnecessary information
     id_strings = return_vnet.id.split('/')
