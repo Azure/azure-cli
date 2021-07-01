@@ -774,6 +774,9 @@ backup recoverypoint list:
     backup_management_type:
       rule_exclusions:
       - option_length_too_long
+    recommended_for_archive:
+      rule_exclusions:
+      - option_length_too_long
 backup recoverypoint show:
   parameters:
     backup_management_type:
@@ -1341,6 +1344,16 @@ cosmosdb update:
     virtual_network_rules:
       rule_exclusions:
       - option_length_too_long
+cosmosdb database:
+  parameters:
+    db_resource_group_name:
+      rule_exclusions:
+        - parameter_should_not_end_in_resource_group
+cosmosdb collection:
+  parameters:
+    db_resource_group_name:
+      rule_exclusions:
+        - parameter_should_not_end_in_resource_group
 deploymentmanager service create:
   parameters:
     service_topology_name:

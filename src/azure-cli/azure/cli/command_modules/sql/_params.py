@@ -211,6 +211,13 @@ maintenance_configuration_id_param_type = CLIArgumentType(
     options_list=['--maint-config-id', '-m'],
     help='Specified maintenance configuration id or name for this resource.')
 
+ledger_on_param_type = CLIArgumentType(
+    options_list=['--ledger-on'],
+    help='Create a ledger database, in which the integrity of all data is protected by the ledger feature. '
+         'All tables in the ledger database must be ledger tables. '
+         'Note: the value of this property cannot be changed after the database has been created. ',
+    arg_type=get_three_state_flag("Enabled", "Disabled", False, False))
+
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL managed instance.')
@@ -482,6 +489,7 @@ def _configure_db_dw_create_params(
             'high_availability_replica_count',
             'requested_backup_storage_redundancy',
             'maintenance_configuration_id',
+            'is_ledger_on',
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -511,6 +519,9 @@ def _configure_db_dw_create_params(
     arg_ctx.argument('maintenance_configuration_id',
                      arg_type=maintenance_configuration_id_param_type)
 
+    arg_ctx.argument('is_ledger_on',
+                     arg_type=ledger_on_param_type)
+
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
     # Only applicable to default create mode. Also only applicable to db.
@@ -518,6 +529,7 @@ def _configure_db_dw_create_params(
         arg_ctx.ignore('sample_name')
         arg_ctx.ignore('catalog_collation')
         arg_ctx.ignore('maintenance_configuration_id')
+        arg_ctx.ignore('is_ledger_on')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -974,6 +986,15 @@ def load_arguments(self, _):
                    required=True,
                    help='Status of the transparent data encryption.',
                    arg_type=get_enum_type(TransparentDataEncryptionStatus))
+
+    #####
+    #           sql db ledger-digest-uploads
+    ######
+    with self.argument_context('sql db ledger-digest-uploads enable') as c:
+        c.argument('endpoint',
+                   options_list=['--endpoint'],
+                   help='The endpoint of a digest storage, '
+                   'which can be either an Azure Blob storage or a ledger in Azure Confidential Ledger.')
 
     ###############################################
     #                sql db ltr                   #
