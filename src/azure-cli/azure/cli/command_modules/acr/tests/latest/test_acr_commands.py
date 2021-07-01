@@ -248,14 +248,12 @@ class AcrCommandsTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_acr_import_no_wait(self, resource_group):
         source_registry_name = self.create_random_name("sourceregistrysamesub", 40)
-        registry_name = self.create_random_name("targetregistry", 20)
 
         self.kwargs.update({
             'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
             'source_registry_rg': 'resourcegroupsamesub',
             'source_loc': 'westus',
             'source_registry_name': source_registry_name,
-            'registry_name': registry_name,
             'sku': 'Standard',
             'source_image': 'microsoft:azure-cli',
         })

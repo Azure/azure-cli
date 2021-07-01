@@ -26,7 +26,7 @@ LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid " \
 CREDENTIALS_INVALID = "Authentication failed. Please provide password."
 
 
-def acr_import(cmd,
+def acr_import(cmd, # pylint: disable=too-many-locals
                client,
                registry_name,
                source_image,
@@ -99,20 +99,20 @@ def acr_import(cmd,
 
     try:
         if no_wait:
+            logger.warning('Import has started. Due to no-wait option, failures will not be reflected.')
             return sdk_no_wait(no_wait, client.import_image, resource_group_name, registry_name, import_parameters)
-        else:
-            result_poller = client.import_image(
-                resource_group_name=resource_group_name,
-                registry_name=registry_name,
-                parameters=import_parameters)
 
-            return LongRunningOperation(cmd.cli_ctx, 'Importing image...')(result_poller)
+        result_poller = client.import_image(
+            resource_group_name=resource_group_name,
+            registry_name=registry_name,
+            parameters=import_parameters)
+        return LongRunningOperation(cmd.cli_ctx, 'Importing image...')(result_poller)
 
     except CLIError as e:
-        _handle_exception(e, cmd, source_registry, source_image, registry)
+        _handle_import_exception(e, cmd, source_registry, source_image, registry)
 
 
-def _handle_exception(e, cmd, source_registry, source_image, registry):
+def _handle_import_exception(e, cmd, source_registry, source_image, registry):
     from msrestazure.azure_exceptions import ClientException
     try:
         # if command fails, it might be because user specified registry twice in --source and --registry

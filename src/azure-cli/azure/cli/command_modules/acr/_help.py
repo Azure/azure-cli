@@ -264,7 +264,7 @@ examples:
     text: |
         az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag \\
             -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
-  - name: Import an image without waiting for completion.
+  - name: Import an image without waiting for successful completion. Failures during import will not be reflected. Run `az acr repository show-tags` to confirm that import succeeded.
     text: >
         az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag --no-wait
 """
