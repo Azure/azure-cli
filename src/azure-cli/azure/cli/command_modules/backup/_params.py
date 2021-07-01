@@ -41,7 +41,7 @@ retain_until_help = """The date until which this backed up copy will be availabl
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
 target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
-infrastructure_encryption_type_help = """Infrastructure encryption must be enabled when configuring encryption of the vault for the first time. Once enabled, infrastructure encryption cannot be disabled. Allowed values: Enabled, Disabled"""
+infrastructure_encryption_type_help = """Use this parameter to Enable/Disable Infrastructure encryption. This must be set when configuring encryption of the vault for the first time. Once Enabled/Disabled, infrastructure encryption setting cannot be changed. Default value: Disabled. Allowed values: Enabled /Disabled"""
 
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
@@ -64,9 +64,9 @@ diskslist_type = CLIArgumentType(nargs='+', help=diskslist_help)
 target_container_name_type = CLIArgumentType(options_list=['--target-container-name'], help=target_container_name_help)
 filepath_type = CLIArgumentType(options_list=['--filepath'], help="The path to which the DB should be restored as files.")
 from_full_rp_type = CLIArgumentType(options_list=['--from-full-rp-name'], help="Name of the starting Recovery point.")
-identity_type = CLIArgumentType(options_list=['--identity-type'], arg_type=get_enum_type(allowed_identity_types), help="The identity type to be enabled for this vault, whether it is systemassigned, user-assigned or none")
-identity_id_type = CLIArgumentType(nargs='+', options_list=['--identity-id'], help="Space-separated list of user assigned identities. This will be applicable only for user-assigned identity type")
-user_assigned_identity_id_type = CLIArgumentType(options_list=['--identity-id'], help="This will be applicable only for user-assigned identity type")
+identity_type = CLIArgumentType(options_list=['--identity-type'], arg_type=get_enum_type(allowed_identity_types), help="The identity type to be enabled for this vault, whether it is systemassigned, userassigned or none")
+identity_id_type = CLIArgumentType(nargs='+', options_list=['--identity-id'], help="Space-separated list of userassigned identities. This will be applicable only for userassigned identity type")
+user_assigned_identity_id_type = CLIArgumentType(options_list=['--identity-id'], help="UserAssigned Identity Id to be used for CMK encryption, this will be applicable for encryption using userassigned identity")
 encryption_key_id_type = CLIArgumentType(options_list=['--encryption-key-id'], help="The encryption key id you want to use for encryption")
 infrastructure_encryption_type = CLIArgumentType(options_list=['--infrastructure-encryption'], arg_type=get_enum_type(['Enabled', 'Disabled']), help=infrastructure_encryption_type_help)
 
@@ -304,7 +304,7 @@ def load_arguments(self, _):
         c.argument('restore_only_osdisk', arg_type=get_three_state_flag(), help='Use this flag to restore only OS disks of a backed up VM.')
         c.argument('restore_as_unmanaged_disks', arg_type=get_three_state_flag(), help='Use this flag to specify to restore as unmanaged disks')
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
-        c.argument('disk_encryption_set_id', options_list=['--disk-encryption-set-id'], help='The disk encryption set id is used for encrypting restored disks. Please ensure access to disk encryption set id is specified here.')
+        c.argument('disk_encryption_set_id', options_list=['--disk-encryption-set-id'], help='The disk encryption set id is used for encrypting restored disks. Please ensure access to disk encryption set id that is specified here.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

@@ -26,7 +26,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
-    MutuallyExclusiveArgumentError, ArgumentUsageError
+    MutuallyExclusiveArgumentError, ArgumentUsageError, ValidationError
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
@@ -226,7 +226,7 @@ def update_vault(client, resource_group_name, vault_name, identity_type=None, id
                                  curr_identity_type, identity_id, remove_user_assigned,
                                  remove_system_assigned)
     else:
-        raise CLIError(
+        raise RequiredArgumentMissingError(
             """
             Invalid parameters, no operation specified.
             """)
@@ -253,9 +253,9 @@ def remove_identities(client, resource_group_name, vault_name, curr_identity_det
                 --identiy-id paramter is only supported for UserAssigned identities
                 """)
         if curr_identity_type not in ["systemassigned", "systemassigned, userassigned"]:
-            raise CLIError(
+            raise ArgumentUsageError(
                 """
-                System assigned identity is not enabled for Recovery Service Vault.
+                System assigned identity is not enabled for Recovery Services Vault.
                 """)
         if curr_identity_type == 'systemassigned':
             identity_type = 'none'
@@ -263,7 +263,7 @@ def remove_identities(client, resource_group_name, vault_name, curr_identity_det
             identity_type = 'userassigned'
     else:
         if curr_identity_type not in ["userassigned", "systemassigned, userassigned"]:
-            raise CLIError(
+            raise ArgumentUsageError(
                 """
                 There are no user assigned identities to be removed.
                 """)
@@ -316,14 +316,14 @@ def update_encryption(cmd, client, resource_group_name, vault_name, encryption_k
     if identity_details is not None:
         identity_type = identity_details.type.lower()
     if identity_details is None or identity_type == 'none':
-        raise CLIError(
+        raise ValidationError(
             """
-            Please enable identities of Recovery Service Vault
+            Please enable identities of Recovery Services Vault
             """)
 
     if encryption_type != "CustomerManaged":
-        if not(use_systemassigned_identity) and identity_id is None:
-            raise CLIError(
+        if use_systemassigned_identity is None and identity_id is None:
+            raise RequiredArgumentMissingError(
                 """
                 Please provide user assigned identity id using --identity-id paramter or set --use-system-assigned flag
                 """)
@@ -336,26 +336,26 @@ def update_encryption(cmd, client, resource_group_name, vault_name, encryption_k
             """)
 
     kekIdentity = None
-    is_identity_present = 1
+    is_identity_present = False
     if identity_id is not None:
         if identity_type not in ["userassigned", "systemassigned, userassigned"]:
-            raise CLIError(
+            raise ArgumentUsageError(
                 """
-                Please add user assigned identity for Recovery Service Vault.
+                Please add user assigned identity for Recovery Services Vault.
                 """)
         if identity_id in identity_details.user_assigned_identities.keys():
-            is_identity_present = 0
-        if is_identity_present == 1:
-            raise CLIError(
+            is_identity_present = True
+        if not is_identity_present:
+            raise InvalidArgumentValueError(
                 """
-                This user assigned identity not available for Recovery Service Vault.
+                This user assigned identity not available for Recovery Services Vault.
                 """)
 
     if use_systemassigned_identity:
         if identity_type not in ["systemassigned", "systemassigned, userassigned"]:
-            raise CLIError(
+            raise ArgumentUsageError(
                 """
-                Please make sure that system assigned identity is enabled for Recovery Service Vault
+                Please make sure that system assigned identity is enabled for Recovery Services Vault
                 """)
     if identity_id is not None or use_systemassigned_identity:
         kekIdentity = CmkKekIdentity(user_assigned_identity=identity_id,
