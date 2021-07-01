@@ -95,24 +95,24 @@ def maps_account_update(client,
                         type_=None,
                         user_assigned_identities=None,
                         name=None):
-    if kind is None:
-        kind = "Gen1"
     if disable_local_auth is None:
         disable_local_auth = False
     maps_account_update_parameters = {}
     if tags is not None:
         maps_account_update_parameters['tags'] = tags
-    maps_account_update_parameters['kind'] = "Gen1" if kind is None else kind
+    if kind is not None:
+        maps_account_update_parameters['kind'] = kind
     maps_account_update_parameters['disable_local_auth'] = False if disable_local_auth is None else disable_local_auth
     if linked_resources is not None:
         maps_account_update_parameters['linked_resources'] = linked_resources
-    maps_account_update_parameters['identity'] = {}
+    if type_ is not None or user_assigned_identities is not None:
+        maps_account_update_parameters['identity'] = {}
     if type_ is not None:
         maps_account_update_parameters['identity']['type'] = type_
     if user_assigned_identities is not None:
         maps_account_update_parameters['identity']['user_assigned_identities'] = user_assigned_identities
-    maps_account_update_parameters['sku'] = {}
-    maps_account_update_parameters['sku']['name'] = name
+    if name is not None:
+        maps_account_update_parameters['sku'] = {'name': name}
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
                          maps_account_update_parameters=maps_account_update_parameters)
@@ -191,7 +191,8 @@ def maps_creator_update(client,
     creator_update_parameters = {}
     if tags is not None:
         creator_update_parameters['tags'] = tags
-    creator_update_parameters['storage_units'] = storage_units
+    if storage_units is not None:
+        creator_update_parameters['storage_units'] = storage_units
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
                          creator_name=creator_name,
