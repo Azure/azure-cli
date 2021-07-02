@@ -95,14 +95,13 @@ def maps_account_update(client,
                         type_=None,
                         user_assigned_identities=None,
                         name=None):
-    if disable_local_auth is None:
-        disable_local_auth = False
     maps_account_update_parameters = {}
     if tags is not None:
         maps_account_update_parameters['tags'] = tags
     if kind is not None:
         maps_account_update_parameters['kind'] = kind
-    maps_account_update_parameters['disable_local_auth'] = False if disable_local_auth is None else disable_local_auth
+    if disable_local_auth is not None:
+        maps_account_update_parameters['disable_local_auth'] = disable_local_auth
     if linked_resources is not None:
         maps_account_update_parameters['linked_resources'] = linked_resources
     if type_ is not None or user_assigned_identities is not None:
