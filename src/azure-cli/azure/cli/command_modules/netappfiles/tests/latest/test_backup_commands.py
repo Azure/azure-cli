@@ -9,6 +9,7 @@ LOCATION = "southcentralusstage"
 VNET_LOCATION = "southcentralus"
 
 
+@unittest.skip("CBS is not working on any region so skipping for now")
 class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
@@ -206,7 +207,6 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         assert not volume['dataProtection']['backup']['backupEnabled']
 
-    @unittest.skip("Environments are down and therefore not able to gather recordings for this at the moment")
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_')
     def test_restore_backup_to_new_volume(self):
         # create backup
