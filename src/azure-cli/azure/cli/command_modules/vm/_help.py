@@ -2142,7 +2142,7 @@ short-summary: Add a secret to a VM. To install certificates on a virtual machin
 examples:
   - name: Add a secret to a VM using the Azure Key Vault virtual machine extension (Linux).
     text: |
-        az vm extension set -n "KeyVaultForLinux" --publisher Microsoft.Azure.KeyVault -g "<resourcegroup>" --vm-name "<vmName>" --version 2.0 --settings '{\"secretsManagementSettings\": { \"pollingIntervalInS\": \"<pollingInterval>\", \"certificateStoreName\": \"<certStoreName>\", \"certificateStoreLocation\": \"<certStoreLoc>\", \"observedCertificates\": [\" <observedCert1> \", \" <observedCert2> \"] }}'
+        az vm extension add -n "KeyVaultForLinux" --publisher Microsoft.Azure.KeyVault -g "<resourcegroup>" --vm-name "<vmName>" --version 2.0 --settings '{\"secretsManagementSettings\": { \"pollingIntervalInS\": \"<pollingInterval>\", \"certificateStoreName\": \"<certStoreName>\", \"certificateStoreLocation\": \"<certStoreLoc>\", \"observedCertificates\": [\" <observedCert1> \", \" <observedCert2> \"] }}'
   - name: Add a secret to a VM using the Azure Key Vault virtual machine extension (Windows).
     text: |
         az vm extension set --name "KeyVaultForWindows" --publisher Microsoft.Azure.KeyVault --resource-group "<resourcegroup>" --vm-name "<vmName>" --settings '{\"secretsManagementSettings\": { \"pollingIntervalInS\": \"<pollingInterval>\", \"certificateStoreName\": \"<certStoreName>\", \"certificateStoreLocation\": \"<certStoreLoc>\", \"observedCertificates\": [\" <observedCert1> \", \" <observedCert2> \"] }}'
