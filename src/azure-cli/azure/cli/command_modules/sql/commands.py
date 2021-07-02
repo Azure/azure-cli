@@ -24,6 +24,7 @@ from ._format import (
 )
 
 from ._util import (
+    get_sql_backup_short_term_retention_policies_operations,
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations,
     get_sql_databases_operations,
@@ -341,6 +342,18 @@ def load_command_table(self, _):
             'restore_long_term_retention_backup',
             supports_no_wait=True)
         g.wait_command('wait')
+
+    backup_short_term_retention_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#BackupShortTermRetentionPoliciesOperations.{}',
+        client_factory=get_sql_backup_short_term_retention_policies_operations)
+
+    with self.command_group('sql db str-policy',
+                            backup_short_term_retention_policies_operations,
+                            client_factory=get_sql_backup_short_term_retention_policies_operations,
+                            is_preview=True) as g:
+
+        g.custom_command('set', 'update_short_term_retention', supports_no_wait=True)
+        g.custom_show_command('show', 'get_short_term_retention')
 
     database_sensitivity_labels_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',

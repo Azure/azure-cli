@@ -6163,7 +6163,7 @@ short-summary: Create a route server.
 examples:
   - name: Create a route server.
     text: |
-      az network routeserver create --resource-group myresourcegroup --name myrouteserver --hosted-subnet my_subnet_id
+      az network routeserver create --resource-group myresourcegroup --name myrouteserver --hosted-subnet my_subnet_id --public-ip-address my_public_ip
 """
 
 helps['network routeserver update'] = """

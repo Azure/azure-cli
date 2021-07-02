@@ -460,11 +460,7 @@ def _get_identity_object_from_type(
                 identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value,
                                                   user_assigned_identities=umiDict)
     elif assignIdentityIsPresent:
-        if existingResourceIdentity is not None:
-            identityResult = existingResourceIdentity
-            identityResult.type = ResourceIdType.system_assigned.value
-        else:
-            identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
+        identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
 
     if assignIdentityIsPresent is False and existingResourceIdentity is not None:
         identityResult = existingResourceIdentity
@@ -2703,6 +2699,45 @@ def update_long_term_retention(
         resource_group_name=resource_group_name,
         policy_name=LongTermRetentionPolicyName.DEFAULT,
         parameters=kwargs)
+
+    return policy
+
+
+def update_short_term_retention(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        retention_days,
+        diffbackup_hours,
+        no_wait=False):
+    '''
+    Updates short term retention for live database
+    '''
+
+    return sdk_no_wait(
+        no_wait,
+        client.create_or_update,
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        retention_days=retention_days,
+        diff_backup_interval_in_hours=diffbackup_hours)
+
+
+def get_short_term_retention(
+        client,
+        database_name,
+        server_name,
+        resource_group_name):
+    '''
+    Gets short term retention for live database
+    '''
+
+    policy = client.get(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name)
 
     return policy
 

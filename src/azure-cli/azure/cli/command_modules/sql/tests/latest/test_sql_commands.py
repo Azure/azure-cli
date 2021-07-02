@@ -776,6 +776,45 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 
+class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
+    def test_sql_db_short_term_retention(self):
+
+        # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
+        self.kwargs.update({
+            'resource_group': 'WestUS2ResourceGroup',
+            'server_name': 'lillian-westus2-server',
+            'database_name': 'ps5691',
+            'retention_days_v1': 7,
+            'diffbackup_hours_v1': 24,
+            'retention_days_v2': 6,
+            'diffbackup_hours_v2': 12
+        })
+
+        # Test UPDATE short term retention policy on live database, value updated to v1.
+        self.cmd(
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v1} --diffbackup-hours {diffbackup_hours_v1}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v1}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
+
+        # Test GET short term retention policy on live database, value equals to v1.
+        self.cmd(
+            'sql db str-policy show -g {resource_group} -s {server_name} -n {database_name}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v1}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
+
+        # Test UPDATE short term retention policy on live database, value updated to v2.
+        self.cmd(
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v2} --diffbackup-hours {diffbackup_hours_v2}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v2}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
+
+
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_long_term_retention(
             self):
@@ -867,7 +906,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'restore-dest-cli'
+            'dest_database_name': 'restore-dest-cli-temp'
         })
 
         self.cmd(
@@ -4952,7 +4991,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
         s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
 
-        failover_group_name = "fgclitest16578"
+        failover_group_name = "fgclitest16578-lulu"
 
         database_name = "db1"
 
@@ -5071,7 +5110,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         # Fail back to original server
-        self.cmd('sql failover-group set-primary --allow-data-loss -g {} -s {} -n {}'
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
                  .format(s1.group, s1.name, failover_group_name))
 
         # The failover operation is completed when new primary is promoted to primary role
