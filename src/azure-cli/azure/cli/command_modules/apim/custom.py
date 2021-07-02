@@ -23,7 +23,8 @@ from knack.util import CLIError
 from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
-                                             ApiManagementServiceSkuProperties, ApiManagementServiceBackupRestoreParameters,
+                                             ApiManagementServiceSkuProperties,
+                                             ApiManagementServiceBackupRestoreParameters,
                                              ApiContract, ApiType, ApiCreateOrUpdateParameter, Protocol,
                                              VirtualNetworkType, SkuType, ApiCreateOrUpdatePropertiesWsdlSelector,
                                              SoapApiType, ContentFormat, SubscriptionKeyParameterNamesContract,
@@ -60,7 +61,8 @@ def create_apim(client, resource_group_name, name, publisher_email, sku_name=Sku
         notification_sender_email=publisher_email,
         publisher_email=publisher_email,
         publisher_name=publisher_name,
-        sku=ApiManagementServiceSkuProperties(name=sku_name, capacity=sku_capacity),
+        sku=ApiManagementServiceSkuProperties(
+            name=sku_name, capacity=sku_capacity),
         enable_client_certificate=enable_client_certificate,
         virtual_network_type=VirtualNetworkType(virtual_network_type),
         tags=tags
@@ -105,7 +107,8 @@ def update_apim(instance, publisher_email=None, sku_name=None, sku_capacity=None
         instance.identity = None
     else:
         if instance.identity is None:
-            instance.identity = ApiManagementServiceIdentity(type="SystemAssigned")
+            instance.identity = ApiManagementServiceIdentity(
+                type="SystemAssigned")
 
     if enable_client_certificate is not None:
         instance.enable_client_certificate = enable_client_certificate
@@ -168,11 +171,12 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
 
 # API Operations
 
-def create_apim_api(client, resource_group_name, service_name, api_id, description=None, subscription_key_header_name=None,
-                    subscription_key_query_param_name=None, open_id_provider_id=None, bearer_token_sending_methods=None,
-                    authorization_server_id=None, authorization_scope=None, display_name=None, service_url=None, protocols=None,
-                    path=None, subscription_key_required=None, api_type=None,
-                    subscription_required=False, no_wait=False):
+def create_apim_api(client, resource_group_name, service_name, api_id, description=None,
+                    subscription_key_header_name=None, subscription_key_query_param_name=None,
+                    open_id_provider_id=None, bearer_token_sending_methods=None,
+                    authorization_server_id=None, authorization_scope=None, display_name=None,
+                    service_url=None, protocols=None, path=None, subscription_key_required=None,
+                    api_type=None, subscription_required=False, no_wait=False):
     """Creates a new API. """
 
     if authorization_server_id is not None and authorization_scope is not None:
@@ -200,10 +204,13 @@ def create_apim_api(client, resource_group_name, service_name, api_id, descripti
         api_id=api_id,
         description=description,
         authentication_settings=authentication_settings,
-        subscription_key_parameter_names=get_subscription_key_parameter_names(subscription_key_query_param_name, subscription_key_header_name),
+        subscription_key_parameter_names=get_subscription_key_parameter_names(
+            subscription_key_query_param_name,
+            subscription_key_header_name),
         display_name=display_name,
         service_url=service_url,
-        protocols=protocols if protocols is not None else [Protocol.https.value],
+        protocols=protocols if protocols is not None else [
+            Protocol.https.value],
         path=path,
         api_type=api_type if api_type is not None else ApiType.http.value,
         subscription_required=subscription_required
@@ -229,7 +236,8 @@ def list_apim_api(client, resource_group_name, service_name, filter_display_name
     return client.api.list_by_service(resource_group_name, service_name, filter=filter_display_name, skip=skip, top=top)
 
 
-def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=None, if_match=None, no_wait=False):
+def delete_apim_api(
+        client, resource_group_name, service_name, api_id, delete_revisions=None, if_match=None, no_wait=False):
     """Deletes an existing API. """
 
     cms = client.api
@@ -244,16 +252,17 @@ def delete_apim_api(client, resource_group_name, service_name, api_id, delete_re
         delete_revisions=delete_revisions if delete_revisions is not None else False)
 
 
-def update_apim_api(instance, description=None, subscription_key_header_name=None, subscription_key_query_param_name=None,
-                    display_name=None, service_url=None, protocols=None, path=None,
-                    api_type=None, subscription_required=None, tags=None):
+def update_apim_api(instance, description=None, subscription_key_header_name=None,
+                    subscription_key_query_param_name=None, display_name=None, service_url=None, protocols=None,
+                    path=None, api_type=None, subscription_required=None, tags=None):
     """Updates an existing API. """
 
     if description is not None:
         instance.description = description
 
     if subscription_key_header_name is not None:
-        instance.subscription_key_parameter_names = get_subscription_key_parameter_names(subscription_key_query_param_name, subscription_key_header_name)
+        instance.subscription_key_parameter_names = get_subscription_key_parameter_names(
+            subscription_key_query_param_name, subscription_key_header_name)
 
     if display_name is not None:
         instance.display_name = display_name
@@ -279,16 +288,18 @@ def update_apim_api(instance, description=None, subscription_key_header_name=Non
     return instance
 
 
-def import_apim_api(client, resource_group_name, service_name, path, specification_format, description=None,
-                    subscription_key_header_name=None, subscription_key_query_param_name=None, api_id=None,
-                    api_revision=None, api_version=None, api_version_set_id=None, display_name=None, service_url=None,
-                    protocols=None, specification_path=None, specification_url=None, api_type=None, subscription_required=None,
-                    soap_api_type=None, wsdl_endpoint_name=None, wsdl_service_name=None, no_wait=False):
+def import_apim_api(
+        client, resource_group_name, service_name, path, specification_format, description=None,
+        subscription_key_header_name=None, subscription_key_query_param_name=None, api_id=None, api_revision=None,
+        api_version=None, api_version_set_id=None, display_name=None, service_url=None, protocols=None,
+        specification_path=None, specification_url=None, api_type=None, subscription_required=None, soap_api_type=None,
+        wsdl_endpoint_name=None, wsdl_service_name=None, no_wait=False):
     """Import a new API"""
     cms = client.api
 
     # api_type: Type of API. Possible values include: 'http', 'soap'
-    # possible parameter format is 'wadl-xml', 'wadl-link-json', 'swagger-json', 'swagger-link-json', 'wsdl', 'wsdl-link', 'openapi', 'openapi+json', 'openapi-link'
+    # possible parameter format is 'wadl-xml', 'wadl-link-json', 'swagger-json', 'swagger-link-json',
+    #   'wsdl', 'wsdl-link', 'openapi', 'openapi+json', 'openapi-link'
     # possible parameter specificationFormat is 'Wadl', 'Swagger', 'OpenApi', 'OpenApiJson', 'Wsdl'
 
     resource = ApiCreateOrUpdateParameter(
@@ -307,9 +318,11 @@ def import_apim_api(client, resource_group_name, service_name, path, specificati
     elif specification_url is not None and specification_path is None:
         resource.value = specification_url
     elif specification_path is not None and specification_url is not None:
-        raise CLIError("Can't specify specification-url and specification-path at the same time.")
+        raise CLIError(
+            "Can't specify specification-url and specification-path at the same time.")
     else:
-        raise CLIError("Please either specify specification-url or specification-path.")
+        raise CLIError(
+            "Please either specify specification-url or specification-path.")
 
     FORMAT_MAPPINGS = {
         ImportFormat.Wadl.value: {
@@ -339,14 +352,16 @@ def import_apim_api(client, resource_group_name, service_name, path, specificati
     if specification_format in FORMAT_MAPPINGS:
         resource.format = FORMAT_MAPPINGS[specification_format][specification_path is not None]
     else:
-        raise CLIError("Please provide valid value for specificationFormat: " + specification_format)
+        raise CLIError(
+            "Please provide valid value for specificationFormat: " + specification_format)
 
     resource.protocols = protocols
     resource.service_url = service_url
     resource.display_name = display_name
     resource.description = description
     resource.subscription_required = subscription_required
-    resource.subscription_key_parameter_names = get_subscription_key_parameter_names(subscription_key_query_param_name, subscription_key_header_name)
+    resource.subscription_key_parameter_names = get_subscription_key_parameter_names(
+        subscription_key_query_param_name, subscription_key_header_name)
     resource.api_version = api_version
     resource.api_version_set_id = _get_vs_fullpath(api_version_set_id)
 
@@ -380,7 +395,8 @@ def get_subscription_key_parameter_names(subscription_key_header_name=None, subs
             query=subscription_key_query_param_name
         )
     elif subscription_key_query_param_name is not None or subscription_key_header_name is not None:
-        raise CLIError("Please specify 'subscription_key_query_param_name' and 'subscription_key_header_name' at the same time.")
+        raise CLIError(
+            "Please specify 'subscription_key_query_param_name' and 'subscription_key_header_name' at the same time.")
 
     return None
 
@@ -431,7 +447,9 @@ def show_product(client, resource_group_name, service_name, product_id):
     return client.product.get(resource_group_name, service_name, product_id)
 
 
-def create_product(client, resource_group_name, service_name, product_name, product_id=None, description=None, legal_terms=None, subscription_required=None, approval_required=None, subscriptions_limit=None, state=None, no_wait=False):
+def create_product(
+        client, resource_group_name, service_name, product_name, product_id=None, description=None, legal_terms=None,
+        subscription_required=None, approval_required=None, subscriptions_limit=None, state=None, no_wait=False):
 
     parameters = ProductContract(
         description=description,
@@ -463,7 +481,9 @@ def create_product(client, resource_group_name, service_name, product_name, prod
         parameters=parameters)
 
 
-def update_product(instance, product_name=None, description=None, legal_terms=None, subscription_required=None, approval_required=None, subscriptions_limit=None, state=None):
+def update_product(
+        instance, product_name=None, description=None, legal_terms=None, subscription_required=None,
+        approval_required=None, subscriptions_limit=None, state=None):
 
     if product_name is not None:
         instance.display_name = product_name
@@ -494,7 +514,8 @@ def update_product(instance, product_name=None, description=None, legal_terms=No
     return instance
 
 
-def delete_product(client, resource_group_name, service_name, product_id, delete_subscriptions=None, if_match=None, no_wait=False):
+def delete_product(
+        client, resource_group_name, service_name, product_id, delete_subscriptions=None, if_match=None, no_wait=False):
 
     return sdk_no_wait(
         no_wait,
@@ -508,7 +529,8 @@ def delete_product(client, resource_group_name, service_name, product_id, delete
 
 # Named Value Operations
 
-def create_apim_nv(client, resource_group_name, service_name, named_value_id, display_name, value=None, tags=None, secret=False):
+def create_apim_nv(
+        client, resource_group_name, service_name, named_value_id, display_name, value=None, tags=None, secret=False):
     """Creates a new Named Value. """
 
     resource = NamedValueCreateContract(
@@ -571,7 +593,9 @@ def get_api_operation(client, resource_group_name, service_name, api_id, operati
     return client.api_operation.get(resource_group_name, service_name, api_id, operation_id)
 
 
-def create_api_operation(client, resource_group_name, service_name, api_id, url_template, method, display_name, template_parameters=None, operation_id=None, description=None, if_match=None, no_wait=False):
+def create_api_operation(
+        client, resource_group_name, service_name, api_id, url_template, method, display_name, template_parameters=None,
+        operation_id=None, description=None, if_match=None, no_wait=False):
     """Creates a new operation in the API or updates an existing one."""
 
     if operation_id is None:
@@ -638,7 +662,8 @@ def show_api_release(client, resource_group_name, service_name, api_id, release_
     return client.api_release.get(resource_group_name, service_name, api_id, release_id)
 
 
-def create_api_release(client, resource_group_name, service_name, api_id, api_revision, release_id=None, if_match=None, notes=None):
+def create_api_release(
+        client, resource_group_name, service_name, api_id, api_revision, release_id=None, if_match=None, notes=None):
     """Creates a new Release for the API."""
 
     if release_id is None:
@@ -646,7 +671,8 @@ def create_api_release(client, resource_group_name, service_name, api_id, api_re
 
     api_id1 = "/apis/" + api_id + ";rev=" + api_revision
 
-    return client.api_release.create_or_update(resource_group_name, service_name, api_id, release_id, "*" if if_match is None else if_match, api_id1, notes)
+    return client.api_release.create_or_update(
+        resource_group_name, service_name, api_id, release_id, "*" if if_match is None else if_match, api_id1, notes)
 
 
 def update_api_release(instance, notes=None):
@@ -660,7 +686,8 @@ def update_api_release(instance, notes=None):
 def delete_api_release(client, resource_group_name, service_name, api_id, release_id, if_match=None):
     """Deletes the specified release in the API."""
 
-    return client.api_release.delete(resource_group_name, service_name, api_id, release_id, "*" if if_match is None else if_match)
+    return client.api_release.delete(
+        resource_group_name, service_name, api_id, release_id, "*" if if_match is None else if_match)
 
 
 def list_api_revision(client, resource_group_name, service_name, api_id):
@@ -669,8 +696,8 @@ def list_api_revision(client, resource_group_name, service_name, api_id):
     return client.api_revision.list_by_service(resource_group_name, service_name, api_id)
 
 
-def create_apim_api_revision(client, resource_group_name, service_name, api_id, api_revision, api_revision_description=None,
-                             no_wait=False):
+def create_apim_api_revision(client, resource_group_name, service_name, api_id, api_revision,
+                             api_revision_description=None, no_wait=False):
     """Creates a new API Revision. """
 
     cur_api = client.api.get(resource_group_name, service_name, api_id)
@@ -703,7 +730,8 @@ def show_api_vs(client, resource_group_name, service_name, version_set_id):
     return client.api_version_set.get(resource_group_name, service_name, version_set_id)
 
 
-def create_api_vs(client, resource_group_name, service_name, display_name, versioning_scheme, version_set_id=None, if_match=None, description=None, version_query_name=None, version_header_name=None, no_wait=False):
+def create_api_vs(client, resource_group_name, service_name, display_name, versioning_scheme, version_set_id=None,
+                  if_match=None, description=None, version_query_name=None, version_header_name=None, no_wait=False):
     """Creates or Updates a Api Version Set."""
 
     if version_set_id is None:
@@ -716,13 +744,15 @@ def create_api_vs(client, resource_group_name, service_name, display_name, versi
 
     if versioning_scheme == VersioningScheme.header:
         if version_header_name is None:
-            raise CLIError("Please specify version header name while using 'header' as version scheme.")
+            raise CLIError(
+                "Please specify version header name while using 'header' as version scheme.")
 
         resource.version_header_name = version_header_name
 
     if versioning_scheme == VersioningScheme.query:
         if version_query_name is None:
-            raise CLIError("Please specify version query name while using 'query' as version scheme.")
+            raise CLIError(
+                "Please specify version query name while using 'query' as version scheme.")
 
         resource.version_query_name = version_query_name
 
@@ -736,7 +766,9 @@ def create_api_vs(client, resource_group_name, service_name, display_name, versi
         if_match="*" if if_match is None else if_match)
 
 
-def update_api_apivs(instance, versioning_scheme=None, description=None, display_name=None, version_header_name=None, version_query_name=None):
+def update_api_apivs(
+        instance, versioning_scheme=None, description=None, display_name=None, version_header_name=None,
+        version_query_name=None):
     """Updates the details of the Api VersionSet specified by its identifier."""
 
     if display_name is not None:
@@ -746,13 +778,15 @@ def update_api_apivs(instance, versioning_scheme=None, description=None, display
         instance.versioning_scheme = versioning_scheme
         if versioning_scheme == VersioningScheme.header:
             if version_header_name is None:
-                raise CLIError("Please specify version header name while using 'header' as version scheme.")
+                raise CLIError(
+                    "Please specify version header name while using 'header' as version scheme.")
 
             instance.version_header_name = version_header_name
             instance.version_query_name = None
         if versioning_scheme == VersioningScheme.query:
             if version_query_name is None:
-                raise CLIError("Please specify version query name while using 'query' as version scheme.")
+                raise CLIError(
+                    "Please specify version query name while using 'query' as version scheme.")
 
             instance.version_query_name = version_query_name
             instance.version_header_name = None
