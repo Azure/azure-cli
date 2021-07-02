@@ -46,6 +46,7 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroupReadWriteEndpoint,
     ServerNetworkAccessFlag,
     ServerInfo,
+    ShortTermRetentionPolicyName,
     EncryptionProtector,
     ManagedInstanceEncryptionProtector,
     FirewallRule,
@@ -2721,10 +2722,14 @@ def update_short_term_retention(
         resource_group_name,
         retention_days,
         diffbackup_hours,
-        no_wait=False):
+        no_wait=False,
+        **kwargs):
     '''
     Updates short term retention for live database
     '''
+
+    kwargs['retention_days'] = retention_days
+    kwargs['diff_backup_interval_in_hours'] = diffbackup_hours
 
     return sdk_no_wait(
         no_wait,
@@ -2732,8 +2737,8 @@ def update_short_term_retention(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
-        retention_days=retention_days,
-        diff_backup_interval_in_hours=diffbackup_hours)
+        policy_name=ShortTermRetentionPolicyName.DEFAULT,
+        parameters=kwargs)
 
 
 def get_short_term_retention(
@@ -2745,12 +2750,11 @@ def get_short_term_retention(
     Gets short term retention for live database
     '''
 
-    policy = client.get(
+    return client.get(
         database_name=database_name,
         server_name=server_name,
-        resource_group_name=resource_group_name)
-
-    return policy
+        resource_group_name=resource_group_name,
+        policy_name=ShortTermRetentionPolicyName.DEFAULT)
 
 
 def _list_by_database_long_term_retention_backups(

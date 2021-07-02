@@ -3125,7 +3125,6 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  ' --storage-uri {}'
                  .format(server, db_name2, resource_group, admin_password, admin_login, storageKey, bacpacUri),
                  checks=[
-                     # Uncomment this when bug in backend is fixed
                      JMESPathCheck('blobUri', bacpacUri),
                      JMESPathCheck('databaseName', db_name2),
                      JMESPathCheck('requestType', 'ImportToExistingDatabase'),
@@ -3138,7 +3137,6 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  ' --storage-uri {}'
                  .format(server, db_name3, resource_group, admin_password, admin_login, sasKey, bacpacUri2),
                  checks=[
-                     # Uncomment this when bug in backend is fixed
                      JMESPathCheck('blobUri', bacpacUri2),
                      JMESPathCheck('databaseName', db_name3),
                      JMESPathCheck('requestType', 'ImportToExistingDatabase'),
