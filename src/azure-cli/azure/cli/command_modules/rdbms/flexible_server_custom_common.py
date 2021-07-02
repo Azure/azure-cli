@@ -205,8 +205,8 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
                        "If your parameter persistence is turned OFF, consider passing them explicitly.")
     if not yes:
         user_confirmation(
-            "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
-                                                                                              resource_group_name), yes=yes)
+            "Are you sure you want to delete the database '{0}' of server '{1}'".format(database_name,
+                                                                                        server_name), yes=yes)
 
     try:
         result = client.begin_delete(resource_group_name, server_name, database_name)
@@ -283,7 +283,6 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
     if allow_push:
         logger.warning("Pushing the created action file to origin %s branch", branch)
         run_subprocess("git push origin {}".format(branch))
-        github_actions_run(action_name, branch)
     else:
         logger.warning('You did not set --allow-push parameter. Please push the prepared file %s to your remote repo and run "deploy run" command to activate the workflow.', action_path)
 
@@ -291,7 +290,7 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
 def github_actions_run(action_name, branch):
 
     gitcli_check_and_login()
-    logger.warning("Created event for %s.yml in branch %s", action_name, branch)
+    logger.warning("Created an event for %s.yml in branch %s", action_name, branch)
     run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
 
 

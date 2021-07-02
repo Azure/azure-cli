@@ -6989,7 +6989,8 @@ def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, n
 def create_virtual_hub(cmd, client,
                        resource_group_name,
                        virtual_hub_name,
-                       hosted_subnet=None,
+                       hosted_subnet,
+                       public_ip_address=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -7012,7 +7013,10 @@ def create_virtual_hub(cmd, client,
     vhub_poller = client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
-    ip_config = HubIpConfiguration(subnet=SubResource(id=hosted_subnet))
+    ip_config = HubIpConfiguration(
+        subnet=SubResource(id=hosted_subnet),
+        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+    )
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
         vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(
@@ -7046,8 +7050,11 @@ def update_virtual_hub(cmd, instance,
 def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wait=False):
     from azure.cli.core.commands import LongRunningOperation
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
-    poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
-    LongRunningOperation(cmd.cli_ctx)(poller)
+    ip_configs = list(vhub_ip_config_client.list(resource_group_name, virtual_hub_name))
+    if ip_configs:
+        ip_config = ip_configs[0]   # There will always be only 1
+        poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
+        LongRunningOperation(cmd.cli_ctx)(poller)
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name)
 
 

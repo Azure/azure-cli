@@ -221,6 +221,7 @@ def load_command_table(self, _):
         g.custom_command('register', 'register_provider')
         g.custom_command('unregister', 'unregister_provider')
         g.custom_command('operation list', 'list_provider_operations')
+        g.custom_command('permission list', 'list_provider_permissions')
         g.custom_show_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
@@ -373,11 +374,17 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_policy_assignment')
         g.custom_command('list', 'list_policy_assignment')
         g.custom_show_command('show', 'show_policy_assignment')
+        g.custom_command('update', 'update_policy_assignment')
 
     with self.command_group('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
         g.custom_command('assign', 'set_identity')
         g.custom_show_command('show', 'show_identity')
         g.custom_command('remove', 'remove_identity')
+
+    with self.command_group('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
+        g.custom_command('create', 'create_policy_non_compliance_message')
+        g.custom_command('list', 'list_policy_non_compliance_message')
+        g.custom_command('delete', 'delete_policy_non_compliance_message')
 
     with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_definition')

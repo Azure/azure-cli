@@ -23,7 +23,7 @@ vault_name = "sarath-vault"
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    # @record_only()
+    #@record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="southeastasia")
@@ -56,7 +56,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    # @record_only()
+    #@record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="southeastasia")
@@ -104,7 +104,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {sa2} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    # @record_only()
+    #@record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="southeastasia")
@@ -172,7 +172,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    # @record_only()
+    #@record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="southeastasia")
@@ -213,7 +213,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    # @record_only()
+    #@record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="southeastasia")
@@ -334,7 +334,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    # @record_only()
+    #@record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="southeastasia")
@@ -387,7 +387,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    # @record_only()
+    #@record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="southeastasia")
@@ -444,7 +444,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    # @record_only()
+    #@record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="southeastasia")

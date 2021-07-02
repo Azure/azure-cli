@@ -47,12 +47,13 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, \
-        BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, \
+    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, \
         TokenStatus, ZoneRedundancy = self.get_models(
             'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
-            'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType',
             'TokenStatus', 'ZoneRedundancy')
+    TaskStatus, BaseImageTriggerType, SourceRegistryLoginMode, UpdateTriggerPayloadType = self.get_models(
+        'TaskStatus', 'BaseImageTriggerType', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', operation_group='tasks')
+    RunStatus = self.get_models('RunStatus', operation_group='runs')
 
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
@@ -421,9 +422,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr connected-registry update') as c:
         c.argument('log_level', help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False)
         c.argument('add_client_token_list', options_list=['--add-client-tokens'], nargs='*', required=False,
-                   help='Client tokens to be added. Use the format "--add-client-tokens [TOKEN_ID1 TOKEN_ID2 ...]" per token id.')
+                   help='Client tokens to be added. Use the format "--add-client-tokens [TOKEN_NAME1 TOKEN_NAME2 ...]" per token id.')
         c.argument('remove_client_token_list', options_list=['--remove-client-tokens'], nargs='*', required=False,
-                   help='Client tokens to be removed. Use the format "--remove-client-tokens [TOKEN_ID1 TOKEN_ID2 ...]" per token id.')
+                   help='Client tokens to be removed. Use the format "--remove-client-tokens [TOKEN_NAME1 TOKEN_NAME2 ...]" per token id.')
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False)
         c.argument('sync_message_ttl', help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False)
