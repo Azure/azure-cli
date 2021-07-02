@@ -16,6 +16,7 @@ from azure.cli.core.util import (
 
 from azure.mgmt.sql.models import (
     AdministratorName,
+    AdministratorType,
     AuthenticationName,
     BlobAuditingPolicyState,
     CapabilityGroup,
@@ -3568,6 +3569,7 @@ def server_ad_admin_set(
     '''
 
     kwargs['tenant_id'] = _get_tenant_id()
+    kwargs['administrator_type'] = AdministratorType.ACTIVE_DIRECTORY
 
     return client.begin_create_or_update(
         server_name=server_name,
