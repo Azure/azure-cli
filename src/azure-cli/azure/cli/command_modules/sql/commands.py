@@ -208,18 +208,22 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#TransparentDataEncryptionsOperations.{}',
         client_factory=get_sql_database_transparent_data_encryptions_operations)
 
-    with self.command_group('sql db tde', transparent_data_encryptions_operations) as g:
+    with self.command_group('sql db tde',
+                            transparent_data_encryptions_operations,
+                            client_factory=get_sql_database_transparent_data_encryptions_operations) as g:
 
-        g.command('set', 'create_or_update')
-        g.show_command('show', 'get')
+        g.custom_command('set', 'transparent_data_encryptions_set')
+        g.custom_command('show', 'transparent_data_encryptions_get')
 
     transparent_data_encryption_activities_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#TransparentDataEncryptionActivitiesOperations.{}',
         client_factory=get_sql_database_transparent_data_encryption_activities_operations)
 
-    with self.command_group('sql db tde', transparent_data_encryption_activities_operations) as g:
+    with self.command_group('sql db tde',
+                            transparent_data_encryption_activities_operations,
+                            client_factory=get_sql_database_transparent_data_encryption_activities_operations) as g:
 
-        g.command('list-activity', 'list_by_configuration')
+        g.custom_command('list-activity', 'tde_list_by_configuration')
 
     replication_links_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ReplicationLinksOperations.{}',

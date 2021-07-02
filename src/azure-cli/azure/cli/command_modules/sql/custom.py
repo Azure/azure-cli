@@ -21,38 +21,39 @@ from azure.mgmt.sql.models import (
     BlobAuditingPolicyState,
     CapabilityGroup,
     CapabilityStatus,
-    CreateMode,
     ConnectionPolicyName,
+    CreateMode,
+    EncryptionProtector,
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
+    FailoverGroupReplicationRole,
+    FirewallRule,
+    InstanceFailoverGroup,
+    InstanceFailoverGroupReadOnlyEndpoint,
+    InstanceFailoverGroupReadWriteEndpoint,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
+    ManagedInstanceEncryptionProtector,
+    ManagedInstanceExternalAdministrator,
+    ManagedInstancePairInfo,
     PartnerInfo,
+    PartnerRegionInfo,
     PerformanceLevelUnit,
-    FailoverGroupReplicationRole,
     ResourceIdentity,
     SecurityAlertPolicyState,
     SensitivityLabel,
     SensitivityLabelSource,
+    ServerExternalAdministrator,
+    ServerInfo,
     ServerKeyType,
+    ServerNetworkAccessFlag,
     ServiceObjectiveName,
+    ShortTermRetentionPolicyName,
     Sku,
     StorageKeyType,
-    InstanceFailoverGroup,
-    ManagedInstancePairInfo,
-    PartnerRegionInfo,
-    InstanceFailoverGroupReadOnlyEndpoint,
-    InstanceFailoverGroupReadWriteEndpoint,
-    ServerNetworkAccessFlag,
-    ServerInfo,
-    ShortTermRetentionPolicyName,
-    EncryptionProtector,
-    ManagedInstanceEncryptionProtector,
-    FirewallRule,
-    UserIdentity,
-    ServerExternalAdministrator,
-    ManagedInstanceExternalAdministrator
+    TransparentDataEncryptionName,
+    UserIdentity
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -1316,7 +1317,7 @@ def db_list_capabilities(
             e.supported_service_level_objectives = [
                 slo for slo in e.supported_service_level_objectives
                 if slo.performance_level.value == int(dtu) and
-                slo.performance_level.unit == PerformanceLevelUnit.dtu.value]
+                slo.performance_level.unit == PerformanceLevelUnit.DTU]
 
     # Filter by vcores
     if vcores:
@@ -1324,7 +1325,7 @@ def db_list_capabilities(
             e.supported_service_level_objectives = [
                 slo for slo in e.supported_service_level_objectives
                 if slo.performance_level.value == int(vcores) and
-                slo.performance_level.unit == PerformanceLevelUnit.vcores.value]
+                slo.performance_level.unit == PerformanceLevelUnit.V_CORES]
 
     # Filter by availability
     if available:
@@ -2699,6 +2700,7 @@ def update_long_term_retention(
 
     return policy
 
+
 def update_long_term_retention_get(
         client,
         resource_group_name,
@@ -2733,7 +2735,7 @@ def update_short_term_retention(
 
     return sdk_no_wait(
         no_wait,
-        client.create_or_update,
+        client.begin_create_or_update,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -3345,7 +3347,7 @@ def elastic_pool_list_capabilities(
             e.supported_elastic_pool_performance_levels = [
                 pl for pl in e.supported_elastic_pool_performance_levels
                 if pl.performance_level.value == int(dtu) and
-                pl.performance_level.unit == PerformanceLevelUnit.dtu.value]
+                pl.performance_level.unit == PerformanceLevelUnit.DTU]
 
     # Filter by vcores
     if vcores:
@@ -3353,7 +3355,7 @@ def elastic_pool_list_capabilities(
             e.supported_elastic_pool_performance_levels = [
                 pl for pl in e.supported_elastic_pool_performance_levels
                 if pl.performance_level.value == int(vcores) and
-                pl.performance_level.unit == PerformanceLevelUnit.vcores.value]
+                pl.performance_level.unit == PerformanceLevelUnit.V_CORES]
 
     # Filter by availability
     if available:
@@ -3810,7 +3812,8 @@ def server_dns_alias_set(
         dns_alias_name,
         original_server_name,
         original_subscription_id=None,
-        original_resource_group_name=None):
+        original_resource_group_name=None,
+        **kwargs):
     '''
     Sets a server DNS alias.
     '''
@@ -3825,12 +3828,13 @@ def server_dns_alias_set(
         quote(original_server_name),
         quote(dns_alias_name))
 
+    kwargs['old_server_dns_alias_id'] = old_alias_id
+
     return client.begin_acquire(
         resource_group_name=resource_group_name,
         server_name=server_name,
         dns_alias_name=dns_alias_name,
-        old_server_dns_alias_id=old_alias_id
-    )
+        parameters=kwargs)
 
 #####
 #           sql server encryption-protector
@@ -3907,8 +3911,7 @@ def server_aad_only_enable(
 def server_aad_only_get(
         client,
         resource_group_name,
-        server_name,
-        **kwargs):
+        server_name):
     '''
     Shows a servers aad-only setting
     '''
@@ -5134,7 +5137,7 @@ def instance_failover_group_update(
     Updates the failover group.
     '''
 
-    failover_group_update_common(
+    _failover_group_update_common(
         instance,
         failover_policy,
         grace_period)
@@ -5175,17 +5178,75 @@ def instance_failover_group_failover(
         failover_group_name=failover_group_name,
         location_name=location_name)
 
-
 ###############################################
 #              sql server conn-policy         #
 ###############################################
+
 
 def conn_policy_show(
         client,
         resource_group_name,
         server_name):
-
+    '''
+    Shows a connectin policy
+    '''
     return client.get(
         resource_group_name=resource_group_name,
         server_name=server_name,
         connection_policy_name=ConnectionPolicyName.DEFAULT)
+
+###############################################
+#              sql db tde                     #
+###############################################
+
+
+def transparent_data_encryptions_set(
+        client,
+        resource_group_name,
+        server_name,
+        database_name,
+        status,
+        **kwargs):
+    '''
+    Sets a Transparent Data Encryption
+    '''
+    kwargs['status'] = status
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT,
+        parameters=kwargs)
+
+
+def transparent_data_encryptions_get(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Shows a Transparent Data Encryption
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT)
+
+
+def tde_list_by_configuration(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Lists Transparent Data Encryption
+    '''
+
+    return client.list_by_configuration(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT)
