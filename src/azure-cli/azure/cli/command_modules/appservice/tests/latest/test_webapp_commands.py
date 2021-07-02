@@ -28,7 +28,7 @@ LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 
 
 class WebappBasicE2ETest(ScenarioTest):
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_e2e(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-e2e', length=24)
@@ -575,7 +575,7 @@ class WebappConfigureTest(ScenarioTest):
     def test_update_webapp_settings_thru_json(self, resource_group):
         webapp_name = self.create_random_name('webapp-config-test', 40)
         plan_name = self.create_random_name('webapp-config-plan', 40)
-
+        slot = 'staging'
         # update through a json file with key value pair
         _, settings_file = tempfile.mkstemp()
         with open(settings_file, 'w+') as file:
@@ -585,6 +585,11 @@ class WebappConfigureTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        # create an empty slot
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot),
+                 checks=[
+            JMESPathCheck('name', slot)
+        ])
 
         output = self.cmd('webapp config appsettings set -g {} -n {} --settings s=value "@{}"'.format(
             resource_group, webapp_name, settings_file)).get_output_in_json()
@@ -617,17 +622,40 @@ class WebappConfigureTest(ScenarioTest):
 
         self.assertEqual(output[0], {
             'name': 's',
-            'value': 'False',
+            'value': 'value',
             'slotSetting': False
         })
         self.assertEqual(output[1], {
             'name': 's2',
-            'value': 'False',
+            'value': 'value2',
             'slotSetting': False
         })
         self.assertEqual(output[2], {
             'name': 's3',
-            'value': 'True',
+            'value': 'value3',
+            'slotSetting': True
+        })
+        with open(settings_file, 'w') as file:
+            file.write(json.dumps(output))
+
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings "@{}"'.format(
+            resource_group, webapp_name, slot, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
+        output.sort(key=lambda s: s['name'])
+
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+        self.assertEqual(output[2], {
+            'name': 's3',
+            'value': 'value3',
             'slotSetting': True
         })
         # update site config
@@ -640,7 +668,8 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config set -g {} -n {} --generic-configurations "@{}"'.format(resource_group, webapp_name, settings_file)).assert_with_checks([
             JMESPathCheck("requestTracingEnabled", True),
             JMESPathCheck("alwaysOn", True),
-        ])
+        ])        
+        
 
 
 class WebappScaleTest(ScenarioTest):
@@ -1570,6 +1599,8 @@ class WebappNetworkConnectionTests(ScenarioTest):
         namespace_name = self.create_random_name('hcnamespace', 24)
         hyco_name = self.create_random_name('hcname', 24)
         um = "[{{\\\"key\\\":\\\"endpoint\\\",\\\"value\\\":\\\"vmsq1:80\\\"}}]"
+        slot = "stage"
+        slot_webapp_name = "{}-{}".format(webapp_name, slot)
 
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
@@ -1585,11 +1616,26 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', hyco_name)
         ])
+
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(
+            resource_group, webapp_name, slot_webapp_name))
+        self.cmd('webapp hybrid-connection add -g {} -n {} --namespace {} --hybrid-connection {} --slot {}'.format(
+            resource_group, webapp_name, namespace_name, hyco_name, slot_webapp_name))
+        self.cmd('webapp hybrid-connection list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name), checks=[
+            JMESPathCheck('length(@)', 1)
+        ])
         self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {}'.format(
             resource_group, webapp_name, namespace_name, hyco_name))
         self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
+        self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {} --slot {}'.format(
+            resource_group, webapp_name, namespace_name, hyco_name, slot_webapp_name))
+        self.cmd(
+            'webapp hybrid-connection list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name),
+            checks=[
+                JMESPathCheck('length(@)', 0)
+            ])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -1598,6 +1644,8 @@ class WebappNetworkConnectionTests(ScenarioTest):
         plan = self.create_random_name('swiftplan', 24)
         subnet_name = self.create_random_name('swiftsubnet', 24)
         vnet_name = self.create_random_name('swiftname', 24)
+        slot = "stage"
+        slot_webapp_name = "{}-{}".format(webapp_name, slot)
 
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
             resource_group, vnet_name, subnet_name))
@@ -1611,9 +1659,22 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name)
         ])
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(
+            resource_group, webapp_name, slot_webapp_name))
+        self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {} --slot {}'.format(
+            resource_group, webapp_name, vnet_name, subnet_name, slot_webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+        self.cmd(
+            'webapp vnet-integration remove -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
 
@@ -1813,6 +1874,17 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('deployer', 'OneDeploy'),
             JMESPathCheck('message', 'OneDeploy'),
             JMESPathCheck('complete', True)
+        ])
+
+
+class DomainScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_domain_create(self, resource_group):
+        contacts = os.path.join(TEST_DIR, 'domain-contact.json')
+        self.cmd("appservice domain create -g {} --hostname {} --contact-info=@\'{}\' --dryrun".format(
+            resource_group, "testuniquedomainname1.com", contacts)
+        ).assert_with_checks([
+            JMESPathCheck('agreement_keys', "['DNRA', 'DNPA']")
         ])
 
 

@@ -1624,11 +1624,9 @@ def _warn_if_manual_handshake_needed(endpoint_type, endpoint):
        "eventgridextension" not in endpoint.lower() and \
        "logic.azure" not in endpoint.lower():
 
-        logger.warning('If the provided endpoint does not support subscription validation '
-                       'handshake, navigate to the validation URL that you receive in the '
-                       'subscription validation event, in order to complete the event '
-                       'subscription creation or update. For more details, '
-                       'please visit http://aka.ms/esvalidation')
+        logger.warning('If you are creating an event subscription from a topic that has “Azure” as the value for its '
+                       '“kind” property, you must validate your webhook endpoint by following the steps described in '
+                       'https://aka.ms/eg-webhook-endpoint-validation.')
 
 
 def _get_sku(sku_name):

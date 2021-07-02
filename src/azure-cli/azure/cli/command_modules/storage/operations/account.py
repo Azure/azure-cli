@@ -59,8 +59,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
-                           allow_cross_tenant_replication=None, default_share_permission=None):
-
+                           allow_cross_tenant_replication=None, default_share_permission=None,
+                           enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow'):  # pylint: disable=unused-argument
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -152,11 +152,20 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
         params.large_file_shares_state = LargeFileSharesState("Enabled")
 
-    if NetworkRuleSet and (bypass or default_action):
+    if NetworkRuleSet and (bypass or default_action or subnet):
+        virtual_network_rules = None
         if bypass and not default_action:
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
-        params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
-                                                 virtual_network_rules=None)
+        if subnet:
+            from msrestazure.tools import is_valid_resource_id
+            if not is_valid_resource_id(subnet):
+                raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
+            VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
+            virtual_network_rules = [VirtualNetworkRule(virtual_network_resource_id=subnet,
+                                                        action=action)]
+        params.network_rule_set = NetworkRuleSet(
+            bypass=bypass, default_action=default_action, ip_rules=None,
+            virtual_network_rules=virtual_network_rules)
 
     if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
         EncryptionServices = cmd.get_models('EncryptionServices')
@@ -204,6 +213,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
+
+    if enable_nfs_v3 is not None:
+        params.enable_nfs_v3 = enable_nfs_v3
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
@@ -284,7 +296,6 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None):
-
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -640,7 +651,9 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
 
 
 def update_file_service_properties(cmd, instance, enable_delete_retention=None,
-                                   delete_retention_days=None, enable_smb_multichannel=None):
+                                   delete_retention_days=None, enable_smb_multichannel=None,
+                                   versions=None, authentication_methods=None, kerberos_ticket_encryption=None,
+                                   channel_encryption=None):
     from azure.cli.core.azclierror import ValidationError
     params = {}
     # set delete retention policy according input
@@ -668,10 +681,17 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
 
     # set protocol settings
     if enable_smb_multichannel is not None:
-        instance.protocol_settings = cmd.get_models('ProtocolSettings')()
-        instance.protocol_settings.smb = cmd.get_models('SmbSetting')(
-            multichannel=cmd.get_models('Multichannel')(enabled=enable_smb_multichannel))
-    if instance.protocol_settings.smb.multichannel:
+        instance.protocol_settings.smb.multichannel = cmd.get_models('Multichannel')(enabled=enable_smb_multichannel)
+
+    if versions is not None:
+        instance.protocol_settings.smb.versions = versions
+    if authentication_methods is not None:
+        instance.protocol_settings.smb.authentication_methods = authentication_methods
+    if kerberos_ticket_encryption is not None:
+        instance.protocol_settings.smb.kerberos_ticket_encryption = kerberos_ticket_encryption
+    if channel_encryption is not None:
+        instance.protocol_settings.smb.channel_encryption = channel_encryption
+    if any(instance.protocol_settings.smb.__dict__.values()):
         params['protocol_settings'] = instance.protocol_settings
 
     return params

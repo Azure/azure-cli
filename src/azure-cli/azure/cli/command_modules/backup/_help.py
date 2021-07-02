@@ -350,6 +350,14 @@ examples:
     crafted: true
 """
 
+helps['backup recoverypoint move'] = """
+type: command
+short-summary: Move a particular recovery point of a backed up item from one tier to another tier.
+examples:
+  - name: Move a particular recovery point of a backed up item.
+    text: az backup recoverypoint move --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --name RpId --source-tier SourceTier --destination-tier DestinationTier
+"""
+
 helps['backup recoverypoint show'] = """
 type: command
 short-summary: Shows details of a particular recovery point.

@@ -849,7 +849,8 @@ def update_hsm(cmd, instance,
         instance.properties.enable_purge_protection = enable_purge_protection
 
     if secondary_locations is not None:
-        instance.properties.secondary_locations = secondary_locations
+        # service not ready
+        raise InvalidArgumentValueError('--secondary-locations has not been supported yet for hsm')
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
         if instance.properties.network_acls is None:
