@@ -787,7 +787,7 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
                 return
 
         # VMs need to be a supported image in the marketplace
-        # Ubuntu 16.04 | 18.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, Flatcar Linux, Debian "Stretch" with backports kernel
+        # Ubuntu 16.04 | 18.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, Flatcar, Debian "Stretch" with backports kernel
         # Oracle Linux 7.4, Windows Server 2016, Windows Server 2012R2
         publisher, offer, sku = namespace.os_publisher, namespace.os_offer, namespace.os_sku
         if not publisher:
@@ -797,7 +797,7 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
         if publisher == 'coreos' or offer == 'coreos':
             from azure.cli.core.parser import InvalidArgumentValueError
             raise InvalidArgumentValueError("As CoreOS is deprecated and there is no image in the marketplace any more,"
-                                            " please use Flatcar linux instead of it.")
+                                            " please use Flatcar Container Linux instead.")
 
         distros = [('canonical', 'UbuntuServer', '^16.04|^18.04'),
                    ('suse', 'sles', '^12-sp3'), ('redhat', 'rhel', '^7.4'),
