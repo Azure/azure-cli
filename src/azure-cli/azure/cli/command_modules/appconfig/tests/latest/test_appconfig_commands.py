@@ -102,7 +102,59 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', sku),
                          self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
+        self.cmd('appconfig update -n {config_store_name} -g {rg}',
+            checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', structered_tag),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('sku.name', sku),
+                    self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
+
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_local_auth(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='DisableLocalAuth', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'disable_local_auth': 'true'
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --disable-local-auth {disable_local_auth}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('disableLocalAuth', True)])
+
+        self.kwargs.update({
+            'key': 'test',
+            'disable_local_auth': 'false'
+        })
+
+        with self.assertRaisesRegex(CLIError, "Cannot find a read write access key for the App Configuration {}".format(config_store_name)):
+            self.cmd('appconfig kv set --key {key} -n {config_store_name} -y')
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --disable-local-auth {disable_local_auth}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('disableLocalAuth', False)])
+
+        self.cmd('appconfig kv set --key {key} -n {config_store_name} -y',
+                 checks=[self.check('key', '{key}')])
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_public_network_access(self, resource_group, location):

@@ -38,7 +38,7 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
-    ServerPublicNetworkAccess,
+    ServerNetworkAccessFlag,
     ServerInfo,
     EncryptionProtector,
     ManagedInstanceEncryptionProtector,
@@ -454,11 +454,7 @@ def _get_identity_object_from_type(
                 identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value,
                                                   user_assigned_identities=umiDict)
     elif assignIdentityIsPresent:
-        if existingResourceIdentity is not None:
-            identityResult = existingResourceIdentity
-            identityResult.type = ResourceIdType.system_assigned.value
-        else:
-            identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
+        identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
 
     if assignIdentityIsPresent is False and existingResourceIdentity is not None:
         identityResult = existingResourceIdentity
@@ -2698,6 +2694,45 @@ def update_long_term_retention(
     return policy
 
 
+def update_short_term_retention(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        retention_days,
+        diffbackup_hours,
+        no_wait=False):
+    '''
+    Updates short term retention for live database
+    '''
+
+    return sdk_no_wait(
+        no_wait,
+        client.create_or_update,
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        retention_days=retention_days,
+        diff_backup_interval_in_hours=diffbackup_hours)
+
+
+def get_short_term_retention(
+        client,
+        database_name,
+        server_name,
+        resource_group_name):
+    '''
+    Gets short term retention for live database
+    '''
+
+    policy = client.get(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name)
+
+    return policy
+
+
 def _list_by_database_long_term_retention_backups(
         client,
         location_name,
@@ -3436,8 +3471,8 @@ def server_create(
 
     if enable_public_network is not None:
         kwargs['public_network_access'] = (
-            ServerPublicNetworkAccess.enabled if enable_public_network
-            else ServerPublicNetworkAccess.disabled)
+            ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
 
     kwargs['key_id'] = key_id
 
@@ -3534,8 +3569,8 @@ def server_update(
 
     if enable_public_network is not None:
         instance.public_network_access = (
-            ServerPublicNetworkAccess.enabled if enable_public_network
-            else ServerPublicNetworkAccess.disabled)
+            ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
 
     instance.primary_user_assigned_identity_id = (
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
@@ -3835,6 +3870,30 @@ def server_aad_only_enable(
         server_name=server_name,
         azure_ad_only_authentication=True
     )
+
+###############################################
+#           sql server ledger                 #
+###############################################
+
+
+def ledger_digest_uploads_enable(
+        client,
+        resource_group_name,
+        server_name,
+        database_name,
+        endpoint):
+    '''
+    Enables ledger storage target
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        ledger_digest_uploads='current',
+        digest_storage_endpoint=endpoint
+    )
+
 
 ###############################################
 #           sql server trust groups           #
