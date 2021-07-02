@@ -380,6 +380,20 @@ def load_arguments(self, _):
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
+
+    with self.argument_context('webapp deployment github-actions')as c:
+        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('resource_group', arg_type=resource_group_name_type, options_list=['--resource-group', '-g'])
+        c.argument('repo', help='The GitHub repository to which the workflow file will be added. In the format: <owner>/<repository-name>')
+        c.argument('token', help='A Personal Access Token with write access to the specified repository. For more information: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line')
+        c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the production slot if not specified.')
+        c.argument('branch', options_list=['--branch', '-b'], help='The branch to which the workflow file will be added. Defaults to "master" if not specified.')
+        c.argument('login_with_github', help='Interactively log in with Github to retrieve the Personal Access Token', action='store_true')
+
+    with self.argument_context('webapp deployment github-actions add')as c:
+        c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework|Version, e.g. "PHP|5.6". Use "az webapp list-runtimes" for available list.')
+        c.argument('force', options_list=['--force', '-f'], help='When true, the command will overwrite any workflow file with a conflicting name.', action='store_true')
+
     with self.argument_context('webapp log config') as c:
         c.argument('application_logging', help='configure application logging',
                    arg_type=get_enum_type(['filesystem', 'azureblobstorage', 'off']))
