@@ -16,9 +16,9 @@ Release History
 
 **APIM**
 
-* Added version parameter for apim api import (#18604)
-* Fixed apim upgrade bug when specifying protocols (#18605)
-* `az apim create`: Fixed `--enable-managed-identity` true failure (#18554)
+* Add version parameter for apim api import (#18604)
+* Fix apim upgrade bug when specifying protocols (#18605)
+* `az apim create`: Fix `--enable-managed-identity` true failure (#18554)
 
 **App Config**
 
@@ -39,7 +39,7 @@ Release History
 
 **AppConfiguration**
 
-* Add support for ```disable_local_auth``` (#18619)
+* Add support for `disable_local_auth` (#18619)
 
 **ARM**
 
@@ -57,7 +57,7 @@ Release History
 **Backup**
 
 * Workload container registration fix, SDK upgraded to 0.12.0, Fixed and Re-ran tests (#18592)
-* Added Archive Support for Azure CLI (#18535)
+* Add Archive Support for Azure CLI (#18535)
 
 **Billing**
 
@@ -88,8 +88,8 @@ Release History
 
 **Cosmos DB**
 
-* Adding point-in-time restore commands to the stable branch. (#18568)
-* Adding support for selecting Cosmos DB analytical storage schema type (#18636)
+* Add point-in-time restore commands to the stable branch. (#18568)
+* Add support for selecting Cosmos DB analytical storage schema type (#18636)
 
 **HDInsight**
 
@@ -113,7 +113,7 @@ Release History
 
 **Resource**
 
-* Third party S2S Consent/Permission Enumeration (#18433)
+* Third-party S2S Consent/Permission Enumeration (#18433)
 
 **Security**
 
