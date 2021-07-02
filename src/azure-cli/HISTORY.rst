@@ -56,7 +56,8 @@ Release History
 
 **Backup**
 
-* Workload container registration fix, SDK upgraded to 0.12.0, Fixed and Re-ran tests (#18592)
+* `az backup container`: Fix container registration
+Workload container registration fix, SDK upgraded to 0.12.0, Fixed and Re-ran tests (#18592)
 * Add Archive Support for Azure CLI (#18535)
 
 **Billing**
