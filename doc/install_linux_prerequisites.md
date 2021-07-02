@@ -95,4 +95,4 @@ sudo zypper refresh && sudo zypper --non-interactive install gcc libffi-devel py
 
 ### Flatcar
 
-Python is installed in the Azure-specific distribution of Flatcar, but is installed into the non-standard location /usr/share/oem/python/bin/python.
+Python is installed in the Azure-specific distribution of Flatcar, but is installed into the non-standard location `/usr/share/oem/python/bin/python`.
