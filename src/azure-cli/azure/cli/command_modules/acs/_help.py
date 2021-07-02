@@ -413,6 +413,9 @@ parameters:
   - name: --assign-identity
     type: string
     short-summary: Specify an existing user assigned identity for control plane's usage in order to manage cluster resource group.
+  - name: --assign-kubelet-identity
+    type: string
+    short-summary: Specify an existing user assigned identity for kubelet's usage, which is typically used to pull image from ACR.
   - name: --node-osdisk-diskencryptionset-id -d
     type: string
     short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
@@ -440,6 +443,9 @@ parameters:
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
+  - name: --enable-ultra-ssd
+    type: bool
+    short-summary: Enable UltraSSD, default value is false.
   - name: --enable-azure-rbac
     type: bool
     short-summary: Enable Azure RBAC to control authorization checks on cluster.
@@ -482,8 +488,12 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
   - name: Create a kubernetes cluster with EncryptionAtHost enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-encryption-at-host
+  - name: Create a kubernetes cluster with UltraSSD enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-ultra-ssd
   - name: Create a kubernetes cluster with Azure RBAC enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
+  - name: Create a kubernetes cluster with custom control plane identity and kubelet identity.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --assign-identity <control-plane-identity-resource-id> --assign-kubelet-identity <kubelet-identity-resource-id>
 """
 
 helps['aks update'] = """
@@ -821,11 +831,16 @@ parameters:
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
+  - name: --enable-ultra-ssd
+    type: bool
+    short-summary: Enable UltraSSD, default value is false.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
   - name: Create a nodepool with EncryptionAtHost enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
+  - name: Create a nodepool with UltraSSD enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-ultra-ssd
 """
 
 helps['aks nodepool delete'] = """

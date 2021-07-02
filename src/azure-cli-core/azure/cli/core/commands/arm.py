@@ -95,11 +95,23 @@ class ArmTemplateBuilder:
         return json.loads(json.dumps(self.parameters))
 
 
+def raise_subdivision_deployment_error(error_message, error_code=None):
+    from azure.cli.core.azclierror import InvalidTemplateError, DeploymentError
+
+    if error_code == 'InvalidTemplateDeployment':
+        raise InvalidTemplateError(error_message)
+
+    raise DeploymentError(error_message)
+
+
 def handle_template_based_exception(ex):
     try:
         raise CLIError(ex.inner_exception.error.message)
     except AttributeError:
-        raise CLIError(ex)
+        if hasattr(ex, 'response'):
+            raise_subdivision_deployment_error(ex.response.internal_response.text, ex.error.code if ex.error else None)
+        else:
+            raise CLIError(ex)
 
 
 def handle_long_running_operation_exception(ex):

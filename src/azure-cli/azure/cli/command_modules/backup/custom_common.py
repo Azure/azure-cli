@@ -8,7 +8,7 @@ import azure.cli.command_modules.backup.custom_help as custom_help
 from azure.cli.command_modules.backup._client_factory import backup_protected_items_cf, \
     protection_containers_cf, protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
 from azure.cli.core.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -21,6 +21,10 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
                      'VM': 'VM',
                      'AzureFileShare': 'AzureFileShare'}
+
+tier_type_map = {'VaultStandard': 'HardenedRP',
+                 'VaultArchive': 'ArchivedRP',
+                 'Snapshot': 'InstantRP'}
 
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
@@ -113,6 +117,83 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
                 item.properties.container_name.lower().split(';')[-1] == container_name.lower()]
 
     return paged_items
+
+
+def fetch_tier(paged_recovery_points):
+
+    for rp in paged_recovery_points:
+        isRehydrated = False
+        isInstantRecoverable = False
+        isHardenedRP = False
+        isArchived = False
+
+        if rp.properties.recovery_point_tier_details is None:
+            continue
+
+        for i in range(len(rp.properties.recovery_point_tier_details)):
+            if (rp.properties.recovery_point_tier_details[i].type == "ArchivedRP" and
+                    rp.properties.recovery_point_tier_details[i].status == "Rehydrated"):
+                isRehydrated = True
+
+            if rp.properties.recovery_point_tier_details[i].status == "Valid":
+                if rp.properties.recovery_point_tier_details[i].type == "InstantRP":
+                    isInstantRecoverable = True
+
+                if rp.properties.recovery_point_tier_details[i].type == "HardenedRP":
+                    isHardenedRP = True
+
+                if rp.properties.recovery_point_tier_details[i].type == "ArchivedRP":
+                    isArchived = True
+
+        if (isHardenedRP and isArchived) or (isRehydrated):
+            setattr(rp, "tier_type", "VaultStandardRehydrated")
+
+        elif isInstantRecoverable and isHardenedRP:
+            setattr(rp, "tier_type", "SnapshotAndVaultStandard")
+
+        elif isInstantRecoverable and isArchived:
+            setattr(rp, "tier_type", "SnapshotAndVaultArchive")
+
+        elif isArchived:
+            setattr(rp, "tier_type", "VaultArchive")
+
+        elif isInstantRecoverable:
+            setattr(rp, "tier_type", "Snapshot")
+
+        elif isHardenedRP:
+            setattr(rp, "tier_type", "VaultStandard")
+
+
+def check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move):
+
+    if target_tier and is_ready_for_move is not None:
+        filter_rps = []
+        for rp in paged_recovery_points:
+            if (rp.properties.recovery_point_move_readiness_info is not None and
+                    rp.properties.recovery_point_move_readiness_info['ArchivedRP'].is_ready_for_move ==
+                    is_ready_for_move):
+                filter_rps.append(rp)
+
+        return filter_rps
+
+    if target_tier or is_ready_for_move is not None:
+        raise RequiredArgumentMissingError("""--is-ready-for-move or --target-tier is missing. Please provide
+        the required arguments.""")
+
+    return paged_recovery_points
+
+
+def filter_rp_based_on_tier(recovery_point_list, tier):
+
+    if tier:
+        filter_rps = []
+        for rp in recovery_point_list:
+            if rp.properties.recovery_point_tier_details is not None and rp.tier_type == tier:
+                filter_rps.append(rp)
+
+        return filter_rps
+
+    return recovery_point_list
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,
