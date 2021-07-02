@@ -753,13 +753,10 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
     from azure.cli.core.profiles import AZURE_API_PROFILES
 
-    # In the latest profile and the profiles that use the same api-version as latest profile,
-    # the default public IP used for VM creation will be expected to be changed from Basic to Standard.
-    # In order to avoid breaking change which has a big impact on users,
+    # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
+    # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard public IP to create VM in the first stage.
-    api_version_for_latest_profile = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].default_api_version
-    if public_ip_sku is None and cmd.supported_api_version(ResourceType.MGMT_COMPUTE,
-                                                           min_api=api_version_for_latest_profile):
+    if public_ip_sku is None and cmd.cli_ctx.cloud.profile == 'latest':
         logger.warning(
             'It is recommended to use parameter "--public-ip-sku Standard" to create new VM with Standard public IP. '
             'Please note that the default public IP used for VM creation will be changed from Basic to Standard '
