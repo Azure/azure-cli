@@ -27,8 +27,8 @@ Release History
 **App Service**
 
 * [BREAKING CHANGE] `az functionapp create`: Remove support for EOL Node 8 and 10 (#18676)
-* [BREAKING CHANGE] az webapp deployment source config: Remove vsts-cd-manager (#18203)
-* [BREAKING CHANGE] az functionapp deployment source config: Remove vsts-cd-manager (#18203)
+* [BREAKING CHANGE] `az webapp deployment source config`: Remove vsts-cd-manager (#18203)
+* [BREAKING CHANGE] `az functionapp deployment source config`: Remove vsts-cd-manager (#18203)
 * `az webapp/functionapp config access-restriction add`: Prevent duplicate rules using service endpoints. (#18024)
 * `az webapp/functionapp config access-restriction remove`: Remove service endpoints are case-insensitive (#18024)
 * `az webapp config access-restrictions add`: Skip validation if user does not have access to get service tag list. (#18527)
@@ -47,12 +47,12 @@ Release History
 
 **ARO**
 
-* `az aro create`: add cidr values for pod/service (#18457)
+* `az aro create`: Add cidr values for pod/service (#18457)
 * Fail if resource doesn't exist on delete (#18546)
 
 **Azurestack**
 
-* [ACR][AKS] add azurestack hybrid profile for AKS (#18118)
+* [ACR][AKS] Add azurestack hybrid profile for AKS (#18118)
 
 **Backup**
 
