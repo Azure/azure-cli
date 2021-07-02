@@ -43,11 +43,12 @@ API_VS_PREFIX = "/apiVersionSets/"
 def _get_vs_fullpath(versionSetId):
     if versionSetId is not None:
         if re.match(API_VS_ARM_ID_Reg, versionSetId) is None:
-            return API_VS_PREFIX + versionSetId
+            fullpath = API_VS_PREFIX + versionSetId
         else:
-            return versionSetId
+            fullpath = versionSetId
     else:
-        return None
+        fullpath = None
+    return fullpath
 
 
 # Service Operations
@@ -389,16 +390,17 @@ def import_apim_api(
 
 
 def get_subscription_key_parameter_names(subscription_key_header_name=None, subscription_key_query_param_name=None):
+    names = None
     if subscription_key_query_param_name is not None and subscription_key_header_name is not None:
-        return SubscriptionKeyParameterNamesContract(
+
+        names = SubscriptionKeyParameterNamesContract(
             header=subscription_key_header_name,
             query=subscription_key_query_param_name
         )
     elif subscription_key_query_param_name is not None or subscription_key_header_name is not None:
         raise CLIError(
             "Please specify 'subscription_key_query_param_name' and 'subscription_key_header_name' at the same time.")
-
-    return None
+    return names
 
 
 # Product API Operations
