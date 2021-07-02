@@ -3102,26 +3102,22 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  ' --storage-uri {}'
                  .format(server, db_name, resource_group, admin_password, admin_login, storageKey, bacpacUri),
                  checks=[
-                     # remove this check since there is an issue in getting properties and the fix is being deployed currently
-                     # JMESPathCheck('blobUri', bacpacUri),
-                     # JMESPathCheck('databaseName', db_name),
-                     # JMESPathCheck('requestType', 'Export'),
-                     # JMESPathCheck('resourceGroup', resource_group),
-                     # JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Succeeded')])
+                     JMESPathCheck('blobUri', bacpacUri),
+                     JMESPathCheck('databaseName', db_name),
+                     JMESPathCheck('requestType', 'ExportDatabase'),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
         self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type SharedAccessKey'
                  ' --storage-uri {}'
                  .format(server, db_name, resource_group, admin_password, admin_login, sasKey, bacpacUri2),
                  checks=[
-                     # remove this check since there is an issue in getting properties and the fix is being deployed currently
-                     # JMESPathCheck('blobUri', bacpacUri2),
-                     # JMESPathCheck('databaseName', db_name),
-                     # JMESPathCheck('requestType', 'Export'),
-                     # JMESPathCheck('resourceGroup', resource_group),
-                     # JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Succeeded')])
+                     JMESPathCheck('blobUri', bacpacUri2),
+                     JMESPathCheck('databaseName', db_name),
+                     JMESPathCheck('requestType', 'ExportDatabase'),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
         # import bacpac to second database using Storage Key
         self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
@@ -3130,13 +3126,11 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  .format(server, db_name2, resource_group, admin_password, admin_login, storageKey, bacpacUri),
                  checks=[
                      # Uncomment this when bug in backend is fixed
-                     # JMESPathCheck('blobUri', bacpacUri),
-                     # JMESPathCheck('databaseName', db_name2),
-                     # JMESPathCheck('name', 'import'),
-                     # JMESPathCheck('requestType', 'Import'),
-                     # JMESPathCheck('resourceGroup', resource_group),
-                     # JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Succeeded')])
+                     JMESPathCheck('blobUri', bacpacUri),
+                     JMESPathCheck('databaseName', db_name2),
+                     JMESPathCheck('requestType', 'ImportToExistingDatabase'),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
         # import bacpac to third database using SAS key
         self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
@@ -3145,13 +3139,11 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  .format(server, db_name3, resource_group, admin_password, admin_login, sasKey, bacpacUri2),
                  checks=[
                      # Uncomment this when bug in backend is fixed
-                     # JMESPathCheck('blobUri', bacpacUri2),
-                     # JMESPathCheck('databaseName', db_name3),
-                     # JMESPathCheck('name', 'import'),
-                     # JMESPathCheck('requestType', 'Import'),
-                     # JMESPathCheck('resourceGroup', resource_group),
-                     # JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Succeeded')])
+                     JMESPathCheck('blobUri', bacpacUri2),
+                     JMESPathCheck('databaseName', db_name3),
+                     JMESPathCheck('requestType', 'ImportToExistingDatabase'),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
 
 class SqlServerConnectionStringScenarioTest(ScenarioTest):

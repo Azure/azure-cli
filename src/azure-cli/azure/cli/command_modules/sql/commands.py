@@ -318,7 +318,7 @@ def load_command_table(self, _):
                             is_preview=True) as g:
 
         g.custom_command('set', 'update_long_term_retention')
-        g.show_command('show', 'get')
+        g.custom_command('show', 'update_long_term_retention_get')
 
     database_long_term_retention_backups_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionBackupsOperations.{}',

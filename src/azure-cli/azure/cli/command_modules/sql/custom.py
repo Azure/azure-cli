@@ -1255,9 +1255,9 @@ def db_failover(
 
     # Choose which failover method to use
     if allow_data_loss:
-        failover_func = client.failover_allow_data_loss
+        failover_func = client.begin_failover_allow_data_loss
     else:
-        failover_func = client.failover
+        failover_func = client.begin_failover
 
     # Execute failover from the primary to this database
     return failover_func(
@@ -1409,8 +1409,6 @@ def db_export(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
-        storage_key_type=storage_key_type,
-        storage_key=storage_key,
         parameters=kwargs)
 
 
@@ -1431,12 +1429,10 @@ def db_import(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.import_method(
+    return client.begin_import_method(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
-        storage_key_type=storage_key_type,
-        storage_key=storage_key,
         parameters=kwargs)
 
 
@@ -2701,6 +2697,21 @@ def update_long_term_retention(
         parameters=kwargs)
 
     return policy
+
+def update_long_term_retention_get(
+        client,
+        resource_group_name,
+        database_name,
+        server_name):
+    '''
+    Gets long term retention for managed database
+    '''
+
+    return client.get(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        policy_name=LongTermRetentionPolicyName.DEFAULT)
 
 
 def update_short_term_retention(
@@ -5004,9 +5015,9 @@ def failover_group_failover(
 
     # Choose which failover method to use
     if allow_data_loss:
-        failover_func = client.force_failover_allow_data_loss
+        failover_func = client.begin_force_failover_allow_data_loss
     else:
-        failover_func = client.failover
+        failover_func = client.begin_failover
 
     return failover_func(
         resource_group_name=resource_group_name,
