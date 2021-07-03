@@ -581,7 +581,7 @@ def load_command_table(self, _):
                             encryption_protectors_operations,
                             client_factory=get_sql_encryption_protectors_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'encryption_protector_get')
         g.custom_command('set', 'encryption_protector_update')
 
     virtual_network_rules_operations = CliCommandType(
@@ -704,7 +704,7 @@ def load_command_table(self, _):
                             managed_instance_encryption_protectors_operations,
                             client_factory=get_sql_managed_instance_encryption_protectors_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'managed_instance_encryption_protector_get')
         g.custom_command('set', 'managed_instance_encryption_protector_update')
 
     managed_instance_aadadmin_operations = CliCommandType(

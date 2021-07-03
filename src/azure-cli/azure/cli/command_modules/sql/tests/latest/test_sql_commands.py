@@ -3276,8 +3276,6 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
     def test_sql_tdebyok(self, resource_group, server):
         resource_prefix = 'sqltdebyok'
 
-        self.skipTest("Skipping based on discussion with owning team - mibrkic")
-
         # add identity to server
         server_resp = self.cmd('sql server update -g {} -n {} -i'
                                .format(resource_group, server)).get_output_in_json()

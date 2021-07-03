@@ -24,6 +24,7 @@ from azure.mgmt.sql.models import (
     ConnectionPolicyName,
     CreateMode,
     EncryptionProtector,
+    EncryptionProtectorName,
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
@@ -46,6 +47,7 @@ from azure.mgmt.sql.models import (
     SensitivityLabelSource,
     ServerExternalAdministrator,
     ServerInfo,
+    ServerKey,
     ServerKeyType,
     ServerNetworkAccessFlag,
     ServiceObjectiveName,
@@ -3738,8 +3740,10 @@ def server_key_create(
         resource_group_name=resource_group_name,
         server_name=server_name,
         key_name=key_name,
-        server_key_type='AzureKeyVault',
-        uri=kid)
+        parameters=ServerKey(
+            server_key_type=ServerKeyType.AZURE_KEY_VAULT,
+            uri=kid)
+    )
 
 
 def server_key_get(
@@ -3770,7 +3774,7 @@ def server_key_delete(
 
     key_name = _get_server_key_name_from_uri(kid)
 
-    return client.delete(
+    return client.begin_delete(
         resource_group_name=resource_group_name,
         server_name=server_name,
         key_name=key_name)
@@ -3840,6 +3844,19 @@ def server_dns_alias_set(
 #           sql server encryption-protector
 #####
 
+def encryption_protector_get(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Gets a server encryption protector.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        encryption_protector_name=EncryptionProtectorName.CURRENT)
+
 
 def encryption_protector_update(
         client,
@@ -3852,17 +3869,17 @@ def encryption_protector_update(
     Updates a server encryption protector.
     '''
 
-    if server_key_type == ServerKeyType.service_managed.value:
+    if server_key_type == ServerKeyType.SERVICE_MANAGED:
         key_name = 'ServiceManaged'
     else:
         if kid is None:
             raise CLIError('A uri must be provided if the server_key_type is AzureKeyVault.')
         key_name = _get_server_key_name_from_uri(kid)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        encryption_protector_name='Current',
+        encryption_protector_name=EncryptionProtectorName.CURRENT,
         parameters=EncryptionProtector(server_key_type=server_key_type,
                                        server_key_name=key_name,
                                        auto_rotation_enabled=auto_rotation_enabled))
@@ -4281,7 +4298,7 @@ def managed_instance_key_create(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
         key_name=key_name,
-        server_key_type=ServerKeyType.azure_key_vault.value,
+        server_key_type=ServerKeyType.AZURE_KEY_VAULT,
         uri=kid
     )
 
@@ -4335,20 +4352,34 @@ def managed_instance_encryption_protector_update(
     Updates a server encryption protector.
     '''
 
-    if server_key_type == ServerKeyType.service_managed.value:
+    if server_key_type == ServerKeyType.SERVICE_MANAGED:
         key_name = 'ServiceManaged'
     else:
         if kid is None:
             raise CLIError('A uri must be provided if the server_key_type is AzureKeyVault.')
         key_name = _get_server_key_name_from_uri(kid)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
-        encryption_protector_name='Current',
+        encryption_protector_name=EncryptionProtectorName.CURRENT,
         parameters=ManagedInstanceEncryptionProtector(server_key_type=server_key_type,
                                                       server_key_name=key_name,
                                                       auto_rotation_enabled=auto_rotation_enabled))
+
+
+def managed_instance_encryption_protector_get(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Shows a server encryption protector.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        encryption_protector_name=EncryptionProtectorName.CURRENT)
 
 
 #####
