@@ -1361,6 +1361,43 @@ examples:
     text: az sql server firewall-rule update -g mygroup -s myserver -n myrule --start-ip-address 5.4.3.2 --end-ip-address 9.8.7.6
 """
 
+helps['sql server outbound-firewall-rule'] = """
+type: group
+short-summary: Manage a server's outbound firewall rules.
+"""
+
+helps['sql server outbound-firewall-rule create'] = """
+type: command
+short-summary: Create a new outbound firewall rule.
+examples:
+  - name: Create a new outbound firewall rule
+    text: az sql server outbound-firewall-rule create -g mygroup -s myserver -n allowedFQDN
+  - name: Create a new outbound firewall rule
+    text: az sql server outbound-firewall-rule create -g mygroup -s myserver --fqdn allowedFQDN
+  - name: Create a new outbound firewall rule
+    text: az sql server outbound-firewall-rule create -g mygroup -s myserver --allowed-fqdn allowedFQDN
+"""
+
+helps['sql server outbound-firewall-rule list'] = """
+type: command
+short-summary: List a server's outbound firewall rules.
+examples:
+  - name: List a server's outbound firewall rules
+    text: az sql server outbound-firewall-rule list -g mygroup -s myserver
+"""
+
+helps['sql server outbound-firewall-rule show'] = """
+type: command
+short-summary: Shows the details for an outbound firewall rule.
+examples:
+  - name: Shows the outbound firewall rule
+    text: az sql server outbound-firewall-rule show -g mygroup -s myserver -n myrule
+  - name: Shows the outbound firewall rule
+    text: az sql server outbound-firewall-rule show -g mygroup -s myserver --fqdn myrule
+  - name: Shows the outbound firewall rule
+    text: az sql server outbound-firewall-rule show -g mygroup -s myserver --allowed-fqdn allowedFQDN
+"""
+
 helps['sql server key'] = """
 type: group
 short-summary: Manage a server's keys.
