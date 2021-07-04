@@ -2935,6 +2935,22 @@ def restore_long_term_retention_backup(
         parameters=kwargs)
 
 
+def db_threat_detection_policy_get(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Gets a threat detection policy.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        security_alert_policy_name=SecurityAlertPolicyName.DEFAULT)
+
+
 def db_threat_detection_policy_update(
         cmd,
         instance,
