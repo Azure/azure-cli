@@ -388,9 +388,11 @@ def load_command_table(self, _):
                             database_threat_detection_policies_operations,
                             client_factory=get_sql_database_threat_detection_policies_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_command('show', 'db_threat_detection_policy_get')
         g.generic_update_command('update',
-                                 custom_func_name='db_threat_detection_policy_update')
+                                 setter_name='create_or_update',
+                                 custom_func_name='db_threat_detection_policy_update',
+                                 )
 
     database_usages_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseUsagesOperations.{}',
@@ -592,12 +594,14 @@ def load_command_table(self, _):
                             virtual_network_rules_operations,
                             client_factory=get_sql_virtual_network_rules_operations) as g:
 
-        g.command('create', 'begin_create_or_update',
-                  validator=validate_subnet)
+        g.custom_command('create',
+                         'vnet_rule_begin_create_or_update',
+                         validator=validate_subnet)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.command('delete', 'begin_delete')
-        g.generic_update_command('update', setter_name='begin_create_or_update')
+        g.custom_command('update',
+                         'vnet_rule_begin_create_or_update')
 
     server_connection_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerConnectionPoliciesOperations.{}',
@@ -608,7 +612,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_server_connection_policies_operations) as c:
 
         c.custom_command('show', 'conn_policy_show')
-        c.generic_update_command('update')
+        c.custom_command('update', 'conn_policy_update')
 
     server_dns_aliases_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerDnsAliasesOperations.{}',

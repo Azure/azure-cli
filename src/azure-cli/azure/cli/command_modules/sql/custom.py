@@ -23,6 +23,7 @@ from azure.mgmt.sql.models import (
     CapabilityStatus,
     ConnectionPolicyName,
     CreateMode,
+    DatabaseSecurityAlertPolicy,
     EncryptionProtector,
     EncryptionProtectorName,
     FailoverGroup,
@@ -42,9 +43,11 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     PerformanceLevelUnit,
     ResourceIdentity,
+    SecurityAlertPolicyName,
     SecurityAlertPolicyState,
     SensitivityLabel,
     SensitivityLabelSource,
+    ServerConnectionPolicy,
     ServerExternalAdministrator,
     ServerInfo,
     ServerKey,
@@ -55,7 +58,8 @@ from azure.mgmt.sql.models import (
     Sku,
     StorageKeyType,
     TransparentDataEncryptionName,
-    UserIdentity
+    UserIdentity,
+    VirtualNetworkRule
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -2949,7 +2953,7 @@ def db_threat_detection_policy_update(
     # Apply state
     if state:
         instance.state = SecurityAlertPolicyState[state.lower()]
-    enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()  # pylint: disable=no-member
+    enabled = instance.state.lower() == SecurityAlertPolicyState.ENABLED.value.lower()  # pylint: disable=no-member
 
     # Set storage-related properties
     _db_security_policy_update(
@@ -5226,6 +5230,22 @@ def conn_policy_show(
         server_name=server_name,
         connection_policy_name=ConnectionPolicyName.DEFAULT)
 
+def conn_policy_update(
+        client,
+        resource_group_name,
+        server_name,
+        connection_type):
+    '''
+    Updates a connectin policy
+    '''
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        connection_policy_name=ConnectionPolicyName.DEFAULT,
+        parameters=ServerConnectionPolicy(
+            connection_type=connection_type)
+    )
+
 ###############################################
 #              sql db tde                     #
 ###############################################
@@ -5281,3 +5301,27 @@ def tde_list_by_configuration(
         server_name=server_name,
         database_name=database_name,
         transparent_data_encryption_name=TransparentDataEncryptionName.CURRENT)
+
+###############################################
+#              sql server vnet-rule           #
+###############################################
+
+def vnet_rule_begin_create_or_update(
+        client,
+        resource_group_name,
+        server_name,
+        virtual_network_rule_name,
+        virtual_network_subnet_id,
+        ignore_missing_vnet_service_endpoint=False):
+    '''
+    Creates or Updates Virtual Network Rules
+    '''
+
+    return client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        virtual_network_rule_name=virtual_network_rule_name,
+        parameters=VirtualNetworkRule(
+            virtual_network_subnet_id=virtual_network_subnet_id,
+            ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint)
+    )
