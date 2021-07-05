@@ -281,13 +281,13 @@ def metadata_processing(notebook_properties, displayedWidgets):
                             'codemirror_mode' in notebook_properties['metadata']['language_info']:
                         notebook_properties.pop(['metadata']['language_info']['codemirror_mode'])
                     metadata['language_info'] = notebook_properties['metadata']['language_info']
-                if elementkey == 'description':
+                elif elementkey == 'description':
                     metadata['description'] = notebook_properties['metadata']['description']
-                if elementkey == 'saveOutput':
+                elif elementkey == 'saveOutput':
                     metadata['save_output'] = notebook_properties['metadata']['saveOutput']
-                if elementkey == 'kernelspec':
+                elif elementkey == 'kernelspec':
                     metadata['kernelspec'] = notebook_properties['metadata']['kernelspec']
-                if elementkey == 'synapse_widget' and \
+                elif elementkey == 'synapse_widget' and \
                         'state' in notebook_properties['metadata']['synapse_widget']:
                     for ekey in list(notebook_properties['metadata']['synapse_widget']['state'].keys()):
                         for i in reversed(range(len(displayedWidgets))):
@@ -303,9 +303,7 @@ def write_to_file(notebook, path):
         notebook_properties = notebook.properties.as_dict()
         livyStatementMetaOutputContentType = 'application/vnd.livy.statement-meta+json'
         synapseWidgetViewOutputContentType = 'application/vnd.synapse.widget-view+json'
-        #synapseWidgetNotebookMetadataVersion = '0.1'
         notebook_result = {}
-        #metadata = {}
         displayedWidgets = []
         notebook_result['nbformat'] = 4
         notebook_result['nbformat_minor'] = 2
@@ -316,7 +314,8 @@ def write_to_file(notebook, path):
                             synapseWidgetViewOutputContentType in output['data']:
                         displayedWidgets.append(output["data"]["application/vnd.synapse.widget-view+json"])
 
-        metadata_results, displayedWidgets_results, notebook_properties_results = metadata_processing(notebook_properties, displayedWidgets)
+        metadata_results, displayedWidgets_results, notebook_properties_results = \
+            metadata_processing(notebook_properties, displayedWidgets)
 
         if len(displayedWidgets_results) > 0:
             logging.info('Detected widget with missing data.')
