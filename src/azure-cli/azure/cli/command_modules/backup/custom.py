@@ -226,9 +226,9 @@ def update_vault(client, resource_group_name, vault_name, identity_type=None, id
                 identity_type = 'systemassigned,userassigned'
 
     elif remove_system_assigned or remove_user_assigned:
-        return remove_identities(client, resource_group_name, vault_name, curr_identity_details,
-                                 curr_identity_type, identity_id, remove_user_assigned,
-                                 remove_system_assigned)
+        return _remove_identities(client, resource_group_name, vault_name, curr_identity_details,
+                                  curr_identity_type, identity_id, remove_user_assigned,
+                                  remove_system_assigned)
     else:
         raise RequiredArgumentMissingError(
             """
@@ -240,8 +240,8 @@ def update_vault(client, resource_group_name, vault_name, identity_type=None, id
     return client.begin_update(resource_group_name, vault_name, vault)
 
 
-def remove_identities(client, resource_group_name, vault_name, curr_identity_details, curr_identity_type,
-                      identity_id, remove_user_assigned, remove_system_assigned):
+def _remove_identities(client, resource_group_name, vault_name, curr_identity_details, curr_identity_type,
+                       identity_id, remove_user_assigned, remove_system_assigned):
     identity_type = None
     user_assigned_identity = None
     if remove_user_assigned and remove_system_assigned:
@@ -817,9 +817,8 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     source_resource_id, target_rg_id,
                                     use_original_storage_account, restore_disk_lun_list,
-                                    rehydration_duration, rehydration_priority, tier,
-                                    disk_encryption_set_id,encryption, recovery_point, 
-                                    use_secondary_region):
+                                    rehydration_duration, rehydration_priority, tier, disk_encryption_set_id,
+                                    encryption, recovery_point, use_secondary_region):
 
     if disk_encryption_set_id is not None:
         if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
