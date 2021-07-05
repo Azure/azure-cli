@@ -262,18 +262,17 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
             livyStatementMetaOutputContentType = 'application/vnd.livy.statement-meta+json'
             synapseWidgetViewOutputContentType = 'application/vnd.synapse.widget-view+json'
             synapseWidgetNotebookMetadataVersion = '0.1'
-            notebook_result= {}
-            metadata= {}
+            notebook_result = {}
+            metadata = {}
             displayedWidgets = []
 
             notebook_result['nbformat'] = 4
             notebook_result['nbformat_minor'] = 2
             for cell in notebook_properties['cells']:
                 if cell['cell_type'] == 'code' and cell['outputs']:
-                     for output in cell['outputs']:
-                         if output['output_type'] == 'display_data' and \
-                                 synapseWidgetViewOutputContentType in output['data']:
-                             displayedWidgets.append(output["data"]["application/vnd.synapse.widget-view+json"])
+                    for output in cell['outputs']:
+                        if output['output_type'] == 'display_data' and synapseWidgetViewOutputContentType in output['data']:
+                            displayedWidgets.append(output["data"]["application/vnd.synapse.widget-view+json"])
 
             for key in list(notebook_properties.keys()):
                 if key == 'metadata':
@@ -288,7 +287,7 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
                             metadata['save_output'] = notebook_properties['metadata']['saveOutput']
                         if elementkey == 'kernelspec':
                             metadata['kernelspec'] = notebook_properties['metadata']['kernelspec']
-                        if elementkey == 'synapse_widget' and 'state' in  notebook_properties['metadata']['synapse_widget']:
+                        if elementkey == 'synapse_widget' and 'state' in notebook_properties['metadata']['synapse_widget']:
                             for ekey in list(notebook_properties['metadata']['synapse_widget']['state'].keys()):
                                 for i in reversed(range(len(displayedWidgets))):
                                     if displayedWidgets[i]['widget_id'] == ekey:
@@ -301,9 +300,8 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
 
             for cell in notebook_properties['cells']:
                 if cell['cell_type'] == 'code' and cell['outputs']:
-                     for output in cell['outputs']:
-                         if output['output_type'] == 'display_data' and output['data'] and \
-                                 livyStatementMetaOutputContentType in output['data']:
+                    for output in cell['outputs']:
+                        if output['output_type'] == 'display_data' and output['data'] and livyStatementMetaOutputContentType in output['data']:
                             output['data'].pop(livyStatementMetaOutputContentType)
 
             notebook_result['metadata'] = metadata
