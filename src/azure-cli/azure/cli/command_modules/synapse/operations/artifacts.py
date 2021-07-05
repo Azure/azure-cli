@@ -273,29 +273,35 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
 def metadata_processing(notebook_properties, displayedWidgets):
     synapseWidgetNotebookMetadataVersion = '0.1'
     metadata = {}
+    notebook_properties_metadata = {}
     for key in list(notebook_properties.keys()):
         if key == 'metadata':
-            for elementkey in list(notebook_properties['metadata'].keys()):
-                if elementkey == 'language_info':
-                    if notebook_properties['metadata']['language_info'] and \
-                            'codemirror_mode' in notebook_properties['metadata']['language_info']:
-                        notebook_properties.pop(['metadata']['language_info']['codemirror_mode'])
-                    metadata['language_info'] = notebook_properties['metadata']['language_info']
-                elif elementkey == 'description':
-                    metadata['description'] = notebook_properties['metadata']['description']
-                elif elementkey == 'saveOutput':
-                    metadata['save_output'] = notebook_properties['metadata']['saveOutput']
-                elif elementkey == 'kernelspec':
-                    metadata['kernelspec'] = notebook_properties['metadata']['kernelspec']
-                elif elementkey == 'synapse_widget' and \
-                        'state' in notebook_properties['metadata']['synapse_widget']:
-                    for ekey in list(notebook_properties['metadata']['synapse_widget']['state'].keys()):
-                        for i in reversed(range(len(displayedWidgets))):
-                            if displayedWidgets[i]['widget_id'] == ekey:
-                                displayedWidgets.pop(i)
-                    metadata['synapse_widget'] = notebook_properties['metadata']['synapse_widget']
-                    metadata['synapse_widget']['version'] = synapseWidgetNotebookMetadataVersion
-    return metadata, displayedWidgets, notebook_properties
+            notebook_properties_metadata = notebook_properties['metadata']
+
+    if notebook_properties_metadata is None:
+        return metadata, displayedWidgets
+
+    for elementkey in list(notebook_properties_metadata.keys()):
+        if elementkey == 'language_info':
+            if notebook_properties_metadata['language_info'] and \
+                    'codemirror_mode' in notebook_properties_metadata['language_info']:
+                notebook_properties_metadata['language_info'].pop('codemirror_mode')
+            metadata['language_info'] = notebook_properties_metadata['language_info']
+        elif elementkey == 'description':
+            metadata['description'] = notebook_properties_metadata['description']
+        elif elementkey == 'saveOutput':
+            metadata['save_output'] = notebook_properties_metadata['saveOutput']
+        elif elementkey == 'kernelspec':
+            metadata['kernelspec'] = notebook_properties_metadata['kernelspec']
+        elif elementkey == 'synapse_widget' and \
+                'state' in notebook_properties_metadata['synapse_widget']:
+            for ekey in list(notebook_properties_metadata['synapse_widget']['state'].keys()):
+                for i in reversed(range(len(displayedWidgets))):
+                    if displayedWidgets[i]['widget_id'] == ekey:
+                        displayedWidgets.pop(i)
+            metadata['synapse_widget'] = notebook_properties_metadata['synapse_widget']
+            metadata['synapse_widget']['version'] = synapseWidgetNotebookMetadataVersion
+    return metadata, displayedWidgets
 
 
 def write_to_file(notebook, path):
@@ -314,13 +320,13 @@ def write_to_file(notebook, path):
                             synapseWidgetViewOutputContentType in output['data']:
                         displayedWidgets.append(output["data"]["application/vnd.synapse.widget-view+json"])
 
-        metadata_results, displayedWidgets_results, notebook_properties_results = \
+        metadata_results, displayedWidgets_results = \
             metadata_processing(notebook_properties, displayedWidgets)
 
         if len(displayedWidgets_results) > 0:
             logging.info('Detected widget with missing data.')
 
-        for cell in notebook_properties_results['cells']:
+        for cell in notebook_properties['cells']:
             if cell['cell_type'] == 'code' and cell['outputs']:
                 for output in cell['outputs']:
                     if output['output_type'] == 'display_data' and output['data'] and \
@@ -328,7 +334,7 @@ def write_to_file(notebook, path):
                         output['data'].pop(livyStatementMetaOutputContentType)
 
         notebook_result['metadata'] = metadata_results
-        notebook_result['cells'] = notebook_properties_results['cells']
+        notebook_result['cells'] = notebook_properties['cells']
         with open(path, 'w') as f:
             json.dump(notebook_result, f, indent=4)
     except IOError:
