@@ -553,6 +553,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    type=get_api_version_type(), min_api='2018-07-01',
                    help="Indicate the default version to use for requests to the Blob service if an incoming request's "
                         "version is not specified.")
+        c.argument('enable_last_access_tracking', arg_type=get_three_state_flag(), min_api='2019-06-01',
+                   options_list=['--enable-last-access-tracking', '-t'],
+                   help='When set to true last access time based tracking policy is enabled.')
 
     with self.argument_context('storage account file-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
