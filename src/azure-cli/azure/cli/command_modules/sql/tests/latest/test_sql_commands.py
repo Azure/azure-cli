@@ -832,7 +832,9 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test update long term retention on live database
         self.cmd(
-            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name} --weekly-retention {weekly_retention} --monthly-retention {monthly_retention} --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
+            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
+            ' --weekly-retention {weekly_retention} --monthly-retention {monthly_retention}'
+            ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
@@ -910,7 +912,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         })
 
         self.cmd(
-            'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name} --dest-server {server_name} --dest-resource-group {rg}',
+            'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
+            ' --dest-server {server_name} --dest-resource-group {rg}',
             checks=[
                 self.check('name', '{dest_database_name}')])
 
@@ -1031,6 +1034,7 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'sn': server,
+            'administrator_name': "ActiveDirectory",
             'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
             'oid2': 'e4d43337-d52c-4a0c-b581-09055e0359a0',
             'user': 'DSEngAll',
@@ -1049,12 +1053,13 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
                      self.check('[0].login', '{user}'),
                      self.check('[0].sid', '{oid}')])
 
-        self.cmd('sql server ad-admin update -s {sn} -g {rg} -u {user2} -i {oid2}',
+        self.cmd('sql server ad-admin update -s {sn} -g {rg} --administrator-name {administrator_name}'
+                 ' -u {user2} -i {oid2}',
                  checks=[
                      self.check('login', '{user2}'),
                      self.check('sid', '{oid2}')])
 
-        self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
+        self.cmd('sql server ad-admin delete -s {sn} -g {rg} --administrator-name {administrator_name}')
 
         self.cmd('sql server ad-admin list -s {sn} -g {rg}',
                  checks=[

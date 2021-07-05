@@ -36,6 +36,7 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroupReadWriteEndpoint,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
+    ManagedInstanceAzureADOnlyAuthentication,
     ManagedInstanceEncryptionProtector,
     ManagedInstanceExternalAdministrator,
     ManagedInstancePairInfo,
@@ -47,6 +48,7 @@ from azure.mgmt.sql.models import (
     SecurityAlertPolicyState,
     SensitivityLabel,
     SensitivityLabelSource,
+    ServerAzureADOnlyAuthentication,
     ServerConnectionPolicy,
     ServerExternalAdministrator,
     ServerInfo,
@@ -1122,7 +1124,7 @@ def db_create_replica(
     partner_database_name = partner_database_name or database_name
 
     # Set create mode
-    kwargs['create_mode'] = CreateMode.secondary.value
+    kwargs['create_mode'] = CreateMode.SECONDARY.value
 
     # Some sku properties may be filled in from the command line. However
     # the sku tier must be the same as the source tier, so it is grabbed
@@ -1211,7 +1213,7 @@ def db_restore(
 
     kwargs['restore_point_in_time'] = restore_point_in_time
     kwargs['source_database_deletion_date'] = source_database_deletion_date
-    kwargs['create_mode'] = CreateMode.restore.value if is_deleted else CreateMode.point_in_time_restore.value
+    kwargs['create_mode'] = CreateMode.RESTORE.value if is_deleted else CreateMode.POINT_IN_TIME_RESTORE.value
 
     # Check backup storage redundancy configurations
     location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
@@ -2917,7 +2919,7 @@ def restore_long_term_retention_backup(
         server_name=target_server_name,
         resource_group_name=target_resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
+    kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP.value
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
     kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
 
@@ -2928,7 +2930,7 @@ def restore_long_term_retention_backup(
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         database_name=target_database_name,
         server_name=target_server_name,
         resource_group_name=target_resource_group_name,
@@ -3013,7 +3015,7 @@ def db_sensitivity_label_show(
         schema_name,
         table_name,
         column_name,
-        SensitivityLabelSource.current)
+        SensitivityLabelSource.CURRENT)
 
 
 def db_sensitivity_label_update(
@@ -3052,7 +3054,7 @@ def db_sensitivity_label_update(
             schema_name,
             table_name,
             column_name,
-            SensitivityLabelSource.current)
+            SensitivityLabelSource.CURRENT)
         # Initialize with existing values
         sensitivity_label.label_name = current_label.label_name
         sensitivity_label.label_id = current_label.label_id
@@ -3918,13 +3920,13 @@ def server_aad_only_disable(
     Disables a servers aad-only setting
     '''
 
-    kwargs['azure_ad_only_authentication'] = False
-
     return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         authentication_name=AuthenticationName.DEFAULT,
-        parameters=kwargs)
+        parameters=ServerAzureADOnlyAuthentication(
+            azure_ad_only_authentication=False)
+    )
 
 
 def server_aad_only_enable(
@@ -3936,13 +3938,13 @@ def server_aad_only_enable(
     Enables a servers aad-only setting
     '''
 
-    kwargs['azure_ad_only_authentication'] = True
-
     return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         authentication_name=AuthenticationName.DEFAULT,
-        parameters=kwargs)
+        parameters=ServerAzureADOnlyAuthentication(
+            azure_ad_only_authentication=True)
+    )
 
 
 def server_aad_only_get(
@@ -4452,10 +4454,13 @@ def mi_aad_only_disable(
     Disables the managed instance AAD-only setting
     '''
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
-        azure_ad_only_authentication=False
+        authentication_name=AuthenticationName.DEFAULT,
+        parameters=ManagedInstanceAzureADOnlyAuthentication(
+            azure_ad_only_authentication=False
+        )
     )
 
 
@@ -4467,12 +4472,29 @@ def mi_aad_only_enable(
     Enables the AAD-only setting
     '''
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
-        azure_ad_only_authentication=True
+        authentication_name=AuthenticationName.DEFAULT,
+        parameters=ManagedInstanceAzureADOnlyAuthentication(
+            azure_ad_only_authentication=True
+        )
     )
 
+
+def mi_aad_only_get(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Gets the AAD-only setting
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        authentication_name=AuthenticationName.DEFAULT
+    )
 
 ###############################################
 #                sql managed db               #
@@ -4529,7 +4551,7 @@ def managed_db_restore(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.point_in_time_restore.value
+    kwargs['create_mode'] = CreateMode.POINT_IN_TIME_RESTORE.value
 
     if deleted_time:
         kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
@@ -4908,7 +4930,7 @@ def restore_long_term_retention_mi_backup(
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
+    kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP.value
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
 
     return client.begin_create_or_update(
@@ -4936,7 +4958,7 @@ def managed_db_log_replay_start(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.restore_external_backup.value
+    kwargs['create_mode'] = CreateMode.RESTORE_EXTERNAL_BACKUP.value
 
     if auto_complete and not last_backup_name:
         raise CLIError('Please specify a last backup name when using auto complete flag.')

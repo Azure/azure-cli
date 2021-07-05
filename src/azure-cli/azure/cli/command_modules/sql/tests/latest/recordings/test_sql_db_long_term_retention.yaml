@@ -23,125 +23,28 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Sql/servers/mysqlserver-x/databases/testLtr/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"UpsertDatabaseBackupArchivalPolicyV2","startTime":"2021-07-02T01:06:22.73Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Sql/locations/eastus/longTermRetentionPolicyAzureAsyncOperation/fdd8d40c-1270-4b38-bf83-3c35534a809c?api-version=2020-11-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '90'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 02 Jul 2021 01:06:22 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Sql/locations/eastus/longTermRetentionPolicyOperationResults/fdd8d40c-1270-4b38-bf83-3c35534a809c?api-version=2020-11-01-preview
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql db ltr-policy set
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -s -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Sql/locations/eastus/longTermRetentionPolicyAzureAsyncOperation/fdd8d40c-1270-4b38-bf83-3c35534a809c?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"fdd8d40c-1270-4b38-bf83-3c35534a809c","status":"Succeeded","startTime":"2021-07-02T01:06:22.73Z"}'
+      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
+        ''myResourceGroup'' could not be found."}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '106'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Jul 2021 01:06:37 GMT
+      - Mon, 05 Jul 2021 21:16:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql db ltr-policy set
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -s -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Sql/servers/mysqlserver-x/databases/testLtr/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"properties":{"weeklyRetention":"P1W","monthlyRetention":"P1M","yearlyRetention":"P2M","weekOfYear":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Sql/servers/mysqlserver-x/databases/testLtr/backupLongTermRetentionPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '389'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 02 Jul 2021 01:06:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
+      code: 404
+      message: Not Found
 version: 1

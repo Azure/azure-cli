@@ -489,7 +489,7 @@ def load_command_table(self, _):
                        table_transformer=instance_pool_table_format)
         g.custom_command('list', 'instance_pool_list',
                          table_transformer=instance_pool_table_format)
-        g.command('update', 'begin_update')
+        g.generic_update_command('update', setter_name='begin_update')
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('create', 'instance_pool_create',
                          supports_no_wait=True, table_transformer=instance_pool_table_format)
@@ -734,7 +734,7 @@ def load_command_table(self, _):
 
         g.custom_command('disable', 'mi_aad_only_disable')
         g.custom_command('enable', 'mi_aad_only_enable')
-        g.show_command('get', 'get')
+        g.custom_command('get', 'mi_aad_only_get')
 
     ###############################################
     #                sql managed db               #
