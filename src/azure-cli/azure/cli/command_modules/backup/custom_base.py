@@ -386,13 +386,10 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
-
-                  
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
                                 storage_account, target_resource_group, restore_to_staging_storage_account,
                                 restore_only_osdisk, diskslist, restore_as_unmanaged_disks, use_secondary_region,
                                 rehydration_duration, rehydration_priority, disk_encryption_set_id)
-                               
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,

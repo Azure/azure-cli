@@ -104,7 +104,7 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type)
         c.argument('identity_type', identity_type)
         c.argument('identity_id', identity_id_type)
-        c.argument('remove_user_assigned', action='store_true', help="Use this flag to remove user-assigned MSI")
+        c.argument('remove_user_assigned', action='store_true', help="Use this flag to remove user assigned identity")
         c.argument('remove_system_assigned', action='store_true', help="Use this flag to remove system assigned identity")
 
     # Encryption

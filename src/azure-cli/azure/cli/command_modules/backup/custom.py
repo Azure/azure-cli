@@ -226,9 +226,9 @@ def update_vault(client, resource_group_name, vault_name, identity_type=None, id
                 identity_type = 'systemassigned,userassigned'
 
     elif remove_system_assigned or remove_user_assigned:
-        return remove_identities(client, resource_group_name, vault_name, curr_identity_details,
-                                 curr_identity_type, identity_id, remove_user_assigned,
-                                 remove_system_assigned)
+        return _remove_identities(client, resource_group_name, vault_name, curr_identity_details,
+                                  curr_identity_type, identity_id, remove_user_assigned,
+                                  remove_system_assigned)
     else:
         raise RequiredArgumentMissingError(
             """
@@ -240,8 +240,8 @@ def update_vault(client, resource_group_name, vault_name, identity_type=None, id
     return client.begin_update(resource_group_name, vault_name, vault)
 
 
-def remove_identities(client, resource_group_name, vault_name, curr_identity_details, curr_identity_type,
-                      identity_id, remove_user_assigned, remove_system_assigned):
+def _remove_identities(client, resource_group_name, vault_name, curr_identity_details, curr_identity_type,
+                       identity_id, remove_user_assigned, remove_system_assigned):
     identity_type = None
     user_assigned_identity = None
     if remove_user_assigned and remove_system_assigned:
@@ -817,7 +817,15 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     source_resource_id, target_rg_id,
                                     use_original_storage_account, restore_disk_lun_list,
-                                    rehydration_duration, rehydration_priority, tier):
+                                    rehydration_duration, rehydration_priority, tier, disk_encryption_set_id,
+                                    encryption, recovery_point, use_secondary_region):
+
+    if disk_encryption_set_id is not None:
+        if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
+                recovery_point.properties.is_managed_virtual_machine and
+                not(recovery_point.properties.is_source_vm_encrypted) and use_secondary_region is None):
+            raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
+
     if tier == 'VaultArchive':
         rehyd_duration = 'P' + str(rehydration_duration) + 'D'
         rehydration_info = RecoveryPointRehydrationInfo(rehydration_retention_duration=rehyd_duration,
@@ -833,7 +841,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             target_resource_group_id=target_rg_id,
             original_storage_account_option=use_original_storage_account,
             restore_disk_lun_list=restore_disk_lun_list,
-            recovery_point_rehydration_info=rehydration_info, disk_encryption_set_id = disk_encryption_set_id)
+            recovery_point_rehydration_info=rehydration_info,
+            disk_encryption_set_id=disk_encryption_set_id)
 
     else:
         trigger_restore_properties = IaasVMRestoreRequest(
@@ -845,7 +854,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             source_resource_id=source_resource_id,
             target_resource_group_id=target_rg_id,
             original_storage_account_option=use_original_storage_account,
-            restore_disk_lun_list=restore_disk_lun_list, disk_encryption_set_id = disk_encryption_set_id)
+            restore_disk_lun_list=restore_disk_lun_list,
+            disk_encryption_set_id=disk_encryption_set_id)
 
     return trigger_restore_properties
 
@@ -923,18 +933,14 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     if diskslist:
         restore_disk_lun_list = diskslist
 
-    if disk_encryption_set_id is not None:
-        if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
-                recovery_point.properties.is_managed_virtual_machine and
-                not(recovery_point.properties.is_source_vm_encrypted) and use_secondary_region is None):
-            raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
     trigger_restore_properties = _get_trigger_restore_properties(rp_name, vault_location, _storage_account_id,
                                                                  _source_resource_id, target_rg_id,
                                                                  use_original_storage_account, restore_disk_lun_list,
                                                                  rehydration_duration, rehydration_priority,
                                                                  None if rp_list[0].
                                                                  properties.recovery_point_tier_details is None else
-                                                                 rp_list[0].tier_type)
+                                                                 rp_list[0].tier_type, disk_encryption_set_id,
+                                                                 encryption, recovery_point, use_secondary_region)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     if use_secondary_region:
