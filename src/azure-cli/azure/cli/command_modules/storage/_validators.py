@@ -210,7 +210,7 @@ def process_blob_source_uri(cmd, namespace):
     """
     Validate the parameters referenced to a blob source and create the source URI from them.
     """
-    from .util import create_short_lived_blob_sas, create_short_lived_file_sas
+    from .util import create_short_lived_blob_sas
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
         '\n\t   --source-uri' \
@@ -387,7 +387,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     namespace.copy_source = uri
 
 
-def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
+def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements, too-many-locals
     from .util import create_short_lived_blob_sas, create_short_lived_blob_sas_v2, create_short_lived_file_sas
     from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
         MutuallyExclusiveArgumentError
@@ -476,7 +476,8 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
             # is_storagev2() is used to distinguish if the command is in track2 SDK
             # If yes, we will use get_login_credentials() as token credential
             if is_storagev2(prefix):
-                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container, blob)
+                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container,
+                                                            blob)
             else:
                 source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
 
