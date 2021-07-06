@@ -162,7 +162,6 @@ def create_ase_inbound_services(cmd, resource_group_name, name, subnet, vnet_nam
 def _get_ase_client_factory(cli_ctx, api_version=None):
     client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient).app_service_environments
     if api_version:
-        logger.warning(api_version)
         client.api_version = api_version
     else:
         client.api_version = VERSION_2019_08_01
