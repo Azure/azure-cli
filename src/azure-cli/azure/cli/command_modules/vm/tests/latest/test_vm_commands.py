@@ -4072,7 +4072,6 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
-    @unittest.skip('Service failed')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
     @StorageAccountPreparer()
@@ -4105,14 +4104,25 @@ class VMGalleryImage(ScenarioTest):
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --gallery-image-version 1.0.0 --os-vhd-uri {vhd} --os-vhd-storage-account {stac} --data-vhds-uris {vhd1} {vhd2} --data-vhds-luns 0 1 --data-vhds-storage-accounts {sa} {sa} --replica-count 1', checks=[
-            self.check('storageProfile.osDiskImage.source.uri', vhd_uri),
-            self.check('storageProfile.dataDiskImages[0].source.uri', vhd1_uri),
-            self.check('storageProfile.dataDiskImages[1].source.uri', vhd2_uri),
-            self.check('storageProfile.dataDiskImages[0].lun', 0),
-            self.check('storageProfile.dataDiskImages[1].lun', 1),
-        ])
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+        # self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 '
+        #          '--gallery-image-version 1.0.0 --os-vhd-uri {vhd} --os-vhd-storage-account {stac} --data-vhds-uris '
+        #          '{vhd1} {vhd2} --data-vhds-luns 0 1 --data-vhds-storage-accounts {sa} {sa} --replica-count 1', checks=[
+        #     self.check('storageProfile.osDiskImage.source.uri', vhd_uri),
+        #     self.check('storageProfile.dataDiskImages[0].source.uri', vhd1_uri),
+        #     self.check('storageProfile.dataDiskImages[1].source.uri', vhd2_uri),
+        #     self.check('storageProfile.dataDiskImages[0].lun', 0),
+        #     self.check('storageProfile.dataDiskImages[1].lun', 1),
+        # ])
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10')
+        self.cmd('disk create -g {rg} -n d2 --size-gb 10')
+        s1_id = self.cmd('snapshot create -g {rg} -n s1 --source d1').get_output_in_json()['id']
+        s2_id = self.cmd('snapshot create -g {rg} -n s2 --source d2').get_output_in_json()['id']
+        result = self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 '
+                 '--gallery-image-version 1.0.0 --os-snapshot s1 --data-snapshot-luns 0 --data-snapshots s2 '
+                 '--data-vhds-luns 1 --data-vhds-sa {sa} --data-vhds-uris {vhd1}').get_output_in_json()
+        a = result
 
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
     def test_gallery_specialized(self, resource_group):
