@@ -8,9 +8,7 @@ from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigrationValidationOptions,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncTaskInput,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseInput,
-                                             MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseTableInput,
-                                             MigrateMySqlAzureDbForMySqlSyncTaskInput,
-                                             MigrateMySqlAzureDbForMySqlSyncDatabaseInput)
+                                             MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseTableInput)
 
 
 def get_migrate_sql_to_sqldb_offline_input(database_options_json,
@@ -37,31 +35,6 @@ def get_migrate_sql_to_sqldb_offline_input(database_options_json,
                                           target_connection_info=target_connection_info,
                                           selected_databases=database_options,
                                           validation_options=validation_options)
-
-
-def get_migrate_mysql_to_azuredbformysql_sync_input(database_options_json,
-                                                    source_connection_info,
-                                                    target_connection_info):
-    database_options = []
-
-    for d in database_options_json:
-        def_migration_setting_input = {"fullLoadSubTasks": "5",
-                                       "inlineLobMaxSize": "0",
-                                       "limitLOBSize": "true",
-                                       "lobChunkSize": "64",
-                                       "lobMaxSize": "32"}
-        database_options.append(
-            MigrateMySqlAzureDbForMySqlSyncDatabaseInput(
-                name=d.get('name', None),
-                target_database_name=d.get('target_database_name', None),
-                migration_setting=d.get('migrationSetting', def_migration_setting_input),
-                source_setting=d.get('sourceSetting', None),
-                target_setting=d.get('targetSetting', None),
-                table_map=d.get('tableMap', None)))
-
-    return MigrateMySqlAzureDbForMySqlSyncTaskInput(source_connection_info=source_connection_info,
-                                                    target_connection_info=target_connection_info,
-                                                    selected_databases=database_options)
 
 
 def get_migrate_postgresql_to_azuredbforpostgresql_sync_input(database_options_json,
