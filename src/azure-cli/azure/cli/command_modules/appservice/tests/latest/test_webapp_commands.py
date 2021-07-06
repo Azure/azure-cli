@@ -1801,24 +1801,13 @@ class WebappNetworkConnectionTests(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
-            resource_group, webapp_name, vnet_name, subnet['id']), checks=[
-            JMESPathCheck('vnetRouteAllEnabled', True)
-        ])
+            resource_group, webapp_name, vnet_name, subnet['id']))
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name)
         ])
         self.cmd('webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
-        # Disable route all
-        self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {} --disable-route-all'.format(
-            resource_group, webapp_name, vnet_name, subnet['id']), checks=[
-            JMESPathCheck('vnetRouteAllEnabled', False)
-        ])
-        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', subnet_name)
-        ])
-        self.cmd('webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+       
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
