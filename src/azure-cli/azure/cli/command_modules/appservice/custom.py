@@ -3570,8 +3570,7 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
     return mod_list
 
 
-def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None,
-                         disable_route_all=None, skip_delegation_check=False):
+def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
     SwiftVirtualNetwork = cmd.get_models('SwiftVirtualNetwork')
     Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
     client = web_client_factory(cmd.cli_ctx)
@@ -3622,14 +3621,10 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     return_vnet = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                           'create_or_update_swift_virtual_network_connection', slot, swiftVnet)
 
-    # Route all configuration
+    # Enalbe Route All configuration
     config = get_site_configs(cmd, resource_group_name, name, slot)
-    if disable_route_all:
-        if config.vnet_route_all_enabled is True:
-            config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='false')
-    else:  # Default enable
-        if config.vnet_route_all_enabled is False:
-            config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='true')
+    if config.vnet_route_all_enabled is not True:
+        config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='true')
 
     # reformats the vnet entry, removing unnecessary information
     id_strings = return_vnet.id.split('/')
@@ -3639,8 +3634,7 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
         "location": return_vnet.additional_properties["location"],
         "name": return_vnet.name,
         "resourceGroup": resourceGroup,
-        "subnetResourceId": return_vnet.subnet_resource_id,
-        "vnetRouteAllEnabled": config.vnet_route_all_enabled
+        "subnetResourceId": return_vnet.subnet_resource_id
     }
 
     return mod_vnet
