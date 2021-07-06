@@ -10,8 +10,7 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.privatedns import PrivateDnsManagementClient
 
 # Models
-from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation,
-                                       PrivateEndpoint, Subnet, PrivateLinkServiceConnection)
+from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation)
 from azure.mgmt.resource.resources.models import (DeploymentProperties, Deployment, SubResource)
 from azure.mgmt.privatedns.models import (PrivateZone, VirtualNetworkLink, RecordSet, ARecord)
 
@@ -27,7 +26,6 @@ from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource
 
 VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"
-VERSION_2021_01_01 = "2021-01-01"
 
 logger = get_logger(__name__)
 
@@ -119,13 +117,13 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
 
 
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2021_01_01)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase = ase_client.get(resource_group_name, name)
     if ase.kind.lower() == 'asev3':
-        return ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
-        #raise CommandNotFoundError('list-addresses is currently not supported for ASEv3.')
+        # return ase_client.get_ase_v3_networking_configuration(resource_group_name, name) # pending SDK update
+        raise CommandNotFoundError('list-addresses is currently not supported for ASEv3.')
     return ase_client.get_vip_info(resource_group_name, name)
 
 
@@ -137,7 +135,7 @@ def list_appserviceenvironment_plans(cmd, name, resource_group_name=None):
 
 
 def create_ase_inbound_services(cmd, resource_group_name, name, subnet, vnet_name=None, skip_dns=False):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2021_01_01)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
     ase = ase_client.get(resource_group_name, name)
     if not ase:
         raise ResourceNotFoundError("App Service Environment '{}' not found.".format(name))
@@ -145,10 +143,14 @@ def create_ase_inbound_services(cmd, resource_group_name, name, subnet, vnet_nam
     if ase.internal_load_balancing_mode == 'None':
         raise ValidationError('Private DNS Zone is not relevant for External ASE.')
 
-    inbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
-    inbound_vnet_id = _get_vnet_id_from_subnet(cmd.cli_ctx, inbound_subnet_id)
+    if ase.kind.lower() == 'asev3':
+        # pending SDK update (ase_client.get_ase_v3_networking_configuration(resource_group_name, name))
+        raise CommandNotFoundError('create-inbound-services is currently not supported for ASEv3.')
+
     ase_vip_info = ase_client.get_vip_info(resource_group_name, name)
     inbound_ip_address = ase_vip_info.internal_ip_address
+    inbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
+    inbound_vnet_id = _get_vnet_id_from_subnet(cmd.cli_ctx, inbound_subnet_id)
 
     if not skip_dns:
         _ensure_ase_private_dns_zone(cmd.cli_ctx, resource_group_name=resource_group_name, name=name,
