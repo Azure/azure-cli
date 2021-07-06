@@ -39,22 +39,19 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
                    validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
-        c.argument('sku', options_list=['--sku'], help='The SKU type.')
-        c.argument('etag', options_list=['--etag'], type=str, help='The etag for the devices.')
-        c.argument('data_box_edge_device_status', options_list=['--status'], arg_type=get_enum_type([
-            'ReadyToSetup',
-            'Online',
-            'Offline',
-            'NeedsAttention',
-            'Disconnected',
-            'PartiallyDisconnected',
-            'Maintenance']), help='The status of the Data Box Edge/Gateway device.')
-        c.argument('description', options_list=['--description'], type=str,
-                   help='The Description of the Data Box Edge/Gateway device.')
-        c.argument('model_description', options_list=['--model-description'], type=str,
-                   help='The description of the Data Box Edge/Gateway device model.')
-        c.argument('friendly_name', options_list=['--friendly-name'], type=str,
-                   help='The Data Box Edge/Gateway device name.')
+        c.argument('sku', action=AddSku, nargs='+', help='The SKU type.')
+        c.argument('etag', type=str, help='The etag for the devices.')
+        c.argument('data_box_edge_device_status', options_list=['--status'], arg_type=get_enum_type(['ReadyToSetup',
+                                                                                                     'Online',
+                                                                                                     'Offline',
+                                                                                                     'NeedsAttention',
+                                                                                                     'Disconnected',
+                                                                                                     'PartiallyDisconnected',
+                                                                                                     'Maintenance']),
+                   help='The status of the Data Box Edge/Gateway device.')
+        c.argument('description', type=str, help='The Description of the Data Box Edge/Gateway device.')
+        c.argument('model_description', type=str, help='The description of the Data Box Edge/Gateway device model.')
+        c.argument('friendly_name', type=str, help='The Data Box Edge/Gateway device name.')
 
     with self.argument_context('databoxedge device update') as c:
         c.argument('device_name', options_list=['--name', '-n', '--device-name'], type=str, help='The device name.',
@@ -118,11 +115,10 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], type=str, help='The bandwidth schedule name which needs to '
                    'be added/updated.')
         c.argument('resource_group_name', resource_group_name_type)
-        c.argument('start', options_list=['--start'], type=str, help='The start time of the schedule in UTC.')
-        c.argument('stop', options_list=['--stop'], type=str, help='The stop time of the schedule in UTC.')
-        c.argument('rate_in_mbps', options_list=['--rate-in-mbps'], type=int, help='The bandwidth rate in Mbps.')
-        c.argument('days', options_list=['--days'], nargs='+',
-                   help='The days of the week when this schedule is applicable.')
+        c.argument('start', type=str, help='The start time of the schedule in UTC.')
+        c.argument('stop', type=str, help='The stop time of the schedule in UTC.')
+        c.argument('rate_in_mbps', type=int, help='The bandwidth rate in Mbps.')
+        c.argument('days', nargs='+', help='The days of the week when this schedule is applicable.')
 
     with self.argument_context('databoxedge bandwidth-schedule update') as c:
         c.argument('device_name', options_list=['--device-name', '-d'], type=str, help='The device name.',
@@ -130,11 +126,10 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], type=str, help='The bandwidth schedule name which needs to '
                    'be added/updated.', id_part='child_name_1')
         c.argument('resource_group_name', resource_group_name_type)
-        c.argument('start', options_list=['--start'], type=str, help='The start time of the schedule in UTC.')
-        c.argument('stop', options_list=['--stop'], type=str, help='The stop time of the schedule in UTC.')
-        c.argument('rate_in_mbps', options_list=['--rate-in-mbps'], type=int, help='The bandwidth rate in Mbps.')
-        c.argument('days', options_list=['--days'], nargs='+',
-                   help='The days of the week when this schedule is applicable.')
+        c.argument('start', type=str, help='The start time of the schedule in UTC.')
+        c.argument('stop', type=str, help='The stop time of the schedule in UTC.')
+        c.argument('rate_in_mbps', type=int, help='The bandwidth rate in Mbps.')
+        c.argument('days', nargs='+', help='The days of the week when this schedule is applicable.')
         c.ignore('parameters')
 
     with self.argument_context('databoxedge bandwidth-schedule delete') as c:
@@ -174,73 +169,47 @@ def load_arguments(self, _):
         c.argument('device_name', options_list=['--device-name', '-d'], type=str,
                    help='The order details of a device.')
         c.argument('resource_group_name', resource_group_name_type)
-        c.argument('status', options_list=['--status'],
-                   arg_type=get_enum_type(['Untracked', 'AwaitingFulfilment', 'AwaitingPreparation',
-                                           'AwaitingShipment', 'Shipped', 'Arriving', 'Delivered',
-                                           'ReplacementRequested', 'LostDevice', 'Declined',
-                                           'ReturnInitiated', 'AwaitingReturnShipment', 'ShippedBack',
-                                           'CollectedAtMicrosoft']),
-                   help='Status of the order as per the allowed status types.', arg_group='Current Status')
-        c.argument('comments', options_list=['--comments'], type=str,
-                   help='Comments related to this status change.', arg_group='Current Status')
-        c.argument('address_line1', options_list=['--address-line1'], type=str,
-                   help='The address line1.', arg_group='Shipping Address')
-        c.argument('address_line2', options_list=['--address-line2'], type=str,
-                   help='The address line2.', arg_group='Shipping Address')
-        c.argument('address_line3', options_list=['--address-line3'], type=str,
-                   help='The address line3.', arg_group='Shipping Address')
-        c.argument('postal_code', options_list=['--postal-code'], type=str,
-                   help='The postal code.', arg_group='Shipping Address')
-        c.argument('city', options_list=['--city'], type=str,
-                   help='The city name.', arg_group='Shipping Address')
-        c.argument('state', options_list=['--state'], type=str,
-                   help='The state name.', arg_group='Shipping Address')
-        c.argument('country', options_list=['--country'], type=str,
-                   help='The country name.', arg_group='Shipping Address')
-        c.argument('contact_person', options_list=['--contact-person'], type=str,
-                   help='The contact person name.', arg_group='Contact Information')
-        c.argument('company_name', options_list=['--company-name'], type=str,
-                   help='The name of the company.', arg_group='Contact Information')
-        c.argument('phone', options_list=['--phone'], type=str,
-                   help='The phone number.', arg_group='Contact Information')
-        c.argument('email_list', options_list=['--email-list'], nargs='+',
-                   help='The email list.', arg_group='Contact Information')
+        c.argument('status', arg_type=get_enum_type(['Untracked', 'AwaitingFulfilment', 'AwaitingPreparation',
+                                                     'AwaitingShipment', 'Shipped', 'Arriving', 'Delivered',
+                                                     'ReplacementRequested', 'LostDevice', 'Declined',
+                                                     'ReturnInitiated', 'AwaitingReturnShipment', 'ShippedBack',
+                                                     'CollectedAtMicrosoft']), help='Status of the order as per the '
+                   'allowed status types.', arg_group='Current Status')
+        c.argument('comments', type=str, help='Comments related to this status change.', arg_group='Current Status')
+        c.argument('address_line1', type=str, help='The address line1.', arg_group='Shipping Address')
+        c.argument('address_line2', type=str, help='The address line2.', arg_group='Shipping Address')
+        c.argument('address_line3', type=str, help='The address line3.', arg_group='Shipping Address')
+        c.argument('postal_code', type=str, help='The postal code.', arg_group='Shipping Address')
+        c.argument('city', type=str, help='The city name.', arg_group='Shipping Address')
+        c.argument('state', type=str, help='The state name.', arg_group='Shipping Address')
+        c.argument('country', type=str, help='The country name.', arg_group='Shipping Address')
+        c.argument('contact_person', type=str, help='The contact person name.', arg_group='Contact Information')
+        c.argument('company_name', type=str, help='The name of the company.', arg_group='Contact Information')
+        c.argument('phone', type=str, help='The phone number.', arg_group='Contact Information')
+        c.argument('email_list', nargs='+', help='The email list.', arg_group='Contact Information')
 
     with self.argument_context('databoxedge order update') as c:
         c.argument('device_name', options_list=['--device-name', '-d'], type=str,
                    help='The order details of a device.', id_part='name')
         c.argument('resource_group_name', resource_group_name_type)
-        c.argument('status', options_list=['--status'],
-                   arg_type=get_enum_type(['Untracked', 'AwaitingFulfilment', 'AwaitingPreparation',
-                                           'AwaitingShipment', 'Shipped', 'Arriving', 'Delivered',
-                                           'ReplacementRequested', 'LostDevice', 'Declined',
-                                           'ReturnInitiated', 'AwaitingReturnShipment', 'ShippedBack',
-                                           'CollectedAtMicrosoft']),
-                   help='Status of the order as per the allowed status types.', arg_group='Current Status')
-        c.argument('comments', options_list=['--comments'], type=str,
-                   help='Comments related to this status change.', arg_group='Current Status')
-        c.argument('address_line1', options_list=['--address-line1'], type=str,
-                   help='The address line1.', arg_group='Shipping Address')
-        c.argument('address_line2', options_list=['--address-line2'], type=str,
-                   help='The address line2.', arg_group='Shipping Address')
-        c.argument('address_line3', options_list=['--address-line3'], type=str,
-                   help='The address line3.', arg_group='Shipping Address')
-        c.argument('postal_code', options_list=['--postal-code'], type=str,
-                   help='The postal code.', arg_group='Shipping Address')
-        c.argument('city', options_list=['--city'], type=str,
-                   help='The city name.', arg_group='Shipping Address')
-        c.argument('state', options_list=['--state'], type=str,
-                   help='The state name.', arg_group='Shipping Address')
-        c.argument('country', options_list=['--country'], type=str,
-                   help='The country name.', arg_group='Shipping Address')
-        c.argument('contact_person', options_list=['--contact-person'], type=str,
-                   help='The contact person name.', arg_group='Contact Information')
-        c.argument('company_name', options_list=['--company-name'], type=str,
-                   help='The name of the company.', arg_group='Contact Information')
-        c.argument('phone', options_list=['--phone'], type=str,
-                   help='The phone number.', arg_group='Contact Information')
-        c.argument('email_list', options_list=['--email-list'], nargs='+',
-                   help='The email list.', arg_group='Contact Information')
+        c.argument('status', arg_type=get_enum_type(['Untracked', 'AwaitingFulfilment', 'AwaitingPreparation',
+                                                     'AwaitingShipment', 'Shipped', 'Arriving', 'Delivered',
+                                                     'ReplacementRequested', 'LostDevice', 'Declined',
+                                                     'ReturnInitiated', 'AwaitingReturnShipment', 'ShippedBack',
+                                                     'CollectedAtMicrosoft']), help='Status of the order as per the '
+                   'allowed status types.', arg_group='Current Status')
+        c.argument('comments', type=str, help='Comments related to this status change.', arg_group='Current Status')
+        c.argument('address_line1', type=str, help='The address line1.', arg_group='Shipping Address')
+        c.argument('address_line2', type=str, help='The address line2.', arg_group='Shipping Address')
+        c.argument('address_line3', type=str, help='The address line3.', arg_group='Shipping Address')
+        c.argument('postal_code', type=str, help='The postal code.', arg_group='Shipping Address')
+        c.argument('city', type=str, help='The city name.', arg_group='Shipping Address')
+        c.argument('state', type=str, help='The state name.', arg_group='Shipping Address')
+        c.argument('country', type=str, help='The country name.', arg_group='Shipping Address')
+        c.argument('contact_person', type=str, help='The contact person name.', arg_group='Contact Information')
+        c.argument('company_name', type=str, help='The name of the company.', arg_group='Contact Information')
+        c.argument('phone', type=str, help='The phone number.', arg_group='Contact Information')
+        c.argument('email_list', nargs='+', help='The email list.', arg_group='Contact Information')
         c.ignore('order')
 
     with self.argument_context('databoxedge order delete') as c:

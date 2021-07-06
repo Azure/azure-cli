@@ -33,6 +33,3 @@ def load_command_table(self, _):
                             min_api='2019-08-01') as g:
         g.generic_update_command('update', setter_arg_name='order', custom_func_name='databoxedge_order_update',
                                  setter_name='begin_create_or_update', supports_no_wait=True)
-
-
-
