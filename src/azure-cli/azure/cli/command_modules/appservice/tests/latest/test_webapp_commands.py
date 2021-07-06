@@ -296,6 +296,10 @@ class BackupWithName(ScenarioTest):
         self.cmd('webapp config backup create -g {} --webapp-name {} --backup-name {} --container-url {}'.format(resource_group, webapp, backup_name, sasurl), checks=[
             JMESPathCheck('blobName', backup_name)
         ])
+        self.cmd('webapp config backup list -g {} --webapp-name {}'.format(resource_group, webapp), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].blobName', backup_name)
+        ])
 
 
 # Test Framework is not able to handle binary file format, hence, only run live
