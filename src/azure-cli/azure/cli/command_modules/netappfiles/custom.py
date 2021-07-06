@@ -29,7 +29,7 @@ def _update_mapper(existing, new, keys):
 # pylint: disable=unused-argument
 # account update - active_directory is amended with subgroup commands
 def create_account(client, account_name, resource_group_name, location, tags=None, encryption=None):
-    account_encryption = AccountEncryption(key_source=encryption)
+    account_encryption = AccountEncryption(key_source=encryption) if encryption is not None else None
     body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
     return client.begin_create_or_update(resource_group_name, account_name, body)
 
@@ -204,14 +204,24 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
 
 # -- volume update
-def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None,
-                 backup_enabled=False, backup_policy_id=None, policy_enforced=False, throughput_mibps=None):
+def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=False,
+                 backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None):
+    data_protection = None
+    backup = None
+    snapshot = None
+    if vault_id is not None:
+        backup = VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
+                                        backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
+    if snapshot_policy_id is not None:
+        snapshot = VolumeSnapshotProperties(snapshot_policy_id=snapshot_policy_id)
+
+    if backup is not None or snapshot is not None:
+        data_protection = VolumePatchPropertiesDataProtection(backup=backup, snapshot=snapshot)
+
     params = VolumePatch(
         usage_threshold=None if usage_threshold is None else int(usage_threshold) * gib_scale,
         service_level=service_level,
-        data_protection=None if vault_id is None else VolumePatchPropertiesDataProtection(
-            backup=VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
-                                          backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)),
+        data_protection=data_protection,
         tags=tags)
     if throughput_mibps is not None:
         params.throughput_mibps = throughput_mibps
@@ -338,13 +348,15 @@ def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_po
 
 
 # ---- VOLUME BACKUPS ----
-def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location):
-    body = Backup(location=location)
+def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location,
+                  use_existing_snapshot=None):
+    body = Backup(location=location, use_existing_snapshot=use_existing_snapshot)
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
 
-def update_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, tags=None):
-    body = BackupPatch(tags=tags)
+def update_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, tags=None, label=None,
+                  use_existing_snapshot=None):
+    body = BackupPatch(tags=tags, label=label, use_existing_snapshot=use_existing_snapshot)
     return client.begin_update(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
 
@@ -374,4 +386,4 @@ def patch_backup_policy(client, resource_group_name, account_name, backup_policy
         yearly_backups_to_keep=yearly_backups,
         enabled=enabled,
         tags=tags)
-    return client.update(resource_group_name, account_name, backup_policy_name, body)
+    return client.begin_update(resource_group_name, account_name, backup_policy_name, body)
