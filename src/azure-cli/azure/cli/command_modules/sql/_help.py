@@ -1373,9 +1373,7 @@ examples:
   - name: Create a new outbound firewall rule
     text: az sql server outbound-firewall-rule create -g mygroup -s myserver -n allowedFQDN
   - name: Create a new outbound firewall rule
-    text: az sql server outbound-firewall-rule create -g mygroup -s myserver --fqdn allowedFQDN
-  - name: Create a new outbound firewall rule
-    text: az sql server outbound-firewall-rule create -g mygroup -s myserver --allowed-fqdn allowedFQDN
+    text: az sql server outbound-firewall-rule create -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
 """
 
 helps['sql server outbound-firewall-rule list'] = """
@@ -1393,9 +1391,7 @@ examples:
   - name: Shows the outbound firewall rule
     text: az sql server outbound-firewall-rule show -g mygroup -s myserver -n myrule
   - name: Shows the outbound firewall rule
-    text: az sql server outbound-firewall-rule show -g mygroup -s myserver --fqdn myrule
-  - name: Shows the outbound firewall rule
-    text: az sql server outbound-firewall-rule show -g mygroup -s myserver --allowed-fqdn allowedFQDN
+    text: az sql server outbound-firewall-rule show -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
 """
 
 helps['sql server key'] = """

@@ -1663,13 +1663,13 @@ def load_arguments(self, _):
     #           sql server outbound firewall-rule
     #####
     with self.argument_context('sql server outbound-firewall-rule') as c:
-        # Help text needs to be specified because 'sql server outbound firewall-rule update' is a custom
+        # Help text needs to be specified because 'sql server outbound-firewall-rule update' is a custom
         # command.
         c.argument('server_name',
                    arg_type=server_param_type)
 
-        c.argument('outbound_firewall_allowed_fqdn',
-                   options_list=['--allowed-fqdn', '--fqdn', '-n'],
+        c.argument('outbound_rule_fqdn',
+                   options_list=['--outbound-rule-fqdn', '-n'],
                    help='The allowed FQDN for the outbound firewall rule.')
 
     #####

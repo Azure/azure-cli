@@ -392,7 +392,7 @@ def outbound_firewall_rule_table_format(result):
         return OrderedDict([
             ('resourceGroupName', result['resourceGroupName']),
             ('serverName', result['serverName']),
-            ('allowedFQDN', result['allowedFQDN'])
+            ('outboundRuleFqdn', result['outboundRuleFqdn'])
         ])
 
     return _apply_format(result, _outbound_firewall_rule_table_format)

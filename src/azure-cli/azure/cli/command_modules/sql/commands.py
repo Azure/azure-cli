@@ -541,7 +541,6 @@ def load_command_table(self, _):
     with self.command_group('sql server outbound-firewall-rule',
                             outbound_firewall_rules_operations,
                             client_factory=get_sql_outbound_firewall_rules_operations) as g:
-
         g.custom_command('create', 'outbound_firewall_rule_create',
                          table_transformer=outbound_firewall_rule_table_format)
         g.command('delete', 'delete')
