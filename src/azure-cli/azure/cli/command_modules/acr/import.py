@@ -26,7 +26,7 @@ LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid " \
 CREDENTIALS_INVALID = "Authentication failed. Please provide password."
 
 
-def acr_import(cmd, # pylint: disable=too-many-locals
+def acr_import(cmd,  # pylint: disable=too-many-locals
                client,
                registry_name,
                source_image,
