@@ -49,7 +49,7 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
                                      ignore_network_security_group=False, virtual_ip_type='Internal',
                                      front_end_scale_factor=None, front_end_sku=None, force_route_table=False,
                                      force_network_security_group=False, ignore_subnet_size_validation=False,
-                                     location=None, no_wait=False, os_preference=None):
+                                     location=None, no_wait=False, os_preference=None, zone_redundant=None):
     # The current SDK has a couple of challenges creating ASE. The current swagger version used,
     # did not have 201 as valid response code, and thus will fail with polling operations.
     # The Load Balancer Type is an Enum Flag, that is expressed as a simple string enum in swagger,
@@ -79,7 +79,8 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
         _ensure_subnet_delegation(cmd.cli_ctx, subnet_id, 'Microsoft.Web/hostingEnvironments')
         ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
                                                                      subnet_id=subnet_id, kind='ASEv3',
-                                                                     virtual_ip_type=virtual_ip_type)
+                                                                     virtual_ip_type=virtual_ip_type,
+                                                                     zone_redundant=zone_redundant)
     logger.info('Create App Service Environment...')
     deployment_client = _get_resource_client_factory(cmd.cli_ctx).deployments
     return sdk_no_wait(no_wait, deployment_client.begin_create_or_update,
@@ -407,7 +408,7 @@ def _get_unique_deployment_name(prefix):
 
 def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type=None,
                                      front_end_scale_factor=None, front_end_sku=None, tags=None,
-                                     kind='ASEv2', os_preference=None):
+                                     kind='ASEv2', os_preference=None, zone_redundant=None):
     # InternalLoadBalancingMode Enum: None 0, Web 1, Publishing 2.
     # External: 0 (None), Internal: 3 (Web + Publishing)
     ilb_mode = 3 if virtual_ip_type == 'Internal' else 0
@@ -426,6 +427,8 @@ def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type=
         ase_properties['multiSize'] = worker_sku
     if os_preference:
         ase_properties['osPreference'] = os_preference
+    if zone_redundant:
+        ase_properties['zoneRedundant'] = zone_redundant
 
     ase_resource = {
         'name': name,
