@@ -234,6 +234,7 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
                             location_mode=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
+        account_name, dns = account_name.split('.', 2)
         client_kwargs = {'account_name': account_name,
                          'account_key': account_key,
                          'connection_string': connection_string,
@@ -247,6 +248,19 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
         client = service_type(**client_kwargs)
         if location_mode:
             client.location_mode = location_mode
+        if 'Blob' in service_type.__name__:
+            service = 'blob'
+        elif 'File' in service_type.__name__:
+            service = 'file'
+        elif 'Queue' in service_type.__name__:
+            service = 'queue'
+        else:
+            raise CLIError("Invalid service type.")
+        if dns:
+            client.primary_endpoint = "{}.{}.{}.{}".format(client.primary_endpoint.split('.', 1)[0], dns, service,
+                                                           endpoint_suffix)
+            client.secondary_endpoint = "{}.{}.{}.{}".format(client.secondary_endpoint.split('.', 1)[0], dns, service,
+                                                             endpoint_suffix)
     except ValueError as exc:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')

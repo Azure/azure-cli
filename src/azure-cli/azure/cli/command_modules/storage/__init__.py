@@ -288,6 +288,10 @@ Authentication failure. This may be caused by either invalid account key, connec
                              arg_group=group_name,
                              help='A Shared Access Signature (SAS). Must be used in conjunction with storage account '
                                   'name. Environment variable: AZURE_STORAGE_SAS_TOKEN')
+        command.add_argument('endpoint_suffix', required=False, default=None,
+                             arg_group=group_name,
+                             help='The host base component of the url, minus the account name. Defaults to current '
+                                  'cloud configuration. Use `az cloud show` to see current cloud information.')
 
     def _register_data_plane_oauth_arguments(self, command_name):
         from azure.cli.core.commands.parameters import get_enum_type

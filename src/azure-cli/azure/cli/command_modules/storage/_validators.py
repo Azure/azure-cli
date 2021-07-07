@@ -150,12 +150,12 @@ def validate_client_parameters(cmd, namespace):
     if not n.connection_string and not n.account_key and not n.sas_token:
         n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
-    # if connection string supplied or in environment variables, extract account key and name
-    if n.connection_string:
-        conn_dict = validate_key_value_pairs(n.connection_string)
-        n.account_name = conn_dict.get('AccountName')
-        n.account_key = conn_dict.get('AccountKey')
-        n.sas_token = conn_dict.get('SharedAccessSignature')
+    # # if connection string supplied or in environment variables, extract account key and name
+    # if n.connection_string:
+    #     conn_dict = validate_key_value_pairs(n.connection_string)
+    #     n.account_name = conn_dict.get('AccountName')
+    #     n.account_key = conn_dict.get('AccountKey')
+    #     n.sas_token = conn_dict.get('SharedAccessSignature')
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
@@ -176,7 +176,7 @@ def validate_client_parameters(cmd, namespace):
         n.account_name = n.account_name[:-10]
 
     # if account name is specified but no key, attempt to query
-    if n.account_name and not n.account_key and not n.sas_token:
+    if n.account_name and not n.account_key and not n.sas_token and not n.connection_string:
         message = """
 There are no credentials provided in your command and environment, we will query for account key for your storage account.
 It is recommended to provide --connection-string, --account-key or --sas-token in your command as credentials.
@@ -190,7 +190,9 @@ For more information about RBAC roles in storage, visit https://docs.microsoft.c
                        'credentials in your command. Please use --help to get more information about environment '
                        'variable usage.', message)
         try:
-            n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+            # process account_name with dns
+            account_name, _ = n.account_name.split('.', 2)
+            n.account_key = _query_account_key(cmd.cli_ctx, account_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("\nSkip querying account key due to failure: %s", ex)
 

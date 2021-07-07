@@ -24,19 +24,21 @@ Missing credentials to access storage service. The following variations are acce
 
 
 def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
-                                    socket_timeout=None, token_credential=None, location_mode=None):
+                                    socket_timeout=None, token_credential=None, location_mode=None,
+                                    endpoint_suffix=None):
     return get_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
                                    socket_timeout=socket_timeout,
                                    token_credential=token_credential,
-                                   endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint,
+                                   endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint if endpoint_suffix is None else endpoint_suffix,
                                    location_mode=location_mode)
 
 
 def generic_data_service_factory(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
-                                 socket_timeout=None, token_credential=None, location_mode=None):
+                                 socket_timeout=None, token_credential=None, location_mode=None, endpoint_suffix=None):
     try:
         return get_storage_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
-                                               socket_timeout, token_credential, location_mode=location_mode)
+                                               socket_timeout, token_credential, location_mode=location_mode,
+                                               endpoint_suffix=endpoint_suffix)
     except ValueError as val_exception:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')
@@ -81,7 +83,8 @@ def blob_data_service_factory(cli_ctx, kwargs):
                                         sas_token=kwargs.pop('sas_token', None),
                                         socket_timeout=kwargs.pop('socket_timeout', None),
                                         token_credential=kwargs.pop('token_credential', None),
-                                        location_mode=kwargs.pop('location_mode', None))
+                                        location_mode=kwargs.pop('location_mode', None),
+                                        endpoint_suffix=kwargs.pop('endpoint_suffix', None))
 
 
 def table_data_service_factory(cli_ctx, kwargs):
