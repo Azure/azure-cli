@@ -344,7 +344,7 @@ def load_arguments(self, _):
 
     # SDK functions
     for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'recover',
-                 'set-attributes', 'show', 'show-deleted', 'encrypt', 'decrypt']:
+                 'set-attributes', 'show-deleted', 'encrypt', 'decrypt']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
             c.ignore('cls')
             if item in ['list', 'list-deleted']:
@@ -437,6 +437,16 @@ def load_arguments(self, _):
     with self.argument_context('keyvault key list') as c:
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
                 help='Include managed keys. Default: false')
+
+    with self.argument_context('keyvault key show', arg_group='Id') as c:
+        c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
+                   required=False, completer=get_keyvault_name_completion_list('key'),
+                   help='Name of the key. Required if --id is not specified.')
+        c.argument('version', options_list=['--version', '-v'],
+                   help='The key version. If omitted, uses the latest version.', default='',
+                   required=False, completer=get_keyvault_version_completion_list('key'))
+        c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+        c.extra('hsm_name', data_plane_hsm_name_type, required=False)
     # endregion
 
     # region KeyVault Secret

@@ -13,7 +13,8 @@ from azure.cli.command_modules.keyvault._client_factory import (
 
 from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
-    multi_transformers, transform_key_decryption_output, keep_max_results)
+    multi_transformers, transform_key_decryption_output, keep_max_results,
+    transform_key_output)
 
 from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -159,7 +160,7 @@ def load_command_table(self, _):
         g.keyvault_custom('create', 'create_key',
                           doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key')
-        g.keyvault_command('show', 'get_key')
+        # g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
         g.keyvault_command('delete', 'delete_key')
         g.keyvault_command('purge', 'purge_deleted_key')
@@ -174,22 +175,8 @@ def load_command_table(self, _):
         g.keyvault_command('encrypt', 'encrypt', is_preview=True)
         g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 
-    # if not is_azure_stack_profile(self):
-    #     with self.command_group('keyvault key', data_entity.command_type) as g:
-    #         g.keyvault_custom('create', 'create_key',
-    #                           doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
-    #         g.keyvault_command('set-attributes', 'update_key_properties')
-    #         g.keyvault_command('show', 'get_key')
-    #         g.keyvault_custom('import', 'import_key')
-    #         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
-    # else:
-    #     with self.command_group('keyvault key', data_key_entity.command_type) as g:
-    #         g.keyvault_custom('create', 'create_key',
-    #                           doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
-    #         g.keyvault_command('set-attributes', 'update_key')
-    #         g.keyvault_command('show', 'get_key')
-    #         g.keyvault_custom('import', 'import_key')
-    #         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
+    with self.command_group('keyvault key', data_key_entity.command_type) as g:
+        g.keyvault_command('show', 'get_key', transform=transform_key_output)
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_secrets',

@@ -46,6 +46,10 @@ KEYVAULT_TEMPLATE_STRINGS = {
         'azure.keyvault.keys._client#KeyClient{obj_name}',
 }
 
+CLIENT_VERSIONS = {
+    ResourceType.DATA_KEYVAULT_KEYS: '7.0'
+}
+
 
 def is_mgmt_plane(resource_type):
     return resource_type == ResourceType.MGMT_KEYVAULT
@@ -235,7 +239,7 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
 
 
 def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
-    version = str(get_api_version(cli_ctx, resource_type))
+    version = CLIENT_VERSIONS.get(resource_type, None) or str(get_api_version(cli_ctx, resource_type))
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
     vault_url = \
@@ -244,4 +248,7 @@ def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_ty
         command_args.get('identifier', None)
     if not vault_url:
         raise RequiredArgumentMissingError('Please specify --hsm-name or --id')
+    command_args.pop('hsm_name')
+    command_args.pop('vault_base_url')
+    command_args.pop('identifier')
     return vault_url, credential, version
