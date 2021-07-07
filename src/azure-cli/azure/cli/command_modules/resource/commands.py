@@ -455,6 +455,7 @@ def load_command_table(self, _):
 
     with self.command_group('bicep') as g:
         g.custom_command('install', 'install_bicep_cli')
+        g.custom_command('uninstall', 'uninstall_bicep_cli')
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')
