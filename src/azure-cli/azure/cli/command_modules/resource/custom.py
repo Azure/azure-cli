@@ -52,6 +52,7 @@ from ._bicep import (
     run_bicep_command,
     is_bicep_file,
     ensure_bicep_installation,
+    remove_bicep_installation,
     get_bicep_latest_release_tag,
     get_bicep_available_release_tags,
     validate_bicep_target_scope
@@ -3413,6 +3414,10 @@ def install_bicep_cli(cmd, version=None):
     ensure_bicep_installation(release_tag=version)
 
 
+def uninstall_bicep_cli(cmd):
+    remove_bicep_installation()
+
+
 def upgrade_bicep_cli(cmd):
     latest_release_tag = get_bicep_latest_release_tag()
     ensure_bicep_installation(release_tag=latest_release_tag)
@@ -3426,6 +3431,8 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
         args += ["--outfile", outfile]
     if stdout:
         args += ["--stdout"]
+        print(run_bicep_command(args))
+        return
     run_bicep_command(args)
 
 
