@@ -113,8 +113,9 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
 
     options.append(policy_option)
 
+    parameters = ContentKeyPolicy(options=options, description=policy.description)
     return client.update(resource_group_name, account_name,
-                         content_key_policy_name, options, policy.description)
+                         content_key_policy_name, parameters)
 
 
 def remove_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -130,8 +131,9 @@ def remove_content_key_policy_option(client, resource_group_name, account_name, 
 
     policy.options = list(filter(lambda option: option.policy_option_id != policy_option_id, policy.options))
 
+    parameters = ClientKeyPolicy(options=policy.options)
     return client.update(resource_group_name, account_name,
-                         content_key_policy_name, policy.options)
+                         content_key_policy_name, parameters)
 
 
 def update_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -227,8 +229,9 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
         if play_ready_template is not None and _valid_playready_configuration(play_ready_template):
             _play_ready_configuration_factory(json.loads(play_ready_template))
 
+    parameters = ClientKeyPolicy(options=policy.options, description=policy.description)
     return client.update(resource_group_name, account_name,
-                         content_key_policy_name, policy.options, policy.description)
+                         content_key_policy_name, parameters)
 
 
 def update_content_key_policy_setter(client, resource_group_name, account_name, content_key_policy_name,
