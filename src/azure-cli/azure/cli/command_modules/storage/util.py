@@ -5,6 +5,7 @@
 
 
 import os
+from datetime import datetime
 
 
 def collect_blobs(blob_service, container, pattern=None):
@@ -104,7 +105,7 @@ def glob_files_remotely(cmd, client, share_name, pattern, snapshot=None):
 
 
 def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -117,7 +118,7 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
 
 
 def create_short_lived_file_sas(cmd, account_name, account_key, share, directory_name, file_name):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -133,7 +134,7 @@ def create_short_lived_file_sas(cmd, account_name, account_key, share, directory
 
 
 def create_short_lived_container_sas(cmd, account_name, account_key, container):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -146,7 +147,7 @@ def create_short_lived_container_sas(cmd, account_name, account_key, container):
 
 
 def create_short_lived_share_sas(cmd, account_name, account_key, share):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -232,3 +233,14 @@ def check_precondition_success(func):
                 raise
             return False, None
     return wrapper
+
+
+def get_datetime_from_string(dt_str):
+    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
+                             '%Y-%m-%dT%HZ', '%Y-%m-%d']
+    for form in accepted_date_formats:
+        try:
+            return datetime.strptime(dt_str, form)
+        except ValueError:
+            continue
+    raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))

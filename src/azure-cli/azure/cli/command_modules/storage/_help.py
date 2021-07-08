@@ -1920,6 +1920,17 @@ examples:
       text: az storage fs exists -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
 """
 
+helps['storage fs generate-sas'] = """
+type: command
+short-summary: Generate a SAS token for file system in ADLS Gen2 account.
+examples:
+  - name: Generate a sas token for file system and use it to upload files.
+    text: |
+        end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        sas=`az storage fs generate-sas -n mycontainer --https-only --permissions dlrw --expiry $end -o tsv`
+        az storage file upload -p myfile -f myfilesystem -s file.txt --sas-token $sas --account-name myaccount
+"""
+
 helps['storage fs list'] = """
 type: command
 short-summary: List file systems in ADLS Gen2 account.
