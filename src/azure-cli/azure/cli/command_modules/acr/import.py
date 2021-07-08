@@ -100,7 +100,8 @@ def acr_import(cmd,  # pylint: disable=too-many-locals
     try:
         if no_wait:
             logger.warning('Import has started. Due to no-wait option, failures will not be reflected.')
-            return sdk_no_wait(no_wait, client.begin_import_image, resource_group_name, registry_name, import_parameters)
+            return sdk_no_wait(no_wait, client.begin_import_image, resource_group_name, 
+                               registry_name, import_parameters)
 
         result_poller = client.begin_import_image(
             resource_group_name=resource_group_name,
