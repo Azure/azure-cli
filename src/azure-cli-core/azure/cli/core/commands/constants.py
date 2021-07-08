@@ -32,14 +32,13 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 
 BLOCKED_MODS = ['context', 'shell', 'documentdb', 'component']
 
-SURVEY_PROMPT = 'Please let us know how we are doing: https://github.com/microsoftgraph/msgraph-cli/discussions'
+SURVEY_PROMPT = 'Please let us know how we are doing though our feedback form: https://forms.office.com/r/DrBdEYFEun'
 SURVEY_PROMPT_STYLED = [
-    (Style.PRIMARY, 'Please let us know how we are doing: '),
-    (Style.HYPERLINK, 'https://github.com/microsoftgraph/msgraph-cli/discussions'),
+    (Style.PRIMARY, 'Please let us know how we are doing through our feedback form: '),
+    (Style.HYPERLINK, 'https://forms.office.com/r/DrBdEYFEun'),
 ]
 
-UX_SURVEY_PROMPT = 'and let us know if you\'re interested in trying out our newest features: https://aka.ms/CLIUXstudy'
+UX_SURVEY_PROMPT = 'and let us know if you\'re interested in trying out our newest features'
 UX_SURVEY_PROMPT_STYLED = [
-    (Style.PRIMARY, 'and let us know if you\'re interested in trying out our newest features: '),
-    (Style.HYPERLINK, 'https://aka.ms/CLIUXstudy'),
+    (Style.PRIMARY, 'and let us know if you\'re interested in trying out our newest features'),
 ]
