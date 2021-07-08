@@ -8,7 +8,7 @@ from knack.util import CLIError
 
 logger = get_logger(__name__)
 
-DEFAULT_INDEX_URL = "https://personalize.blob.core.windows.net/graph-explorer-container/index.json"
+DEFAULT_INDEX_URL = "https://graphcliextensions.blob.core.windows.net/beta/index.json"
 
 ERR_TMPL_EXT_INDEX = 'Unable to get extension index.\n'
 ERR_TMPL_NON_200 = '{}Server returned status code {{}} for {{}}'.format(ERR_TMPL_EXT_INDEX)
