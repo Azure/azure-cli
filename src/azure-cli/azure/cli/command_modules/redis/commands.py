@@ -40,10 +40,10 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update', custom_func_name='cli_redis_update')
 
     with self.command_group('redis patch-schedule', redis_patch) as g:
-        g.command('create', 'create_or_update')
-        g.command('update', 'create_or_update')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
+        g.custom_command('create', 'cli_redis_patch_schedule_create_or_update', client_factory=cf_patch_schedules)
+        g.custom_command('update', 'cli_redis_patch_schedule_create_or_update', client_factory=cf_patch_schedules)
+        g.custom_command('delete', 'cli_redis_patch_schedule_delete', client_factory=cf_patch_schedules)
+        g.custom_command('show', 'cli_redis_patch_schedule_get', client_factory=cf_patch_schedules)
 
     with self.command_group('redis firewall-rules', redis_firewall_rules) as g:
         g.command('create', 'create_or_update')

@@ -127,6 +127,16 @@ def cli_redis_create_server_link(cmd, client, resource_group_name, name, server_
                                                server_role=replication_role)
     return client.create(resource_group_name, name, cache_to_link.name, params)
 
+def cli_redis_patch_schedule_create_or_update(cmd, client, resource_group_name, name, schedule_entries):
+    from azure.mgmt.redis.models import RedisPatchSchedule
+    return client.create_or_update(resource_group_name, name, "default", RedisPatchSchedule(schedule_entries=schedule_entries))
+
+def cli_redis_patch_schedule_get(cmd, client, resource_group_name, name):
+    return client.get(resource_group_name, name, "default")
+
+def cli_redis_patch_schedule_delete(cmd, client, resource_group_name, name):
+    return client.delete(resource_group_name, name, "default")
+
 
 def cli_redis_list_cache(client, resource_group_name=None):
     cache_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
