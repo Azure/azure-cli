@@ -1509,6 +1509,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
 
 class VMMonitorTestUpdateWindows(ScenarioTest):
 
+    @AllowLargeResponse()
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_windows', location='eastus')
     def test_vm_update_with_workspace_windows(self, resource_group):
