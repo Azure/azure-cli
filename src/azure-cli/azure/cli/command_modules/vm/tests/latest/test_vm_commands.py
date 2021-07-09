@@ -1509,6 +1509,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
 
 class VMMonitorTestUpdateWindows(ScenarioTest):
 
+    @AllowLargeResponse()
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_windows', location='eastus')
     def test_vm_update_with_workspace_windows(self, resource_group):
@@ -3660,6 +3661,7 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.securityProfile.encryptionAtHost', True)
         ])
+        self.cmd('vmss update -g {rg} -n {vmss} --set tags.rule=test')
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
