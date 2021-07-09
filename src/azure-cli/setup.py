@@ -91,7 +91,7 @@ DEPENDENCIES = [
     'azure-mgmt-extendedlocation~=1.0.0b2',
     'azure-mgmt-hdinsight~=8.0.0',
     'azure-mgmt-imagebuilder~=0.4.0',
-    'azure-mgmt-iotcentral~=4.1.0',
+    'azure-mgmt-iotcentral~=9.0.0b1',
     'azure-mgmt-iothub==2.0.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
     'azure-mgmt-keyvault==9.0.0',
