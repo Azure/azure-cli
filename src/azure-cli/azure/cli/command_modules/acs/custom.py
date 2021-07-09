@@ -2318,6 +2318,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
         kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
         identity_profile = {
+            # pylint: disable=line-too-long
             'kubeletidentity': ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties(
                 resource_id=assign_kubelet_identity,
                 client_id=kubelet_identity.client_id,
