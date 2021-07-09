@@ -172,7 +172,7 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
 
         # ----account key----
         # test sas-token for a file system
-        fs_sas = self.storage_cmd('storage fs generate-sas -n {} --https-only --permissions dlrwop --expiry {} -otsv',
+        fs_sas = self.storage_cmd('storage fs generate-sas -n {} --https-only --permissions dlrwopm --expiry {} -otsv',
                                   account_info, file_system, expiry).output.strip()
         self.kwargs['fs_sas'] = fs_sas
 
@@ -184,14 +184,21 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
             self.check('length(@)', 1)
         ])
 
-        self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
+        self.cmd('storage fs file list -f {fs} --path {directory} --account-name {account} --sas-token "{fs_sas}"', checks=[
             self.check('length(@)', 0)
         ])
         self.cmd('storage fs file upload -f {fs} -s "{local_file}" -p {directory}/{file} '
                  '--account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs file list -f {fs} --path {directory} --account-name {account} --sas-token "{fs_sas}"',
+                 checks=[self.check('length(@)', 1)])
+
+        self.cmd('storage fs file move -f {fs} --new-path {fs}/{file} -p {directory}/{file} '
+                 '--account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs file list -f {fs} --path {directory} --exclude-dir --account-name {account} '
+                 '--sas-token "{fs_sas}"', checks=[self.check('length(@)', 0)])
+
         self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
-            self.check('length(@)', 1)
-        ])
+            self.check('length(@)', 1)])
 
         # ----connection string----
         # test sas-token for a file system

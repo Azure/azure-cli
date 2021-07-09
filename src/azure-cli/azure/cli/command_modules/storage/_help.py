@@ -1927,8 +1927,7 @@ examples:
   - name: Generate a sas token for file system and use it to upload files.
     text: |
         end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
-        sas=`az storage fs generate-sas -n mycontainer --https-only --permissions dlrw --expiry $end -o tsv`
-        az storage file upload -p myfile -f myfilesystem -s file.txt --sas-token $sas --account-name myaccount
+        az storage fs generate-sas -n myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
 """
 
 helps['storage fs list'] = """
