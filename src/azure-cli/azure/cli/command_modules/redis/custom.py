@@ -95,7 +95,7 @@ def cli_redis_create(cmd, client,
         static_ip=static_ip,
         zones=zones,
         tags=tags)
-    return client.create(resource_group_name, name, params)
+    return client.begin_create(resource_group_name, name, params)
 
 
 def get_key_value_pair(string):
