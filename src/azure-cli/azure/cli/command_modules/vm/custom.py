@@ -752,6 +752,15 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     from azure.cli.command_modules.vm._vm_utils import ArmTemplateBuilder20190401
     from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 
+    # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
+    # In order to avoid breaking change which has a big impact to users,
+    # we use the hint to guide users to use Standard public IP to create VM in the first stage.
+    if public_ip_sku is None and cmd.cli_ctx.cloud.profile == 'latest':
+        logger.warning(
+            'It is recommended to use parameter "--public-ip-sku Standard" to create new VM with Standard public IP. '
+            'Please note that the default public IP used for VM creation will be changed from Basic to Standard '
+            'in the future.')
+
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
@@ -794,7 +803,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             hash_string(vm_id, length=14, force_lower=True))
         vm_dependencies.append('Microsoft.Storage/storageAccounts/{}'.format(storage_account))
         master_template.add_resource(build_storage_account_resource(cmd, storage_account, location,
-                                                                    tags, storage_sku))
+                                                                    tags, storage_sku, edge_zone))
 
     nic_name = None
     if nic_type == 'new':
@@ -836,8 +845,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             if not vnet_exists:
                 vnet_name = vnet_name or '{}VNET'.format(vm_name)
                 nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-                master_template.add_resource(build_vnet_resource(
-                    cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
+                master_template.add_resource(build_vnet_resource(cmd, vnet_name, location, tags, vnet_address_prefix,
+                                                                 subnet, subnet_address_prefix, edge_zone=edge_zone))
 
         if nsg_type == 'new':
             if nsg_rule is None:
@@ -856,7 +865,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location, tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name,
-                                                                  public_ip_sku, zone, count))
+                                                                  public_ip_sku, zone, count, edge_zone))
 
         subnet_id = subnet if is_valid_resource_id(subnet) else \
             '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
@@ -895,7 +904,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         nic_resource = build_nic_resource(
             cmd, nic_name, location, tags, vm_name, subnet_id, private_ip_address, nsg_id,
             public_ip_address_id, application_security_groups, accelerated_networking=accelerated_networking,
-            count=count)
+            count=count, edge_zone=edge_zone)
         nic_resource['dependsOn'] = nic_dependencies
         master_template.add_resource(nic_resource)
     else:
@@ -2514,7 +2523,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             subnet = subnet or '{}Subnet'.format(vmss_name)
             vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
             vnet = build_vnet_resource(
-                cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+                cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix, edge_zone=edge_zone)
             if app_gateway_type:
                 vnet['properties']['subnets'].append({
                     'name': 'appGwSubnet',
@@ -2563,7 +2572,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 master_template.add_resource(build_public_ip_resource(
                     cmd, public_ip_address, location, tags,
                     _get_public_ip_address_allocation(public_ip_address_allocation, load_balancer_sku),
-                    public_ip_address_dns_name, load_balancer_sku, zones))
+                    public_ip_address_dns_name, load_balancer_sku, zones, edge_zone=edge_zone))
                 public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                         public_ip_address)
 
@@ -2576,7 +2585,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 cmd, load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
                 'loadBalancerFrontEnd', public_ip_address_id, subnet_id, private_ip_address='',
                 private_ip_allocation='Dynamic', sku=load_balancer_sku, instance_count=instance_count,
-                disable_overprovision=disable_overprovision)
+                disable_overprovision=disable_overprovision, edge_zone=edge_zone)
             lb_resource['dependsOn'] = lb_dependencies
             master_template.add_resource(lb_resource)
 
@@ -2622,7 +2631,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         # create storage accounts if needed for unmanaged disk storage
         if storage_profile == StorageProfile.SAPirImage:
             master_template.add_resource(build_vmss_storage_account_pool_resource(
-                cmd, 'storageLoop', location, tags, storage_sku))
+                cmd, 'storageLoop', location, tags, storage_sku, edge_zone))
             master_template.add_variable('storageAccountNames', [
                 '{}{}'.format(naming_prefix, x) for x in range(5)
             ])
@@ -3536,7 +3545,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                         data_vhds_storage_accounts[i] = resource_id(
                             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                             namespace='Microsoft.Storage', type='storageAccounts', name=storage_account)
-                data_disk_images = []
+                if data_disk_images is None:
+                    data_disk_images = []
                 for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
                     data_disk_images.append(GalleryDataDiskImage(
                         source=GalleryArtifactVersionSource(id=account, uri=uri), lun=lun))

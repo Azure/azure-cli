@@ -315,7 +315,7 @@ def _format_property_modify(builder, before, after, children, indent_level):
         # Space before =>
         if _is_non_empty_object(before):
             builder.append_line()
-            _format_indent(indent_level)
+            _format_indent(builder, indent_level)
         else:
             builder.append(Symbol.WHITE_SPACE)
 

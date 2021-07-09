@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.25.0"
+VERSION = "2.26.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -64,7 +64,7 @@ DEPENDENCIES = [
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement~=0.2.0',
-    'azure-mgmt-appconfiguration~=1.0.1',
+    'azure-mgmt-appconfiguration~=2.0.0',
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batchai~=2.0',
@@ -82,7 +82,7 @@ DEPENDENCIES = [
     'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
-    'azure-mgmt-datamigration~=4.1.0',
+    'azure-mgmt-datamigration~=9.0.0',
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
@@ -106,7 +106,7 @@ DEPENDENCIES = [
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=4.0.0',
     'azure-mgmt-network~=19.0.0',
-    'azure-mgmt-policyinsights~=0.5.0',
+    'azure-mgmt-policyinsights~=1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=8.1.0b4',
     'azure-mgmt-recoveryservicesbackup~=0.12.0',
