@@ -8,8 +8,9 @@ import time
 import uuid
 
 from azure.cli.core._profile import Profile
+from azure.cli.core.cloud import get_active_cloud_name
 from azure.cli.core.commands.client_factory import configure_common_settings
-from azure.cli.core.azclierror import BadRequestError
+from azure.cli.core.azclierror import BadRequestError, InvalidArgumentValueError
 from azure.graphrbac import GraphRbacManagementClient
 from azure.graphrbac.models import ApplicationCreateParameters
 from azure.graphrbac.models import GraphErrorException
@@ -21,10 +22,11 @@ logger = get_logger(__name__)
 
 
 class AADManager:
-    MANAGED_APP_PREFIX = 'https://az.aro.azure.com/'
+    MANAGED_APP = {'AzureUSGovernment': 'https://az.aro.azure.us/', 'AzureCloud': 'https://az.aro.azure.com/'}
 
     def __init__(self, cli_ctx):
         profile = Profile(cli_ctx=cli_ctx)
+        self.cli_ctx = cli_ctx
         credentials, _, tenant_id = profile.get_login_credentials(
             resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
         self.client = GraphRbacManagementClient(
@@ -39,7 +41,7 @@ class AADManager:
         app = self.client.applications.create(ApplicationCreateParameters(
             display_name=display_name,
             identifier_uris=[
-                self.MANAGED_APP_PREFIX + str(uuid.uuid4()),
+                self.get_managed_app_url()
             ],
             password_credentials=[
                 PasswordCredential(
@@ -52,6 +54,12 @@ class AADManager:
         ))
 
         return app, password
+
+    def get_managed_app_url(self):
+        cloud_name = get_active_cloud_name(self.cli_ctx)
+        if cloud_name not in self.MANAGED_APP.keys():
+            raise InvalidArgumentValueError("ARO not supported in: " + cloud_name)
+        return self.MANAGED_APP[cloud_name] + str(uuid.uuid4())
 
     def get_service_principal(self, app_id):
         sps = list(self.client.service_principals.list(
@@ -97,7 +105,7 @@ class AADManager:
         # https://github.com/Azure/azure-sdk-for-python/issues/18131
         for c in credentials:
             if c.custom_key_identifier is None:
-                raise BadRequestError("Cluster AAD application contains a client secret with an empty description.\n\
+                raise BadRequestError("Cluster AAD application contains a client secret with an empty identifier.\n\
 Please either manually remove the existing client secret and run `az aro update --refresh-credentials`, \n\
 or manually create a new client secret and run `az aro update --client-secret <ClientSecret>`.")
 
