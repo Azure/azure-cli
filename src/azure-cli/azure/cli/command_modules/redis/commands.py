@@ -28,11 +28,11 @@ def load_command_table(self, _):
 
     with self.command_group('redis', redis_sdk) as g:
         g.custom_command('create', 'cli_redis_create', client_factory=cf_redis)
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('export', 'cli_redis_export')
         g.command('force-reboot', 'force_reboot')
-        g.command('import-method', 'import_data', deprecate_info=g.deprecate(redirect='redis import', hide=True))
-        g.command('import', 'import_data')
+        g.command('import-method', 'begin_import_data', deprecate_info=g.deprecate(redirect='redis import', hide=True))
+        g.command('import', 'begin_import_data')
         g.custom_command('list', 'cli_redis_list_cache')
         g.command('list-keys', 'list_keys')
         g.command('regenerate-keys', 'regenerate_key')
