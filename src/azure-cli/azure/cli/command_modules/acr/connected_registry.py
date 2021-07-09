@@ -130,10 +130,10 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
 
     try:
         return client.begin_create(subscription_id=subscription_id,
-                             resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             connected_registry_name=connected_registry_name,
-                             connected_registry_create_parameters=connected_registry_create_parameters)
+                                   resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   connected_registry_name=connected_registry_name,
+                                   connected_registry_create_parameters=connected_registry_create_parameters)
     except ValidationError as e:
         raise CLIError(e)
 
