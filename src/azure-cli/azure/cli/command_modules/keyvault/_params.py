@@ -26,7 +26,7 @@ from azure.cli.command_modules.keyvault._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
-    validate_vault_name_and_hsm_name, set_vault_base_url,
+    validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
     process_hsm_name, KeyEncryptionDataType)
 
 # CUSTOM CHOICE LISTS
@@ -447,6 +447,9 @@ def load_arguments(self, _):
                    required=False, completer=get_keyvault_version_completion_list('key'))
         c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
         c.extra('hsm_name', data_plane_hsm_name_type, required=False)
+        c.extra('identifier', options_list=['--id'],
+                help='Id of the key. If specified all other \'Id\' arguments should be omitted.',
+                validator=validate_keyvault_resource_id('key'))
     # endregion
 
     # region KeyVault Secret
