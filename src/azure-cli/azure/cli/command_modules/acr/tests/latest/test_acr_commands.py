@@ -246,6 +246,34 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
     @ResourceGroupPreparer()
+    def test_acr_import_no_wait(self, resource_group):
+        source_registry_name = self.create_random_name("sourceregistrysamesub", 40)
+
+        self.kwargs.update({
+            'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
+            'source_registry_rg': 'resourcegroupsamesub',
+            'source_loc': 'westus',
+            'source_registry_name': source_registry_name,
+            'sku': 'Standard',
+            'source_image': 'microsoft:azure-cli',
+        })
+
+        # create a resource group for the source registry
+        self.cmd('group create -n {source_registry_rg} -l {source_loc}')
+
+        # create a source registry 
+        self.cmd('acr create -n {source_registry_name} -g {source_registry_rg} -l {source_loc} --sku {sku}',
+                 checks=[self.check('name', '{source_registry_name}'),
+                         self.check('location', '{source_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # import image using no-wait
+        self.cmd('acr import -n {source_registry_name} -r {resource_id} --source {source_image} --no-wait')
+
+    @ResourceGroupPreparer()
     @record_only()
     def test_acr_image_import(self, resource_group):
         '''There are nine test cases.
@@ -386,7 +414,7 @@ class AcrCommandsTests(ScenarioTest):
 
         # create the registry with CMK encryption enabled using the user-assigned identity
         result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium --identity {identity_id} --key-encryption-key {key_id}', checks=[
-            self.check('identity.type', 'UserAssigned'),
+            self.check('identity.type', 'userAssigned'),
             self.check('encryption.status', 'enabled'),
             self.check('encryption.keyVaultProperties.identity', '{client_id}'),
             self.check('encryption.keyVaultProperties.keyIdentifier', '{key_id}')
@@ -427,8 +455,8 @@ class AcrCommandsTests(ScenarioTest):
 
         # show identity
         result = self.cmd('acr identity show --name {registry_name}').get_output_in_json()
-        self.assertTrue('SystemAssigned' in result['type'])
-        self.assertTrue('UserAssigned' in result['type'])
+        self.assertTrue('systemAssigned' in result['type'])
+        self.assertTrue('userAssigned' in result['type'])
         self.assertTrue(len(result['userAssignedIdentities']) == 1)
         self.assertEquals(list(result['userAssignedIdentities'].keys())[0].lower(), self.kwargs['identity_id'].lower())
 
@@ -439,29 +467,29 @@ class AcrCommandsTests(ScenarioTest):
 
         # try different combinations of adds and deletes
         # system
-        self.cmd('acr identity assign --name {registry_name} --identities {system_identity}', self.check('identity.type', 'SystemAssigned'))
+        self.cmd('acr identity assign --name {registry_name} --identities {system_identity}', self.check('identity.type', 'systemAssigned'))
         time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities {system_identity}', self.check('identity', None))
         # user
-        self.cmd('acr identity assign --name {registry_name} --identities {identity_id}', self.check('identity.type', 'UserAssigned'))
+        self.cmd('acr identity assign --name {registry_name} --identities {identity_id}', self.check('identity.type', 'userAssigned'))
         time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity', None))
 
         # add multiple identities
         result = self.cmd('acr identity assign --name {registry_name} --identities "{system_identity}" "{identity_id}"',
-                          self.check('identity.type', 'SystemAssigned, UserAssigned')).get_output_in_json()
+                          self.check('identity.type', 'systemAssigned, userAssigned')).get_output_in_json()
         self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower()], result['identity'])
         # add another user identity to existing
         time.sleep(10)
         result = self.cmd('acr identity assign --name {registry_name} --identities {second_identity_id}',
-                          self.check('identity.type', 'SystemAssigned, UserAssigned')).get_output_in_json()
+                          self.check('identity.type', 'systemAssigned, userAssigned')).get_output_in_json()
         self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower(), self.kwargs['second_identity_id'].lower()], result['identity'])
 
         # remove identities and validate result
         time.sleep(10)
-        self.cmd('acr identity remove --name {registry_name} --identities {second_identity_id}', self.check('identity.type', 'SystemAssigned, UserAssigned'))
+        self.cmd('acr identity remove --name {registry_name} --identities {second_identity_id}', self.check('identity.type', 'systemAssigned, userAssigned'))
 
-        self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity.type', 'SystemAssigned'))
+        self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity.type', 'systemAssigned'))
         self.cmd('acr identity remove --name {registry_name} --identities {system_identity}', self.check('identity', None))
 
     @ResourceGroupPreparer()
@@ -532,7 +560,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr update --name {registry_name} --resource-group {rg} --anonymous-pull-enabled false',
                  checks=[self.check('anonymousPullEnabled', False)])
 
-    @ResourceGroupPreparer(location='centraluseuap')
+    @ResourceGroupPreparer(location='eastus2')
     def test_acr_with_private_endpoint(self, resource_group):
         self.kwargs.update({
             'registry_name': self.create_random_name('testreg', 20),

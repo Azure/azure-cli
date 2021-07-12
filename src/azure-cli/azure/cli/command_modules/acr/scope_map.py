@@ -39,12 +39,16 @@ def acr_scope_map_create(cmd,
 
     actions = parse_scope_map_actions(repository_actions_list, gateway_actions_list)
 
-    return client.create(
+    scope_map = {
+        'actions': actions,
+        'description': description
+    }
+
+    return client.begin_create(
         resource_group_name,
         registry_name,
         scope_map_name,
-        actions,
-        description
+        scope_map
     )
 
 

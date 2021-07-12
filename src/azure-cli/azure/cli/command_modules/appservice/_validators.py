@@ -219,6 +219,9 @@ def _validate_service_tag_format(cmd, namespace):
         name = namespace.name
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
         service_tag_full_list = network_client.service_tags.list(webapp.location).values
+        if service_tag_full_list is None:
+            logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
+            return
         for tag in input_tags:
             valid_tag = False
             for tag_full_list in service_tag_full_list:

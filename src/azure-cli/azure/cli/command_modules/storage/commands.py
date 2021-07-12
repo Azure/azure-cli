@@ -17,7 +17,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
                                                                cf_or_policy, cf_container_client,
-                                                               cf_queue_service, cf_sa_blob_inventory)
+                                                               cf_queue_service, cf_sa_blob_inventory, cf_blob_service)
 
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
@@ -460,6 +460,28 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('lease release', 'release_container_lease')
         g.storage_command_oauth('lease change', 'change_container_lease')
         g.storage_command_oauth('lease break', 'break_container_lease')
+
+    blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
+                                             resource_type=ResourceType.DATA_STORAGE_BLOB)
+    with self.command_group('storage container', custom_command_type=blob_service_custom_sdk,
+                            resource_type=ResourceType.DATA_STORAGE_BLOB,
+                            min_api='2019-02-02') as g:
+        from ._transformers import transform_container_list_output
+        from azure.cli.command_modules.storage._format import transform_container_list
+
+        g.storage_custom_command_oauth('list', 'list_containers',
+                                       transform=transform_container_list_output,
+                                       table_transformer=transform_container_list)
+
+    blob_service_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.blob._blob_service_client#'
+                        'BlobServiceClient.{}',
+        client_factory=cf_blob_service,
+        resource_type=ResourceType.DATA_STORAGE_BLOB
+    )
+    with self.command_group('storage container', command_type=blob_service_sdk, min_api='2020-02-10',
+                            resource_type=ResourceType.DATA_STORAGE_BLOB) as g:
+        g.storage_command_oauth('restore', 'undelete_container')
 
     with self.command_group('storage container', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('acl', blob_data_service_factory)) as g:

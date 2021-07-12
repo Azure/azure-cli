@@ -3845,6 +3845,7 @@ class NetworkVirtualHubRouter(ScenarioTest):
             'rg': resource_group,
             'location': resource_group_location,
             'vnet': 'vnet2',
+            'vhr_ip1': 'vhrip1',
             'subnet1': 'RouteServerSubnet',
             'vrouter': 'vrouter2',
             'peer': 'peer1'
@@ -3859,13 +3860,14 @@ class NetworkVirtualHubRouter(ScenarioTest):
         # which will block subnet is assigned to the virtual router
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove networkSecurityGroup')
         vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
+        self.cmd('network public-ip create -g {rg} -n {vhr_ip1}')
 
         self.kwargs.update({
             'subnet1_id': vnet['subnets'][0]['id']
         })
 
         self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
-                 '--hosted-subnet {subnet1_id}',
+                 '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1}',
                  checks=[
                      self.check('type', 'Microsoft.Network/virtualHubs'),
                      self.check('ipConfigurations', None),

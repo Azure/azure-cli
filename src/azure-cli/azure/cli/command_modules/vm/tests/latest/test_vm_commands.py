@@ -19,7 +19,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, StringContainCheck)
+    StorageAccountPreparer, JMESPathCheck, StringContainCheck, VirtualNetworkPreparer, KeyVaultPreparer)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -1509,6 +1509,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
 
 class VMMonitorTestUpdateWindows(ScenarioTest):
 
+    @AllowLargeResponse()
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_windows', location='eastus')
     def test_vm_update_with_workspace_windows(self, resource_group):
@@ -3652,6 +3653,7 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.securityProfile.encryptionAtHost', True)
         ])
+        self.cmd('vmss update -g {rg} -n {vmss} --set tags.rule=test')
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
@@ -4062,14 +4064,11 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
-    @unittest.skip('Service failed')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
-    @StorageAccountPreparer()
-    def test_gallery_image_version_vhd(self, resource_group, storage_account, storage_account_info):
+    def test_gallery_image_version_vhd(self, resource_group):
         self.kwargs.update({
-            'gallery': self.create_random_name(prefix='gallery_', length=20),
-            'account_key': storage_account_info[1]
+            'gallery': self.create_random_name(prefix='gallery_', length=20)
         })
 
         self.cmd('vm create -g {rg} -n vm1 --image centos --use-unmanaged-disk --nsg-rule NONE --generate-ssh-key')
@@ -4080,29 +4079,22 @@ class VMGalleryImage(ScenarioTest):
             'stac': storage_account_os
         })
 
-        local_file_1 = self.create_temp_file(1024 * 1024)
-        local_file_2 = self.create_temp_file(1024 * 1024)
-
-        self.cmd('storage container create -n container1 --account-name {sa} --account-key {account_key} --public-access container')
-        self.cmd('storage blob upload -c container1 --account-name {} -f "{}" -n file1.vhd --type page'.format(storage_account, local_file_1))
-        self.cmd('storage blob upload -c container1 --account-name {} -f "{}" -n file2.vhd --type page'.format(storage_account, local_file_2))
-
-        vhd1_uri = 'https://{}.blob.core.windows.net/container1/file1.vhd'.format(storage_account)
-        vhd2_uri = 'https://{}.blob.core.windows.net/container1/file2.vhd'.format(storage_account)
-        self.kwargs.update({
-            'vhd1': vhd1_uri,
-            'vhd2': vhd2_uri
-        })
-
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --gallery-image-version 1.0.0 --os-vhd-uri {vhd} --os-vhd-storage-account {stac} --data-vhds-uris {vhd1} {vhd2} --data-vhds-luns 0 1 --data-vhds-storage-accounts {sa} {sa} --replica-count 1', checks=[
-            self.check('storageProfile.osDiskImage.source.uri', vhd_uri),
-            self.check('storageProfile.dataDiskImages[0].source.uri', vhd1_uri),
-            self.check('storageProfile.dataDiskImages[1].source.uri', vhd2_uri),
-            self.check('storageProfile.dataDiskImages[0].lun', 0),
-            self.check('storageProfile.dataDiskImages[1].lun', 1),
-        ])
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10')
+        self.cmd('disk create -g {rg} -n d2 --size-gb 10')
+        s1_id = self.cmd('snapshot create -g {rg} -n s1 --source d1').get_output_in_json()['id']
+        s2_id = self.cmd('snapshot create -g {rg} -n s2 --source d2').get_output_in_json()['id']
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 '
+                 '--gallery-image-version 1.0.0 --os-snapshot s1 --data-snapshot-luns 0 --data-snapshots s2 '
+                 '--data-vhds-luns 1 --data-vhds-sa {stac} --data-vhds-uris {vhd}',
+                 checks=[
+                     self.check('storageProfile.osDiskImage.source.id', s1_id),
+                     self.check('storageProfile.dataDiskImages[0].source.id', s2_id),
+                     self.check('storageProfile.dataDiskImages[0].lun', 0),
+                     self.check('storageProfile.dataDiskImages[1].source.uri', vhd_uri),
+                     self.check('storageProfile.dataDiskImages[1].lun', 1)])
 
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
     def test_gallery_specialized(self, resource_group):
@@ -5193,7 +5185,7 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
 class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='westus')
-    def test_vmss_orchestration_mode(self, resource_group):
+    def test_vmss_simple_orchestration_mode(self, resource_group):
         self.kwargs.update({
             'ppg': 'ppg1',
             'vmss': 'vmss1',
@@ -5202,7 +5194,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
         self.cmd('ppg create -g {rg} -n {ppg}')
         self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
-                 '--ppg {ppg} --platform-fault-domain-count 3 --generate-ssh-keys',
+                 '--ppg {ppg} --platform-fault-domain-count 3 ',
                  checks=[
                      self.check('vmss.singlePlacementGroup', False),
                      self.check('vmss.platformFaultDomainCount', 3)
@@ -5211,6 +5203,140 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm} --image centos --platform-fault-domain 0 --vmss {vmss} --generate-ssh-keys --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('platformFaultDomain', 0)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='eastus2euap')
+    @VirtualNetworkPreparer(location='eastus2euap', parameter_name='virtual_network')
+    def test_vmss_complex_orchestration_mode(self, resource_group, virtual_network):
+
+        self.kwargs.update({
+            'vmss0': self.create_random_name(prefix='vmss0', length=10),
+            'vmss1': self.create_random_name(prefix='vmss1', length=10),
+            'vnet_name': virtual_network,
+            'vmss2': self.create_random_name(prefix='vmss2', length=10),
+            'vmss3': self.create_random_name(prefix='vmss3', length=10),
+            'vmss4': self.create_random_name(prefix='vmss4', length=10),
+            'vmss5': self.create_random_name(prefix='vmss5', length=10),
+            'ssh_key': TEST_SSH_KEY_PUB
+        })
+
+        # test without authentication info
+        self.cmd('vmss create -n {vmss0} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss ')
+
+        self.cmd('vmss show -g {rg} -n {vmss0}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with password
+        self.cmd('vmss create -g {rg} -n {vmss1} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --admin-username testvmss '
+                 '--admin-password This!s@Terr!bleP@ssw0rd --computer-name-prefix testvmss --image debian '
+                 '--vnet-name {vnet_name} --subnet default --network-api-version 2020-11-01')
+
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux'),
+        ])
+
+        # test with ssh
+        self.cmd('vmss create -n {vmss2} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --generate-ssh-keys ')
+
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with ssh path
+        self.cmd('vmss create -n {vmss3} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --generate-ssh-keys ')
+
+        self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with ssh value
+        self.cmd('vmss create -n {vmss4} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --ssh-key-value \'{ssh_key}\' ')
+
+        self.cmd('vmss show -g {rg} -n {vmss4}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with authentication type
+        self.cmd('vmss create -n {vmss5} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --authentication-type ssh ')
+
+        self.cmd('vmss show -g {rg} -n {vmss5}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
         ])
 
 
@@ -5232,7 +5358,7 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
         self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
-            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-keys --subscription {aux_sub}')
         self.cmd(
             'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
         time.sleep(70)
@@ -5474,16 +5600,48 @@ class VMCreateCountScenarioTest(ScenarioTest):
 class ExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extended_location_')
     def test_vm_extended_location(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image ubuntults --nsg-rule None --generate-ssh-keys --edge-zone microsoftlosangeles1')
+        self.cmd('vm create -g {rg} -n vm --image ubuntults --nsg-rule None --generate-ssh-keys '
+                 '--edge-zone microsoftlosangeles1 --public-ip-sku Standard')
         self.cmd('vm show -g {rg} -n vm', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network vnet show -g {rg} -n vmVNET', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network nic show -g {rg} -n vmVMNic', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network public-ip show -n vmPublicIP -g {rg}', checks=[
             self.check('extendedLocation.name', 'microsoftlosangeles1'),
             self.check('extendedLocation.type', 'EdgeZone')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extended_location_')
     def test_vmss_extended_location(self, resource_group):
-        self.cmd('vmss create -g {rg} -n vmss --image ubuntults --generate-ssh-keys --edge-zone microsoftlosangeles1')
+        self.cmd('vmss create -g {rg} -n vmss --image ubuntults --generate-ssh-keys '
+                 '--edge-zone microsoftlosangeles1 --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n vmss', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network vnet show -g {rg} -n vmssVNET', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network lb show -g {rg} -n vmssLB', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network public-ip show -n vmssLBPublicIP -g {rg}', checks=[
             self.check('extendedLocation.name', 'microsoftlosangeles1'),
             self.check('extendedLocation.type', 'EdgeZone')
         ])
