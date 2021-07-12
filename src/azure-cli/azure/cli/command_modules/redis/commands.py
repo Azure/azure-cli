@@ -30,12 +30,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_redis_create', client_factory=cf_redis)
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('export', 'cli_redis_export')
-        g.command('force-reboot', 'force_reboot')
-        g.command('import-method', 'begin_import_data', deprecate_info=g.deprecate(redirect='redis import', hide=True))
-        g.command('import', 'begin_import_data')
+        g.custom_command('force-reboot', 'cli_redis_force_reboot', client_factory=cf_redis)
+        g.custom_command('import-method', 'cli_redis_import', client_factory=cf_redis, deprecate_info=g.deprecate(redirect='redis import', hide=True))
+        g.custom_command('import', 'cli_redis_import', client_factory=cf_redis)
         g.custom_command('list', 'cli_redis_list_cache')
         g.command('list-keys', 'list_keys')
-        g.command('regenerate-keys', 'regenerate_key')
+        g.custom_command('regenerate-keys', 'cli_redis_regenerate_key', client_factory=cf_redis)
         g.show_command('show', 'get')
         g.generic_update_command('update', setter_name='update', custom_func_name='cli_redis_update')
 
@@ -46,8 +46,8 @@ def load_command_table(self, _):
         g.custom_command('show', 'cli_redis_patch_schedule_get', client_factory=cf_patch_schedules)
 
     with self.command_group('redis firewall-rules', redis_firewall_rules) as g:
-        g.command('create', 'create_or_update')
-        g.command('update', 'create_or_update')
+        g.custom_command('create', 'cli_redis_firewall_create', client_factory=cf_firewall_rule)
+        g.custom_command('update', 'cli_redis_firewall_create', client_factory=cf_firewall_rule)
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('list', 'list_by_redis_resource')

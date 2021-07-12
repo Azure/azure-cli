@@ -22,7 +22,7 @@ wrong_vmsize_error = CLIError('Invalid VM size. Example for Valid values: '
 def cli_redis_export(cmd, client, resource_group_name, name, prefix, container, file_format=None):
     from azure.mgmt.redis.models import ExportRDBParameters
     parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format)
-    return client.export_data(resource_group_name, name, parameters)
+    return client.begin_export_data(resource_group_name, name, parameters)
 
 
 # pylint: disable=unused-argument
@@ -125,7 +125,7 @@ def cli_redis_create_server_link(cmd, client, resource_group_name, name, server_
     params = RedisLinkedServerCreateParameters(linked_redis_cache_id=cache_to_link.id,
                                                linked_redis_cache_location=cache_to_link.location,
                                                server_role=replication_role)
-    return client.create(resource_group_name, name, cache_to_link.name, params)
+    return client.begin_create(resource_group_name, name, cache_to_link.name, params)
 
 def cli_redis_patch_schedule_create_or_update(cmd, client, resource_group_name, name, schedule_entries):
     from azure.mgmt.redis.models import RedisPatchSchedule
@@ -148,5 +148,21 @@ def get_cache_from_resource_id(client, cache_resource_id):
     from msrestazure.tools import parse_resource_id
     id_comps = parse_resource_id(cache_resource_id)
     return client.get(id_comps['resource_group'], id_comps['name'])
+
+def cli_redis_firewall_create(cmd, client, resource_group_name, name, rule_name, start_ip, end_ip):
+    from azure.mgmt.redis.models import RedisFirewallRule
+    return client.create_or_update(resource_group_name, name, rule_name, RedisFirewallRule(start_ip=start_ip, end_ip=end_ip))
+
+def cli_redis_regenerate_key(cmd, client, resource_group_name, name, key_type):
+    from azure.mgmt.redis.models import RedisRegenerateKeyParameters
+    return client.regenerate_key(resource_group_name, name, RedisRegenerateKeyParameters(key_type=key_type))
+
+def cli_redis_import(cmd, client, resource_group_name, name, files):
+    from azure.mgmt.redis.models import ImportRDBParameters
+    return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files))
+
+def cli_redis_force_reboot(cmd, client, resource_group_name, name, reboot_type):
+    from azure.mgmt.redis.models import RedisRebootParameters
+    return client.force_reboot(resource_group_name, name, RedisRebootParameters(reboot_type=reboot_type))
 
 # endregion
