@@ -248,7 +248,7 @@ def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_ty
         command_args.get('identifier', None)
     if not vault_url:
         raise RequiredArgumentMissingError('Please specify --hsm-name or --id')
-    command_args.pop('hsm_name')
-    command_args.pop('vault_base_url')
-    command_args.pop('identifier')
+    command_args.pop('hsm_name', None)
+    command_args.pop('vault_base_url', None)
+    command_args.pop('identifier', None)
     return vault_url, credential, version
