@@ -1587,9 +1587,8 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Managed storage
     if blob_uri is None:
         try:
-            poller = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
-            uris = LongRunningOperation(cmd.cli_ctx)(poller)
-            blob_uri = uris.serial_console_log_blob_uri
+            boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
+            blob_uri = boot_diagnostics_data.serial_console_log_blob_uri
         except CloudError:
             pass
         if blob_uri is None:
