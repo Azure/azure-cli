@@ -857,6 +857,7 @@ def load_arguments(self, _):
         c.argument('macsec_ckn_secret_identifier',
                    help='The connectivity key name (CKN) that stored in the KeyVault.')
         c.argument('macsec_cipher', arg_type=express_route_link_macsec_cipher_type, help='Cipher Method')
+        c.argument('macsec_sci_state', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True), help='Sci mode', min_api='2020-06-01')
 
     with self.argument_context('network express-route port location', min_api='2018-08-01') as c:
         c.argument('location_name', options_list=['--location', '-l'])
