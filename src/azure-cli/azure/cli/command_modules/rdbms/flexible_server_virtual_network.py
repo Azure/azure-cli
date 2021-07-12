@@ -175,7 +175,8 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
 def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location):
     dns_suffix_client = cf_postgres_flexible_private_dns_zone_suffix_operations(cmd.cli_ctx, '_')
 
-    private_dns_zone_suffix = dns_suffix_client.execute(database_engine)
+    # private_dns_zone_suffix = dns_suffix_client.execute()
+    private_dns_zone_suffix = "postgres.database.azure.com"
     vnet_sub, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
     private_dns_client = private_dns_client_factory(cmd.cli_ctx)
     private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx)

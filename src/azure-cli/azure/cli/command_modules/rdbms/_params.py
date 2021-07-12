@@ -259,7 +259,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_D2s_v3', options_list=['--sku-name'],
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3 ')
-                c.argument('storage_mb', default='128', options_list=['--storage-size'], type=int,
+                c.argument('storage_gb', default='128', options_list=['--storage-size'], type=int,
                            help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
                 c.argument('backup_retention', default=7, type=int, options_list=['--backup-retention'],
                            help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
@@ -268,13 +268,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Server major version.')
                 c.argument('zone', options_list=['--zone', '-z'],
                            help='Availability zone into which to provision the resource.')
+                c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled.')
+                c.argument('standby_availability_zone', options_list=['--standby-zone'], help="availability zone information of the standby.")
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable',
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_B1ms', options_list=['--sku-name'],
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_E16ds_v4 ')
-                c.argument('storage_mb', default='32', options_list=['--storage-size'], type=int,
-                           help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
+                c.argument('storage_gb', default='32', options_list=['--storage-size'], type=int,
+                           help='The storage capacity of the server. Minimum is 32 GiB and increases in 1 GiB increments. Max is 16 TiB.')
                 c.argument('backup_retention', default=7, type=int, options_list=['--backup-retention'],
                            help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.')
                 c.argument('version', default='5.7', options_list=['--version'],
@@ -288,11 +290,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'], default='Enabled',
                            help='Enable or disable autogrow of the storage. Default value is Enabled.')
 
-            c.argument('vnet_resource_id', options_list=['--vnet'], help='Name or ID of a new or existing virtual network. If you want to use a vnet from different resource group or subscription, please provide a resource ID. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
+            c.argument('vnet', options_list=['--vnet'], help='Name or ID of a new or existing virtual network. If you want to use a vnet from different resource group or subscription, please provide a resource ID. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
             c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')
             c.argument('subnet_address_prefix', options_list=['--subnet-prefixes'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. Default value is 10.0.0.0/24.')
-            c.argument('subnet_arm_resource_id', options_list=['--subnet'],
-                       help='Name or resource ID of a new or existing subnet. If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. Please note that the subnet will be delegated to flexibleServers provider. After delegation, this subnet cannot be used for any other type of Azure resources.')
+            c.argument('subnet', options_list=['--subnet'],
+                       help='Name or resource ID of a new or existing subnet. If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers/Microsoft.DBforMySQL/flexibleServers. After delegation, this subnet cannot be used for any other type of Azure resources.')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), options_list=['--admin-user', '-u'], arg_group='Authentication', arg_type=administrator_login_setter_arg_type,
@@ -328,7 +330,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Availability zone into which to provision the resource.')
                 c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'],
                            help='This parameter only applies for a server with private access. The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
-                c.argument('subnet_arm_resource_id', options_list=['--subnet'],
+                c.argument('subnet', options_list=['--subnet'],
                            help='Resource ID of an existing subnet. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers if not already delegated. After delegation, this subnet cannot be used for any other type of Azure resources.')
             elif command_group == 'mysql':
                 c.argument('source_server', options_list=['--source-server'],
@@ -338,7 +340,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.ignore('assign_identity')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
-            c.argument('ha_enabled', options_list=['--high-availability'], arg_type=get_enum_type(['Enabled', 'Disabled']),
+            c.argument('high_availability', options_list=['--high-availability'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                        help='Enable or disable high availability feature.  Default value is Disabled.')
             c.argument('maintenance_window', options_list=['--maintenance-window'], validator=maintenance_window_validator,
                        help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
@@ -370,10 +372,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
                 c.argument('sku_name', options_list=['--sku-name'],
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3 ')
-                c.argument('storage_mb', options_list=['--storage-size'], type=int,
+                c.argument('storage_gb', options_list=['--storage-size'], type=int,
                            help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
                 c.argument('backup_retention', type=int, options_list=['--backup-retention'],
                            help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
+                c.argument('standby_availability_zone', options_list=['--standby-zone'], help="availability zone information of the standby.")
 
         with self.argument_context('{} flexible-server list-skus'.format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx))

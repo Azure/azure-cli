@@ -102,7 +102,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
         g.command('start', 'begin_start')
         g.custom_command('stop', 'flexible_server_stop', custom_command_type=flexible_server_custom_common)
-        g.custom_command('delete', 'server_delete_func')
+        g.custom_command('delete', 'flexible_server_delete')
         g.show_command('show', 'get')
         g.custom_command('list', 'server_list_custom_func', custom_command_type=flexible_server_custom_common, table_transformer=table_transform_output_list_servers)
         g.generic_update_command('update',

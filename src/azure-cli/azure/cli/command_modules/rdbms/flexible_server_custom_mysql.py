@@ -175,7 +175,7 @@ def flexible_server_update_custom_func(cmd, instance,
                                        assign_identity=False,
                                        replication_role=None,
                                        maintenance_window=None,
-                                       ha_enabled=None,
+                                       high_availability=None,
                                        iops=None):
     # validator
     location = ''.join(instance.location.lower().split())
@@ -209,7 +209,7 @@ def flexible_server_update_custom_func(cmd, instance,
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
 
-    if ha_enabled:
+    if high_availability:
         validate_mysql_ha_enabled(instance)
 
     if auto_grow:
@@ -251,7 +251,7 @@ def flexible_server_update_custom_func(cmd, instance,
                              ssl_enforcement=ssl_enforcement,
                              delegated_subnet_arguments=instance.delegated_subnet_arguments,
                              tags=tags,
-                             ha_enabled=ha_enabled,
+                             high_availability=high_availability,
                              replication_role=replication_role)
 
     if assign_identity:

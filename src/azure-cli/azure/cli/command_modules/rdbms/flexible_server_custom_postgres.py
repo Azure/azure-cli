@@ -13,11 +13,11 @@ from azure.cli.core.local_context import ALL
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability, resource_client_factory, network_client_factory
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, parse_public_access_input, \
-    generate_password, parse_maintenance_window, get_postgres_list_skus_info, check_existence, get_id_components
+    generate_password, parse_maintenance_window, check_existence, get_id_components
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
 from .validators import pg_arguments_validator, validate_server_name
@@ -35,53 +35,49 @@ def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
                            sku_name=None, tier=None,
-                           storage_mb=None, administrator_login=None,
+                           storage_gb=None, administrator_login=None,
                            administrator_login_password=None, version=None,
-                           tags=None, public_access=None, database_name=None,
-                           assign_identity=False, subnet_arm_resource_id=None,
-                           high_availability=None, zone=None, vnet_resource_id=None,
-                           vnet_address_prefix=None, subnet_address_prefix=None,
-                           private_dns_zone_arguments=None):
-    # validator
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                             server_name, 'postgres')
-
-    sku_info, single_az = get_postgres_list_skus_info(cmd, location)
-    pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
-    storage_mb *= 1024
+                           tags=None, database_name=None,
+                           subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+                           private_dns_zone_arguments=None, public_access=None,
+                           high_availability=None, zone=None, maintenance_window=None,
+                           geo_redundant_backup=None, standby_availability_zone=None):
 
     db_context = DbContext(
-        azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
-        logging_name='PostgreSQL', command_group='postgres', server_client=client)
+        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
+        cf_availability=cf_postgres_check_resource_availability, logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
-    if high_availability is not None and high_availability.lower() == 'enabled':
-        if tier == 'Burstable':
-            raise ArgumentUsageError("High availability is not supported for Burstable tier")
-        if single_az:
-            raise ArgumentUsageError("This region is single availability zone. High availability is not supported in a single availability zone region.")
+    # Generate missing parameters
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                             server_name, 'postgres')
+    server_name = server_name.lower()
 
-    # Raise error when user passes values for both parameters
-    if subnet_arm_resource_id is not None and public_access is not None:
-        raise CLIError("Incorrect usage : A combination of the parameters --subnet "
-                       "and --public_access is invalid. Use either one of them.")
+    pg_arguments_validator(db_context,
+                           server_name=server_name,
+                           location=location,
+                           tier=tier,
+                           sku_name=sku_name,
+                           storage_gb=storage_gb,
+                           high_availability=high_availability,
+                           standby_availability_zone=standby_availability_zone,
+                           zone=zone,
+                           subnet=subnet,
+                           public_access=public_access,
+                           version=version)
 
     server_result = firewall_id = subnet_id = None
 
-    server_name = server_name.lower()
-    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-
-    # Handle Vnet scenario
-    if public_access is None:
+    network = postgresql_flexibleservers.models.Network()
+    if subnet is not None or vnet is not None:
         subnet_id = prepare_private_network(cmd,
                                             resource_group_name,
                                             server_name,
-                                            vnet=vnet_resource_id,
-                                            subnet=subnet_arm_resource_id,
+                                            vnet=vnet,
+                                            subnet=subnet,
                                             location=location,
                                             delegation_service_name=DELEGATION_SERVICE_NAME,
                                             vnet_address_pref=vnet_address_prefix,
                                             subnet_address_pref=subnet_address_prefix)
-        delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
         private_dns_zone_id = prepare_private_dns_zone(cmd,
                                                        'PostgreSQL',
                                                        resource_group_name,
@@ -89,34 +85,65 @@ def flexible_server_create(cmd, client,
                                                        private_dns_zone=private_dns_zone_arguments,
                                                        subnet_id=subnet_id,
                                                        location=location)
-        private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
+        network.delegated_subnet_resource_id = subnet_id
+        network.private_dns_zone_arm_resource_id = private_dns_zone_id
     else:
-        delegated_subnet_arguments = None
-        private_dns_zone_arguments = None
+        network.public_network_access = ' Enabled'
+
+    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb)
+
+    backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
+                                                      geo_redundant_backup=geo_redundant_backup)
+
+    sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+
+    if high_availability.lower() == "enabled":
+        high_availability = "ZoneRedundant"
+    high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
+                                                                           standby_availability_zone=standby_availability_zone)
+
+    maintenance_window_object = postgresql_flexibleservers.models.MaintenanceWindow()
+    if maintenance_window is not None:
+        custom_window = 'Enabled'
+        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+    else:
+        custom_window = "Disabled"
+        day_of_week = start_hour = start_minute = 0
+    maintenance_window_object.day_of_week = day_of_week
+    maintenance_window_object.start_hour = start_hour
+    maintenance_window_object.start_minute = start_minute
+    maintenance_window_object.custom_window = custom_window
 
     administrator_login_password = generate_password(administrator_login_password)
-    if server_result is None:
-        # Create postgresql
-        # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
-        server_result = _create_server(db_context, cmd, resource_group_name, server_name, location,
-                                       backup_retention,
-                                       sku_name, tier, storage_mb, administrator_login,
-                                       administrator_login_password,
-                                       version, tags, subnet_id, assign_identity, delegated_subnet_arguments,
-                                       high_availability, zone, private_dns_zone_arguments)
 
-        # Adding firewall rule
-        if public_access is not None and str(public_access).lower() != 'none':
-            if str(public_access).lower() == 'all':
-                start_ip, end_ip = '0.0.0.0', '255.255.255.255'
-            else:
-                start_ip, end_ip = parse_public_access_input(public_access)
-            firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+    # Create postgresql
+    # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
+    server_result = _create_server(db_context, cmd, resource_group_name, server_name,
+                                   tags=tags,
+                                   location=location,
+                                   sku=sku,
+                                   administrator_login=administrator_login,
+                                   administrator_login_password=administrator_login_password,
+                                   storage=storage,
+                                   backup=backup,
+                                   network=network,
+                                   version=version,
+                                   high_availability=high_availability,
+                                   maintenance_window=maintenance_window_object,
+                                   availability_zone=zone)
 
-        # Create mysql database if it does not exist
-        if database_name is None:
-            database_name = DEFAULT_DB_NAME
-        _create_database(db_context, cmd, resource_group_name, server_name, database_name)
+    # Adding firewall rule
+    if public_access is not None and str(public_access).lower() != 'none':
+        if str(public_access).lower() == 'all':
+            start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+        else:
+            start_ip, end_ip = parse_public_access_input(public_access)
+        firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+
+    # Create mysql database if it does not exist
+    if database_name is None:
+        database_name = DEFAULT_DB_NAME
+    _create_database(db_context, cmd, resource_group_name, server_name, database_name)
 
     user = server_result.administrator_login
     server_id = server_result.id
@@ -129,7 +156,7 @@ def flexible_server_create(cmd, client,
                    'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
                    server_name, resource_group_name)
 
-    _update_local_contexts(cmd, server_name, resource_group_name, location, user)
+    _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version,
                           administrator_login_password if administrator_login_password is not None else '*****',
@@ -139,9 +166,10 @@ def flexible_server_create(cmd, client,
 
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
-                            source_server, restore_point_in_time=None, location=None, zone=None, no_wait=False,
-                            private_dns_zone_arguments=None, subnet_arm_resource_id=None):
+                            source_server, restore_point_in_time=None, zone=None, no_wait=False,
+                            subnet=None, private_dns_zone_arguments=None):
     provider = 'Microsoft.DBforPostgreSQL'
+    server_name = server_name.lower()
     validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     if not is_valid_resource_id(source_server):
@@ -157,29 +185,26 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
-    parameters = postgresql_flexibleservers.models.Server(
-        point_in_time_utc=restore_point_in_time,
-        source_server_name=source_server,  # this should be the source server name, not id
-        create_mode="PointInTimeRestore",
-        availability_zone=zone,
-        source_resource_group_name=resource_group_name,
-        source_subscription_id=get_subscription_id(cmd.cli_ctx),
-        location=location)
-
-    # Retrieve location from same location as source server
     try:
         id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
-        parameters.location = source_server_object.location
 
-        if source_server_object.public_network_access == 'Disabled':
+        parameters = postgresql_flexibleservers.models.Server(
+            location=source_server_object.location,
+            point_in_time_utc=restore_point_in_time,
+            source_server_resource_id=source_server_id,  # this should be the source server name, not id
+            create_mode="PointInTimeRestore",
+            availability_zone=zone
+        )
+
+        if source_server_object.network.public_network_access == 'Disabled':
             setup_restore_network(cmd=cmd,
                                   resource_group_name=resource_group_name,
                                   server_name=server_name,
-                                  location=location,
+                                  location=parameters.location,
                                   parameters=parameters,
                                   source_server_object=source_server_object,
-                                  subnet_id=subnet_arm_resource_id,
+                                  subnet_id=subnet,
                                   private_dns_zone=private_dns_zone_arguments)
 
     except Exception as e:
@@ -190,8 +215,8 @@ def flexible_server_restore(cmd, client,
 
 def setup_restore_network(cmd, resource_group_name, server_name, location, parameters, source_server_object, subnet_id=None, private_dns_zone=None):
 
-    parameters.delegated_subnet_arguments = source_server_object.delegated_subnet_arguments
-    parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
+    parameters.network = postgresql_flexibleservers.models.Network(delegated_subnet_resource_id=source_server_object.network.delegated_subnet_resource_id,
+                                                                   private_dns_zone_arm_resource_id=source_server_object.network.private_dns_zone_arm_resource_id)
 
     if subnet_id is not None:
         vnet_sub, vnet_rg, vnet_name, subnet_name = get_id_components(subnet_id)
@@ -210,12 +235,12 @@ def setup_restore_network(cmd, resource_group_name, server_name, location, param
                 for delgtn in subnet.delegations:
                     if delgtn.service_name != DELEGATION_SERVICE_NAME:
                         raise CLIError("Can not use subnet with existing delegations other than {}".format(DELEGATION_SERVICE_NAME))
-            parameters.delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
+            parameters.network.delegated_subnet_resource_id = subnet_id
         else:
             raise ResourceNotFoundError("The subnet does not exist. Please verify the subnet Id.")
 
-    if private_dns_zone is not None or source_server_object.private_dns_zone_arguments is None:
-        subnet_id = source_server_object.delegated_subnet_arguments.subnet_arm_resource_id if subnet_id is None else subnet_id
+    if private_dns_zone is not None or source_server_object.network.private_dns_zone_arm_resource_id is None:
+        subnet_id = parameters.network.delegated_subnet_resource_id
         private_dns_zone_id = prepare_private_dns_zone(cmd,
                                                        'PostgreSQL',
                                                        resource_group_name,
@@ -223,25 +248,35 @@ def setup_restore_network(cmd, resource_group_name, server_name, location, param
                                                        private_dns_zone=private_dns_zone,
                                                        subnet_id=subnet_id,
                                                        location=location)
-        parameters.private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
+        parameters.network.private_dns_zone_arm_resource_id = private_dns_zone_id
 
 
-# Update Flexible server command
-def flexible_server_update_custom_func(cmd, instance,
+def flexible_server_update_custom_func(cmd, client, instance,
                                        sku_name=None,
                                        tier=None,
-                                       storage_mb=None,
+                                       storage_gb=None,
                                        backup_retention=None,
                                        administrator_login_password=None,
-                                       ha_enabled=None,
+                                       high_availability=None,
+                                       standby_availability_zone=None,
                                        maintenance_window=None,
-                                       assign_identity=False,
                                        tags=None):
 
     # validator
     location = ''.join(instance.location.lower().split())
-    sku_info, _ = get_postgres_list_skus_info(cmd, location)
-    pg_arguments_validator(tier, sku_name, storage_mb, sku_info, instance=instance)
+    db_context = DbContext(
+        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
+        cf_availability=cf_postgres_check_resource_availability, logging_name='PostgreSQL', command_group='postgres', server_client=client)
+
+    pg_arguments_validator(db_context,
+                           location=location,
+                           tier=tier,
+                           sku_name=sku_name,
+                           storage_gb=storage_gb,
+                           high_availability=high_availability,
+                           zone=instance.availability_zone,
+                           standby_availability_zone=standby_availability_zone,
+                           instance=instance)
 
     server_module_path = instance.__module__
     module = import_module(server_module_path)
@@ -253,11 +288,11 @@ def flexible_server_update_custom_func(cmd, instance,
     if tier:
         instance.sku.tier = tier
 
-    if storage_mb:
-        instance.storage_profile.storage_mb = storage_mb * 1024
+    if storage_gb:
+        instance.storage.storage_size_gb = storage_gb
 
     if backup_retention:
-        instance.storage_profile.backup_retention_days = backup_retention
+        instance.backup.backup_retention_days = backup_retention
 
     if maintenance_window:
         # if disabled is pass in reset to default values
@@ -282,22 +317,27 @@ def flexible_server_update_custom_func(cmd, instance,
             instance.maintenance_window.start_minute = start_minute
             instance.maintenance_window.custom_window = custom_window
 
+    if high_availability:
+        if high_availability.lower() == "enabled":
+            high_availability = "ZoneRedundant"
+            instance.high_availability.mode = high_availability
+            if standby_availability_zone:
+                instance.high_availability.standby_availability_zone = standby_availability_zone
+        else:
+            instance.high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability)
+
     params = ServerForUpdate(sku=instance.sku,
-                             storage_profile=instance.storage_profile,
+                             storage=instance.storage,
+                             backup=instance.backup,
                              administrator_login_password=administrator_login_password,
-                             ha_enabled=ha_enabled,
+                             high_availability=instance.high_availability,
                              maintenance_window=instance.maintenance_window,
                              tags=tags)
 
-    if assign_identity:
-        if server_module_path.find('postgres'):
-            if instance.identity is None:
-                instance.identity = postgresql_flexibleservers.models.Identity()
-            params.identity = instance.identity
     return params
 
 
-def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
+def flexible_server_delete(cmd, client, resource_group_name=None, server_name=None, yes=None):
     result = None
     if not yes:
         user_confirmation(
@@ -316,7 +356,6 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
     return result
 
 
-# Wait command
 def flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
@@ -352,36 +391,30 @@ def flexible_list_skus(cmd, client, location):
     return result
 
 
-def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
-                   storage_mb, administrator_login, administrator_login_password, version, tags, public_network_access,
-                   assign_identity, delegated_subnet_arguments, ha_enabled, availability_zone, private_dns_zone_arguments):
+def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
+                   storage, backup, network, version, high_availability, maintenance_window, availability_zone):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
-                   'Please refer to https://aka.ms/postgres-pricing for pricing details', server_name, sku_name)
+                   'Please refer to https://aka.ms/postgres-pricing for pricing details', server_name, sku.name)
 
     # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
     # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
     parameters = postgresql_flexibleservers.models.Server(
-        sku=postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier),
+        tags=tags,
+        location=location,
+        sku=sku,
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
+        storage=storage,
+        backup=backup,
+        network=network,
         version=version,
-        public_network_access=public_network_access,
-        storage_profile=postgresql_flexibleservers.models.StorageProfile(
-            backup_retention_days=backup_retention,
-            storage_mb=storage_mb),
-        delegated_subnet_arguments=delegated_subnet_arguments,
-        ha_enabled=ha_enabled,
+        high_availability=high_availability,
+        maintenance_window=maintenance_window,
         availability_zone=availability_zone,
-        location=location,
-        create_mode="Default",  # can also be create
-        tags=tags,
-        private_dns_zone_arguments=private_dns_zone_arguments)
-
-    if assign_identity:
-        parameters.identity = postgresql_flexibleservers.models.Identity()
+        create_mode="Create")
 
     return resolve_poller(
         server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
@@ -496,12 +529,14 @@ def _form_response(username, sku, location, server_id, host, version, password, 
     return output
 
 
-def _update_local_contexts(cmd, server_name, resource_group_name, location, user):
+def _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user):
     if cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name',
                                       server_name)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'administrator_login',
                                       user)  # Setting the server name in the local context
+        cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'database_name',
+                                      database_name)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                       location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
@@ -509,10 +544,12 @@ def _update_local_contexts(cmd, server_name, resource_group_name, location, user
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
 class DbContext(object):
-    def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
-                 command_group=None, server_client=None):
+    def __init__(self, cmd=None, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
+                 cf_availability=None, command_group=None, server_client=None):
+        self.cmd = cmd
         self.azure_sdk = azure_sdk
         self.cf_firewall = cf_firewall
+        self.cf_availability = cf_availability
         self.logging_name = logging_name
         self.cf_db = cf_db
         self.command_group = command_group
