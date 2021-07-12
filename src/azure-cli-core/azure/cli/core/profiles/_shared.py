@@ -217,7 +217,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
         ResourceType.MGMT_IOTHUB: '2021-03-31',
         ResourceType.MGMT_ARO: '2020-04-30',
-        ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
+        ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
         ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-05-01', {
             'container_services': '2017-07-01',
