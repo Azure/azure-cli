@@ -203,9 +203,9 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
 
     try:
         return client.begin_update(resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             connected_registry_name=connected_registry_name,
-                             connected_registry_update_parameters=connected_registry_update_parameters)
+                                   registry_name=registry_name,
+                                   connected_registry_name=connected_registry_name,
+                                   connected_registry_update_parameters=connected_registry_update_parameters)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -269,9 +269,9 @@ def acr_connected_registry_deactivate(cmd,
     user_confirmation("Are you sure you want to deactivate the connected registry '{}' in '{}'?".format(
         connected_registry_name, registry_name), yes)
     return client.begin_deactivate(subscription_id=subscription_id,
-                             resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             connected_registry_name=connected_registry_name)
+                                   resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   connected_registry_name=connected_registry_name)
 
 
 def acr_connected_registry_list(cmd,
