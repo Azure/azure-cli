@@ -97,7 +97,11 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
-    DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties', operation_group='runs')
+    DockerBuildRequest, PlatformProperties = cmd.get_models(
+        'DockerBuildRequest',
+        'PlatformProperties',
+        operation_group='runs')
+
     docker_build_request = DockerBuildRequest(
         agent_pool_name=agent_pool_name,
         image_names=image_names,

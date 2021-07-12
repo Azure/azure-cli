@@ -74,7 +74,10 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         pack_image_tag=pack_image_tag,
         no_pull='--no-pull' if not pull else '')
 
-    EncodedTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'PlatformProperties', operation_group='task_runs')
+    EncodedTaskRunRequest, PlatformProperties = cmd.get_models(
+        'EncodedTaskRunRequest',
+        'PlatformProperties',
+        operation_group='task_runs')
 
     request = EncodedTaskRunRequest(
         encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),
