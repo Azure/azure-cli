@@ -22,7 +22,7 @@ from azure.cli.command_modules.batchai._format import (
     job_show_table_format,
     file_list_table_format,
     file_server_list_table_format,
-    file_server_show_table_format,
+    # file_server_show_table_format,
     remote_login_table_format,
     node_setup_files_list_table_format,
     usage_table_format,

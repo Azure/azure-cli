@@ -214,7 +214,7 @@ examples:
 """
 
 # helps['batchai file-server delete'] = """
-# type: command
+# # type: command
 # short-summary: Delete a file server.
 # examples:
 #   - name: Delete file server and wait for deletion to be completed.
@@ -234,7 +234,7 @@ examples:
 """
 
 # helps['batchai file-server show'] = """
-# type: command
+# # type: command
 # short-summary: Show information about a file server.
 # examples:
 #   - name: Show full information about a file server.
