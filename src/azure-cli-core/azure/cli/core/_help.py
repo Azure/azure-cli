@@ -18,30 +18,25 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 PRIVACY_STATEMENT = """
-Welcome to Azure CLI!
+Welcome to Microsoft Graph CLI!
 ---------------------
-Use `az -h` to see available commands or go to https://aka.ms/cli.
+Use `mg -h` to see available commands.
 
-Telemetry
----------
-The Azure CLI collects usage data in order to improve your experience.
-The data is anonymous and does not include commandline argument values.
-The data is collected by Microsoft.
-
-You can change your telemetry settings with `az configure`.
 """
 
 WELCOME_MESSAGE = r"""
-     /\
-    /  \    _____   _ _  ___ _
-   / /\ \  |_  / | | | \'__/ _\
-  / ____ \  / /| |_| | | |  __/
- /_/    \_\/___|\__,_|_|  \___|
+___  ____                           __ _     _____                 _
+|  \/  (_)                         / _| |   |  __ \               | |
+| .  . |_  ___ _ __ ___  ___  ___ | |_| |_  | |  \/_ __ __ _ _ __ | |__
+| |\/| | |/ __| '__/ _ \/ __|/ _ \|  _| __| | | __| '__/ _` | '_ \| '_ \
+| |  | | | (__| | | (_) \__ \ (_) | | | |_  | |_\ \ | | (_| | |_) | | | |
+\_|  |_/_|\___|_|  \___/|___/\___/|_|  \__|  \____/_|  \__,_| .__/|_| |_|
+                                                            | |
+                                                            |_|
+Welcome to the Microsoft Graph CLI!
 
 
-Welcome to Azure CLI v3 beta with MSAL support!
-
-Use `az --version` to display the current version.
+Use `mg --version` to display the current version.
 Here are the base commands:
 """
 
@@ -91,7 +86,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_az_find_message(command, enable_color):
         from colorama import Style
         indent = 0
-        message = 'For more specific examples, use: az find "az {}"'.format(command)
+        message = 'For more specific examples, use: mg find "mg {}"'.format(command)
         if enable_color:
             message = Style.BRIGHT + message + Style.RESET_ALL
         _print_indent(message + '\n', indent)

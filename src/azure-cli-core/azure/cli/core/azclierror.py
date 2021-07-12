@@ -130,13 +130,13 @@ class UnknownError(AzCLIError):
 # Raise the error classes here in your codes. Avoid using fallback error classes unless you can not find a proper one.
 # Command related error types
 class CommandNotFoundError(UserFault):
-    """ Command is misspelled or not recognized by AzureCLI. """
+    """ Command is misspelled or not recognized by Microsoft Graph CLI. """
     pass
 
 
 # Argument related error types
 class UnrecognizedArgumentError(UserFault):
-    """ Argument is misspelled or not recognized by AzureCLI. """
+    """ Argument is misspelled or not recognized by Microsoft Graph CLI. """
     pass
 
 
