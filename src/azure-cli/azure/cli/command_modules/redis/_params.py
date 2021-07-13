@@ -22,8 +22,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=cache_name)
         c.argument('redis_configuration', help='JSON encoded configuration settings. Use @{file} to load from a file.',
                    type=JsonString)
-        c.argument('reboot_type', arg_type=get_enum_type(RebootType))
-        c.argument('key_type', arg_type=get_enum_type(RedisKeyType))
+        c.argument('reboot_type', arg_type=get_enum_type(RebootType), help='Which Redis node(s) to reboot. Depending on this value data loss is possible.')
+        c.argument('key_type', arg_type=get_enum_type(RedisKeyType), help='The Redis access key to regenerate.')
         c.argument('files', help='SAS url for blobs that needs to be imported', nargs='+')
         c.argument('format', arg_type=format_type)
         c.argument('file_format', arg_type=format_type)
@@ -53,11 +53,7 @@ def load_arguments(self, _):
         c.argument('start_ip', help='Lowest IP address included in the range.')
 
     with self.argument_context('redis force-reboot') as c:
-        c.argument('reboot_type', help='Which Redis node(s) to reboot. Depending on this value data loss is possible.')
         c.argument('shard_id', help='If clustering is enabled, the ID of the shard to be rebooted.')
-
-    with self.argument_context('redis regenerate-keys') as c:
-        c.argument('key_type', help='The Redis access key to regenerate.')
 
     with self.argument_context('redis server-link') as c:
         c.argument('name', arg_type=cache_name, id_part=None)
