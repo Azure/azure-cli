@@ -1899,6 +1899,11 @@ examples:
     text: az webapp log deployment list --name MyWebApp --resource-group MyResourceGroup
 """
 
+helps['functionapp log'] = """
+type: group
+short-summary: Manage function app logs.
+"""
+
 helps['functionapp log deployment'] = """
 type: group
 short-summary: Manage function app deployment logs.
