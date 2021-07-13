@@ -185,6 +185,27 @@ examples:
     text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
 """
 
+helps['sql db str-policy'] = """
+type: group
+short-summary: Manage SQL database short term retention policy.
+"""
+
+helps['sql db str-policy set'] = """
+type: command
+short-summary: Update short term retention settings for a live database.
+examples:
+  - name: Set short term retention for a live database.
+    text: az sql db str-policy set -g mygroup -s myserver -n mydb --retention-days retentionindays --diffbackup-hours diffbackuphours
+"""
+
+helps['sql db str-policy show'] = """
+type: command
+short-summary: Show the short term retention policy for a live database.
+examples:
+  - name: Show short term retention policy for a live database.
+    text: az sql db str-policy show -g mygroup -s myserver -n mydb
+"""
+
 helps['sql db ltr-policy'] = """
 type: group
 short-summary: Manage SQL database long term retention policy.

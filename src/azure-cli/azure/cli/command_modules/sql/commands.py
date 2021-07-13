@@ -24,6 +24,7 @@ from ._format import (
 )
 
 from ._util import (
+    get_sql_backup_short_term_retention_policies_operations,
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations,
     get_sql_databases_operations,
@@ -207,18 +208,22 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#TransparentDataEncryptionsOperations.{}',
         client_factory=get_sql_database_transparent_data_encryptions_operations)
 
-    with self.command_group('sql db tde', transparent_data_encryptions_operations) as g:
+    with self.command_group('sql db tde',
+                            transparent_data_encryptions_operations,
+                            client_factory=get_sql_database_transparent_data_encryptions_operations) as g:
 
-        g.command('set', 'create_or_update')
-        g.show_command('show', 'get')
+        g.custom_command('set', 'transparent_data_encryptions_set')
+        g.custom_command('show', 'transparent_data_encryptions_get')
 
     transparent_data_encryption_activities_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#TransparentDataEncryptionActivitiesOperations.{}',
         client_factory=get_sql_database_transparent_data_encryption_activities_operations)
 
-    with self.command_group('sql db tde', transparent_data_encryption_activities_operations) as g:
+    with self.command_group('sql db tde',
+                            transparent_data_encryption_activities_operations,
+                            client_factory=get_sql_database_transparent_data_encryption_activities_operations) as g:
 
-        g.command('list-activity', 'list_by_configuration')
+        g.custom_command('list-activity', 'tde_list_by_configuration')
 
     replication_links_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ReplicationLinksOperations.{}',
@@ -303,9 +308,9 @@ def load_command_table(self, _):
                             ledger_digest_uploads_operations,
                             client_factory=get_sql_database_ledger_digest_uploads_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_command('show', 'ledger_digest_uploads_show')
         g.custom_command('enable', 'ledger_digest_uploads_enable')
-        g.command('disable', 'disable')
+        g.custom_command('disable', 'ledger_digest_uploads_disable')
 
     database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionPoliciesOperations.{}',
@@ -317,7 +322,7 @@ def load_command_table(self, _):
                             is_preview=True) as g:
 
         g.custom_command('set', 'update_long_term_retention')
-        g.show_command('show', 'get')
+        g.custom_command('show', 'update_long_term_retention_get')
 
     database_long_term_retention_backups_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionBackupsOperations.{}',
@@ -341,6 +346,18 @@ def load_command_table(self, _):
             'restore_long_term_retention_backup',
             supports_no_wait=True)
         g.wait_command('wait')
+
+    backup_short_term_retention_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#BackupShortTermRetentionPoliciesOperations.{}',
+        client_factory=get_sql_backup_short_term_retention_policies_operations)
+
+    with self.command_group('sql db str-policy',
+                            backup_short_term_retention_policies_operations,
+                            client_factory=get_sql_backup_short_term_retention_policies_operations,
+                            is_preview=True) as g:
+
+        g.custom_command('set', 'update_short_term_retention', supports_no_wait=True)
+        g.custom_show_command('show', 'get_short_term_retention')
 
     database_sensitivity_labels_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',
@@ -371,9 +388,11 @@ def load_command_table(self, _):
                             database_threat_detection_policies_operations,
                             client_factory=get_sql_database_threat_detection_policies_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_command('show', 'db_threat_detection_policy_get')
         g.generic_update_command('update',
-                                 custom_func_name='db_threat_detection_policy_update')
+                                 setter_name='create_or_update',
+                                 custom_func_name='db_threat_detection_policy_update',
+                                 )
 
     database_usages_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseUsagesOperations.{}',
@@ -470,7 +489,7 @@ def load_command_table(self, _):
                        table_transformer=instance_pool_table_format)
         g.custom_command('list', 'instance_pool_list',
                          table_transformer=instance_pool_table_format)
-        g.command('update', 'begin_update')
+        g.generic_update_command('update', setter_name='begin_update')
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('create', 'instance_pool_create',
                          supports_no_wait=True, table_transformer=instance_pool_table_format)
@@ -564,7 +583,7 @@ def load_command_table(self, _):
                             encryption_protectors_operations,
                             client_factory=get_sql_encryption_protectors_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'encryption_protector_get')
         g.custom_command('set', 'encryption_protector_update')
 
     virtual_network_rules_operations = CliCommandType(
@@ -575,12 +594,14 @@ def load_command_table(self, _):
                             virtual_network_rules_operations,
                             client_factory=get_sql_virtual_network_rules_operations) as g:
 
-        g.command('create', 'begin_create_or_update',
-                  validator=validate_subnet)
+        g.custom_command('create',
+                         'vnet_rule_begin_create_or_update',
+                         validator=validate_subnet)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.command('delete', 'begin_delete')
-        g.generic_update_command('update', setter_name='begin_create_or_update')
+        g.custom_command('update',
+                         'vnet_rule_begin_create_or_update')
 
     server_connection_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerConnectionPoliciesOperations.{}',
@@ -590,8 +611,8 @@ def load_command_table(self, _):
                             server_connection_policies_operations,
                             client_factory=get_sql_server_connection_policies_operations) as c:
 
-        c.show_command('show', 'get')
-        c.generic_update_command('update')
+        c.custom_command('show', 'conn_policy_show')
+        c.custom_command('update', 'conn_policy_update')
 
     server_dns_aliases_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerDnsAliasesOperations.{}',
@@ -617,7 +638,7 @@ def load_command_table(self, _):
 
         g.custom_command('disable', 'server_aad_only_disable')
         g.custom_command('enable', 'server_aad_only_enable')
-        g.show_command('get', 'get')
+        g.custom_command('get', 'server_aad_only_get')
 
     ###############################################
     #           sql server trust groups           #
@@ -687,7 +708,7 @@ def load_command_table(self, _):
                             managed_instance_encryption_protectors_operations,
                             client_factory=get_sql_managed_instance_encryption_protectors_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'managed_instance_encryption_protector_get')
         g.custom_command('set', 'managed_instance_encryption_protector_update')
 
     managed_instance_aadadmin_operations = CliCommandType(
@@ -713,7 +734,7 @@ def load_command_table(self, _):
 
         g.custom_command('disable', 'mi_aad_only_disable')
         g.custom_command('enable', 'mi_aad_only_enable')
-        g.show_command('get', 'get')
+        g.custom_command('get', 'mi_aad_only_get')
 
     ###############################################
     #                sql managed db               #

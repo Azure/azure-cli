@@ -829,15 +829,54 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 
+class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
+    def test_sql_db_short_term_retention(self):
+
+        # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
+        self.kwargs.update({
+            'resource_group': 'WestUS2ResourceGroup',
+            'server_name': 'lillian-westus2-server',
+            'database_name': 'ps5691',
+            'retention_days_v1': 7,
+            'diffbackup_hours_v1': 24,
+            'retention_days_v2': 6,
+            'diffbackup_hours_v2': 12
+        })
+
+        # Test UPDATE short term retention policy on live database, value updated to v1.
+        self.cmd(
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v1} --diffbackup-hours {diffbackup_hours_v1}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v1}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
+
+        # Test GET short term retention policy on live database, value equals to v1.
+        self.cmd(
+            'sql db str-policy show -g {resource_group} -s {server_name} -n {database_name}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v1}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
+
+        # Test UPDATE short term retention policy on live database, value updated to v2.
+        self.cmd(
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v2} --diffbackup-hours {diffbackup_hours_v2}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v2}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
+
+
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_long_term_retention(
             self):
 
         self.kwargs.update({
-            'rg': 'myResourceGroup',
-            'loc': 'eastus',
-            'server_name': 'mysqlserver-x',
-            'database_name': 'testLtr',
+            'rg': 'ayang',
+            'loc': 'southeastasia',
+            'server_name': 'ayang-seas',
+            'database_name': 'db1',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
@@ -846,7 +885,9 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test update long term retention on live database
         self.cmd(
-            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name} --weekly-retention {weekly_retention} --monthly-retention {monthly_retention} --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
+            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
+            ' --weekly-retention {weekly_retention} --monthly-retention {monthly_retention}'
+            ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
@@ -920,11 +961,12 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'restore-dest-cli'
+            'dest_database_name': 'cli-restore-ltr'
         })
 
         self.cmd(
-            'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name} --dest-server {server_name} --dest-resource-group {rg}',
+            'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
+            ' --dest-server {server_name} --dest-resource-group {rg}',
             checks=[
                 self.check('name', '{dest_database_name}')])
 
@@ -993,6 +1035,7 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'sn': server,
+            'administrator_name': "ActiveDirectory",
             'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
             'oid2': 'e4d43337-d52c-4a0c-b581-09055e0359a0',
             'user': 'DSEngAll',
@@ -1011,12 +1054,13 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
                      self.check('[0].login', '{user}'),
                      self.check('[0].sid', '{oid}')])
 
-        self.cmd('sql server ad-admin update -s {sn} -g {rg} -u {user2} -i {oid2}',
+        self.cmd('sql server ad-admin update -s {sn} -g {rg} --administrator-name {administrator_name}'
+                 ' -u {user2} -i {oid2}',
                  checks=[
                      self.check('login', '{user2}'),
                      self.check('sid', '{oid2}')])
 
-        self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
+        self.cmd('sql server ad-admin delete -s {sn} -g {rg} --administrator-name {administrator_name}')
 
         self.cmd('sql server ad-admin list -s {sn} -g {rg}',
                  checks=[
@@ -1426,7 +1470,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         email_addresses_expected = ['test1@example.com','test2@example.com']
         email_account_admins = True
 
-        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {} --security-alert-policy-name default'
                  ' --state {} --storage-key {} --storage-endpoint {}'
                  ' --retention-days {} --email-addresses {} --disabled-alerts {}'
                  ' --email-account-admins {}'
@@ -1445,7 +1489,8 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # update threat policy - specify storage account and resource group. use secondary key
         key_2 = self._get_storage_key(storage_account_2, resource_group_2)
-        self.cmd('sql db threat-policy update -g {} -s {} -n {} --storage-account {}'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {} --security-alert-policy-name default'
+                 ' --storage-account {}'
                  .format(resource_group, server, database_name, storage_account_2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1617,7 +1662,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
         audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
                                   'DATABASE_ROLE_MEMBER_CHANGE_GROUP']
 
-        self.cmd('sql server audit-policy update -g {} -n {}'
+        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
                  ' --state {} --blob-storage-target-state {} --storage-key {} --storage-endpoint={}'
                  ' --retention-days={} --actions {}'
                  .format(resource_group, server, state_enabled, state_enabled, key,
@@ -1642,7 +1687,8 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
 
         # update audit policy - specify storage account and resource group. use secondary key
         storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
-        self.cmd('sql server audit-policy update -g {} -n {} --blob-storage-target-state {} --storage-account {}'
+        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+                 ' --blob-storage-target-state {} --storage-account {}'
                  .format(resource_group, server, state_enabled, storage_account_2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1652,7 +1698,8 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # update audit policy - disable
-        self.cmd('sql server audit-policy update -g {} -n {} --state {}'
+        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+                 ' --state {}'
                  .format(resource_group, server, state_disabled),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1671,7 +1718,8 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                                                   JMESPathCheck('provisioningState', 'Succeeded')]).get_output_in_json()['id']
 
         # update audit policy - enable log analytics target
-        self.cmd('sql server audit-policy update -g {} -n {} --state {}'
+        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+                 ' --state {}'
                  ' --log-analytics-target-state {} --log-analytics-workspace-resource-id {}'
                  .format(resource_group, server, state_enabled, state_enabled, log_analytics_workspace_id),
                  checks=[
@@ -1692,7 +1740,8 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('isAzureMonitorTargetEnabled', True)])
 
         # update audit policy - disable log analytics target
-        self.cmd('sql server audit-policy update -g {} -n {} --state {} --log-analytics-target-state {}'
+        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+                 ' --state {} --log-analytics-target-state {}'
                  .format(resource_group, server, state_enabled, state_disabled),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1734,7 +1783,8 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                                          .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
 
         # update audit policy - enable event hub target
-        self.cmd('sql server audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
+        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+                 ' --state {} --event-hub-target-state {}'
                  ' --event-hub-authorization-rule-id {} --event-hub {}'
                  .format(resource_group, server, state_enabled, state_enabled,
                          eventhub_auth_rule_id, eventhub_name),
@@ -1756,7 +1806,8 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('isAzureMonitorTargetEnabled', True)])
 
         # update audit policy - disable event hub target
-        self.cmd('sql server audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
+        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+                 ' --state {} --event-hub-target-state {}'
                  .format(resource_group, server, state_enabled, state_disabled),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -3064,26 +3115,22 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  ' --storage-uri {}'
                  .format(server, db_name, resource_group, admin_password, admin_login, storageKey, bacpacUri),
                  checks=[
-                     # remove this check since there is an issue in getting properties and the fix is being deployed currently
-                     # JMESPathCheck('blobUri', bacpacUri),
-                     # JMESPathCheck('databaseName', db_name),
-                     # JMESPathCheck('requestType', 'Export'),
-                     # JMESPathCheck('resourceGroup', resource_group),
-                     # JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Succeeded')])
+                     JMESPathCheck('blobUri', bacpacUri),
+                     JMESPathCheck('databaseName', db_name),
+                     JMESPathCheck('requestType', 'ExportDatabase'),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
         self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type SharedAccessKey'
                  ' --storage-uri {}'
                  .format(server, db_name, resource_group, admin_password, admin_login, sasKey, bacpacUri2),
                  checks=[
-                     # remove this check since there is an issue in getting properties and the fix is being deployed currently
-                     # JMESPathCheck('blobUri', bacpacUri2),
-                     # JMESPathCheck('databaseName', db_name),
-                     # JMESPathCheck('requestType', 'Export'),
-                     # JMESPathCheck('resourceGroup', resource_group),
-                     # JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Succeeded')])
+                     JMESPathCheck('blobUri', bacpacUri2),
+                     JMESPathCheck('databaseName', db_name),
+                     JMESPathCheck('requestType', 'ExportDatabase'),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
         # import bacpac to second database using Storage Key
         self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
@@ -3091,14 +3138,11 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  ' --storage-uri {}'
                  .format(server, db_name2, resource_group, admin_password, admin_login, storageKey, bacpacUri),
                  checks=[
-                     # Uncomment this when bug in backend is fixed
-                     # JMESPathCheck('blobUri', bacpacUri),
-                     # JMESPathCheck('databaseName', db_name2),
-                     # JMESPathCheck('name', 'import'),
-                     # JMESPathCheck('requestType', 'Import'),
-                     # JMESPathCheck('resourceGroup', resource_group),
-                     # JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Succeeded')])
+                     JMESPathCheck('blobUri', bacpacUri),
+                     JMESPathCheck('databaseName', db_name2),
+                     JMESPathCheck('requestType', 'ImportToExistingDatabase'),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
         # import bacpac to third database using SAS key
         self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
@@ -3106,14 +3150,11 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  ' --storage-uri {}'
                  .format(server, db_name3, resource_group, admin_password, admin_login, sasKey, bacpacUri2),
                  checks=[
-                     # Uncomment this when bug in backend is fixed
-                     # JMESPathCheck('blobUri', bacpacUri2),
-                     # JMESPathCheck('databaseName', db_name3),
-                     # JMESPathCheck('name', 'import'),
-                     # JMESPathCheck('requestType', 'Import'),
-                     # JMESPathCheck('resourceGroup', resource_group),
-                     # JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Succeeded')])
+                     JMESPathCheck('blobUri', bacpacUri2),
+                     JMESPathCheck('databaseName', db_name3),
+                     JMESPathCheck('requestType', 'ImportToExistingDatabase'),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
 
 class SqlServerConnectionStringScenarioTest(ScenarioTest):
@@ -4397,6 +4438,10 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
     def test_sql_managed_db_short_retention(self, mi, rg):
         resource_prefix = 'MIDBShortTermRetention'
 
+        loc = 'westcentralus'
+        resource_group = 'autobot-managed-instance-v12'
+        subnet = '/subscriptions/4b9746e4-d324-4e1d-be53-ec3c8f3a0c18/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet'
+
         self.kwargs.update({
             'loc': ManagedInstancePreparer.location,
             'managed_instance_name': mi,
@@ -4577,6 +4622,10 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
     def test_sql_managed_deleted_db_restore(self, mi, rg):
         
         resource_prefix = 'MIRestoreDeletedDB'
+
+        loc = 'westcentralus'
+        resource_group_1 = 'autobot-managed-instance-v12'
+        subnet = '/subscriptions/4b9746e4-d324-4e1d-be53-ec3c8f3a0c18/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet'
 
         self.kwargs.update({
             'loc': ManagedInstancePreparer.location,
@@ -4768,7 +4817,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
         s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
 
-        failover_group_name = "fgclitest16578"
+        failover_group_name = "fgclitest16578-lulu"
 
         database_name = "db1"
 
@@ -4887,7 +4936,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         # Fail back to original server
-        self.cmd('sql failover-group set-primary --allow-data-loss -g {} -s {} -n {}'
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
                  .format(s1.group, s1.name, failover_group_name))
 
         # The failover operation is completed when new primary is promoted to primary role
@@ -5224,7 +5273,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         state_enabled = 'Enabled'
         retention_days = 30
 
-        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {} --security-alert-policy-name default'
                  ' --state {} --storage-key {} --storage-endpoint {}'
                  ' --retention-days {} --email-addresses {} --disabled-alerts {}'
                  ' --email-account-admins {}'
@@ -5362,6 +5411,8 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
 
+        self.cmd('sql mi delete -g {resource_group} -n {managed_instance_name} --yes', checks=NoneCheck())
+
 
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
     @AllowLargeResponse()
@@ -5415,6 +5466,8 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         # Cancel log replay service
         self.cmd('sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --yes',
                  checks=NoneCheck())
+     
+        self.cmd('sql mi delete -g {resource_group} -n {managed_instance_name} --yes', checks=NoneCheck())
 
 
 class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
