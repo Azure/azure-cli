@@ -528,18 +528,19 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
     rules = sa.network_rule_set
     if subnet:
         if all(not x.virtual_network_resource_id.endswith(subnet) for x in rules.virtual_network_rules):
-            raise InvalidArgumentValueError("Specified subnet {} is not in the storage account network rules. "
-                                            "Found subnets are {}. Note: resource id is case sensitive.".format(
-                subnet, [x.virtual_network_resource_id for x in rules.virtual_network_rules]))
+            raise InvalidArgumentValueError(
+                "Specified subnet {} is not in the storage account network rules. Found subnets are {}. Note: "
+                "resource id is case sensitive.".format(
+                    subnet, [x.virtual_network_resource_id for x in rules.virtual_network_rules]))
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
                                        if not x.virtual_network_resource_id.endswith(subnet)]
     if ip_address:
         IpRule = cmd.get_models('IPRule')
         ip_rule = IpRule(ip_address_or_range=ip_address)
         if ip_rule not in rules.ip_rules:
-            raise InvalidArgumentValueError("Specified ip address {} is not in the storage account network rules. "
-                                            "Found ip addresses are {}.".format(
-                ip_address, [x.ip_address_or_range for x in rules.ip_rules]))
+            raise InvalidArgumentValueError(
+                "Specified ip address {} is not in the storage account network rules. Found ip addresses are {}.".
+                format(ip_address, [x.ip_address_or_range for x in rules.ip_rules]))
         rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
 
     if resource_id:
@@ -549,7 +550,7 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
             raise InvalidArgumentValueError(
                 "Specified resource access rule with resource id {} and tenant id {} is not in the storage account "
                 "network rules. Found resource access rules are {}. Note: resource id is case sensitive.".format(
-                resource_id, tenant_id, [todict(x) for x in rules.resource_access_rules]))
+                    resource_id, tenant_id, [todict(x) for x in rules.resource_access_rules]))
         rules.resource_access_rules = [x for x in rules.resource_access_rules if x != resource_access_rule]
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
