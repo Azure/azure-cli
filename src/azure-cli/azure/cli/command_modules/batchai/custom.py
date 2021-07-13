@@ -698,8 +698,9 @@ def list_clusters(client, resource_group, workspace_name):
 
 
 def resize_cluster(client, resource_group, workspace_name, cluster_name, target):
-    return client.update(resource_group, workspace_name, cluster_name, scale_settings=models.ScaleSettings(
+    parameters = models.ClusterUpdateParameters(scale_settings=models.ScaleSettings(
         manual=models.ManualScaleSettings(target_node_count=target)))
+    return client.update(resource_group, workspace_name, cluster_name, parameters=parameters)
 
 
 def set_cluster_auto_scale_parameters(client, resource_group, workspace_name, cluster_name, min_nodes, max_nodes):
