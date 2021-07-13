@@ -1760,9 +1760,12 @@ def validate_fs_directory_download_source_url(cmd, namespace):
     if namespace.source_path:
         file_client = client.get_file_client(file_path=namespace.source_path)
         url = file_client.url
-    namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
-                                        account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                        service='blob', resource_types='co', permissions='rl')
+    if _is_valid_uri(url):
+        namespace.source = url
+    else:
+        namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                            account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                            service='blob', resource_types='co', permissions='rl')
     del namespace.source_fs
     del namespace.source_path
 
