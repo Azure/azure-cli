@@ -86,3 +86,33 @@ type: command
 short-summary: Update a Redis cache.
 long-summary: Scale or update settings of a Redis cache.
 """
+
+helps['redis force-reboot'] = """
+type: command
+short-summary: Reboot specified Redis node(s).
+long-summary: Usage example - az redis force-reboot --name testCacheName --resource-group testResourceGroup --reboot-type {AllNodes, PrimaryNode, SecondaryNode}  [--shard-id]
+"""
+
+helps['redis import-method'] = """
+type: command
+short-summary: Import data into Redis cache.
+long-summary: Usage example - az redis import-method --name testCacheName --resource-group testResourceGroup --files [--file-format]
+"""
+
+helps['redis patch-schedule delete'] = """
+type: command
+short-summary: Deletes the patching schedule of a redis cache.
+long-summary: Usage example - az redis patch-schedule delete --name testCacheName --resource-group testResourceGroup
+"""
+
+helps['redis patch-schedule show'] = """
+type: command
+short-summary: Gets the patching schedule of a redis cache.
+long-summary: Usage example - az redis patch-schedule show --name testCacheName --resource-group testResourceGroup [--query-examples]
+"""
+
+helps['redis regenerate-keys'] = """
+type: command
+short-summary: Regenerate Redis cache's access keys.
+long-summary: Usage example - az redis regenerate-keys --name testCacheName --resource-group testResourceGroup --key-type {Primary, Secondary}
+"""

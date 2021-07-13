@@ -47,6 +47,18 @@ def load_arguments(self, _):
         c.argument('cache_name', arg_type=cache_name, id_part=None)
         c.argument('rule_name', help='Name of the firewall rule')
 
+    with self.argument_context('redis firewall-rules') as c:
+        c.argument('end_ip', help='Highest IP address included in the range.')
+        c.argument('rule_name', help='The name of the firewall rule.')
+        c.argument('start_ip', help='Lowest IP address included in the range.')
+
+    with self.argument_context('redis force-reboot') as c:
+        c.argument('reboot_type', help='Which Redis node(s) to reboot. Depending on this value data loss is possible.')
+        c.argument('shard_id', help='If clustering is enabled, the ID of the shard to be rebooted.')
+
+    with self.argument_context('redis regenerate-keys') as c:
+        c.argument('key_type', help='The Redis access key to regenerate.')
+
     with self.argument_context('redis server-link') as c:
         c.argument('name', arg_type=cache_name, id_part=None)
         c.argument('server_to_link', help='Resource ID or name of the redis cache to be linked')

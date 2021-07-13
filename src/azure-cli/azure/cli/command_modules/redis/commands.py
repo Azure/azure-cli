@@ -43,7 +43,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_redis_patch_schedule_create_or_update', client_factory=cf_patch_schedules)
         g.custom_command('update', 'cli_redis_patch_schedule_create_or_update', client_factory=cf_patch_schedules)
         g.custom_command('delete', 'cli_redis_patch_schedule_delete', client_factory=cf_patch_schedules)
-        g.custom_command('show', 'cli_redis_patch_schedule_get', client_factory=cf_patch_schedules)
+        g.custom_show_command('show', 'cli_redis_patch_schedule_get', client_factory=cf_patch_schedules)
 
     with self.command_group('redis firewall-rules', redis_firewall_rules) as g:
         g.custom_command('create', 'cli_redis_firewall_create', client_factory=cf_firewall_rule)
