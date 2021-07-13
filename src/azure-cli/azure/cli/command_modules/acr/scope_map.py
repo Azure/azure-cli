@@ -42,8 +42,8 @@ def acr_scope_map_create(cmd,
     ScopeMap = cmd.get_models('ScopeMap')
 
     scope_map = ScopeMap(
-        actions = actions,
-        description = description
+        actions=actions,
+        description=description
     )
 
     return client.begin_create(
