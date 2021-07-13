@@ -118,7 +118,7 @@ DEPENDENCIES = [
     'azure-mgmt-resource==18.0.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
-    'azure-mgmt-security~=0.6.0',
+    'azure-mgmt-security~=1.0.0',
     'azure-mgmt-servicebus~=6.0.0',
     'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
