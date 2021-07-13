@@ -41,7 +41,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck('networkRuleSet.bypass', 'Logging'),
                      JMESPathCheck('networkRuleSet.defaultAction', 'Deny')])
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}'.format(**kwargs))
+        result = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}'.format(**kwargs)).get_output_in_json()
+        subnet_id = result['newVNet']['subnets'][0]['id']
+
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(
                 **kwargs))
@@ -66,8 +68,17 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(ipRules)', 2),
             JMESPathCheck('length(virtualNetworkRules)', 1)
         ])
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd(
+                'storage account network-rule remove -g {rg} --account-name {acc} --ip-address 2.1.2.3'.format(**kwargs))
         self.cmd(
             'storage account network-rule remove -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+
+        kwargs['lower_subnet'] = subnet_id.replace('resourceGroups', 'resourcegroups')
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account network-rule remove -g {rg} --account-name {acc} --subnet {lower_subnet}'.format(
+                **kwargs))
         self.cmd(
             'storage account network-rule remove -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
                 **kwargs))
@@ -87,7 +98,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rid2': "/subscriptions/a7e99807-abbf-4642-bdec-2c809a96a8bc/resourceGroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace2",
             'rid3': "/subscriptions/a7e99807-abbf-4642-bdec-2c809a96a8bc/resourceGroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace3",
             'tid1': "72f988bf-86f1-41af-91ab-2d7cd011db47",
-            'tid2': "72f988bf-86f1-41af-91ab-2d7cd011db47"
+            'tid2': "72f988bf-86f1-41af-91ab-2d7cd011db47",
+            'wrong_rid': "/subscriptions/a7e99807-abbf-4642-bdec-2c809a96a8bc/resourcegroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace1"
         }
 
         self.cmd(
@@ -117,6 +129,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         # remove network-rule
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account network-rule remove -g {rg} --account-name {sa} --resource-id {wrong_rid} '
+                     '--tenant-id {tid1}')
         self.cmd(
             'storage account network-rule remove -g {rg} --account-name {sa} --resource-id {rid1} --tenant-id {tid1}')
         self.cmd('storage account network-rule list -g {rg} --account-name {sa}', checks=[
