@@ -127,14 +127,14 @@ def cli_redis_create_server_link(cmd, client, resource_group_name, name, server_
                                                server_role=replication_role)
     return client.begin_create(resource_group_name, name, cache_to_link.name, params)
 
-def cli_redis_patch_schedule_create_or_update(cmd, client, resource_group_name, name, schedule_entries):
+def cli_redis_patch_schedule_create_or_update(client, resource_group_name, name, schedule_entries):
     from azure.mgmt.redis.models import RedisPatchSchedule
     return client.create_or_update(resource_group_name, name, "default", RedisPatchSchedule(schedule_entries=schedule_entries))
 
-def cli_redis_patch_schedule_get(cmd, client, resource_group_name, name):
+def cli_redis_patch_schedule_get(client, resource_group_name, name):
     return client.get(resource_group_name, name, "default")
 
-def cli_redis_patch_schedule_delete(cmd, client, resource_group_name, name):
+def cli_redis_patch_schedule_delete(client, resource_group_name, name):
     return client.delete(resource_group_name, name, "default")
 
 
@@ -149,20 +149,20 @@ def get_cache_from_resource_id(client, cache_resource_id):
     id_comps = parse_resource_id(cache_resource_id)
     return client.get(id_comps['resource_group'], id_comps['name'])
 
-def cli_redis_firewall_create(cmd, client, resource_group_name, name, rule_name, start_ip, end_ip):
+def cli_redis_firewall_create(client, resource_group_name, name, rule_name, start_ip, end_ip):
     from azure.mgmt.redis.models import RedisFirewallRule
     return client.create_or_update(resource_group_name, name, rule_name, RedisFirewallRule(start_ip=start_ip, end_ip=end_ip))
 
-def cli_redis_regenerate_key(cmd, client, resource_group_name, name, key_type):
+def cli_redis_regenerate_key(client, resource_group_name, name, key_type):
     from azure.mgmt.redis.models import RedisRegenerateKeyParameters
     return client.regenerate_key(resource_group_name, name, RedisRegenerateKeyParameters(key_type=key_type))
 
-def cli_redis_import(cmd, client, resource_group_name, name, files):
+def cli_redis_import(client, resource_group_name, name, files, file_format=None):
     from azure.mgmt.redis.models import ImportRDBParameters
-    return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files))
+    return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files, format=file_format))
 
-def cli_redis_force_reboot(cmd, client, resource_group_name, name, reboot_type):
+def cli_redis_force_reboot(client, resource_group_name, name, reboot_type, shard_id=None):
     from azure.mgmt.redis.models import RedisRebootParameters
-    return client.force_reboot(resource_group_name, name, RedisRebootParameters(reboot_type=reboot_type))
+    return client.force_reboot(resource_group_name, name, RedisRebootParameters(reboot_type=reboot_type, shard_id=shard_id))
 
 # endregion
