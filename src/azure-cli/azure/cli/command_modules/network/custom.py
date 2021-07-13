@@ -3019,8 +3019,7 @@ def update_express_route_port_link(cmd, instance, parent, express_route_port_nam
         # need to remove this conversion when the issue is fixed.
         if macsec_cipher is not None:
             macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
-            if macsec_cipher in macsec_ciphers_tmp:
-                macsec_cipher = macsec_ciphers_tmp[macsec_cipher]
+            macsec_cipher = macsec_ciphers_tmp.get(macsec_cipher, macsec_cipher)
         instance.mac_sec_config.cipher = macsec_cipher
         instance.mac_sec_config.sci_state = macsec_sci_state
 

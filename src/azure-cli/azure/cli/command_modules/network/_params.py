@@ -62,7 +62,7 @@ def load_arguments(self, _):
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
-     ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState,
+     ExpressRouteLinkMacSecCipher,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType, GatewayLoadBalancerTunnelProtocol,
      GatewayLoadBalancerTunnelInterfaceType, VpnNatRuleType, VpnNatRuleMode) = self.get_models(
@@ -74,7 +74,7 @@ def load_arguments(self, _):
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
-         'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState',
+         'ExpressRouteLinkMacSecCipher',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
          'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType', 'GatewayLoadBalancerTunnelProtocol',
          'GatewayLoadBalancerTunnelInterfaceType', 'VpnNatRuleType', 'VpnNatRuleMode')
