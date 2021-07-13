@@ -4485,6 +4485,35 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_auto_upgrade_channel(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--generate-ssh-keys --enable-managed-identity ' \
+                     '--auto-upgrade-channel rapid'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoUpgradeProfile.upgradeChannel', 'rapid')
+        ])
+
+        # update upgrade channel
+        self.cmd('aks update --resource-group={resource_group} --name={name} --auto-upgrade-channel stable', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoUpgradeProfile.upgradeChannel', 'stable')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
