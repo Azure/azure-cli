@@ -8,10 +8,9 @@ import time
 import unittest
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, record_only)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, live_only, record_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
-from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
 from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 from azure_devtools.scenario_tests import AllowLargeResponse
@@ -21,14 +20,13 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_plr')
-    def test_private_link_resource_keyvault(self, resource_group):
+    @KeyVaultPreparer(name_prefix='cli-test-kv-plr-', location='centraluseuap')
+    def test_private_link_resource_keyvault(self, resource_group, key_vault):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-plr-', 24),
             'loc': 'centraluseuap',
             'rg': resource_group
         })
 
-        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
         self.cmd('network private-link-resource list '
                  '--name {kv} '
                  '-g {rg} '
@@ -52,9 +50,9 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='centraluseuap')
     def test_private_endpoint_connection_keyvault(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-pe-', 24),
             'loc': 'centraluseuap',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
@@ -64,8 +62,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         })
 
         # Prepare vault and network
-        keyvault = _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete').get_output_in_json()
-        self.kwargs['kv_id'] = keyvault['id']
+        self.kwargs['kv_id'] = self.cmd('keyvault show -n {kv} -g {rg} --query "id" -otsv').output
         self.cmd('network vnet create '
                  '-n {vnet} '
                  '-g {rg} '
