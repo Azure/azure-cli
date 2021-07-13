@@ -107,7 +107,6 @@ def load_arguments(self, _):
     ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
     app_gateway_name_type = CLIArgumentType(help='Name of the application gateway.', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
     express_route_link_macsec_cipher_type = CLIArgumentType(get_enum_type(ExpressRouteLinkMacSecCipher))
-    express_route_link_admin_state_type = CLIArgumentType(get_enum_type(ExpressRouteLinkAdminState))
     zone_compatible_type = CLIArgumentType(
         options_list=['--zone', '-z'],
         nargs='+',
@@ -848,7 +847,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network express-route port link update', min_api='2019-08-01') as c:
         c.argument('admin_state',
-                   arg_type=express_route_link_admin_state_type,
+                   arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True),
                    help='Enable/Disable administrative state of an ExpressRoute Link')
 
     with self.argument_context('network express-route port link update', arg_group='MACsec', min_api='2019-08-01') as c:
