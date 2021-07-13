@@ -94,12 +94,12 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'sa': storage_account,
-            'rid1': "/subscriptions/a7e99807-abbf-4642-bdec-2c809a96a8bc/resourceGroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace1",
-            'rid2': "/subscriptions/a7e99807-abbf-4642-bdec-2c809a96a8bc/resourceGroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace2",
-            'rid3': "/subscriptions/a7e99807-abbf-4642-bdec-2c809a96a8bc/resourceGroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace3",
+            'rid1': "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace1",
+            'rid2': "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace2",
+            'rid3': "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace3",
             'tid1': "72f988bf-86f1-41af-91ab-2d7cd011db47",
             'tid2': "72f988bf-86f1-41af-91ab-2d7cd011db47",
-            'wrong_rid': "/subscriptions/a7e99807-abbf-4642-bdec-2c809a96a8bc/resourcegroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace1"
+            'wrong_rid': "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/res9407/providers/Microsoft.Synapse/workspaces/testworkspace1"
         }
 
         self.cmd(
