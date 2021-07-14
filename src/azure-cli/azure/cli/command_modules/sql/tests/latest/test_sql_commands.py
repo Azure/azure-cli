@@ -989,6 +989,9 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         edition_updated = 'BusinessCritical'
         v_core_update = 4
 
+        if self.is_live:
+            sleep(60)
+
         print('Updating MI...\n')
 
         # Update sql managed_instance
@@ -3941,103 +3944,20 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
 class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='westeurope', name_prefix='clitest')
-    def test_sql_server_trust_groups(self):
-        # self.skipTest("Skipping based on discussion with owning team - Matija Bojovic")
-
-        resource_prefix = 'sqlstg'
-
-        account = self.cmd('account show').get_output_in_json()
-
+    @ManagedInstancePreparer(parameter_name="mi1")
+    @ManagedInstancePreparer(parameter_name="mi2")
+    def test_sql_server_trust_groups(self, mi1, rg, mi2):
         self.kwargs.update({
-            'loc': 'westeurope',
-            'vnet_name': 'stgCliTestVname',
-            'subnet_name': 'stgCliTestSubnet',
-            'nsg': 'stgCliTestNsg',
-            'route_table_name': 'stgCliTestRouteTable',
-            'route_name_default': 'default',
-            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
-            'managed_instance_name_1': self.create_random_name(managed_instance_name_prefix,
-                                                               managed_instance_name_max_length),
-            'managed_instance_name_2': self.create_random_name(managed_instance_name_prefix,
-                                                               managed_instance_name_max_length),
-            'vault_name': self.create_random_name(resource_prefix, 24),
-            'admin_login': 'admin123',
-            'admin_password': 'SecretPassword123',
-            'license_type': 'LicenseIncluded',
-            'v_cores': 4,
-            'storage_size_in_gb': 32,
-            'edition': 'GeneralPurpose',
-            'family': 'Gen5',
-            'collation': ManagedInstancePreparer.collation,
-            'proxy_override': "Proxy",
-            'delegations': 'Microsoft.Sql/managedInstances',
-            'subscription_id': account['id']
-        })
-
-        self.cmd('az network nsg create --name {nsg} --resource-group {rg} --location {loc}')
-
-        self.cmd(
-            'az network nsg rule create --name "allow_management_inbound" --nsg-name {nsg} --priority 100 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges 9000 9003 1438 1440 1452 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"')
-        self.cmd(
-            'az network nsg rule create --name "allow_misubnet_inbound" --nsg-name {nsg} --priority 200 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Inbound --protocol "*" --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
-        self.cmd(
-            'az network nsg rule create --name "allow_health_probe_inbound" --nsg-name {nsg} --priority 300 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Inbound --protocol "*" --source-address-prefixes AzureLoadBalancer --source-port-ranges "*"')
-        self.cmd(
-            'az network nsg rule create --name "allow_management_outbound" --nsg-name {nsg} --priority 1100 --resource-group {rg} --access Allow --destination-address-prefixes AzureCloud --destination-port-ranges 443 12000 --direction Outbound --protocol Tcp --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
-        self.cmd(
-            'az network nsg rule create --name "allow_misubnet_outbound" --nsg-name {nsg} --priority 200 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Outbound --protocol "*" --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
-
-        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
-        self.cmd(
-            'network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --delegations {delegations}')
-
-        # Create and prepare VNet and subnet for new virtual cluster
-        self.cmd('network route-table create -g {rg} -n {route_table_name}')
-        self.cmd(
-            'network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd(
-            'network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-
-        self.cmd(
-            'az network vnet subnet update --name {subnet_name} --network-security-group {nsg} --route-table {route_table_name} --vnet-name {vnet_name} --resource-group {rg}')
-        subnet = self.cmd(
-            'network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-
-        self.kwargs.update({
-            'subnet_id': subnet['id']
+            'loc': ManagedInstancePreparer.location,
+            'rg': rg,
+            'managed_instance_name_1': mi1,
+            'managed_instance_name_2': mi2
         })
 
         # Create sql managed_instance
-        managed_instance_1 = self.cmd('sql mi create -g {rg} -n {managed_instance_name_1} -l {loc} '
-                                      '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                                      '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                                      '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
-                                      checks=[
-                                          self.check('name', '{managed_instance_name_1}'),
-                                          self.check('resourceGroup', '{rg}'),
-                                          self.check('administratorLogin', '{admin_login}'),
-                                          self.check('vCores', '{v_cores}'),
-                                          self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                                          self.check('licenseType', '{license_type}'),
-                                          self.check('sku.tier', '{edition}'),
-                                          self.check('sku.family', '{family}'),
-                                          self.check('sku.capacity', '{v_cores}')]).get_output_in_json()
+        managed_instance_1 = self.cmd('sql mi show -g {rg} -n {managed_instance_name_1}').get_output_in_json()
 
-        managed_instance_2 = self.cmd('sql mi create -g {rg} -n {managed_instance_name_2} -l {loc} '
-                                      '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                                      '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                                      '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
-                                      checks=[
-                                          self.check('name', '{managed_instance_name_2}'),
-                                          self.check('resourceGroup', '{rg}'),
-                                          self.check('administratorLogin', '{admin_login}'),
-                                          self.check('vCores', '{v_cores}'),
-                                          self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                                          self.check('licenseType', '{license_type}'),
-                                          self.check('sku.tier', '{edition}'),
-                                          self.check('sku.family', '{family}'),
-                                          self.check('sku.capacity', '{v_cores}')]).get_output_in_json()
+        managed_instance_2 = self.cmd('sql mi show -g {rg} -n {managed_instance_name_2}').get_output_in_json()
 
         self.kwargs.update({
             'stg_name': 'stg-test',
