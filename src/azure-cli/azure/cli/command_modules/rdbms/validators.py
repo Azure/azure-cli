@@ -13,7 +13,7 @@ from azure.cli.core.commands.validators import (
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
-                                    get_mysql_backup_retention, get_mysql_tiers,
+                                    get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
                                     get_postgres_list_skus_info, get_postgres_versions,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers)
 
@@ -119,7 +119,13 @@ def validate_private_endpoint_connection_id(cmd, namespace):
     del namespace.connection_id
 
 
-def mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=None, instance=None):
+def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
+                              standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
+                              version=None, instance=None):
+    # validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
+    sku_info, single_az, iops_info = get_mysql_list_skus_info(db_context.cmd, location)
+    _high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az)
+    _network_arg_validator(subnet, public_access)
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
@@ -177,11 +183,10 @@ def _mysql_version_validator(version, sku_info, tier):
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None):
-    validate_server_name(db_context.cf_availability(db_context.cmd.cli_ctx, '_'),
-                         server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+    validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     sku_info, single_az = get_postgres_list_skus_info(db_context.cmd, location)
-    _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az)
-    _pg_network_arg_validator(subnet, public_access)
+    _high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az)
+    _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
@@ -227,7 +232,7 @@ def _pg_version_validator(version, sku_info, tier):
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
 
 
-def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az):
+def _high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az):
     if high_availability is not None and high_availability.lower() == 'enabled':
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
@@ -242,10 +247,10 @@ def _pg_high_availability_validator(high_availability, standby_availability_zone
             raise ArgumentUsageError("The zone of the server cannot be same as standby zone.")
 
 
-def _pg_network_arg_validator(subnet, public_access):
+def _network_arg_validator(subnet, public_access):
     if subnet is not None and public_access is not None:
         raise CLIError("Incorrect usage : A combination of the parameters --subnet "
-                       "and --public_access is invalid. Use either one of them.")
+                       "and --public-access is invalid. Use either one of them.")
 
 
 def maintenance_window_validator(ns):
@@ -320,14 +325,19 @@ def _valid_range(addr_range):
     return False
 
 
-def validate_server_name(client, server_name, type_):
+def validate_server_name(db_context, server_name, type_):
+    client = db_context.cf_availability(db_context.cmd.cli_ctx, '_')
+
     if not server_name:
         return
 
     if len(server_name) < 3 or len(server_name) > 63:
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
 
-    result = client.execute(name_availability_request={'name': server_name, 'type': type_})
+    if db_context.command_group == 'mysql':
+        result = client.execute(db_context.location, name_availability_request={'name': server_name, 'type': type_})
+    else:
+        result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 
     if not result.name_available:
         raise ValidationError(result.message)
