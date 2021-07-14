@@ -47,12 +47,13 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, \
-        BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, \
+    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, \
         TokenStatus, ZoneRedundancy = self.get_models(
             'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
-            'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType',
             'TokenStatus', 'ZoneRedundancy')
+    TaskStatus, BaseImageTriggerType, SourceRegistryLoginMode, UpdateTriggerPayloadType = self.get_models(
+        'TaskStatus', 'BaseImageTriggerType', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', operation_group='tasks')
+    RunStatus = self.get_models('RunStatus', operation_group='runs')
 
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
@@ -105,6 +106,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('target_tags', options_list=['--image', '-t'], help="The name and tag of the image using the format: '-t repo/image:tag'. Multiple tags are supported by passing -t multiple times.", action='append')
         c.argument('repository', help='The repository name for a manifest-only copy of images. Multiple copies supported by passing --repository multiple times.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
+        c.argument('no_wait', help="Do not wait for the import to complete and return immediately after queuing the import.", action='store_true')
 
     with self.argument_context('acr config content-trust') as c:
         c.argument('registry_name', options_list=['--registry', '-r', c.deprecate(target='-n', redirect='-r', hide=True), c.deprecate(target='--name', redirect='--registry', hide=True)])

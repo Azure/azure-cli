@@ -285,12 +285,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
                                 'on compute and storage provisioned. The default value for IOPS is free IOPS. '
                                 'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server')
+                c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'], default='Enabled',
+                           help='Enable or disable autogrow of the storage. Default value is Enabled.')
 
             c.argument('vnet_resource_id', options_list=['--vnet'], help='Name or ID of a new or existing virtual network. If you want to use a vnet from different resource group or subscription, please provide a resource ID. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
             c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')
             c.argument('subnet_address_prefix', options_list=['--subnet-prefixes'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. Default value is 10.0.0.0/24.')
             c.argument('subnet_arm_resource_id', options_list=['--subnet'],
-                       help='Name or resource ID of a new or existing subnet. If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers/Microsoft.DBforMySQL/flexibleServers. After delegation, this subnet cannot be used for any other type of Azure resources.')
+                       help='Name or resource ID of a new or existing subnet. If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. Please note that the subnet will be delegated to flexibleServers provider. After delegation, this subnet cannot be used for any other type of Azure resources.')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), options_list=['--admin-user', '-u'], arg_group='Authentication', arg_type=administrator_login_setter_arg_type,
@@ -305,7 +307,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled. High availability can only be set during flexible server create time')
             c.argument('assign_identity', options_list=['--assign-identity'],
                        help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault. No need to enter extra argument.')
-            c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'], help='This parameter only applies for a server with private access. The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
+            c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'], help='This parameter only applies for a server with private access. The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group as virtual network if not provided by users.')
             c.argument('database_name', id_part=None, arg_type=database_name_setter_arg_type, options_list=['--database-name', '-d'], help='The name of the database to be created when provisioning the database server')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
@@ -326,6 +328,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Availability zone into which to provision the resource.')
                 c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'],
                            help='This parameter only applies for a server with private access. The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
+                c.argument('subnet_arm_resource_id', options_list=['--subnet'],
+                           help='Resource ID of an existing subnet. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers if not already delegated. After delegation, this subnet cannot be used for any other type of Azure resources.')
             elif command_group == 'mysql':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name or resource ID of the source server to restore from.')

@@ -1893,6 +1893,16 @@ examples:
         az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
 """
 
+helps['provider permission'] = """
+type: group
+short-summary: Manage permissions for a provider.
+"""
+
+helps['provider permission list'] = """
+type: command
+short-summary: List permissions from a provider.
+"""
+
 helps['provider operation'] = """
 type: group
 short-summary: Get provider operations metadatas.
@@ -2445,6 +2455,11 @@ examples:
     text: az bicep install
   - name: Install a specific version of Bicep CLI.
     text: az bicep install --version v0.2.212
+"""
+
+helps['bicep uninstall'] = """
+type: command
+short-summary: Uninstall Bicep CLI.
 """
 
 helps['bicep upgrade'] = """

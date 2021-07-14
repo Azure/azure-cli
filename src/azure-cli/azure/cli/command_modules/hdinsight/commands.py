@@ -93,11 +93,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.wait_command('wait')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
 
-    # Monitoring operations
+    # Monitoring operations(classic monitor)
     with self.command_group('hdinsight monitor', hdinsight_extensions_sdk, client_factory=cf_hdinsight_extensions) as g:
         g.show_command('show', 'get_monitoring_status')
         g.custom_command('enable', 'enable_hdi_monitoring')
         g.command('disable', 'begin_disable_monitoring')
+
+    # New Azure Monitor operations
+    with self.command_group('hdinsight azure-monitor', hdinsight_extensions_sdk,
+                            client_factory=cf_hdinsight_extensions) as g:
+        g.show_command('show', 'get_azure_monitor_status')
+        g.custom_command('enable', 'enable_hdi_azure_monitor')
+        g.command('disable', 'begin_disable_azure_monitor')
 
     # VirtualMachine operations
     with self.command_group('hdinsight host', hdinsight_virtual_machines_sdk,

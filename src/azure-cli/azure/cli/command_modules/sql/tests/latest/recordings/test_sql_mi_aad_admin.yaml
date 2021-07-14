@@ -1,49 +1,1082 @@
 interactions:
 - request:
-    body: '{"location": "westeurope"}'
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:15 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AlTI9lpzMHtJkRIY0rtnWWw; expires=Fri, 09-Jul-2021 07:29:16 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7Wevr00nf_RqDNq9tTMlLyQE490TOC8BUw_0-vydefkGVp3tZ7niHuSR6_BRo8h_Vxp07ZtpNl7jGpB9TcLpQTxFDRwWU2TP3XVF34b2Sm36DNAbPdwLV9WXItnQN3wt4xh0ZWxZAq7G7y02JhayrM312jDyP6U1z2KWurWFFWXqK4RggAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"administratorType": "ActiveDirectory", "login": "OneboxAuthUser1@cltestaad.ccsctp.net",
+      "sid": "0ef94dba-c9bc-40d3-9ec2-6db192f3ce0c", "tenantId": "f435658b-a8c3-4460-adf2-84617caef396"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network route-table create
+      - sql mi ad-admin create
       Connection:
       - keep-alive
       Content-Length:
-      - '26'
+      - '204'
       Content-Type:
-      - application/json
+      - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n -l
+      - --mi -g -i -u
       User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DejanDuVnetRG/providers/Microsoft.Network/routeTables/vcCliTestRouteTableAad?api-version=2020-07-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators/ActiveDirectory?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
-        ''DejanDuVnetRG'' could not be found."}}'
+      string: '{"operation":"UpdateActiveDirectoryAdministrator","startTime":"2021-06-09T07:29:16.697Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/locations/northeurope/administratorAzureAsyncOperation/f4c73ac2-76b9-4f07-9b79-56e3a866aa75?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '89'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:16 GMT
+      expires:
+      - '-1'
+      location:
+      - https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/locations/northeurope/administratorOperationResults/f4c73ac2-76b9-4f07-9b79-56e3a866aa75?api-version=2020-11-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: 933C94B8E7E64A99A959C3DE8C736770 Ref B: STBEDGE0114 Ref C: 2021-06-09T07:29:16Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:32 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=Atk95cQWO09Aq53teOeiZEs; expires=Fri, 09-Jul-2021 07:29:32 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7WevrAnF3qOlmsDbMMvtNouQv1GGBWmk8Lv46mPWUb6mGeAoX_wKtlT3Z7e0MmeDtbBDUp3yto536AglS4n4EGkJCpY31pSapMXxda1NSSC0aAi5CMj9kzqWm3ONF1htwTnNTay1ldNc9TZTET8yvgAvwhIWPe1hSy7MDoUvVk6374DIgAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - WUS2 ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -i -u
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/locations/northeurope/administratorAzureAsyncOperation/f4c73ac2-76b9-4f07-9b79-56e3a866aa75?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"f4c73ac2-76b9-4f07-9b79-56e3a866aa75","status":"Succeeded","startTime":"2021-06-09T07:29:16.697Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '105'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 21 Jan 2021 10:04:27 GMT
+      - Wed, 09 Jun 2021 07:29:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-msedge-ref:
+      - 'Ref A: B2CCCA4FF923474C9335B01EB3F86A6F Ref B: WSTEDGE1014 Ref C: 2021-06-09T07:29:32Z'
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:32 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AuKI9JI6KipJtcPx9mC5MOw; expires=Fri, 09-Jul-2021 07:29:32 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7WevrAwVDa_BPQKla0YzC51DWDab4dFpeuW8TWKMIXcnd3K39_U_4Obo1hkP_rfSWUVi7vX1h7naLBvBrcQh_TKeLqp4bjbkmphwogKfukOhCwFsNDmq0Uc5de_L2-ekbiFzcl0bsVGxrTt_WA7gzOQi7d3CsrXNNm94mbHUTngiae50gAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - WUS2 ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -i -u
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"administratorType":"ActiveDirectory","login":"OneboxAuthUser1@cltestaad.ccsctp.net","sid":"0ef94dba-c9bc-40d3-9ec2-6db192f3ce0c","tenantId":"f435658b-a8c3-4460-adf2-84617caef396"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/managedInstances/administrators"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: D45D592DB3D740908B4688338B3D1BC7 Ref B: WSTEDGE1014 Ref C: 2021-06-09T07:29:32Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:32 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AiYfkC1t46xAn2M7AhzuyiU; expires=Fri, 09-Jul-2021 07:29:33 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7Wevrj-sgu66kXNgcFXcgLT4p1gq2NuPHOWLo8WDHNQPPDtbahutFLvgU3vfN6jdfAasqYStSHXhis_B9agLw_TWs-jtsIgiKAOJL4cSEFMlZvYS0DY2lILlh3rN5waLa8gA7-s3PYKQYIaaLr-XSV1TX32hEOq09d2KBfye5SUVUTnsgAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"administratorType":"ActiveDirectory","login":"OneboxAuthUser1@cltestaad.ccsctp.net","sid":"0ef94dba-c9bc-40d3-9ec2-6db192f3ce0c","tenantId":"f435658b-a8c3-4460-adf2-84617caef396"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/managedInstances/administrators"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '467'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: E223F1378EFC4DBB8ACE6CE663C28867 Ref B: WSTEDGE0912 Ref C: 2021-06-09T07:29:33Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:33 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AvpuoQh8znFIrwQflKVPoic; expires=Fri, 09-Jul-2021 07:29:33 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7WevrDZsvbJoqf3A36SLVmOLQUgxzt3lTuPlNyZMzctXWj1k2BpGUrpfx06Ye9E7tFFnv1opbuHfaTuqpKb2IOwS2B1NA5mf6h09_cQ2igGTtTMmtLQ1jc9ASmAC90Z4r6uZLK2TZKig9fa14YtzEw94MZDeHP7VnHtVCANR659_dPmYgAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - WUS2 ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"administratorType": "ActiveDirectory", "login": "OneboxAuthUser2@cltestaad.ccsctp.net",
+      "sid": "b599ec4b-9e8e-4649-906f-d2685a6105fa", "tenantId": "f435658b-a8c3-4460-adf2-84617caef396"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '204'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --mi -g -u -i
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"operation":"UpdateActiveDirectoryAdministrator","startTime":"2021-06-09T07:29:34.41Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/locations/northeurope/administratorAzureAsyncOperation/2dd3a40a-c7fd-4c37-9b64-7b22e8627429?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '88'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/locations/northeurope/administratorOperationResults/2dd3a40a-c7fd-4c37-9b64-7b22e8627429?api-version=2020-11-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: 9D4236B5A5A24C8B9FE7C7D7D06BDAEB Ref B: WSTEDGE1005 Ref C: 2021-06-09T07:29:33Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:49 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AvQ_2c_ay2dLo5dUJNOEhWY; expires=Fri, 09-Jul-2021 07:29:49 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7WevrPRP3VJ0F0bUQHGrK_aHoidFPmyF0gs46PBVSIuu2qywxaKqGaR57ewwT1FAi7UqROwa4-VRuKSmVULjTSjoLRFlZ1zD4-M5OmFPjQai9UirkNGOSmhJW6z9tBe6HxWFmnULfhs8U99-b2BCnwq3VM53SrjCLOge4dgUrWzyjQ3ogAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -u -i
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/locations/northeurope/administratorAzureAsyncOperation/2dd3a40a-c7fd-4c37-9b64-7b22e8627429?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"2dd3a40a-c7fd-4c37-9b64-7b22e8627429","status":"Succeeded","startTime":"2021-06-09T07:29:34.41Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: FF27DAC242544CA2876F48542F095A46 Ref B: WSTEDGE1005 Ref C: 2021-06-09T07:29:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:50 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AjKZF9pi1SdPjTPEILy52jA; expires=Fri, 09-Jul-2021 07:29:50 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7WevrTh4Uh6844qKRlPpE45ANLu9l7QIZEwcYZvhbMphbGGThrGkHh3VgSeDyKibBWrozxE5Ia3qjE-GHjxfvYk8c6jm2-sNkMf4QdAy2IgLom5Rz_Pu1QM9bJCePuq4T7pS2o961D0Y_SObvaJv9v-8pdcznhK0hwep12XmdqUfKtAcgAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -u -i
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"administratorType":"ActiveDirectory","login":"OneboxAuthUser2@cltestaad.ccsctp.net","sid":"b599ec4b-9e8e-4649-906f-d2685a6105fa","tenantId":"f435658b-a8c3-4460-adf2-84617caef396"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/managedInstances/administrators"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 32378D1473B1433084D0A2C4AA626B8D Ref B: WSTEDGE1005 Ref C: 2021-06-09T07:29:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:50 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AoqhQ0r4bXBLgQ9chr1mzI0; expires=Fri, 09-Jul-2021 07:29:51 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7WevrwVDbOMurvJBr3gN4AIdU3jDg-rO_SFIcovLvdUB2cjApQ8UIy43xO390h1Xy95bkid05GlGfPI0K0PP4Fy3sZwLNLpe0UxQH41PCayNSs6nDQXVHkTOkre9FJwGSttrAOygj7WSuNtnoXCcC3uhJtRnX-pyVEOU7NjzvwVgbHR8gAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"operation":"DropActiveDirectoryAdministrator","startTime":"2021-06-09T07:29:51.433Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/locations/northeurope/administratorAzureAsyncOperation/ae7c28cf-c61b-4053-82b5-791e14454b9d?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '87'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:29:51 GMT
+      expires:
+      - '-1'
+      location:
+      - https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/locations/northeurope/administratorOperationResults/ae7c28cf-c61b-4053-82b5-791e14454b9d?api-version=2020-11-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-msedge-ref:
+      - 'Ref A: EF2E99F60FA341AD924685F71A821706 Ref B: WSTEDGE0914 Ref C: 2021-06-09T07:29:51Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:30:06 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AmG1AJIBsE1BgDWIlPjUU0I; expires=Fri, 09-Jul-2021 07:30:06 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7WevrQbFKEvpEncpzb1Hr33UZrDaqJSVM7zGmpH6XGUKrfzRS5uWBCagLKXa7T8ygbffhXAxNlhS6urIgJPy6K92GooiZ3fAQdeO7OqOUVyv6sg22hFmdrw0xVg-l8yKK1Fb7T80B4BLPTyOaxzF7kntaJrbotxDa72od87IhthaHLKsgAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/locations/northeurope/administratorAzureAsyncOperation/ae7c28cf-c61b-4053-82b5-791e14454b9d?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"ae7c28cf-c61b-4053-82b5-791e14454b9d","status":"Succeeded","startTime":"2021-06-09T07:29:51.433Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:30:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 18E953CB62904D61BFDC88F7ABA85989 Ref B: WSTEDGE1014 Ref C: 2021-06-09T07:30:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.7
+    method: GET
+    uri: https://login.microsoftonline.com/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=86400, private
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:30:06 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AgAH8-bwiApCsOTRfmHqiX8; expires=Fri, 09-Jul-2021 07:30:07 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAAD--DLA3VO7QrddgJg7Wevr7cOB11iW6HGFW_Tk-xI15_FmHSLsfblgWHgBcDyLbMLL70n3zNEGKhh4lxr2G_aXn90q-to10VH6maKeRsVIv3ncbj9hW1-NZncH-c0g5Kja9jQraLFQaUHxqjcBlMhPSuTPBWjoEwz_xF1qkXZRUqWPovxlGc7wEPT-eqEoAGUgAA;
+        domain=.login.microsoftonline.com; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; secure; samesite=none; httponly
+      - stsservicecookie=estscorp; path=/; secure; samesite=none; httponly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.11787.15 - WUS2 ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clperftesting_sneu_rg/providers/Microsoft.Sql/managedInstances/t48-gp-neu/administrators?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Jun 2021 07:30:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: EB022320FBC64513AA70617C719FE554 Ref B: CO1EDGE1509 Ref C: 2021-06-09T07:30:07Z'
+    status:
+      code: 200
+      message: OK
 version: 1

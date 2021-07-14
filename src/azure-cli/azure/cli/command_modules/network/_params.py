@@ -2083,6 +2083,10 @@ def load_arguments(self, _):
         c.argument('hosted_subnet', help='The ID of a subnet where Route Server would be deployed')
         c.argument('allow_branch_to_branch_traffic', options_list=['--allow-b2b-traffic'],
                    arg_type=get_three_state_flag(), help='Allow branch to branch traffic.')
+        c.argument('public_ip_address', validator=get_public_ip_validator(),
+                   help='The name or ID of the public IP address.',
+                   completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'),
+                   min_api='2021-02-01')
 
     with self.argument_context('network routeserver create') as c:
         c.argument('virtual_hub_name', id_part=None)
