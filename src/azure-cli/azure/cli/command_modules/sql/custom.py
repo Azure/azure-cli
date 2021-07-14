@@ -40,6 +40,7 @@ from azure.mgmt.sql.models import (
     ManagedInstanceAzureADOnlyAuthentication,
     ManagedInstanceEncryptionProtector,
     ManagedInstanceExternalAdministrator,
+    ManagedInstanceKey,
     ManagedInstanceLongTermRetentionPolicyName,
     ManagedInstancePairInfo,
     ManagedShortTermRetentionPolicyName,
@@ -59,6 +60,7 @@ from azure.mgmt.sql.models import (
     ServerKeyType,
     ServerNetworkAccessFlag,
     ServiceObjectiveName,
+    ServerTrustGroup,
     ShortTermRetentionPolicyName,
     Sku,
     StorageKeyType,
@@ -4038,8 +4040,10 @@ def server_trust_group_create(
                        resource_group_name=resource_group_name,
                        location_name=location,
                        server_trust_group_name=name,
-                       group_members=members,
-                       trust_scopes=trust_scope)
+                       parameters=ServerTrustGroup(
+                           group_members=members,
+                           trust_scopes=trust_scope
+                       ))
 
 
 def server_trust_group_delete(
@@ -4317,12 +4321,14 @@ def managed_instance_key_create(
 
     key_name = _get_server_key_name_from_uri(kid)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
         key_name=key_name,
-        server_key_type=ServerKeyType.AZURE_KEY_VAULT,
-        uri=kid
+        parameters=ManagedInstanceKey(
+            server_key_type=ServerKeyType.AZURE_KEY_VAULT,
+            uri=kid
+        )
     )
 
 
@@ -4354,7 +4360,7 @@ def managed_instance_key_delete(
 
     key_name = _get_server_key_name_from_uri(kid)
 
-    return client.delete(
+    return client.begin_delete(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
         key_name=key_name)
