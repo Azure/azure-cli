@@ -702,6 +702,11 @@ examples:
     crafted: true
 """
 
+helps['cdn waf'] = """
+type: group
+short-summary: Manage CDN WAF.
+"""
+
 helps['cdn waf policy'] = """
 type: group
 short-summary: Manage CDN WAF policies.
