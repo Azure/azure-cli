@@ -4106,6 +4106,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
+        if self.is_live:
+            sleep(60)
+
         # test update sql managed_instance 1
         self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
                  .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
