@@ -9,7 +9,7 @@ import unittest
 import time
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
-    StorageAccountPreparer, record_only
+    StorageAccountPreparer, KeyVaultPreparer, record_only
 from azure.mgmt.recoveryservicesbackup.models import StorageType
 from azure_devtools.scenario_tests import AllowLargeResponse
 
@@ -887,20 +887,25 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
-    def test_backup_encryption(self, resource_group, resource_group_location, vault1, vault2):
+    @KeyVaultPreparer()
+    def test_backup_encryption(self, resource_group, resource_group_location, vault1, vault2, key_vault):
         self.kwargs.update({
             'loc' : resource_group_location,
             'vault1': vault1,
             'vault2': vault2,
             'rg': resource_group,
+            'key_vault': key_vault,
+            'key1': self.create_random_name('clitest-key1', 20),
+            'key2': self.create_random_name('clitest-key2', 20),
+            'identity1': self.create_random_name('clitest-identity1', 50),
+            'identity2': self.create_random_name('clitest-identity2', 50),
+            'identity_permissions': "get list unwrapKey wrapKey",
         })
 
 
-        self.kwargs['identity1'] = self.create_random_name('clitest-identity', 50)
         self.kwargs['identity1_id'] = self.cmd('identity create -n {identity1} -g {rg} --query id').get_output_in_json()
         self.kwargs['identity1_principalid'] = self.cmd('identity show -n {identity1} -g {rg} --query principalId').get_output_in_json()
 
-        self.kwargs['identity2'] = self.create_random_name('clitest-identity', 50)
         self.kwargs['identity2_id'] = self.cmd('identity create -n {identity2} -g {rg} --query id').get_output_in_json()
         self.kwargs['identity2_principalid'] = self.cmd('identity show -n {identity2} -g {rg} --query principalId').get_output_in_json()
 
@@ -917,18 +922,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['system2_principalid'] = system_v2_json['identity']['principalId']
 
-        self.kwargs['keyvault'] = self.create_random_name('clitest-keyvault', 20)
-        self.cmd('keyvault create -n {keyvault} -g {rg} -l {loc} --enable-purge-protection true', checks=[
-            self.check('location', '{loc}'),
-            self.check('name', '{keyvault}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check("properties.provisioningState", "Succeeded"),
-            self.check("properties.enablePurgeProtection", True),
-            self.check("properties.enableSoftDelete", True)
-        ])
+        self.cmd('keyvault update --name {key_vault} --enable-soft-delete --enable-purge-protection')
 
-        self.kwargs['key1'] = self.create_random_name('clitest-key1', 20)
-        key1_json = self.cmd('keyvault key create --vault-name {keyvault} -n {key1} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+        key1_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key1} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),
             self.check('key.kty', "RSA"),
         ]).get_output_in_json()
@@ -941,8 +937,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("verify", keyOps1)
         self.assertIn("wrapKey", keyOps1)
 
-        self.kwargs['key2'] = self.create_random_name('clitest-key2', 20)
-        key2_json = self.cmd('keyvault key create --vault-name {keyvault} -n {key2} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+        key2_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key2} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),
             self.check('key.kty', "RSA"),
         ]).get_output_in_json()
@@ -956,10 +951,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("wrapKey", keyOps2)
 
 
-        self.kwargs['key1_id'] = self.cmd('keyvault key show --vault-name {keyvault} --name {key1} --query key.kid').get_output_in_json()
-        self.kwargs['key2_id'] = self.cmd('keyvault key show --vault-name {keyvault} --name {key2} --query key.kid').get_output_in_json()
+        self.kwargs['key1_id'] = key1_json['key']['kid']
+        self.kwargs['key2_id'] = key2_json['key']['kid']
 
-        policy1_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {identity1_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
+        policy1_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {identity1_principalid} --key-permissions {identity_permissions}').get_output_in_json()
         identity1_has_access = False
 
         access_policy1 = policy1_json['properties']['accessPolicies']
@@ -975,7 +970,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("get", key_permissions)
         self.assertIn("unwrapKey", key_permissions)
 
-        policy2_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {identity2_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
+        policy2_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {identity2_principalid} --key-permissions {identity_permissions}').get_output_in_json()
         identity2_has_access = False
 
         access_policy2 = policy2_json['properties']['accessPolicies']
@@ -991,7 +986,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("get", key_permissions)
         self.assertIn("unwrapKey", key_permissions)
 
-        policy3_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {system1_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
+        policy3_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {system1_principalid} --key-permissions {identity_permissions}').get_output_in_json()
         system1_has_access = False
 
         access_policy3 = policy3_json['properties']['accessPolicies']
@@ -1007,7 +1002,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("get", key_permissions)
         self.assertIn("unwrapKey", key_permissions)
 
-        policy4_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {system2_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
+        policy4_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {system2_principalid} --key-permissions {identity_permissions}').get_output_in_json()
         system2_has_access = False
 
         access_policy4 = policy4_json['properties']['accessPolicies']
@@ -1091,7 +1086,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('keyvault delete -n {keyvault} -g {rg}')
+        
 
 
         
