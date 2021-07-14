@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.26.0
+++++++
+* Minor fixes
+
 2.25.0
 ++++++
 * Fix #18360 and #18262: Write to stderr issue (#18414)
