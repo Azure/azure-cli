@@ -11,25 +11,26 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/capabilities?include=supportedManagedInstanceVersions&api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/capabilities?include=supportedManagedInstanceVersions&api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"West Central US","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen4","sku":"GP_Gen4","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"Gen5","sku":"GP_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
-        is available in multi-az regions"}],"zoneRedundant":false,"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen4","sku":"BC_Gen4","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"Gen5","sku":"BC_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
+      string: '{"name":"West Europe","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","sku":"GP_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
+        is available in multi-az regions"}],"zoneRedundant":false,"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen5","sku":"BC_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
         is available in multi-az regions"}],"zoneRedundant":false,"status":"Available"}],"supportedInstancePoolEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen5_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen5_16","value":16,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_24","value":24,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_32","value":32,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_40","value":40,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_64","value":64,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_80","value":80,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"}],"status":"Default"}],"status":"Default"}],"status":"Default"}],"status":"Available"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '14621'
+      - '10991'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:15:04 GMT
+      - Tue, 13 Jul 2021 19:20:17 GMT
       expires:
       - '-1'
       pragma:
@@ -48,11 +49,12 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westcentralus", "sku": {"name": "GP_Gen5"}, "properties":
-      {"administratorLogin": "admin123", "administratorLoginPassword": "SecretPassword123",
-      "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet",
-      "licenseType": "LicenseIncluded", "vCores": 4, "storageSizeInGB": 128, "administrators":
-      {}}}'
+    body: '{"location": "westeurope", "tags": {}, "sku": {"name": "GP_Gen5"}, "properties":
+      {"administratorLogin": "admin123", "administratorLoginPassword": "SecretPassword123SecretPassword",
+      "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance",
+      "licenseType": "LicenseIncluded", "vCores": 8, "storageSizeInGB": 32, "collation":
+      "Serbian_Cyrillic_100_CS_AS", "publicDataEndpointEnabled": true, "proxyOverride":
+      "Proxy", "administrators": {}}}'
     headers:
       Accept:
       - application/json
@@ -63,27 +65,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '453'
+      - '596'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"type":"None"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","timezoneId":"UTC","maintenanceConfigurationId":"SystemDefault","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"type":"None"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"SystemDefault","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '677'
+      - '834'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:15:15 GMT
+      - Tue, 13 Jul 2021 19:20:21 GMT
       expires:
       - '-1'
       pragma:
@@ -111,23 +114,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.20f99a1b7737.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"20f99a1b7737","publicDataEndpointEnabled":false,"timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1148'
+      - '1330'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:16:16 GMT
+      - Tue, 13 Jul 2021 19:21:21 GMT
       expires:
       - '-1'
       pragma:
@@ -157,23 +161,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.20f99a1b7737.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"20f99a1b7737","publicDataEndpointEnabled":false,"timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1148'
+      - '1330'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:16:46 GMT
+      - Tue, 13 Jul 2021 19:21:52 GMT
       expires:
       - '-1'
       pragma:
@@ -203,23 +208,71 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --capacity --storage --edition --family
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.20f99a1b7737.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"20f99a1b7737","publicDataEndpointEnabled":false,"timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1146'
+      - '1330'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:17:16 GMT
+      - Tue, 13 Jul 2021 19:22:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
+        --family --tags --proxy-override --public-data-endpoint-enabled
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1328'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Jul 2021 19:22:52 GMT
       expires:
       - '-1'
       pragma:
@@ -251,21 +304,21 @@ interactions:
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.20f99a1b7737.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"20f99a1b7737","publicDataEndpointEnabled":false,"timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1146'
+      - '1328'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:17:17 GMT
+      - Tue, 13 Jul 2021 19:22:53 GMT
       expires:
       - '-1'
       pragma:
@@ -284,7 +337,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westcentralus", "properties": {"collation": "Latin1_General_100_CS_AS_SC"}}'
+    body: '{"location": "westeurope", "properties": {"collation": "Serbian_Cyrillic_100_CS_AS"}}'
     headers:
       Accept:
       - application/json
@@ -295,33 +348,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '89'
+      - '85'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"CreateManagedDatabase","startTime":"2021-06-30T12:17:24.793Z"}'
+      string: '{"operation":"CreateManagedDatabase","startTime":"2021-07-13T19:22:55.37Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/658f65c9-1bc5-4705-9625-c05439cb9732?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/318afc02-9a15-42b3-a37f-cfed10077aaf?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '76'
+      - '75'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:17:24 GMT
+      - Tue, 13 Jul 2021 19:22:54 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/658f65c9-1bc5-4705-9625-c05439cb9732?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseOperationResults/318afc02-9a15-42b3-a37f-cfed10077aaf?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -349,479 +402,12 @@ interactions:
       ParameterSetName:
       - -g --mi -n --collation
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/658f65c9-1bc5-4705-9625-c05439cb9732?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/318afc02-9a15-42b3-a37f-cfed10077aaf?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"658f65c9-1bc5-4705-9625-c05439cb9732","status":"Succeeded","startTime":"2021-06-30T12:17:24.793Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:17:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --collation
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2021-06-30T12:17:24.997Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '452'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:17:40 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.20f99a1b7737.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":128,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"20f99a1b7737","publicDataEndpointEnabled":false,"timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1146'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:22:40 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westcentralus", "properties": {"restorePointInTime": "2021-06-30T12:22:40.500911Z",
-      "createMode": "PointInTimeRestore", "sourceDatabaseId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '343'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"operation":"CreateManagedRestoreRequest","startTime":"2021-06-30T12:22:46.99Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/6707b5e1-a3df-4956-ad1f-10937ac459d8?api-version=2020-11-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '81'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:22:47 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/6707b5e1-a3df-4956-ad1f-10937ac459d8?api-version=2020-11-01-preview
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/6707b5e1-a3df-4956-ad1f-10937ac459d8?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"6707b5e1-a3df-4956-ad1f-10937ac459d8","status":"InProgress","startTime":"2021-06-30T12:22:46.99Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:23:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/6707b5e1-a3df-4956-ad1f-10937ac459d8?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"6707b5e1-a3df-4956-ad1f-10937ac459d8","status":"InProgress","startTime":"2021-06-30T12:22:46.99Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:23:17 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/6707b5e1-a3df-4956-ad1f-10937ac459d8?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"6707b5e1-a3df-4956-ad1f-10937ac459d8","status":"InProgress","startTime":"2021-06-30T12:22:46.99Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:23:32 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/6707b5e1-a3df-4956-ad1f-10937ac459d8?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"6707b5e1-a3df-4956-ad1f-10937ac459d8","status":"InProgress","startTime":"2021-06-30T12:22:46.99Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:23:47 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/6707b5e1-a3df-4956-ad1f-10937ac459d8?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"6707b5e1-a3df-4956-ad1f-10937ac459d8","status":"InProgress","startTime":"2021-06-30T12:22:46.99Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:24:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/6707b5e1-a3df-4956-ad1f-10937ac459d8?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"6707b5e1-a3df-4956-ad1f-10937ac459d8","status":"InProgress","startTime":"2021-06-30T12:22:46.99Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:24:17 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --mi -n --dest-name --time
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/6707b5e1-a3df-4956-ad1f-10937ac459d8?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"6707b5e1-a3df-4956-ad1f-10937ac459d8","status":"Succeeded","startTime":"2021-06-30T12:22:46.99Z"}'
+      string: '{"name":"318afc02-9a15-42b3-a37f-cfed10077aaf","status":"Succeeded","startTime":"2021-07-13T19:22:55.37Z"}'
     headers:
       cache-control:
       - no-cache
@@ -830,7 +416,198 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:24:33 GMT
+      - Tue, 13 Jul 2021 19:23:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --collation
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-07-13T19:22:55.607Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '506'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Jul 2021 19:23:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1328'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Jul 2021 19:28:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "properties": {"restorePointInTime": "2021-07-13T19:28:11.30341Z",
+      "createMode": "PointInTimeRestore", "sourceDatabaseId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '393'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"operation":"CreateManagedRestoreRequest","startTime":"2021-07-13T19:28:37.533Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/9e1fe73b-e279-42b3-ac7a-a9e05e0fdb90?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '82'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Jul 2021 19:28:37 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseOperationResults/9e1fe73b-e279-42b3-ac7a-a9e05e0fdb90?api-version=2020-11-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/9e1fe73b-e279-42b3-ac7a-a9e05e0fdb90?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"9e1fe73b-e279-42b3-ac7a-a9e05e0fdb90","status":"InProgress","startTime":"2021-07-13T19:28:37.533Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Jul 2021 19:28:52 GMT
       expires:
       - '-1'
       pragma:
@@ -862,21 +639,113 @@ interactions:
       ParameterSetName:
       - -g --mi -n --dest-name --time
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/9e1fe73b-e279-42b3-ac7a-a9e05e0fdb90?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2021-06-30T12:22:47.287Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
+      string: '{"name":"9e1fe73b-e279-42b3-ac7a-a9e05e0fdb90","status":"InProgress","startTime":"2021-07-13T19:28:37.533Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '468'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:24:33 GMT
+      - Tue, 13 Jul 2021 19:29:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/9e1fe73b-e279-42b3-ac7a-a9e05e0fdb90?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"9e1fe73b-e279-42b3-ac7a-a9e05e0fdb90","status":"Succeeded","startTime":"2021-07-13T19:28:37.533Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Jul 2021 19:29:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi -n --dest-name --time
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-07-13T19:28:37.783Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '522'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Jul 2021 19:29:23 GMT
       expires:
       - '-1'
       pragma:
@@ -908,21 +777,21 @@ interactions:
       ParameterSetName:
       - -g --managed-instance
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2021-06-30T12:22:47.287Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"},{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2021-06-30T12:17:24.997Z","earliestRestorePoint":"2021-06-30T12:19:20.577Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}]}'
+      string: '{"value":[{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-07-13T19:22:55.607Z","earliestRestorePoint":"2021-07-13T19:24:07.317Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"},{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-07-13T19:28:37.783Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '983'
+      - '1091'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:24:34 GMT
+      - Tue, 13 Jul 2021 19:29:24 GMT
       expires:
       - '-1'
       pragma:
@@ -954,21 +823,21 @@ interactions:
       ParameterSetName:
       - -g --managed-instance -n
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2021-06-30T12:17:24.997Z","earliestRestorePoint":"2021-06-30T12:19:20.577Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
+      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-07-13T19:22:55.607Z","earliestRestorePoint":"2021-07-13T19:24:07.317Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '502'
+      - '556'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:24:34 GMT
+      - Tue, 13 Jul 2021 19:29:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1000,21 +869,21 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"collation":"Latin1_General_100_CS_AS_SC","status":"Online","creationDate":"2021-06-30T12:22:47.287Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
+      string: '{"properties":{"collation":"Serbian_Cyrillic_100_CS_AS","status":"Online","creationDate":"2021-07-13T19:28:37.783Z","defaultSecondaryLocation":"northeurope"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/restoredcliautomationdb01","name":"restoredcliautomationdb01","type":"Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '468'
+      - '522'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:24:35 GMT
+      - Tue, 13 Jul 2021 19:29:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1048,15 +917,15 @@ interactions:
       ParameterSetName:
       - -g --managed-instance -n --yes
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"DropManagedDatabase","startTime":"2021-06-30T12:24:37.383Z"}'
+      string: '{"operation":"DropManagedDatabase","startTime":"2021-07-13T19:29:26.313Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/15916a43-174d-4171-adee-7f72c9ca07bf?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/afe599b3-869f-445f-a7f6-2f9a6cb44948?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1064,11 +933,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:24:36 GMT
+      - Tue, 13 Jul 2021 19:29:25 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/15916a43-174d-4171-adee-7f72c9ca07bf?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseOperationResults/afe599b3-869f-445f-a7f6-2f9a6cb44948?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -1096,12 +965,12 @@ interactions:
       ParameterSetName:
       - -g --managed-instance -n --yes
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/15916a43-174d-4171-adee-7f72c9ca07bf?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedDatabaseAzureAsyncOperation/afe599b3-869f-445f-a7f6-2f9a6cb44948?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"15916a43-174d-4171-adee-7f72c9ca07bf","status":"Succeeded","startTime":"2021-06-30T12:24:37.383Z"}'
+      string: '{"name":"afe599b3-869f-445f-a7f6-2f9a6cb44948","status":"Succeeded","startTime":"2021-07-13T19:29:26.313Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1110,7 +979,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:24:52 GMT
+      - Tue, 13 Jul 2021 19:29:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1142,9 +1011,9 @@ interactions:
       ParameterSetName:
       - -g --managed-instance -n
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/cliautomationdb01?api-version=2020-11-01-preview
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The requested resource
@@ -1158,7 +1027,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:24:52 GMT
+      - Tue, 13 Jul 2021 19:29:42 GMT
       expires:
       - '-1'
       pragma:
@@ -1186,17 +1055,17 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - --ids --yes
+      - -g -n --yes --no-wait
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"DropManagedServer","startTime":"2021-06-30T12:24:55.427Z"}'
+      string: '{"operation":"DropManagedServer","startTime":"2021-07-13T19:29:43.067Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/453adcbe-3df9-40b3-bd73-ee0b7c26faca?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedInstanceAzureAsyncOperation/9da1221f-a567-48e3-b5c7-f3224377ae41?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1204,11 +1073,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 30 Jun 2021 12:24:54 GMT
+      - Tue, 13 Jul 2021 19:29:42 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceOperationResults/453adcbe-3df9-40b3-bd73-ee0b7c26faca?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedInstanceOperationResults/9da1221f-a567-48e3-b5c7-f3224377ae41?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -1222,50 +1091,4 @@ interactions:
     status:
       code: 202
       message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --ids --yes
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/453adcbe-3df9-40b3-bd73-ee0b7c26faca?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"453adcbe-3df9-40b3-bd73-ee0b7c26faca","status":"Succeeded","startTime":"2021-06-30T12:24:55.427Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 30 Jun 2021 12:25:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
 version: 1

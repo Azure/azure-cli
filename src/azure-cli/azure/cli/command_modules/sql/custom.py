@@ -36,10 +36,13 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroupReadWriteEndpoint,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
+    ManagedBackupShortTermRetentionPolicy,
     ManagedInstanceAzureADOnlyAuthentication,
     ManagedInstanceEncryptionProtector,
     ManagedInstanceExternalAdministrator,
+    ManagedInstanceLongTermRetentionPolicyName,
     ManagedInstancePairInfo,
+    ManagedShortTermRetentionPolicyName,
     PartnerInfo,
     PartnerRegionInfo,
     PerformanceLevelUnit,
@@ -4579,10 +4582,13 @@ def update_short_term_retention_mi(
         managed_instance_name,
         resource_group_name,
         retention_days,
-        deleted_time=None):
+        deleted_time=None,
+        **kwargs):
     '''
     Updates short term retention for database
     '''
+
+    kwargs['retention_days'] = retention_days
 
     if deleted_time:
         database_name = '{},{}'.format(
@@ -4598,13 +4604,15 @@ def update_short_term_retention_mi(
             restorable_dropped_database_id=database_name,
             managed_instance_name=managed_instance_name,
             resource_group_name=resource_group_name,
-            retention_days=retention_days)
+            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT,
+            parameters=kwargs)
     else:
         policy = client.begin_create_or_update(
             database_name=database_name,
             managed_instance_name=managed_instance_name,
             resource_group_name=resource_group_name,
-            retention_days=retention_days)
+            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT,
+            parameters=kwargs)
 
     return policy
 
@@ -4633,12 +4641,14 @@ def get_short_term_retention_mi(
         policy = client.get(
             restorable_dropped_database_id=database_name,
             managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name)
+            resource_group_name=resource_group_name,
+            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT)
     else:
         policy = client.get(
             database_name=database_name,
             managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name)
+            resource_group_name=resource_group_name,
+            policy_name = ManagedShortTermRetentionPolicyName.DEFAULT)
 
     return policy
 
@@ -4694,9 +4704,26 @@ def update_long_term_retention_mi(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
+        policy_name=ManagedInstanceLongTermRetentionPolicyName.DEFAULT,
         parameters=kwargs)
 
     return policy
+
+
+def get_long_term_retention_mi(
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name):
+    '''
+    Gets long term retention for managed database
+    '''
+
+    return client.get(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        policy_name=ManagedInstanceLongTermRetentionPolicyName.DEFAULT)
 
 
 def _get_backup_id_resource_values(backup_id):
@@ -4949,6 +4976,9 @@ def managed_db_log_replay_start(
         storage_container_uri,
         storage_container_sas_token,
         **kwargs):
+    '''
+    Start a log replay restore.
+    '''
 
     # Determine managed instance location
     kwargs['location'] = _get_managed_instance_location(
@@ -4969,6 +4999,23 @@ def managed_db_log_replay_start(
 
     # Create
     return client.begin_create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+def managed_db_log_replay_complete_restore(
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        **kwargs):
+    '''
+    Complete a log replay restore.
+    '''
+
+    return client.begin_complete_restore(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
