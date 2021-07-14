@@ -898,11 +898,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['identity1'] = self.create_random_name('clitest-identity', 50)
         self.kwargs['identity1_id'] = self.cmd('identity create -n {identity1} -g {rg} --query id').get_output_in_json()
-        self.kwargs['identity1_principalid'] = self.cmd('az identity show -n {identity1} -g {rg} --query principalId').get_output_in_json()
+        self.kwargs['identity1_principalid'] = self.cmd('identity show -n {identity1} -g {rg} --query principalId').get_output_in_json()
 
         self.kwargs['identity2'] = self.create_random_name('clitest-identity', 50)
         self.kwargs['identity2_id'] = self.cmd('identity create -n {identity2} -g {rg} --query id').get_output_in_json()
-        self.kwargs['identity2_principalid'] = self.cmd('az identity show -n {identity2} -g {rg} --query principalId').get_output_in_json()
+        self.kwargs['identity2_principalid'] = self.cmd('identity show -n {identity2} -g {rg} --query principalId').get_output_in_json()
 
 
         userMSI_v1_json = self.cmd('backup vault update --identity-type userassigned --identity-id {identity1_id} {identity2_id} -g {rg} -v {vault1}').get_output_in_json()
@@ -1090,6 +1090,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.useSystemAssignedIdentity', False),
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
+
+        self.cmd('keyvault delete -n {keyvault} -g {rg}')
 
 
         
