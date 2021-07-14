@@ -454,7 +454,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 
         # test sql db commands
         db1 = self.cmd('sql db create -g {} --server {} --name {} --read-scale {} --backup-storage-redundancy {} --yes'
-                       .format(resource_group, server, database_name, read_scale_disabled, backup_storage_redundancy_local),
+                       .format(resource_group, server, database_name, read_scale_disabled,
+                               backup_storage_redundancy_local),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group),
                            JMESPathCheck('name', database_name),
@@ -674,37 +675,37 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 
         # test sql db is created with ledger off by default
         self.cmd('sql db create -g {} --server {} --name {} --yes'
-                       .format(resource_group, server, database_name_one),
-                       checks=[
-                           JMESPathCheck('resourceGroup', resource_group),
-                           JMESPathCheck('name', database_name_one),
-                           JMESPathCheck('location', resource_group_location),
-                           JMESPathCheck('ledgerOn', False)])
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('ledgerOn', False)])
 
         self.cmd('sql db show -g {} -s {} --name {}'
                  .format(resource_group, server, database_name_one),
                  checks=[
-                           JMESPathCheck('resourceGroup', resource_group),
-                           JMESPathCheck('name', database_name_one),
-                           JMESPathCheck('location', resource_group_location),
-                           JMESPathCheck('ledgerOn', False)])
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('ledgerOn', False)])
 
         # test sql db with ledger on
         self.cmd('sql db create -g {} --server {} --name {} --ledger-on --yes'
-                       .format(resource_group, server, database_name_two),
-                       checks=[
-                           JMESPathCheck('resourceGroup', resource_group),
-                           JMESPathCheck('name', database_name_two),
-                           JMESPathCheck('location', resource_group_location),
-                           JMESPathCheck('ledgerOn', True)])
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('ledgerOn', True)])
 
         self.cmd('sql db show -g {} -s {} --name {}'
                  .format(resource_group, server, database_name_two),
                  checks=[
-                           JMESPathCheck('resourceGroup', resource_group),
-                           JMESPathCheck('name', database_name_two),
-                           JMESPathCheck('location', resource_group_location),
-                           JMESPathCheck('ledgerOn', True)])
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('ledgerOn', True)])
 
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
@@ -778,20 +779,21 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
         auto_pause_delay = 120
         min_capacity = 1.0
 
-        self.cmd('sql db create -g {} --server {} --name {} -e {} -c {} -f {} --compute-model {} --auto-pause-delay {} --min-capacity {}'
-                 .format(resource_group, server, database_name_2,
-                         vcore_edition, vcore_capacity,
-                         vcore_family, compute_model_serverless, auto_pause_delay, min_capacity),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_2),
-                     JMESPathCheck('edition', vcore_edition),
-                     JMESPathCheck('sku.tier', vcore_edition),
-                     JMESPathCheck('sku.capacity', vcore_capacity),
-                     JMESPathCheck('sku.family', vcore_family),
-                     JMESPathCheck('sku.name', 'GP_S_Gen5'),
-                     JMESPathCheck('autoPauseDelay', auto_pause_delay),
-                     JMESPathCheck('minCapacity', min_capacity)])
+        self.cmd(
+            'sql db create -g {} --server {} --name {} -e {} -c {} -f {} --compute-model {} --auto-pause-delay {} --min-capacity {}'
+            .format(resource_group, server, database_name_2,
+                    vcore_edition, vcore_capacity,
+                    vcore_family, compute_model_serverless, auto_pause_delay, min_capacity),
+            checks=[
+                JMESPathCheck('resourceGroup', resource_group),
+                JMESPathCheck('name', database_name_2),
+                JMESPathCheck('edition', vcore_edition),
+                JMESPathCheck('sku.tier', vcore_edition),
+                JMESPathCheck('sku.capacity', vcore_capacity),
+                JMESPathCheck('sku.family', vcore_family),
+                JMESPathCheck('sku.name', 'GP_S_Gen5'),
+                JMESPathCheck('autoPauseDelay', auto_pause_delay),
+                JMESPathCheck('minCapacity', min_capacity)])
 
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
@@ -831,7 +833,6 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_short_term_retention(self):
-
         # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
         self.kwargs.update({
             'resource_group': 'WestUS2ResourceGroup',
@@ -871,7 +872,6 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_long_term_retention(
             self):
-
         self.kwargs.update({
             'rg': 'ayang',
             'loc': 'southeastasia',
@@ -975,6 +975,10 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'sql db ltr-backup delete -l {loc} -s {server_name} -d {database_name} -n \'{backup_name}\' --yes',
             checks=[NoneCheck()])
 
+# Ji: cannot pass: stuck in cancel op.
+# E           azure.core.exceptions.HttpResponseError: (CannotCancelOperation) Cannot cancel management operation '28dca96c-f79d-4222-8f39-2d022fabde04' in the current state.
+#
+# env/lib/python3.8/site-packages/azure/mgmt/sql/operations/_managed_instance_operations_operations.py:240: HttpResponseError
 
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
@@ -1031,7 +1035,6 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
     @SqlServerPreparer(location='westeurope')
     def test_aad_admin(self, resource_group, server):
-
         self.kwargs.update({
             'rg': resource_group,
             'sn': server,
@@ -1079,7 +1082,8 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
         user = 'DSEngAll'
         oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
 
-        self.cmd('sql server ad-admin create -s {} -g {} -u {} -i {}'.format(server, resource_group, user, oid), checks=[])
+        self.cmd('sql server ad-admin create -s {} -g {} -u {} -i {}'.format(server, resource_group, user, oid),
+                 checks=[])
 
         self.cmd('sql server ad-only-auth enable -n {} -g {}'.format(server, resource_group), checks=[])
         self.cmd('sql server ad-only-auth disable -n {} -g {}'.format(server, resource_group), checks=[])
@@ -1089,14 +1093,13 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
     def test_sql_mi_aad_admin(self):
-
         print('Test is started...\n')
 
         self.kwargs.update({
             'oid': '0ef94dba-c9bc-40d3-9ec2-6db192f3ce0c',
             'user': 'OneboxAuthUser1@cltestaad.ccsctp.net',
-            'managed_instance_name':'t48-gp-neu',
-            'rg':'clperftesting_sneu_rg'
+            'managed_instance_name': 't48-gp-neu',
+            'rg': 'clperftesting_sneu_rg'
         })
 
         print('Arguments are updated with login and sid data')
@@ -1114,8 +1117,10 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
 class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
-    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1', location='westeurope')
-    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2', location='westeurope')
+    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1',
+                       location='westeurope')
+    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2',
+                       location='westeurope')
     @AllowLargeResponse()
     def test_sql_db_copy(self, resource_group_1, resource_group_2,
                          resource_group_location,
@@ -1211,7 +1216,7 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
     while db['earliestRestoreDate'] is None:
         sleep(60)
         db = test.cmd('sql db show -g {} -s {} -n {}'
-                  .format(resource_group, server, database_name)).get_output_in_json()
+                      .format(resource_group, server, database_name)).get_output_in_json()
 
     earliest_restore_date = _get_earliest_restore_date(db)
 
@@ -1225,7 +1230,6 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
 
 
 def _wait_until_first_backup_midb(self):
-
     earliest_restore_date_string = None
 
     while earliest_restore_date_string is None:
@@ -1327,7 +1331,8 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
         timeout = timedelta(0, 15 * 60)  # 15 minutes timeout
 
         while True:
-            deleted_dbs = list(self.cmd('sql db list-deleted -g {} -s {}'.format(resource_group, server)).get_output_in_json())
+            deleted_dbs = list(
+                self.cmd('sql db list-deleted -g {} -s {}'.format(resource_group, server)).get_output_in_json())
 
             if deleted_dbs:
                 # Deleted db found, stop polling
@@ -1355,7 +1360,8 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
 
         # Restore deleted to earlier point in time
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --deleted-time {} --dest-name {}'
-                 .format(resource_group, server, database_name, _get_earliest_restore_date_for_deleted_db(deleted_db).isoformat(),
+                 .format(resource_group, server, database_name,
+                         _get_earliest_restore_date_for_deleted_db(deleted_db).isoformat(),
                          _get_deleted_date(deleted_db).isoformat(), restore_database_name2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1465,9 +1471,9 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # update threat detection policy - enable
         disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
-        disabled_alerts_expected = ['Sql_Injection_Vulnerability','Access_Anomaly']
+        disabled_alerts_expected = ['Sql_Injection_Vulnerability', 'Access_Anomaly']
         email_addresses_input = 'test1@example.com test2@example.com'
-        email_addresses_expected = ['test1@example.com','test2@example.com']
+        email_addresses_expected = ['test1@example.com', 'test2@example.com']
         email_account_admins = True
 
         self.cmd('sql db threat-policy update -g {} -s {} -n {} --security-alert-policy-name default'
@@ -1510,7 +1516,8 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                                               checks=[
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
-                                                  JMESPathCheck('provisioningState', 'Succeeded')]).get_output_in_json()['id']
+                                                  JMESPathCheck('provisioningState',
+                                                                'Succeeded')]).get_output_in_json()['id']
 
         # update audit policy - enable log analytics target
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
@@ -1573,8 +1580,9 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         # create event hub autorization rule
         eventhub_auth_rule = 'cliehauthruledb01'
 
-        eventhub_auth_rule_id = self.cmd('eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
-                                         .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
+        eventhub_auth_rule_id = self.cmd(
+            'eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
+            .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
 
         # update audit policy - enable event hub target
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {} --event-hub-target-state {}'
@@ -1638,7 +1646,6 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
     def test_sql_server_security_mgmt(self, resource_group, resource_group_2,
                                       resource_group_location, server,
                                       storage_account, storage_account_2):
-
         state_enabled = 'Enabled'
         state_disabled = 'Disabled'
 
@@ -1715,7 +1722,8 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                                               checks=[
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
-                                                  JMESPathCheck('provisioningState', 'Succeeded')]).get_output_in_json()['id']
+                                                  JMESPathCheck('provisioningState',
+                                                                'Succeeded')]).get_output_in_json()['id']
 
         # update audit policy - enable log analytics target
         self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
@@ -1779,8 +1787,9 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
         # create event hub autorization rule
         eventhub_auth_rule = 'cliehauthruledb01'
 
-        eventhub_auth_rule_id = self.cmd('eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
-                                         .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
+        eventhub_auth_rule_id = self.cmd(
+            'eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
+            .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
 
         # update audit policy - enable event hub target
         self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
@@ -1846,7 +1855,6 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
     def test_sql_server_ms_support_mgmt(self, resource_group, resource_group_2,
                                         resource_group_location, server,
                                         storage_account, storage_account_2):
-
         state_enabled = 'Enabled'
         state_disabled = 'Disabled'
 
@@ -1886,12 +1894,13 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
 
         # update MS support audit policy - specify storage account and resource group. use secondary key
         storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
-        self.cmd('sql server ms-support audit-policy update -g {} -n {} --blob-storage-target-state {} --storage-account {}'
-                 .format(resource_group, server, state_enabled, storage_account_2),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageEndpoint', storage_endpoint_2)])
+        self.cmd(
+            'sql server ms-support audit-policy update -g {} -n {} --blob-storage-target-state {} --storage-account {}'
+            .format(resource_group, server, state_enabled, storage_account_2),
+            checks=[
+                JMESPathCheck('resourceGroup', resource_group),
+                JMESPathCheck('state', state_enabled),
+                JMESPathCheck('storageEndpoint', storage_endpoint_2)])
 
         # update MS support audit policy - disable
         self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {}'
@@ -1908,7 +1917,8 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
                                               checks=[
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
-                                                  JMESPathCheck('provisioningState', 'Succeeded')]).get_output_in_json()['id']
+                                                  JMESPathCheck('provisioningState',
+                                                                'Succeeded')]).get_output_in_json()['id']
 
         # update MS support audit policy - enable log analytics target
         self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {}'
@@ -1966,8 +1976,9 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
         # create event hub autorization rule
         eventhub_auth_rule = 'cliehauthrulems02'
 
-        eventhub_auth_rule_id = self.cmd('eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
-                                         .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
+        eventhub_auth_rule_id = self.cmd(
+            'eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
+            .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
 
         # update MS support audit policy - enable event hub target
         self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
@@ -2935,7 +2946,8 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         self.cmd('sql db list-editions -l {} --dtu 100'.format(location),
                  checks=[
                      # All results have 100 dtu
-                     JMESPathCheckGreaterThan('length([].supportedServiceLevelObjectives[?performanceLevel.value == `100`][])', 0),
+                     JMESPathCheckGreaterThan(
+                         'length([].supportedServiceLevelObjectives[?performanceLevel.value == `100`][])', 0),
                      JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.value != `100`][])', 0),
                      JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `DTU`][])', 0)])
 
@@ -2943,9 +2955,11 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         self.cmd('sql db list-editions -l {} --vcore 2'.format(location),
                  checks=[
                      # All results have 2 vcores
-                     JMESPathCheckGreaterThan('length([].supportedServiceLevelObjectives[?performanceLevel.value == `2`][])', 0),
+                     JMESPathCheckGreaterThan(
+                         'length([].supportedServiceLevelObjectives[?performanceLevel.value == `2`][])', 0),
                      JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.value != `2`][])', 0),
-                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `VCores`][])', 0)])
+                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `VCores`][])',
+                                   0)])
 
         # Search for db service objective - note that it's case insensitive
         # Checked items:
@@ -2959,8 +2973,9 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
 
         pool_max_size_length_jmespath = 'length([].supportedElasticPoolPerformanceLevels[].supportedMaxSizes[])'
         pool_db_max_dtu_length_jmespath = 'length([].supportedElasticPoolPerformanceLevels[].supportedPerDatabaseMaxPerformanceLevels[])'
-        pool_db_min_dtu_length_jmespath = ('length([].supportedElasticPoolPerformanceLevels[].supportedPerDatabaseMaxPerformanceLevels[]'
-                                           '.supportedPerDatabaseMinPerformanceLevels[])')
+        pool_db_min_dtu_length_jmespath = (
+            'length([].supportedElasticPoolPerformanceLevels[].supportedPerDatabaseMaxPerformanceLevels[]'
+            '.supportedPerDatabaseMinPerformanceLevels[])')
         pool_db_max_size_length_jmespath = 'length([].supportedElasticPoolPerformanceLevels[].supportedPerDatabaseMaxSizes[])'
 
         # Get all elastic pool capabilities
@@ -2981,17 +2996,22 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         self.cmd('sql elastic-pool list-editions -l {} --dtu 100'.format(location),
                  checks=[
                      # All results have 100 dtu
-                     JMESPathCheckGreaterThan('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value == `100`][])', 0),
-                     JMESPathCheck('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value != `100`][])', 0),
+                     JMESPathCheckGreaterThan(
+                         'length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value == `100`][])', 0),
+                     JMESPathCheck(
+                         'length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value != `100`][])', 0),
                      JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `DTU`][])', 0)])
 
         # Search for vcores
         self.cmd('sql elastic-pool list-editions -l {} --vcore 2'.format(location),
                  checks=[
                      # All results have 2 vcores
-                     JMESPathCheckGreaterThan('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value == `2`][])', 0),
-                     JMESPathCheck('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value != `2`][])', 0),
-                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `VCores`][])', 0)])
+                     JMESPathCheckGreaterThan(
+                         'length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value == `2`][])', 0),
+                     JMESPathCheck('length([].supportedElasticPoolPerformanceLevels[?performanceLevel.value != `2`][])',
+                                   0),
+                     JMESPathCheck('length([].supportedServiceLevelObjectives[?performanceLevel.unit != `VCores`][])',
+                                   0)])
 
         # Get all db capabilities with pool max size
         self.cmd('sql elastic-pool list-editions -l {} --show-details max-size'.format(location),
@@ -3161,43 +3181,58 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
     def test_sql_db_conn_str(self):
         # ADO.NET, username/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net').get_output_in_json()
-        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;')
+        self.assertEqual(conn_str,
+                         'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;')
 
         # ADO.NET, ADPassword
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -a ADPassword').get_output_in_json()
-        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Password"')
+        conn_str = self.cmd(
+            'sql db show-connection-string -s myserver -n mydb -c ado.net -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str,
+                         'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Password"')
 
         # ADO.NET, ADIntegrated
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -a ADIntegrated').get_output_in_json()
-        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Integrated"')
+        conn_str = self.cmd(
+            'sql db show-connection-string -s myserver -n mydb -c ado.net -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str,
+                         'Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Integrated"')
 
         # SqlCmd, username/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd').get_output_in_json()
-        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U <username> -P <password> -N -l 30')
+        self.assertEqual(conn_str,
+                         'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U <username> -P <password> -N -l 30')
 
         # SqlCmd, ADPassword
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -a ADPassword').get_output_in_json()
-        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U <username> -P <password> -G -N -l 30')
+        conn_str = self.cmd(
+            'sql db show-connection-string -s myserver -n mydb -c sqlcmd -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str,
+                         'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U <username> -P <password> -G -N -l 30')
 
         # SqlCmd, ADIntegrated
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -a ADIntegrated').get_output_in_json()
+        conn_str = self.cmd(
+            'sql db show-connection-string -s myserver -n mydb -c sqlcmd -a ADIntegrated').get_output_in_json()
         self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -G -N -l 30')
 
         # JDBC, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc').get_output_in_json()
-        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=<username>@myserver;password=<password>;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30')
+        self.assertEqual(conn_str,
+                         'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=<username>@myserver;password=<password>;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30')
 
         # JDBC, ADPassword
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -a ADPassword').get_output_in_json()
-        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=<username>;password=<password>;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryPassword')
+        conn_str = self.cmd(
+            'sql db show-connection-string -s myserver -n mydb -c jdbc -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str,
+                         'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=<username>;password=<password>;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryPassword')
 
         # JDBC, ADIntegrated
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -a ADIntegrated').get_output_in_json()
-        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryIntegrated')
+        conn_str = self.cmd(
+            'sql db show-connection-string -s myserver -n mydb -c jdbc -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str,
+                         'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryIntegrated')
 
         # PHP PDO, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo').get_output_in_json()
-        self.assertEqual(conn_str, '$conn = new PDO("sqlsrv:server = tcp:myserver.database.windows.net,1433; Database = mydb; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "<username>", "<password>");')
+        self.assertEqual(conn_str,
+                         '$conn = new PDO("sqlsrv:server = tcp:myserver.database.windows.net,1433; Database = mydb; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "<username>", "<password>");')
 
         # PHP PDO, ADPassword
         self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADPassword', expect_failure=True)
@@ -3207,7 +3242,8 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
 
         # PHP, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php').get_output_in_json()
-        self.assertEqual(conn_str, '$connectionOptions = array("UID"=>"<username>@myserver", "PWD"=>"<password>", "Database"=>mydb, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:myserver.database.windows.net,1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);')
+        self.assertEqual(conn_str,
+                         '$connectionOptions = array("UID"=>"<username>@myserver", "PWD"=>"<password>", "Database"=>mydb, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:myserver.database.windows.net,1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);')
 
         # PHP, ADPassword
         self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADPassword', expect_failure=True)
@@ -3217,15 +3253,20 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
 
         # ODBC, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc').get_output_in_json()
-        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=<username>@myserver;Pwd=<password>;Encrypt=yes;TrustServerCertificate=no;')
+        self.assertEqual(conn_str,
+                         'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=<username>@myserver;Pwd=<password>;Encrypt=yes;TrustServerCertificate=no;')
 
         # ODBC, ADPassword
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -a ADPassword').get_output_in_json()
-        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=<username>@myserver;Pwd=<password>;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryPassword')
+        conn_str = self.cmd(
+            'sql db show-connection-string -s myserver -n mydb -c odbc -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str,
+                         'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=<username>@myserver;Pwd=<password>;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryPassword')
 
         # ODBC, ADIntegrated
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -a ADIntegrated').get_output_in_json()
-        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryIntegrated')
+        conn_str = self.cmd(
+            'sql db show-connection-string -s myserver -n mydb -c odbc -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str,
+                         'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryIntegrated')
 
 
 class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
@@ -3345,7 +3386,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, server, kid),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
-                     JMESPathCheck('serverKeyName', server_key_name),                   
+                     JMESPathCheck('serverKeyName', server_key_name),
                      JMESPathCheck('uri', kid),
                      JMESPathCheck('autoRotationEnabled', True)])
 
@@ -3354,7 +3395,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, server),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
-                     JMESPathCheck('serverKeyName', server_key_name),                    
+                     JMESPathCheck('serverKeyName', server_key_name),
                      JMESPathCheck('uri', kid)])
 
         # update encryption protector to service managed
@@ -3383,11 +3424,11 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
+
 class SqlServerIdentityTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_sql_server_identity(self):
-
         server_name_test = 'umitest'
         server_name = self.create_random_name(server_name_test, managed_instance_name_max_length)
         admin_login = 'admin123'
@@ -3407,19 +3448,20 @@ class SqlServerIdentityTest(ScenarioTest):
 
         test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
         umi_list = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
-        
+
         identity_type = ResourceIdType.system_assigned_user_assigned.value
         user = admin_login
 
         self.cmd('sql server create -g {} -n {} -l {} -i '
-                  '--admin-user {} --admin-password {} --user-assigned-identity-id {} --identity-type {} --pid {}'
-                  .format(resource_group_1, server_name, loc, user, admin_passwords[0], umi_list, identity_type, test_umi),
-                  checks=[
+                 '--admin-user {} --admin-password {} --user-assigned-identity-id {} --identity-type {} --pid {}'
+                 .format(resource_group_1, server_name, loc, user, admin_passwords[0], umi_list, identity_type,
+                         test_umi),
+                 checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned')])
-        
+
         # test show sql server
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group_1, server_name),
@@ -3749,7 +3791,8 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
     MDB2 = "SQL_EastUS2_DB_2"
 
     def _get_full_maintenance_id(self, name):
-        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(self.get_subscription_id(), name)
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
+            self.get_subscription_id(), name)
 
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
@@ -3774,7 +3817,8 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
 
         # Test creating database with maintenance set to DB_2 (full id)
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --capacity {} --maint-config-id {}'
-                 .format(resource_group, server, database_name_2, "Standard", 50, self._get_full_maintenance_id(self.MDB2)),
+                 .format(resource_group, server, database_name_2, "Standard", 50,
+                         self._get_full_maintenance_id(self.MDB2)),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name_2),
@@ -3847,7 +3891,8 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
 
         # Test creating elastic pool with maintenance set to DB_2 (full id)
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --capacity {} --maint-config-id {}'
-                 .format(resource_group, server, pool_name_2, "Standard", 100, self._get_full_maintenance_id(self.MDB2)),
+                 .format(resource_group, server, pool_name_2, "Standard", 100,
+                         self._get_full_maintenance_id(self.MDB2)),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', pool_name_2),
@@ -3892,6 +3937,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
                      JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB1))])
 
 
+# Ji: not try
 class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
@@ -3911,8 +3957,10 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
             'route_table_name': 'stgCliTestRouteTable',
             'route_name_default': 'default',
             'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
-            'managed_instance_name_1': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
-            'managed_instance_name_2': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'managed_instance_name_1': self.create_random_name(managed_instance_name_prefix,
+                                                               managed_instance_name_max_length),
+            'managed_instance_name_2': self.create_random_name(managed_instance_name_prefix,
+                                                               managed_instance_name_max_length),
             'vault_name': self.create_random_name(resource_prefix, 24),
             'admin_login': 'admin123',
             'admin_password': 'SecretPassword123',
@@ -3929,22 +3977,32 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
         self.cmd('az network nsg create --name {nsg} --resource-group {rg} --location {loc}')
 
-        self.cmd('az network nsg rule create --name "allow_management_inbound" --nsg-name {nsg} --priority 100 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges 9000 9003 1438 1440 1452 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"')
-        self.cmd('az network nsg rule create --name "allow_misubnet_inbound" --nsg-name {nsg} --priority 200 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Inbound --protocol "*" --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
-        self.cmd('az network nsg rule create --name "allow_health_probe_inbound" --nsg-name {nsg} --priority 300 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Inbound --protocol "*" --source-address-prefixes AzureLoadBalancer --source-port-ranges "*"')
-        self.cmd('az network nsg rule create --name "allow_management_outbound" --nsg-name {nsg} --priority 1100 --resource-group {rg} --access Allow --destination-address-prefixes AzureCloud --destination-port-ranges 443 12000 --direction Outbound --protocol Tcp --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
-        self.cmd('az network nsg rule create --name "allow_misubnet_outbound" --nsg-name {nsg} --priority 200 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Outbound --protocol "*" --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
+        self.cmd(
+            'az network nsg rule create --name "allow_management_inbound" --nsg-name {nsg} --priority 100 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges 9000 9003 1438 1440 1452 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"')
+        self.cmd(
+            'az network nsg rule create --name "allow_misubnet_inbound" --nsg-name {nsg} --priority 200 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Inbound --protocol "*" --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
+        self.cmd(
+            'az network nsg rule create --name "allow_health_probe_inbound" --nsg-name {nsg} --priority 300 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Inbound --protocol "*" --source-address-prefixes AzureLoadBalancer --source-port-ranges "*"')
+        self.cmd(
+            'az network nsg rule create --name "allow_management_outbound" --nsg-name {nsg} --priority 1100 --resource-group {rg} --access Allow --destination-address-prefixes AzureCloud --destination-port-ranges 443 12000 --direction Outbound --protocol Tcp --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
+        self.cmd(
+            'az network nsg rule create --name "allow_misubnet_outbound" --nsg-name {nsg} --priority 200 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Outbound --protocol "*" --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
 
         self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --delegations {delegations}')
+        self.cmd(
+            'network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --delegations {delegations}')
 
         # Create and prepare VNet and subnet for new virtual cluster
         self.cmd('network route-table create -g {rg} -n {route_table_name}')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd(
+            'network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd(
+            'network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
 
-        self.cmd('az network vnet subnet update --name {subnet_name} --network-security-group {nsg} --route-table {route_table_name} --vnet-name {vnet_name} --resource-group {rg}')
-        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+        self.cmd(
+            'az network vnet subnet update --name {subnet_name} --network-security-group {nsg} --route-table {route_table_name} --vnet-name {vnet_name} --resource-group {rg}')
+        subnet = self.cmd(
+            'network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         self.kwargs.update({
             'subnet_id': subnet['id']
@@ -3988,7 +4046,8 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
             'mi2': managed_instance_2['id'],
         })
 
-        stg = self.cmd('az sql stg create -g {rg} -l {loc} --trust-scope {trust_scope} -n {stg_name} -m {mi1} {mi2}').get_output_in_json()
+        stg = self.cmd(
+            'az sql stg create -g {rg} -l {loc} --trust-scope {trust_scope} -n {stg_name} -m {mi1} {mi2}').get_output_in_json()
         assert stg['name'] == 'stg-test'
 
         self.cmd('az sql stg show -g {rg} -l {loc} -n {stg_name}').get_output_in_json()
@@ -4002,11 +4061,14 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
         self.cmd('az sql stg delete -g {rg} -l {loc} -n {stg_name} --yes')
 
 
+# Ji: not try
 # This test check creation of MI with maintenance configuration that is not default one
 class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
     MMI1 = "SQL_NorthEurope_MI_1"
+
     def _get_full_maintenance_id(self, name):
-        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(self.get_subscription_id(), name)
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
+            self.get_subscription_id(), name)
 
     def test_sql_managed_instance_cmw(self):
         # Values of existing resources in order to test this feature
@@ -4017,9 +4079,10 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
 
         self.kwargs.update({
             'loc': loc,
-            'rg' : resource_group,
+            'rg': resource_group,
             'subnet': subnet,
-            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
             'username': 'admin123',
             'admin_password': 'SecretPassword123',
             'timezone_id': 'Central European Standard Time',
@@ -4035,10 +4098,10 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
 
         # test create sql managed_instance with FMW
         managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-                                      '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
-                                      '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
-                                      '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}"',
-                                      checks=[
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
+                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}"',
+                                    checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
                                         self.check('administratorLogin', '{username}'),
@@ -4052,21 +4115,24 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                         self.check('collation', '{collation}'),
                                         self.check('proxyOverride', '{proxy_override}'),
                                         self.check('publicDataEndpointEnabled', 'True'),
-                                        self.check('maintenanceConfigurationId', self._get_full_maintenance_id(self.MMI1))]).get_output_in_json()
+                                        self.check('maintenanceConfigurationId',
+                                                   self._get_full_maintenance_id(self.MMI1))]).get_output_in_json()
 
         # test delete sql managed instance 2
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
 
+# Ji: not pass
+# E           azure.cli.testsdk.exceptions.JMESPathCheckAssertionError: Query 'storageAccountType' doesn't yield expected value 'LRS', instead the actual value is 'None'. Data:
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
-
     DEFAULT_MC = "SQL_Default"
     MMI1 = "SQL_WestEurope_MI_1"
     tag1 = "tagName1=tagValue1"
     tag2 = "tagName2=tagValue2"
 
     def _get_full_maintenance_id(self, name):
-        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(self.get_subscription_id(), name)
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
+            self.get_subscription_id(), name)
 
     @AllowLargeResponse()
     @ManagedInstancePreparer(tags=f"{tag1} {tag2}", minimalTlsVersion="1.2")
@@ -4091,12 +4157,12 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('vCores', 4),
+                     JMESPathCheck('vCores', 8),
                      JMESPathCheck('storageSizeInGb', 32),
                      JMESPathCheck('licenseType', license_type),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('sku.family', families[0]),
-                     JMESPathCheck('sku.capacity', 4),
+                     JMESPathCheck('sku.capacity', 8),
                      JMESPathCheck('collation', collation),
                      JMESPathCheck('identity', None),
                      JMESPathCheck('publicDataEndpointEnabled', 'True'),
@@ -4159,7 +4225,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2', 'tagName3': 'tagValue3'}")])
+                     JMESPathCheck('tags',
+                                   "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2', 'tagName3': 'tagValue3'}")])
 
         # test remove managed instance tags
         self.cmd('sql mi update -g {} -n {} --remove tags.tagName1'
@@ -4189,8 +4256,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
 
+# Ji: not pass due to
+# E           azure.cli.testsdk.exceptions.JMESPathCheckAssertionError: Query 'identity.type' doesn't yield expected value 'SystemAssigned, UserAssigned', instead the actual value is 'None'. Data:
 class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
-
     test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
 
     @AllowLargeResponse()
@@ -4211,6 +4279,7 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
                      JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned'),
                      JMESPathCheck('primaryUserAssignedIdentityId', self.test_umi)])
 
+# Ji: not pass due to record only
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     @record_only()
     def test_sql_instance_pool(self):
@@ -4233,7 +4302,8 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
             '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
-                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family), checks=[
+                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family),
+            checks=[
                 JMESPathCheck('name', instance_pool_name_1),
                 JMESPathCheck('resourceGroup', resource_group),
                 JMESPathCheck('vCores', v_cores),
@@ -4270,7 +4340,8 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
             '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
-                resource_group, instance_pool_name_2, location, subnet, license_type, v_cores, edition, family), checks=[
+                resource_group, instance_pool_name_2, location, subnet, license_type, v_cores, edition, family),
+            checks=[
                 JMESPathCheck('name', instance_pool_name_2),
                 JMESPathCheck('resourceGroup', resource_group),
                 JMESPathCheck('vCores', v_cores),
@@ -4322,33 +4393,34 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                  .format(resource_group, instance_pool_name_2), checks=NoneCheck())
 
 
+# Ji:
+#         self.kwargs.update({
+# >           'mi_identity': managed_instance['identity']['principalId'],
+#             'vault_name': self.create_random_name(resource_prefix, 24),
+#             'key_name': self.create_random_name(resource_prefix, 32),
+#         })
+# E       TypeError: 'NoneType' object is not subscriptable
+#
+# src/azure-cli/azure/cli/command_modules/sql/tests/latest/test_sql_commands.py:4418: TypeError
 class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
     # Remove when issue #9393 is fixed.
-    @live_only()
-    def test_sql_mi_tdebyok(self):
-
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    @ManagedInstancePreparer()
+    def test_sql_mi_tdebyok(self, mi, rg):
         resource_prefix = 'sqltdebyok'
 
         self.kwargs.update({
-            'loc': 'eastus2',
-            'rg' : 'rg-sso',
-            'managed_instance_name': 'clitest-donotdelete',
+            'loc': ManagedInstancePreparer.location,
+            'rg': rg,
+            'managed_instance_name': mi,
             'database_name': self.create_random_name(resource_prefix, 20),
-            'vault_name': self.create_random_name(resource_prefix, 24),
-            'admin_login': 'admin123',
-            'admin_password': 'SecretPassword123',
-            'license_type': 'LicenseIncluded',
-            'v_cores': 8,
-            'storage_size_in_gb': '32',
-            'edition': 'GeneralPurpose',
-            'family': 'Gen5',
             'collation': ManagedInstancePreparer.collation,
-            'proxy_override': "Proxy"
         })
 
         # create sql managed_instance
-        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name} ',checks=[self.check('name', '{managed_instance_name}')]).get_output_in_json()
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name} ',
+                                    checks=[self.check('name', '{managed_instance_name}')]).get_output_in_json()
 
         # create database
         self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
@@ -4368,10 +4440,12 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
         # create vault and acl server identity
 
         self.cmd('keyvault create -g {rg} -n {vault_name} --enable-soft-delete true')
-        self.cmd('keyvault set-policy -g {rg} -n {vault_name} --object-id {mi_identity} --key-permissions wrapKey unwrapKey get list')
+        self.cmd(
+            'keyvault set-policy -g {rg} -n {vault_name} --object-id {mi_identity} --key-permissions wrapKey unwrapKey get list')
 
         # create key
-        key_resp = self.cmd('keyvault key create -n {key_name} -p software --vault-name {vault_name}').get_output_in_json()
+        key_resp = self.cmd(
+            'keyvault key create -n {key_name} -p software --vault-name {vault_name}').get_output_in_json()
 
         self.kwargs.update({
             'kid': key_resp['key']['kid'],
@@ -4405,12 +4479,13 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
                      self.check('serverKeyName', 'ServiceManaged')])
 
         # update encryption protector to akv key
-        self.cmd('sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid} --auto_rotation_enabled',
-                 checks=[
-                     self.check('serverKeyType', 'AzureKeyVault'),
-                     self.check('serverKeyName', '{server_key_name}'),
-                     self.check('uri', '{kid}'),
-                     self.check('autoRotationEnabled', True)])
+        self.cmd(
+            'sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid} --auto_rotation_enabled',
+            checks=[
+                self.check('serverKeyType', 'AzureKeyVault'),
+                self.check('serverKeyName', '{server_key_name}'),
+                self.check('uri', '{kid}'),
+                self.check('autoRotationEnabled', True)])
 
         # validate encryption protector is akv via show
         self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
@@ -4448,6 +4523,7 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
             'database_name': self.create_random_name(resource_prefix, 50),
             'collation': ManagedInstancePreparer.collation,
             'retention_days_inc': 14,
+            'retention_days_dec': 7,
             'rg': rg
         })
 
@@ -4461,10 +4537,11 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
                      self.check('status', 'Online')])
 
         # test update short term retention on live database
-        self.cmd('sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_inc}',
-                 checks=[
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('retentionDays', '{retention_days_inc}')])
+        self.cmd(
+            'sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_inc}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('retentionDays', '{retention_days_inc}')])
 
         # test get short term retention on live database
         self.cmd('sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
@@ -4489,23 +4566,26 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
         })
 
         # test update short term retention on deleted database
-        self.cmd('sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deleted-time {deleted_time}',
-                 checks=[
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('retentionDays', '{retention_days_dec}')])
+        self.cmd(
+            'sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deleted-time {deleted_time}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('retentionDays', '{retention_days_dec}')])
 
         # test get short term retention on deleted database
-        self.cmd('sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deleted-time {deleted_time}',
-                 checks=[
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('retentionDays', '{retention_days_dec}')])
+        self.cmd(
+            'sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deleted-time {deleted_time}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('retentionDays', '{retention_days_dec}')])
 
 
+# Ji: not pass
+# azure.core.exceptions.ResourceNotFoundError: (ParentResourceNotFound) Can not perform requested operation on nested resource. Parent resource 'clitestmimfw7odrjj6avlxj6x6gv2oei3nguiil3t73bjl422z2lk6ltgaghw/MIDBLongTermRetentionuxo5j43jwihactiavhx5fsyta7tfh' not found.
 class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()
     def test_sql_managed_db_long_term_retention(self, mi, rg):
         resource_prefix = 'MIDBLongTermRetention'
-        
         self.kwargs.update({
             'rg': rg,
             'loc': ManagedInstancePreparer.location,
@@ -4617,15 +4697,9 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
-    #@ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     @ManagedInstancePreparer()
     def test_sql_managed_deleted_db_restore(self, mi, rg):
-        
         resource_prefix = 'MIRestoreDeletedDB'
-
-        loc = 'westcentralus'
-        resource_group_1 = 'autobot-managed-instance-v12'
-        subnet = '/subscriptions/4b9746e4-d324-4e1d-be53-ec3c8f3a0c18/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet'
 
         self.kwargs.update({
             'loc': ManagedInstancePreparer.location,
@@ -4662,18 +4736,18 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
         })
 
         # test restore deleted database
-        self.cmd('sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
-                 checks=[
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('name', '{restored_database_name}'),
-                     self.check('status', 'Online')])
+        self.cmd(
+            'sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('name', '{restored_database_name}'),
+                self.check('status', 'Online')])
 
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
     @ManagedInstancePreparer()
     def test_sql_managed_db_mgmt(self, mi, rg):
-        
         database_name = "cliautomationdb01"
         database_name_restored = "restoredcliautomationdb01"
 
@@ -4697,7 +4771,8 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
         # test sql db restore command
         db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
-                       .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored, datetime.utcnow().isoformat()),
+                       .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored,
+                               datetime.utcnow().isoformat()),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group_1),
                            JMESPathCheck('name', database_name_restored),
@@ -4738,13 +4813,12 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  expect_failure=True)
 
-
+# need specific setting for the oid
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
     # Remove when issue #9393 is fixed.
-    @live_only()
+    @ManagedInstancePreparer()
     def test_sql_mi_aad_admin(self):
-
         print('Test is started...\n')
 
         self.kwargs.update({
@@ -4752,8 +4826,8 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
             'oid2': 'b599ec4b-9e8e-4649-906f-d2685a6105fa',
             'user': 'OneboxAuthUser1@cltestaad.ccsctp.net',
             'user2': 'OneboxAuthUser2@cltestaad.ccsctp.net',
-            'managed_instance_name':'t48-gp-neu',
-            'rg':'clperftesting_sneu_rg'
+            'managed_instance_name': 't48-gp-neu',
+            'rg': 'clperftesting_sneu_rg'
         })
 
         print('Arguments are updated with login and sid data')
@@ -4835,17 +4909,18 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         # Create Failover Group
-        self.cmd('sql failover-group create -n {} -g {} -s {} --partner-resource-group {} --partner-server {} --failover-policy Automatic --grace-period 2'
-                 .format(failover_group_name, s1.group, s1.name, s2.group, s2.name),
-                 checks=[
-                     JMESPathCheck('name', failover_group_name),
-                     JMESPathCheck('resourceGroup', s1.group),
-                     JMESPathCheck('partnerServers[0].id', server2_id),
-                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
-                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
-                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
-                     JMESPathCheck('length(databases)', 0)
-                 ])
+        self.cmd(
+            'sql failover-group create -n {} -g {} -s {} --partner-resource-group {} --partner-server {} --failover-policy Automatic --grace-period 2'
+            .format(failover_group_name, s1.group, s1.name, s2.group, s2.name),
+            checks=[
+                JMESPathCheck('name', failover_group_name),
+                JMESPathCheck('resourceGroup', s1.group),
+                JMESPathCheck('partnerServers[0].id', server2_id),
+                JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                JMESPathCheck('length(databases)', 0)
+            ])
 
         # List of all failover groups on the primary server
         self.cmd('sql failover-group list -g {} -s {}'
@@ -5009,6 +5084,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
 
+# need to delete the MI, thus have to walkaround to test
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
     def test_sql_virtual_cluster_mgmt(self):
@@ -5024,7 +5100,8 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
             'route_table_name': 'vcCliTestRouteTable7',
             'route_name_internet': 'vcCliTestRouteInternet',
             'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
-            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
             'admin_login': 'admin123',
             'admin_password': 'SecretPassword123',
             'license_type': 'LicenseIncluded',
@@ -5063,7 +5140,8 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
         if not (self.in_recording or self.is_live):
             self.kwargs.update({
-                'subnet_id':  subnet.replace("4b9746e4-d324-4e1d-be53-ec3c8f3a0c18", "00000000-0000-0000-0000-000000000000")
+                'subnet_id': subnet.replace("4b9746e4-d324-4e1d-be53-ec3c8f3a0c18",
+                                            "00000000-0000-0000-0000-000000000000")
             })
 
         # test list sql virtual cluster in the subscription, should be at least 1
@@ -5080,7 +5158,8 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
                                         self.greater_than('length(@)', 0),
                                         self.greater_than('length([?subnetId == \'{subnet_id}\'])', 1),
                                         self.check('[?subnetId == \'{subnet_id}\'].location | [0]', '{loc}'),
-                                        self.check('[?subnetId == \'{subnet_id}\'].resourceGroup | [0]', '{rg}')]).get_output_in_json()
+                                        self.check('[?subnetId == \'{subnet_id}\'].resourceGroup | [0]',
+                                                   '{rg}')]).get_output_in_json()
 
         virtual_cluster = next(vc for vc in virtual_clusters if vc['subnetId'] == self._apply_kwargs('{subnet_id}'))
 
@@ -5099,6 +5178,8 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         # delete sql managed instance
         self.cmd('sql mi delete -g {rg} -n {managed_instance_name} --yes', checks=NoneCheck())
 
+
+# need another instance in different region in order to create Failover group
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
     @ManagedInstancePreparer(parameter_name="mi1")
     @ManagedInstancePreparer(parameter_name="mi2")
@@ -5111,14 +5192,16 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
         mi2_location = "eastus"
 
         # Create Failover Group
-        self.cmd('sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2'
-                 .format(failover_group_name, resource_group_name, managed_instance_name_1, resource_group_name, managed_instance_name_2),
-                 checks=[
-                     JMESPathCheck('name', failover_group_name),
-                     JMESPathCheck('resourceGroup', resource_group_name),
-                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
-                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120)
-                 ])
+        self.cmd(
+            'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2'
+            .format(failover_group_name, resource_group_name, managed_instance_name_1, resource_group_name,
+                    managed_instance_name_2),
+            checks=[
+                JMESPathCheck('name', failover_group_name),
+                JMESPathCheck('resourceGroup', resource_group_name),
+                JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120)
+            ])
 
         # Get Instance Failover Group on a partner managed instance and check if role is secondary
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
@@ -5266,9 +5349,9 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
         # enable ADS - (required to use data classification)
         disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
-        disabled_alerts_expected = ['Sql_Injection_Vulnerability','Access_Anomaly']
+        disabled_alerts_expected = ['Sql_Injection_Vulnerability', 'Access_Anomaly']
         email_addresses_input = 'test1@example.com test2@example.com'
-        email_addresses_expected = ['test1@example.com','test2@example.com']
+        email_addresses_expected = ['test1@example.com', 'test2@example.com']
         email_account_admins = True
         state_enabled = 'Enabled'
         retention_days = 30
@@ -5325,11 +5408,13 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         information_type = 'Name'
         label_name = 'Confidential - GDPR'
 
-        response = self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
-                            .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
-                            checks=[
-                                JMESPathCheck('informationType', information_type),
-                                JMESPathCheck('labelName', label_name)]).get_output_in_json()
+        response = self.cmd(
+            'sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
+            .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type,
+                    label_name),
+            checks=[
+                JMESPathCheck('informationType', information_type),
+                JMESPathCheck('labelName', label_name)]).get_output_in_json()
 
         information_type_id = response['informationTypeId']
         label_id = response['labelId']
@@ -5395,6 +5480,7 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('minimalTlsVersion', tls1_1)])
 
 
+# need rewrite the test
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
     @ManagedInstancePreparer()
@@ -5406,7 +5492,7 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
         # Wait for 5 minutes so that first full backup is created
         if self.in_recording or self.is_live:
-            sleep(5*60)
+            sleep(5 * 60)
 
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
@@ -5414,6 +5500,7 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         self.cmd('sql mi delete -g {resource_group} -n {managed_instance_name} --yes', checks=NoneCheck())
 
 
+# not pass due to http reponse error
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer()
@@ -5433,17 +5520,20 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         })
 
         # Start Log Replay Service
-        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --ss {storage_sas} --su {storage_uri} --no-wait',
-                 checks=NoneCheck())
+        self.cmd(
+            'sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --ss {storage_sas} --su {storage_uri} --no-wait',
+            checks=NoneCheck())
 
         if self.in_recording or self.is_live:
             sleep(10)
 
-        self.cmd('sql midb log-replay wait -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --exists')
+        self.cmd(
+            'sql midb log-replay wait -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --exists')
 
         # Complete log replay service
-        self.cmd('sql midb log-replay complete -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --last-bn {last_backup_name}',
-                 checks=NoneCheck())
+        self.cmd(
+            'sql midb log-replay complete -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --last-bn {last_backup_name}',
+            checks=NoneCheck())
 
         if self.in_recording or self.is_live:
             sleep(60)
@@ -5456,17 +5546,19 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         # Cancel test for Log replay
 
         # Start Log Replay Service
-        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --ss {storage_sas} --su {storage_uri} --no-wait',
-                 checks=NoneCheck())
+        self.cmd(
+            'sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --ss {storage_sas} --su {storage_uri} --no-wait',
+            checks=NoneCheck())
 
         # Wait a minute to start restoring
         if self.in_recording or self.is_live:
             sleep(60)
 
         # Cancel log replay service
-        self.cmd('sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --yes',
-                 checks=NoneCheck())
-     
+        self.cmd(
+            'sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --yes',
+            checks=NoneCheck())
+
         self.cmd('sql mi delete -g {resource_group} -n {managed_instance_name} --yes', checks=NoneCheck())
 
 
@@ -5497,11 +5589,11 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
 
         sleep(2)
 
-        # validate setting through show command 
+        # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('state', 'Enabled'),
-                        JMESPathCheck('digestStorageEndpoint', endpoint)])
+                         JMESPathCheck('digestStorageEndpoint', endpoint)])
 
         # disable ledger digest uploads
         self.cmd('sql db ledger-digest-uploads disable -g {} -s {} --name {}'
@@ -5509,7 +5601,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
 
         sleep(2)
 
-        # validate setting through show command 
+        # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('state', 'Disabled')])

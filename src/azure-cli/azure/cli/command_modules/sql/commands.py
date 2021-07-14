@@ -778,7 +778,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_database_long_term_retention_policies_operations) as g:
 
         g.custom_command('set', 'update_long_term_retention_mi', is_preview=True)
-        g.show_command('show', 'get', is_preview=True)
+        g.custom_command('show', 'get_long_term_retention_mi', is_preview=True)
 
     managed_database_long_term_retention_backups_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionManagedInstanceBackupsOperations.{}',
@@ -808,7 +808,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_databases_operations) as g:
         g.custom_command('start', 'managed_db_log_replay_start', supports_no_wait=True)
         g.command('stop', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.command('complete', 'begin_complete_restore')
+        g.custom_command('complete', 'managed_db_log_replay_complete_restore')
         g.wait_command('wait')
 
     managed_database_restore_details_operations = CliCommandType(
