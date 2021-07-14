@@ -909,9 +909,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         system_v1_json = self.cmd('backup vault update --identity-type systemassigned -g {rg} -v {vault1}').get_output_in_json()
 
+        self.kwargs['system1_principalid'] = system_v1_json['identity']['principalId']
+
         userMSI1_v2_json = self.cmd('backup vault update --identity-type userassigned --identity-id {identity1_id} -g {rg} -v {vault2}').get_output_in_json()
 
         system_v2_json = self.cmd('backup vault update --identity-type systemassigned -g {rg} -v {vault2}').get_output_in_json()
+
+        self.kwargs['system2_principalid'] = system_v2_json['identity']['principalId']
 
         self.kwargs['keyvault'] = self.create_random_name('clitest-keyvault', 20)
         self.cmd('keyvault create -n {keyvault} -g {rg} -l {loc} --enable-purge-protection true', checks=[
@@ -919,7 +923,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('name', '{keyvault}'),
             self.check('resourceGroup', '{rg}'),
             self.check("properties.provisioningState", "Succeeded"),
-            self.check("properties.enablePurgeProtection", True)
+            self.check("properties.enablePurgeProtection", True),
+            self.check("properties.enableSoftDelete", True)
         ])
 
         self.kwargs['key1'] = self.create_random_name('clitest-key1', 20)
@@ -985,6 +990,39 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("wrapKey", key_permissions)
         self.assertIn("get", key_permissions)
         self.assertIn("unwrapKey", key_permissions)
+
+        policy3_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {system1_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
+        system1_has_access = False
+
+        access_policy3 = policy3_json['properties']['accessPolicies']
+        for element in access_policy3:
+            if element['objectId'] == self.kwargs['system1_principalid']:
+                access_policy3 = element
+                system1_has_access = True
+            
+        self.assertEqual(system1_has_access, True)
+        key_permissions = access_policy3['permissions']['keys']
+        self.assertIn("list", key_permissions)
+        self.assertIn("wrapKey", key_permissions)
+        self.assertIn("get", key_permissions)
+        self.assertIn("unwrapKey", key_permissions)
+
+        policy4_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {system2_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
+        system2_has_access = False
+
+        access_policy4 = policy4_json['properties']['accessPolicies']
+        for element in access_policy4:
+            if element['objectId'] == self.kwargs['system2_principalid']:
+                access_policy4 = element
+                system2_has_access = True
+            
+        self.assertEqual(system2_has_access, True)
+        key_permissions = access_policy4['permissions']['keys']
+        self.assertIn("list", key_permissions)
+        self.assertIn("wrapKey", key_permissions)
+        self.assertIn("get", key_permissions)
+        self.assertIn("unwrapKey", key_permissions)
+
 
         self.cmd('backup vault encryption update --encryption-key-id {key1_id} --identity-id {identity1_id} -g {rg} -v {vault1}')
 
