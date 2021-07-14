@@ -112,13 +112,16 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
             template += f" --minimal-tls-version {self.minimalTlsVersion}"
 
         if self.identityType == ResourceIdType.system_assigned_user_assigned.value or self.identityType == ResourceIdType.user_assigned.value:
-            template += f" --user-assigned-identity-id {self.userAssignedIdentityId} --identity-type {self.identityType} --pid {self.pid}"
+            template += f" --assign-identity --user-assigned-identity-id {self.userAssignedIdentityId} --identity-type {self.identityType} --pid {self.pid}"
 
         if self.identityType == ResourceIdType.system_assigned.value:
-            template += f" --identity-type {self.identityType}"
+            template += f" --assign-identity"
 
         if self.otherParams:
             template += f" {self.otherParams}"
+
+        print(template)
+        print(self.identityType)
 
         execute(DummyCli(), template.format(
             self.group, name, self.location,
@@ -978,11 +981,6 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup delete -l {loc} -s {server_name} -d {database_name} -n \'{backup_name}\' --yes',
             checks=[NoneCheck()])
-
-# Ji: cannot pass: stuck in cancel op.
-# E           azure.core.exceptions.HttpResponseError: (CannotCancelOperation) Cannot cancel management operation '28dca96c-f79d-4222-8f39-2d022fabde04' in the current state.
-#
-# env/lib/python3.8/site-packages/azure/mgmt/sql/operations/_managed_instance_operations_operations.py:240: HttpResponseError
 
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
@@ -4046,8 +4044,6 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
 
-# Ji: not pass
-# E           azure.cli.testsdk.exceptions.JMESPathCheckAssertionError: Query 'storageAccountType' doesn't yield expected value 'LRS', instead the actual value is 'None'. Data:
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     DEFAULT_MC = "SQL_Default"
     MMI1 = "SQL_WestEurope_MI_1"
@@ -4333,10 +4329,9 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
 #
 # src/azure-cli/azure/cli/command_modules/sql/tests/latest/test_sql_commands.py:4418: TypeError
 class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
-
-    # Remove when issue #9393 is fixed.
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
-    @ManagedInstancePreparer()
+    @ManagedInstancePreparer(
+        identity_type=ResourceIdType.system_assigned.value
+    )
     def test_sql_mi_tdebyok(self, mi, rg):
         resource_prefix = 'sqltdebyok'
 
@@ -4349,8 +4344,13 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
         })
 
         # get sql managed_instance
-        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name} ',
-                                    checks=[self.check('name', '{managed_instance_name}')]).get_output_in_json()
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'mi_identity': managed_instance['identity']['principalId'],
+            'vault_name': self.create_random_name(resource_prefix, 24),
+            'key_name': self.create_random_name(resource_prefix, 32),
+        })
 
         # create database
         self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
@@ -4360,12 +4360,6 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
                      self.check('location', '{loc}'),
                      self.check('collation', '{collation}'),
                      self.check('status', 'Online')])
-
-        self.kwargs.update({
-            'mi_identity': managed_instance['identity']['principalId'],
-            'vault_name': self.create_random_name(resource_prefix, 24),
-            'key_name': self.create_random_name(resource_prefix, 32),
-        })
 
         # create vault and acl server identity
 
@@ -4509,9 +4503,6 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
                 self.check('resourceGroup', '{rg}'),
                 self.check('retentionDays', '{retention_days_dec}')])
 
-
-# Ji: not pass
-# azure.core.exceptions.ResourceNotFoundError: (ParentResourceNotFound) Can not perform requested operation on nested resource. Parent resource 'clitestmimfw7odrjj6avlxj6x6gv2oei3nguiil3t73bjl422z2lk6ltgaghw/MIDBLongTermRetentionuxo5j43jwihactiavhx5fsyta7tfh' not found.
 class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()
     def test_sql_managed_db_long_term_retention(self, mi, rg):
