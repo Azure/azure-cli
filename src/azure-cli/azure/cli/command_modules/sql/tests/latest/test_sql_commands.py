@@ -4209,21 +4209,20 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 
 # Ji: not pass due to record only
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
-    @record_only()
-    def test_sql_instance_pool(self):
+    # @record_only()
+    @ManagedInstancePreparer()
+    def test_sql_instance_pool(self, mi, rg):
         print("Starting instance pool tests")
         instance_pool_name_1 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
         instance_pool_name_2 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
         license_type = 'LicenseIncluded'
-        location = 'northcentralus'
+        location = ManagedInstancePreparer.location
         v_cores = 8
         edition = 'GeneralPurpose'
         family = 'Gen5'
-        resource_group = 'billingPools'
+        resource_group = rg
 
-        location = 'westcentralus'
-        resource_group = 'autobot-managed-instance-v12'
-        subnet = '/subscriptions/4b9746e4-d324-4e1d-be53-ec3c8f3a0c18/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet'
+        subnet = ManagedInstancePreparer.subnet
         num_pools = len(self.cmd('sql instance-pool list -g {}'.format(resource_group)).get_output_in_json())
 
         # test create sql managed_instance
