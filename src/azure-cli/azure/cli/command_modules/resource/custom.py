@@ -1862,7 +1862,6 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 input_template = getattr(packed_template, 'RootTemplate')
                 artifacts = getattr(packed_template, 'Artifacts')
 
-
         if ui_form_definition_file:
             ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
             input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
