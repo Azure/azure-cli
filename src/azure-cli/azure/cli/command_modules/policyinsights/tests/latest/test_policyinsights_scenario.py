@@ -11,14 +11,15 @@ class PolicyInsightsTests(ScenarioTest):
 
     # Current recording was recorded against "Azure Governance Policy UX Test" (e78961ba-36fe-4739-9212-e3031b4c8db7)
     @record_only()
+    @AllowLargeResponse()
     def test_policy_insights(self):
         top_clause = '--top 2'
         filter_clause = '--filter "isCompliant eq false"'
         apply_clause = '--apply "groupby((policyAssignmentId, resourceId), aggregate($count as numRecords))"'
         select_clause = '--select "policyAssignmentId, resourceId, numRecords"'
         order_by_clause = '--order-by "numRecords desc"'
-        from_clause = '--from "2020-04-01T00:00:00Z"'
-        to_clause = '--to "2020-04-07T01:30:00Z"'
+        from_clause = '--from "2021-07-01T00:00:00Z"'
+        to_clause = '--to "2021-07-03T01:30:00Z"'
         scopes = [
             '-m "azgovtest5"',
             '',

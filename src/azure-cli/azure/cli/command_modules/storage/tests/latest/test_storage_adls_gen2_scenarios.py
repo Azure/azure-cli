@@ -5,7 +5,7 @@
 import unittest
 import os
 
-from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, NoneCheck,
+from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, JMESPathCheckExists,
                                api_version_constraint, RoleBasedServicePrincipalPreparer)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
@@ -406,6 +406,11 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage fs file list -f {} --num-results 1 --marker {}',
                          account_info, filesystem, next_marker).assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # List files excluding directory with marker
+        result = self.storage_cmd('storage fs file list -f {} --num-results 1 --show-next-marker --exclude-dir',
+                                  account_info, filesystem).get_output_in_json()
+        self.assertIsNotNone(result[0]['nextMarker'])
 
         # Download file
         local_dir = self.create_temp_dir()

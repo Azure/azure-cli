@@ -107,25 +107,21 @@ long-summary: |
   The following project configurations are supported:
     -) source -> target
     1) SQL -> SQLDB
-    2) MySQL -> AzureDbForMySQL
-    3) PostgreSQL -> AzureDbForPostgreSQL
+    2) PostgreSQL -> AzureDbForPostgreSQL
 
 parameters:
   - name: --source-platform
     type: string
     short-summary: >
-        The type of server for the source database. The supported types are: SQL, MySQL, PostgreSQL.
+        The type of server for the source database. The supported types are: SQL, PostgreSQL.
   - name: --target-platform
     type: string
     short-summary: >
-        The type of service for the target database. The supported types are: SQLDB, AzureDbForMySQL, AzureDbForPostgreSQL.
+        The type of service for the target database. The supported types are: SQLDB, AzureDbForPostgreSQL.
 examples:
   - name: Create a SQL to SQLDB project for a DMS instance.
     text: >
         az dms project create -l westus -n sqlproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
-  - name: Create a MySQL to AzureDbForMySql project for a DMS instance.
-    text: >
-        az dms project create -l westus -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySQL --tags tagName1=tagValue1 tagWithNoValue
   - name: Create a PostgreSql to AzureDbForPostgreSql project for a DMS instance.
     text: >
         az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags tagName1=tagValue1 tagWithNoValue
@@ -190,13 +186,12 @@ long-summary: |
   The following task configurations are supported:
     -) source -> target :: task type
     1) SQL -> SQLDB :: OfflineMigration
-    2) MySQL -> AzureDbForMySql :: OnlineMigration
-    3) PostgreSQL -> AzureDbForPostgreSql :: OnlineMigration
+    2) PostgreSQL -> AzureDbForPostgreSql :: OnlineMigration
 parameters:
   - name: --task-type
     type: string
     short-summary: >
-        The type of data movement the task will support. The supported types are: OnlineMigration, OfflineMigration. If not provided, will default to OfflineMigration for SQL and OnlineMigration for MySQL and PostgreSQL.
+        The type of data movement the task will support. The supported types are: OnlineMigration, OfflineMigration. If not provided, will default to OfflineMigration for SQL and OnlineMigration for PostgreSQL.
   - name: --database-options-json
     type: string
     short-summary: >
@@ -210,39 +205,6 @@ parameters:
                     "target_database_name": "target database",
                     "make_source_db_read_only": false|true,
                     "table_map": {
-                        "schema.SourceTableName1": "schema.TargetTableName1",
-                        "schema.SourceTableName2": "schema.TargetTableName2",
-                        ...n
-                    }
-                },
-                ...n
-            ]
-
-        For MySQL, the format of the database options JSON object.
-            [
-                {
-                    "name": "source database",
-                    "target_database_name": "target database",
-                    // Used for manipulating the underlying migration engine.
-                    // Only provide if instructed to do so or if you really know what you are doing.
-                    "migrationSetting": {
-                        "setting1": "value1",
-                        ...n
-                    },
-                    // Used for manipulating the underlying migration engine.
-                    // Only provide if instructed to do so or if you really know what you are doing.
-                    "sourceSetting": {
-                        "setting1": "value1",
-                        ...n
-                    },
-                    // Used for manipulating the underlying migration engine.
-                    // Only provide if instructed to do so or if you really know what you are doing.
-                    "targetSetting": {
-                        "setting1": "value1",
-                        ...n
-                    },
-                    // Optional parameter to list tables that you want included in the migration.
-                    "tableMap": {
                         "schema.SourceTableName1": "schema.TargetTableName1",
                         "schema.SourceTableName2": "schema.TargetTableName2",
                         ...n
@@ -295,14 +257,6 @@ parameters:
             "authentication": "SqlAuthentication|WindowsAuthentication",
             "encryptConnection": true,      // highly recommended to leave as true
             "trustServerCertificate": false  // highly recommended to leave as false
-        }
-
-      The format of the connection JSON object for MySql connections.
-        {
-            "userName": "user name",    // if this is missing or null, you will be prompted
-            "password": null,           // if this is missing or null (highly recommended) you will be prompted
-            "serverName": "server name",
-            "port": 3306                // if this is missing, it will default to 3306
         }
 
       The format of the connection JSON object for PostgreSQL connections.

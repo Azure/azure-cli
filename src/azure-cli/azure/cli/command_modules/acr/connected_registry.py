@@ -129,7 +129,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
     )
 
     try:
-        return client.begin_create(resource_group_name=resource_group_name,
+        return client.begin_create(subscription_id=subscription_id,
+                                   resource_group_name=resource_group_name,
                                    registry_name=registry_name,
                                    connected_registry_name=connected_registry_name,
                                    connected_registry_create_parameters=connected_registry_create_parameters)
@@ -266,7 +267,8 @@ def acr_connected_registry_deactivate(cmd,
 
     user_confirmation("Are you sure you want to deactivate the connected registry '{}' in '{}'?".format(
         connected_registry_name, registry_name), yes)
-    return client.begin_deactivate(resource_group_name=resource_group_name,
+    return client.begin_deactivate(subscription_id=subscription_id,
+                                   resource_group_name=resource_group_name,
                                    registry_name=registry_name,
                                    connected_registry_name=connected_registry_name)
 
@@ -517,11 +519,6 @@ def _update_repo_permissions(cmd,
         return None
     current_actions = list(final_actions_set)
     logger.warning(msg)
-    ScopeMapUpdateParameters = cmd.get_models('ScopeMapUpdateParameters')
-    scope_map_update_parameters = ScopeMapUpdateParameters(
-        description=description,
-        actions=current_actions
-    )
     return scope_map_client.begin_update(
         resource_group_name,
         registry_name,
