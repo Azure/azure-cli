@@ -523,7 +523,7 @@ def _update_repo_permissions(cmd,
         description=description,
         actions=current_actions
     )
-    
+
     return scope_map_client.begin_update(
         resource_group_name,
         registry_name,
