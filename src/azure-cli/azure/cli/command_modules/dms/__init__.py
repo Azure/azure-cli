@@ -15,9 +15,7 @@ class DmsCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
-        from azure.cli.command_modules.dms.commands import dms_api_exception_handler
-        dms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dms.custom#{}',
-                                    exception_handler=dms_api_exception_handler)
+        dms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dms.custom#{}')
         super(DmsCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                 resource_type=ResourceType.MGMT_DATAMIGRATION,
                                                 custom_command_type=dms_custom)

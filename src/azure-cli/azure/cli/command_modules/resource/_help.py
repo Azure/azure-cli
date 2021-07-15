@@ -2457,6 +2457,11 @@ examples:
     text: az bicep install --version v0.2.212
 """
 
+helps['bicep uninstall'] = """
+type: command
+short-summary: Uninstall Bicep CLI.
+"""
+
 helps['bicep upgrade'] = """
 type: command
 short-summary: Upgrade Bicep CLI to the latest version.
