@@ -246,6 +246,34 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
     @ResourceGroupPreparer()
+    def test_acr_import_no_wait(self, resource_group):
+        source_registry_name = self.create_random_name("sourceregistrysamesub", 40)
+
+        self.kwargs.update({
+            'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
+            'source_registry_rg': 'resourcegroupsamesub',
+            'source_loc': 'westus',
+            'source_registry_name': source_registry_name,
+            'sku': 'Standard',
+            'source_image': 'microsoft:azure-cli',
+        })
+
+        # create a resource group for the source registry
+        self.cmd('group create -n {source_registry_rg} -l {source_loc}')
+
+        # create a source registry 
+        self.cmd('acr create -n {source_registry_name} -g {source_registry_rg} -l {source_loc} --sku {sku}',
+                 checks=[self.check('name', '{source_registry_name}'),
+                         self.check('location', '{source_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # import image using no-wait
+        self.cmd('acr import -n {source_registry_name} -r {resource_id} --source {source_image} --no-wait')
+
+    @ResourceGroupPreparer()
     @record_only()
     def test_acr_image_import(self, resource_group):
         '''There are nine test cases.

@@ -644,6 +644,15 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                  no_self_perms=None,
                  tags=None,
                  no_wait=False):
+    from azure.core.exceptions import HttpResponseError
+    try:
+        vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+        if vault:
+            raise InvalidArgumentValueError('The specified vault: {} already exists'.format(vault_name))
+    except HttpResponseError:
+        # if client.get raise exception, we can take it as no existing vault found
+        # just continue the normal creation process
+        pass
     from azure.cli.core._profile import Profile
     from azure.graphrbac import GraphRbacManagementClient
 
@@ -1577,7 +1586,7 @@ def import_certificate(cmd, client, vault_base_url, certificate_name, certificat
 
 
 def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
-                         identifier=None, encoding='PEM', certificate_version=''):   # pylint: disable=unused-argument
+                         identifier=None, encoding='PEM', certificate_version=''):  # pylint: disable=unused-argument
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -1928,9 +1937,10 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     return ret
 
 
+# pylint: disable=unused-argument
 def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                            role_assignment_name=None, assignee=None,
-                           assignee_principal_type=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
+                           assignee_principal_type=None, hsm_name=None, identifier=None):
     """ Create a new role assignment for a user, group, or service principal. """
     from azure.cli.command_modules.role.custom import _resolve_object_id
 
@@ -1970,8 +1980,9 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
     )
 
 
+# pylint: disable=unused-argument
 def delete_role_assignment(cmd, client, role_assignment_name=None, scope=None, assignee=None, role=None,
-                           assignee_object_id=None, ids=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
+                           assignee_object_id=None, ids=None, hsm_name=None, identifier=None):
     """ Delete a role assignment. """
     query_scope = scope
     if query_scope is None:
@@ -2167,7 +2178,8 @@ def _get_role_definition_name(role_definition_name, role_id):
     return role_definition_name
 
 
-def delete_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+# pylint: disable=unused-argument
+def delete_role_definition(client, hsm_name, role_definition_name=None, role_id=None):
     # Get role definition name
     role_definition_name = _get_role_definition_name(role_definition_name, role_id)
 

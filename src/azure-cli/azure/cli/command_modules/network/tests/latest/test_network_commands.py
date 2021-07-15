@@ -17,7 +17,7 @@ from .recording_processors import StorageAccountSASReplacer
 
 from azure.cli.testsdk import (
     ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only,
-    record_only)
+    record_only, KeyVaultPreparer)
 
 from knack.util import CLIError
 
@@ -555,6 +555,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_identity')
+    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
     def test_network_app_gateway_with_identity(self, resource_group):
 
         self.kwargs.update({
@@ -563,7 +564,6 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
             'one_off_identity': 'id1',
             'access_identity': 'id2',
             'ip': 'ip1',
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
             'cert': 'MyCertificate'
         })
 
@@ -574,10 +574,8 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
             'access_identity_principal': access_identity_result['principalId']
         })
 
-        self.cmd('keyvault create -g {rg} -n {kv} --sku premium')
         self.cmd('keyvault set-policy -g {rg} -n {kv} '
                  '--object-id {access_identity_principal} --secret-permissions get list set')
-        self.cmd('keyvault update -n {kv} --enable-soft-delete -g {rg}')
 
         # create a certificate
         keyvault_cert_policy = self.cmd('az keyvault certificate get-default-policy').get_output_in_json()
