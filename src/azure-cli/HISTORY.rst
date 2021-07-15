@@ -144,6 +144,7 @@ Workload container registration fix, SDK upgraded to 0.12.0, Fixed and Re-ran te
 * `az sql db ledger-digest-uploads`:  Support SQL Ledger (#18672)
 * Fix for IdentityType for UMI (#18693)
 * `az sql db str-policy set/show`: Add Set and Show ShortTermRetentionPolicy (#14919)
+* Update SQL Managed Instance cmdlet `az sql mi update` with two new parameters: subnet and vnet-name.
 
 **Storage**
 

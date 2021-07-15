@@ -4253,7 +4253,8 @@ def managed_instance_update(
         primary_user_assigned_identity_id=None,
         key_id=None,
         identity_type=None,
-        user_assigned_identity_id=None):
+        user_assigned_identity_id=None,
+        virtual_network_subnet_id=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -4301,6 +4302,9 @@ def managed_instance_update(
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
 
     instance.key_id = (key_id or instance.key_id)
+
+    if virtual_network_subnet_id is not None:
+        instance.subnet_id = virtual_network_subnet_id
 
     return instance
 
