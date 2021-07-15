@@ -1098,16 +1098,16 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
         self.cmd('sql server ad-only-auth get -n {} -g {}'.format(server, resource_group), checks=[])
 
 
-class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
-
-    def test_sql_mi_aad_admin(self):
+class SqlManagedInstanceAzureADOnlyAuthenticationsScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_mi_ad_only_auth(self, mi, rg):
         print('Test is started...\n')
 
         self.kwargs.update({
             'oid': '0ef94dba-c9bc-40d3-9ec2-6db192f3ce0c',
             'user': 'OneboxAuthUser1@cltestaad.ccsctp.net',
-            'managed_instance_name': 't48-gp-neu',
-            'rg': 'clperftesting_sneu_rg'
+            'managed_instance_name': mi,
+            'rg': rg
         })
 
         print('Arguments are updated with login and sid data')
@@ -4749,7 +4749,7 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
 
     # Remove when issue #9393 is fixed.
     @ManagedInstancePreparer()
-    def test_sql_mi_aad_admin(self):
+    def test_sql_mi_aad_admin(self, mi, rg):
         print('Test is started...\n')
 
         self.kwargs.update({
@@ -4757,8 +4757,8 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
             'oid2': 'b599ec4b-9e8e-4649-906f-d2685a6105fa',
             'user': 'OneboxAuthUser1@cltestaad.ccsctp.net',
             'user2': 'OneboxAuthUser2@cltestaad.ccsctp.net',
-            'managed_instance_name': 't48-gp-neu',
-            'rg': 'clperftesting_sneu_rg'
+            'managed_instance_name': mi,
+            'rg': rg
         })
 
         print('Arguments are updated with login and sid data')

@@ -4426,10 +4426,12 @@ def mi_ad_admin_set(
     '''
 
     kwargs['tenant_id'] = _get_tenant_id()
+    kwargs['administrator_type'] = AdministratorType.ACTIVE_DIRECTORY
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY,
         parameters=kwargs
     )
 
@@ -4442,9 +4444,10 @@ def mi_ad_admin_delete(
     Deletes a managed instance active directory administrator.
     '''
 
-    return client.delete(
+    return client.begin_delete(
         resource_group_name=resource_group_name,
-        managed_instance_name=managed_instance_name
+        managed_instance_name=managed_instance_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY
     )
 
 
