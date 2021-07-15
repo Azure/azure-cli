@@ -152,6 +152,11 @@ def db_transform(result):
     result.edition = result.sku.tier
     result.elastic_pool_name = _last_segment(result.elastic_pool_id)
 
+    # rename ledger setting name
+    if hasattr(result, 'is_ledger_on'):
+        result.ledger_on = result.is_ledger_on
+        del result.is_ledger_on
+
     if hasattr(result, 'storage_account_type'):
         result.backupStorageRedundancy = _get_external_backup_storage_redundancy(result.storage_account_type)
         del result.storage_account_type
@@ -244,16 +249,15 @@ def elastic_pool_transform(result):
     '''
     Transforms the json response for an elastic pool.
     '''
-    from azure.mgmt.sql.models import ElasticPoolEdition
 
     # Add properties in order to improve backwards compatibility with api-version 2014-04-01
     result.edition = result.sku.tier
     result.storageMb = result.max_size_bytes / 1024 / 1024
 
     is_dtu = result.sku.tier in (
-        ElasticPoolEdition.basic.value,
-        ElasticPoolEdition.standard.value,
-        ElasticPoolEdition.premium.value)
+        'Basic',
+        'Standard',
+        'Premium')
 
     result.dtu = result.sku.capacity if is_dtu else None
     result.database_dtu_min = int(result.per_database_settings.min_capacity) if is_dtu else None

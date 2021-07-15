@@ -711,6 +711,8 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
             if not hub_identity.user_assigned_identities[identity]:
                 raise ArgumentUsageError('Hub {0} is not currently using a user-assigned identity with id: {1}'.format(hub_name, identity))
             del hub_identity.user_assigned_identities[identity]
+        if not hub_identity.user_assigned_identities:
+            del hub_identity.user_assigned_identities
     elif isinstance(user_identities, list):
         del hub_identity.user_assigned_identities
 
@@ -718,9 +720,9 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
             IdentityType.system_assigned.value,
             IdentityType.system_assigned_user_assigned.value
     ]:
-        hub_identity.type = IdentityType.system_assigned_user_assigned.value if hub_identity.user_assigned_identities else IdentityType.system_assigned.value
+        hub_identity.type = IdentityType.system_assigned_user_assigned.value if getattr(hub_identity, 'user_assigned_identities', None) else IdentityType.system_assigned.value
     else:
-        hub_identity.type = IdentityType.user_assigned.value if hasattr(hub_identity, 'user_assigned_identities') else IdentityType.none.value
+        hub_identity.type = IdentityType.user_assigned.value if getattr(hub_identity, 'user_assigned_identities', None) else IdentityType.none.value
 
     hub.identity = hub_identity
     if not getattr(hub.identity, 'user_assigned_identities', None):
@@ -1213,7 +1215,7 @@ def iot_central_app_create(
               sku=appSku,
               template=template)
 
-    return sdk_no_wait(no_wait, client.apps.create_or_update, resource_group_name, app_name, app)
+    return sdk_no_wait(no_wait, client.apps.begin_create_or_update, resource_group_name, app_name, app)
 
 
 def iot_central_app_get(client, app_name, resource_group_name=None):
@@ -1223,7 +1225,7 @@ def iot_central_app_get(client, app_name, resource_group_name=None):
 
 
 def iot_central_app_delete(client, app_name, resource_group_name, no_wait=False):
-    return sdk_no_wait(no_wait, client.apps.delete, resource_group_name, app_name)
+    return sdk_no_wait(no_wait, client.apps.begin_delete, resource_group_name, app_name)
 
 
 def iot_central_app_list(client, resource_group_name=None):
@@ -1233,7 +1235,7 @@ def iot_central_app_list(client, resource_group_name=None):
 
 
 def iot_central_app_update(client, app_name, parameters, resource_group_name):
-    return client.apps.update(resource_group_name, app_name, parameters)
+    return client.apps.begin_update(resource_group_name, app_name, parameters)
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):
@@ -1321,7 +1323,7 @@ def _build_identity(system=False, identities=None):
         return ArmIdentity(type=identity_type)
     if system:
         identity_type = IdentityType.system_assigned.value
-    user_identities = [i for i in identities] if identities else None
+    user_identities = list(identities) if identities else None
     if user_identities and identity_type == IdentityType.system_assigned.value:
         identity_type = IdentityType.system_assigned_user_assigned.value
     elif user_identities:

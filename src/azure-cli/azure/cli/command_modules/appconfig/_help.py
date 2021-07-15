@@ -16,14 +16,14 @@ helps['appconfig create'] = """
 type: command
 short-summary: Create an App Configuration.
 examples:
-  - name: Create an App Configuration with name, location, sku and resource group.
-    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard
+  - name: Create an App Configuration with name, location, sku, tags and resource group.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --tags key1=value1 key2=value2
   - name: Create an App Configuration with name, location, sku and resource group with system assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
   - name: Create an App Configuration with name, location, sku and resource group with user assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
-  - name: Create an App Configuration with name, location and resource group and enable public network access.
-    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network
+  - name: Create an App Configuration with name, location and resource group with public network access enabled and local auth disabled.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network --disable-local-auth
 """
 
 helps['appconfig identity'] = """
@@ -283,8 +283,8 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net
   - name: Remove customer encryption key
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
-  - name: Update an App Configuration to enable public network access.
-    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true
+  - name: Update an App Configuration to enable public network access and disable local auth.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true --disable-local-auth true
 """
 
 helps['appconfig feature'] = """

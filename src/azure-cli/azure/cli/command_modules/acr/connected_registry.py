@@ -63,7 +63,10 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                                   sync_audit_logs_enabled=False):
 
     if bool(sync_token_name) == bool(repositories):
-        raise CLIError("usage error: you need to provide either --sync-token-name or --repository, but not both.")
+        raise CLIError("usage error: you must provide either --sync-token-name or --repository, but not both.")
+    # Check needed since the sync token gateway actions must be at least 5 characters long.
+    if len(connected_registry_name) < 5:
+        raise CLIError("argument error: Connected registry name must be at least 5 characters long")
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -73,7 +76,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                        "Enabling the data endpoint might affect your firewall rules.\nTo enable data endpoint run:" +
                        "\n\taz acr update -n {} --data-endpoint-enabled true".format(registry_name))
 
-    ErrorResponseException = cmd.get_models('ErrorResponseException')
+    from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None
     mode = mode.capitalize()
     if parent_name:
@@ -126,11 +129,11 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
     )
 
     try:
-        return client.create(subscription_id=subscription_id,
-                             resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             connected_registry_name=connected_registry_name,
-                             connected_registry_create_parameters=connected_registry_create_parameters)
+        return client.begin_create(subscription_id=subscription_id,
+                                   resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   connected_registry_name=connected_registry_name,
+                                   connected_registry_create_parameters=connected_registry_create_parameters)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -199,10 +202,10 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
     )
 
     try:
-        return client.update(resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             connected_registry_name=connected_registry_name,
-                             connected_registry_update_parameters=connected_registry_update_parameters)
+        return client.begin_update(resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   connected_registry_name=connected_registry_name,
+                                   connected_registry_update_parameters=connected_registry_update_parameters)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -221,7 +224,7 @@ def acr_connected_registry_delete(cmd,
     try:
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
-        result = client.delete(resource_group_name, registry_name, connected_registry_name)
+        result = client.begin_delete(resource_group_name, registry_name, connected_registry_name)
         sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
         sync_token_name = sync_token.name
         sync_scope_map_name = sync_token.scope_map_id.split('/scopeMaps/')[1]
@@ -265,10 +268,10 @@ def acr_connected_registry_deactivate(cmd,
 
     user_confirmation("Are you sure you want to deactivate the connected registry '{}' in '{}'?".format(
         connected_registry_name, registry_name), yes)
-    return client.deactivate(subscription_id=subscription_id,
-                             resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             connected_registry_name=connected_registry_name)
+    return client.begin_deactivate(subscription_id=subscription_id,
+                                   resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   connected_registry_name=connected_registry_name)
 
 
 def acr_connected_registry_list(cmd,
@@ -352,7 +355,7 @@ def _create_sync_token(cmd,
         sync_token_name = SYNC_TOKEN_NAME.format(connected_registry_name)
         logger.warning("If sync token '%s' already exists, it properties will be overwritten", sync_token_name)
         Token = cmd.get_models('Token')
-        poller = token_client.create(
+        poller = token_client.begin_create(
             resource_group_name,
             registry_name,
             sync_token_name,
@@ -517,7 +520,7 @@ def _update_repo_permissions(cmd,
         return None
     current_actions = list(final_actions_set)
     logger.warning(msg)
-    return scope_map_client.update(
+    return scope_map_client.begin_update(
         resource_group_name,
         registry_name,
         sync_scope_map_name,

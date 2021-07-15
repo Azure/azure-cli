@@ -1458,10 +1458,10 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a java|11|Java SE|8 runtime using '|' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using '|' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|8"
-  - name: Create a web app with a java|11|Java SE|8 runtime using ':' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using ':' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:8"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
@@ -1715,6 +1715,35 @@ examples:
         az webapp deployment user show
 """
 
+helps['webapp deployment github-actions'] = """
+type: group
+short-summary: Configure GitHub Actions for a webapp
+"""
+
+helps['webapp deployment github-actions add'] = """
+type: command
+short-summary: Add a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified webapp.
+examples:
+  - name: Add GitHub Actions to a specified repository, providing personal access token
+    text: >
+        az webapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --token MyPersonalAccessToken
+  - name: Add GitHub Actions to a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az webapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --login-with-github
+"""
+
+helps['webapp deployment github-actions remove'] = """
+type: command
+short-summary: Remove and disconnect the GitHub Actions workflow file from the specified repository.
+examples:
+  - name: Remove GitHub Actions from a specified repository, providing personal access token
+    text: >
+        az webapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --token MyPersonalAccessToken
+  - name: Remove GitHub Actions from a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az webapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --login-with-github
+"""
+
 helps['webapp hybrid-connection'] = """
 type: group
 short-summary: methods that list, add and remove hybrid-connections from webapps
@@ -1868,6 +1897,11 @@ short-summary: List deployments associated with web app
 examples:
   - name: List the deployment logs
     text: az webapp log deployment list --name MyWebApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp log'] = """
+type: group
+short-summary: Manage function app logs.
 """
 
 helps['functionapp log deployment'] = """

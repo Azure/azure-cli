@@ -626,8 +626,15 @@ class IoTHubTest(ScenarioTest):
                      self.check('length(userAssignedIdentities)', 2),
                      self.check('type', IdentityType.system_assigned_user_assigned.value)])
 
-        # remove (--user-assigned, --system-assigned) remove all remaining identities
-        self.cmd('iot hub identity remove -n {0} -g {1} --user-assigned --system-assigned'
+        # remove (--user-assigned)
+        self.cmd('iot hub identity remove -n {0} -g {1} --user-assigned'
+                 .format(identity_hub, rg),
+                 checks=[
+                     self.check('userAssignedIdentities', None),
+                     self.check('type', IdentityType.system_assigned.value)])
+
+        # remove (--system)
+        self.cmd('iot hub identity remove -n {0} -g {1} --system'
                  .format(identity_hub, rg),
                  checks=[
                      self.check('userAssignedIdentities', None),

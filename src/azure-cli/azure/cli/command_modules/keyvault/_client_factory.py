@@ -17,13 +17,17 @@ class Clients(str, Enum):
     private_endpoint_connections = 'private_endpoint_connections'
     private_link_resources = 'private_link_resources'
     managed_hsms = 'managed_hsms'
+    mhsm_private_endpoint_connections = 'mhsm_private_endpoint_connections'
+    mhsm_private_link_resources = 'mhsm_private_link_resources'
 
 
 OPERATIONS_NAME = {
     Clients.vaults: 'VaultsOperations',
     Clients.private_endpoint_connections: 'PrivateEndpointConnectionsOperations',
     Clients.private_link_resources: 'PrivateLinkResourcesOperations',
-    Clients.managed_hsms: 'ManagedHsmsOperations'
+    Clients.managed_hsms: 'ManagedHsmsOperations',
+    Clients.mhsm_private_endpoint_connections: 'MHSMPrivateEndpointConnectionsOperations',
+    Clients.mhsm_private_link_resources: 'MHSMPrivateLinkResourcesOperations'
 }
 
 KEYVAULT_TEMPLATE_STRINGS = {

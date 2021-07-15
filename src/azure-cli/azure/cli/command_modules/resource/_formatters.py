@@ -108,7 +108,7 @@ def _format_change_type_legend(builder, resource_changes):
         change_type_color = _change_type_to_color[change_type]
         _format_indent(builder)
         builder.append(change_type_symbol, change_type_color).append(Symbol.WHITE_SPACE)
-        builder.append_line(change_type.value.title())
+        builder.append_line(change_type.title())
 
 
 def _format_resource_changes_stats(builder, resource_changes):
@@ -315,7 +315,7 @@ def _format_property_modify(builder, before, after, children, indent_level):
         # Space before =>
         if _is_non_empty_object(before):
             builder.append_line()
-            _format_indent(indent_level)
+            _format_indent(builder, indent_level)
         else:
             builder.append(Symbol.WHITE_SPACE)
 
