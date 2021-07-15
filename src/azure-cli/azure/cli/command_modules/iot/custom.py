@@ -43,15 +43,12 @@ from azure.mgmt.iothub.models import (IotHubSku,
                                       TestAllRoutesInput)
 
 
-from azure.mgmt.iothubprovisioningservices.models import (CertificateBodyDescription as DpsCertificateBodyDescription,
-                                                          ProvisioningServiceDescription,
+from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
                                                           IotDpsPropertiesDescription,
                                                           IotHubDefinitionDescription,
                                                           IotDpsSkuInfo,
                                                           IotDpsSku,
-                                                          OperationInputs as DpsOperationInputs,
-                                                          SharedAccessSignatureAuthorizationRuleAccessRightsDescription,
-                                                          VerificationCodeRequest)
+                                                          SharedAccessSignatureAuthorizationRuleAccessRightsDescription)
 
 
 from azure.mgmt.iotcentral.models import (AppSkuInfo,
@@ -106,17 +103,17 @@ def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sk
                                                      properties=dps_property,
                                                      sku=IotDpsSkuInfo(name=sku, capacity=unit),
                                                      tags=tags)
-    return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
+    return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
 
 
 def iot_dps_update(client, dps_name, parameters, resource_group_name, tags=None):
     if tags is not None:
         parameters.tags = tags
-    return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, parameters)
+    return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, parameters)
 
 
 def iot_dps_delete(client, dps_name, resource_group_name):
-    return client.iot_dps_resource.begin_delete(dps_name, resource_group_name)
+    return client.iot_dps_resource.delete(dps_name, resource_group_name)
 
 
 # DPS access policy methods
@@ -147,8 +144,8 @@ def iot_dps_access_policy_create(cmd, client, dps_name, resource_group_name, acc
     dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description))
     return iot_dps_access_policy_get(client, dps_name, resource_group_name, access_policy_name)
 
 
@@ -175,8 +172,8 @@ def iot_dps_access_policy_update(cmd, client, dps_name, resource_group_name, acc
     dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description))
     return iot_dps_access_policy_get(client, dps_name, resource_group_name, access_policy_name)
 
 
@@ -194,8 +191,8 @@ def iot_dps_access_policy_delete(cmd, client, dps_name, resource_group_name, acc
     dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description))
     return iot_dps_access_policy_list(client, dps_name, resource_group_name)
 
 
@@ -233,8 +230,8 @@ def iot_dps_linked_hub_create(cmd, client, dps_name, resource_group_name, connec
     dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description))
     return iot_dps_linked_hub_list(client, dps_name, resource_group_name)
 
 
@@ -258,8 +255,8 @@ def iot_dps_linked_hub_update(cmd, client, dps_name, resource_group_name, linked
     dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description))
     return iot_dps_linked_hub_get(client, dps_name, resource_group_name, linked_hub)
 
 
@@ -277,8 +274,8 @@ def iot_dps_linked_hub_delete(cmd, client, dps_name, resource_group_name, linked
     dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description))
     return iot_dps_linked_hub_list(client, dps_name, resource_group_name)
 
 
@@ -300,14 +297,7 @@ def iot_dps_certificate_create(client, dps_name, resource_group_name, certificat
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-    cert_description = DpsCertificateBodyDescription(certificate=certificate, is_verified=is_verified)
-    return client.dps_certificate.create_or_update(
-        resource_group_name,
-        dps_name,
-        certificate_name,
-        cert_description,
-        None
-    )
+    return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, None, certificate, is_verified)
 
 
 def iot_dps_certificate_update(client, dps_name, resource_group_name, certificate_name, certificate_path, etag, is_verified=False):
@@ -317,8 +307,7 @@ def iot_dps_certificate_update(client, dps_name, resource_group_name, certificat
             certificate = open_certificate(certificate_path)
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-            cert_description = DpsCertificateBodyDescription(certificate=certificate, is_verified=is_verified)
-            return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, cert_description, etag)
+            return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, etag, certificate, is_verified)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot dps certificate create' to create a new certificate."
                    .format(certificate_name))
 
@@ -328,20 +317,20 @@ def iot_dps_certificate_delete(client, dps_name, resource_group_name, certificat
 
 
 def iot_dps_certificate_gen_code(client, dps_name, resource_group_name, certificate_name, etag):
-    result = client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
-    if getattr(getattr(result, 'properties', {}), 'certificate', None):
-        # Fix for error deserializing byte array to JSON
-        import base64
-        result.properties.certificate = base64.b64encode(result.properties.certificate.decode().encode('utf-8'))
-    return result
+    response = client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
+    properties = getattr(response, 'properties', {})
+    cert = getattr(properties, 'certificate', None)
+    if isinstance(cert, bytearray):
+        response.properties.certificate = response.properties.certificate.decode('utf-8')
+    return response
 
 
 def iot_dps_certificate_verify(client, dps_name, resource_group_name, certificate_name, certificate_path, etag):
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-    request = VerificationCodeRequest(certificate=certificate)
-    return client.dps_certificate.verify_certificate(certificate_name, etag, resource_group_name, dps_name, request)
+    return client.dps_certificate.verify_certificate(certificate_name, etag, resource_group_name, dps_name,
+                                                     None, None, None, None, None, None, None, None, certificate)
 
 
 # CUSTOM METHODS
@@ -1213,7 +1202,7 @@ def _get_iot_dps_by_name(client, dps_name, resource_group=None):
 
 
 def _check_dps_name_availability(iot_dps_resource, dps_name):
-    name_availability = iot_dps_resource.check_provisioning_service_name_availability(DpsOperationInputs(name=dps_name))
+    name_availability = iot_dps_resource.check_provisioning_service_name_availability(dps_name)
     if name_availability is not None and not name_availability.name_available:
         raise CLIError(name_availability.message)
 
