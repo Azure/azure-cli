@@ -517,11 +517,13 @@ def _update_repo_permissions(cmd,
         return None
     current_actions = list(final_actions_set)
     logger.warning(msg)
+
     ScopeMapUpdateParameters = cmd.get_models('ScopeMapUpdateParameters')
     scope_map_update_parameters = ScopeMapUpdateParameters(
         description=description,
         actions=current_actions
     )
+    
     return scope_map_client.begin_update(
         resource_group_name,
         registry_name,
