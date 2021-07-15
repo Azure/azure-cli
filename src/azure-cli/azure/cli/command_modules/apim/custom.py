@@ -9,6 +9,8 @@
 #
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
+# pylint: disable=wildcard-import
+# pylint: disable=too-many-locals
 
 from .generated.custom import *  # noqa: F403
 try:
