@@ -229,3 +229,33 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
             self.check('length(@)', 2)
         ])
+
+        # ----stored access policy----
+        # test sas-token for a file system
+        self.kwargs['policy'] = self.create_random_name(prefix='policy', length=16)
+        self.cmd('storage container policy create -n {policy} -c {fs} --permissions dlrw '
+                 '--connection-string {con_str} --expiry {expiry} -otsv')
+
+        sas = self.cmd('storage fs generate-sas -n {fs} --https-only --policy-name {policy} '
+                       '--connection-string {con_str} -otsv').output.strip()
+        self.kwargs['fs_sas'] = sas
+
+        self.kwargs['new_dir1'] = self.create_random_name('ndir1', 16)
+        self.kwargs['new_file1'] = self.create_random_name('nfile1', 16)
+
+        self.cmd('storage fs directory list -f {fs} --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('storage fs directory create -f {fs} -n {new_dir1} --account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs directory list -f {fs} --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 3)
+        ])
+
+        self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('storage fs file upload -f {fs} -s "{local_file}" -p {new_file1} '
+                 '--account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 3)
+        ])
