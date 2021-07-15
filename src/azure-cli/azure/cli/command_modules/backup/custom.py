@@ -189,46 +189,31 @@ def list_vaults(client, resource_group_name=None):
     return client.list_by_subscription_id()
 
 
-def update_vault(client, resource_group_name, vault_name, identity_type=None, identity_id=None,
-                 remove_user_assigned=None, remove_system_assigned=None):
-
+def assign_identity(client, resource_group_name, vault_name, system_assigned=None, user_assigned=None):
     vault_details = client.get(resource_group_name, vault_name)
 
     curr_identity_details = vault_details.identity
     curr_identity_type = 'none'
+    identity_type = 'none'
+    user_assigned_identity = None
 
     if curr_identity_details is not None:
         curr_identity_type = curr_identity_details.type.lower()
-    user_assigned_identity = None
 
-    if identity_type is not None:
-        if remove_user_assigned or remove_system_assigned:
-            raise MutuallyExclusiveArgumentError("Addition and Deletion of identities are not possible at same time.")
-
-        identity_type = identity_type.replace(" ", "").lower()
-
-        if identity_type in ["none", "systemassigned"]:
-            if identity_id is not None:
-                raise ArgumentUsageError("--identiy-id paramter is only supported for UserAssigned identities.")
-
-            if curr_identity_type in ["systemassigned, userassigned", "userassigned"]:
-                if identity_type == "systemassigned":
-                    identity_type = 'systemassigned,userassigned'
-        elif identity_type == 'userassigned':
-            if identity_id is None:
-                raise RequiredArgumentMissingError("Please provide identity id using --identity-id parameter.")
-
-            userid = UserIdentity()
-            user_assigned_identity = dict()
-            for element in identity_id:
-                user_assigned_identity[element] = userid
-            if curr_identity_type in ["systemassigned", "systemassigned, userassigned"]:
-                identity_type = 'systemassigned,userassigned'
-
-    elif remove_system_assigned or remove_user_assigned:
-        return _remove_identities(client, resource_group_name, vault_name, curr_identity_details,
-                                  curr_identity_type, identity_id, remove_user_assigned,
-                                  remove_system_assigned)
+    if user_assigned is not None:
+        userid = UserIdentity()
+        user_assigned_identity = dict()
+        for userMSI in user_assigned:
+            user_assigned_identity[userMSI] = userid
+        if system_assigned is not None or curr_identity_type in ["systemassigned", "systemassigned, userassigned"]:
+            identity_type = "systemassigned,userassigned"
+        else:
+            identity_type = "userassigned"
+    elif system_assigned is not None:
+        if curr_identity_type in ["systemassigned, userassigned", "userassigned"]:
+            identity_type = "systemassigned,userassigned"
+        else:
+            identity_type = "systemassigned"
     else:
         raise RequiredArgumentMissingError(
             """
@@ -240,71 +225,92 @@ def update_vault(client, resource_group_name, vault_name, identity_type=None, id
     return client.begin_update(resource_group_name, vault_name, vault)
 
 
-def _remove_identities(client, resource_group_name, vault_name, curr_identity_details, curr_identity_type,
-                       identity_id, remove_user_assigned, remove_system_assigned):
-    identity_type = None
-    user_assigned_identity = None
-    if remove_user_assigned and remove_system_assigned:
-        raise MutuallyExclusiveArgumentError(
-            """
-            Both system and user assigned identities can't be removed at same time.
-            """)
+def remove_identity(client, resource_group_name, vault_name, system_assigned=None, user_assigned=None):
+    vault_details = client.get(resource_group_name, vault_name)
 
-    if remove_system_assigned:
-        if identity_id is not None:
-            raise MutuallyExclusiveArgumentError(
-                """
-                --identiy-id paramter is only supported for UserAssigned identities
-                """)
-        if curr_identity_type not in ["systemassigned", "systemassigned, userassigned"]:
-            raise ArgumentUsageError(
-                """
-                System assigned identity is not enabled for Recovery Services Vault.
-                """)
-        if curr_identity_type == 'systemassigned':
-            identity_type = 'none'
-        else:
-            identity_type = 'userassigned'
-    else:
+    curr_identity_details = vault_details.identity
+    curr_identity_type = 'none'
+    user_assigned_identity = None
+    identity_type = 'none'
+
+    if curr_identity_details is not None:
+        curr_identity_type = curr_identity_details.type.lower()
+
+    if user_assigned is not None:
         if curr_identity_type not in ["userassigned", "systemassigned, userassigned"]:
             raise ArgumentUsageError(
                 """
                 There are no user assigned identities to be removed.
                 """)
-        if identity_id is None:
-            raise RequiredArgumentMissingError(
-                """
-                Please provide identity ids to be removed using --identity-id parameter.
-                """)
-
         userid = None
         remove_count_of_userMSI = 0
         totaluserMSI = 0
         user_assigned_identity = dict()
         for element in curr_identity_details.user_assigned_identities.keys():
-            if element in identity_id:
+            if element in user_assigned:
                 remove_count_of_userMSI += 1
             totaluserMSI += 1
-
-        for userMSI in identity_id:
+        if len(user_assigned) == 0:
+            remove_count_of_userMSI = totaluserMSI
+        for userMSI in user_assigned:
             user_assigned_identity[userMSI] = userid
-
-        if curr_identity_type == 'systemassigned, userassigned':
-            if remove_count_of_userMSI == totaluserMSI:
-                identity_type = 'systemassigned'
-                user_assigned_identity = None
-            else:
-                identity_type = 'systemassigned,userassigned'
-        else:
+        if system_assigned is not None:
+            if curr_identity_type != "systemassigned, userassigned":
+                raise ArgumentUsageError(
+                    """
+                    System assigned identity is not enabled for Recovery Services Vault.
+                    """)
             if remove_count_of_userMSI == totaluserMSI:
                 identity_type = 'none'
                 user_assigned_identity = None
             else:
-                identity_type = 'userassigned'
+                identity_type = "userassigned"
+        else:
+            if curr_identity_type == 'systemassigned, userassigned':
+                if remove_count_of_userMSI == totaluserMSI:
+                    identity_type = 'systemassigned'
+                    user_assigned_identity = None
+                else:
+                    identity_type = 'systemassigned,userassigned'
+            else:
+                if remove_count_of_userMSI == totaluserMSI:
+                    identity_type = 'none'
+                    user_assigned_identity = None
+                else:
+                    identity_type = 'userassigned'
+    elif system_assigned is not None:
+        return _remove_system_identity(client, resource_group_name, vault_name, curr_identity_type)
+    else:
+        raise RequiredArgumentMissingError(
+            """
+            Invalid parameters, no operation specified.
+            """)
 
     identity_data = IdentityData(type=identity_type, user_assigned_identities=user_assigned_identity)
     vault = PatchVault(identity=identity_data)
     return client.begin_update(resource_group_name, vault_name, vault)
+
+
+def _remove_system_identity(client, resource_group_name, vault_name, curr_identity_type):
+    user_assigned_identity = None
+    identity_type = 'none'
+    if curr_identity_type not in ["systemassigned", "systemassigned, userassigned"]:
+        raise ArgumentUsageError(
+            """
+            System assigned identity is not enabled for Recovery Services Vault.
+            """)
+    if curr_identity_type == 'systemassigned':
+        identity_type = 'none'
+    else:
+        identity_type = 'userassigned'
+
+    identity_data = IdentityData(type=identity_type, user_assigned_identities=user_assigned_identity)
+    vault = PatchVault(identity=identity_data)
+    return client.begin_update(resource_group_name, vault_name, vault)
+
+
+def show_identity(client, resource_group_name, vault_name):
+    return client.get(resource_group_name, vault_name).identity
 
 
 def update_encryption(cmd, client, resource_group_name, vault_name, encryption_key_id, infrastructure_encryption=None,
