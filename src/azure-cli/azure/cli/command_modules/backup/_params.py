@@ -28,7 +28,6 @@ allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAIns
 allowed_target_tier_type_chk_archivable = ['VaultArchive']
 allowed_tier_type = ['VaultStandard', 'Snapshot', 'VaultArchive', 'VaultStandardRehydrated', 'SnapshotAndVaultStandard', 'SnapshotAndVaultArchive']
 allowed_rehyd_priority_type = ['Standard', 'High']
-allowed_identity_types = ['systemassigned', 'userassigned', 'none']
 
 backup_management_type_help = """Specifiy the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
@@ -73,11 +72,11 @@ from_full_rp_type = CLIArgumentType(options_list=['--from-full-rp-name'], help="
 target_tier_type = CLIArgumentType(help=target_tier_help, arg_type=get_enum_type(allowed_target_tier_type_chk_archivable), options_list=['--target-tier'])
 tier_type = CLIArgumentType(help=tier_help, arg_type=get_enum_type(allowed_tier_type), options_list=['--tier'])
 rehyd_priority_type = CLIArgumentType(help=rehyd_priority_type_help, arg_type=get_enum_type(allowed_rehyd_priority_type), options_list=['--rehydration-priority'])
-identity_type = CLIArgumentType(options_list=['--identity-type'], arg_type=get_enum_type(allowed_identity_types), help="The identity type to be enabled for this vault, whether it is systemassigned, userassigned or none")
-identity_id_type = CLIArgumentType(nargs='+', options_list=['--identity-id'], help="Space-separated list of userassigned identities. This will be applicable only for userassigned identity type")
 user_assigned_identity_id_type = CLIArgumentType(options_list=['--identity-id'], help="UserAssigned Identity Id to be used for CMK encryption, this will be applicable for encryption using userassigned identity")
 encryption_key_id_type = CLIArgumentType(options_list=['--encryption-key-id'], help="The encryption key id you want to use for encryption")
 infrastructure_encryption_type = CLIArgumentType(options_list=['--infrastructure-encryption'], arg_type=get_enum_type(['Enabled', 'Disabled']), help=infrastructure_encryption_type_help)
+user_assigned_type = CLIArgumentType(nargs='+', options_list=['--user-assigned'], help="Space-separated list of userassigned identities.")
+user_assigned_remove_type = CLIArgumentType(nargs='*', options_list=['--user-assigned'], help="Space-separated list of userassigned identities.")
 
 
 # pylint: disable=too-many-statements
@@ -100,12 +99,18 @@ def load_arguments(self, _):
         c.argument('cross_region_restore_flag', arg_type=get_enum_type(['True', 'False']), help='Set cross-region-restore feature state for a Recovery Services Vault. Default: False.')
 
     # Identity
-    with self.argument_context('backup vault update') as c:
+    with self.argument_context('backup vault identity assign') as c:
         c.argument('vault_name', vault_name_type)
-        c.argument('identity_type', identity_type)
-        c.argument('identity_id', identity_id_type)
-        c.argument('remove_user_assigned', action='store_true', help="Use this flag to remove user assigned identity")
-        c.argument('remove_system_assigned', action='store_true', help="Use this flag to remove system assigned identity")
+        c.argument('system_assigned', action='store_true', options_list=['--system-assigned'], help="Provide this flag to enable system assigned identity for Recovery Services Vault.")
+        c.argument('user_assigned', user_assigned_type)
+
+    with self.argument_context('backup vault identity remove') as c:
+        c.argument('vault_name', vault_name_type)
+        c.argument('system_assigned', action='store_true', options_list=['--system-assigned'], help="Provide this flag to enable system assigned identity for Recovery Services Vault.")
+        c.argument('user_assigned', user_assigned_remove_type)
+
+    with self.argument_context('backup vault identity show') as c:
+        c.argument('vault_name', vault_name_type)
 
     # Encryption
     with self.argument_context('backup vault encryption') as c:

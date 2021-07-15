@@ -34,7 +34,9 @@ def load_command_table(self, _):
         g.custom_command('backup-properties show', 'get_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('backup-properties set', 'set_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('delete', 'delete_vault', confirmation=True)
-        g.custom_command('update', 'update_vault')
+        g.custom_command('identity assign', 'assign_identity')
+        g.custom_command('identity remove', 'remove_identity')
+        g.custom_command('identity show', 'show_identity')
         g.custom_command('encryption update', 'update_encryption')
         g.custom_command('encryption show', 'show_encryption', client_factory=backup_resource_encryption_config_cf)
 
