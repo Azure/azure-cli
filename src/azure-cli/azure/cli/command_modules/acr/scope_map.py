@@ -113,11 +113,10 @@ def acr_scope_map_update(cmd,
         description=description,
         actions=current_actions
     )
-    return client.begin_update(
-        resource_group_name,
-        registry_name,
-        scope_map_name,
-        scope_map_update_parameters
+    return client.begin_update(resource_group_name,
+                               registry_name,
+                               scope_map_name,
+                               scope_map_update_parameters
     )
 
 

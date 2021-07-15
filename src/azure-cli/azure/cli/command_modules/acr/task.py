@@ -105,9 +105,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             is_system_task=is_system_task)
         try:
             return client.begin_create(resource_group_name=resource_group_name,
-                                 registry_name=registry_name,
-                                 task_name=task_name,
-                                 task_create_parameters=task_create_parameters)
+                                       registry_name=registry_name,
+                                       task_name=task_name,
+                                       task_create_parameters=task_create_parameters)
         except ValidationError as e:
             raise CLIError(e)
 
@@ -802,9 +802,9 @@ def acr_task_timer_remove(cmd,
 
         try:
             return client.begin_create(resource_group_name=resource_group_name,
-                                 registry_name=registry_name,
-                                 task_name=task_name,
-                                 task_create_parameters=existingTask)
+                                       registry_name=registry_name,
+                                       task_name=task_name,
+                                       task_create_parameters=existingTask)
         except ValidationError as e:
             raise CLIError(e)
 
