@@ -391,9 +391,6 @@ class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
         outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
         outbound_firewall_rule_allowed_fqdn_2 = 'testOBFR2'
 
-        # self.cmd('sql server outbound-firewall-rule list -g {} --server {}'
-        #          .format(resource_group, server), checks=[JMESPathCheck('length(@)', None)])
-
         # test sql server outbound-firewall-rule create
         self.cmd('sql server outbound-firewall-rule create -g {} --server {} --outbound-rule-fqdn {}'
                  .format(resource_group, server, outbound_firewall_rule_allowed_fqdn_1),
@@ -419,8 +416,6 @@ class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
         # test sql server outbound-firewall-rule list
         self.cmd('sql server outbound-firewall-rule list -g {} --server {}'
                  .format(resource_group, server), checks=[JMESPathCheck('length(@)', 2)])
-
-        #####################PASTE HERE
 
         # test sql server outbound-firewall-rule delete
         self.cmd('sql server outbound-firewall-rule delete -g {} --server {} --outbound-rule-fqdn {}'

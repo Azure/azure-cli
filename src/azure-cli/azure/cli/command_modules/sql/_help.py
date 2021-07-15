@@ -1394,6 +1394,16 @@ examples:
     text: az sql server outbound-firewall-rule show -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
 """
 
+helps['sql server outbound-firewall-rule delete'] = """
+type: command
+short-summary: Deletes the outbound firewall rule.
+examples:
+  - name: Deletes the outbound firewall rule
+    text: az sql server outbound-firewall-rule delete -g mygroup -s myserver -n myrule
+  - name: Deletes the outbound firewall rule
+    text: az sql server outbound-firewall-rule delete -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
+"""
+
 helps['sql server key'] = """
 type: group
 short-summary: Manage a server's keys.
