@@ -106,7 +106,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup vault identity remove') as c:
         c.argument('vault_name', vault_name_type)
-        c.argument('system_assigned', action='store_true', options_list=['--system-assigned'], help="Provide this flag to enable system assigned identity for Recovery Services Vault.")
+        c.argument('system_assigned', action='store_true', options_list=['--system-assigned'], help="Provide this flag to remove system assigned identity for Recovery Services Vault.")
         c.argument('user_assigned', user_assigned_remove_type)
 
     with self.argument_context('backup vault identity show') as c:
