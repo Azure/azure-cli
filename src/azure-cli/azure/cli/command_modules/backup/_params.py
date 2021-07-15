@@ -47,7 +47,7 @@ target_container_name_help = """The target container to which the DB recovery po
 target_tier_help = """ The destination/target tier to which a particular recovery point has to be moved."""
 tier_help = """ Provide 'tier' parameter to filter recovery points."""
 rehyd_priority_type_help = """The type of priority to be maintained while rehydrating a recovery point """
-infrastructure_encryption_type_help = """Use this parameter to Enable/Disable Infrastructure encryption. This must be set when configuring encryption of the vault for the first time. Once Enabled/Disabled, infrastructure encryption setting cannot be changed. Default value: Disabled. Allowed values: Enabled /Disabled"""
+infrastructure_encryption_type_help = """Use this parameter to enable/disable infrastructure encryption. This must be set when configuring encryption of the vault for the first time. Once enabled/disabled, infrastructure encryption setting cannot be changed. Default value: Disabled. Allowed values: Enabled, Disabled"""
 
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
