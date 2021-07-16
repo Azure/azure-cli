@@ -4186,6 +4186,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
     test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
+    verify_umi_with_empty_uuid = '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
 
     @AllowLargeResponse()
     @ManagedInstancePreparer(
@@ -4196,13 +4197,16 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
         managed_instance_name = mi
         resource_group_1 = rg
 
-        # test show sql managed instance 2
+        # test show sql managed instance
         self.cmd('sql mi show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name),
                  checks=[
                      JMESPathCheck('name', managed_instance_name),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('primaryUserAssignedIdentityId', self.test_umi),
+                     JMESPathCheck(
+                         'primaryUserAssignedIdentityId',
+                         self.test_umi if self.in_recording or self.is_live else self.verify_umi_with_empty_uuid
+                     ),
                      JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned')]
                  )
 
