@@ -481,10 +481,9 @@ class IoTHubTest(ScenarioTest):
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsi test/user/'.format(identity_hub, rg), expect_failure=True)
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsi [system]'.format(identity_hub, rg), expect_failure=True)
 
-        # Setting identity-based file upload and changing to user identity
-        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2} --fsi {3}'.format(identity_hub, rg, identity_based_auth, user_identity_1)).get_output_in_json()
+        # Back to identity-based file upload
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'.format(identity_hub, rg, identity_based_auth, user_identity_1)).get_output_in_json()
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
-        assert updated_hub['properties']['storageEndpoints']['$default']['identity'] == user_identity_1
 
         # Create EH and link identity
         eh_info = self._create_eventhub_and_link_identity(rg, hub_object_id, [user_identity_1])
