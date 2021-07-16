@@ -72,11 +72,14 @@ from_full_rp_type = CLIArgumentType(options_list=['--from-full-rp-name'], help="
 target_tier_type = CLIArgumentType(help=target_tier_help, arg_type=get_enum_type(allowed_target_tier_type_chk_archivable), options_list=['--target-tier'])
 tier_type = CLIArgumentType(help=tier_help, arg_type=get_enum_type(allowed_tier_type), options_list=['--tier'])
 rehyd_priority_type = CLIArgumentType(help=rehyd_priority_type_help, arg_type=get_enum_type(allowed_rehyd_priority_type), options_list=['--rehydration-priority'])
-user_assigned_identity_id_type = CLIArgumentType(options_list=['--identity-id'], help="UserAssigned Identity Id to be used for CMK encryption, this will be applicable for encryption using userassigned identity")
+mi_user_assigned_type = CLIArgumentType(options_list=['--mi-user-assigned'], help="UserAssigned Identity Id to be used for CMK encryption, this will be applicable for encryption using userassigned identity")
+mi_system_assigned_type = CLIArgumentType(action='store_true', options_list=['--mi-system-assigned'], help="Provide this flag to use system assigned identity for encryption.")
 encryption_key_id_type = CLIArgumentType(options_list=['--encryption-key-id'], help="The encryption key id you want to use for encryption")
 infrastructure_encryption_type = CLIArgumentType(options_list=['--infrastructure-encryption'], arg_type=get_enum_type(['Enabled', 'Disabled']), help=infrastructure_encryption_type_help)
-user_assigned_type = CLIArgumentType(nargs='+', options_list=['--user-assigned'], help="Space-separated list of userassigned identities.")
-user_assigned_remove_type = CLIArgumentType(nargs='*', options_list=['--user-assigned'], help="Space-separated list of userassigned identities.")
+user_assigned_type = CLIArgumentType(nargs='+', options_list=['--user-assigned'], help="Space-separated list of userassigned identities to be assigned to Recovery Services Vault.")
+user_assigned_remove_type = CLIArgumentType(nargs='*', options_list=['--user-assigned'], help="Space-separated list of userassigned identities to be removed from Recovery Services Vault.")
+system_assigned_remove_type = CLIArgumentType(action='store_true', options_list=['--system-assigned'], help="Provide this flag to remove system assigned identity for Recovery Services Vault.")
+system_assigned_type = CLIArgumentType(action='store_true', options_list=['--system-assigned'], help="Provide this flag to enable system assigned identity for Recovery Services Vault.")
 
 
 # pylint: disable=too-many-statements
@@ -101,12 +104,12 @@ def load_arguments(self, _):
     # Identity
     with self.argument_context('backup vault identity assign') as c:
         c.argument('vault_name', vault_name_type)
-        c.argument('system_assigned', action='store_true', options_list=['--system-assigned'], help="Provide this flag to enable system assigned identity for Recovery Services Vault.")
+        c.argument('system_assigned', system_assigned_type)
         c.argument('user_assigned', user_assigned_type)
 
     with self.argument_context('backup vault identity remove') as c:
         c.argument('vault_name', vault_name_type)
-        c.argument('system_assigned', action='store_true', options_list=['--system-assigned'], help="Provide this flag to remove system assigned identity for Recovery Services Vault.")
+        c.argument('system_assigned', system_assigned_remove_type)
         c.argument('user_assigned', user_assigned_remove_type)
 
     with self.argument_context('backup vault identity show') as c:
@@ -119,8 +122,8 @@ def load_arguments(self, _):
     with self.argument_context('backup vault encryption update') as c:
         c.argument('encryption_key_id', encryption_key_id_type)
         c.argument('infrastructure_encryption', infrastructure_encryption_type)
-        c.argument('identity_id', user_assigned_identity_id_type)
-        c.argument('use_systemassigned_identity', action='store_true', options_list=['--use-system-assigned'], help="Provide this flag to use system assigned identity for encryption.")
+        c.argument('mi_user_assigned', mi_user_assigned_type)
+        c.argument('mi_system_assigned', mi_system_assigned_type)
 
     with self.argument_context('backup vault encryption show') as c:
         c.argument('vault_name', vault_name_type)

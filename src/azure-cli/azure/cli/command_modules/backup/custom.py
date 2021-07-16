@@ -314,7 +314,7 @@ def show_identity(client, resource_group_name, vault_name):
 
 
 def update_encryption(cmd, client, resource_group_name, vault_name, encryption_key_id, infrastructure_encryption=None,
-                      identity_id=None, use_systemassigned_identity=None):
+                      mi_user_assigned=None, mi_system_assigned=None):
     keyVaultproperties = CmkKeyVaultProperties(key_uri=encryption_key_id)
 
     vault_details = client.get(resource_group_name, vault_name)
@@ -332,14 +332,14 @@ def update_encryption(cmd, client, resource_group_name, vault_name, encryption_k
             """)
 
     if encryption_type != "CustomerManaged":
-        if use_systemassigned_identity is None and identity_id is None:
+        if mi_system_assigned is None and mi_user_assigned is None:
             raise RequiredArgumentMissingError(
                 """
                 Please provide user assigned identity id using --identity-id paramter or set --use-system-assigned flag
                 """)
         if infrastructure_encryption is None:
             infrastructure_encryption = "Disabled"
-    if identity_id is not None and use_systemassigned_identity:
+    if mi_user_assigned is not None and mi_system_assigned:
         raise MutuallyExclusiveArgumentError(
             """
             Both --identity-id and --use-system-assigned parameters can't be given at the same time.
@@ -347,13 +347,13 @@ def update_encryption(cmd, client, resource_group_name, vault_name, encryption_k
 
     kekIdentity = None
     is_identity_present = False
-    if identity_id is not None:
+    if mi_user_assigned is not None:
         if identity_type not in ["userassigned", "systemassigned, userassigned"]:
             raise ArgumentUsageError(
                 """
                 Please add user assigned identity for Recovery Services Vault.
                 """)
-        if identity_id in identity_details.user_assigned_identities.keys():
+        if mi_user_assigned in identity_details.user_assigned_identities.keys():
             is_identity_present = True
         if not is_identity_present:
             raise InvalidArgumentValueError(
@@ -361,15 +361,15 @@ def update_encryption(cmd, client, resource_group_name, vault_name, encryption_k
                 This user assigned identity not available for Recovery Services Vault.
                 """)
 
-    if use_systemassigned_identity:
+    if mi_system_assigned:
         if identity_type not in ["systemassigned", "systemassigned, userassigned"]:
             raise ArgumentUsageError(
                 """
                 Please make sure that system assigned identity is enabled for Recovery Services Vault
                 """)
-    if identity_id is not None or use_systemassigned_identity:
-        kekIdentity = CmkKekIdentity(user_assigned_identity=identity_id,
-                                     use_system_assigned_identity=use_systemassigned_identity)
+    if mi_user_assigned is not None or mi_system_assigned:
+        kekIdentity = CmkKekIdentity(user_assigned_identity=mi_user_assigned,
+                                     use_system_assigned_identity=mi_system_assigned)
     encryption_data = VaultPropertiesEncryption(key_vault_properties=keyVaultproperties, kek_identity=kekIdentity,
                                                 infrastructure_encryption=infrastructure_encryption)
     vault_properties = VaultProperties(encryption=encryption_data)
