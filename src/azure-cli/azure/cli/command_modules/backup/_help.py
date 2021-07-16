@@ -531,8 +531,10 @@ helps['backup vault encryption update'] = """
 type: command
 short-summary: Update encryption properties of a Recovery Services Vault.
 examples:
-  - name: Update encryption properties of a Recovery Services Vault.
-    text: az backup vault encryption update --encryption-key-id MyEncryptionKeyId --resource-group MyResourceGroup --vault-name MyVault
+  - name: Update encryption properties to use user assigned identity of a Recovery Services Vault.
+    text: az backup vault encryption update --encryption-key-id MyEncryptionKeyId --mi-user-assigned MyUserAssignedIdentityId --resource-group MyResourceGroup --vault-name MyVault
+  - name: Update encryption properties to use system assigned identity of a Recovery Services Vault.
+    text: az backup vault encryption update --encryption-key-id MyEncryptionKeyId --mi-system-assigned --resource-group MyResourceGroup --vault-name MyVault
 """
 helps['backup vault encryption show'] = """
 type: command
