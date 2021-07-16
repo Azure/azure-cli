@@ -48,9 +48,9 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, \
-        TokenStatus, ZoneRedundancy = self.get_models(
+        TokenStatus, ZoneRedundancy, ExportPolicyStatus = self.get_models(
             'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
-            'TokenStatus', 'ZoneRedundancy')
+            'TokenStatus', 'ZoneRedundancy', 'ExportPolicyStatus')
     TaskStatus, BaseImageTriggerType, SourceRegistryLoginMode, UpdateTriggerPayloadType = self.get_models(
         'TaskStatus', 'BaseImageTriggerType', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', operation_group='tasks')
     RunStatus = self.get_models('RunStatus', operation_group='runs')
@@ -61,6 +61,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('tenant_suffix', options_list=['--suffix'], help="The tenant suffix in registry login server. You may specify '--suffix tenant' if your registry login server is in the format 'registry-tenant.azurecr.io'. Applicable if you\'re accessing the registry from a different subscription or you have permission to access images but not the permission to manage the registry resource.")
         c.argument('sku', help='The SKU of the container registry', arg_type=get_enum_type(SkuName))
         c.argument('admin_enabled', help='Indicates whether the admin user is enabled', arg_type=get_three_state_flag())
+        c.argument('export_enabled', help='Indicates whether exports for this user are enabled', arg_type=get_enum_type(ExportPolicyStatus))
         c.argument('password_name', help='The name of password to regenerate', arg_type=get_enum_type(PasswordName))
         c.argument('username', options_list=['--username', '-u'], help='The username used to log into a container registry')
         c.argument('password', options_list=['--password', '-p'], help='The password used to log into a container registry')

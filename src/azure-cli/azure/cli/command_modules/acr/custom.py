@@ -51,6 +51,7 @@ def acr_create(cmd,
                public_network_enabled=None,
                zone_redundancy=None,
                allow_trusted_services=None,
+               export_enabled=None,
                tags=None):
 
     if default_action and sku not in get_premium_sku(cmd):
@@ -59,7 +60,7 @@ def acr_create(cmd,
     if sku not in get_managed_sku(cmd):
         raise CLIError("Classic SKU is no longer supported. Please select a managed SKU.")
 
-    Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
+    Registry, Sku, NetworkRuleSet, Policies, ExportPolicy = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet', 'Policies', 'ExportPolicy')
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
                         zone_redundancy=zone_redundancy, tags=tags)
     if default_action:
@@ -72,6 +73,11 @@ def acr_create(cmd,
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
+
+    if export_enabled is not None:
+        export_policy = ExportPolicy(status=export_enabled)
+        policies = Policies(export_policy=export_policy)
+        registry.policies = policies
 
     lro_poller = client.begin_create(resource_group_name, registry_name, registry)
 
@@ -112,6 +118,7 @@ def acr_update_custom(cmd,
                       public_network_enabled=None,
                       allow_trusted_services=None,
                       anonymous_pull_enabled=None,
+                      export_enabled=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -135,6 +142,12 @@ def acr_update_custom(cmd,
 
     if anonymous_pull_enabled is not None:
         instance.anonymous_pull_enabled = anonymous_pull_enabled
+
+    if export_enabled is not None:
+        Policies, ExportPolicy = cmd.get_models('Policies', 'ExportPolicy')
+        export_policy = ExportPolicy(status=export_enabled)
+        policies = Policies(export_policy=export_policy)
+        instance.policies = policies
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
 
