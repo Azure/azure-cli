@@ -1209,6 +1209,8 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('status', 'Provisioning')
             ])
+        import time
+        time.sleep(20)
 
         # get event subscription status
         self.cmd(
