@@ -232,7 +232,7 @@ def cf_blob_service(cli_ctx, kwargs):
                                                            'to get a valid connection string')
 
     account_url = get_account_url(cli_ctx, account_name=account_name, service='blob', endpoint_suffix=endpoint_suffix)
-    account_name, _ = account_name.split('.', 2)
+    account_name = account_name.split('.', 2)[0]
     if account_key:
         credential = {
             "account_name": account_name,
