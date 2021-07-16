@@ -29,7 +29,8 @@ def get_storage_data_service_client(cli_ctx, service, name=None, key=None, conne
     return get_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
                                    socket_timeout=socket_timeout,
                                    token_credential=token_credential,
-                                   endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint if endpoint_suffix is None else endpoint_suffix,
+                                   endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint
+                                   if endpoint_suffix is None else endpoint_suffix,
                                    location_mode=location_mode)
 
 
@@ -113,6 +114,7 @@ def cloud_storage_account_service_factory(cli_ctx, kwargs):
     account_key = kwargs.pop('account_key', None)
     sas_token = kwargs.pop('sas_token', None)
     kwargs.pop('connection_string', None)
+    kwargs.pop('endpoint_suffix', None)
     return t_cloud_storage_account(account_name, account_key, sas_token)
 
 
@@ -131,10 +133,11 @@ def multi_service_properties_factory(cli_ctx, kwargs):
     connection_string = kwargs.pop('connection_string', None)
     sas_token = kwargs.pop('sas_token', None)
     services = kwargs.pop('services', [])
+    endpoint_suffix = kwargs.pop('endpoint_suffix', None)
 
     def get_creator(name, service_type):
         return lambda: ServiceProperties(cli_ctx, name, service_type, account_name, account_key, connection_string,
-                                         sas_token)
+                                         sas_token, endpoint_suffix)
 
     creators = {'b': get_creator('blob', t_base_blob_service), 'f': get_creator('file', t_file_service),
                 'q': get_creator('queue', t_queue_service), 't': get_creator('table', t_table_service)}

@@ -234,7 +234,8 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
                             location_mode=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
-        account_name = account_name.split('.', 2)[0]
+        if account_name:
+            account_name = account_name.split('.', 2)[0]
         client_kwargs = {'account_name': account_name,
                          'account_key': account_key,
                          'connection_string': connection_string,
@@ -254,9 +255,11 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
             service = 'file'
         elif 'Queue' in service_type.__name__:
             service = 'queue'
+        elif 'Table' in service_type.__name__:
+            service = 'table'
         else:
             raise CLIError("Invalid service type.")
-        if len(account_name.split('.', 2)) == 2:
+        if account_name and len(account_name.split('.', 2)) == 2:
             dns = account_name.split('.', 2)[1]
             client.primary_endpoint = "{}.{}.{}.{}".format(client.primary_endpoint.split('.', 1)[0], dns, service,
                                                            endpoint_suffix)

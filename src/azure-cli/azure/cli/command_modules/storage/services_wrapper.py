@@ -10,11 +10,12 @@ from ._client_factory import generic_data_service_factory
 
 class ServiceProperties:
     def __init__(self, cli_ctx, name, service, account_name=None, account_key=None, connection_string=None,
-                 sas_token=None):
+                 sas_token=None, endpoint_suffix=None):
         self.cli_ctx = cli_ctx
         self.name = name
         self.client = generic_data_service_factory(cli_ctx, service, name=account_name, key=account_key,
-                                                   connection_string=connection_string, sas_token=sas_token)
+                                                   connection_string=connection_string, sas_token=sas_token,
+                                                   endpoint_suffix=endpoint_suffix)
         if not self.client:
             from knack.util import CLIError
             raise CLIError('Failed to initialize data client.')
