@@ -616,7 +616,8 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
                                    enable_delete_retention=None, delete_retention_days=None,
                                    enable_restore_policy=None, restore_days=None,
                                    enable_versioning=None, enable_container_delete_retention=None,
-                                   container_delete_retention_days=None, default_service_version=None):
+                                   container_delete_retention_days=None, default_service_version=None,
+                                   enable_last_access_tracking=None):
     if enable_change_feed is not None:
         if enable_change_feed is False:
             change_feed_retention_days = None
@@ -646,6 +647,11 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
 
     if default_service_version is not None:
         instance.default_service_version = default_service_version
+
+    # Update last access time tracking policy
+    if enable_last_access_tracking is not None:
+        LastAccessTimeTrackingPolicy = cmd.get_models('LastAccessTimeTrackingPolicy')
+        instance.last_access_time_tracking_policy = LastAccessTimeTrackingPolicy(enable=enable_last_access_tracking)
 
     return instance
 
