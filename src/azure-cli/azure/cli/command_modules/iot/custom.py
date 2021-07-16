@@ -608,11 +608,11 @@ def update_iot_hub_custom(instance,
     )
 
     # sas token authentication switches
-    if hasattr(instance.properties, 'disable_local_auth') and disable_local_auth is not None:
+    if disable_local_auth is not None:
         instance.properties.disable_local_auth = disable_local_auth
-    if hasattr(instance.properties, 'disable_device_sas') and disable_device_sas is not None:
+    if disable_device_sas is not None:
         instance.properties.disable_device_sas = disable_device_sas
-    if hasattr(instance.properties, 'disable_module_sas') and disable_module_sas is not None:
+    if disable_module_sas is not None:
         instance.properties.disable_module_sas = disable_module_sas
 
     instance.properties.storage_endpoints['$default'] = default_storage_endpoint
