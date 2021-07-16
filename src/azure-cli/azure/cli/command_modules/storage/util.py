@@ -119,7 +119,7 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
 
 
 def create_short_lived_blob_sas_v2(cmd, account_name, account_key, container, blob):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
 
     t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
                            resource_type=ResourceType.DATA_STORAGE_BLOB)
