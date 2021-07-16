@@ -1677,7 +1677,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
         audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
                                   'DATABASE_ROLE_MEMBER_CHANGE_GROUP']
 
-        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+        self.cmd('sql server audit-policy update -g {} -n {}'
                  ' --state {} --blob-storage-target-state {} --storage-key {} --storage-endpoint={}'
                  ' --retention-days={} --actions {}'
                  .format(resource_group, server, state_enabled, state_enabled, key,
@@ -1702,7 +1702,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
 
         # update audit policy - specify storage account and resource group. use secondary key
         storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
-        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+        self.cmd('sql server audit-policy update -g {} -n {}'
                  ' --blob-storage-target-state {} --storage-account {}'
                  .format(resource_group, server, state_enabled, storage_account_2),
                  checks=[
@@ -1713,7 +1713,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # update audit policy - disable
-        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+        self.cmd('sql server audit-policy update -g {} -n {}'
                  ' --state {}'
                  .format(resource_group, server, state_disabled),
                  checks=[
@@ -1734,7 +1734,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                                                                 'Succeeded')]).get_output_in_json()['id']
 
         # update audit policy - enable log analytics target
-        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+        self.cmd('sql server audit-policy update -g {} -n {}'
                  ' --state {}'
                  ' --log-analytics-target-state {} --log-analytics-workspace-resource-id {}'
                  .format(resource_group, server, state_enabled, state_enabled, log_analytics_workspace_id),
@@ -1756,7 +1756,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('isAzureMonitorTargetEnabled', True)])
 
         # update audit policy - disable log analytics target
-        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+        self.cmd('sql server audit-policy update -g {} -n {}'
                  ' --state {} --log-analytics-target-state {}'
                  .format(resource_group, server, state_enabled, state_disabled),
                  checks=[
@@ -1800,7 +1800,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                 .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
 
         # update audit policy - enable event hub target
-        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+        self.cmd('sql server audit-policy update -g {} -n {}'
                  ' --state {} --event-hub-target-state {}'
                  ' --event-hub-authorization-rule-id {} --event-hub {}'
                  .format(resource_group, server, state_enabled, state_enabled,
@@ -1823,7 +1823,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('isAzureMonitorTargetEnabled', True)])
 
         # update audit policy - disable event hub target
-        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+        self.cmd('sql server audit-policy update -g {} -n {}'
                  ' --state {} --event-hub-target-state {}'
                  .format(resource_group, server, state_enabled, state_disabled),
                  checks=[
