@@ -416,7 +416,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-01-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     def test_storage_account_with_shared_key_access(self, resource_group):
         name = self.create_random_name(prefix='cli', length=24)
@@ -476,6 +476,34 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update -n {name} -g {rg} --default-share-permission None',
                  checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication.defaultSharePermission',
                                        'None')])
+
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-01-01')
+    @ResourceGroupPreparer(location='westus', name_prefix='cli_storage_account')
+    def test_storage_account_with_nfs(self, resource_group):
+        self.kwargs = {
+            'name1': self.create_random_name(prefix='sa1', length=24),
+            'name2': self.create_random_name(prefix='sa2', length=24),
+            'name3': self.create_random_name(prefix='sa3', length=24),
+            'vnet': self.create_random_name(prefix='vnet', length=10),
+            'subnet': self.create_random_name(prefix='subnet', length=10),
+            'rg': resource_group
+        }
+
+        result = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()
+        self.kwargs['subnet_id'] = result['newVNet']['subnets'][0]['id']
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage')
+        self.cmd('storage account create -n {name1} -g {rg} --subnet {subnet_id} '
+                 '--default-action Deny --hns --sku Standard_LRS --enable-nfs-v3 true',
+                 checks=[JMESPathCheck('enableNfsV3', True)])
+
+        self.cmd('storage account create -n {name2} -g {rg} --enable-nfs-v3 false',
+                 checks=[JMESPathCheck('enableNfsV3', False)])
+
+        self.cmd('storage account create -n {name3} -g {rg} --enable-nfs-v3 --vnet-name {vnet} '
+                 '--subnet {subnet} --default-action Deny --hns --sku Standard_LRS ',
+                 checks=[JMESPathCheck('enableNfsV3', True)])
 
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
@@ -1079,10 +1107,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         policy_file = os.path.join(curr_dir, 'mgmt_policy.json').replace('\\', '\\\\')
 
         self.kwargs = {'rg': resource_group, 'sa': storage_account, 'policy': policy_file}
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
         self.cmd('storage account management-policy create --account-name {sa} -g {rg} --policy @"{policy}"',
                  checks=[JMESPathCheck('policy.rules[0].name', 'olcmtest'),
                          JMESPathCheck('policy.rules[0].enabled', True),
-                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToCool.daysAfterModificationGreaterThan', 30),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToCool.daysAfterLastAccessTimeGreaterThan', 30),
                          JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToArchive.daysAfterModificationGreaterThan', 90),
                          JMESPathCheck('policy.rules[0].definition.actions.baseBlob.delete.daysAfterModificationGreaterThan', 1000),
                          JMESPathCheck('policy.rules[0].definition.actions.snapshot.tierToCool.daysAfterCreationGreaterThan', 30),
@@ -1559,6 +1590,29 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage account blob-service-properties show -n {sa} -g {rg}',
                  checks=[self.check('defaultServiceVersion', '2018-11-09')])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
+    @StorageAccountPreparer(location="eastus2", kind="StorageV2")
+    def test_storage_account_update_last_access(self):
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
+        result = self.cmd(
+            'storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['name'], "AccessTimeTracking")
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['trackingGranularityInDays'], 1)
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['blobType'][0], "blockBlob")
+
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy'], None)
+
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
+        result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
 
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):

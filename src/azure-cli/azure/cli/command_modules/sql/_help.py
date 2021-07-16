@@ -185,6 +185,27 @@ examples:
     text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
 """
 
+helps['sql db str-policy'] = """
+type: group
+short-summary: Manage SQL database short term retention policy.
+"""
+
+helps['sql db str-policy set'] = """
+type: command
+short-summary: Update short term retention settings for a live database.
+examples:
+  - name: Set short term retention for a live database.
+    text: az sql db str-policy set -g mygroup -s myserver -n mydb --retention-days retentionindays --diffbackup-hours diffbackuphours
+"""
+
+helps['sql db str-policy show'] = """
+type: command
+short-summary: Show the short term retention policy for a live database.
+examples:
+  - name: Show short term retention policy for a live database.
+    text: az sql db str-policy show -g mygroup -s myserver -n mydb
+"""
+
 helps['sql db ltr-policy'] = """
 type: group
 short-summary: Manage SQL database long term retention policy.
@@ -1190,6 +1211,11 @@ examples:
             --event-hub-target-state Disabled
 """
 
+helps['sql server ms-support'] = """
+type: group
+short-summary: Manage a server's Microsoft support operations.
+"""
+
 helps['sql server ms-support audit-policy'] = """
 type: group
 short-summary: Manage a server's Microsoft support operations auditing policy.
@@ -1522,4 +1548,33 @@ short-summary: Disable sensitivity recommendations for a given column (recommend
 examples:
   - name: Disable sensitivity recommendations for a given column.
     text: az sql db classification recommendation disable -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
+"""
+
+helps['sql db ledger-digest-uploads'] = """
+type: group
+short-summary: Manage ledger digest upload settings.
+"""
+
+helps['sql db ledger-digest-uploads enable'] = """
+type: command
+short-summary: Enable uploading ledger digests to an Azure Storage account or to Azure Confidential Ledger. If uploading ledger digests is already enabled, the cmdlet resets the digest storage endpoint to a new value.
+examples:
+  - name: Enable uploading ledger digests to an Azure Blob storage.
+    text: az sql db ledger-digest-uploads enable --name mydb --resource-group MyResourceGroup --server myserver --endpoint https://mystorage.blob.core.windows.net
+"""
+
+helps['sql db ledger-digest-uploads disable'] = """
+type: command
+short-summary: Disable uploading ledger digests.
+examples:
+  - name: Disable uploading ledger digests.
+    text: az sql db ledger-digest-uploads disable --name mydb --resource-group MyResourceGroup --server myserver
+"""
+
+helps['sql db ledger-digest-uploads show'] = """
+type: command
+short-summary: Show the current ledger digest settings.
+examples:
+  - name: Show the settings for uploading ledger digests.
+    text: az sql db ledger-digest-uploads show --name mydb --resource-group MyResourceGroup --server myserver
 """

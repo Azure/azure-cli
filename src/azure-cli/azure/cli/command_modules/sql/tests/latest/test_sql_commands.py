@@ -20,6 +20,7 @@ from azure.cli.testsdk import (
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
+    KeyVaultPreparer,
     LiveScenarioTest,
     record_only)
 from azure.cli.testsdk.preparers import (
@@ -613,6 +614,46 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readScale', 'Enabled'),
                      JMESPathCheck('highAvailabilityReplicaCount', '2')])
 
+    @ResourceGroupPreparer(location='westcentralus')
+    @SqlServerPreparer(location='westcentralus')
+    def test_sql_db_ledger(self, resource_group, resource_group_location, server):
+        database_name_one = "cliautomationdb01"
+        database_name_two = "cliautomationdb02"
+
+        # test sql db is created with ledger off by default
+        self.cmd('sql db create -g {} --server {} --name {} --yes'
+                       .format(resource_group, server, database_name_one),
+                       checks=[
+                           JMESPathCheck('resourceGroup', resource_group),
+                           JMESPathCheck('name', database_name_one),
+                           JMESPathCheck('location', resource_group_location),
+                           JMESPathCheck('ledgerOn', False)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                           JMESPathCheck('resourceGroup', resource_group),
+                           JMESPathCheck('name', database_name_one),
+                           JMESPathCheck('location', resource_group_location),
+                           JMESPathCheck('ledgerOn', False)])
+
+        # test sql db with ledger on
+        self.cmd('sql db create -g {} --server {} --name {} --ledger-on --yes'
+                       .format(resource_group, server, database_name_two),
+                       checks=[
+                           JMESPathCheck('resourceGroup', resource_group),
+                           JMESPathCheck('name', database_name_two),
+                           JMESPathCheck('location', resource_group_location),
+                           JMESPathCheck('ledgerOn', True)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                           JMESPathCheck('resourceGroup', resource_group),
+                           JMESPathCheck('name', database_name_two),
+                           JMESPathCheck('location', resource_group_location),
+                           JMESPathCheck('ledgerOn', True)])
+
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
@@ -736,6 +777,45 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 
+class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
+    def test_sql_db_short_term_retention(self):
+
+        # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
+        self.kwargs.update({
+            'resource_group': 'WestUS2ResourceGroup',
+            'server_name': 'lillian-westus2-server',
+            'database_name': 'ps5691',
+            'retention_days_v1': 7,
+            'diffbackup_hours_v1': 24,
+            'retention_days_v2': 6,
+            'diffbackup_hours_v2': 12
+        })
+
+        # Test UPDATE short term retention policy on live database, value updated to v1.
+        self.cmd(
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v1} --diffbackup-hours {diffbackup_hours_v1}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v1}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
+
+        # Test GET short term retention policy on live database, value equals to v1.
+        self.cmd(
+            'sql db str-policy show -g {resource_group} -s {server_name} -n {database_name}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v1}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
+
+        # Test UPDATE short term retention policy on live database, value updated to v2.
+        self.cmd(
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v2} --diffbackup-hours {diffbackup_hours_v2}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v2}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
+
+
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_long_term_retention(
             self):
@@ -827,7 +907,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'restore-dest-cli'
+            'dest_database_name': 'restore-dest-cli-temp'
         })
 
         self.cmd(
@@ -3217,7 +3297,8 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus')
     @SqlServerPreparer(location='eastus')
-    def test_sql_tdebyok(self, resource_group, server):
+    @KeyVaultPreparer(location='eastus', name_prefix='sqltdebyok')
+    def test_sql_tdebyok(self, resource_group, server, key_vault):
         resource_prefix = 'sqltdebyok'
 
         # add identity to server
@@ -3231,16 +3312,13 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, server, db_name))
 
         # create vault and acl server identity
-        vault_name = self.create_random_name(resource_prefix, 24)
-        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true'
-                 .format(resource_group, vault_name))
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, vault_name, server_identity))
+                 .format(resource_group, key_vault, server_identity))
 
         # create key
         key_name = self.create_random_name(resource_prefix, 32)
         key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
-                            .format(key_name, vault_name)).get_output_in_json()
+                            .format(key_name, key_vault)).get_output_in_json()
         kid = key_resp['key']['kid']
 
         # add server key
@@ -4892,7 +4970,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
         s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
 
-        failover_group_name = "fgclitest16578"
+        failover_group_name = "fgclitest16578-lulu"
 
         database_name = "db1"
 
@@ -5011,7 +5089,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         # Fail back to original server
-        self.cmd('sql failover-group set-primary --allow-data-loss -g {} -s {} -n {}'
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
                  .format(s1.group, s1.name, failover_group_name))
 
         # The failover operation is completed when new primary is promoted to primary role
@@ -5656,3 +5734,47 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         # Cancel log replay service
         self.cmd('sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --yes',
                  checks=NoneCheck())
+
+class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ResourceGroupPreparer()
+    @SqlServerPreparer(location='westcentralus')
+    def test_sql_ledger(self, resource_group, server):
+        db_name = self.create_random_name("sqlledgerdb", 20)
+        endpoint = "https://test.confidential-ledger.azure.com"
+
+        # create database
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(resource_group, server, db_name))
+
+        # validate ledger digest uploads is disabled by default
+        self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
+                 .format(resource_group, server, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])
+
+        # enable uploads to ACL dummy instance
+        self.cmd('sql db ledger-digest-uploads enable -g {} -s {} --name {} --endpoint {}'
+                 .format(resource_group, server, db_name, endpoint))
+
+        sleep(2)
+
+        # validate setting through show command 
+        self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
+                 .format(resource_group, server, db_name),
+                 checks=[JMESPathCheck('state', 'Enabled'),
+                        JMESPathCheck('digestStorageEndpoint', endpoint)])
+
+        # disable ledger digest uploads
+        self.cmd('sql db ledger-digest-uploads disable -g {} -s {} --name {}'
+                 .format(resource_group, server, db_name))
+
+        sleep(2)
+
+        # validate setting through show command 
+        self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
+                 .format(resource_group, server, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])
