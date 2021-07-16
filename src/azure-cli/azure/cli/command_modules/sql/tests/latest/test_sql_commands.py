@@ -397,7 +397,6 @@ class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', outbound_firewall_rule_allowed_fqdn_1)])
-                     #.get_output_in_json()
 
         # test sql server outbound-firewall-rule show by group/server/name
         self.cmd('sql server outbound-firewall-rule show -g {} --server {} --outbound-rule-fqdn {}'

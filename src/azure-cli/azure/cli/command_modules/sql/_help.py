@@ -1388,9 +1388,9 @@ helps['sql server outbound-firewall-rule show'] = """
 type: command
 short-summary: Shows the details for an outbound firewall rule.
 examples:
-  - name: Shows the outbound firewall rule
+  - name: Show the outbound firewall rule
     text: az sql server outbound-firewall-rule show -g mygroup -s myserver -n myrule
-  - name: Shows the outbound firewall rule
+  - name: Show the outbound firewall rule
     text: az sql server outbound-firewall-rule show -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
 """
 
@@ -1398,9 +1398,9 @@ helps['sql server outbound-firewall-rule delete'] = """
 type: command
 short-summary: Deletes the outbound firewall rule.
 examples:
-  - name: Deletes the outbound firewall rule
+  - name: Delete the outbound firewall rule
     text: az sql server outbound-firewall-rule delete -g mygroup -s myserver -n myrule
-  - name: Deletes the outbound firewall rule
+  - name: Delete the outbound firewall rule
     text: az sql server outbound-firewall-rule delete -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
 """
 

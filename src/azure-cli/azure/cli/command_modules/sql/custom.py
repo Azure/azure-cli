@@ -3721,20 +3721,6 @@ def outbound_firewall_rule_create(
         outbound_rule_fqdn=outbound_rule_fqdn)
 
 
-def outbound_firewall_rule_delete(
-        client,
-        server_name,
-        resource_group_name,
-        outbound_rule_fqdn):
-    '''
-    Deletes an existing outbound firewall rule.
-    '''
-    return client.delete(
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        outbound_rule_fqdn=outbound_rule_fqdn)
-
-
 #####
 #           sql server key
 #####
