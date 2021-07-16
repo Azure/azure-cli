@@ -1,15 +1,15 @@
 interactions:
 - request:
-    body: '{"annotations": [], "lastPublishTime": "2020-05-11T03:42:44Z", "activities":
-      [{"name": "Notebook1", "dependsOn": [], "policy": {"timeout": "7.00:00:00",
-      "retry": 0, "retryIntervalInSeconds": 30, "secureOutput": false, "secureInput":
-      false}, "userProperties": [], "typeProperties": {"notebook": {"referenceName":
-      "Notebook 1", "type": "NotebookReference"}}}], "properties": {"activities":
-      [{"policy": {"timeout": "7.00:00:00", "retry": 0, "retryIntervalInSeconds":
-      30, "secureOutput": false, "secureInput": false}, "name": "Notebook1", "type":
-      "SynapseNotebook", "dependsOn": [], "userProperties": [], "typeProperties":
-      {"notebook": {"type": "NotebookReference", "referenceName": "Notebook 1"}}}],
-      "annotations": []}}'
+    body: '{"activities": [{"name": "Notebook1", "dependsOn": [], "policy": {"timeout":
+      "7.00:00:00", "retry": 0, "retryIntervalInSeconds": 30, "secureOutput": false,
+      "secureInput": false}, "userProperties": [], "typeProperties": {"notebook":
+      {"referenceName": "Notebook1", "type": "NotebookReference"}, "snapshot": true}}],
+      "lastPublishTime": "2021-07-09T07:48:05Z", "annotations": [], "properties":
+      {"activities": [{"name": "Notebook1", "type": "SynapseNotebook", "dependsOn":
+      [], "userProperties": [], "policy": {"timeout": "7.00:00:00", "retry": 0, "retryIntervalInSeconds":
+      30, "secureInput": false, "secureOutput": false}, "typeProperties": {"notebook":
+      {"type": "NotebookReference", "referenceName": "Notebook1"}}}], "annotations":
+      []}}'
     headers:
       Accept:
       - application/json
@@ -18,16 +18,16 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '716'
+      - '732'
       Content-Type:
       - application/json
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/pipeline","recordId":226029,"state":"Creating","created":"2020-09-01T11:40:20.6733333Z","changed":"2020-09-01T11:40:20.6733333Z","type":"Pipeline","name":"pipeline","operationId":"475e0ab9-6c14-4b46-b08c-fb96305a4de9"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtest/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/pipelines/pipeline","recordId":706168,"state":"Creating","created":"2021-07-16T12:40:53.1333333Z","changed":"2021-07-16T12:40:53.1333333Z","type":"Pipeline","name":"pipeline","operationId":"0b60a43c-cfcd-4c0c-a7df-3b601d89edbd","artifactId":"7AC11583-4298-46AA-BFD1-FB93CC200236"}'
     headers:
       access-control-allow-headers:
       - Location
@@ -36,13 +36,13 @@ interactions:
       - Location
       - Retry-After
       content-length:
-      - '374'
+      - '424'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 01 Sep 2020 11:40:20 GMT
+      - Fri, 16 Jul 2021 12:40:52 GMT
       location:
-      - https://testsynapseworkspace.dev.azuresynapse.net/operationResults/475e0ab9-6c14-4b46-b08c-fb96305a4de9?api-version=2019-06-01-preview
+      - https://testingsynapseworkspace.dev.azuresynapse.net/operationResults/0b60a43c-cfcd-4c0c-a7df-3b601d89edbd?api-version=2019-06-01-preview
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -60,34 +60,33 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/operationResults/475e0ab9-6c14-4b46-b08c-fb96305a4de9?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/operationResults/0b60a43c-cfcd-4c0c-a7df-3b601d89edbd?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/pipeline","name":"pipeline","type":"Microsoft.Synapse/workspaces/pipelines","properties":{"activities":[{"policy":{"timeout":"7.00:00:00","retry":0,"retryIntervalInSeconds":30,"secureOutput":false,"secureInput":false},"name":"Notebook1","type":"SynapseNotebook","dependsOn":[],"userProperties":[],"typeProperties":{"notebook":{"type":"NotebookReference","referenceName":"Notebook
-        1"}}}],"annotations":[],"lastPublishTime":"2020-09-01T11:40:22Z"},"etag":"0b0038d1-0000-0100-0000-5f4e33260000"}'
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtest/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/pipelines/pipeline\",\n
+        \ \"name\": \"pipeline\",\n  \"type\": \"Microsoft.Synapse/workspaces/pipelines\",\n
+        \ \"properties\": {\n    \"activities\": [\n      {\n        \"name\": \"Notebook1\",\n
+        \       \"type\": \"SynapseNotebook\",\n        \"dependsOn\": [],\n        \"userProperties\":
+        [],\n        \"policy\": {\n          \"timeout\": \"7.00:00:00\",\n          \"retry\":
+        0,\n          \"retryIntervalInSeconds\": 30,\n          \"secureInput\":
+        false,\n          \"secureOutput\": false\n        },\n        \"typeProperties\":
+        {\n          \"notebook\": {\n            \"type\": \"NotebookReference\",\n
+        \           \"referenceName\": \"Notebook1\"\n          }\n        }\n      }\n
+        \   ],\n    \"annotations\": [],\n    \"lastPublishTime\": \"2021-07-16T12:40:54Z\"\n
+        \ },\n  \"etag\": \"68004a82-0000-3400-0000-60f17e560000\"\n}"
     headers:
-      cache-control:
-      - no-cache
       content-length:
-      - '648'
+      - '895'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 01 Sep 2020 11:40:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
+      - Fri, 16 Jul 2021 12:41:03 GMT
       server:
-      - Microsoft-IIS/10.0 Microsoft-HTTPAPI/2.0
+      - Kestrel Microsoft-HTTPAPI/2.0
       strict-transport-security:
-      - max-age=15724800; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
+      - max-age=31536000; includeSubDomains
     status:
       code: 200
       message: OK
@@ -101,34 +100,33 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/pipeline","name":"pipeline","type":"Microsoft.Synapse/workspaces/pipelines","properties":{"activities":[{"policy":{"timeout":"7.00:00:00","retry":0,"retryIntervalInSeconds":30,"secureOutput":false,"secureInput":false},"name":"Notebook1","type":"SynapseNotebook","dependsOn":[],"userProperties":[],"typeProperties":{"notebook":{"type":"NotebookReference","referenceName":"Notebook
-        1"}}}],"annotations":[],"lastPublishTime":"2020-09-01T11:40:22Z"},"etag":"0b0038d1-0000-0100-0000-5f4e33260000"}'
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtest/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/pipelines/pipeline\",\n
+        \ \"name\": \"pipeline\",\n  \"type\": \"Microsoft.Synapse/workspaces/pipelines\",\n
+        \ \"properties\": {\n    \"activities\": [\n      {\n        \"name\": \"Notebook1\",\n
+        \       \"type\": \"SynapseNotebook\",\n        \"dependsOn\": [],\n        \"userProperties\":
+        [],\n        \"policy\": {\n          \"timeout\": \"7.00:00:00\",\n          \"retry\":
+        0,\n          \"retryIntervalInSeconds\": 30,\n          \"secureInput\":
+        false,\n          \"secureOutput\": false\n        },\n        \"typeProperties\":
+        {\n          \"notebook\": {\n            \"type\": \"NotebookReference\",\n
+        \           \"referenceName\": \"Notebook1\"\n          }\n        }\n      }\n
+        \   ],\n    \"annotations\": [],\n    \"lastPublishTime\": \"2021-07-16T12:40:54Z\"\n
+        \ },\n  \"etag\": \"68004a82-0000-3400-0000-60f17e560000\"\n}"
     headers:
-      cache-control:
-      - no-cache
       content-length:
-      - '648'
+      - '895'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 01 Sep 2020 11:40:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
+      - Fri, 16 Jul 2021 12:41:04 GMT
       server:
-      - Microsoft-IIS/10.0 Microsoft-HTTPAPI/2.0
+      - Kestrel Microsoft-HTTPAPI/2.0
       strict-transport-security:
-      - max-age=15724800; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
+      - max-age=31536000; includeSubDomains
     status:
       code: 200
       message: OK
@@ -142,22 +140,20 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/pipelines?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/pipelines?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/Pipeline
-        1","name":"Pipeline 1","type":"Microsoft.Synapse/workspaces/pipelines","etag":"4200191d-0000-0100-0000-5eb8c9b40000","properties":{"activities":[{"name":"Notebook1","type":"SynapseNotebook","dependsOn":[],"policy":{"timeout":"7.00:00:00","retry":0,"retryIntervalInSeconds":30,"secureOutput":false,"secureInput":false},"userProperties":[],"typeProperties":{"notebook":{"referenceName":"Notebook
-        1","type":"NotebookReference"}}}],"annotations":[],"lastPublishTime":"2020-05-11T03:42:44Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/dongwwa_pipeline_8572","name":"dongwwa_pipeline_8572","type":"Microsoft.Synapse/workspaces/pipelines","etag":"300020f3-0000-0100-0000-5efb3f8b0000","properties":{"description":"testDescription","activities":[],"parameters":{"dongwwatest":{"type":"Array"}},"lastPublishTime":"2020-06-30T13:35:07Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/dongwwa_pipeline_6637","name":"dongwwa_pipeline_6637","type":"Microsoft.Synapse/workspaces/pipelines","etag":"30003ef4-0000-0100-0000-5efb3fa20000","properties":{"description":"testDescription","activities":[],"parameters":{"dongwwatest":{"type":"Array"}},"lastPublishTime":"2020-06-30T13:35:30Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/dongwwa_pipeline_5633","name":"dongwwa_pipeline_5633","type":"Microsoft.Synapse/workspaces/pipelines","etag":"300009ff-0000-0100-0000-5efb407e0000","properties":{"description":"testDescription","activities":[],"parameters":{"dongwwatest":{"type":"Array"}},"lastPublishTime":"2020-06-30T13:39:10Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/dongwwa_pipeline_7898","name":"dongwwa_pipeline_7898","type":"Microsoft.Synapse/workspaces/pipelines","etag":"3100f414-0000-0100-0000-5efb42930000","properties":{"description":"testDescription","activities":[],"parameters":{"dongwwatest":{"type":"Array"}},"lastPublishTime":"2020-06-30T13:48:03Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/dongwwa_pipeline_1795","name":"dongwwa_pipeline_1795","type":"Microsoft.Synapse/workspaces/pipelines","etag":"3100f714-0000-0100-0000-5efb42930000","properties":{"description":"testDescription","activities":[],"parameters":{"dongwwatest":{"type":"Array"}},"lastPublishTime":"2020-06-30T13:48:03Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/dongwwa_pipeline_6157","name":"dongwwa_pipeline_6157","type":"Microsoft.Synapse/workspaces/pipelines","etag":"3100578a-0000-0100-0000-5efb507b0000","properties":{"description":"testDescription","activities":[],"parameters":{"dongwwatest":{"type":"Array"}},"lastPublishTime":"2020-06-30T14:47:23Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/dongwwa_pipeline_8864","name":"dongwwa_pipeline_8864","type":"Microsoft.Synapse/workspaces/pipelines","etag":"3100068c-0000-0100-0000-5efb50af0000","properties":{"description":"testDescription","activities":[],"parameters":{"dongwwatest":{"type":"Array"}},"lastPublishTime":"2020-06-30T14:48:15Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/pipeline","name":"pipeline","type":"Microsoft.Synapse/workspaces/pipelines","etag":"0b0038d1-0000-0100-0000-5f4e33260000","properties":{"activities":[{"policy":{"timeout":"7.00:00:00","retry":0,"retryIntervalInSeconds":30,"secureOutput":false,"secureInput":false},"name":"Notebook1","type":"SynapseNotebook","dependsOn":[],"userProperties":[],"typeProperties":{"notebook":{"type":"NotebookReference","referenceName":"Notebook
-        1"}}}],"annotations":[],"lastPublishTime":"2020-09-01T11:40:22Z"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtest/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/pipelines/Pipeline1","name":"Pipeline1","type":"Microsoft.Synapse/workspaces/pipelines","etag":"4d009593-0000-3400-0000-60e7ff350000","properties":{"activities":[{"name":"Notebook1","type":"SynapseNotebook","dependsOn":[],"policy":{"timeout":"7.00:00:00","retry":0,"retryIntervalInSeconds":30,"secureOutput":false,"secureInput":false},"userProperties":[],"typeProperties":{"notebook":{"referenceName":"Notebook1","type":"NotebookReference"},"snapshot":true}}],"annotations":[],"lastPublishTime":"2021-07-09T07:48:05Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtest/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/pipelines/Pipeline2","name":"Pipeline2","type":"Microsoft.Synapse/workspaces/pipelines","etag":"4d000694-0000-3400-0000-60e7ff590000","properties":{"activities":[{"name":"Notebook1","type":"SynapseNotebook","dependsOn":[],"policy":{"timeout":"7.00:00:00","retry":0,"retryIntervalInSeconds":30,"secureOutput":false,"secureInput":false},"userProperties":[],"typeProperties":{"notebook":{"referenceName":"Notebook1","type":"NotebookReference"},"snapshot":true}}],"annotations":[],"lastPublishTime":"2021-07-09T07:48:41Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtest/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/pipelines/Pipeline3","name":"Pipeline3","type":"Microsoft.Synapse/workspaces/pipelines","etag":"4d00ba94-0000-3400-0000-60e7ffc00000","properties":{"description":"sdfg","activities":[{"name":"Notebook2","type":"SynapseNotebook","dependsOn":[],"policy":{"timeout":"7.00:00:00","retry":0,"retryIntervalInSeconds":30,"secureOutput":false,"secureInput":false},"userProperties":[],"typeProperties":{"notebook":{"referenceName":"Notebook1","type":"NotebookReference"},"snapshot":true}}],"annotations":[],"lastPublishTime":"2021-07-09T07:50:24Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtest/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/pipelines/Pipeline4","name":"Pipeline4","type":"Microsoft.Synapse/workspaces/pipelines","etag":"4d009895-0000-3400-0000-60e7ffe50000","properties":{"description":"fd
+        sdffd","activities":[{"name":"Notebook4","type":"SynapseNotebook","dependsOn":[],"policy":{"timeout":"7.00:00:00","retry":0,"retryIntervalInSeconds":30,"secureOutput":false,"secureInput":false},"userProperties":[],"typeProperties":{"notebook":{"referenceName":"Notebook1","type":"NotebookReference"},"snapshot":true}}],"annotations":[],"lastPublishTime":"2021-07-09T07:51:01Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtest/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/pipelines/pipeline","name":"pipeline","type":"Microsoft.Synapse/workspaces/pipelines","etag":"68004a82-0000-3400-0000-60f17e560000","properties":{"activities":[{"name":"Notebook1","type":"SynapseNotebook","dependsOn":[],"userProperties":[],"policy":{"timeout":"7.00:00:00","retry":0,"retryIntervalInSeconds":30,"secureInput":false,"secureOutput":false},"typeProperties":{"notebook":{"type":"NotebookReference","referenceName":"Notebook1"}}}],"annotations":[],"lastPublishTime":"2021-07-16T12:40:54Z"}}]}'
     headers:
       content-length:
-      - '4498'
+      - '3359'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 01 Sep 2020 11:40:34 GMT
+      - Fri, 16 Jul 2021 12:41:05 GMT
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -179,12 +175,12 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline/createRun?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline/createRun?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"runId":"f2de93e2-ec47-11ea-8e0c-448500a5b1ac"}'
+      string: '{"runId":"16a542a4-e633-11eb-93b2-e454e8c2e0df"}'
     headers:
       cache-control:
       - no-cache
@@ -193,7 +189,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 01 Sep 2020 11:40:46 GMT
+      - Fri, 16 Jul 2021 12:41:14 GMT
       expires:
       - '-1'
       pragma:
@@ -213,7 +209,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       Connection:
@@ -221,9 +217,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/pipelineruns/f2de93e2-ec47-11ea-8e0c-448500a5b1ac/cancel?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/pipelineruns/16a542a4-e633-11eb-93b2-e454e8c2e0df/cancel?api-version=2019-06-01-preview
   response:
     body:
       string: ''
@@ -233,7 +229,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 01 Sep 2020 11:40:48 GMT
+      - Fri, 16 Jul 2021 12:41:15 GMT
       expires:
       - '-1'
       pragma:
@@ -259,21 +255,64 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/pipelineruns/f2de93e2-ec47-11ea-8e0c-448500a5b1ac?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/pipelineruns/16a542a4-e633-11eb-93b2-e454e8c2e0df?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/f2de93e2-ec47-11ea-8e0c-448500a5b1ac","runId":"f2de93e2-ec47-11ea-8e0c-448500a5b1ac","debugRunId":null,"runGroupId":"f2de93e2-ec47-11ea-8e0c-448500a5b1ac","pipelineName":"pipeline","parameters":{},"invokedBy":{"id":"6db24b4007b647bdae631f21638c1ed5","name":"Manual","invokedByType":"Manual"},"runStart":"2020-09-01T11:40:36.2334913Z","runEnd":"2020-09-01T11:40:59.221821Z","durationInMs":22988,"status":"Cancelled","message":"","lastUpdated":"2020-09-01T11:40:59.221821Z","annotations":[],"runDimension":{},"isLatest":true}'
+      string: "{\n  \"id\": \"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/RGTEST/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTINGSYNAPSEWORKSPACE/pipelineruns/16a542a4-e633-11eb-93b2-e454e8c2e0df\",\n
+        \ \"runId\": \"16a542a4-e633-11eb-93b2-e454e8c2e0df\",\n  \"debugRunId\":
+        null,\n  \"runGroupId\": \"16a542a4-e633-11eb-93b2-e454e8c2e0df\",\n  \"pipelineName\":
+        \"pipeline\",\n  \"parameters\": {},\n  \"invokedBy\": {\n    \"id\": \"20bfca0fb89e417caa7d8e4f6dc31b26\",\n
+        \   \"name\": \"Manual\",\n    \"invokedByType\": \"Manual\"\n  },\n  \"runStart\":
+        \"2021-07-16T12:41:07.1682021Z\",\n  \"runEnd\": \"2021-07-16T12:41:34.1110826Z\",\n
+        \ \"durationInMs\": 26942,\n  \"status\": \"Cancelled\",\n  \"message\": \"\",\n
+        \ \"lastUpdated\": \"2021-07-16T12:41:34.1112695Z\",\n  \"annotations\": [],\n
+        \ \"runDimension\": {},\n  \"isLatest\": true\n}"
+    headers:
+      content-length:
+      - '768'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Jul 2021 12:41:35 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"lastUpdatedAfter": "2020-09-01T00:36:44.334576Z", "lastUpdatedBefore":
+      "2020-10-16T00:36:44.334576Z"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '103'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/queryPipelineRuns?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '12'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 01 Sep 2020 11:41:10 GMT
+      - Fri, 16 Jul 2021 12:41:37 GMT
       expires:
       - '-1'
       pragma:
@@ -304,69 +343,21 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/queryPipelineRuns?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline/pipelineruns/16a542a4-e633-11eb-93b2-e454e8c2e0df/queryActivityruns?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/ea66a454-ec34-11ea-a001-448500a5b1ac","runId":"ea66a454-ec34-11ea-a001-448500a5b1ac","debugRunId":null,"runGroupId":"ea66a454-ec34-11ea-a001-448500a5b1ac","pipelineName":"Pipeline
-        1","parameters":{},"invokedBy":{"id":"f8eea33848a34a8f932132b433c5ecb8","name":"Manual","invokedByType":"Manual"},"runStart":"2020-09-01T09:24:21.4296215Z","runEnd":"2020-09-01T09:28:08.353579Z","durationInMs":226923,"status":"Succeeded","message":"","lastUpdated":"2020-09-01T09:28:08.353579Z","annotations":[],"runDimension":{},"isLatest":true},{"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/9bd25ed0-ec3a-11ea-bdad-448500a5b1ac","runId":"9bd25ed0-ec3a-11ea-bdad-448500a5b1ac","debugRunId":null,"runGroupId":"9bd25ed0-ec3a-11ea-bdad-448500a5b1ac","pipelineName":"pipeline","parameters":{},"invokedBy":{"id":"3c5fc0980ed24db7a53c8747a8509203","name":"Manual","invokedByType":"Manual"},"runStart":"2020-09-01T10:05:06.4761951Z","runEnd":"2020-09-01T10:07:38.2715583Z","durationInMs":151795,"status":"Succeeded","message":"","lastUpdated":"2020-09-01T10:07:38.2715583Z","annotations":[],"runDimension":{},"isLatest":true},{"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/5065005a-ec3b-11ea-8228-448500a5b1ac","runId":"5065005a-ec3b-11ea-8228-448500a5b1ac","debugRunId":null,"runGroupId":"5065005a-ec3b-11ea-8228-448500a5b1ac","pipelineName":"pipeline","parameters":{},"invokedBy":{"id":"31b919d3fd6d471489379e74f62fa715","name":"Manual","invokedByType":"Manual"},"runStart":"2020-09-01T10:10:09.3554654Z","runEnd":"2020-09-01T10:10:54.7772587Z","durationInMs":45421,"status":"Succeeded","message":"","lastUpdated":"2020-09-01T10:10:54.7772587Z","annotations":[],"runDimension":{},"isLatest":true},{"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/778cb124-ec3b-11ea-b079-448500a5b1ac","runId":"778cb124-ec3b-11ea-b079-448500a5b1ac","debugRunId":null,"runGroupId":"778cb124-ec3b-11ea-b079-448500a5b1ac","pipelineName":"pipeline","parameters":{},"invokedBy":{"id":"f9880b5a31354dc499263c014e022e86","name":"Manual","invokedByType":"Manual"},"runStart":"2020-09-01T10:11:15.0472577Z","runEnd":"2020-09-01T10:12:02.7959448Z","durationInMs":47748,"status":"Succeeded","message":"","lastUpdated":"2020-09-01T10:12:02.7959448Z","annotations":[],"runDimension":{},"isLatest":true},{"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/a2df3c64-ec3b-11ea-b0c9-448500a5b1ac","runId":"a2df3c64-ec3b-11ea-b0c9-448500a5b1ac","debugRunId":null,"runGroupId":"a2df3c64-ec3b-11ea-b0c9-448500a5b1ac","pipelineName":"pipeline","parameters":{},"invokedBy":{"id":"cf25402726004512b46dcfc015ddf0a6","name":"Manual","invokedByType":"Manual"},"runStart":"2020-09-01T10:12:27.7653384Z","runEnd":"2020-09-01T10:13:23.3567842Z","durationInMs":55591,"status":"Succeeded","message":"","lastUpdated":"2020-09-01T10:13:23.3567842Z","annotations":[],"runDimension":{},"isLatest":true},{"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/9c76a94a-ec46-11ea-b59e-448500a5b1ac","runId":"9c76a94a-ec46-11ea-b59e-448500a5b1ac","debugRunId":null,"runGroupId":"9c76a94a-ec46-11ea-b59e-448500a5b1ac","pipelineName":"pipeline","parameters":{},"invokedBy":{"id":"79e3cf9fff6a4b81887cbca7ea87c43a","name":"Manual","invokedByType":"Manual"},"runStart":"2020-09-01T11:31:01.796892Z","runEnd":"2020-09-01T11:31:16.6195585Z","durationInMs":14822,"status":"Cancelled","message":"","lastUpdated":"2020-09-01T11:31:16.6195585Z","annotations":[],"runDimension":{},"isLatest":true},{"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/f200f812-ec46-11ea-a57b-448500a5b1ac","runId":"f200f812-ec46-11ea-a57b-448500a5b1ac","debugRunId":null,"runGroupId":"f200f812-ec46-11ea-a57b-448500a5b1ac","pipelineName":"pipeline","parameters":{},"invokedBy":{"id":"d1ff4ddb7ebc42f8a42c635c1c728f49","name":"Manual","invokedByType":"Manual"},"runStart":"2020-09-01T11:33:25.2600077Z","runEnd":"2020-09-01T11:33:46.6576457Z","durationInMs":21397,"status":"Cancelled","message":"","lastUpdated":"2020-09-01T11:33:46.6576457Z","annotations":[],"runDimension":{},"isLatest":true},{"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/f2de93e2-ec47-11ea-8e0c-448500a5b1ac","runId":"f2de93e2-ec47-11ea-8e0c-448500a5b1ac","debugRunId":null,"runGroupId":"f2de93e2-ec47-11ea-8e0c-448500a5b1ac","pipelineName":"pipeline","parameters":{},"invokedBy":{"id":"6db24b4007b647bdae631f21638c1ed5","name":"Manual","invokedByType":"Manual"},"runStart":"2020-09-01T11:40:36.2334913Z","runEnd":"2020-09-01T11:40:59.221821Z","durationInMs":22988,"status":"Cancelled","message":"","lastUpdated":"2020-09-01T11:40:59.221821Z","annotations":[],"runDimension":{},"isLatest":true}]}'
+      string: '{"value":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5490'
+      - '12'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 01 Sep 2020 11:41:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=15724800; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"lastUpdatedAfter": "2020-09-01T00:36:44.334576Z", "lastUpdatedBefore":
-      "2020-10-16T00:36:44.334576Z"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '103'
-      Content-Type:
-      - application/json
-      User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
-    method: POST
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline/pipelineruns/f2de93e2-ec47-11ea-8e0c-448500a5b1ac/queryActivityruns?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"value":[{"activityRunEnd":null,"activityName":"Notebook1","activityRunStart":"2020-09-01T11:40:47.8348462Z","activityType":"SynapseNotebook","durationInMs":null,"retryAttempt":null,"error":{"errorCode":"","message":"","failureType":"","target":"Notebook1"},"activityRunId":"7745a183-4dc7-4132-89bd-5dc0fe509ab5","iterationHash":"","input":{"notebook":{"type":"NotebookReference","referenceName":"Notebook
-        1"}},"linkedServiceName":"","output":{"status":{"livyInfo":{"notStartedAt":null,"startingAt":null,"idleAt":null,"deadAt":null,"shuttingDownAt":null,"killedAt":null,"recoveringAt":null,"busyAt":null,"errorAt":null,"currentState":"not_started","jobCreationRequest":{"name":"7745a183-4dc7-4132-89bd-5dc0fe509ab5","file":null,"className":null,"args":null,"jars":null,"files":null,"archives":null,"conf":{},"driverMemory":"28g","driverCores":4,"executorMemory":"28g","executorCores":4,"numExecutors":1}},"name":"7745a183-4dc7-4132-89bd-5dc0fe509ab5","workspaceName":"testsynapseworkspace","computeName":"testsparkpool","submitterName":null,"submitterId":"ee20d9e7-6295-4240-ba3f-c3784616c565","artifactId":"Livy","jobType":"SparkSession","result":"Uncertain","schedulerInfo":{"submittedAt":"2020-09-01T11:40:47.8694402Z","scheduledAt":null,"endedAt":null,"cancellationRequestedAt":null,"currentState":"Queued"},"pluginInfo":{"preparationStartedAt":null,"resourceAcquisitionStartedAt":null,"submissionStartedAt":null,"monitoringStartedAt":null,"cleanupStartedAt":null,"currentState":"Preparation"},"errorInfo":null,"tags":{},"id":293,"appId":null,"appInfo":null,"state":"not_started","log":null},"effectiveIntegrationRuntime":"DefaultIntegrationRuntime
-        (East US)","executionDuration":0,"durationInQueue":{"integrationRuntimeQueue":0}},"userProperties":{},"pipelineName":"pipeline","pipelineRunId":"f2de93e2-ec47-11ea-8e0c-448500a5b1ac","status":"Cancelled","recoveryStatus":"None","integrationRuntimeNames":null,"executionDetails":null,"id":"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/ZZY-TEST-RG/PROVIDERS/MICROSOFT.SYNAPSE/WORKSPACES/TESTSYNAPSEWORKSPACE/pipelineruns/f2de93e2-ec47-11ea-8e0c-448500a5b1ac/activityruns/7745a183-4dc7-4132-89bd-5dc0fe509ab5"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2185'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 01 Sep 2020 11:41:13 GMT
+      - Fri, 16 Jul 2021 12:41:38 GMT
       expires:
       - '-1'
       pragma:
@@ -386,7 +377,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       Connection:
@@ -394,25 +385,25 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/pipelines/pipeline","recordId":0,"state":"Deleting","created":"0001-01-01T00:00:00","changed":"0001-01-01T00:00:00","type":"Pipeline","name":"pipeline","operationId":"59073988-1149-47e2-b0d9-64fcad0f803f"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtest/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/pipelines/pipeline","recordId":0,"state":"Deleting","created":"0001-01-01T00:00:00","changed":"0001-01-01T00:00:00","type":"Pipeline","name":"pipeline","operationId":"f9c6da6b-9d01-4504-ab5f-dfbd8faab0cb"}'
     headers:
       access-control-allow-headers:
       - Location
       access-control-expose-headers:
       - Location
       content-length:
-      - '351'
+      - '349'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 01 Sep 2020 11:41:14 GMT
+      - Fri, 16 Jul 2021 12:41:39 GMT
       location:
-      - https://testsynapseworkspace.dev.azuresynapse.net/operationResults/59073988-1149-47e2-b0d9-64fcad0f803f?api-version=2019-06-01-preview
+      - https://testingsynapseworkspace.dev.azuresynapse.net/operationResults/f9c6da6b-9d01-4504-ab5f-dfbd8faab0cb?api-version=2019-06-01-preview
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -430,9 +421,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/operationResults/59073988-1149-47e2-b0d9-64fcad0f803f?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/operationResults/f9c6da6b-9d01-4504-ab5f-dfbd8faab0cb?api-version=2019-06-01-preview
   response:
     body:
       string: ''
@@ -440,7 +431,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 01 Sep 2020 11:41:44 GMT
+      - Fri, 16 Jul 2021 12:42:10 GMT
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -458,21 +449,21 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - azsdk-python-synapse/0.1.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - azsdk-python-synapse-artifacts/0.6.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://testsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline?api-version=2019-06-01-preview
+    uri: https://testingsynapseworkspace.dev.azuresynapse.net/pipelines/pipeline?api-version=2019-06-01-preview
   response:
     body:
       string: '{"code":"PipelineNotFound","message":"The Pipeline pipeline was not
-        found in (subscription=051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3 resourceGroup=zzy-test-rg
-        workspace=testsynapseworkspace)"}'
+        found in (subscription=051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3 resourceGroup=rgtest
+        workspace=testingsynapseworkspace)"}'
     headers:
       content-length:
-      - '187'
+      - '185'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 01 Sep 2020 11:41:45 GMT
+      - Fri, 16 Jul 2021 12:42:11 GMT
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:

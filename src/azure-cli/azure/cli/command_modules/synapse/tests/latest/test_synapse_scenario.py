@@ -120,7 +120,6 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse spark pool show --name {spark-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
-    @record_only()
     @unittest.skip('(keyvaultfailure) KeyVault set-policy failed with Bad Request')
     def test_workspace_with_cmk(self):
         self.kwargs.update({
@@ -303,16 +302,15 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql pool show --name {sql-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
-    @record_only()
     def test_sql_pool_restore_and_list_deleted(self):
         self.kwargs.update({
             'location': 'eastus2euap',
-            'workspace': 'zes0219test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'rivertiger0220 ',
-            'performance-level': 'DW1000c',
+            'workspace': 'testingsynapseworkspace',
+            'rg': 'rgtest',
+            'sql-pool': 'testsqlpool ',
+            'performance-level': 'DW300c',
             'dest-sql-pool': self.create_random_name(prefix='destsqlpool', length=15),
-            'restore-point-time': '2021-05-24T08:09:15'
+            'restore-point-time': '2021-07-09T06:50:57'
         })
 
         # restore sql pool
@@ -344,13 +342,14 @@ class SynapseScenarioTests(ScenarioTest):
                      self.greater_than("length([])", 0)
                  ])
 
-    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool_classification_and_recommendation(self):
         self.kwargs.update({
             'location': 'eastus2euap',
-            'workspace': 'zes0514test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'sqlzes0514test',
+            'workspace': 'testingsynapseworkspace',
+            'rg': 'rgtest',
+            'sql-pool': 'testsqlpool',
+            'performance-level': 'DW400c',
             'schema': 'dbo',
             'table': 'Persons',
             'column': 'City',
@@ -1103,10 +1102,9 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse dataset show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
     def test_pipeline(self):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspace',
+            'workspace': 'testingsynapseworkspace',
             'name': 'pipeline',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'pipeline.json')
         })
@@ -1167,14 +1165,13 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse pipeline show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
     def test_trigger(self):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspace',
+            'workspace': 'testingsynapseworkspace',
             'name': 'trigger',
             'event-trigger': 'EventTrigger',
             'tumbling-window-trigger': 'TumblingWindowTrigger',
-            'run-id': '08586024051698130326966471413CU40',
+            'run-id': '08585751736833675609074740182CU26',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'trigger.json')
         })
 
@@ -1212,8 +1209,6 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('status', 'Provisioning')
             ])
-        import time
-        time.sleep(20)
 
         # get event subscription status
         self.cmd(
@@ -1226,7 +1221,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse trigger unsubscribe-from-event --workspace-name {workspace} --name {event-trigger}',
             checks=[
-                self.check('status', 'Deprovisioning')
+                self.check('status', 'Disabled')
             ])
 
         # start a trigger
@@ -1246,7 +1241,6 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse trigger stop --workspace-name {workspace} --name {tumbling-window-trigger}')
 
-    @record_only()
     @unittest.skip('(InvalidTokenIssuer) Token Authentication failed with SecurityTokenInvalidIssuerException')
     def test_data_flow(self):
         self.kwargs.update({
@@ -1350,15 +1344,14 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
     def test_integration_runtime(self):
         self.kwargs.update({
-            'rg': 'chayang-test-rg',
-            'workspace': 'zes0219test',
+            'rg': 'rgtest',
+            'workspace': 'testingsynapseworkspace',
             'name': 'integrationruntime',
             'type': 'Managed',
-            'selfhosted-integration-runtime': 'IntegrationRuntime0219selfhosted0507',
-            'node': 'MININT-Q3EGQJ8'})
+            'selfhosted-integration-runtime': 'SelfHostedIntegrationRuntime',
+            'node': 'testnode'})
 
         # create integration runtime
         self.cmd(
