@@ -194,11 +194,11 @@ def cf_mgmt_encryption_scope(cli_ctx, _):
     return storage_client_factory(cli_ctx).encryption_scopes
 
 
-def get_account_url(cli_ctx, account_name, service):
+def get_account_url(cli_ctx, account_name, service, endpoint_suffix=None):
     from knack.util import CLIError
     if account_name is None:
         raise CLIError("Please provide storage account name or connection string.")
-    storage_endpoint = cli_ctx.cloud.suffixes.storage_endpoint
+    storage_endpoint = cli_ctx.cloud.suffixes.storage_endpoint if not endpoint_suffix else endpoint_suffix
     return "https://{}.{}.{}".format(account_name, service, storage_endpoint)
 
 
@@ -219,6 +219,7 @@ def cf_blob_service(cli_ctx, kwargs):
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
+    endpoint_suffix = kwargs.pop('endpoint_suffix', None)
 
     if connection_string:
         try:
@@ -230,8 +231,15 @@ def cf_blob_service(cli_ctx, kwargs):
                                             recommendation='Try `az storage account show-connection-string` '
                                                            'to get a valid connection string')
 
-    account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
-    credential = account_key or sas_token or token_credential
+    account_url = get_account_url(cli_ctx, account_name=account_name, service='blob', endpoint_suffix=endpoint_suffix)
+    account_name, _ = account_name.split('.', 2)
+    if account_key:
+        credential = {
+            "account_name": account_name,
+            "account_key": account_key
+        }
+    else:
+        credential = token_credential or sas_token
 
     return t_blob_service(account_url=account_url, credential=credential, **client_kwargs)
 
