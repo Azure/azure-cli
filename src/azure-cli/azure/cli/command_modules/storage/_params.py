@@ -1687,6 +1687,34 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=validate_fs_public_access,
                    help="Specify whether data in the file system may be accessed publicly and the level of access.")
 
+    with self.argument_context('storage fs generate-sas') as c:
+        t_file_system_permissions = self.get_sdk('_models#FileSystemSasPermissions',
+                                                 resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_sas_arguments()
+        c.argument('file_system', options_list=['--name', '-n'], help="File system name.")
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy.')
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format(get_permission_help_string(t_file_system_permissions)),
+                   validator=get_permission_validator(t_file_system_permissions))
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+                                         'using this shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
+                                               'using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+                                        'using this shared access signature.')
+        c.argument('as_user', min_api='2018-11-09', action='store_true',
+                   validator=as_user_validator,
+                   help="Indicates that this command return the SAS signed with the user delegation key. "
+                        "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.ignore('sas_token')
+        c.argument('full_uri', action='store_true',
+                   help='Indicate that this command return the full blob URI and the shared access signature token.')
+
     with self.argument_context('storage fs list') as c:
         c.argument('include_metadata', arg_type=get_three_state_flag(),
                    help='Specify that file system metadata be returned in the response. The default value is "False".')

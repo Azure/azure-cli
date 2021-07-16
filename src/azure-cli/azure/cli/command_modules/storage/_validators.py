@@ -754,12 +754,30 @@ def validate_metadata(namespace):
 
 
 def get_permission_help_string(permission_class):
-    allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
+    allowed_values = get_permission_allowed_values(permission_class)
     return ' '.join(['({}){}'.format(x[0], x[1:]) for x in allowed_values])
 
 
+def get_permission_allowed_values(permission_class):
+    if permission_class:
+        instance = permission_class()
+
+        allowed_values = [x.lower() for x in dir(instance) if not x.startswith('_')]
+        if 'from_string' in allowed_values:
+            allowed_values.remove('from_string')
+        for i, item in enumerate(allowed_values):
+            if item == 'delete_previous_version':
+                allowed_values[i] = 'x' + item
+            if item == 'manage_access_control':
+                allowed_values[i] = 'permissions'
+            if item == 'manage_ownership':
+                allowed_values[i] = 'ownership'
+        return allowed_values
+    return None
+
+
 def get_permission_validator(permission_class):
-    allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
+    allowed_values = get_permission_allowed_values(permission_class)
     allowed_string = ''.join(x[0] for x in allowed_values)
 
     def validator(namespace):
@@ -768,7 +786,10 @@ def get_permission_validator(permission_class):
                 help_string = get_permission_help_string(permission_class)
                 raise ValueError(
                     'valid values are {} or a combination thereof.'.format(help_string))
-            namespace.permission = permission_class(_str=namespace.permission)
+            if hasattr(permission_class, 'from_string'):
+                namespace.permission = permission_class.from_string(namespace.permission)
+            else:
+                namespace.permission = permission_class(_str=namespace.permission)
 
     return validator
 
