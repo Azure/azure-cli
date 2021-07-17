@@ -334,23 +334,23 @@ def set_key(cmd,
             raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
 
         if retrieved_kv is None:
-            if content_type and __is_json_content_type(content_type):
+            if __is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
-                    value = 'null' if value is None else value
+                    value = '""' if value is None else value
                     json.loads(value)
                 except ValueError:
                     raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
             set_kv = ConfigurationSetting(key=key,
                                           label=label,
-                                          value=value,
-                                          content_type=content_type,
+                                          value="" if value is None else value,
+                                          content_type="" if content_type is None else content_type,
                                           tags=tags)
         else:
             value = retrieved_kv.value if value is None else value
             content_type = retrieved_kv.content_type if content_type is None else content_type
-            if content_type and __is_json_content_type(content_type):
+            if __is_json_content_type(content_type):
                 try:
                     # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
                     json.loads(value)
