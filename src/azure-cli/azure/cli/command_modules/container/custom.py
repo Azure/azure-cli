@@ -8,17 +8,19 @@
 import errno
 try:
     import msvcrt
+    from ._vt_helper import enable_vt_mode
 except ImportError:
     # Not supported for Linux machines.
     pass
+import os
 import platform
-import select
 import shlex
 import signal
 import sys
 import threading
 import time
 try:
+    import fcntl
     import termios
     import tty
 except ImportError:
@@ -619,79 +621,119 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
         execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_command, terminal_size)
 
         if platform.system() is WINDOWS_NAME:
-            _start_exec_pipe_win(execContainerResponse.web_socket_uri, execContainerResponse.password)
+            _start_exec_pipe_windows(execContainerResponse.web_socket_uri, execContainerResponse.password)
         else:
-            _start_exec_pipe(execContainerResponse.web_socket_uri, execContainerResponse.password)
+            _start_exec_pipe_linux(execContainerResponse.web_socket_uri, execContainerResponse.password)
 
     else:
         raise CLIError('--container-name required when container group has more than one container.')
 
 
-def _start_exec_pipe_win(web_socket_uri, password):
-
-    def _on_ws_open(ws):
+def _start_exec_pipe_windows(web_socket_uri, password):
+    def _on_ws_open_windows(ws):
         ws.send(password)
-        t = threading.Thread(target=_capture_stdin, args=[ws])
-        t.daemon = True
-        t.start()
-
-    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open, on_message=_on_ws_msg)
-
+        readKeyboard = threading.Thread(target=_capture_stdin_windows, args=[ws], daemon=True)
+        readKeyboard.start()
+    enable_vt_mode()
+    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_windows, on_message=_on_ws_msg)
     ws.run_forever()
 
 
 def _on_ws_msg(ws, msg):
+    if isinstance(msg, bytes):
+        msg = msg.decode()
     sys.stdout.write(msg)
     sys.stdout.flush()
 
 
-def _capture_stdin(ws):
+def _capture_stdin_windows(ws):
     while True:
-        if msvcrt.kbhit:
-            x = msvcrt.getch()
-            ws.send(x)
+        try:
+            x = _getkey_windows()
+            x = x.encode()
+            ws.send(x, opcode=0x2) # OPCODE_BINARY = 0x2
+        except (OSError, IOError, websocket.WebSocketConnectionClosedException) as e:
+            if isinstance(e, websocket.WebSocketConnectionClosedException):
+                pass
+            elif e.errno == 9: # [Errno 9] Bad file descriptor, happens when ws is closed and we try to write to it
+                pass
+            elif e.args and e.args[0] == errno.EINTR:
+                pass
+            else:
+                raise
 
 
-def _start_exec_pipe(web_socket_uri, password):
-    ws = websocket.create_connection(web_socket_uri)
+def _getkey_windows():
+    c = _getch_windows(nonblocking=False)
+    while (ct := _getch_windows(nonblocking=True)) != "":
+        c += ct
+        if len(c) > 100:
+            break
 
-    oldtty = termios.tcgetattr(sys.stdin)
+    return c
+
+
+def _getch_windows(nonblocking: bool = False):
+    if nonblocking and not msvcrt.kbhit():
+        return ""
+    return msvcrt.getwch()
+
+
+def _start_exec_pipe_linux(web_socket_uri, password):
+    stdin_fd = sys.stdin.fileno()
+    old_tty = termios.tcgetattr(stdin_fd)
     old_handler = signal.getsignal(signal.SIGWINCH)
-
-    try:
-        tty.setraw(sys.stdin.fileno())
-        tty.setcbreak(sys.stdin.fileno())
+    def _on_ws_open_linux(ws):
+        tty.setraw(stdin_fd)
+        tty.setcbreak(stdin_fd)
         ws.send(password)
-        while True:
-            try:
-                if not _cycle_exec_pipe(ws):
-                    break
-            except (select.error, IOError) as e:
-                if e.args and e.args[0] == errno.EINTR:
-                    pass
-                else:
-                    raise
-    except websocket.WebSocketException:
-        pass
+        readKeyboard = threading.Thread(target=_capture_stdin_linux, args=[ws], daemon=True)
+        readKeyboard.start()
+
+    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_linux, on_message=_on_ws_msg)
+    ws.run_forever()
+    termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_tty)
+    signal.signal(signal.SIGWINCH, old_handler)
+
+
+def _capture_stdin_linux(ws):
+    while True:
+        try:
+            x = _getkey_linux()
+            x = x.encode()
+            ws.send(x, opcode=0x2) # OPCODE_BINARY = 0x2
+        except (OSError, IOError, websocket.WebSocketConnectionClosedException) as e:
+            if isinstance(e, websocket.WebSocketConnectionClosedException):
+                pass
+            elif e.errno == 9: # [Errno 9] Bad file descriptor
+                pass
+            elif e.args and e.args[0] == errno.EINTR:
+                pass
+            else:
+                raise
+
+
+def _getkey_linux():
+    c = _getch_linux(nonblocking=False)
+    while (ct := _getch_linux(nonblocking=True)) != "":
+        c += ct
+        if len(c) > 100:
+            break
+
+    return c
+
+
+def _getch_linux(nonblocking: bool):
+    stdin_fd = sys.stdin.fileno()
+    old_flags = fcntl.fcntl(stdin_fd, fcntl.F_GETFL)
+    try:
+        if nonblocking:
+            fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flags | os.O_NONBLOCK)
+        ch = sys.stdin.read(1)
     finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
-        signal.signal(signal.SIGWINCH, old_handler)
+        fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flags)
 
-
-def _cycle_exec_pipe(ws):
-    r, _, _ = select.select([ws.sock, sys.stdin], [], [])
-    if ws.sock in r:
-        data = ws.recv()
-        if isinstance(data, bytes):
-            data = data.decode('utf-8')
-        sys.stdout.write(data)
-        sys.stdout.flush()
-    if sys.stdin in r:
-        x = sys.stdin.read(1)
-        if not x:
-            return True
-        ws.send(x)
-    return True
+    return ch
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
