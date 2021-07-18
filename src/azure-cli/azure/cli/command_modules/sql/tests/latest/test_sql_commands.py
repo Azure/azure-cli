@@ -76,6 +76,7 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
+    subscription_id = '4cac86b0-1e56-48c2-9df2-669a6d2d87c5'
     location = 'westeurope'
     subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance'
     group = 'Committer-SwaggerAndGeneratedSDKs-MI-CLI'
@@ -5038,7 +5039,7 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
         if not (self.in_recording or self.is_live):
             self.kwargs.update({
-                'subnet_id': subnet.replace("4b9746e4-d324-4e1d-be53-ec3c8f3a0c18",
+                'subnet_id': subnet.replace(ManagedInstancePreparer.subscription_id,
                                             "00000000-0000-0000-0000-000000000000")
             })
 
