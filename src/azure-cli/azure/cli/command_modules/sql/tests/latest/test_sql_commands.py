@@ -81,6 +81,13 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     group = 'Committer-SwaggerAndGeneratedSDKs-MI-CLI'
     collation = "Serbian_Cyrillic_100_CS_AS"
 
+    licence = 'LicenseIncluded'
+    v_core = 8
+    storage = 32
+    edition = 'GeneralPurpose'
+    family = 'Gen5'
+    proxy = 'Proxy'
+
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', skip_delete=False):
@@ -98,14 +105,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.otherParams = otherParams
 
     def create_resource(self, name, **kwargs):
-        licence = 'LicenseIncluded'
-        v_core = 8
-        storage = 32
-        edition = 'GeneralPurpose'
-        family = 'Gen5'
-        proxy = 'Proxy'
-
-        template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {} --collation {} --capacity {} --storage {} --edition {} --family {} --tags {} --proxy-override {}'
+        template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {}' \
+                   ' --collation {} --capacity {} --storage {} --edition {} --family {} --tags {}' \
+                   ' --proxy-override {}'
         if self.public:
             template += ' --public-data-endpoint-enabled'
 
@@ -127,8 +129,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         execute(DummyCli(), template.format(
             self.group, name, self.location,
             self.admin_user, self.admin_password,
-            self.subnet, licence, self.collation,
-            v_core, storage, edition, family, self.tags, proxy))
+            self.subnet, self.licence, self.collation,
+            self.v_core, self.storage, self.edition,
+            self.family, self.tags, self.proxy))
         return {self.parameter_name: name, 'rg': self.group}
 
     def remove_resource(self, name, **kwargs):
@@ -4211,19 +4214,18 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
                  )
 
 
-# Ji: not pass due to record only
+
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
-    # @record_only()
     @ManagedInstancePreparer()
     def test_sql_instance_pool(self, mi, rg):
         print("Starting instance pool tests")
         instance_pool_name_1 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
         instance_pool_name_2 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
-        license_type = 'LicenseIncluded'
+        license_type = ManagedInstancePreparer.licence
         location = ManagedInstancePreparer.location
-        v_cores = 8
-        edition = 'GeneralPurpose'
-        family = 'Gen5'
+        v_cores = ManagedInstancePreparer.v_core
+        edition = ManagedInstancePreparer.edition
+        family = ManagedInstancePreparer.family
         resource_group = rg
 
         subnet = ManagedInstancePreparer.subnet
@@ -4322,6 +4324,12 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         # test delete sql managed instance
         self.cmd('sql instance-pool delete -g {} -n {} --yes --no-wait'
                  .format(resource_group, instance_pool_name_2), checks=NoneCheck())
+
+        # verify all created instance pool above have been deleted
+        self.cmd('sql instance-pool list -g {}'
+                 .format(resource_group),
+                 checks=[
+                     JMESPathCheck('length(@)', num_pools)])
 
 
 class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
@@ -4750,8 +4758,6 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
 # need specific setting for the oid
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
-
-    # Remove when issue #9393 is fixed.
     @ManagedInstancePreparer()
     def test_sql_mi_aad_admin(self, mi, rg):
         print('Test is started...\n')
@@ -5019,59 +5025,16 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
 
-# need to delete the MI, thus have to walkaround to test
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
-
-    def test_sql_virtual_cluster_mgmt(self):
-        loc = 'westcentralus'
-        resource_group = 'autobot-managed-instance-v12'
-        subnet = '/subscriptions/4b9746e4-d324-4e1d-be53-ec3c8f3a0c18/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet'
+    @ManagedInstancePreparer()
+    def test_sql_virtual_cluster_mgmt(self, mi, rg):
+        subnet = ManagedInstancePreparer.subnet
 
         self.kwargs.update({
-            'rg': resource_group,
-            'loc': loc,
-            'vnet_name': 'vcCliTestVnet7',
-            'subnet_name': 'vcCliTestSubnet7',
-            'route_table_name': 'vcCliTestRouteTable7',
-            'route_name_internet': 'vcCliTestRouteInternet',
-            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
-            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
-                                                             managed_instance_name_max_length),
-            'admin_login': 'admin123',
-            'admin_password': 'SecretPassword123',
-            'license_type': 'LicenseIncluded',
-            'v_cores': 8,
-            'storage_size_in_gb': '32',
-            'edition': 'GeneralPurpose',
-            'family': 'Gen5',
-            'collation': ManagedInstancePreparer.collation,
-            'proxy_override': "Proxy",
-            'delegations': "Microsoft.Sql/managedInstances"
+            'loc': ManagedInstancePreparer.location,
+            'subnet_id': subnet,
+            'rg': rg
         })
-
-        self.kwargs.update({
-            'subnet_id': subnet
-        })
-
-        # create sql managed_instance
-        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
-                 checks=[
-                     self.check('name', '{managed_instance_name}'),
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('administratorLogin', '{admin_login}'),
-                     self.check('vCores', '{v_cores}'),
-                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                     self.check('licenseType', '{license_type}'),
-                     self.check('sku.tier', '{edition}'),
-                     self.check('sku.family', '{family}'),
-                     self.check('sku.capacity', '{v_cores}'),
-                     self.check('identity', None),
-                     self.check('collation', '{collation}'),
-                     self.check('proxyOverride', '{proxy_override}'),
-                     self.check('publicDataEndpointEnabled', 'True')])
 
         if not (self.in_recording or self.is_live):
             self.kwargs.update({
@@ -5109,9 +5072,6 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
                      self.check('name', '{vc_name}'),
                      self.check('resourceGroup', '{rg}'),
                      self.check('subnetId', '{subnet_id}')])
-
-        # delete sql managed instance
-        self.cmd('sql mi delete -g {rg} -n {managed_instance_name} --yes', checks=NoneCheck())
 
 
 # need another instance in different region in order to create Failover group

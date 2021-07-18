@@ -3460,6 +3460,18 @@ def instance_pool_create(
                        parameters=kwargs)
 
 
+def instance_pool_update(
+        instance,
+        tags=None):
+    '''
+    Updates a instance pool
+    '''
+
+    instance.tags = tags
+
+    return instance
+
+
 def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
     '''
     Validate if the sku family and edition input by user are permissible in the region using
