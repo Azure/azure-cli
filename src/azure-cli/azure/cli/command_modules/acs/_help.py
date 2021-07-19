@@ -449,6 +449,9 @@ parameters:
   - name: --enable-azure-rbac
     type: bool
     short-summary: Enable Azure RBAC to control authorization checks on cluster.
+  - name: --edge-zone
+    type: string
+    short-summary: The name of the Edge Zone.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -494,6 +497,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
   - name: Create a kubernetes cluster with custom control plane identity and kubelet identity.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --assign-identity <control-plane-identity-resource-id> --assign-kubelet-identity <kubelet-identity-resource-id>
+  - name: Create a kubernetes cluster in the Edge Zone.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --location <location> --kubernetes-version 1.20.7 --edge-zone <edge-zone-name>
 """
 
 helps['aks update'] = """
