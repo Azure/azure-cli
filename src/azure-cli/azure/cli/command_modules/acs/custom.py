@@ -47,11 +47,12 @@ from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (ResourceNotFoundError,
-                                       ArgumentUsageError,
                                        ClientRequestError,
+                                       ArgumentUsageError,
                                        InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
-                                       ValidationError)
+                                       ValidationError,
+                                       UnauthorizedError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -100,6 +101,7 @@ from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLE
 from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
 from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM
+from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
 
 logger = get_logger(__name__)
 
@@ -784,10 +786,16 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
     return properties
 
 
-def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    pattern = '/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'  # pylint: disable=line-too-long
+def _get_user_assigned_identity_resource_id_regular_expression():
+    return re.compile(
+        r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)',
+        flags=re.IGNORECASE)
+
+
+def _get_user_assigned_identity(cli_ctx, resource_id):
     resource_id = resource_id.lower()
-    match = re.search(pattern, resource_id)
+    _re_user_assigned_identity_resource_id = _get_user_assigned_identity_resource_id_regular_expression()
+    match = _re_user_assigned_identity_resource_id.search(resource_id)
     if match:
         subscription_id = match.group(1)
         resource_group_name = match.group(2)
@@ -798,12 +806,19 @@ def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
                                                                resource_name=identity_name)
         except CloudError as ex:
             if 'was not found' in ex.message:
-                raise ResourceNotFoundError(
-                    "Identity {} not found.".format(resource_id))
+                raise ResourceNotFoundError("Identity {} not found.".format(resource_id))
             raise ClientRequestError(ex.message)
-        return identity.client_id
+        return identity
     raise InvalidArgumentValueError(
         "Cannot parse identity name from provided resource id {}.".format(resource_id))
+
+
+def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
+    return _get_user_assigned_identity(cli_ctx, resource_id).client_id
+
+
+def _get_user_assigned_identity_object_id(cli_ctx, resource_id):
+    return _get_user_assigned_identity(cli_ctx, resource_id).principal_id
 
 
 # pylint: disable=too-many-locals
@@ -1958,6 +1973,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_watch_namespace=None,
                enable_sgxquotehelper=False,
                enable_encryption_at_host=False,
+               assign_kubelet_identity=None,
+               enable_ultra_ssd=False,
+               edge_zone=None,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
@@ -1991,6 +2009,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
+    ManagedClusterPropertiesIdentityProfileValue = cmd.get_models('ManagedClusterPropertiesIdentityProfileValue',
+                                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                                  operation_group='managed_clusters')
     ManagedCluster = cmd.get_models('ManagedCluster',
                                     resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                     operation_group='managed_clusters')
@@ -2034,6 +2055,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         enable_node_public_ip=enable_node_public_ip,
         node_public_ip_prefix_id=node_public_ip_prefix_id,
         enable_encryption_at_host=enable_encryption_at_host,
+        enable_ultra_ssd=enable_ultra_ssd,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -2289,6 +2311,25 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             user_assigned_identities=user_assigned_identity
         )
 
+    identity_profile = None
+    if assign_kubelet_identity:
+        if not assign_identity:
+            # pylint: disable=line-too-long
+            raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
+        kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
+        identity_profile = {
+            'kubeletidentity': ManagedClusterPropertiesIdentityProfileValue(
+                resource_id=assign_kubelet_identity,
+                client_id=kubelet_identity.client_id,
+                object_id=kubelet_identity.principal_id
+            )
+        }
+        cluster_identity_object_id = _get_user_assigned_identity_object_id(cmd.cli_ctx, assign_identity)
+        # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
+        _ensure_cluster_identity_permission_on_kubelet_identity(
+            cmd.cli_ctx,
+            cluster_identity_object_id)
+
     mc = ManagedCluster(
         location=location,
         tags=tags,
@@ -2305,7 +2346,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         auto_scaler_profile=cluster_autoscaler_profile,
         api_server_access_profile=api_server_access_profile,
         identity=identity,
-        disk_encryption_set_id=node_osdisk_diskencryptionset_id
+        disk_encryption_set_id=node_osdisk_diskencryptionset_id,
+        identity_profile=identity_profile
     )
 
     use_custom_private_dns_zone = False
@@ -2331,6 +2373,18 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         mc.sku = ManagedClusterSKU(
             name="Basic",
             tier="Paid"
+        )
+
+    if edge_zone:
+        ExtendedLocation = cmd.get_models('ExtendedLocation',
+                                          resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                          operation_group='managed_clusters')
+        ExtendedLocationTypes = cmd.get_models('ExtendedLocationTypes',
+                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                               operation_group='managed_clusters')
+        mc.extended_location = ExtendedLocation(
+            name=edge_zone,
+            type=ExtendedLocationTypes.EDGE_ZONE
         )
 
     # Add AAD session key to header.
@@ -2484,6 +2538,12 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     else:
         credentialResults = client.list_cluster_user_credentials(
             resource_group_name, name)
+
+    # Check if KUBECONFIG environmental variable is set
+    # If path is different than default then that means -f/--file is passed
+    # in which case we ignore the KUBECONFIG variable
+    if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
+        path = os.environ["KUBECONFIG"]
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
@@ -3801,6 +3861,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       max_surge=None,
                       mode="User",
                       enable_encryption_at_host=False,
+                      enable_ultra_ssd=False,
                       no_wait=False):
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -3854,6 +3915,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         node_taints=taints_array,
         upgrade_settings=upgradeSettings,
         enable_encryption_at_host=enable_encryption_at_host,
+        enable_ultra_ssd=enable_ultra_ssd,
         mode=mode
     )
 
@@ -4690,3 +4752,23 @@ def _put_managed_cluster_ensuring_permission(
                               headers=headers)
 
     return cluster
+
+
+def _ensure_cluster_identity_permission_on_kubelet_identity(cli_ctx, cluster_identity_object_id, scope):
+    factory = get_auth_management_client(cli_ctx, scope)
+    assignments_client = factory.role_assignments
+
+    for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
+        if i.scope.lower() != scope.lower():
+            continue
+        if not i.role_definition_id.lower().endswith(CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID):
+            continue
+        if i.principal_id.lower() != cluster_identity_object_id.lower():
+            continue
+        # already assigned
+        return
+
+    if not _add_role_assignment(cli_ctx, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
+                                is_service_principal=False, scope=scope):
+        raise UnauthorizedError('Could not grant Managed Identity Operator '
+                                'permission to cluster identity at scope {}'.format(scope))

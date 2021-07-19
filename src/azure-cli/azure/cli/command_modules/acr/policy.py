@@ -45,7 +45,7 @@ def acr_config_content_trust_update(cmd,
     RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
     parameters = RegistryUpdateParameters(policies=policies)
     updated_policies = LongRunningOperation(cmd.cli_ctx)(
-        client.update(resource_group_name, registry_name, parameters)
+        client.begin_update(resource_group_name, registry_name, parameters)
     )
     return updated_policies.policies.trust_policy
 
@@ -87,6 +87,6 @@ def acr_config_retention_update(cmd,
 
     parameters = RegistryUpdateParameters(policies=policies)
     updated_policies = LongRunningOperation(cmd.cli_ctx)(
-        client.update(resource_group_name, registry_name, parameters)
+        client.begin_update(resource_group_name, registry_name, parameters)
     )
     return updated_policies.policies.retention_policy

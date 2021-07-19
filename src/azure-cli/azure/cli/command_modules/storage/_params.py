@@ -553,6 +553,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    type=get_api_version_type(), min_api='2018-07-01',
                    help="Indicate the default version to use for requests to the Blob service if an incoming request's "
                         "version is not specified.")
+        c.argument('enable_last_access_tracking', arg_type=get_three_state_flag(), min_api='2019-06-01',
+                   options_list=['--enable-last-access-tracking', '-t'],
+                   help='When set to true last access time based tracking policy is enabled.')
 
     with self.argument_context('storage account file-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -1257,6 +1260,27 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_duration', type=int)
         c.argument('lease_break_period', type=int)
 
+    with self.argument_context('storage container list', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        c.extra('timeout', timeout_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('num_results', arg_type=num_results_type)
+        c.argument('prefix',
+                   help='Filter the results to return only blobs whose name begins with the specified prefix.')
+        c.argument('include_metadata', arg_type=get_three_state_flag(),
+                   help='Specify that container metadata to be returned in the response.')
+        c.argument('show_next_marker', action='store_true', is_preview=True,
+                   help='Show nextMarker in result when specified.')
+        c.argument('include_deleted', arg_type=get_three_state_flag(), min_api='2020-02-10',
+                   help='Specify that deleted containers to be returned in the response. This is for container restore '
+                   'enabled account. The default value is `False`')
+
+    with self.argument_context('storage container restore') as c:
+        c.argument('deleted_container_name', options_list=['--name', '-n'],
+                   help='Specify the name of the deleted container to restore.')
+        c.argument('deleted_container_version', options_list=['--deleted-version'],
+                   help='Specify the version of the deleted container to restore.')
+        c.extra('timeout', timeout_type)
+
     with self.argument_context('storage container-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
         from .sdkutil import get_container_access_type_names
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), id_part='child_name_2')
@@ -1665,6 +1689,34 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_access', arg_type=get_enum_type(get_fs_access_type_names()),
                    validator=validate_fs_public_access,
                    help="Specify whether data in the file system may be accessed publicly and the level of access.")
+
+    with self.argument_context('storage fs generate-sas') as c:
+        t_file_system_permissions = self.get_sdk('_models#FileSystemSasPermissions',
+                                                 resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_sas_arguments()
+        c.argument('file_system', options_list=['--name', '-n'], help="File system name.")
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy.')
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format(get_permission_help_string(t_file_system_permissions)),
+                   validator=get_permission_validator(t_file_system_permissions))
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+                                         'using this shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
+                                               'using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+                                        'using this shared access signature.')
+        c.argument('as_user', min_api='2018-11-09', action='store_true',
+                   validator=as_user_validator,
+                   help="Indicates that this command return the SAS signed with the user delegation key. "
+                        "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.ignore('sas_token')
+        c.argument('full_uri', action='store_true',
+                   help='Indicate that this command return the full blob URI and the shared access signature token.')
 
     with self.argument_context('storage fs list') as c:
         c.argument('include_metadata', arg_type=get_three_state_flag(),

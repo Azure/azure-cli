@@ -1321,9 +1321,13 @@ short-summary: Manage Azure locks.
 helps['lock create'] = """
 type: command
 short-summary: Create a lock.
-long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource.'
+long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource. \
+                For how to add locks at different levels, please refer to the following examples.'
 examples:
   - name: Create a read-only subscription level lock.
+    text: >
+        az lock create --name lockName --lock-type ReadOnly
+  - name: Create a read-only resource group level lock.
     text: >
         az lock create --name lockName --resource-group group --lock-type ReadOnly
   - name: Create a read-only resource level lock on a vnet resource.
@@ -1339,10 +1343,18 @@ examples:
 helps['lock delete'] = """
 type: command
 short-summary: Delete a lock.
+long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource. \
+                For how to delete locks at different levels, please refer to the following examples.'
 examples:
-  - name: Delete a resource group-level lock
+  - name: Delete a subscription level lock
+    text: >
+        az lock delete --name lockName
+  - name: Delete a resource group level lock
     text: >
         az lock delete --name lockName --resource-group group
+  - name: Delete a resource level lock
+    text: >
+        az lock delete --name lockName --resource-group group --resource resourceName --resource-type resourceType
 """
 
 helps['lock list'] = """
@@ -2455,6 +2467,11 @@ examples:
     text: az bicep install
   - name: Install a specific version of Bicep CLI.
     text: az bicep install --version v0.2.212
+"""
+
+helps['bicep uninstall'] = """
+type: command
+short-summary: Uninstall Bicep CLI.
 """
 
 helps['bicep upgrade'] = """

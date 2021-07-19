@@ -143,7 +143,7 @@ def load_arguments(self, _):
 
     with self.argument_context('provider register') as c:
         c.argument('mg', help="The management group id to register.", options_list=['--management-group-id', '-m'])
-        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.")
+        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.", deprecate_info=c.deprecate(hide=True))
         c.argument('wait', action='store_true', help='wait for the registration to finish')
         c.argument('consent_to_permissions', options_list=['--consent-to-permissions', '-c'], action='store_true', help='A value indicating whether authorization is consented or not.')
 

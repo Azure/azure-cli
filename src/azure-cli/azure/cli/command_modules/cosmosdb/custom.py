@@ -54,6 +54,7 @@ from azure.mgmt.cosmosdb.models import (
     PeriodicModeProperties,
     SqlRoleAssignmentCreateUpdateParameters,
     SqlRoleDefinitionCreateUpdateParameters,
+    AnalyticalStorageConfiguration,
     RestoreParameters,
     ContinuousModeBackupPolicy,
     ContinuousBackupRestoreLocation,
@@ -113,6 +114,7 @@ def cli_cosmosdb_create(cmd, client,
                         backup_retention=None,
                         assign_identity=None,
                         default_identity=None,
+                        analytical_storage_schema_type=None,
                         backup_policy_type=None,
                         databases_to_restore=None,
                         is_restore_request=None,
@@ -158,6 +160,7 @@ def cli_cosmosdb_create(cmd, client,
                                     is_restore_request=is_restore_request,
                                     restore_source=restore_source,
                                     restore_timestamp=restore_timestamp_utc,
+                                    analytical_storage_schema_type=analytical_storage_schema_type,
                                     backup_policy_type=backup_policy_type,
                                     backup_interval=backup_interval,
                                     assign_identity=assign_identity,
@@ -196,6 +199,7 @@ def _create_database_account(client,
                              assign_identity=None,
                              default_identity=None,
                              backup_policy_type=None,
+                             analytical_storage_schema_type=None,
                              databases_to_restore=None,
                              is_restore_request=None,
                              restore_source=None,
@@ -251,6 +255,11 @@ def _create_database_account(client,
         )
         backup_policy.periodic_mode_properties = periodic_mode_properties
 
+    analytical_storage_configuration = None
+    if analytical_storage_schema_type is not None:
+        analytical_storage_configuration = AnalyticalStorageConfiguration()
+        analytical_storage_configuration.schema_type = analytical_storage_schema_type
+
     create_mode = CreateMode.restore.value if is_restore_request else CreateMode.default.value
     params = None
     restore_parameters = None
@@ -290,6 +299,7 @@ def _create_database_account(client,
         backup_policy=backup_policy,
         identity=system_assigned_identity,
         default_identity=default_identity,
+        analytical_storage_configuration=analytical_storage_configuration,
         create_mode=create_mode,
         restore_parameters=restore_parameters
     )
@@ -324,6 +334,7 @@ def cli_cosmosdb_update(client,
                         backup_interval=None,
                         backup_retention=None,
                         default_identity=None,
+                        analytical_storage_schema_type=None,
                         backup_policy_type=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
@@ -373,6 +384,11 @@ def cli_cosmosdb_update(client,
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
             backup_policy = ContinuousModeBackupPolicy()
 
+    analytical_storage_configuration = None
+    if analytical_storage_schema_type is not None:
+        analytical_storage_configuration = AnalyticalStorageConfiguration()
+        analytical_storage_configuration.schema_type = analytical_storage_schema_type
+
     params = DatabaseAccountUpdateParameters(
         locations=locations,
         tags=tags,
@@ -390,7 +406,8 @@ def cli_cosmosdb_update(client,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
         api_properties=api_properties,
         backup_policy=backup_policy,
-        default_identity=default_identity)
+        default_identity=default_identity,
+        analytical_storage_configuration=analytical_storage_configuration)
 
     async_docdb_update = client.begin_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
