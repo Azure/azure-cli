@@ -10,21 +10,21 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
-from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.mgmt.rdbms import postgresql_flexibleservers
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability, resource_client_factory, network_client_factory
-from ._flexible_server_util import generate_missing_parameters, resolve_poller, parse_public_access_input, \
-    generate_password, parse_maintenance_window, check_existence, get_id_components
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
+from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
+    generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
-from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
+from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
+RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
 
 # region create without args
@@ -41,7 +41,7 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, maintenance_window=None,
-                           geo_redundant_backup=None, standby_availability_zone=None):
+                           geo_redundant_backup=None, standby_availability_zone=None, yes=None):
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
@@ -77,18 +77,23 @@ def flexible_server_create(cmd, client,
                                             location=location,
                                             delegation_service_name=DELEGATION_SERVICE_NAME,
                                             vnet_address_pref=vnet_address_prefix,
-                                            subnet_address_pref=subnet_address_prefix)
+                                            subnet_address_pref=subnet_address_prefix,
+                                            yes=yes)
         private_dns_zone_id = prepare_private_dns_zone(cmd,
                                                        'PostgreSQL',
                                                        resource_group_name,
                                                        server_name,
                                                        private_dns_zone=private_dns_zone_arguments,
                                                        subnet_id=subnet_id,
-                                                       location=location)
+                                                       location=location,
+                                                       yes=yes)
         network.delegated_subnet_resource_id = subnet_id
         network.private_dns_zone_arm_resource_id = private_dns_zone_id
     else:
         network.public_network_access = ' Enabled'
+        start_ip, end_ip = prepare_public_network(public_access, yes)
+        if start_ip != -1:
+            public_access = 'Enabled'
 
     storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb)
 
@@ -134,10 +139,6 @@ def flexible_server_create(cmd, client,
 
     # Adding firewall rule
     if public_access is not None and str(public_access).lower() != 'none':
-        if str(public_access).lower() == 'all':
-            start_ip, end_ip = '0.0.0.0', '255.255.255.255'
-        else:
-            start_ip, end_ip = parse_public_access_input(public_access)
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     # Create mysql database if it does not exist
@@ -152,7 +153,7 @@ def flexible_server_create(cmd, client,
     sku = server_result.sku.name
     host = server_result.fully_qualified_domain_name
 
-    logger.warning('Make a note of your password. If you forget, you would have to'
+    logger.warning('Make a note of your password. If you forget, you would have to '
                    'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
                    server_name, resource_group_name)
 
@@ -167,17 +168,20 @@ def flexible_server_create(cmd, client,
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
-                            subnet=None, private_dns_zone_arguments=None):
-    provider = 'Microsoft.DBforPostgreSQL'
+                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+                            private_dns_zone_arguments=None, yes=None):
+
     server_name = server_name.lower()
-    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+    db_context = DbContext(
+        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_availability=cf_postgres_check_resource_availability, logging_name='PostgreSQL', command_group='postgres', server_client=client)
+    validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server_id = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
                 resource_group=resource_group_name,
-                namespace=provider,
+                namespace=RESOURCE_PROVIDER,
                 type='flexibleServers',
                 name=source_server)
         else:
@@ -198,57 +202,33 @@ def flexible_server_restore(cmd, client,
         )
 
         if source_server_object.network.public_network_access == 'Disabled':
-            setup_restore_network(cmd=cmd,
-                                  resource_group_name=resource_group_name,
-                                  server_name=server_name,
-                                  location=parameters.location,
-                                  parameters=parameters,
-                                  source_server_object=source_server_object,
-                                  subnet_id=subnet,
-                                  private_dns_zone=private_dns_zone_arguments)
-
+            if subnet is not None or vnet is not None:
+                network = postgresql_flexibleservers.models.Network()
+                subnet_id = prepare_private_network(cmd,
+                                                    resource_group_name,
+                                                    server_name,
+                                                    vnet=vnet,
+                                                    subnet=subnet,
+                                                    location=source_server_object.location,
+                                                    delegation_service_name=DELEGATION_SERVICE_NAME,
+                                                    vnet_address_pref=vnet_address_prefix,
+                                                    subnet_address_pref=subnet_address_prefix,
+                                                    yes=yes)
+                private_dns_zone_id = prepare_private_dns_zone(cmd,
+                                                               'PostgreSQL',
+                                                               resource_group_name,
+                                                               server_name,
+                                                               private_dns_zone=private_dns_zone_arguments,
+                                                               subnet_id=subnet_id,
+                                                               location=source_server_object.location,
+                                                               yes=yes)
+                network.delegated_subnet_resource_id = subnet_id
+                network.private_dns_zone_arm_resource_id = private_dns_zone_id
+                parameters.network = network
     except Exception as e:
         raise ResourceNotFoundError(e)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
-
-
-def setup_restore_network(cmd, resource_group_name, server_name, location, parameters, source_server_object, subnet_id=None, private_dns_zone=None):
-
-    parameters.network = postgresql_flexibleservers.models.Network(delegated_subnet_resource_id=source_server_object.network.delegated_subnet_resource_id,
-                                                                   private_dns_zone_arm_resource_id=source_server_object.network.private_dns_zone_arm_resource_id)
-
-    if subnet_id is not None:
-        vnet_sub, vnet_rg, vnet_name, subnet_name = get_id_components(subnet_id)
-        resource_client = resource_client_factory(cmd.cli_ctx, vnet_sub)
-        nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_sub)
-        Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
-        delegation = Delegation(name=DELEGATION_SERVICE_NAME, service_name=DELEGATION_SERVICE_NAME)
-        if check_existence(resource_client, subnet_name, vnet_rg, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks'):
-            subnet = nw_client.subnets.get(vnet_rg, vnet_name, subnet_name)
-            # Add Delegation if not delegated already
-            if not subnet.delegations:
-                logger.warning('Adding "%s" delegation to the existing subnet %s.', DELEGATION_SERVICE_NAME, subnet_name)
-                subnet.delegations = [delegation]
-                subnet = nw_client.subnets.begin_create_or_update(vnet_rg, vnet_name, subnet_name, subnet).result()
-            else:
-                for delgtn in subnet.delegations:
-                    if delgtn.service_name != DELEGATION_SERVICE_NAME:
-                        raise CLIError("Can not use subnet with existing delegations other than {}".format(DELEGATION_SERVICE_NAME))
-            parameters.network.delegated_subnet_resource_id = subnet_id
-        else:
-            raise ResourceNotFoundError("The subnet does not exist. Please verify the subnet Id.")
-
-    if private_dns_zone is not None or source_server_object.network.private_dns_zone_arm_resource_id is None:
-        subnet_id = parameters.network.delegated_subnet_resource_id
-        private_dns_zone_id = prepare_private_dns_zone(cmd,
-                                                       'PostgreSQL',
-                                                       resource_group_name,
-                                                       server_name,
-                                                       private_dns_zone=private_dns_zone,
-                                                       subnet_id=subnet_id,
-                                                       location=location)
-        parameters.network.private_dns_zone_arm_resource_id = private_dns_zone_id
 
 
 def flexible_server_update_custom_func(cmd, client, instance,
@@ -335,6 +315,27 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              tags=tags)
 
     return params
+
+
+def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_over=None):
+    instance = client.get(resource_group_name, server_name)
+    if fail_over is not None and instance.high_availability.mode != "ZoneRedundant":
+        raise ArgumentUsageError("Failing over can only be triggered for zone redundant servers.")
+
+    if fail_over is not None:
+        if fail_over not in ['Planned', 'Forced']:
+            raise InvalidArgumentValueError("Allowed failover parameters are 'Planned' and 'Forced'.")
+        if fail_over == 'Planned':
+            fail_over = 'plannedFailover'
+        elif fail_over == 'Forced':
+            fail_over = 'forcedFailover'
+        parameters = postgresql_flexibleservers.models.RestartParameter(restart_with_failover=True,
+                                                                        failover_mode=fail_over)
+    else:
+        parameters = postgresql_flexibleservers.models.RestartParameter(restart_with_failover=False)
+
+    return resolve_poller(
+        client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'PostgreSQL Server Restart')
 
 
 def flexible_server_delete(cmd, client, resource_group_name=None, server_name=None, yes=None):
@@ -425,18 +426,16 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
     # check for existing database, create if not
     cf_db, logging_name = db_context.cf_db, db_context.logging_name
     database_client = cf_db(cmd.cli_ctx, None)
-    try:
-        database_client.get(resource_group_name, server_name, database_name)
-    except ResourceNotFoundError:
-        logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
-        parameters = {
-            'name': database_name,
-            'charset': 'utf8',
-            'collation': 'en_US.utf8'
-        }
-        resolve_poller(
-            database_client.begin_create(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
-            '{} Database Create/Update'.format(logging_name))
+
+    logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
+    parameters = {
+        'name': database_name,
+        'charset': 'utf8',
+        'collation': 'en_US.utf8'
+    }
+    resolve_poller(
+        database_client.begin_create(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
+        '{} Database Create/Update'.format(logging_name))
 
 
 def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):

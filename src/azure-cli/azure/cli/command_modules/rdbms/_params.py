@@ -250,6 +250,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         overriding_none_arg_type = CLIArgumentType(local_context_attribute=LocalContextAttribute(name='context_name', actions=[LocalContextAction.GET]))
 
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type)
 
         with self.argument_context('{} flexible-server create'.format(command_group)) as c:
@@ -289,7 +290,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                 'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server')
                 c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'], default='Enabled',
                            help='Enable or disable autogrow of the storage. Default value is Enabled.')
-
+            c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
             c.argument('vnet', options_list=['--vnet'], help='Name or ID of a new or existing virtual network. If you want to use a vnet from different resource group or subscription, please provide a resource ID. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
             c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')
             c.argument('subnet_address_prefix', options_list=['--subnet-prefixes'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. Default value is 10.0.0.0/24.')
@@ -323,18 +324,32 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='The name of the new server that is created by the restore command.')
             c.argument('restore_point_in_time', options_list=['--restore-time'], default=get_current_time(),
                        help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00')
+            c.argument('vnet', options_list=['--vnet'], help='Name or ID of a new or existing virtual network. If you want to use a vnet from different resource group or subscription, please provide a resource ID. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
+            c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')
+            c.argument('subnet_address_prefix', options_list=['--subnet-prefixes'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. Default value is 10.0.0.0/24.')
+            c.argument('subnet', options_list=['--subnet'],
+                       help='Name or resource ID of a new or existing subnet. If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers/Microsoft.DBforMySQL/flexibleServers. After delegation, this subnet cannot be used for any other type of Azure resources.')
+            c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'],
+                       help='This parameter only applies for a server with private access. The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
             if command_group == 'postgres':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name of the source server to restore from.')
                 c.argument('zone', options_list=['--zone'],
                            help='Availability zone into which to provision the resource.')
-                c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'],
-                           help='This parameter only applies for a server with private access. The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
-                c.argument('subnet', options_list=['--subnet'],
-                           help='Resource ID of an existing subnet. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers if not already delegated. After delegation, this subnet cannot be used for any other type of Azure resources.')
             elif command_group == 'mysql':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name or resource ID of the source server to restore from.')
+
+        with self.argument_context('{} flexible-server georestore'. format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
+            c.argument('source_server', options_list=['--source-server', '-s'], required=True, help='The name or ID of the source server to restore from.')
+            c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
+            c.argument('vnet', options_list=['--vnet'], help='Name or ID of a new or existing virtual network. If you want to use a vnet from different resource group or subscription, please provide a resource ID. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
+            c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')
+            c.argument('subnet_address_prefix', options_list=['--subnet-prefixes'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. Default value is 10.0.0.0/24.')
+            c.argument('subnet', options_list=['--subnet'],
+                       help='Name or resource ID of a new or existing subnet. If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. Please note that the subnet will be delegated to flexible servers. After delegation, this subnet cannot be used for any other type of Azure resources.')
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.ignore('assign_identity')
@@ -377,6 +392,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('backup_retention', type=int, options_list=['--backup-retention'],
                            help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
                 c.argument('standby_availability_zone', options_list=['--standby-zone'], help="availability zone information of the standby.")
+
+        with self.argument_context('{} flexible-server restart'.format(command_group)) as c:
+            c.argument('fail_over', options_list=['--failover'],
+                       help='forced or planned failover for server restart operation')
 
         with self.argument_context('{} flexible-server list-skus'.format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx))

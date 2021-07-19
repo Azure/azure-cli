@@ -119,23 +119,24 @@ def validate_private_endpoint_connection_id(cmd, namespace):
     del namespace.connection_id
 
 
-def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
-                              standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
-                              version=None, instance=None):
+def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None,
+                              server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
+                              subnet=None, public_access=None, version=None, instance=None):
     # validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
-    sku_info, single_az, iops_info = get_mysql_list_skus_info(db_context.cmd, location)
+    sku_info, single_az, _ = get_mysql_list_skus_info(db_context.cmd, location)
     _high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az)
     _network_arg_validator(subnet, public_access)
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
     _mysql_retention_validator(backup_retention, sku_info, tier)
-    _mysql_storage_validator(storage_mb, sku_info, tier, instance)
+    _mysql_storage_validator(storage_gb, sku_info, tier, instance)
     _mysql_sku_name_validator(sku_name, sku_info, tier)
     _mysql_version_validator(version, sku_info, tier)
 
 
 def _mysql_retention_validator(backup_retention, sku_info, tier):
+    print(backup_retention)
     if backup_retention is not None:
         backup_retention_range = get_mysql_backup_retention(sku_info, tier)
         if not backup_retention_range[0] <= int(backup_retention) <= backup_retention_range[1]:
@@ -143,16 +144,16 @@ def _mysql_retention_validator(backup_retention, sku_info, tier):
                            .format(backup_retention_range[0], backup_retention_range[1]))
 
 
-def _mysql_storage_validator(storage_mb, sku_info, tier, instance):
-    if storage_mb is not None:
+def _mysql_storage_validator(storage_gb, sku_info, tier, instance):
+    if storage_gb is not None:
         if instance:
-            original_size = int(instance.storage_profile.storage_mb) // 1024
-            if original_size > storage_mb:
+            original_size = instance.storage.storage_size_gb
+            if original_size > storage_gb:
                 raise CLIError('Updating storage cannot be smaller than the '
                                'original storage size {} GiB.'.format(original_size))
         storage_sizes = get_mysql_storage_size(sku_info, tier)
         min_mysql_storage = 20
-        if not max(min_mysql_storage, storage_sizes[0]) <= int(storage_mb) <= storage_sizes[1]:
+        if not max(min_mysql_storage, storage_sizes[0]) <= storage_gb <= storage_sizes[1]:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
                            .format(max(min_mysql_storage, storage_sizes[0]), storage_sizes[1]))
 
@@ -361,3 +362,8 @@ def validate_private_dns_zone(cmd, server_name, private_dns_zone):
 def validate_mysql_ha_enabled(server):
     if server.storage_profile.storage_autogrow == "Disabled":
         raise ValidationError("You need to enable auto grow first to enable high availability.")
+
+
+def validate_vnet_location(vnet, location):
+    if vnet.location != location:
+        raise ValidationError("The location of Vnet should be same as the location of the server")

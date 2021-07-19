@@ -26,7 +26,7 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-
+from ...flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network, DEFAULT_VNET_ADDRESS_PREFIX, DEFAULT_SUBNET_ADDRESS_PREFIX
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
@@ -82,6 +82,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_restore_failover_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_restore_failover_mgmt(self, resource_group):
+        self._test_flexible_server_restore_failover_mgmt('mysql', resource_group)
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
@@ -244,6 +254,20 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --storage-size 300 --iops 500'
                  .format(database_engine, resource_group, server_name_3),
                  checks=[JMESPathCheck('storageProfile.storageIops', 640)])
+
+    def _test_flexible_server_restore_failover_mgmt(self, database_engine, resource_group):
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
+
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability Enabled \
+                  --zone 1 --maintenance-window Mon:1:10 --geo-redundant-backup Enabled'.format(database_engine,
+                  resource_group, server_name, location, backup_retention, sku_name, tier, storage_size, 'dbadmin', version, database_name))
+
+        self.cmd('{} flexible-server georestore -g {} -n {} -l {} --source-server {}'.
+                 format(resource_group, server_name, location, server_name))
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
@@ -551,33 +575,33 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('postgres', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # @VirtualNetworkPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
-    #     # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
-    #     self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    @VirtualNetworkPreparer(location=mysql_location)
+    def test_mysql_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
+        # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
+        self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('mysql', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_vnet_mgmt_supplied_vnet(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_vnet('postgres', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_vnet_mgmt_supplied_vnet(self, resource_group):
-    #     self._test_flexible_server_vnet_mgmt_supplied_vnet('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_vnet_mgmt_supplied_vnet(self, resource_group):
+        self._test_flexible_server_vnet_mgmt_supplied_vnet('mysql', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # @VirtualNetworkPreparer(parameter_name='virtual_network', location=mysql_location)
-    # def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
-    #     self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group, virtual_network)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    @VirtualNetworkPreparer(parameter_name='virtual_network', location=mysql_location)
+    def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
+        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group, virtual_network)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
@@ -585,11 +609,26 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
     def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
         self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_1')
-    # @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_2')
-    # def test_mysql_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
-    #     self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('mysql', resource_group_1, resource_group_2)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_1')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_2')
+    def test_mysql_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
+        self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('mysql', resource_group_1, resource_group_2)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_flexible_server_vnet_mgmt_prepare_private_network_vname_and_subnetname(self, resource_group):
+        self._test_flexible_server_vnet_mgmt_prepare_private_network_vname_and_subnetname(resource_group)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_flexible_server_vnet_mgmt_prepare_private_network_vnet(self, resource_group):
+        self._test_flexible_server_vnet_mgmt_prepare_private_network_vnet(resource_group)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_flexible_server_vnet_mgmt_prepare_private_network_subnet(self, resource_group):
+        self._test_flexible_server_vnet_mgmt_prepare_private_network_subnet(resource_group)
 
     def _test_flexible_server_vnet_mgmt_existing_supplied_subnetid(self, database_engine, resource_group):
 
@@ -610,7 +649,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()['id']
 
         # create server - Delegation should be added.
-        self.cmd('{} flexible-server create -g {} -n {} --subnet {} -l {} --private-dns-zone {}'
+        self.cmd('{} flexible-server create -g {} -n {} --subnet {} -l {} --private-dns-zone {} --yes'
                  .format(database_engine, resource_group, server_name, subnet_id, location, private_dns_zone))
 
         # flexible-server show to validate delegation is added to both the created server
@@ -763,7 +802,6 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         time.sleep(15 * 60)
 
-
     def _test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, database_engine, resource_group_1, resource_group_2):
         # flexible-server create
         if self.cli_ctx.local_context.is_on:
@@ -820,6 +858,215 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                                                                                                          vnet_name))
         # remove all vnets
         self.cmd('network vnet delete -g {} -n {}'.format(resource_group_1, vnet_name))
+
+    def _test_flexible_server_vnet_mgmt_prepare_private_network_vname_and_subnetname(self, resource_group):
+        server_name = 'vnet-preparer-server'
+        delegation_service_name = "Microsoft.DBforPostgreSQL/flexibleServers"
+        location = self.postgres_location
+        yes = True
+
+        #   Vnet x exist, subnet x exist, address prefixes
+        vnet = 'testvnet1'
+        subnet = 'testsubnet1'
+        vnet_address_pref = '172.1.0.0/16'
+        subnet_address_pref = '172.1.0.0/24'
+        subnet_id = prepare_private_network(self, resource_group, server_name, vnet, subnet, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes=yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group, vnet, subnet))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(vnet_address_pref)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', subnet_address_pref),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+        #   Vnet exist, subnet x exist, address prefixes 
+        vnet = 'testvnet1'
+        subnet = 'testsubnet2'
+        vnet_address_pref = '172.1.0.0/16'
+        subnet_address_pref = '172.1.1.0/24'
+        subnet_id = prepare_private_network(self, resource_group, server_name, vnet, subnet, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes=yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group, vnet, subnet))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(vnet_address_pref)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', subnet_address_pref),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+        # Vnet exist, subnet x exist, x address prefixes
+        vnet = 'testvnet1'
+        subnet = 'testsubnet3'
+        subnet_id = prepare_private_network(self, resource_group, server_name, vnet, subnet, location, delegation_service_name, None, None, yes=yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group, vnet, subnet))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(DEFAULT_VNET_ADDRESS_PREFIX)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', DEFAULT_SUBNET_ADDRESS_PREFIX),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+        # Vnet exist, subnet exist, x address prefixes
+        vnet = 'testvnet1'
+        subnet = 'testsubnet1'
+        vnet_address_pref = '172.1.0.0/16'
+        subnet_address_pref = '172.1.0.0/24'
+        subnet_id = prepare_private_network(self, resource_group, server_name, vnet, subnet, location, delegation_service_name, None, None, yes=yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group, vnet, subnet))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(vnet_address_pref)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', subnet_address_pref),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+        # Vnet exist, subnet exist, address prefixes
+        vnet = 'testvnet1'
+        subnet = 'testsubnet1'
+        vnet_address_pref = '173.1.0.0/16'
+        subnet_address_pref = '173.2.0.0/24'
+        subnet_id = prepare_private_network(self, resource_group, server_name, vnet, subnet, location, delegation_service_name, None, None, yes=yes)
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck('172.1.0.0/16')])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', '172.1.0.0/24'),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+    def _test_flexible_server_vnet_mgmt_prepare_private_network_vnet(self, resource_group):
+        server_name = 'vnet-preparer-server'
+        resource_group_2 = self.create_random_name('clitest.rg', 20)
+        delegation_service_name = "Microsoft.DBforPostgreSQL/flexibleServers"
+        location = self.postgres_location
+        yes = True
+
+        # Vnet x exist -> subnet generate with default prefix 
+        vnet = 'testvnet1'
+        subnet_id = prepare_private_network(self, resource_group, server_name, vnet, None, location, delegation_service_name, None, None, yes=yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group, vnet, 'Subnet' + server_name))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(DEFAULT_VNET_ADDRESS_PREFIX)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', DEFAULT_SUBNET_ADDRESS_PREFIX),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+        # Vnet x exist (id, diff rg)
+        vnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(self.get_subscription_id(), resource_group_2, 'testvnet2')
+        subnet_id = prepare_private_network(self, resource_group, server_name, vnet, None, location, delegation_service_name, None, None, yes=yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group_2, 'testvnet2', 'Subnet' + server_name))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(DEFAULT_VNET_ADDRESS_PREFIX)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', DEFAULT_SUBNET_ADDRESS_PREFIX),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+	    # Vnet exist (name), vnet prefix, subnet prefix
+        vnet = 'testvnet3'
+        vnet_address_pref = '172.0.0.0/16'
+        self.cmd('network vnet create -n {} -g {} -l {} --address-prefix {}'
+                  .format(vnet, resource_group, location, vnet_address_pref))
+        subnet_address_pref = '172.0.10.0/24'
+        subnet_id = prepare_private_network(self, resource_group, server_name, vnet, None, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes=yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group, vnet, 'Subnet' + server_name))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(vnet_address_pref)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', subnet_address_pref),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+	    # Vnet exist (id, diff rg), vnet prefix, subnet prefix
+        vnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(self.get_subscription_id(), resource_group_2, 'testvnet4')
+        vnet_address_pref = '173.1.0.0/16'
+        self.cmd('network vnet create -n {} -g {} -l {} --address-prefix {}'
+                  .format('testvnet4', resource_group_2, location, vnet_address_pref))
+        subnet_address_pref = '173.1.1.0/24'
+        subnet_id = prepare_private_network(self, resource_group, server_name, vnet, None, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes=yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group_2, 'testvnet4', 'Subnet' + server_name))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(vnet_address_pref)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', subnet_address_pref),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+    def _test_flexible_server_vnet_mgmt_prepare_private_network_subnet(self, resource_group):
+        server_name = 'vnet-preparer-server'
+        delegation_service_name = "Microsoft.DBforPostgreSQL/flexibleServers"
+        location = self.postgres_location
+        yes = True
+
+        #   subnet x exist
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                 self.get_subscription_id(), resource_group, 'testvnet', 'testsubnet')
+        vnet_address_pref = '172.1.0.0/16'
+        subnet_address_pref = '172.1.0.0/24'
+        subnet_id = prepare_private_network(self, resource_group, server_name, None, subnet, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group, 'testvnet', 'testsubnet'))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(vnet_address_pref)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', subnet_address_pref),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+        
+        # subnet exist
+        subnet_address_pref = '172.1.1.0/24'
+        self.cmd('network vnet subnet create -g {} -n {} --address-prefixes {} --vnet-name {}'.format(
+                  resource_group, 'testsubnet2', subnet_address_pref, 'testvnet'))
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                 self.get_subscription_id(), resource_group, 'testvnet', 'testsubnet2')
+        
+        subnet_id = prepare_private_network(self, resource_group, server_name, None, subnet, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes)
+        vnet_id = subnet_id.split('/subnets/')[0]
+        self.assertEqual(subnet_id,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), resource_group, 'testvnet', 'testsubnet2'))
+        self.cmd('network vnet show --id {}'.format(vnet_id),
+                 checks=[StringContainCheck(vnet_address_pref)])
+        self.cmd('network vnet subnet show --id {}'.format(subnet_id),
+                 checks=[JMESPathCheck('addressPrefix', subnet_address_pref),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+
+    def _get_vnet_subnet_result(self, subnet_id):
+        vnet_id = subnet_id.split('/subnets/')[0]
+
+        subnet_result = self.cmd('network vnet subnet show --id'.format(subnet_id)).get_output_in_json()
+        vnet_result = self.cmd('network vnet show --id'.format(vnet_id)).get_output_in_json()
+
+        return vnet_result, subnet_result
+
+    def get_models(self, *attr_args, **kwargs):
+        from azure.cli.core.profiles import get_sdk
+        self.module_kwargs = kwargs
+        resource_type = kwargs.get('resource_type', self._get_resource_type())
+        operation_group = kwargs.get('operation_group', self.module_kwargs.get('operation_group', None))
+        return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models', operation_group=operation_group)
+
+    def _get_resource_type(self):
+        resource_type = self.module_kwargs.get('resource_type', None)
+        if not resource_type:
+            command_type = self.module_kwargs.get('command_type', None)
+            resource_type = command_type.settings.get('resource_type', None) if command_type else None
+        return resource_type
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
