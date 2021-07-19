@@ -1398,6 +1398,13 @@ def load_arguments(self, _):
                    'only connections made through Private Links can reach this server.',
                    is_preview=True)
 
+        c.argument('restrict_outbound_network_access',
+                   options_list=['--restrict-outbound-network-access', '-r'],
+                   arg_type=get_three_state_flag(),
+                   help='Set whether outbound network access to server is restricted or not. When true,'
+                   'the outbound connections from the server will be restricted.',
+                   is_preview=True)
+
         c.argument('primary_user_assigned_identity_id',
                    options_list=['--primary-user-assigned-identity-id', '--pid'],
                    help='The ID of the primary user managed identity.')
@@ -1651,6 +1658,19 @@ def load_arguments(self, _):
                    options_list=['--end-ip-address'],
                    help='The end IP address of the firewall rule. Must be IPv4 format. Use value'
                    ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
+
+    #####
+    #           sql server outbound firewall-rule
+    #####
+    with self.argument_context('sql server outbound-firewall-rule') as c:
+        # Help text needs to be specified because 'sql server outbound-firewall-rule update' is a custom
+        # command.
+        c.argument('server_name',
+                   arg_type=server_param_type)
+
+        c.argument('outbound_rule_fqdn',
+                   options_list=['--outbound-rule-fqdn', '-n'],
+                   help='The allowed FQDN for the outbound firewall rule.')
 
     #####
     #           sql server key
