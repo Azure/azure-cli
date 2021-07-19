@@ -337,7 +337,7 @@ def set_key(cmd,
             if __is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
-                    value = '""' if value is None else value
+                    value = 'null' if value is None else value
                     json.loads(value)
                 except ValueError:
                     raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
