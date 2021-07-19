@@ -1863,7 +1863,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
         policy3_path = os.path.join(TEST_DIR, 'policy3.json')
-        cert_secret_path = os.path.join(TEST_DIR, 'cert_secret')
+        cert_secret_path = os.path.join(TEST_DIR, 'cert_secret.der')
         self.kwargs.update({
             'policy_path': policy_path,
             'policy2_path': policy2_path,
@@ -1972,7 +1972,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
         time.sleep(60)
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert1')
-        time.sleep(10)
+        time.sleep(120)
 
         self.cmd('keyvault certificate list --vault-name {kv}',
                  checks=self.is_empty())
