@@ -1972,7 +1972,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
         time.sleep(60)
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert1')
-        time.sleep(120)
+        time.sleep(10)
 
         self.cmd('keyvault certificate list --vault-name {kv}',
                  checks=self.is_empty())
