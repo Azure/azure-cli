@@ -20,6 +20,7 @@ from azure.cli.testsdk import (
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
+    KeyVaultPreparer,
     LiveScenarioTest,
     record_only)
 from azure.cli.testsdk.preparers import (
@@ -382,6 +383,45 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
                  .format(firewall_rule_2, resource_group, server), checks=NoneCheck())
         self.cmd('sql server firewall-rule list -g {} --server {}'
                  .format(resource_group, server), checks=[NoneCheck()])
+
+
+class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
+    def test_sql_outbound_firewall_mgmt(self, resource_group, resource_group_location, server):
+        outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
+        outbound_firewall_rule_allowed_fqdn_2 = 'testOBFR2'
+
+        # test sql server outbound-firewall-rule create
+        self.cmd('sql server outbound-firewall-rule create -g {} --server {} --outbound-rule-fqdn {}'
+                 .format(resource_group, server, outbound_firewall_rule_allowed_fqdn_1),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', outbound_firewall_rule_allowed_fqdn_1)])
+
+        # test sql server outbound-firewall-rule show by group/server/name
+        self.cmd('sql server outbound-firewall-rule show -g {} --server {} --outbound-rule-fqdn {}'
+                 .format(resource_group, server, outbound_firewall_rule_allowed_fqdn_1),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', outbound_firewall_rule_allowed_fqdn_1)])
+
+        # test sql server outbound-firewall-rule create another rule
+        self.cmd('sql server outbound-firewall-rule create -g {} --server {} --outbound-rule-fqdn {}'
+                 .format(resource_group, server, outbound_firewall_rule_allowed_fqdn_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', outbound_firewall_rule_allowed_fqdn_2)])
+
+        # test sql server outbound-firewall-rule list
+        self.cmd('sql server outbound-firewall-rule list -g {} --server {}'
+                 .format(resource_group, server), checks=[JMESPathCheck('length(@)', 2)])
+
+        # test sql server outbound-firewall-rule delete
+        self.cmd('sql server outbound-firewall-rule delete -g {} --server {} --outbound-rule-fqdn {}'
+                 .format(resource_group, server, outbound_firewall_rule_allowed_fqdn_2), checks=NoneCheck())
+        self.cmd('sql server outbound-firewall-rule list -g {} --server {}'
+                 .format(resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
 
 
 class SqlServerDbMgmtScenarioTest(ScenarioTest):
@@ -3296,7 +3336,8 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus')
     @SqlServerPreparer(location='eastus')
-    def test_sql_tdebyok(self, resource_group, server):
+    @KeyVaultPreparer(location='eastus', name_prefix='sqltdebyok')
+    def test_sql_tdebyok(self, resource_group, server, key_vault):
         resource_prefix = 'sqltdebyok'
 
         # add identity to server
@@ -3310,16 +3351,13 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, server, db_name))
 
         # create vault and acl server identity
-        vault_name = self.create_random_name(resource_prefix, 24)
-        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true'
-                 .format(resource_group, vault_name))
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, vault_name, server_identity))
+                 .format(resource_group, key_vault, server_identity))
 
         # create key
         key_name = self.create_random_name(resource_prefix, 32)
         key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
-                            .format(key_name, vault_name)).get_output_in_json()
+                            .format(key_name, key_vault)).get_output_in_json()
         kid = key_resp['key']['kid']
 
         # add server key
@@ -3355,7 +3393,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, server, kid),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
-                     JMESPathCheck('serverKeyName', server_key_name),                   
+                     JMESPathCheck('serverKeyName', server_key_name),
                      JMESPathCheck('uri', kid),
                      JMESPathCheck('autoRotationEnabled', True)])
 
@@ -3364,7 +3402,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, server),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
-                     JMESPathCheck('serverKeyName', server_key_name),                    
+                     JMESPathCheck('serverKeyName', server_key_name),
                      JMESPathCheck('uri', kid)])
 
         # update encryption protector to service managed
@@ -3417,7 +3455,7 @@ class SqlServerIdentityTest(ScenarioTest):
 
         test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
         umi_list = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
-        
+
         identity_type = ResourceIdType.system_assigned_user_assigned.value
         user = admin_login
 
@@ -3429,7 +3467,7 @@ class SqlServerIdentityTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned')])
-        
+
         # test show sql server
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group_1, server_name),
@@ -4221,13 +4259,13 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 
         test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
         umi_list = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
-        
+
         identity_type = ResourceIdType.system_assigned_user_assigned.value
         user = admin_login
 
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
-                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled ' 
+                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled '
                   '--user-assigned-identity-id {} --identity-type {} --pid {}'
                  .format(resource_group_1, managed_instance_name, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition,
                   families[0], collation, proxy_override, umi_list, identity_type, test_umi),
@@ -5763,7 +5801,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
 
         sleep(2)
 
-        # validate setting through show command 
+        # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('state', 'Enabled'),
@@ -5775,7 +5813,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
 
         sleep(2)
 
-        # validate setting through show command 
+        # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('state', 'Disabled')])

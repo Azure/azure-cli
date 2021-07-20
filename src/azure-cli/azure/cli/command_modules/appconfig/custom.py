@@ -33,6 +33,7 @@ def create_configstore(client,
                        name,
                        location,
                        sku="Standard",
+                       tags=None,
                        assign_identity=None,
                        enable_public_network=None,
                        disable_local_auth=None):
@@ -46,6 +47,7 @@ def create_configstore(client,
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
                                             sku=Sku(name=sku),
+                                            tags=tags,
                                             public_network_access=public_network_access,
                                             disable_local_auth=disable_local_auth)
 
@@ -90,7 +92,7 @@ def update_configstore(cmd,
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
-    update_params = ConfigurationStoreUpdateParameters(tags=tags if tags else None,
+    update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,
                                                        public_network_access=public_network_access,
                                                        disable_local_auth=disable_local_auth)
