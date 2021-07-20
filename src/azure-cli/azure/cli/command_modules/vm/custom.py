@@ -1146,8 +1146,20 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     from ._vm_utils import list_sku_info
     result = list_sku_info(cmd.cli_ctx, location)
     if not show_all:
-        result = [x for x in result if not [y for y in (x.restrictions or [])
-                                            if y.reason_code == 'NotAvailableForSubscription']]
+        available_skus = []
+        for sku_info in result:
+            is_available = True
+            if sku_info.restrictions:
+                for restriction in sku_info.restrictions:
+                    if restriction.reason_code == 'NotAvailableForSubscription':
+                        # This SKU is not available only if all zones are restricted
+                        if not (set(sku_info.location_info[0].zones or []) -
+                                set(restriction.restriction_info.zones or [])):
+                            is_available = False
+                            break
+            if is_available:
+                available_skus.append(sku_info)
+        result = available_skus
     if resource_type:
         result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
     if size:
