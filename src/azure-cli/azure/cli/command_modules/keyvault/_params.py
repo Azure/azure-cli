@@ -37,13 +37,15 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
+    (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, SasTokenType,
      SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes,
      JsonWebKeyEncryptionAlgorithm) = self.get_models(
-         'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
+         'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          'JsonWebKeyEncryptionAlgorithm',
          resource_type=ResourceType.DATA_KEYVAULT)
+
+    KeyCurveName = self.get_models('KeyCurveName', resource_type=ResourceType.DATA_KEYVAULT_KEYS)
 
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
@@ -70,12 +72,6 @@ def load_arguments(self, _):
     class CLIKeyTypeForBYOKImport(str, Enum):
         ec = "EC"  #: Elliptic Curve.
         rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
-
-    class CLIJsonWebKeyCurveName(str, Enum):
-        p_256 = "P-256"  #: The NIST P-256 elliptic curve, AKA SECG curve SECP256R1.
-        p_256k = "P-256K"  #: The SECG SECP256K1 elliptic curve.
-        p_384 = "P-384"  #: The NIST P-384 elliptic curve, AKA SECG curve SECP384R1.
-        p_521 = "P-521"  #: The NIST P-521 elliptic curve, AKA SECG curve SECP521R1.
 
     class CLISecurityDomainOperation(str, Enum):
         download = "download"  #: Download operation
@@ -327,9 +323,9 @@ def load_arguments(self, _):
                    help='Space-separated list of permitted JSON web key operations.')
 
     # custom functions
-    for item in ['backup', 'create', 'download', 'import', 'restore']:
+    for item in ['backup', 'download', 'import', 'restore']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            if item in ['create', 'backup', 'download', 'import']:
+            if item in ['backup', 'download', 'import']:
                 c.argument('identifier', options_list=['--id'],
                            help='Id of the Vault or HSM. '
                                 'If specified all other \'Id\' arguments should be omitted.',
@@ -351,29 +347,28 @@ def load_arguments(self, _):
                 c.argument('vault_base_url', vault_name_type, required=False)
             c.extra('hsm_name', data_plane_hsm_name_type)
 
-    for item in ['create', 'import', 'set-attributes']:
+    for item in ['create', 'import']:
         with self.argument_context('keyvault key {}'.format(item)) as c:
-            if item != 'set-attributes':
-                c.argument('protection', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'],
-                           help='Specifies the type of key protection.')
-                c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.')
-                c.argument('key_size', options_list=['--size'], type=int,
-                           help='The key size in bits. For example: 2048, 3072, or 4096 for RSA. 128, 192, or 256 for oct.')
-                c.argument('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
-                           type=datetime_type)
-                c.argument('not_before', default=None, type=datetime_type,
-                           help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+            c.argument('protection', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'],
+                       help='Specifies the type of key protection.')
+            c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.')
+            c.argument('key_size', options_list=['--size'], type=int,
+                       help='The key size in bits. For example: 2048, 3072, or 4096 for RSA. 128, 192, or 256 for oct.')
+            c.argument('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
+                       type=datetime_type)
+            c.argument('not_before', default=None, type=datetime_type,
+                       help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
                    help='The type of key to create. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeytype')
-        c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName),
+        c.argument('curve', arg_type=get_enum_type(KeyCurveName),
                    help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import') as c:
         c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,
                    help='The type of key to import (only for BYOK).')
-        c.argument('curve', arg_type=get_enum_type(CLIJsonWebKeyCurveName), validator=validate_key_import_type,
+        c.argument('curve', arg_type=get_enum_type(KeyCurveName), validator=validate_key_import_type,
                    help='The curve name of the key to import (only for BYOK).')
 
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
@@ -438,18 +433,19 @@ def load_arguments(self, _):
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
                 help='Include managed keys. Default: false')
 
-    with self.argument_context('keyvault key show', arg_group='Id') as c:
-        c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
-                   required=False, completer=get_keyvault_name_completion_list('key'),
-                   help='Name of the key. Required if --id is not specified.')
-        c.argument('version', options_list=['--version', '-v'],
-                   help='The key version. If omitted, uses the latest version.', default='',
-                   required=False, completer=get_keyvault_version_completion_list('key'))
-        c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-        c.extra('hsm_name', data_plane_hsm_name_type, required=False)
-        c.extra('identifier', options_list=['--id'],
-                help='Id of the key. If specified all other \'Id\' arguments should be omitted.',
-                validator=validate_keyvault_resource_id('key'))
+    for scope in ['create', 'show']:
+        with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
+            c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
+                       required=False, completer=get_keyvault_name_completion_list('key'),
+                       help='Name of the key. Required if --id is not specified.')
+            c.argument('version', options_list=['--version', '-v'],
+                       help='The key version. If omitted, uses the latest version.', default='',
+                       required=False, completer=get_keyvault_version_completion_list('key'))
+            c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+            c.extra('hsm_name', data_plane_hsm_name_type, required=False)
+            c.extra('identifier', options_list=['--id'],
+                    help='Id of the key. If specified all other \'Id\' arguments should be omitted.',
+                    validator=validate_keyvault_resource_id('key'))
     # endregion
 
     # region KeyVault Secret
