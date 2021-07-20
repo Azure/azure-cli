@@ -406,9 +406,6 @@ def load_arguments(self, _):
         c.argument('key_name', options_list=['--name', '-n'],
                    help='Name of the key. (Only for restoring from storage account)')
 
-    with self.argument_context('keyvault key set-attributes') as c:
-        c.attributes_argument('key', KeyAttributes)
-
     for scope in ['encrypt', 'decrypt']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
@@ -433,7 +430,7 @@ def load_arguments(self, _):
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
                 help='Include managed keys. Default: false')
 
-    for scope in ['create', 'show']:
+    for scope in ['create', 'set-attributes', 'show']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
                        required=False, completer=get_keyvault_name_completion_list('key'),
@@ -446,6 +443,16 @@ def load_arguments(self, _):
             c.extra('identifier', options_list=['--id'],
                     help='Id of the key. If specified all other \'Id\' arguments should be omitted.',
                     validator=validate_keyvault_resource_id('key'))
+
+    with self.argument_context('keyvault key set-attributes') as c:
+        c.extra('enabled', help='Enable the key.', arg_type=get_three_state_flag())
+        c.extra('expires_on', options_list=['--expires'], default=None, type=datetime_type,
+                help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+        c.extra('not_before', default=None, type=datetime_type,
+                help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+        c.extra('key_operations', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*',
+                help='Space-separated list of permitted JSON web key operations.')
+        c.extra('tags', tags_type)
     # endregion
 
     # region KeyVault Secret
