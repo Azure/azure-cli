@@ -835,6 +835,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
 
     identity_info = None
     if not (use_system_assigned_msi is None and identity_id is None):
+        if not recovery_point.properties.is_managed_virtual_machine:
+            raise InvalidArgumentValueError("--require-msi-for-restore flag is not supported for unmanaged VMs.")
         identity_info = IdentityInfo(
             is_system_assigned_identity=True if use_system_assigned_msi is not None else False,
             managed_identity_resource_id=identity_id
@@ -900,6 +902,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
 
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
+    vault_identity = vault.identity
 
     encryption = backup_resource_encryption_config_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
 
@@ -950,6 +953,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
 
     if diskslist:
         restore_disk_lun_list = diskslist
+
+    _validate_msi_used_for_restore_disks(vault_identity, use_system_assigned_msi, identity_id)
 
     trigger_restore_properties = _get_trigger_restore_properties(rp_name, vault_location, _storage_account_id,
                                                                  _source_resource_id, target_rg_id,
@@ -1363,6 +1368,21 @@ def _validate_object(obj, error_message):
 def _validate_restore_disk_parameters(restore_only_osdisk, diskslist):
     if restore_only_osdisk and diskslist is not None:
         logger.warning("Value of diskslist parameter will be ignored as restore-only-osdisk is set to be true.")
+
+
+def _validate_msi_used_for_restore_disks(vault_identity, use_system_assigned_msi, identity_id):
+    # check if rp is for managed vm
+    if use_system_assigned_msi:
+        if vault_identity.type != "SystemAssigned" and vault_identity.type != "SystemAssigned, UserAssigned":
+            raise ArgumentUsageError("Please ensure that System MSI is enabled for the vault")
+    if identity_id:
+        if vault_identity.type == "UserAssigned" or vault_identity.type == "SystemAssigned, UserAssigned":
+            if not (identity_id.lower() in (id.lower() for id in vault_identity.user_assigned_identities.keys())):
+                raise ArgumentUsageError("""
+                Vault does not have the specified Used MSI. Please ensure you've provided the correct --identity-id.
+                """)
+        else:
+            raise ArgumentUsageError("Please ensure that User MSI is enabled for the vault")
 
 
 # Tracking Utilities

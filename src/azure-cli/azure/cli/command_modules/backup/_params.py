@@ -103,21 +103,21 @@ def load_arguments(self, _):
 
     # Identity
     with self.argument_context('backup vault identity assign') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('system_assigned', system_assigned_type)
         c.argument('user_assigned', user_assigned_type)
 
     with self.argument_context('backup vault identity remove') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('system_assigned', system_assigned_remove_type)
         c.argument('user_assigned', user_assigned_remove_type)
 
     with self.argument_context('backup vault identity show') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
 
     # Encryption
     with self.argument_context('backup vault encryption') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
 
     with self.argument_context('backup vault encryption update') as c:
         c.argument('encryption_key_id', encryption_key_id_type)
@@ -126,7 +126,7 @@ def load_arguments(self, _):
         c.argument('mi_system_assigned', mi_system_assigned_type)
 
     with self.argument_context('backup vault encryption show') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
 
     # Container
     with self.argument_context('backup container') as c:

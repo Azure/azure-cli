@@ -417,7 +417,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                 storage_account, target_resource_group, restore_to_staging_storage_account,
                                 restore_only_osdisk, diskslist, restore_as_unmanaged_disks, use_secondary_region,
                                 rehydration_duration, rehydration_priority, disk_encryption_set_id,
-                                use_system_assigned_msi, identity_id))
+                                use_system_assigned_msi, identity_id)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,
