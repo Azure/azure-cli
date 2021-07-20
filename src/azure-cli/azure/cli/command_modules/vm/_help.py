@@ -2138,7 +2138,7 @@ short-summary: Manage VM secrets.
 
 helps['vm secret add'] = """
 type: command
-short-summary: Add a secret to a VM. To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-windows) instead of `az vm secret add`. 
+short-summary: Add a secret to a VM. To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-windows) instead of `az vm secret add`.
 examples:
   - name: Add a secret to a VM using the Azure Key Vault virtual machine extension (Linux).
     text: |
