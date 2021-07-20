@@ -2009,9 +2009,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
-    ManagedClusterPropertiesIdentityProfileValue = cmd.get_models('ManagedClusterPropertiesIdentityProfileValue',
-                                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                                  operation_group='managed_clusters')
+    ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties = cmd.get_models(
+        'ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group='managed_clusters')
     ManagedCluster = cmd.get_models('ManagedCluster',
                                     resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                     operation_group='managed_clusters')
@@ -2318,7 +2319,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
         kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
         identity_profile = {
-            'kubeletidentity': ManagedClusterPropertiesIdentityProfileValue(
+            # pylint: disable=line-too-long
+            'kubeletidentity': ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties(
                 resource_id=assign_kubelet_identity,
                 client_id=kubelet_identity.client_id,
                 object_id=kubelet_identity.principal_id
@@ -2328,7 +2330,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
         _ensure_cluster_identity_permission_on_kubelet_identity(
             cmd.cli_ctx,
-            cluster_identity_object_id)
+            cluster_identity_object_id,
+            assign_kubelet_identity)
 
     mc = ManagedCluster(
         location=location,
