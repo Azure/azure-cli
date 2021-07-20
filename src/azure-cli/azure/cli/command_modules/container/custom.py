@@ -49,7 +49,6 @@ SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
 MSI_LOCAL_ID = '[system]'
 
-
 def list_containers(client, resource_group_name=None):
     """List all container groups in a resource group. """
     if resource_group_name is None:
@@ -604,7 +603,7 @@ def container_export(cmd, resource_group_name, name, file):
         yaml.safe_dump(resource, f, default_flow_style=False)
 
 
-def container_exec(cmd, resource_group_name, name, exec_command, container_name=None, terminal_row_size=20, terminal_col_size=80):
+def container_exec(cmd, resource_group_name, name, exec_command, container_name=None):
     """Start exec for a container. """
 
     container_client = cf_container(cmd.cli_ctx)
@@ -616,7 +615,8 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
         if container_name is None:
             container_name = container_group.containers[0].name
 
-        terminal_size = ContainerExecRequestTerminalSize(rows=terminal_row_size, cols=terminal_col_size)
+        terminalsize = os.get_terminal_size()
+        terminal_size = ContainerExecRequestTerminalSize(rows=terminalsize.lines, cols=terminalsize.columns)
 
         execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_command, terminal_size)
 
@@ -630,77 +630,83 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
 
 
 def _start_exec_pipe_windows(web_socket_uri, password):
+    import colorama
+    colorama.deinit()
+    enable_vt_mode()
+    buff = bytearray()
+    lock = threading.Lock()
     def _on_ws_open_windows(ws):
         ws.send(password)
-        readKeyboard = threading.Thread(target=_capture_stdin_windows, args=[ws], daemon=True)
+        readKeyboard = threading.Thread(target=_capture_stdin, args=[_getch_windows, buff, lock], daemon=True)
         readKeyboard.start()
-    enable_vt_mode()
+        flushKeyboard = threading.Thread(target=_flush_stdin, args=[ws, buff, lock], daemon=True)
+        flushKeyboard.start()
     ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_windows, on_message=_on_ws_msg)
-    ws.run_forever()
-
-
-def _on_ws_msg(ws, msg):
-    if isinstance(msg, bytes):
-        msg = msg.decode()
-    sys.stdout.write(msg)
-    sys.stdout.flush()
-
-
-def _capture_stdin_windows(ws):
-    while True:
+    # in windows, msvcrt.getch doesn't give us ctrl+C so we have to manually catch it with kb interrupt and send it over the socket
+    websocketRun = threading.Thread(target=ws.run_forever)
+    websocketRun.start()
+    while websocketRun.is_alive():
         try:
-            x = _getkey_windows()
-            x = x.encode()
-            ws.send(x, opcode=0x2) # OPCODE_BINARY = 0x2
-        except (OSError, IOError, websocket.WebSocketConnectionClosedException) as e:
-            if isinstance(e, websocket.WebSocketConnectionClosedException):
+            time.sleep(0.01)
+        except KeyboardInterrupt:
+            try:
+                ws.send(b'\x03')# CTRL-C character (ETX character)
+            finally:
                 pass
-            elif e.errno == 9: # [Errno 9] Bad file descriptor, happens when ws is closed and we try to write to it
-                pass
-            elif e.args and e.args[0] == errno.EINTR:
-                pass
-            else:
-                raise
-
-
-def _getkey_windows():
-    c = _getch_windows(nonblocking=False)
-    while (ct := _getch_windows(nonblocking=True)) != "":
-        c += ct
-        if len(c) > 100:
-            break
-
-    return c
-
-
-def _getch_windows(nonblocking: bool = False):
-    if nonblocking and not msvcrt.kbhit():
-        return ""
-    return msvcrt.getwch()
+    colorama.reinit()
 
 
 def _start_exec_pipe_linux(web_socket_uri, password):
     stdin_fd = sys.stdin.fileno()
     old_tty = termios.tcgetattr(stdin_fd)
-    old_handler = signal.getsignal(signal.SIGWINCH)
+    old_winch_handler = signal.getsignal(signal.SIGWINCH)
+    tty.setraw(stdin_fd)
+    tty.setcbreak(stdin_fd)
+    buff = bytearray()
+    lock = threading.Lock()
     def _on_ws_open_linux(ws):
-        tty.setraw(stdin_fd)
-        tty.setcbreak(stdin_fd)
         ws.send(password)
-        readKeyboard = threading.Thread(target=_capture_stdin_linux, args=[ws], daemon=True)
+        readKeyboard = threading.Thread(target=_capture_stdin, args=[_getch_linux, buff, lock], daemon=True)
         readKeyboard.start()
-
+        flushKeyboard = threading.Thread(target=_flush_stdin, args=[ws, buff, lock], daemon=True)
+        flushKeyboard.start()
     ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_linux, on_message=_on_ws_msg)
     ws.run_forever()
     termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_tty)
-    signal.signal(signal.SIGWINCH, old_handler)
+    signal.signal(signal.SIGWINCH, old_winch_handler)
 
 
-def _capture_stdin_linux(ws):
+def _on_ws_msg(ws, msg):
+    if isinstance(msg, str):
+        msg = msg.encode()
+    sys.stdout.buffer.write(msg)
+    sys.stdout.flush()
+
+
+def _capture_stdin(getch_func, buff, lock):
+    # this method will fill up the buffer from one thread (using the lock)
     while True:
         try:
-            x = _getkey_linux()
-            x = x.encode()
+            x = getch_func()
+            lock.acquire()
+            buff.extend(x)
+            lock.release()
+        finally:
+            if lock.locked():
+                lock.release()
+
+
+def _flush_stdin(ws, buff, lock):
+    # this method will flush the buffer out to the websocket (using the lock)
+    while True:
+        time.sleep(0.01)
+        try:
+            if len(buff) == 0:
+                continue
+            lock.acquire()
+            x = bytes(buff)
+            buff.clear()
+            lock.release()
             ws.send(x, opcode=0x2) # OPCODE_BINARY = 0x2
         except (OSError, IOError, websocket.WebSocketConnectionClosedException) as e:
             if isinstance(e, websocket.WebSocketConnectionClosedException):
@@ -711,29 +717,20 @@ def _capture_stdin_linux(ws):
                 pass
             else:
                 raise
+        finally:
+            if lock.locked():
+                lock.release()
 
 
-def _getkey_linux():
-    c = _getch_linux(nonblocking=False)
-    while (ct := _getch_linux(nonblocking=True)) != "":
-        c += ct
-        if len(c) > 100:
-            break
-
-    return c
+def _getch_windows():
+    while not msvcrt.kbhit():
+        time.sleep(0.01)
+    return msvcrt.getch()
 
 
-def _getch_linux(nonblocking: bool):
-    stdin_fd = sys.stdin.fileno()
-    old_flags = fcntl.fcntl(stdin_fd, fcntl.F_GETFL)
-    try:
-        if nonblocking:
-            fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flags | os.O_NONBLOCK)
-        ch = sys.stdin.read(1)
-    finally:
-        fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flags)
-
-    return ch
+def _getch_linux():
+    ch = sys.stdin.read(1)
+    return ch.encode()
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
