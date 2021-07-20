@@ -62,11 +62,11 @@ def load_arguments(self, _):
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
     deployment_what_if_type = CLIArgumentType(options_list=['--what-if', '-w'], action='store_true',
-                                                           help='Instruct the command to run deployment What-If.',
-                                                           min_api='2019-07-01')
+                                              help='Instruct the command to run deployment What-If.',
+                                              min_api='2019-07-01')
     deployment_what_if_proceed_if_no_change_type = CLIArgumentType(options_list=['--proceed-if-no-change'], action='store_true',
-                                                           help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.',
-                                                           min_api='2019-07-01')
+                                                                   help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.',
+                                                                   min_api='2019-07-01')
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
                                                             arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
                                                             min_api='2019-07-01')

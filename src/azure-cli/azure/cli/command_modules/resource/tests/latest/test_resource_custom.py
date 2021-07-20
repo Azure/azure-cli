@@ -358,7 +358,7 @@ class TestCustom(unittest.TestCase):
         self.assertTrue(str(list(results.keys())) in param_alpha_order)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_resource_group", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
     def test_confirm_with_what_if_prompt_at_resource_group(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         prompt_y_n_mock.return_value = False
@@ -369,7 +369,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_resource_group", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
     def test_proceed_if_no_change_prompt_at_resource_group(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         what_if_command_mock.return_value = WhatIfOperationResult(changes=[
@@ -384,7 +384,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_resource_group", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._deploy_arm_template_at_resource_group", autospec=True)
     def test_proceed_if_no_change_skip_prompt_at_resource_group(self, deploy_template_mock, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
@@ -399,7 +399,7 @@ class TestCustom(unittest.TestCase):
         deploy_template_mock.assert_called_once()
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_subscription_scope", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_subscription_scope_core", autospec=True)
     def test_confirm_with_what_if_prompt_at_subscription_scope(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         prompt_y_n_mock.return_value = False
@@ -410,7 +410,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_subscription_scope", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_subscription_scope_core", autospec=True)
     def test_proceed_if_no_change_prompt_at_subscription_scope(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         what_if_command_mock.return_value = WhatIfOperationResult(changes=[
@@ -425,7 +425,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_subscription_scope", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_subscription_scope_core", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._deploy_arm_template_at_subscription_scope", autospec=True)
     def test_proceed_if_no_change_skip_prompt_at_subscription_scope(self, deploy_template_mock, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
@@ -440,7 +440,7 @@ class TestCustom(unittest.TestCase):
         deploy_template_mock.assert_called_once()
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_management_group", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_management_group_core", autospec=True)
     def test_confirm_with_what_if_prompt_at_management_group(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         prompt_y_n_mock.return_value = False
@@ -451,7 +451,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_management_group", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_management_group_core", autospec=True)
     def test_proceed_if_no_change_prompt_at_management_group(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         what_if_command_mock.return_value = WhatIfOperationResult(changes=[
@@ -466,7 +466,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_management_group", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_management_group_core", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._deploy_arm_template_at_management_group", autospec=True)
     def test_proceed_if_no_change_skip_prompt_at_management_group(self, deploy_template_mock, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
@@ -481,7 +481,7 @@ class TestCustom(unittest.TestCase):
         deploy_template_mock.assert_called_once()
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_tenant_scope", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_tenant_scope_core", autospec=True)
     def test_confirm_with_what_if_prompt_at_tenant_scope(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         prompt_y_n_mock.return_value = False
@@ -492,7 +492,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_tenant_scope", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_tenant_scope_core", autospec=True)
     def test_proceed_if_no_change_prompt_at_tenant_scope(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         what_if_command_mock.return_value = WhatIfOperationResult(changes=[
@@ -507,7 +507,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_tenant_scope", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_tenant_scope_core", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._deploy_arm_template_at_tenant_scope", autospec=True)
     def test_proceed_if_no_change_skip_prompt_at_tenant_scope(self, deploy_template_mock, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
