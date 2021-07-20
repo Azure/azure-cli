@@ -489,7 +489,9 @@ def load_command_table(self, _):
                        table_transformer=instance_pool_table_format)
         g.custom_command('list', 'instance_pool_list',
                          table_transformer=instance_pool_table_format)
-        g.generic_update_command('update', setter_name='begin_update')
+        g.generic_update_command('update',
+                                 custom_func_name='instance_pool_update',
+                                 setter_name='begin_update')
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('create', 'instance_pool_create',
                          supports_no_wait=True, table_transformer=instance_pool_table_format)

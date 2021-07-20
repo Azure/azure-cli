@@ -3,6 +3,137 @@
 Release History
 ===============
 
+2.26.0
+++++++
+
+**AKS**
+
+* Migrate ACS module to track 2 SDK (#18117)
+* Upgrade api-version to 2021-05-01 for ACS module (#18593)
+* Add UltraSSD support (#18649)
+* Support use custom kubelet identity (#18615)
+* `az aks get-credentials`: Add a check for KUBECONFIG environmental variable (#18704)
+
+**APIM**
+
+* Add version parameter for apim api import (#18604)
+* Fix apim upgrade bug when specifying protocols (#18605)
+* `az apim create`: Fix `--enable-managed-identity` true failure (#18554)
+
+**App Config**
+
+* Stop overwriting KeyVault reference content type during import (#18602)
+
+**App Service**
+
+* [BREAKING CHANGE] `az functionapp create`: Remove support for EOL Node 8 and 10 (#18676)
+* [BREAKING CHANGE] `az webapp deployment source config`: Remove vsts-cd-manager (#18203)
+* [BREAKING CHANGE] `az functionapp deployment source config`: Remove vsts-cd-manager (#18203)
+* `az webapp/functionapp config access-restriction add`: Prevent duplicate rules using service endpoints. (#18024)
+* `az webapp/functionapp config access-restriction remove`: Remove service endpoints are case-insensitive (#18024)
+* `az webapp config access-restrictions add`: Skip validation if user does not have access to get service tag list. (#18527)
+* Add support for Linux Consumption and improve how content share name is generated. (#18675)
+* : Fix an issue where adding VNET integration & Hybrid connections on a slot is not working (#18582)
+* `az appservice domain create`: Fix get correct domain agreements (#18622)
+* `az webapp deployment github-actions add/remove`: new commands (#18261)
+
+**AppConfiguration**
+
+* Add support for `disable_local_auth` (#18619)
+
+**ARM**
+
+* `az provider register`: Make parameter `--accept-term` become not required (#18509)
+
+**ARO**
+
+* `az aro create`: Add cidr values for pod/service (#18457)
+* Fail if resource doesn't exist on delete (#18546)
+
+**Azurestack**
+
+* [ACR][AKS] Add azurestack hybrid profile for AKS (#18118)
+
+**Backup**
+
+* `az backup container`: Fix container registration
+Workload container registration fix, SDK upgraded to 0.12.0, Fixed and Re-ran tests (#18592)
+* Add Archive Support for Azure CLI (#18535)
+
+**Billing**
+
+* Migrate billing to track2 SDK (#18608)
+
+**Cognitive Services**
+
+* `az cognitiveservices account`: Add list-deleted, show-deleted, recover, purge commands (#18464)
+
+**Compute **
+
+* `az sig create/update`: Add --permissions to specify the permission of sharing gallery. (#18503)
+* `az sig share`: Manage gallery sharing profile. (#18503)
+* `az sig list-shared`:  List shared galleries by subscription id or tenant id. (#18503)
+* `az sig show-shared`:  Get a shared gallery. (#18503)
+* `az sig image-definition list-shared`:  List shared galleries by subscription id or tenant id. (#18503)
+* `az sig image-definition show-shared`:  Get a shared gallery image. (#18503)
+* `az sig image-version list-shared`:  List shared galleries by subscription id or tenant id. (#18503)
+* `az sig image-version show-shared`:   Get a shared gallery image version. (#18503)
+* `az vmss create`: Support NetworkApiVersion for Vmss with OrchestraionMode == Flexible (#18132)
+* Make dependent resources of VM/VMSS support edge zone (#18708)
+* Update from CoreOS to Flatcar (#18644)
+* Add the hint to suggest users use the standard public IP when creating VM (#18662)
+
+**Container Registry**
+
+* Migrate to track2 SDK (#18611)
+
+**Cosmos DB**
+
+* Add point-in-time restore commands to the stable branch. (#18568)
+* Add support for selecting Cosmos DB analytical storage schema type (#18636)
+
+**HDInsight**
+
+* `az hdinsight create`: Remove the incoming breaking change notice for the parameter `--workernode-size` and `--headnode-size`. (#18519)
+* Add three new cmdlets to support new azure monitor feature: (#18519)
+
+**NetAppFiles**
+
+* `az netappfiles account ad add`: Optional parameter added named --administrators (#18666)
+* `az netappfiles pool create`: Optional parameter added --cool-access (#18666)
+* `az netappfiles volume create`: Optional parameters added named --chown-mode, --cool-access, --coolness-period, --coolness-period (#18666)
+* `az netappfiles volume backup restore-status`: Command added to see backup restore status (#18666)
+
+**Network**
+
+* `az network routeserver create`: Add `--public-ip-address` argument. (#18663)
+
+**RDBMS**
+
+* Add autogrow parameter for MySQL and add database name to output json when created (#18441)
+
+**Resource**
+
+* Third-party S2S Consent/Permission Enumeration (#18433)
+
+**Security**
+
+* Remove preview from security module (#18529)
+
+**SQL**
+
+* Bump sdk version (#18373)
+* Fix for server create in SQL 0.28 (#18640)
+* `az sql db ledger-digest-uploads`:  Support SQL Ledger (#18672)
+* Fix for IdentityType for UMI (#18693)
+* `az sql db str-policy set/show`: Add Set and Show ShortTermRetentionPolicy (#14919)
+
+**Storage**
+
+* GA support secured SMB (#18638)
+* `az storage account create`: Support `--enable-nfs-v3` to set NFS 3.0 protocol (#16766)
+* Support container soft delete (#18508)
+
 2.25.0
 ++++++
 

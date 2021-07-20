@@ -40,6 +40,7 @@ from azure.mgmt.sql.models import (
     ManagedInstanceAzureADOnlyAuthentication,
     ManagedInstanceEncryptionProtector,
     ManagedInstanceExternalAdministrator,
+    ManagedInstanceKey,
     ManagedInstanceLongTermRetentionPolicyName,
     ManagedInstancePairInfo,
     ManagedShortTermRetentionPolicyName,
@@ -59,6 +60,7 @@ from azure.mgmt.sql.models import (
     ServerKeyType,
     ServerNetworkAccessFlag,
     ServiceObjectiveName,
+    ServerTrustGroup,
     ShortTermRetentionPolicyName,
     Sku,
     StorageKeyType,
@@ -3458,6 +3460,18 @@ def instance_pool_create(
                        parameters=kwargs)
 
 
+def instance_pool_update(
+        instance,
+        tags=None):
+    '''
+    Updates a instance pool
+    '''
+
+    instance.tags = tags
+
+    return instance
+
+
 def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
     '''
     Validate if the sku family and edition input by user are permissible in the region using
@@ -4038,8 +4052,10 @@ def server_trust_group_create(
                        resource_group_name=resource_group_name,
                        location_name=location,
                        server_trust_group_name=name,
-                       group_members=members,
-                       trust_scopes=trust_scope)
+                       parameters=ServerTrustGroup(
+                           group_members=members,
+                           trust_scopes=trust_scope
+                       ))
 
 
 def server_trust_group_delete(
@@ -4317,12 +4333,14 @@ def managed_instance_key_create(
 
     key_name = _get_server_key_name_from_uri(kid)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
         key_name=key_name,
-        server_key_type=ServerKeyType.AZURE_KEY_VAULT,
-        uri=kid
+        parameters=ManagedInstanceKey(
+            server_key_type=ServerKeyType.AZURE_KEY_VAULT,
+            uri=kid
+        )
     )
 
 
@@ -4354,7 +4372,7 @@ def managed_instance_key_delete(
 
     key_name = _get_server_key_name_from_uri(kid)
 
-    return client.delete(
+    return client.begin_delete(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
         key_name=key_name)
@@ -4420,10 +4438,12 @@ def mi_ad_admin_set(
     '''
 
     kwargs['tenant_id'] = _get_tenant_id()
+    kwargs['administrator_type'] = AdministratorType.ACTIVE_DIRECTORY
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY,
         parameters=kwargs
     )
 
@@ -4436,9 +4456,10 @@ def mi_ad_admin_delete(
     Deletes a managed instance active directory administrator.
     '''
 
-    return client.delete(
+    return client.begin_delete(
         resource_group_name=resource_group_name,
-        managed_instance_name=managed_instance_name
+        managed_instance_name=managed_instance_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY
     )
 
 
@@ -5287,9 +5308,9 @@ def instance_failover_group_failover(
 
     # Choose which failover method to use
     if allow_data_loss:
-        failover_func = client.force_failover_allow_data_loss
+        failover_func = client.begin_force_failover_allow_data_loss
     else:
-        failover_func = client.failover
+        failover_func = client.begin_failover
 
     return failover_func(
         resource_group_name=resource_group_name,

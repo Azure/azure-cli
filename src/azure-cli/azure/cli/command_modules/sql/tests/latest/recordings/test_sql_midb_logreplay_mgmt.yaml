@@ -98,7 +98,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -263,12 +263,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1330'
+      - '1328'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -294,16 +294,15 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - sql mi create
+      - sql midb log-replay start
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
+      - -g --mi -n --ss --su --no-wait
       User-Agent:
       - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
@@ -338,7 +337,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"location": "westeurope", "properties": {"createMode": "RestoreExternalBackup",
+      "storageContainerUri": "https://tempmi.blob.core.windows.net/mibrkic", "storageContainerSasToken":
+      "sp=rl&st=2021-06-30T13:25:17Z&se=2021-06-30T21:25:17Z&spr=https&sv=2020-08-04&sr=c&sig=f9QOpBZ3sPoMew1nPbZOn9DdI%2FTWDtxqXayxBgF9Ubw%3D",
+      "autoCompleteRestore": false}}'
     headers:
       Accept:
       - application/json
@@ -391,15 +393,15 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - sql midb log-replay start
+      - sql midb log-replay complete
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --mi -n --ss --su --no-wait
+      - -g --mi -n --last-bn
       User-Agent:
       - AZURECLI/2.25.0 azsdk-python-mgmt-sql/3.0.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
     method: GET
@@ -478,10 +480,12 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
       code: 400
       message: Bad Request

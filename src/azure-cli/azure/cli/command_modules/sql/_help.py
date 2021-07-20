@@ -1211,6 +1211,11 @@ examples:
             --event-hub-target-state Disabled
 """
 
+helps['sql server ms-support'] = """
+type: group
+short-summary: Manage a server's Microsoft support operations.
+"""
+
 helps['sql server ms-support audit-policy'] = """
 type: group
 short-summary: Manage a server's Microsoft support operations auditing policy.
