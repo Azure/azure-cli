@@ -3451,6 +3451,7 @@ def server_create(
         assign_identity=False,
         no_wait=False,
         enable_public_network=None,
+        restrict_outbound_network_access=None,
         key_id=None,
         user_assigned_identity_id=None,
         primary_user_assigned_identity_id=None,
@@ -3472,6 +3473,11 @@ def server_create(
     if enable_public_network is not None:
         kwargs['public_network_access'] = (
             ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
+
+    if restrict_outbound_network_access is not None:
+        kwargs['restrict_outbound_network_access'] = (
+            ServerNetworkAccessFlag.enabled if restrict_outbound_network_access
             else ServerNetworkAccessFlag.disabled)
 
     kwargs['key_id'] = key_id
@@ -3543,6 +3549,7 @@ def server_update(
         assign_identity=False,
         minimal_tls_version=None,
         enable_public_network=None,
+        restrict_outbound_network_access=None,
         primary_user_assigned_identity_id=None,
         key_id=None,
         identity_type=None,
@@ -3570,6 +3577,11 @@ def server_update(
     if enable_public_network is not None:
         instance.public_network_access = (
             ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
+
+    if restrict_outbound_network_access is not None:
+        instance.public_network_access = (
+            ServerNetworkAccessFlag.enabled if restrict_outbound_network_access
             else ServerNetworkAccessFlag.disabled)
 
     instance.primary_user_assigned_identity_id = (
@@ -3688,6 +3700,25 @@ def firewall_rule_create(
         resource_group_name=resource_group_name,
         parameters=FirewallRule(start_ip_address=start_ip_address,
                                 end_ip_address=end_ip_address))
+
+
+#########################################################
+#           sql server outbound-firewall-rule           #
+#########################################################
+
+
+def outbound_firewall_rule_create(
+        client,
+        server_name,
+        resource_group_name,
+        outbound_rule_fqdn):
+    '''
+    Creates a new outbound firewall rule.
+    '''
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        outbound_rule_fqdn=outbound_rule_fqdn)
 
 
 #####

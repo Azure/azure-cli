@@ -76,6 +76,9 @@ def list_fs_files(client, path=None, recursive=True, num_results=None, timeout=N
 
     result = list(next(pages))
 
+    if exclude_dir:
+        result = list(f for f in result if not f.is_directory)
+
     if show_next_marker:
         next_marker = {"nextMarker": pages.continuation_token}
         result.append(next_marker)
@@ -83,9 +86,6 @@ def list_fs_files(client, path=None, recursive=True, num_results=None, timeout=N
         if pages.continuation_token:
             logger.warning('Next Marker:')
             logger.warning(pages.continuation_token)
-
-    if exclude_dir:
-        return list(f for f in result if not f.is_directory)
 
     return result
 

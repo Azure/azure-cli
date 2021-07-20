@@ -1975,6 +1975,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_encryption_at_host=False,
                assign_kubelet_identity=None,
                enable_ultra_ssd=False,
+               edge_zone=None,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
@@ -2372,6 +2373,18 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         mc.sku = ManagedClusterSKU(
             name="Basic",
             tier="Paid"
+        )
+
+    if edge_zone:
+        ExtendedLocation = cmd.get_models('ExtendedLocation',
+                                          resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                          operation_group='managed_clusters')
+        ExtendedLocationTypes = cmd.get_models('ExtendedLocationTypes',
+                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                               operation_group='managed_clusters')
+        mc.extended_location = ExtendedLocation(
+            name=edge_zone,
+            type=ExtendedLocationTypes.EDGE_ZONE
         )
 
     # Add AAD session key to header.

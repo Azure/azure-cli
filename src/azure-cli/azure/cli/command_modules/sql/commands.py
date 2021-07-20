@@ -16,6 +16,7 @@ from ._format import (
     elastic_pool_edition_table_format,
     firewall_rule_table_format,
     instance_pool_table_format,
+    outbound_firewall_rule_table_format,
     server_table_format,
     usage_table_format,
     LongRunningOperationResultTransform,
@@ -44,6 +45,7 @@ from ._util import (
     get_sql_encryption_protectors_operations,
     get_sql_failover_groups_operations,
     get_sql_firewall_rules_operations,
+    get_sql_outbound_firewall_rules_operations,
     get_sql_instance_pools_operations,
     get_sql_managed_databases_operations,
     get_sql_managed_database_restore_details_operations,
@@ -531,6 +533,21 @@ def load_command_table(self, _):
                        table_transformer=firewall_rule_table_format)
         g.command('list', 'list_by_server',
                   table_transformer=firewall_rule_table_format)
+
+    outbound_firewall_rules_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#OutboundFirewallRulesOperations.{}',
+        client_factory=get_sql_outbound_firewall_rules_operations)
+
+    with self.command_group('sql server outbound-firewall-rule',
+                            outbound_firewall_rules_operations,
+                            client_factory=get_sql_outbound_firewall_rules_operations) as g:
+        g.custom_command('create', 'outbound_firewall_rule_create',
+                         table_transformer=outbound_firewall_rule_table_format)
+        g.command('delete', 'delete')
+        g.show_command('show', 'get',
+                       table_transformer=outbound_firewall_rule_table_format)
+        g.command('list', 'list_by_server',
+                  table_transformer=outbound_firewall_rule_table_format)
 
     aadadmin_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerAzureADAdministratorsOperations.{}',
