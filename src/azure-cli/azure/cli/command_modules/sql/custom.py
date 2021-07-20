@@ -5295,11 +5295,11 @@ def instance_failover_group_failover(
     Failover an instance failover group.
     '''
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
+    #from azure.cli.core.commands.client_factory import get_subscription_id
 
     failover_group = client.get(
         resource_group_name=resource_group_name,
-        subscription_id=get_subscription_id(cmd.cli_ctx),
+        #subscription_id=get_subscription_id(cmd.cli_ctx),
         failover_group_name=failover_group_name,
         location_name=location_name)
 

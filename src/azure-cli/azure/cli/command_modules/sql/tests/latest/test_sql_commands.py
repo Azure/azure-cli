@@ -112,6 +112,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         location = self.location
         subnet = self.subnet
+        v_core = self.v_core
 
         template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {}' \
                    ' --collation {} --capacity {} --storage {} --edition {} --family {} --tags {}' \
@@ -5086,7 +5087,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
         managed_instance_name_1 = mi1
         managed_instance_name_2 = mi2
         resource_group_name = rg
-        failover_group_name = "fgtest2020a"
+        failover_group_name = "fgtest2021a"
         mi1_location = ManagedInstancePreparer.location
         mi2_location = ManagedInstancePreparer.sec_location
 
