@@ -42,6 +42,7 @@ from azure.mgmt.sql.models import (
     ManagedInstanceLongTermRetentionPolicyName,
     ManagedInstancePairInfo,
     ManagedShortTermRetentionPolicyName,
+    OutboundFirewallRule,
     PartnerInfo,
     PartnerRegionInfo,
     PerformanceLevelUnit,
@@ -3782,15 +3783,16 @@ def outbound_firewall_rule_create(
     '''
     Creates a new outbound firewall rule.
     '''
-    return client.create_or_update(
+    return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
-        outbound_rule_fqdn=outbound_rule_fqdn)
+        outbound_rule_fqdn=outbound_rule_fqdn,
+        parameters=OutboundFirewallRule())
 
 
-#####
-#           sql server key
-#####
+#########################################################
+#           sql server key                              #
+#########################################################
 
 
 def server_key_create(
