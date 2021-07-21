@@ -1145,6 +1145,7 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
 def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_type=None):
     from ._vm_utils import list_sku_info
     result = list_sku_info(cmd.cli_ctx, location)
+    # pylint: disable=too-many-nested-blocks
     if not show_all:
         available_skus = []
         for sku_info in result:
@@ -1152,9 +1153,13 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
             if sku_info.restrictions:
                 for restriction in sku_info.restrictions:
                     if restriction.reason_code == 'NotAvailableForSubscription':
+                        # The attribute location_info is not supported in versions 2017-03-30 and earlier
+                        if cmd.supported_api_version(max_api='2017-03-30'):
+                            is_available = False
+                            break
                         # This SKU is not available only if all zones are restricted
-                        if not (set(sku_info.location_info[0].zones or []) -
-                                set(restriction.restriction_info.zones or [])):
+                        elif not (set(sku_info.location_info[0].zones or []) -
+                                  set(restriction.restriction_info.zones or [])):
                             is_available = False
                             break
             if is_available:
