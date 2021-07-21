@@ -1012,15 +1012,15 @@ def _get_auth_provider_latest_api_version(cli_ctx):
     return api_version
 
 
-def _update_provider(cli_ctx, namespace, registering, wait, properties=None, mg_id=None, accept_terms=None):
+def _update_provider(cmd, namespace, registering, wait, properties=None, mg_id=None, accept_terms=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
-    rcf = _resource_client_factory(cli_ctx)
+    rcf = _resource_client_factory(cmd.cli_ctx)
     is_rpaas = namespace.lower() in RPAAS_APIS
     if mg_id is None and registering:
         if is_rpaas and accept_terms:
             wait = True
-        if properties:
+        if cmd.supported_api_version(min_api='2021-04-01'):
             r = rcf.providers.register(namespace, properties=properties)
         else:
             r = rcf.providers.register(namespace)
@@ -1043,7 +1043,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, properties=None, mg_
         if is_rpaas and accept_terms and registering and mg_id is None:
             # call accept term API
             from azure.cli.core.util import send_raw_request
-            send_raw_request(cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
+            send_raw_request(cmd.cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
     else:
         action = 'Registering' if registering else 'Unregistering'
         msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
@@ -2032,14 +2032,14 @@ def list_resources(cmd, resource_group_name=None,
 
 def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
     properties = None
-    if consent_to_permissions:
+    if cmd.supported_api_version(min_api='2021-04-01') and consent_to_permissions:
         ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest', 'ProviderConsentDefinition')
         properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
+    _update_provider(cmd, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=False, wait=wait)
+    _update_provider(cmd, resource_provider_namespace, registering=False, wait=wait)
 
 
 def list_provider_operations(cmd):
