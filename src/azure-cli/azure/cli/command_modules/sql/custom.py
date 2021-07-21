@@ -23,7 +23,6 @@ from azure.mgmt.sql.models import (
     CapabilityStatus,
     ConnectionPolicyName,
     CreateMode,
-    DatabaseSecurityAlertPolicy,
     EncryptionProtector,
     EncryptionProtectorName,
     FailoverGroup,
@@ -36,7 +35,6 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroupReadWriteEndpoint,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
-    ManagedBackupShortTermRetentionPolicy,
     ManagedInstanceAzureADOnlyAuthentication,
     ManagedInstanceEncryptionProtector,
     ManagedInstanceExternalAdministrator,
@@ -3883,6 +3881,7 @@ def server_dns_alias_set(
 #           sql server encryption-protector
 #####
 
+
 def encryption_protector_get(
         client,
         resource_group_name,
@@ -4669,7 +4668,7 @@ def get_short_term_retention_mi(
             database_name=database_name,
             managed_instance_name=managed_instance_name,
             resource_group_name=resource_group_name,
-            policy_name = ManagedShortTermRetentionPolicyName.DEFAULT)
+            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT)
 
     return policy
 
@@ -5285,7 +5284,6 @@ def instance_failover_group_update(
 
 
 def instance_failover_group_failover(
-        cmd,
         client,
         resource_group_name,
         failover_group_name,
@@ -5295,11 +5293,8 @@ def instance_failover_group_failover(
     Failover an instance failover group.
     '''
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
     failover_group = client.get(
         resource_group_name=resource_group_name,
-        subscription_id=get_subscription_id(cmd.cli_ctx),
         failover_group_name=failover_group_name,
         location_name=location_name)
 
@@ -5333,6 +5328,7 @@ def conn_policy_show(
         resource_group_name=resource_group_name,
         server_name=server_name,
         connection_policy_name=ConnectionPolicyName.DEFAULT)
+
 
 def conn_policy_update(
         client,
@@ -5409,6 +5405,7 @@ def tde_list_by_configuration(
 ###############################################
 #              sql server vnet-rule           #
 ###############################################
+
 
 def vnet_rule_begin_create_or_update(
         client,

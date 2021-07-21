@@ -89,9 +89,13 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     family = 'Gen5'
     proxy = 'Proxy'
 
+    sec_location = 'westus'
+    sec_subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/secondary-vnet/subnets/ManagedInstance'
+
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
-                 admin_password='SecretPassword123SecretPassword', public=True, tags='', skip_delete=False):
+                 admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
+                 skip_delete=False):
         super(ManagedInstancePreparer, self).__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -104,11 +108,17 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.userAssignedIdentityId = user_assigned_identity_id
         self.pid = pid
         self.otherParams = otherParams
+        self.is_geo_secondary = is_geo_secondary
 
     def create_resource(self, name, **kwargs):
+        location = self.location
+        subnet = self.subnet
+        v_core = self.v_core
+
         template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {}' \
                    ' --collation {} --capacity {} --storage {} --edition {} --family {} --tags {}' \
                    ' --proxy-override {}'
+
         if self.public:
             template += ' --public-data-endpoint-enabled'
 
@@ -124,14 +134,16 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         if self.otherParams:
             template += f" {self.otherParams}"
 
-        print(template)
-        print(self.identityType)
+        if self.is_geo_secondary:
+            location = self.sec_location
+            subnet = self.sec_subnet
+            v_core = 4
 
         execute(DummyCli(), template.format(
-            self.group, name, self.location,
+            self.group, name, location,
             self.admin_user, self.admin_password,
-            self.subnet, self.licence, self.collation,
-            self.v_core, self.storage, self.edition,
+            subnet, self.licence, self.collation,
+            v_core, self.storage, self.edition,
             self.family, self.tags, self.proxy))
         return {self.parameter_name: name, 'rg': self.group}
 
@@ -1105,6 +1117,7 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
 class SqlManagedInstanceAzureADOnlyAuthenticationsScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()
     def test_sql_mi_ad_only_auth(self, mi, rg):
+        self.skipTest("Skipping based on discussion with MI AAD team.")
         print('Test is started...\n')
 
         self.kwargs.update({
@@ -3987,8 +4000,6 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
         self.cmd('az sql stg delete -g {rg} -l {loc} -n {stg_name} --yes')
 
 
-# Ji: not try
-# This test check creation of MI with maintenance configuration that is not default one
 class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
     MMI1 = "SQL_NorthEurope_MI_1"
 
@@ -4213,7 +4224,6 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
                      ),
                      JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned')]
                  )
-
 
 
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
@@ -4687,7 +4697,6 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
-
     @ManagedInstancePreparer()
     def test_sql_managed_db_mgmt(self, mi, rg):
         database_name = "cliautomationdb01"
@@ -4757,10 +4766,10 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                  expect_failure=True)
 
 
-# need specific setting for the oid
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()
     def test_sql_mi_aad_admin(self, mi, rg):
+        self.skipTest("Skipping based on discussion with MI AAD team.")
         print('Test is started...\n')
 
         self.kwargs.update({
@@ -5075,17 +5084,16 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
                      self.check('subnetId', '{subnet_id}')])
 
 
-# need another instance in different region in order to create Failover group
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
     @ManagedInstancePreparer(parameter_name="mi1")
-    @ManagedInstancePreparer(parameter_name="mi2")
+    @ManagedInstancePreparer(parameter_name="mi2", is_geo_secondary=True)
     def test_sql_instance_failover_group_mgmt(self, mi1, rg, mi2):
         managed_instance_name_1 = mi1
         managed_instance_name_2 = mi2
         resource_group_name = rg
-        failover_group_name = "fgtest2020a"
+        failover_group_name = "fgtest2021a"
         mi1_location = ManagedInstancePreparer.location
-        mi2_location = "eastus"
+        mi2_location = ManagedInstancePreparer.sec_location
 
         # Create Failover Group
         self.cmd(
@@ -5222,7 +5230,6 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
     @StorageAccountPreparer(location='eastus2')
     def test_sql_db_sensitivity_classifications(self, resource_group, resource_group_location, server, storage_account):
         from azure.mgmt.sql.models import SampleName
-        # self.skipTest("Skipping based on discussion with owning team - ranisha")
         database_name = "sensitivityclassificationsdb01"
 
         # create db
@@ -5376,9 +5383,7 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('minimalTlsVersion', tls1_1)])
 
 
-# need rewrite the test
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
-
     @ManagedInstancePreparer()
     def test_sql_mi_failover_mgmt(self, mi, rg):
         self.kwargs.update({
@@ -5393,7 +5398,7 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
 
-# not pass due to http reponse error
+
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer()
@@ -5403,18 +5408,27 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         managed_database_name1 = 'logReplayTestDb1'
         # Uploading bak file to blob is restricted by testing framework, so only mitigation for now is to use hard-coded values
         self.kwargs.update({
+            'storage_account': 'toolingsa',
+            'container_name': 'tools',
             'resource_group': rg,
             'managed_instance_name': mi,
             'managed_database_name': managed_database_name,
             'managed_database_name1': managed_database_name1,
-            'storage_sas': 'sp=rl&st=2021-06-30T13:25:17Z&se=2021-06-30T21:25:17Z&spr=https&sv=2020-08-04&sr=c&sig=f9QOpBZ3sPoMew1nPbZOn9DdI%2FTWDtxqXayxBgF9Ubw%3D',
-            'storage_uri': 'https://tempmi.blob.core.windows.net/mibrkic',
+            'storage_uri': 'https://toolingsa.blob.core.windows.net/tools',
             'last_backup_name': 'full.bak'
         })
 
+        from datetime import datetime, timedelta
+        self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
+
+        self.kwargs['storage_key'] = str(self.cmd(
+            'az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)
+        self.kwargs['sas_token'] = self.cmd(
+            'storage container generate-sas --account-name {storage_account} --account-key {storage_key} --name {container_name} --permissions rl --expiry {expiry}  -otsv').output.strip()
+
         # Start Log Replay Service
         self.cmd(
-            'sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --ss {storage_sas} --su {storage_uri} --no-wait',
+            'sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --ss {sas_token} --su {storage_uri} --no-wait',
             checks=NoneCheck())
 
         if self.in_recording or self.is_live:
@@ -5440,7 +5454,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
 
         # Start Log Replay Service
         self.cmd(
-            'sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --ss {storage_sas} --su {storage_uri} --no-wait',
+            'sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --ss {sas_token} --su {storage_uri} --no-wait',
             checks=NoneCheck())
 
         # Wait a minute to start restoring
@@ -5451,8 +5465,6 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         self.cmd(
             'sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --yes',
             checks=NoneCheck())
-
-        self.cmd('sql mi delete -g {resource_group} -n {managed_instance_name} --yes', checks=NoneCheck())
 
 
 class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):

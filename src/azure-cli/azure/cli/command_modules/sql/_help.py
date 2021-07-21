@@ -206,6 +206,11 @@ examples:
     text: az sql db str-policy show -g mygroup -s myserver -n mydb
 """
 
+helps['sql db str-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the policy is set.
+"""
+
 helps['sql db ltr-policy'] = """
 type: group
 short-summary: Manage SQL database long term retention policy.
@@ -406,23 +411,28 @@ examples:
   - name: Enable by storage account name.
     text: |
         az sql db threat-policy update -g mygroup -s myserver -n mydb \\
-            --state Enabled --storage-account mystorage
+            --state Enabled --storage-account mystorage \\
+            --security-alert-policy-name default
   - name: Enable by storage endpoint and key.
     text: |
         az sql db threat-policy update -g mygroup -s myserver -n mydb \\
             --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
-            --storage-key MYKEY==
+            --storage-key MYKEY== \\
+            --security-alert-policy-name default
   - name: Disable a subset of alert types.
     text: |
         az sql db threat-policy update -g mygroup -s myserver -n mydb \\
-            --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly
+            --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly \\
+            --security-alert-policy-name default
   - name: Configure email recipients for a policy.
     text: |
         az sql db threat-policy update -g mygroup -s myserver -n mydb \\
             --email-addresses me@examlee.com you@example.com \\
-            --email-account-admins Enabled
+            --email-account-admins Enabled \\
+            --security-alert-policy-name default
   - name: Disable a threat policy.
-    text: az sql db threat-policy update -g mygroup -s myserver -n mydb --state Disabled
+    text: az sql db threat-policy update -g mygroup -s myserver -n mydb --state Disabled \\
+            --security-alert-policy-name default
 """
 
 helps['sql db update'] = """
@@ -1081,7 +1091,7 @@ type: command
 short-summary: Get status of Log Replay service.
 examples:
   - name: Get status of the ongoing log replay service.
-    text: az sql midb log-replay show -g mygroup --mi myinstance -n mymanageddb
+    text: az sql midb log-replay show -g mygroup --mi myinstance -n mymanageddb --restore-details-name Default
 """
 
 helps['sql midb log-replay stop'] = """

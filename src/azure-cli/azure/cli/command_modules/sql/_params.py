@@ -27,6 +27,7 @@ from azure.mgmt.sql.models import (
     DatabaseLicenseType,
     ElasticPoolLicenseType,
     SampleName,
+    SecurityAlertPolicyName,
     SecurityAlertPolicyState,
     ServerConnectionType,
     ServerKeyType,
@@ -940,6 +941,13 @@ def load_arguments(self, _):
     with self.argument_context('sql db threat-policy update') as c:
         _configure_security_policy_storage_params(c)
 
+        c.argument('security_alert_policy_name',
+                   arg_group=policy_arg_group,
+                   options_list=['--security-alert-policy-name', '-p'],
+                   required=True,
+                   help='The name of the security alert policy. The value is Default.',
+                   arg_type=get_enum_type(SecurityAlertPolicyName))
+
         policy_arg_group = 'Policy'
         notification_arg_group = 'Notification'
 
@@ -1602,7 +1610,8 @@ def load_arguments(self, _):
 
         c.argument('connection_type',
                    options_list=['--connection-type', '-t'],
-                   arg_type=get_enum_type(ServerConnectionType))
+                   arg_type=get_enum_type(ServerConnectionType),
+                   help='The required parameters for updating a secure connection policy. The value is default',)
 
     #####
     #           sql server dns-alias
@@ -1695,7 +1704,8 @@ def load_arguments(self, _):
                    arg_type=server_param_type)
 
         c.argument('virtual_network_rule_name',
-                   options_list=['--name', '-n'])
+                   options_list=['--name', '-n'],
+                   help='The name of the virtual network rule.')
 
         c.argument('virtual_network_subnet_id',
                    options_list=['--subnet'],

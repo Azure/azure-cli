@@ -213,7 +213,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_database_transparent_data_encryptions_operations) as g:
 
         g.custom_command('set', 'transparent_data_encryptions_set')
-        g.custom_command('show', 'transparent_data_encryptions_get')
+        g.custom_show_command('show', 'transparent_data_encryptions_get')
 
     transparent_data_encryption_activities_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#TransparentDataEncryptionActivitiesOperations.{}',
@@ -308,7 +308,7 @@ def load_command_table(self, _):
                             ledger_digest_uploads_operations,
                             client_factory=get_sql_database_ledger_digest_uploads_operations) as g:
 
-        g.custom_command('show', 'ledger_digest_uploads_show')
+        g.custom_show_command('show', 'ledger_digest_uploads_show')
         g.custom_command('enable', 'ledger_digest_uploads_enable')
         g.custom_command('disable', 'ledger_digest_uploads_disable')
 
@@ -322,7 +322,7 @@ def load_command_table(self, _):
                             is_preview=True) as g:
 
         g.custom_command('set', 'update_long_term_retention')
-        g.custom_command('show', 'update_long_term_retention_get')
+        g.custom_show_command('show', 'update_long_term_retention_get')
 
     database_long_term_retention_backups_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionBackupsOperations.{}',
@@ -358,6 +358,7 @@ def load_command_table(self, _):
 
         g.custom_command('set', 'update_short_term_retention', supports_no_wait=True)
         g.custom_show_command('show', 'get_short_term_retention')
+        g.wait_command('wait')
 
     database_sensitivity_labels_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',
@@ -388,7 +389,7 @@ def load_command_table(self, _):
                             database_threat_detection_policies_operations,
                             client_factory=get_sql_database_threat_detection_policies_operations) as g:
 
-        g.custom_command('show', 'db_threat_detection_policy_get')
+        g.custom_show_command('show', 'db_threat_detection_policy_get')
         g.generic_update_command('update',
                                  setter_name='create_or_update',
                                  custom_func_name='db_threat_detection_policy_update',
@@ -613,7 +614,7 @@ def load_command_table(self, _):
                             server_connection_policies_operations,
                             client_factory=get_sql_server_connection_policies_operations) as c:
 
-        c.custom_command('show', 'conn_policy_show')
+        c.custom_show_command('show', 'conn_policy_show')
         c.custom_command('update', 'conn_policy_update')
 
     server_dns_aliases_operations = CliCommandType(
@@ -779,7 +780,7 @@ def load_command_table(self, _):
                             managed_database_long_term_retention_policies_operations,
                             client_factory=get_sql_managed_database_long_term_retention_policies_operations) as g:
 
-        g.custom_command('set', 'update_long_term_retention_mi', is_preview=True)
+        g.custom_show_command('set', 'update_long_term_retention_mi', is_preview=True)
         g.custom_command('show', 'get_long_term_retention_mi', is_preview=True)
 
     managed_database_long_term_retention_backups_operations = CliCommandType(
