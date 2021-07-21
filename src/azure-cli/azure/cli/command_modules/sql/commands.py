@@ -324,7 +324,7 @@ def load_command_table(self, _):
                             is_preview=True) as g:
 
         g.custom_command('set', 'update_long_term_retention')
-        g.custom_show_command('show', 'update_long_term_retention_get')
+        g.custom_show_command('show', 'get_long_term_retention')
 
     database_long_term_retention_backups_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionBackupsOperations.{}',
@@ -630,8 +630,8 @@ def load_command_table(self, _):
                             server_connection_policies_operations,
                             client_factory=get_sql_server_connection_policies_operations) as c:
 
-        c.custom_show_command('show', 'conn_policy_show')
-        c.custom_command('update', 'conn_policy_update')
+        c.custom_show_command('show', 'show_conn_policy')
+        c.custom_command('update', 'update_conn_policy')
 
     server_dns_aliases_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerDnsAliasesOperations.{}',
@@ -796,7 +796,7 @@ def load_command_table(self, _):
                             managed_database_long_term_retention_policies_operations,
                             client_factory=get_sql_managed_database_long_term_retention_policies_operations) as g:
 
-        g.custom_show_command('set', 'update_long_term_retention_mi', is_preview=True)
+        g.custom_command('set', 'update_long_term_retention_mi', is_preview=True)
         g.custom_show_command('show', 'get_long_term_retention_mi', is_preview=True)
 
     managed_database_long_term_retention_backups_operations = CliCommandType(

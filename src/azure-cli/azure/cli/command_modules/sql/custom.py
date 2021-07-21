@@ -2713,7 +2713,7 @@ def update_long_term_retention(
     return policy
 
 
-def update_long_term_retention_get(
+def get_update_long_term_retention(
         client,
         resource_group_name,
         database_name,
@@ -5350,7 +5350,7 @@ def instance_failover_group_failover(
 ###############################################
 
 
-def conn_policy_show(
+def show_conn_policy(
         client,
         resource_group_name,
         server_name):
@@ -5363,7 +5363,7 @@ def conn_policy_show(
         connection_policy_name=ConnectionPolicyName.DEFAULT)
 
 
-def conn_policy_update(
+def update_conn_policy(
         client,
         resource_group_name,
         server_name,
