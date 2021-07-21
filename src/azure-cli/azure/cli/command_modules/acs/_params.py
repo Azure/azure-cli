@@ -10,7 +10,7 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
-    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type)
+    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type, edge_zone_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.profiles import ResourceType
 from knack.arguments import CLIArgumentType
@@ -24,7 +24,7 @@ from ._validators import (
     validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
-    validate_ppg, validate_assign_identity, validate_max_surge)
+    validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity)
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, \
     CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, \
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE, \
@@ -189,6 +189,7 @@ def load_arguments(self, _):
         c.argument('aad_tenant_id')
         c.argument('dns_service_ip')
         c.argument('docker_bridge_address')
+        c.argument('edge_zone', edge_zone_type)
         c.argument('load_balancer_sku', type=str,
                    validator=validate_load_balancer_sku)
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
@@ -252,6 +253,8 @@ def load_arguments(self, _):
         c.argument('aci_subnet_name')
         c.argument('enable_encryption_at_host', options_list=[
                    '--enable-encryption-at-host'], action='store_true')
+        c.argument('enable_ultra_ssd', options_list=[
+                   '--enable-ultra-ssd'], action='store_true')
         c.argument('appgw_name', options_list=[
                    '--appgw-name'], arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', options_list=[
@@ -262,6 +265,7 @@ def load_arguments(self, _):
                    '--appgw-subnet-id'], arg_group='Application Gateway')
         c.argument('appgw_watch_namespace', options_list=[
                    '--appgw-watch-namespace'], arg_group='Application Gateway')
+        c.argument('assign_kubelet_identity', validator=validate_assign_kubelet_identity)
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_sgxquotehelper', action='store_true')
@@ -400,6 +404,8 @@ def load_arguments(self, _):
                 [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]))
             c.argument('enable_encryption_at_host', options_list=[
                        '--enable-encryption-at-host'], action='store_true')
+            c.argument('enable_ultra_ssd', options_list=[
+                       '--enable-ultra-ssd'], action='store_true')
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:

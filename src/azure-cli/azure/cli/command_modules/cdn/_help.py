@@ -36,48 +36,44 @@ parameters:
     type: string
     short-summary: The host name of the custom domain. Must be a domain name.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Create a custom domain with resource name customdomain1 within an endpoint and profile.
     text: >
         az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile
-        -n domain-name --hostname www.example.com
-  - name: Enable custom https with a minimum
-    text: >
-        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile
-        -n domain-name --hostname www.example.com
+        -n customdomain1 --hostname www.example.com
 """
 
 helps['cdn custom-domain delete'] = """
 type: command
 short-summary: Delete the custom domain of a CDN.
 examples:
-  - name: Delete a custom domain.
+  - name: Delete a custom domain with resource name customdomain1.
     text: >
         az cdn custom-domain delete -g group --endpoint-name endpoint --profile-name profile
-        -n domain-name
+        -n customdomain1
 """
 
 helps['cdn custom-domain show'] = """
 type: command
 short-summary: Show details for the custom domain of a CDN.
 examples:
-  - name: Get the details of a custom domain.
+  - name: Get the details of a custom domain with resource name customdomain1.
     text: >
         az cdn custom-domain show -g group --endpoint-name endpoint --profile-name profile
-        -n domain-name
+        -n customdomain1
 """
 
 helps['cdn custom-domain enable-https'] = """
 type: command
-short-summary: Enable HTTPS delivery of the custom domain.
+short-summary: Enable HTTPS for a custom domain. The resource name of the custom domain could be obtained using "az cdn custom-domain list".
 examples:
-  - name: Enable HTTPS using a CDN-managed certificate
+  - name: Enable HTTPS for custom domain with resource name customdomain1 using a CDN-managed certificate
     text: >
         az cdn custom-domain enable-https -g group --profile-name profile --endpoint-name endpoint
-        -n domain-name
-  - name: Enable HTTPS using a CDN-managed certificate and a minimum TLS version of 1.2
+        -n customdomain1
+  - name: Enable HTTPS for custom domain with resource name customdomain1 using a CDN-managed certificate and set the minimum TLS version to 1.2
     text: >
         az cdn custom-domain enable-https -g group --profile-name profile --endpoint-name endpoint
-        -n domain-name --min-tls-version 1.2
+        -n customdomain1 --min-tls-version 1.2
 """
 
 helps['cdn edge-node'] = """
@@ -239,11 +235,16 @@ examples:
     text: >
         az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 0
         --rule-name global --action-name CacheExpiration --cache-behavior BypassCache
-  - name: Create a rule for http to https redirect
+  - name: Create a rule for http to https redirect.
     text: >
         az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
         --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTP
         --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
+  - name: Create a rule to distribute requests with "/test1" in its URL path to origin group with name "origingroup1".
+    text: >
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
+        --rule-name "origin-groupo-verride" --match-variable UrlPath --operator Contains --match-values /test1
+        --action-name "OriginGroupOverride" --origin-group origingroup1
 """
 
 helps['cdn endpoint rule remove'] = """
@@ -702,6 +703,11 @@ examples:
     crafted: true
 """
 
+helps['cdn waf'] = """
+type: group
+short-summary: Manage CDN WAF.
+"""
+
 helps['cdn waf policy'] = """
 type: group
 short-summary: Manage CDN WAF policies.
@@ -1036,6 +1042,11 @@ examples:
   - name: Get a rate limit rule of a CDN WAF policy.
     text: >
         az cdn waf policy rate-limit-rule show -g group --policy-name policy -n ratelimitrule
+"""
+
+helps['afd'] = """
+type: group
+short-summary: Manage Azure Front Door.
 """
 
 helps['afd profile'] = """

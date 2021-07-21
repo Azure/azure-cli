@@ -28,6 +28,7 @@ from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueEr
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.arm import raise_subdivision_deployment_error
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
 
@@ -51,6 +52,7 @@ from ._bicep import (
     run_bicep_command,
     is_bicep_file,
     ensure_bicep_installation,
+    remove_bicep_installation,
     get_bicep_latest_release_tag,
     get_bicep_available_release_tags,
     validate_bicep_target_scope
@@ -301,15 +303,6 @@ def _remove_comments_from_json(template, preserve_order=True, file_path=None):
         raise CLIError("Failed to parse the JSON data, please check whether it is a valid JSON format")
 
 
-def _raise_subdivision_deployment_error(error_message, error_code=None):
-    from azure.cli.core.azclierror import InvalidTemplateError, DeploymentError
-
-    if error_code == 'InvalidTemplateDeployment':
-        raise InvalidTemplateError(error_message)
-
-    raise DeploymentError(error_message)
-
-
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
 def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file=None,
                                          template_uri=None, deployment_name=None, parameters=None,
@@ -374,14 +367,14 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         try:
             validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = deployment_client.validate(resource_group_name, deployment_name, deployment)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -486,14 +479,14 @@ def _deploy_arm_template_at_subscription_scope(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -567,14 +560,14 @@ def _deploy_arm_template_at_resource_group(cmd,
         try:
             validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -646,7 +639,7 @@ def _deploy_arm_template_at_management_group(cmd,
             validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
                                                                                      deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
@@ -654,7 +647,7 @@ def _deploy_arm_template_at_management_group(cmd,
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -720,7 +713,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
             validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
                                                                            parameters=deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
@@ -728,7 +721,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        _raise_subdivision_deployment_error(err_message)
+        raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -1026,9 +1019,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, properties=None, mg_
     client = cf_providers(cli_ctx, None, api_version='2021-04-01')
     is_rpaas = namespace.lower() in RPAAS_APIS
     if mg_id is None and registering:
-        if is_rpaas:
-            if not accept_terms:
-                raise RequiredArgumentMissingError("--accept-terms must be specified when registering the {} RP from RPaaS.".format(namespace))
+        if is_rpaas and accept_terms:
             wait = True
         r = client.register(namespace, properties=properties)
     elif mg_id and registering:
@@ -1047,7 +1038,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, properties=None, mg_
             rp_info = client.get(namespace)
             if rp_info.registration_state == target_state:
                 break
-        if is_rpaas and registering and mg_id is None:
+        if is_rpaas and accept_terms and registering and mg_id is None:
             # call accept term API
             from azure.cli.core.util import send_raw_request
             send_raw_request(cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
@@ -3423,6 +3414,10 @@ def install_bicep_cli(cmd, version=None):
     ensure_bicep_installation(release_tag=version)
 
 
+def uninstall_bicep_cli(cmd):
+    remove_bicep_installation()
+
+
 def upgrade_bicep_cli(cmd):
     latest_release_tag = get_bicep_latest_release_tag()
     ensure_bicep_installation(release_tag=latest_release_tag)
@@ -3436,6 +3431,8 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
         args += ["--outfile", outfile]
     if stdout:
         args += ["--stdout"]
+        print(run_bicep_command(args))
+        return
     run_bicep_command(args)
 
 

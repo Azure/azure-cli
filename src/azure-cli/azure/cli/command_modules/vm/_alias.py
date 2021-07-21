@@ -24,16 +24,16 @@ alias_json = """
             "sku": "7.5",
             "version": "latest"
           },
-          "CoreOS": {
-            "publisher": "CoreOS",
-            "offer": "CoreOS",
-            "sku": "Stable",
-            "version": "latest"
-          },
           "Debian": {
             "publisher": "Debian",
             "offer": "debian-10",
             "sku": "10",
+            "version": "latest"
+          },
+          "Flatcar": {
+            "publisher": "kinvolk",
+            "offer": "flatcar-container-linux-free",
+            "sku": "stable",
             "version": "latest"
           },
           "openSUSE-Leap": {

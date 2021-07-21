@@ -40,7 +40,8 @@ def create_account(client, account_name, resource_group_name, location, tags=Non
 def add_active_directory(instance, account_name, resource_group_name, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
-                         security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, tags=None):
+                         security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, tags=None,
+                         administrators=None):
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
@@ -48,7 +49,8 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                                        server_root_ca_certificate=server_root_ca_cert, aes_encryption=aes_encryption,
                                        ldap_signing=ldap_signing, security_operators=security_operators,
                                        ldap_over_tls=ldap_over_tls,
-                                       allow_local_nfs_users_with_ldap=allow_local_ldap_users)
+                                       allow_local_nfs_users_with_ldap=allow_local_ldap_users,
+                                       administrators=administrators)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
     _update_mapper(instance, body, ['active_directories'])
@@ -88,8 +90,14 @@ def patch_account(instance, account_name, resource_group_name, tags=None, encryp
 
 
 # ---- POOL ----
-def create_pool(client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None, qos_type=None):
-    body = CapacityPool(service_level=service_level, size=int(size) * tib_scale, location=location, tags=tags, qos_type=qos_type)
+def create_pool(client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None,
+                qos_type=None, cool_access=None):
+    body = CapacityPool(service_level=service_level,
+                        size=int(size) * tib_scale,
+                        location=location,
+                        tags=tags,
+                        qos_type=qos_type,
+                        cool_access=cool_access)
     return client.begin_create_or_update(resource_group_name, account_name, pool_name, body)
 
 
@@ -114,7 +122,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   has_root_access=None, snapshot_dir_visible=None,
                   smb_encryption=None, smb_continuously_avl=None, encryption_key_source=None,
                   rule_index=None, unix_read_only=None, unix_read_write=None, cifs=None,
-                  allowed_clients=None, ldap_enabled=None):
+                  allowed_clients=None, ldap_enabled=None, chown_mode=None, cool_access=None, coolness_period=None,
+                  unix_permissions=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
@@ -150,7 +159,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                                          kerberos5i_read_write=kerberos5i_rw,
                                          kerberos5p_read_only=kerberos5p_r,
                                          kerberos5p_read_write=kerberos5p_rw,
-                                         has_root_access=has_root_access)
+                                         has_root_access=has_root_access,
+                                         chown_mode=chown_mode)
         rules.append(export_policy)
 
         volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
@@ -198,7 +208,10 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         smb_encryption=smb_encryption,
         smb_continuously_available=smb_continuously_avl,
         encryption_key_source=encryption_key_source,
-        ldap_enabled=ldap_enabled)
+        ldap_enabled=ldap_enabled,
+        cool_access=cool_access,
+        coolness_period=coolness_period,
+        unix_permissions=unix_permissions)
 
     return client.begin_create_or_update(resource_group_name, account_name, pool_name, volume_name, body)
 
