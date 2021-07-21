@@ -65,6 +65,7 @@ def flexible_server_create(cmd, client,
                               zone=zone,
                               subnet=subnet,
                               public_access=public_access,
+                              auto_grow=auto_grow,
                               version=version)
     _, _, iops_info = get_mysql_list_skus_info(db_context.cmd, location)
 
@@ -334,6 +335,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               high_availability=high_availability,
                               zone=instance.availability_zone,
                               standby_availability_zone=standby_availability_zone,
+                              auto_grow=auto_grow,
                               instance=instance)
     _, _, iops_info = get_mysql_list_skus_info(db_context.cmd, location)
 
@@ -394,34 +396,33 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                             sku_name=instance.sku.name)
 
     if auto_grow:
-        validate_auto_grow_update(instance, auto_grow)
         instance.storage.storage_autogrow = auto_grow
 
-    if maintenance_window:
-        logger.warning('If you are updating maintenancw window with other parameter, maintenance window will be updated first. Please update the other parameters later.')
-        # if disabled is pass in reset to default values
-        if maintenance_window.lower() == "disabled":
-            day_of_week = start_hour = start_minute = 0
-            custom_window = "Disabled"
-        else:
-            day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-            custom_window = "Enabled"
+    # if maintenance_window:
+    #     logger.warning('If you are updating maintenancw window with other parameter, maintenance window will be updated first. Please update the other parameters later.')
+    #     # if disabled is pass in reset to default values
+    #     if maintenance_window.lower() == "disabled":
+    #         day_of_week = start_hour = start_minute = 0
+    #         custom_window = "Disabled"
+    #     else:
+    #         day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+    #         custom_window = "Enabled"
 
-        # set values - if maintenance_window when is None when created then create a new object
-        if instance.maintenance_window is None:
-            instance.maintenance_window = mysql_flexibleservers.models.MaintenanceWindow(
-                day_of_week=day_of_week,
-                start_hour=start_hour,
-                start_minute=start_minute,
-                custom_window=custom_window
-            )
-        else:
-            instance.maintenance_window.day_of_week = day_of_week
-            instance.maintenance_window.start_hour = start_hour
-            instance.maintenance_window.start_minute = start_minute
-            instance.maintenance_window.custom_window = custom_window
+    #     # set values - if maintenance_window when is None when created then create a new object
+    #     if instance.maintenance_window is None:
+    #         instance.maintenance_window = mysql_flexibleservers.models.MaintenanceWindow(
+    #             day_of_week=day_of_week,
+    #             start_hour=start_hour,
+    #             start_minute=start_minute,
+    #             custom_window=custom_window
+    #         )
+    #     else:
+    #         instance.maintenance_window.day_of_week = day_of_week
+    #         instance.maintenance_window.start_hour = start_hour
+    #         instance.maintenance_window.start_minute = start_minute
+    #         instance.maintenance_window.custom_window = custom_window
 
-        return ServerForUpdate(maintenance_window=instance.maintenance_window)
+    #     return ServerForUpdate(maintenance_window=instance.maintenance_window)
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
@@ -551,7 +552,7 @@ def flexible_list_skus(cmd, client, location):
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, maintenance_window, availability_zone, iops, auto_grow):
+                   storage, backup, network, version, high_availability, maintenance_window, availability_zone):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 

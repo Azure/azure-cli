@@ -177,7 +177,7 @@ def load_flexibleserver_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('create', 'flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
-        g.custom_command('georestore', 'flexible_server_georestore', supports_no_wait=True)
+        g.custom_command('geo-restore', 'flexible_server_georestore', supports_no_wait=True)
         g.command('start', 'begin_start')
         g.custom_command('stop', 'flexible_server_stop', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'server_delete_func')
