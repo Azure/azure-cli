@@ -5,6 +5,7 @@
 
 
 import os
+from azure.cli.core.profiles import ResourceType
 from datetime import datetime
 
 
@@ -112,6 +113,18 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
         t_sas = cmd.get_models('shareaccesssignature#SharedAccessSignature')
 
     t_blob_permissions = cmd.get_models('blob.models#BlobPermissions')
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = t_sas(account_name, account_key)
+    return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
+
+
+def create_short_lived_blob_sas_v2(cmd, account_name, account_key, container, blob):
+    from datetime import timedelta
+
+    t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
+                           resource_type=ResourceType.DATA_STORAGE_BLOB)
+
+    t_blob_permissions = cmd.get_models('_models#BlobSasPermissions', resource_type=ResourceType.DATA_STORAGE_BLOB)
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = t_sas(account_name, account_key)
     return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
