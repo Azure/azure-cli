@@ -394,8 +394,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'db_threat_detection_policy_get')
         g.generic_update_command('update',
                                  setter_name='create_or_update',
-                                 custom_func_name='db_threat_detection_policy_update',
-                                 )
+                                 custom_func_name='db_threat_detection_policy_update')
 
     database_usages_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseUsagesOperations.{}',
@@ -798,7 +797,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_database_long_term_retention_policies_operations) as g:
 
         g.custom_show_command('set', 'update_long_term_retention_mi', is_preview=True)
-        g.custom_command('show', 'get_long_term_retention_mi', is_preview=True)
+        g.custom_show_command('show', 'get_long_term_retention_mi', is_preview=True)
 
     managed_database_long_term_retention_backups_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionManagedInstanceBackupsOperations.{}',

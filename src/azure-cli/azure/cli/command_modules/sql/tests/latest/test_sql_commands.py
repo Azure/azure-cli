@@ -5439,6 +5439,7 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
 
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
+    @live_only()
     @AllowLargeResponse()
     @ManagedInstancePreparer()
     def test_sql_midb_logreplay_mgmt(self, mi, rg):
