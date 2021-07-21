@@ -4642,7 +4642,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     # live only for the following reasons
     # 1. execute `kubectl get pods` in subprocess and cannot be mocked by testsdk
     # 2. rely on some environment variable to indicate the execution is under test environment (e.g. "PYTEST_CURRENT_TEST")
-    @live_only
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_browse_legacy(self, resource_group, resource_group_location):
