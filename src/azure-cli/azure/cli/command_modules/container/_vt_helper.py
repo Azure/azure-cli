@@ -18,6 +18,7 @@ ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
 DISABLE_NEWLINE_AUTO_RETURN = 0x0008
 ENABLE_VIRTUAL_TERMINAL_INPUT = 0x0200
 
+
 def _check_zero(result, _, args):
     if not result:
         raise OSError(get_last_error())

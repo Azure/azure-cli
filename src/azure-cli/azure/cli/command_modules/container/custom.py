@@ -20,7 +20,6 @@ import sys
 import threading
 import time
 try:
-    import fcntl
     import termios
     import tty
 except ImportError:
@@ -48,6 +47,7 @@ AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
 MSI_LOCAL_ID = '[system]'
+
 
 def list_containers(client, resource_group_name=None):
     """List all container groups in a resource group. """
@@ -635,6 +635,7 @@ def _start_exec_pipe_windows(web_socket_uri, password):
     enable_vt_mode()
     buff = bytearray()
     lock = threading.Lock()
+
     def _on_ws_open_windows(ws):
         ws.send(password)
         readKeyboard = threading.Thread(target=_capture_stdin, args=[_getch_windows, buff, lock], daemon=True)
@@ -650,7 +651,7 @@ def _start_exec_pipe_windows(web_socket_uri, password):
             time.sleep(0.01)
         except KeyboardInterrupt:
             try:
-                ws.send(b'\x03')# CTRL-C character (ETX character)
+                ws.send(b'\x03')  # CTRL-C character (ETX character)
             finally:
                 pass
     colorama.reinit()
@@ -664,6 +665,7 @@ def _start_exec_pipe_linux(web_socket_uri, password):
     tty.setcbreak(stdin_fd)
     buff = bytearray()
     lock = threading.Lock()
+
     def _on_ws_open_linux(ws):
         ws.send(password)
         readKeyboard = threading.Thread(target=_capture_stdin, args=[_getch_linux, buff, lock], daemon=True)
@@ -707,11 +709,11 @@ def _flush_stdin(ws, buff, lock):
             x = bytes(buff)
             buff.clear()
             lock.release()
-            ws.send(x, opcode=0x2) # OPCODE_BINARY = 0x2
+            ws.send(x, opcode=0x2)  # OPCODE_BINARY = 0x2
         except (OSError, IOError, websocket.WebSocketConnectionClosedException) as e:
             if isinstance(e, websocket.WebSocketConnectionClosedException):
                 pass
-            elif e.errno == 9: # [Errno 9] Bad file descriptor
+            elif e.errno == 9:  # [Errno 9] Bad file descriptor
                 pass
             elif e.args and e.args[0] == errno.EINTR:
                 pass
