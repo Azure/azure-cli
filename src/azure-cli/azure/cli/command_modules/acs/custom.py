@@ -1637,10 +1637,10 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
 
 
 # pylint: disable=too-many-statements,too-many-branches
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
-               listen_address='127.0.0.1', listen_port='8001'):
+def _aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
+               listen_address='127.0.0.1', listen_port='8001', resource_type=ResourceType.MGMT_CONTAINERSERVICE):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
-                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                resource_type=resource_type,
                                                 operation_group='managed_clusters')
     # verify the kube-dashboard addon was not disabled
     instance = client.get(resource_group_name, name)
@@ -1769,6 +1769,12 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
             requests.post('http://localhost:8888/closeport/8001')
     return return_msg
 
+# pylint: disable=too-many-statements,too-many-branches
+def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
+               listen_address='127.0.0.1', listen_port='8001'):
+
+    return _aks_browse(cmd, client, resource_group_name, name, disable_browser=disable_browser,
+               listen_address=listen_address, listen_port=listen_port, resource_type=ResourceType.MGMT_CONTAINERSERVICE)
 
 def _trim_nodepoolname(nodepool_name):
     if not nodepool_name:
