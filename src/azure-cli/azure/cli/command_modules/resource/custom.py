@@ -2372,7 +2372,6 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
             policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-            print(parameters)
             return policy_client.policy_definitions.create_or_update_at_management_group(name, management_group, parameters)
         if subscription:
             subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
