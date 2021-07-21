@@ -373,6 +373,31 @@ def firewall_rule_table_format(result):
     return _apply_format(result, _firewall_rule_table_format)
 
 
+########################################################
+#            sql server outbound-firewall-rule         #
+########################################################
+
+
+def outbound_firewall_rule_table_format(result):
+    '''
+    Formats a single or list of server outbound firewall rules as summary results for display with "-o table".
+    '''
+
+    def _outbound_firewall_rule_table_format(result):
+        '''
+        Formats a server outbound firewall rule as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
+
+        return OrderedDict([
+            ('resourceGroupName', result['resourceGroupName']),
+            ('serverName', result['serverName']),
+            ('outboundRuleFqdn', result['outboundRuleFqdn'])
+        ])
+
+    return _apply_format(result, _outbound_firewall_rule_table_format)
+
+
 ###############################################
 #                sql mi             #
 ###############################################

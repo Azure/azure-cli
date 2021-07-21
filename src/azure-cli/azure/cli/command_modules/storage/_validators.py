@@ -387,8 +387,8 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     namespace.copy_source = uri
 
 
-def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
-    from .util import create_short_lived_blob_sas, create_short_lived_file_sas
+def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements, too-many-locals
+    from .util import create_short_lived_blob_sas, create_short_lived_blob_sas_v2, create_short_lived_file_sas
     from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
         MutuallyExclusiveArgumentError
     usage_string = \
@@ -472,7 +472,14 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
             source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                                      dir_name, file_name)
         elif valid_blob_source and (ns.get('share_name', None) or not same_account):
-            source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
+            prefix = cmd.command_kwargs['resource_type'].value[0]
+            # is_storagev2() is used to distinguish if the command is in track2 SDK
+            # If yes, we will use get_login_credentials() as token credential
+            if is_storagev2(prefix):
+                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container,
+                                                            blob)
+            else:
+                source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
 
     query_params = []
     if source_sas:
@@ -1774,9 +1781,12 @@ def validate_fs_directory_download_source_url(cmd, namespace):
     if namespace.source_path:
         file_client = client.get_file_client(file_path=namespace.source_path)
         url = file_client.url
-    namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
-                                        account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                        service='blob', resource_types='co', permissions='rl')
+    if _is_valid_uri(url):
+        namespace.source = url
+    else:
+        namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                            account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                            service='blob', resource_types='co', permissions='rl')
     del namespace.source_fs
     del namespace.source_path
 

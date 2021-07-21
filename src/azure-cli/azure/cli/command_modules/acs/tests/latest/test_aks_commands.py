@@ -217,6 +217,57 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_edge_zone(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        kubernetes_version = "1.20.7"
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'edge_zone': 'microsoftrrdclab1',
+            'kubernetes_version': kubernetes_version,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--kubernetes-version {kubernetes_version} --edge-zone {edge_zone}'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.check('location', 'eastus2euap'),
+            self.check('extendedLocation.name', 'microsoftrrdclab1'),
+            self.check('extendedLocation.type', 'edgezone'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('kubernetesVersion', '{kubernetes_version}')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
     # TODO: remove when issue #9392 is addressed.
     @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
