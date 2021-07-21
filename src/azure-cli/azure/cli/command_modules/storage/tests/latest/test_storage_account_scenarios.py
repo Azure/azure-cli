@@ -1107,10 +1107,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         policy_file = os.path.join(curr_dir, 'mgmt_policy.json').replace('\\', '\\\\')
 
         self.kwargs = {'rg': resource_group, 'sa': storage_account, 'policy': policy_file}
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
         self.cmd('storage account management-policy create --account-name {sa} -g {rg} --policy @"{policy}"',
                  checks=[JMESPathCheck('policy.rules[0].name', 'olcmtest'),
                          JMESPathCheck('policy.rules[0].enabled', True),
-                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToCool.daysAfterModificationGreaterThan', 30),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToCool.daysAfterLastAccessTimeGreaterThan', 30),
                          JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToArchive.daysAfterModificationGreaterThan', 90),
                          JMESPathCheck('policy.rules[0].definition.actions.baseBlob.delete.daysAfterModificationGreaterThan', 1000),
                          JMESPathCheck('policy.rules[0].definition.actions.snapshot.tierToCool.daysAfterCreationGreaterThan', 30),
@@ -1587,6 +1590,29 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage account blob-service-properties show -n {sa} -g {rg}',
                  checks=[self.check('defaultServiceVersion', '2018-11-09')])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
+    @StorageAccountPreparer(location="eastus2", kind="StorageV2")
+    def test_storage_account_update_last_access(self):
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
+        result = self.cmd(
+            'storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['name'], "AccessTimeTracking")
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['trackingGranularityInDays'], 1)
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['blobType'][0], "blockBlob")
+
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy'], None)
+
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
+        result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
 
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
