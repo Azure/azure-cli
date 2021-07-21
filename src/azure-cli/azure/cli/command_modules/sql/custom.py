@@ -2713,7 +2713,7 @@ def update_long_term_retention(
     return policy
 
 
-def get_update_long_term_retention(
+def get_long_term_retention(
         client,
         resource_group_name,
         database_name,
