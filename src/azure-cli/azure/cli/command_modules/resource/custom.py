@@ -1020,7 +1020,10 @@ def _update_provider(cli_ctx, namespace, registering, wait, properties=None, mg_
     if mg_id is None and registering:
         if is_rpaas and accept_terms:
             wait = True
-        r = rcf.providers.register(namespace, properties=properties)
+        if properties:
+            r = rcf.providers.register(namespace, properties=properties)
+        else:
+            r = rcf.providers.register(namespace)
     elif mg_id and registering:
         r = rcf.providers.register_at_management_group_scope(namespace, mg_id)
         if r is None:
