@@ -2,7 +2,7 @@
 
 Azure CLI is built on Azure Python SDKs. Recently, Azure Python SDK team announced the next generation product, named Track 2 SDK. The old version of SDK is called Track 1 SDK. It claims that it has some advantages than Track 1 SDK. It is not compatible with Track 1 SDK. A considerable number of work days are required for Azure CLI developers to migrate their modules from Track 1 SDK to Track 2 SDK. Let's see an example of Track 2 SDK. [azure-mgmt-compute 17.0.0b1](https://pypi.org/project/azure-mgmt-compute/17.0.0b1/) introduces important breaking changes and important new features like unified authentication and asynchronous programming.
 
-This document summarizes steps to apply the changes for migration, typical changes when adopting Track 2 SDK in Azure CLI.
+This document summarizes the steps to apply the changes for migration, typical changes when adopting Track 2 SDK in Azure CLI.
 
 ## Example PRs
 1. [Compute PR #15750](https://github.com/Azure/azure-cli/pull/15750)
