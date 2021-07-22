@@ -409,7 +409,8 @@ def acr_connected_registry_install_info(cmd,
                                         registry_name,
                                         parent_protocol,
                                         resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, parent_protocol, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, parent_protocol,
+                             resource_group_name)
 
 
 def acr_connected_registry_install_renew_credentials(cmd,
@@ -418,7 +419,8 @@ def acr_connected_registry_install_renew_credentials(cmd,
                                                      registry_name,
                                                      parent_protocol,
                                                      resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, parent_protocol, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, parent_protocol,
+                             resource_group_name)
 
 
 def _get_install_info(cmd,
