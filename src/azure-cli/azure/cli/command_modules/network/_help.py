@@ -1333,6 +1333,13 @@ short-summary: Manage application gateway web application firewall (WAF) policie
 helps['network application-gateway waf-policy custom-rule match-condition add'] = """
 type: command
 short-summary: A match condition to an application gateway WAF policy custom rule.
+examples:
+  - name: Add application gateway WAF policy custom rule match condition with contains.
+    text: |
+        az network application-gateway waf-policy custom-rule match-condition add --resource-group MyResourceGroup --policy-name MyPolicy --name MyWAFPolicyRule --match-variables RequestHeaders.value --operator contains --values foo boo --transform lowercase
+  - name: Add application gateway WAF policy custom rule match condition with equal.
+    text: |
+        az network application-gateway waf-policy custom-rule match-condition add --resource-group MyResourceGroup --policy-name MyPolicy --name MyWAFPolicyRule --match-variables RequestHeaders.Content-Type --operator Equal --values application/csp-report
 """
 
 helps['network application-gateway waf-policy custom-rule match-condition list'] = """
