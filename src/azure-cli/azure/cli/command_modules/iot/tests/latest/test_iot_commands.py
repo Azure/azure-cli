@@ -42,7 +42,7 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub create -n {0} -g {1} --retention-day 3'
                  ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
                  ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
-                 ' --fileupload-notification-ttl 20 --min-tls-version 1.2 --fuld 15'.format(hub, rg),
+                 ' --fileupload-notification-ttl 20 --min-tls-version 1.2 --fnld 15'.format(hub, rg),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
@@ -452,7 +452,7 @@ class IoTHubTest(ScenarioTest):
         sleep(60)
 
         # Test 'az iot hub update' with Identity-based fileUpload
-        updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fsi [system] --fcs {2} --fc {3} --fuld 15'
+        updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fsi [system] --fcs {2} --fc {3} --fnld 15'
                                .format(identity_hub, identity_based_auth, storageConnectionString, containerName)).get_output_in_json()
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
         assert updated_hub['properties']['messagingEndpoints']['fileNotifications']['lockDurationAsIso8601'] == '0:00:15'

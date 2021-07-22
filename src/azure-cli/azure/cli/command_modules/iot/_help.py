@@ -829,7 +829,7 @@ examples:
   - name: Update the IoT Hub file upload notification settings and queue lock duration
     text: >
         az iot hub update -n MyIoTHub --fileupload-notification-max-delivery-count 50
-        --fileupload-notification-ttl 48 --fileupload-notifications --fileupload-lock-duration 10
+        --fileupload-notification-ttl 48 --fileupload-notifications --fileupload-notification-lock-duration 10
 """
 
 helps['iot central'] = """
