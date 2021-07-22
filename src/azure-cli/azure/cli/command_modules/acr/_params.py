@@ -439,6 +439,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr connected-registry install') as c:
         c.argument('parent_protocol', options_list=['--parent-protocol'], help='Required parameter to specify the parent protocol. Should be either "http" or "https".', required=True)
 
+
 def _get_helm_default_install_location():
     exe_name = 'helm'
     system = platform.system()
