@@ -1159,7 +1159,7 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
                             break
                         # This SKU is not available only if all zones are restricted
                         if not (set(sku_info.location_info[0].zones or []) -
-                                  set(restriction.restriction_info.zones or [])):
+                                set(restriction.restriction_info.zones or [])):
                             is_available = False
                             break
             if is_available:
