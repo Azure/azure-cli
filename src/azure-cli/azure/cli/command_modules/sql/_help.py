@@ -411,28 +411,23 @@ examples:
   - name: Enable by storage account name.
     text: |
         az sql db threat-policy update -g mygroup -s myserver -n mydb \\
-            --state Enabled --storage-account mystorage \\
-            --security-alert-policy-name default
+            --state Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az sql db threat-policy update -g mygroup -s myserver -n mydb \\
             --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
-            --storage-key MYKEY== \\
-            --security-alert-policy-name default
+            --storage-key MYKEY==
   - name: Disable a subset of alert types.
     text: |
         az sql db threat-policy update -g mygroup -s myserver -n mydb \\
-            --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly \\
-            --security-alert-policy-name default
+            --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly
   - name: Configure email recipients for a policy.
     text: |
         az sql db threat-policy update -g mygroup -s myserver -n mydb \\
             --email-addresses me@examlee.com you@example.com \\
-            --email-account-admins Enabled \\
-            --security-alert-policy-name default
+            --email-account-admins Enabled
   - name: Disable a threat policy.
-    text: az sql db threat-policy update -g mygroup -s myserver -n mydb --state Disabled \\
-            --security-alert-policy-name default
+    text: az sql db threat-policy update -g mygroup -s myserver -n mydb --state Disabled
 """
 
 helps['sql db update'] = """
@@ -1091,7 +1086,7 @@ type: command
 short-summary: Get status of Log Replay service.
 examples:
   - name: Get status of the ongoing log replay service.
-    text: az sql midb log-replay show -g mygroup --mi myinstance -n mymanageddb --restore-details-name Default
+    text: az sql midb log-replay show -g mygroup --mi myinstance -n mymanageddb
 """
 
 helps['sql midb log-replay stop'] = """

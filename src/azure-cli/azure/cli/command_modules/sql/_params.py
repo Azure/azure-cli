@@ -27,7 +27,6 @@ from azure.mgmt.sql.models import (
     DatabaseLicenseType,
     ElasticPoolLicenseType,
     SampleName,
-    SecurityAlertPolicyName,
     SecurityAlertPolicyState,
     ServerConnectionType,
     ServerKeyType,
@@ -940,13 +939,6 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db threat-policy update') as c:
         _configure_security_policy_storage_params(c)
-
-        c.argument('security_alert_policy_name',
-                   arg_group=policy_arg_group,
-                   options_list=['--security-alert-policy-name', '-p'],
-                   required=True,
-                   help='The name of the security alert policy. The value is Default.',
-                   arg_type=get_enum_type(SecurityAlertPolicyName))
 
         policy_arg_group = 'Policy'
         notification_arg_group = 'Notification'

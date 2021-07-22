@@ -47,6 +47,7 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     PerformanceLevelUnit,
     ResourceIdentity,
+    RestoreDetailsName,
     SecurityAlertPolicyName,
     SecurityAlertPolicyState,
     SensitivityLabel,
@@ -3003,6 +3004,21 @@ def db_threat_detection_policy_update(
     return instance
 
 
+def db_threat_detection_policy_update_setter(
+        client,
+        resource_group_name,
+        server_name,
+        database_name,
+        parameters):
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        security_alert_policy_name=SecurityAlertPolicyName.DEFAULT,
+        parameters=parameters)
+
+
 def db_sensitivity_label_show(
         client,
         database_name,
@@ -5073,6 +5089,22 @@ def managed_db_log_replay_complete_restore(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
+
+
+def managed_db_log_replay_get(
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name):
+    '''
+    Gets a log replay restore.
+    '''
+
+    return client.get(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        restore_details_name=RestoreDetailsName.DEFAULT)
 
 ###############################################
 #              sql failover-group             #

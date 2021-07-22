@@ -387,13 +387,19 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#DatabaseSecurityAlertPoliciesOperations.{}',
         client_factory=get_sql_database_threat_detection_policies_operations)
 
+    database_threat_detection_policy_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.sql.custom#{}')
+
     with self.command_group('sql db threat-policy',
                             database_threat_detection_policies_operations,
                             client_factory=get_sql_database_threat_detection_policies_operations) as g:
 
         g.custom_show_command('show', 'db_threat_detection_policy_get')
         g.generic_update_command('update',
-                                 setter_name='create_or_update',
+                                 getter_name='db_threat_detection_policy_get',
+                                 getter_type=database_threat_detection_policy_update_sdk,
+                                 setter_name='db_threat_detection_policy_update_setter',
+                                 setter_type=database_threat_detection_policy_update_sdk,
                                  custom_func_name='db_threat_detection_policy_update')
 
     database_usages_operations = CliCommandType(
@@ -838,7 +844,7 @@ def load_command_table(self, _):
                             managed_database_restore_details_operations,
                             client_factory=get_sql_managed_database_restore_details_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'managed_db_log_replay_get')
 
     ###############################################
     #                sql virtual cluster         #

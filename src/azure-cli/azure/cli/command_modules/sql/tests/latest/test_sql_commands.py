@@ -1540,7 +1540,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         email_addresses_expected = ['test1@example.com', 'test2@example.com']
         email_account_admins = True
 
-        self.cmd('sql db threat-policy update -g {} -s {} -n {} --security-alert-policy-name default'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
                  ' --state {} --storage-key {} --storage-endpoint {}'
                  ' --retention-days {} --email-addresses {} --disabled-alerts {}'
                  ' --email-account-admins {}'
@@ -1559,7 +1559,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # update threat policy - specify storage account and resource group. use secondary key
         key_2 = self._get_storage_key(storage_account_2, resource_group_2)
-        self.cmd('sql db threat-policy update -g {} -s {} -n {} --security-alert-policy-name default'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
                  ' --storage-account {}'
                  .format(resource_group, server, database_name, storage_account_2),
                  checks=[
@@ -5298,7 +5298,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         state_enabled = 'Enabled'
         retention_days = 30
 
-        self.cmd('sql db threat-policy update -g {} -s {} -n {} --security-alert-policy-name default'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
                  ' --state {} --storage-key {} --storage-endpoint {}'
                  ' --retention-days {} --email-addresses {} --disabled-alerts {}'
                  ' --email-account-admins {}'
@@ -5496,6 +5496,12 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         self.cmd(
             'sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --ss {sas_token} --su {storage_uri} --no-wait',
             checks=NoneCheck())
+
+        self.cmd(
+            'sql midb log-replay show -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1}',
+            checks=[
+                JMESPathCheck('type', 'Microsoft.Sql/managedInstances/databases/restoreDetails'),
+                JMESPathCheck('resourceGroup', rg)])
 
         # Wait a minute to start restoring
         if self.in_recording or self.is_live:
