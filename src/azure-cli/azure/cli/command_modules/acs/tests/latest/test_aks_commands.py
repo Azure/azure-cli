@@ -4674,6 +4674,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('addonProfiles.{}.enabled'.format(CONST_KUBE_DASHBOARD_ADDON_NAME), True)
         ])
 
+        # install kubectl
+        install_cmd = 'aks install-cli'
+        self.cmd(install_cmd, checks=[self.is_empty()])
+
         # test aks browse cmd
         browse_cmd = 'aks browse --resource-group={resource_group} --name={name} --listen-address=1.1.1.1 --listen-port=8080 --disable-browser'
         self.cmd(browse_cmd, checks=[
@@ -4683,3 +4687,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    def test_aks_install_kubectl(self):
+        ctl_fd, ctl_temp_file = tempfile.mkstemp()
+        login_fd, login_temp_file = tempfile.mkstemp()
+        version = "latest"
+        install_cmd = 'aks install-cli --client-version={} --install-location={} --base-src-url={} ' \
+                      '--kubelogin-version={} --kubelogin-install-location={} --kubelogin-base-src-url={}'.format(version, ctl_temp_file, "", version, login_temp_file, "")
+
+        # install kubectl & kubelogin
+        try:
+            self.cmd(install_cmd, checks=[self.is_empty()])
+            self.assertGreater(os.path.getsize(ctl_temp_file), 0)
+            self.assertGreater(os.path.getsize(login_temp_file), 0)
+        finally:
+            os.close(ctl_fd)
+            os.close(login_fd)
+            os.remove(ctl_temp_file)
+            os.remove(login_temp_file)
