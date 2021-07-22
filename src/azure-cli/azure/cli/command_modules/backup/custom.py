@@ -1371,15 +1371,14 @@ def _validate_restore_disk_parameters(restore_only_osdisk, diskslist):
 
 
 def _validate_msi_used_for_restore_disks(vault_identity, use_system_assigned_msi, identity_id):
-    # check if rp is for managed vm
     if use_system_assigned_msi:
-        if vault_identity.type != "SystemAssigned" and vault_identity.type != "SystemAssigned, UserAssigned":
+        if vault_identity.type is None or "systemassigned" not in vault_identity.type.lower():
             raise ArgumentUsageError("Please ensure that System MSI is enabled for the vault")
     if identity_id:
-        if vault_identity.type == "UserAssigned" or vault_identity.type == "SystemAssigned, UserAssigned":
+        if vault_identity.type is not None and "userassigned" in vault_identity.type.lower():
             if not (identity_id.lower() in (id.lower() for id in vault_identity.user_assigned_identities.keys())):
                 raise ArgumentUsageError("""
-                Vault does not have the specified Used MSI. Please ensure you've provided the correct --identity-id.
+                Vault does not have the specified User MSI. Please ensure you've provided the correct --identity-id.
                 """)
         else:
             raise ArgumentUsageError("Please ensure that User MSI is enabled for the vault")
