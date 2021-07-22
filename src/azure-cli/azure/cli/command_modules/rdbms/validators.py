@@ -5,7 +5,7 @@
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
+from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import (
@@ -15,7 +15,8 @@ from azure.cli.core.profiles import ResourceType
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
                                     get_postgres_list_skus_info, get_postgres_versions,
-                                    get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers)
+                                    get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
+                                    _is_resource_name)
 
 logger = get_logger(__name__)
 
@@ -121,10 +122,12 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None,
                               server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
-                              subnet=None, public_access=None, version=None, auto_grow=None, instance=None):
+                              subnet=None, public_access=None, version=None, auto_grow=None, replication_role=None,
+                              instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
     sku_info, single_az, _ = get_mysql_list_skus_info(db_context.cmd, location)
-    _mysql_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, auto_grow, instance)
+    _mysql_high_availability_validator(high_availability, standby_availability_zone, zone, tier,
+                                       single_az, auto_grow, instance)
     _network_arg_validator(subnet, public_access)
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -132,8 +135,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_retention_validator(backup_retention, sku_info, tier)
     _mysql_storage_validator(storage_gb, sku_info, tier, instance)
     _mysql_sku_name_validator(sku_name, sku_info, tier, instance)
-    _mysql_version_validator(version, sku_info, tier)
-    _mysql_auto_grow_validator(auto_grow, instance)
+    _mysql_version_validator(version, sku_info, tier, instance)
+    _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
 
 
 def _mysql_retention_validator(backup_retention, sku_info, tier):
@@ -166,7 +169,8 @@ def _mysql_tier_validator(tier, sku_info):
 
 
 def _mysql_sku_name_validator(sku_name, sku_info, tier, instance):
-    tier = instance.sku.tier if tier is None
+    if instance is not None:
+        tier = instance.sku.tier if tier is None else tier
     if sku_name:
         skus = get_mysql_skus(sku_info, tier)
         if sku_name not in skus:
@@ -176,7 +180,8 @@ def _mysql_sku_name_validator(sku_name, sku_info, tier, instance):
 
 
 def _mysql_version_validator(version, sku_info, tier, instance):
-    tier = instance.sku.tier if tier is None
+    if instance is not None:
+        tier = instance.sku.tier if tier is None else tier
     if version:
         versions = get_mysql_versions(sku_info, tier)
         if version not in versions:
@@ -184,15 +189,37 @@ def _mysql_version_validator(version, sku_info, tier, instance):
 
 
 def _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance):
-    replication_role = instance.replication_role if replication_role is None
-    high_availability = instance.high_availability.mode if high_availability is None 
+    if auto_grow is None:
+        return
+    if instance is not None:
+        replication_role = instance.replication_role if replication_role is None else replication_role
+        high_availability = instance.high_availability.mode if high_availability is None else high_availability
     # if replica, cannot be disabled
     if replication_role != 'None' and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for replica server cannot be disabled.")
     # if ha, cannot be disabled
-    if (high_availability == 'Enabled' or high_availability == 'ZoneRedundant') \
-        and auto_grow.lower() == 'disabled':
+    if high_availability in ['Enabled', 'ZoneRedundant'] and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for high availability server cannot be disabled.")
+
+
+def _mysql_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az,
+                                       auto_grow, instance):
+    if instance:
+        tier = instance.sku.tier if tier is None else tier
+        auto_grow = instance.storage.auto_grow if auto_grow is None else auto_grow
+    if high_availability is not None and high_availability.lower() == 'enabled':
+        if tier == 'Burstable':
+            raise ArgumentUsageError("High availability is not supported for Burstable tier")
+        if single_az:
+            raise ArgumentUsageError("This region is single availability zone."
+                                     "High availability is not supported in a single availability zone region.")
+        if auto_grow.lower == 'Disabled':
+            raise ArgumentUsageError("Enabling High Availability requires Auto grow to be turned ON.")
+    if standby_availability_zone:
+        if not high_availability:
+            raise ArgumentUsageError("You need to enable high availability to set standby availability zone.")
+        if zone == standby_availability_zone:
+            raise ArgumentUsageError("The zone of the server cannot be same as standby zone.")
 
 
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
@@ -200,14 +227,14 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            version=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     sku_info, single_az = get_postgres_list_skus_info(db_context.cmd, location)
-    _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az)
+    _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
     _pg_storage_validator(storage_gb, sku_info, tier, instance)
-    _pg_sku_name_validator(sku_name, sku_info, tier)
-    _pg_version_validator(version, sku_info, tier)
+    _pg_sku_name_validator(sku_name, sku_info, tier, instance)
+    _pg_version_validator(version, sku_info, tier, instance)
 
 
 def _pg_storage_validator(storage_gb, sku_info, tier, instance):
@@ -231,7 +258,9 @@ def _pg_tier_validator(tier, sku_info):
             raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
 
-def _pg_sku_name_validator(sku_name, sku_info, tier):
+def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
+    if instance is not None:
+        tier = instance.sku.tier if tier is None else tier
     if sku_name:
         skus = get_postgres_skus(sku_info, tier)
         if sku_name not in skus:
@@ -240,7 +269,9 @@ def _pg_sku_name_validator(sku_name, sku_info, tier):
             raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
 
 
-def _pg_version_validator(version, sku_info, tier):
+def _pg_version_validator(version, sku_info, tier, instance):
+    if instance is not None:
+        tier = instance.sku.tier if tier is None else tier
     if version:
         versions = get_postgres_versions(sku_info, tier)
         if version not in versions:
@@ -248,7 +279,8 @@ def _pg_version_validator(version, sku_info, tier):
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
-    tier = instance.sku.tier if tier is None
+    if instance:
+        tier = instance.sku.tier if tier is None else tier
     if high_availability is not None and high_availability.lower() == 'enabled':
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
@@ -262,22 +294,6 @@ def _pg_high_availability_validator(high_availability, standby_availability_zone
         if zone == standby_availability_zone:
             raise ArgumentUsageError("The zone of the server cannot be same as standby zone.")
 
-def _mysql_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, auto_grow, instance):
-    tier = instance.sku.tier if tier is None
-    auto_grow = instance.storage.auto_grow if auto_grow is None
-    if high_availability is not None and high_availability.lower() == 'enabled':
-        if tier == 'Burstable':
-            raise ArgumentUsageError("High availability is not supported for Burstable tier")
-        if single_az:
-            raise ArgumentUsageError("This region is single availability zone."
-                                     "High availability is not supported in a single availability zone region.")
-        if auto_grow.lower == 'Disabled':
-            raise ArgumentUsageError("Enabling High Availability requires Auto grow to be turned ON.")
-    if standby_availability_zone:
-        if not high_availability:
-            raise ArgumentUsageError("You need to enable high availability to set standby availability zone.")
-        if zone == standby_availability_zone:
-            raise ArgumentUsageError("The zone of the server cannot be same as standby zone.")
 
 def _network_arg_validator(subnet, public_access):
     if subnet is not None and public_access is not None:
@@ -374,10 +390,22 @@ def validate_server_name(db_context, server_name, type_):
     if not result.name_available:
         raise ValidationError(result.message)
 
-def validate_private_dns_zone(cmd, server_name, private_dns_zone):
-    postgresql_server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
-    if private_dns_zone == server_name + postgresql_server_endpoint:
+
+def validate_private_dns_zone(db_context, server_name, private_dns_zone, private_dns_zone_suffix):
+    cmd = db_context.cmd
+    if db_context.command_group == 'postgres':
+        server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
+    else:
+        server_endpoint = cmd.cli_ctx.cloud.suffixes.mysql_server_endpoint
+    if private_dns_zone == server_name + server_endpoint:
         raise ValidationError("private dns zone name cannot be same as the server's fully qualified domain name")
+
+    if private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
+        raise ValidationError('The suffix of the private DNS zone should be "{}"'.format(private_dns_zone_suffix))
+
+    if _is_resource_name(private_dns_zone) and not is_valid_resource_name(private_dns_zone) \
+            or not _is_resource_name(private_dns_zone) and not is_valid_resource_id(private_dns_zone):
+        raise ValidationError("Check if the private dns zone name or Id is in correct format.")
 
 
 def validate_mysql_ha_enabled(server):

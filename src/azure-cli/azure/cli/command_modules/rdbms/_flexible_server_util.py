@@ -195,7 +195,6 @@ def _postgres_parse_list_skus(result, database_engine):
     for tier_info in tiers:
         tier_name = tier_info.name
         tier_dict = {}
-        sku_iops_dict = {}
 
         skus = set()
         versions = set()
@@ -246,8 +245,7 @@ def _mysql_parse_list_skus(result, database_engine):
         storage_info = tier_info.supported_storage_editions[0]
 
         tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
-        tier_dict["storage_sizes"] = (int(storage_info.min_storage_size) // 1024,
-                                        int(storage_info.max_storage_size) // 1024)
+        tier_dict["storage_sizes"] = (int(storage_info.min_storage_size) // 1024, int(storage_info.max_storage_size) // 1024)
         iops_dict[tier_name] = sku_iops_dict
         tiers_dict[tier_name] = tier_dict
 
@@ -452,8 +450,7 @@ def get_user_confirmation(message, yes=False):
     try:
         if not prompt_y_n(message):
             return False
-        else:
-            return True
+        return True
     except NoTTYException:
         raise CLIError(
             'Unable to prompt for confirmation as no tty available. Use --yes.')

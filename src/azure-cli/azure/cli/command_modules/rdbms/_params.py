@@ -22,7 +22,7 @@ from .randomname.generate import generate_username
 from ._flexible_server_util import get_current_time
 
 
-def load_arguments(self, _):    # pylint: disable=too-many-statements
+def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-locals
 
     server_completers = {
         'mariadb': get_resource_name_completion_list('Microsoft.DBforMariaDB/servers'),
@@ -214,6 +214,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     _complex_params('postgres')
 
     # Flexible-server
+    # pylint: disable=too-many-locals
     def _flexible_server_params(command_group):
 
         server_name_arg_type = CLIArgumentType(
@@ -242,7 +243,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 name='administrator_login',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
                 scopes=['{} flexible-server'.format(command_group)]))
-        
+
         administrator_login_password_arg_type = CLIArgumentType(
             options_list=['--admin-password', '-p'],
             help='The password of the administrator. Minimum 8 characters and maximum 128 characters. '
@@ -253,14 +254,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         database_name_arg_type = CLIArgumentType(
             metavar='NAME',
-            options_list=['--name', '-n'],
+            options_list=['--database-name', '-d'],
             id_part='child_name_1',
             help='The name of the database to be created when provisioning the database server',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
                 scopes=['{} flexible-server'.format(command_group)]))
-        
+
         tier_arg_type = CLIArgumentType(
             options_list=['--tier'],
             help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized '
@@ -391,8 +392,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             help='The name or resource ID of the source server to restore from.'
         )
 
-        overriding_none_arg_type = CLIArgumentType(local_context_attribute=LocalContextAttribute(name='context_name', actions=[LocalContextAction.GET]))
-
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -412,7 +411,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
-            c.argument('administrator_login', default=generate_username(),  arg_type=administrator_login_arg_type)
+            c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
             c.argument('backup_retention', default=7, arg_type=backup_retention_arg_type)
             c.argument('public_access', arg_type=public_access_arg_type)
@@ -426,11 +425,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
             c.argument('high_availability', arg_type=high_availability_arg_type)
-            c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'])
+            c.argument('database_name', arg_type=database_name_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
-            # c.argument('assign_identity', options_list=['--assign-identity'],
-            #            help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault. No need to enter extra argument.')
-            
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
@@ -443,17 +439,17 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('subnet', arg_type=subnet_arg_type)
             c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
-            c.argument('zone', arg_type=zone_arg_type)            
+            c.argument('zone', arg_type=zone_arg_type)
 
         with self.argument_context('{} flexible-server georestore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
-            c.argument('source_server', options_list=['--source-server', '-s'], required=True, help='The name or ID of the source server to restore from.')
+            c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
             c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
             c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
-            c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+            c.argument('private_dns_zone_arguments', arg_type=private_dns_zone_arguments_arg_type)
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
@@ -473,8 +469,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('iops', arg_type=iops_arg_type)
 
         with self.argument_context('{} flexible-server restart'.format(command_group)) as c:
-            c.argument('fail_over', options_list=['--failover'],
-                       help='forced or planned failover for server restart operation')
+            if command_group == 'postgres':
+                c.argument('fail_over', options_list=['--failover'],
+                           help='Forced or planned failover for server restart operation. Allowed values: Forced, Planned')
+            elif command_group == 'mysql':
+                c.argument('fail_over', options_list=['--failover'],
+                           help='Forced failover for server restart operation. Allowed values: Forced')
 
         with self.argument_context('{} flexible-server list-skus'.format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
@@ -484,7 +484,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 if scope == "list":
-                    c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part=None, arg_type=server_name_arg_type)
                 else:
                     c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
@@ -501,14 +501,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='Source of the configuration.')
 
         # firewall-rule
-        # for scope in ['create', 'delete', 'list', 'show', 'update']:
-        #     argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
-        #     with self.argument_context(argument_context_string) as c:
-        #         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        #         if scope == "list":
-        #             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
-        #         else:
-        #             c.argument('server_name', id_part='name', arg_type=server_name_arg_type)
+        for scope in ['create', 'delete', 'list', 'show', 'update']:
+            argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                if scope == "list":
+                    c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+                else:
+                    c.argument('server_name', id_part='name', arg_type=server_name_arg_type)
 
         for scope in ['create', 'delete', 'show', 'update']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
@@ -516,10 +516,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'],
                            help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
                 c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
-                       help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+                           help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
                 c.argument('start_ip_address', options_list=['--start-ip-address'], validator=ip_address_validator,
-                       help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
-        
+                           help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+
         with self.argument_context('{} flexible-server firewall-rule delete'.format(command_group)) as c:
             c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
 
@@ -530,9 +530,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('database_name', arg_type=database_name_arg_type)
 
-        # with self.argument_context('{} flexible-server db list'.format(command_group)) as c:
-        #     c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-        #     c.argument('database_name', id_part=None, arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of the database.')
+        with self.argument_context('{} flexible-server db list'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+            c.argument('database_name', id_part=None, arg_type=database_name_arg_type)
 
         with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
             c.argument('charset', help='The charset of the database. The default value is UTF8')
@@ -547,11 +547,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
             c.argument('database_name', arg_type=database_name_arg_type)
 
-        # with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:
-        #     c.argument('server_name', id_part=None, options_list=['--name', '-n'], help='Name of the source server.')
+        with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--name', '-n'], help='Name of the source server.')
 
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
-            c.argument('server_name', arg_type=source_server_arg_type)
+            c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('replica_name', options_list=['--replica-name'],
                        help='The name of the server to restore to.')
             c.ignore('location')

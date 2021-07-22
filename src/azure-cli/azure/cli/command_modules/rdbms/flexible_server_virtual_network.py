@@ -14,7 +14,7 @@ from azure.cli.core.azclierror import ValidationError
 from azure.mgmt.privatedns.models import PrivateZone
 from azure.mgmt.privatedns.models import SubResource
 from azure.mgmt.privatedns.models import VirtualNetworkLink
-from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory, cf_postgres_flexible_private_dns_zone_suffix_operations
+from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory
 from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation
 from .validators import validate_private_dns_zone, validate_vnet_location
 
@@ -75,7 +75,7 @@ def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet,
 def process_private_network_with_id_input(cmd, rid, nw_client, resource_client, server_name, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes):
     id_subscription, id_resource_group, id_vnet, id_subnet = get_id_components(rid)
     nw_client, resource_client = _change_client_with_different_subscription(cmd, id_subscription, nw_client, resource_client)
-    _resource_group_verify_and_create(resource_client, id_resource_group, location, yes)
+    _create_and_verify_resource_group(resource_client, id_resource_group, location, yes)
     if id_subnet is None:
         id_subnet = 'Subnet' + server_name
 
@@ -92,7 +92,7 @@ def _change_client_with_different_subscription(cmd, subscription, nw_client, res
     return nw_client, resource_client
 
 
-def _resource_group_verify_and_create(resource_client, resource_group, location, yes):
+def _create_and_verify_resource_group(resource_client, resource_group, location, yes):
     if not resource_client.resource_groups.check_existence(resource_group):
         logger.warning("Provided resource group in the resource ID doesn't exist.")
         user_confirmation("Do you want to create a new resource group {0}".format(resource_group), yes=yes)
@@ -169,56 +169,54 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
     return subnet
 
 
-def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location, yes):
-    dns_suffix_client = cf_postgres_flexible_private_dns_zone_suffix_operations(cmd.cli_ctx, '_')
+def prepare_private_dns_zone(db_context, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location, yes):
+    cmd = db_context.cmd
+    dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
+    private_dns_zone_suffix = dns_suffix_client.execute()
+    if db_context.command_group == 'mysql':
+        private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
 
-    # private_dns_zone_suffix = dns_suffix_client.execute()
-    private_dns_zone_suffix = "postgres.database.azure.com"
+    # Get Vnet Components
     vnet_sub, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
-    private_dns_client = private_dns_client_factory(cmd.cli_ctx)
-    private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx)
-    resource_client = resource_client_factory(cmd.cli_ctx)
-
+    nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_sub)
     vnet_id = resource_id(subscription=vnet_sub,
                           resource_group=vnet_rg,
                           namespace='Microsoft.Network',
                           type='virtualNetworks',
                           name=vnet_name)
-    nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_sub)
     vnet = nw_client.virtual_networks.get(vnet_rg, vnet_name)
 
+    # Process private dns zone (no input or Id input)
     dns_rg = None
+    dns_subscription = get_subscription_id(cmd.cli_ctx)
     if private_dns_zone is None:
         if 'private' in private_dns_zone_suffix:
             private_dns_zone = server_name + '.' + private_dns_zone_suffix
         else:
             private_dns_zone = server_name + '.private.' + private_dns_zone_suffix
-    #  resource ID input => check subscription and change client
     elif not _is_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):
-        subscription, dns_rg, private_dns_zone, _ = get_id_components(private_dns_zone)
-        if private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
-            raise ValidationError('The suffix of the private DNS zone should be "{}"'.format(private_dns_zone_suffix))
+        dns_subscription, dns_rg, private_dns_zone, _ = get_id_components(private_dns_zone)
 
-        if subscription != get_subscription_id(cmd.cli_ctx):
-            logger.warning('The provided private DNS zone ID is in different subscription from the server')
-            resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=subscription)
-            private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=subscription)
-            private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=subscription)
-        _resource_group_verify_and_create(resource_client, dns_rg, location, yes)
-    #  check Invalid resource ID or Name format
-    elif _is_resource_name(private_dns_zone) and not is_valid_resource_name(private_dns_zone) \
-            or not _is_resource_name(private_dns_zone) and not is_valid_resource_id(private_dns_zone):
-        raise ValidationError("Check if the private dns zone name or Id is in correct format.")
-    #  Invalid resource name suffix check
-    elif _is_resource_name(private_dns_zone) and private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
-        raise ValidationError('The suffix of the private DNS zone should be in "{}" format'.format(private_dns_zone_suffix))
+    validate_private_dns_zone(db_context,
+                              server_name=server_name,
+                              private_dns_zone=private_dns_zone,
+                              private_dns_zone_suffix=private_dns_zone_suffix)
 
-    validate_private_dns_zone(cmd, server_name=server_name, private_dns_zone=private_dns_zone)
-
-    link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet.id))
-    link.registration_enabled = False
+    # client factories
+    if dns_subscription != get_subscription_id(cmd.cli_ctx):
+        logger.warning('The provided private DNS zone ID is in different subscription from the server')
+        subscription_id = dns_subscription
+    else:
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+    resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=subscription_id)
+    private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=subscription_id)
+    private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=subscription_id)
 
     # check existence DNS zone and change resource group
+    if dns_rg is not None:
+        _create_and_verify_resource_group(resource_client, dns_rg, location, yes)
+
+    # decide which resource group the dns zone provision
     zone_exist_flag = False
     if dns_rg is not None and check_existence(resource_client, private_dns_zone, dns_rg, 'Microsoft.Network', 'privateDnsZones'):
         zone_exist_flag = True
@@ -228,8 +226,12 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
     elif dns_rg is None and check_existence(resource_client, private_dns_zone, vnet_rg, 'Microsoft.Network', 'privateDnsZones'):
         zone_exist_flag = True
         dns_rg = vnet_rg
-    else:
+    elif dns_rg is None:
+        zone_exist_flag = False
         dns_rg = vnet_rg
+
+    link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet.id))
+    link.registration_enabled = False
 
     # create DNS zone if not exist
     if not zone_exist_flag:
@@ -280,10 +282,12 @@ def prepare_public_network(public_access, yes):
         if get_user_confirmation("Do you want to enable access for all IPs ", yes=yes):
             return '0.0.0.0', '255.255.255.255'
         return -1, -1
-    else:
-        if str(public_access).lower() == 'all':
-            start_ip, end_ip = '0.0.0.0', '255.255.255.255'
-        else:
-            start_ip, end_ip = parse_public_access_input(public_access)
 
-        return start_ip, end_ip
+    if str(public_access).lower() == 'all':
+        start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+    elif str(public_access).lower() == 'none':
+        start_ip, end_ip = -1, -1
+    else:
+        start_ip, end_ip = parse_public_access_input(public_access)
+
+    return start_ip, end_ip

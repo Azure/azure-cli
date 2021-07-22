@@ -189,7 +189,7 @@ def load_flexibleserver_command_table(self, _):
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_server_update_custom_func')
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
-        g.command('restart', 'begin_restart')
+        g.custom_command('restart', 'flexible_server_restart')
 
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,
                             custom_command_type=flexible_servers_custom_mysql,

@@ -14,7 +14,8 @@ from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.mgmt.rdbms import postgresql_flexibleservers
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
+    cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
@@ -40,12 +41,12 @@ def flexible_server_create(cmd, client,
                            tags=None, database_name=None,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
-                           high_availability=None, zone=None, maintenance_window=None,
-                           geo_redundant_backup=None, standby_availability_zone=None, yes=None):
+                           high_availability=None, zone=None,
+                           geo_redundant_backup=None, standby_availability_zone=None, yes=False):
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
-        cf_availability=cf_postgres_check_resource_availability, logging_name='PostgreSQL', command_group='postgres', server_client=client)
+        cf_availability=cf_postgres_check_resource_availability, cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations, logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -79,7 +80,7 @@ def flexible_server_create(cmd, client,
                                             vnet_address_pref=vnet_address_prefix,
                                             subnet_address_pref=subnet_address_prefix,
                                             yes=yes)
-        private_dns_zone_id = prepare_private_dns_zone(cmd,
+        private_dns_zone_id = prepare_private_dns_zone(db_context,
                                                        'PostgreSQL',
                                                        resource_group_name,
                                                        server_name,
@@ -91,7 +92,7 @@ def flexible_server_create(cmd, client,
         network.private_dns_zone_arm_resource_id = private_dns_zone_id
     else:
         network.public_network_access = ' Enabled'
-        start_ip, end_ip = prepare_public_network(public_access, yes)
+        start_ip, end_ip = prepare_public_network(public_access, yes=yes)
         if start_ip != -1:
             public_access = 'Enabled'
 
@@ -106,18 +107,6 @@ def flexible_server_create(cmd, client,
         high_availability = "ZoneRedundant"
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
-
-    maintenance_window_object = postgresql_flexibleservers.models.MaintenanceWindow()
-    if maintenance_window is not None:
-        custom_window = 'Enabled'
-        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-    else:
-        custom_window = "Disabled"
-        day_of_week = start_hour = start_minute = 0
-    maintenance_window_object.day_of_week = day_of_week
-    maintenance_window_object.start_hour = start_hour
-    maintenance_window_object.start_minute = start_minute
-    maintenance_window_object.custom_window = custom_window
 
     administrator_login_password = generate_password(administrator_login_password)
 
@@ -134,7 +123,6 @@ def flexible_server_create(cmd, client,
                                    network=network,
                                    version=version,
                                    high_availability=high_availability,
-                                   maintenance_window=maintenance_window_object,
                                    availability_zone=zone)
 
     # Adding firewall rule
@@ -169,11 +157,12 @@ def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
                             subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
-                            private_dns_zone_arguments=None, yes=None):
+                            private_dns_zone_arguments=None, yes=False):
 
     server_name = server_name.lower()
     db_context = DbContext(
-        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_availability=cf_postgres_check_resource_availability, logging_name='PostgreSQL', command_group='postgres', server_client=client)
+        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
+        cf_availability=cf_postgres_check_resource_availability, cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations, logging_name='PostgreSQL', command_group='postgres', server_client=client)
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     if not is_valid_resource_id(source_server):
@@ -214,7 +203,7 @@ def flexible_server_restore(cmd, client,
                                                     vnet_address_pref=vnet_address_prefix,
                                                     subnet_address_pref=subnet_address_prefix,
                                                     yes=yes)
-                private_dns_zone_id = prepare_private_dns_zone(cmd,
+                private_dns_zone_id = prepare_private_dns_zone(db_context,
                                                                'PostgreSQL',
                                                                resource_group_name,
                                                                server_name,
@@ -338,7 +327,7 @@ def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_
         client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'PostgreSQL Server Restart')
 
 
-def flexible_server_delete(cmd, client, resource_group_name=None, server_name=None, yes=None):
+def flexible_server_delete(cmd, client, resource_group_name=None, server_name=None, yes=False):
     result = None
     if not yes:
         user_confirmation(
@@ -393,7 +382,7 @@ def flexible_list_skus(cmd, client, location):
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, maintenance_window, availability_zone):
+                   storage, backup, network, version, high_availability, availability_zone):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -413,7 +402,6 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         network=network,
         version=version,
         high_availability=high_availability,
-        maintenance_window=maintenance_window,
         availability_zone=availability_zone,
         create_mode="Create")
 
@@ -544,11 +532,12 @@ def _update_local_contexts(cmd, server_name, resource_group_name, database_name,
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
 class DbContext(object):
     def __init__(self, cmd=None, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
-                 cf_availability=None, command_group=None, server_client=None):
+                 cf_availability=None, cf_private_dns_zone_suffix=None, command_group=None, server_client=None):
         self.cmd = cmd
         self.azure_sdk = azure_sdk
         self.cf_firewall = cf_firewall
         self.cf_availability = cf_availability
+        self.cf_private_dns_zone_suffix = cf_private_dns_zone_suffix
         self.logging_name = logging_name
         self.cf_db = cf_db
         self.command_group = command_group
