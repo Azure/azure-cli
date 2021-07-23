@@ -12,6 +12,7 @@ from knack.util import CLIError
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
+from ._constants import FeatureFlagConstants
 from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)
@@ -225,10 +226,19 @@ def validate_resolve_keyvault(namespace):
 
 
 def validate_feature(namespace):
-    if namespace.feature:
-        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
-        invalid = re.search(invalid_pattern, namespace.feature)
-        if invalid:
-            raise CLIError("Feature name is invalid. Only alphanumeric characters, '.', '-' and '_' are allowed.")
-    else:
-        raise CLIError("Feature name cannot be empty.")
+    if namespace.feature is not None:
+        if '%' in namespace.feature:
+            raise CLIError("Feature name cannot contain the '%' character.")
+        if not namespace.feature:
+            raise CLIError("Feature name cannot be empty.")
+
+
+def validate_feature_key(namespace):
+    if namespace.key is not None:
+        input_key = str(namespace.key).lower()
+        if '%' in input_key:
+            raise CLIError("Feature flag key cannot contain the '%' character.")
+        if not input_key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+            raise CLIError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+        if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+            raise CLIError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))

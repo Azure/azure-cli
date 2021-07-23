@@ -305,6 +305,9 @@ helps['appconfig feature set'] = """
         - name: Set a feature flag using your 'az login' credentials.
           text:
             az appconfig feature set --endpoint https://myappconfiguration.azconfig.io --feature color --label MyLabel --auth-mode login
+        - name: Set a feature flag with name "Beta" and custom key ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature set -n MyAppConfiguration --feature Beta --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature delete'] = """
@@ -320,6 +323,9 @@ helps['appconfig feature delete'] = """
         - name: Delete a feature using App Configuration endpoint and your 'az login' credentials.
           text:
             az appconfig feature delete --endpoint https://myappconfiguration.azconfig.io --feature color --auth-mode login
+        - name: Delete a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature delete -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta --yes
     """
 
 helps['appconfig feature show'] = """
@@ -335,6 +341,9 @@ helps['appconfig feature show'] = """
         - name: Show a feature flag using App Configuration endpoint and your 'az login' credentials.
           text:
             az appconfig feature show --endpoint https://myappconfiguration.azconfig.io --feature color --auth-mode login
+        - name: Show a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature show -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature list'] = """
@@ -347,7 +356,7 @@ helps['appconfig feature list'] = """
         - name: List all feature flags with null labels.
           text:
             az appconfig feature list -n MyAppConfiguration --label \\0
-        - name: List a specfic feature for any label start with v1. using connection string.
+        - name: List a specific feature for any label start with v1. using connection string.
           text:
             az appconfig feature list --feature color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
         - name: List all features with any labels and query only key, state and conditions.
@@ -359,6 +368,9 @@ helps['appconfig feature list'] = """
         - name: List feature flags with multiple labels.
           text:
             az appconfig feature list --label test,prod,\\0 -n MyAppConfiguration
+        - name: List all features starting with "MyApp1".
+          text:
+            az appconfig feature list -n MyAppConfiguration --key .appconfig.featureflag/MyApp1*
     """
 
 helps['appconfig feature lock'] = """
@@ -371,6 +383,9 @@ helps['appconfig feature lock'] = """
         - name: Force locking a feature using connection string.
           text:
             az appconfig feature lock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+        - name: Lock a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature lock -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature unlock'] = """
@@ -383,6 +398,9 @@ helps['appconfig feature unlock'] = """
         - name: Force unlocking a feature using connection string.
           text:
             az appconfig feature unlock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+        - name: Unlock a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature unlock -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature enable'] = """
@@ -395,6 +413,9 @@ helps['appconfig feature enable'] = """
         - name: Force enabling a feature using connection string.
           text:
             az appconfig feature enable --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+        - name: Enable a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature enable -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature disable'] = """
@@ -407,6 +428,9 @@ helps['appconfig feature disable'] = """
         - name: Force disabling a feature using connection string.
           text:
             az appconfig feature disable --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+        - name: Disable a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature disable -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature filter'] = """
