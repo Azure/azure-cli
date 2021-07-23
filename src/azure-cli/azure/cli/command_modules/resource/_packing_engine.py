@@ -6,6 +6,7 @@ import os
 import re
 import json
 from knack.util import CLIError
+from azure.cli.core.azclierror import BadRequestError
 from azure.cli.core.util import read_file_content, shell_safe_json_parse
 from azure.cli.command_modules.resource.custom import _remove_comments_from_json
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -97,7 +98,7 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
 
             if(not os.path.commonpath([getattr(context, 'RootTemplateDirectory')]) ==
                os.path.commonpath([getattr(context, 'RootTemplateDirectory'), abs_local_path])):
-                raise CLIError('Unable to handle the reference to file ' + abs_local_path + 'from ' +
+                raise BadRequestError('Unable to handle the reference to file ' + abs_local_path + 'from ' +
                                template_abs_file_path + 'because it exists outside of the root template directory of ' +
                                getattr(context, 'RootTemplateDirectory'))
 
@@ -199,8 +200,8 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
                                       _normalize_directory_seperators_for_local_file_system(getattr(artifact, 'path')))
             abs_local_path = os.path.abspath(local_path)
             if os.path.commonpath([target_dir]) != os.path.commonpath([target_dir, abs_local_path]):
-                raise CLIError('Unable to unpack linked template ' + getattr(artifact, 'path') +
-                               'because it would create a file outside of the target directory hierarchy of' +
+                raise BadRequestError('Unable to unpack linked template ' + getattr(artifact, 'path') +
+                               'because it would create a file outside of the target directory hierarchy of ' +
                                target_dir)
 
         # Process each artifact:
