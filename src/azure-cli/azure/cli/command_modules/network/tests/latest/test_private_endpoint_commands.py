@@ -1864,7 +1864,7 @@ class NetworkPrivateLinkSearchScenarioTest(ScenarioTest):
         self.cmd("az network private-endpoint-connection delete --id {pec_id} -y")
 
 
-def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, group_id=True):
+def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, group_id=True, delete=True):
     self.kwargs.update({
         'vnet': self.create_random_name('cli-vnet-', 24),
         'subnet': self.create_random_name('cli-subnet-', 24),
@@ -1913,8 +1913,9 @@ def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, gr
                  '--resource-name {resource} --type {type}',
                  checks=self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'))
 
-    self.cmd('network private-endpoint-connection delete --name {name} -g {rg} '
-             '--resource-name {resource} --type {type} -y')
+    if delete:
+        self.cmd('network private-endpoint-connection delete --name {name} -g {rg} '
+                 '--resource-name {resource} --type {type} -y')
 
 
 # Rely on other modules. The test may be broken when other modules bump sdk. At that time, run the failed test in live.
@@ -2002,6 +2003,20 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
         })
 
         _test_private_endpoint(self, approve=False, rejected=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_batch_account")
+    def test_private_endpoint_connection_batch_account(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'batch account',
+            'resource': self.create_random_name(prefix='clibatchtestacct', length=24),
+            'list_num': 1,
+            'type': 'Microsoft.Batch/batchAccounts',
+            'extra_create': '-l eastus --public-network-access Disabled',
+        })
+
+        # Private Endpoint Connection of batch account doesn't have delete operation.
+        _test_private_endpoint(self, approve=False, rejected=False, delete=False)
 
 
 if __name__ == '__main__':
