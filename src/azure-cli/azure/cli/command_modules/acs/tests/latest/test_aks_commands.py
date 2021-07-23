@@ -4693,7 +4693,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     # live only, otherwise the current recording mechanism will also record the binary files of
     # kubectl and kubelogin resulting in the cassette file size exceeding 100MB
-    @live_only
+    @live_only()
     def test_aks_install_kubectl(self):
         ctl_fd, ctl_temp_file = tempfile.mkstemp()
         login_fd, login_temp_file = tempfile.mkstemp()
