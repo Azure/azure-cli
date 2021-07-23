@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import subprocess
 import tempfile
 import unittest
 
@@ -4675,8 +4676,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # install kubectl
-        install_cmd = 'aks install-cli'
-        self.cmd(install_cmd, checks=[self.is_empty()])
+        try:
+            subprocess.call(["az", "aks", "install-cli"], shell=True)
+        except subprocess.CalledProcessError as err:
+            raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
         # test aks browse cmd
         browse_cmd = 'aks browse --resource-group={resource_group} --name={name} --listen-address=1.1.1.1 --listen-port=8080 --disable-browser'
@@ -4688,6 +4691,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    # live only, otherwise the current recording mechanism will also record the binary files of
+    # kubectl and kubelogin resulting in the cassette file size exceeding 100MB
+    @live_only
     def test_aks_install_kubectl(self):
         ctl_fd, ctl_temp_file = tempfile.mkstemp()
         login_fd, login_temp_file = tempfile.mkstemp()
