@@ -641,6 +641,8 @@ def _start_exec_pipe_win(web_socket_uri, password):
 
 
 def _on_ws_msg(ws, msg):
+    if isinstance(msg, bytes):
+        msg = msg.decode('utf-8')
     sys.stdout.write(msg)
     sys.stdout.flush()
 
