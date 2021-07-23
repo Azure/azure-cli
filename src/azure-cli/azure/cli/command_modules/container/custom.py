@@ -537,6 +537,31 @@ def _create_ip_address(ip_address, ports, protocol, dns_name_label, network_prof
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          type=ContainerGroupIpAddressType.private)
 
+def container_update(cmd, resource_group_name, name=None, container_name=None, image=None, no_wait=False):
+    """Update a container"""
+
+    if not name:
+        raise CLIError("error: the --name/-n argument is required.")
+
+    if not image:
+        raise CLIError("error: the --image argument is required.")
+
+    container_client = cf_container(cmd.cli_ctx)
+    container_group_client = cf_container_groups(cmd.cli_ctx)
+    container_group = container_group_client.get(resource_group_name, name)
+
+    # If container name is not present, use the first container.
+    if container_name is None:
+        containerIndex = 0
+    else:
+        containerIndex = next(i for container,i in enumerate(container_group.containers) if container.name==container_name)
+
+    container_group.containers[containerIndex].image = image
+
+    lro = sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name,
+                      name, container_group)
+
+    return lro
 
 # pylint: disable=inconsistent-return-statements
 def container_logs(cmd, resource_group_name, name, container_name=None, follow=False):

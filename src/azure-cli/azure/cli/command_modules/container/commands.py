@@ -25,6 +25,7 @@ def load_command_table(self, _):
         g.custom_command('exec', 'container_exec')
         g.custom_command('export', 'container_export')
         g.custom_command('attach', 'attach_to_container')
+        g.custom_command('update', 'update_container')
 
     with self.command_group('container', container_group_sdk) as g:
         g.command('restart', 'restart', supports_no_wait=True)

@@ -121,6 +121,10 @@ def load_arguments(self, _):
     with self.argument_context('container export') as c:
         c.argument('file', options_list=['--file', '-f'], help="The file path to export the container group.")
 
+    with self.argument_context('container update') as c:
+        c.argument('container_name', help='The container name to tail the logs. If omitted, the first container in the container group will be chosen')
+        c.argument('image', validator=validate_image, help='The container image name')
+
     with self.argument_context('container exec') as c:
         c.argument('container_name', help='The container name where to execute the command. Can be ommitted for container groups with only one container.')
         c.argument('exec_command', help='The command to run from within the container')
