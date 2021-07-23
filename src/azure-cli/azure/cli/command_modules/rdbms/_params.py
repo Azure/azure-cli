@@ -616,7 +616,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 elif scope == "delete":
                     c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
                                help='Name or ID of the migration.')
-                    c.argument('yes', arg_type=yes_arg_type)
+                    c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')
