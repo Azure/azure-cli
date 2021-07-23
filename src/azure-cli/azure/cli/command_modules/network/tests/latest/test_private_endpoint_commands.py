@@ -721,6 +721,7 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest):
         return filepath
 
     # Currently private-link-resource and private-endpoint-connection are whitelist only features so scenario tests are limited
+    @unittest.skip('unavaiable')
     @ResourceGroupPreparer(location='westcentralus')
     def test_private_link_resource_batch_account(self, resource_group, batch_account_name='testplinksbatch'):
         self.kwargs.update({
