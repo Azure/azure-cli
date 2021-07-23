@@ -235,9 +235,8 @@ def flexible_server_restore(cmd, client,
 
 
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, location, source_server,
-                               no_wait=False, geo_redundant_backup=None, restore_point_in_time=None,
                                subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
-                               private_dns_zone_arguments=None, yes=False):
+                               private_dns_zone_arguments=None, yes=False, no_wait=False):
     server_name = server_name.lower()
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,

@@ -439,17 +439,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
+            c.argument('yes', arg_type=yes_arg_type)
 
         if command_group == 'mysql':
             with self.argument_context('{} flexible-server geo-restore'. format(command_group)) as c:
                 c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
                 c.argument('source_server', arg_type=source_server_arg_type)
-                c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
                 c.argument('vnet', arg_type=vnet_arg_type)
                 c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
                 c.argument('subnet', arg_type=subnet_arg_type)
                 c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
                 c.argument('private_dns_zone_arguments', arg_type=private_dns_zone_arguments_arg_type)
+                c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
@@ -521,7 +522,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
 
         with self.argument_context('{} flexible-server firewall-rule delete'.format(command_group)) as c:
-            c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
+            c.argument('yes', arg_type=yes_arg_type)
 
         # db
         for scope in ['create', 'delete', 'list', 'show', 'update']:
@@ -539,7 +540,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('collation', help='The collation of the database.')
 
         with self.argument_context('{} flexible-server db delete'.format(command_group)) as c:
-            c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
+            c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server show-connection-string'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
@@ -615,8 +616,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 elif scope == "delete":
                     c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
                                help='Name or ID of the migration.')
-                    c.argument('yes', options_list=['--yes', '-y'], action='store_true',
-                               help='Do not prompt for confirmation.')
+                    c.argument('yes', arg_type=yes_arg_type)
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')
