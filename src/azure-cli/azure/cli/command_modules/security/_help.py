@@ -90,6 +90,11 @@ examples:
         az security atp storage update --resource-group MyResourceGroup --storage-account MyStorageAccount --is-enabled false
 """
 
+helps['security va'] = """
+type: group
+short-summary: View Vulnerability Assessment.
+"""
+
 helps['security va sql'] = """
 type: group
 short-summary: View Sql Vulnerability Assessment scan results and manage baseline.
