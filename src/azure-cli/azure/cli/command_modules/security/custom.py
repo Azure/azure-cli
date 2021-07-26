@@ -14,6 +14,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         Pricing,
                                         WorkspaceSetting,
                                         AdvancedThreatProtectionSetting,
+                                        RuleResultsInput,
                                         RulesResultsInput)
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from msrestazure.tools import resource_id
@@ -408,9 +409,9 @@ def update_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, da
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     if baseline_latest is True and baseline is None:
-        return client.create_or_update(rule_id, workspace_id, va_sql_resource_id, RulesResultsInput(latest_scan=True))
+        return client.create_or_update(rule_id, workspace_id, va_sql_resource_id, RuleResultsInput(latest_scan=True))
     if baseline_latest is False and baseline is not None:
-        return client.create_or_update(rule_id, workspace_id, va_sql_resource_id, RulesResultsInput(results=baseline))
+        return client.create_or_update(rule_id, workspace_id, va_sql_resource_id, RuleResultsInput(results=baseline))
     raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
 
 
