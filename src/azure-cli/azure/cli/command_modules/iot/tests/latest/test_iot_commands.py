@@ -465,7 +465,7 @@ class IoTHubTest(ScenarioTest):
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsi [system]'.format(identity_hub, rg), expect_failure=True)
 
         # Back to identity-based file upload
-        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'.format(identity_hub, rg, identity_based_auth, user_identity_1)).get_output_in_json()
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'.format(identity_hub, rg, identity_based_auth)).get_output_in_json()
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
 
         # Create EH and link identity
@@ -656,6 +656,115 @@ class IoTHubTest(ScenarioTest):
                      self.check('userAssignedIdentities', None),
                      self.check('type', IdentityType.none.value)])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='westus2')
+    @StorageAccountPreparer()
+    def test_hub_file_upload(self, resource_group, resource_group_location, storage_account):
+        from time import sleep
+
+        hub = self.create_random_name(prefix='cli-file-upload-hub', length=32)
+        user_identity_name = self.create_random_name(prefix='hub-user-identity', length=32)
+        rg = resource_group
+        containerName = self.create_random_name(prefix='iothubcontainer1', length=24)
+        storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
+        identity_based_auth = 'identityBased'
+        key_based_auth = 'keyBased'
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+
+        # create user-assigned identity
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user_identity_obj = self.cmd('identity create -n {0} -g {1}'.format(user_identity_name, rg)).get_output_in_json()
+        user_identity = user_identity_obj['id']
+        user_identity_id = user_identity_obj['principalId']
+
+        self.cmd('iot hub create -n {0} -g {1}'.format(hub, rg))
+
+        # File upload - set to identity based (fail because no identity)
+        self.cmd('iot hub update -n {0} -g {1} --fc {2} --fcs {3} --fsa {4}'
+                 .format(hub, rg, containerName, storageConnectionString, identity_based_auth),
+                 expect_failure=True)
+
+        # File upload - set fileupload-identity /user/identity or [system] - fail
+        self.cmd('iot hub update -n {0} -g {1} --fc {2} --fcs {3} --fsi /test/user/identity'
+                 .format(hub, rg, containerName, storageConnectionString),
+                 expect_failure=True)
+        self.cmd('iot hub update -n {0} -g {1} --fc {2} --fcs {3} --fsi [system]'
+                 .format(hub, rg, containerName, storageConnectionString),
+                 expect_failure=True)
+
+        # File upload - add connection string and containername - keybased
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fc {2} --fcs {3}'
+                 .format(hub, rg, containerName, storageConnectionString)).get_output_in_json()
+        assert not updated_hub['properties']['storageEndpoints']['$default']['authenticationType']
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
+    
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'
+                 .format(hub, rg, key_based_auth)).get_output_in_json()
+        assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == key_based_auth
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
+        
+
+        # Change to identity-based (with no identity) - fail
+        self.cmd('iot hub update -n {0} -g {1} --fsa identitybased'.format(hub, rg), expect_failure=True)
+
+        # change to use a user/identity or system identity - fail
+        self.cmd('iot hub update -n {0} -g {1} --fsi [system]'.format(hub, rg), expect_failure=True)
+        self.cmd('iot hub update -n {0} -g {1} --fsi /test/user/identity'.format(hub, rg), expect_failure=True)
+
+        # add system identity, assign access to storage account
+        hub_identity = self.cmd('iot hub identity assign --system -n {0} -g {1}'.format(hub, rg), checks=[
+            self.check('type', IdentityType.system_assigned.value)
+        ]).get_output_in_json()['principalId']
+
+        storage_role = 'Storage Blob Data Contributor'
+        storage_id = self.cmd('storage account show -n {0} -g {1}'.format(storage_account, rg)).get_output_in_json()['id']
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'.format(storage_role, hub_identity, storage_id))
+        sleep(30)
+
+        # change to system identity - fail (needs identityBased auth type)
+        self.cmd('iot hub update -n {0} -g {1} --fsi [system]'.format(hub, rg), expect_failure=True)
+
+        # change to identity-based
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'.format(hub, rg, identity_based_auth)).get_output_in_json()
+        assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
+
+        # explicitly assign to system identity
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsi [system]'.format(hub, rg)).get_output_in_json()
+
+        # explicit [system] should leave identity as null/None
+        assert not updated_hub['properties']['storageEndpoints']['$default']['identity']
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
+
+        # change to user-identity - fail
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsi /test/user/identity'.format(hub, rg), expect_failure=True)
+  
+        # add a user identity, assign access to storage account
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'.format(storage_role, user_identity_id, storage_id))
+        sleep(30)
+        self.cmd('iot hub identity assign -n {0} -g {1} --user {2}'.format(hub, rg, user_identity), checks=[
+            self.exists('userAssignedIdentities."{0}"'.format(user_identity)),
+            self.check('type', IdentityType.system_assigned_user_assigned.value)])
+
+        # change to user-identity
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsi {2}'.format(hub, rg, user_identity)).get_output_in_json()
+        assert updated_hub['properties']['storageEndpoints']['$default']['identity']['userAssignedIdentity'] == user_identity
+        assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
+
+        # change to key-based
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'.format(hub, rg, key_based_auth)).get_output_in_json()
+        assert not updated_hub['properties']['storageEndpoints']['$default']['identity']
+        assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == key_based_auth
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
 
     def _get_eventhub_connectionstring(self, rg):
         ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest1', length=32)

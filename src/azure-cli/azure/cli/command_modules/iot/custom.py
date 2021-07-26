@@ -1311,11 +1311,12 @@ def _process_fileupload_args(
 ):
     from datetime import timedelta
     if fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value:
-        default_storage_endpoint.authentication_type = AuthenticationType.IdentityBased
+        default_storage_endpoint.authentication_type = AuthenticationType.IdentityBased.value
         if fileupload_storage_container_uri:
             default_storage_endpoint.container_uri = fileupload_storage_container_uri
     elif fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.KeyBased.value:
         default_storage_endpoint.authentication_type = AuthenticationType.KeyBased.value
+        default_storage_endpoint.identity = None
     elif fileupload_storage_authentication_type is not None:
         default_storage_endpoint.authentication_type = None
         default_storage_endpoint.container_uri = None
@@ -1333,7 +1334,7 @@ def _process_fileupload_args(
     # Fix for identity/authentication-type params missing on hybrid profile api
     if hasattr(default_storage_endpoint, 'authentication_type'):
         # If we are now (or will be) using fsa=identity AND we've set a new identity
-        if default_storage_endpoint.authentication_type == AuthenticationType.IdentityBased and fileupload_storage_identity:
+        if default_storage_endpoint.authentication_type and default_storage_endpoint.authentication_type.lower() == AuthenticationType.IdentityBased.value and fileupload_storage_identity:
             # setup new fsi
             default_storage_endpoint.identity = ManagedIdentity(
                 user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity not in [IdentityType.none.value, SYSTEM_ASSIGNED_IDENTITY] else None
