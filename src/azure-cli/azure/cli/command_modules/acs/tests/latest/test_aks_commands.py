@@ -4763,3 +4763,38 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_node_public_ip(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        ipprefix_name = self.create_random_name('cliaksipprefix', 20)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'ipprefix_name': ipprefix_name
+        })
+
+        # create public ip prefix
+        ipprefix_id = self.cmd('az network public-ip prefix create -g {rg} -n {ipprefix_name} --location {location} --length 29'). \
+            get_output_in_json().get("id")
+
+        self.kwargs.update({
+            'ipprefix_id': ipprefix_id
+        })
+
+        # create
+        subscription_id = self.get_subscription_id()
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} --enable-node-public-ip --node-public-ip-prefix {ipprefix_id}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].enableNodePublicIp', True),
+            self.check('agentPoolProfiles[0].nodePublicIpPrefixId', "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/publicIPPrefixes/{}".format(subscription_id, resource_group, ipprefix_name))
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
