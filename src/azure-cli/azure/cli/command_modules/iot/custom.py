@@ -425,11 +425,12 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         raise RequiredArgumentMissingError('Please mention storage container name.')
     if fileupload_storage_container_name and not fileupload_storage_connectionstring:
         raise RequiredArgumentMissingError('Please mention storage connection string.')
-    identity_based_file_upload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
+    identity_based_file_upload = fileupload_storage_authentication_type and fileupload_storage_authentication_type == AuthenticationType.IdentityBased.value
     if not identity_based_file_upload and fileupload_storage_identity:
         raise RequiredArgumentMissingError('In order to set a fileupload storage identity, please set file upload storage authentication (--fsa) to IdentityBased')
     if identity_based_file_upload or fileupload_storage_identity:
-        if fileupload_storage_identity == SYSTEM_ASSIGNED_IDENTITY and not system_identity:
+        # Not explicitly setting fileupload_storage_identity assumes system-assigned managed identity for file upload
+        if fileupload_storage_identity in [None, SYSTEM_ASSIGNED_IDENTITY] and not system_identity:
             raise ArgumentUsageError('System managed identity [--mi-system-assigned] must be enabled in order to use managed identity for file upload')
         if fileupload_storage_identity and fileupload_storage_identity != SYSTEM_ASSIGNED_IDENTITY and not user_identities:
             raise ArgumentUsageError('User identity [--mi-user-assigned] must be added in order to use it for file upload')
@@ -565,7 +566,7 @@ def update_iot_hub_custom(instance,
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
     # if setting a fileupload storage identity or changing fileupload to identity-based
-    if fileupload_storage_identity or (fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value):
+    if fileupload_storage_identity or fileupload_storage_authentication_type == AuthenticationType.IdentityBased.value:
         instance_identity = _get_hub_identity_type(instance)
 
         # if hub has no identity
@@ -576,7 +577,7 @@ def update_iot_hub_custom(instance,
         has_user_identity = instance_identity in [IdentityType.user_assigned.value, IdentityType.system_assigned_user_assigned.value]
 
         # if changing storage identity to '[system]'
-        if fileupload_storage_identity == SYSTEM_ASSIGNED_IDENTITY:
+        if fileupload_storage_identity in [None, SYSTEM_ASSIGNED_IDENTITY]:
             if not has_system_identity:
                 raise ArgumentUsageError('System managed identity must be enabled in order to use managed identity for file upload')
         # if changing to user identity and hub has no user identities
@@ -837,7 +838,7 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 
 
 def validate_authentication_type_input(endpoint_type, connection_string=None, authentication_type=None, endpoint_uri=None, entity_path=None):
-    is_keyBased = (AuthenticationType.KeyBased.value == authentication_type.lower()) or (authentication_type is None)
+    is_keyBased = (AuthenticationType.KeyBased.value == authentication_type) or (authentication_type is None)
     has_connection_string = (connection_string is not None)
     if is_keyBased and not has_connection_string:
         raise CLIError("Please provide a connection string '--connection-string/-c'")
@@ -859,7 +860,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                                     identity=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
-    if identity and authentication_type.lower() != AuthenticationType.IdentityBased.value:
+    if identity and authentication_type != AuthenticationType.IdentityBased.value:
         raise ArgumentUsageError("In order to use an identity for authentication, you must select --auth-type as 'identityBased'")
 
     if EndpointType.EventHub.value == endpoint_type.lower():
@@ -1310,11 +1311,11 @@ def _process_fileupload_args(
         fileupload_storage_identity=None,
 ):
     from datetime import timedelta
-    if fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value:
+    if fileupload_storage_authentication_type and fileupload_storage_authentication_type == AuthenticationType.IdentityBased.value:
         default_storage_endpoint.authentication_type = AuthenticationType.IdentityBased.value
         if fileupload_storage_container_uri:
             default_storage_endpoint.container_uri = fileupload_storage_container_uri
-    elif fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.KeyBased.value:
+    elif fileupload_storage_authentication_type and fileupload_storage_authentication_type == AuthenticationType.KeyBased.value:
         default_storage_endpoint.authentication_type = AuthenticationType.KeyBased.value
         default_storage_endpoint.identity = None
     elif fileupload_storage_authentication_type is not None:
@@ -1334,7 +1335,7 @@ def _process_fileupload_args(
     # Fix for identity/authentication-type params missing on hybrid profile api
     if hasattr(default_storage_endpoint, 'authentication_type'):
         # If we are now (or will be) using fsa=identity AND we've set a new identity
-        if default_storage_endpoint.authentication_type and default_storage_endpoint.authentication_type.lower() == AuthenticationType.IdentityBased.value and fileupload_storage_identity:
+        if default_storage_endpoint.authentication_type == AuthenticationType.IdentityBased.value and fileupload_storage_identity:
             # setup new fsi
             default_storage_endpoint.identity = ManagedIdentity(
                 user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity not in [IdentityType.none.value, SYSTEM_ASSIGNED_IDENTITY] else None
