@@ -4781,7 +4781,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
-    @record_only
+    # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
     def test_sql_mi_aad_admin(self):
         print('Test is started...\n')
 
@@ -4829,7 +4829,7 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
 
 
 class SqlManagedInstanceAzureADOnlyAuthenticationsScenarioTest(ScenarioTest):
-    @record_only
+    # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
     def test_sql_mi_ad_only_auth(self):
         print('Test is started...\n')
 
