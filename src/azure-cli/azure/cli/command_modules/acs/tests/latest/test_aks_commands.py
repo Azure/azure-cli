@@ -4737,3 +4737,29 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_loadbalancer(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} --load-balancer-sku=standard ' \
+                     '--load-balancer-managed-outbound-ip-count 2 --load-balancer-outbound-ports 2048 ' \
+                     '--load-balancer-idle-timeout 5'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 2048),
+            self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 5),
+            self.check('networkProfile.loadBalancerProfile.effectiveOutboundIPs | length(@) == `2`', True)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
