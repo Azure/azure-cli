@@ -250,7 +250,7 @@ def remove_identity(client, resource_group_name, vault_name, system_assigned=Non
             if element in user_assigned:
                 remove_count_of_userMSI += 1
             totaluserMSI += 1
-        if len(user_assigned) == 0:
+        if not user_assigned:
             remove_count_of_userMSI = totaluserMSI
         for userMSI in user_assigned:
             user_assigned_identity[userMSI] = userid
@@ -829,8 +829,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
 
     if disk_encryption_set_id is not None:
         if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
-                recovery_point.properties.is_managed_virtual_machine and
-                not(recovery_point.properties.is_source_vm_encrypted) and use_secondary_region is None):
+               recovery_point.properties.is_managed_virtual_machine and
+               not(recovery_point.properties.is_source_vm_encrypted) and use_secondary_region is None):
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
 
     identity_info = None
@@ -838,9 +838,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
         if not recovery_point.properties.is_managed_virtual_machine:
             raise InvalidArgumentValueError("--require-msi-for-restore flag is not supported for unmanaged VMs.")
         identity_info = IdentityInfo(
-            is_system_assigned_identity=True if use_system_assigned_msi is not None else False,
-            managed_identity_resource_id=identity_id
-            )
+            is_system_assigned_identity=use_system_assigned_msi is not None,
+            managed_identity_resource_id=identity_id)
 
     if tier == 'VaultArchive':
         rehyd_duration = 'P' + str(rehydration_duration) + 'D'
@@ -968,11 +967,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     if use_secondary_region:
-        if target_rg_id is None:
-            raise RequiredArgumentMissingError("Please provide target resource group using --target-resource-group.")
-
-        if rehydration_priority is not None:
-            raise MutuallyExclusiveArgumentError("Archive restore isn't supported for secondary region.")
+        _validate_crr(target_rg_id, rehydration_priority)
 
         azure_region = secondary_region_map[vault_location]
         aad_client = aad_properties_cf(cmd.cli_ctx)
@@ -1376,12 +1371,20 @@ def _validate_msi_used_for_restore_disks(vault_identity, use_system_assigned_msi
             raise ArgumentUsageError("Please ensure that System MSI is enabled for the vault")
     if identity_id:
         if vault_identity.type is not None and "userassigned" in vault_identity.type.lower():
-            if not (identity_id.lower() in (id.lower() for id in vault_identity.user_assigned_identities.keys())):
+            if identity_id.lower() not in (id.lower() for id in vault_identity.user_assigned_identities.keys()):
                 raise ArgumentUsageError("""
                 Vault does not have the specified User MSI. Please ensure you've provided the correct --identity-id.
                 """)
         else:
             raise ArgumentUsageError("Please ensure that User MSI is enabled for the vault")
+
+
+def _validate_crr(target_rg_id, rehydration_priority):
+    if target_rg_id is None:
+        raise RequiredArgumentMissingError("Please provide target resource group using --target-resource-group.")
+
+    if rehydration_priority is not None:
+        raise MutuallyExclusiveArgumentError("Archive restore isn't supported for secondary region.")
 
 
 # Tracking Utilities

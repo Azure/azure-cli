@@ -48,57 +48,61 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # Each test will enable backup at the start and disable backup at the end of the test
     # Make sure that the backup is not already enabled since the start of the test
 
+    # For the tests using PSTestVM664243 and hiagaSrcVault -
+    # Each test will register the container at the start and unregister at the end of the test
+    # Make sure that the container is not already registered since the start of the test
+
     # Note: Archive test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
-    #@record_only()
-    #def test_backup_wl_sql_container(self):
+    @record_only()
+    def test_backup_wl_sql_container(self):
 
-    #    self.kwargs.update({
-    #        'vault': vault_sql,
-    #        'name': container_sql,
-    #        'fname': container_friendly_sql,
-    #        'rg': rg_sql,
-    #        'wt': 'MSSQL',
-    #        'sub': sub_sql,
-    #        'id': id_sql
-    #    })
+        self.kwargs.update({
+            'vault': "hiagaSrcVault",
+            'name': "VMAppContainer;Compute;hiagaSrcRG2;PSTestVM664243",
+            'fname': "PSTestVM664243",
+            'rg': "hiagaSrcRG",
+            'wt': 'MSSQL',
+            'sub': sub_sql,
+            'id': "/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/HIAGASRCRG2/providers/Microsoft.Compute/virtualMachines/PSTestVM664243"
+        })
 
-    #    self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id} ')
+        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id} ')
 
-    #    self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-    #        self.check("length([?name == '{name}'])", 1)])
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+            self.check("length([?name == '{name}'])", 1)])
 
-    #    container_json = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-    #        self.check('properties.friendlyName', '{fname}'),
-    #        self.check('properties.healthStatus', 'Healthy'),
-    #        self.check('properties.registrationStatus', 'Registered'),
-    #        self.check('resourceGroup', '{rg}')
-    #    ]).get_output_in_json()
+        container_json = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+            self.check('properties.friendlyName', '{fname}'),
+            self.check('properties.healthStatus', 'Healthy'),
+            self.check('properties.registrationStatus', 'Registered'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
 
-    #    self.kwargs['container_name'] = container_json['name']
+        self.kwargs['container_name'] = container_json['name']
 
-    #    self.cmd('backup container show -n {container_name} -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-    #        self.check('properties.friendlyName', '{fname}'),
-    #        self.check('properties.healthStatus', 'Healthy'),
-    #        self.check('properties.registrationStatus', 'Registered'),
-    #        self.check('name', '{container_name}'),
-    #        self.check('resourceGroup', '{rg}')
-    #    ]).get_output_in_json()
+        self.cmd('backup container show -n {container_name} -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+            self.check('properties.friendlyName', '{fname}'),
+            self.check('properties.healthStatus', 'Healthy'),
+            self.check('properties.registrationStatus', 'Registered'),
+            self.check('name', '{container_name}'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
 
-    #    self.assertIn(vault_sql.lower(), container_json['id'].lower())
-    #    self.assertIn(container_sql.lower(), container_json['name'].lower())
+        self.assertIn(self.kwargs['vault'].lower(), container_json['id'].lower())
+        self.assertIn(self.kwargs['name'].lower(), container_json['name'].lower())
 
-    #    self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-    #        self.check("length([?properties.friendlyName == '{fname}'])", 1)])
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+            self.check("length([?properties.friendlyName == '{fname}'])", 1)])
 
-    #    self.cmd('backup container re-register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} -y --container-name {name}')
+        self.cmd('backup container re-register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} -y --container-name {name}')
 
-    #    self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-    #        self.check("length([?name == '{name}'])", 1)])
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+            self.check("length([?name == '{name}'])", 1)])
 
-    #    self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-    #    self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-    #        self.check("length([?name == '{name}'])", 0)])
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+            self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_sql_policy(self):

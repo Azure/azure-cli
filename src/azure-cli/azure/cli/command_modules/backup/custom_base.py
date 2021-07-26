@@ -388,30 +388,26 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
 
-    if (require_msi_for_restore):
+    if require_msi_for_restore:
         if ((use_system_assigned_msi is None and use_user_assigned_msi is None) or
-            (use_system_assigned_msi is not None and use_user_assigned_msi is not None)):
+                (use_system_assigned_msi is not None and use_user_assigned_msi is not None)):
             raise RequiredArgumentMissingError(
                 """
                 Please provide either the --use-system-assigned-msi flag or the --use-user-assigned-msi flag.
-                """
-                )
+                """)
     else:
         if (use_system_assigned_msi or use_user_assigned_msi):
             raise RequiredArgumentMissingError(
                 """
                 Please provide the --require-msi-for-restore flag.
-                """
-                )
+                """)
 
     if ((use_user_assigned_msi is None and identity_id is not None) or
-        (use_user_assigned_msi is not None and identity_id is None)):
+            (use_user_assigned_msi is not None and identity_id is None)):
         raise RequiredArgumentMissingError(
             """
             Either --use-user-assigned-msi or --identity-id is missing.
-            """
-            )
-
+            """)
 
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
                                 storage_account, target_resource_group, restore_to_staging_storage_account,

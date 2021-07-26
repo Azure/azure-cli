@@ -598,7 +598,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
         if rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive':
             # normal rehydrated restore
-            trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority)
+            trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time,
+                                                                       rehydration_priority)
 
             rehyd_duration = 'P' + str(rehydration_duration) + 'D'
             rehydration_info = RecoveryPointRehydrationInfo(rehydration_retention_duration=rehyd_duration,
