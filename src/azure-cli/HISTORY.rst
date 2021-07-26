@@ -20,6 +20,10 @@ Release History
 * Hotfix: `az storage fs directory download`: Fix the issue with `--sas-token` to generate valid sas url (#18811)
 * Hotfix: `az storage blob copy start`: Fix the issue in copy from different account (#18730)
 
+**Redis**
+
+*Add param `--redis-version` to `az redis create` and `az redis update` commands
+
 2.26.0
 ++++++
 
