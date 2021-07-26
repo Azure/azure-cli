@@ -1,345 +1,7 @@
 interactions:
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/capabilities?include=supportedManagedInstanceVersions&api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"West Europe","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","sku":"GP_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
-        is available in multi-az regions"}],"zoneRedundant":false,"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen5","sku":"BC_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestEurope_MI_1","status":"Available"},{"name":"SQL_WestEurope_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
-        is available in multi-az regions"}],"zoneRedundant":false,"status":"Available"}],"supportedInstancePoolEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen5_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen5_16","value":16,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_24","value":24,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_32","value":32,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_40","value":40,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_64","value":64,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_80","value":80,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"}],"status":"Default"}],"status":"Default"}],"status":"Default"}],"status":"Available"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '10991'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 19 Jul 2021 01:49:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westeurope", "tags": {}, "sku": {"name": "GP_Gen5"}, "properties":
-      {"administratorLogin": "admin123", "administratorLoginPassword": "SecretPassword123SecretPassword",
-      "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance",
-      "licenseType": "LicenseIncluded", "vCores": 8, "storageSizeInGB": 32, "collation":
-      "Serbian_Cyrillic_100_CS_AS", "publicDataEndpointEnabled": true, "proxyOverride":
-      "Proxy", "administrators": {}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '596'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"identity":{"type":"None"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"SystemDefault","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '834'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 19 Jul 2021 01:49:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1330'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 19 Jul 2021 01:50:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1330'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 19 Jul 2021 01:50:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1330'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 19 Jul 2021 01:51:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1330'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 19 Jul 2021 01:51:40 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.af68df860586.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"af68df860586","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"westeurope","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1328'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 19 Jul 2021 01:52:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"administratorType": "ActiveDirectory", "login": "DSEngAll",
-      "sid": "5e90ef3b-9b42-4777-819b-25c36961ea4d", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}}'
+    body: '{"properties": {"administratorType": "ActiveDirectory", "login": "dmitar@aadsqlmi.net",
+      "sid": "03db4d3a-a1d3-42d1-8055-2452646dbc2a", "tenantId": "3312f4d4-a202-41eb-a696-5b3bc1c7ac36"}}'
     headers:
       Accept:
       - application/json
@@ -350,33 +12,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '176'
+      - '187'
       Content-Type:
       - application/json
       ParameterSetName:
       - --mi -g -i -u
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001/administrators/ActiveDirectory?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"CreateActiveDirectoryAdministrator","startTime":"2021-07-19T01:52:12.7Z"}'
+      string: '{"operation":"UpdateActiveDirectoryAdministrator","startTime":"2021-07-26T06:10:45.297Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/72f43caf-a1d1-42a6-a334-4a2642acb6d0?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/2de9518b-19ed-41f2-a369-b1b48fb9190a?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '87'
+      - '89'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 19 Jul 2021 01:52:12 GMT
+      - Mon, 26 Jul 2021 06:10:45 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/administratorOperationResults/72f43caf-a1d1-42a6-a334-4a2642acb6d0?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorOperationResults/2de9518b-19ed-41f2-a369-b1b48fb9190a?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -404,24 +66,21 @@ interactions:
       ParameterSetName:
       - --mi -g -i -u
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/72f43caf-a1d1-42a6-a334-4a2642acb6d0?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/2de9518b-19ed-41f2-a369-b1b48fb9190a?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"72f43caf-a1d1-42a6-a334-4a2642acb6d0","status":"Failed","startTime":"2021-07-19T01:52:12.7Z","error":{"code":"ServicePrincipalLookupInAadFailed","message":"The
-        requested principal could not be resolved. Please check if managed identity
-        was assigned to Managed Instance during creation and ''Directory Readers''
-        role granted to identity."}}'
+      string: '{"name":"2de9518b-19ed-41f2-a369-b1b48fb9190a","status":"Succeeded","startTime":"2021-07-26T06:10:45.297Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '346'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 19 Jul 2021 01:52:28 GMT
+      - Mon, 26 Jul 2021 06:11:01 GMT
       expires:
       - '-1'
       pragma:
@@ -447,35 +106,272 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - sql mi delete
+      - sql mi ad-admin create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -i -u
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"administratorType":"ActiveDirectory","login":"dmitar@aadsqlmi.net","sid":"03db4d3a-a1d3-42d1-8055-2452646dbc2a","tenantId":"3312f4d4-a202-41eb-a696-5b3bc1c7ac36"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/managedInstances/administrators"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '442'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"administratorType":"ActiveDirectory","login":"dmitar@aadsqlmi.net","sid":"03db4d3a-a1d3-42d1-8055-2452646dbc2a","tenantId":"3312f4d4-a202-41eb-a696-5b3bc1c7ac36"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/managedInstances/administrators"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"administratorType": "ActiveDirectory", "login": "srdan@aadsqlmi.onmicrosoft.com",
+      "sid": "23716ccd-3bf5-4934-9773-20ce34909e2e", "tenantId": "3312f4d4-a202-41eb-a696-5b3bc1c7ac36"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '198'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --mi -g -u -i
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"operation":"UpdateActiveDirectoryAdministrator","startTime":"2021-07-26T06:11:02.717Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/0b7dd855-e6fe-4b94-8f71-ad8c47b8a87c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '89'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:02 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorOperationResults/0b7dd855-e6fe-4b94-8f71-ad8c47b8a87c?api-version=2020-11-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -u -i
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/0b7dd855-e6fe-4b94-8f71-ad8c47b8a87c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"0b7dd855-e6fe-4b94-8f71-ad8c47b8a87c","status":"Succeeded","startTime":"2021-07-26T06:11:02.717Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -u -i
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"administratorType":"ActiveDirectory","login":"srdan@aadsqlmi.onmicrosoft.com","sid":"23716ccd-3bf5-4934-9773-20ce34909e2e","tenantId":"3312f4d4-a202-41eb-a696-5b3bc1c7ac36"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/managedInstances/administrators"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '453'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin delete
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       ParameterSetName:
-      - -g -n --yes --no-wait
+      - --mi -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"operation":"DropManagedServer","startTime":"2021-07-19T01:52:29.59Z"}'
+      string: '{"operation":"DropActiveDirectoryAdministrator","startTime":"2021-07-26T06:11:19.11Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedInstanceAzureAsyncOperation/79a6eaae-10ea-4f9e-988e-0fb595fe5997?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/6c3ac037-f3cd-4e34-bcc5-e9084487ce88?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '71'
+      - '86'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 19 Jul 2021 01:52:29 GMT
+      - Mon, 26 Jul 2021 06:11:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Sql/locations/westeurope/managedInstanceOperationResults/79a6eaae-10ea-4f9e-988e-0fb595fe5997?api-version=2020-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorOperationResults/6c3ac037-f3cd-4e34-bcc5-e9084487ce88?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -489,4 +385,96 @@ interactions:
     status:
       code: 202
       message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/6c3ac037-f3cd-4e34-bcc5-e9084487ce88?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"6c3ac037-f3cd-4e34-bcc5-e9084487ce88","status":"Succeeded","startTime":"2021-07-26T06:11:19.11Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

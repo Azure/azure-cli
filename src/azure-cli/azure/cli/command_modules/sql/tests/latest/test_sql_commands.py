@@ -1153,31 +1153,6 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
         self.cmd('sql server ad-only-auth get -n {} -g {}'.format(server, resource_group), checks=[])
 
 
-class SqlManagedInstanceAzureADOnlyAuthenticationsScenarioTest(ScenarioTest):
-    @ManagedInstancePreparer()
-    def test_sql_mi_ad_only_auth(self, mi, rg):
-        self.skipTest("Skipping based on discussion with MI AAD team.")
-        print('Test is started...\n')
-
-        self.kwargs.update({
-            'oid': '0ef94dba-c9bc-40d3-9ec2-6db192f3ce0c',
-            'user': 'OneboxAuthUser1@cltestaad.ccsctp.net',
-            'managed_instance_name': mi,
-            'rg': rg
-        })
-
-        print('Arguments are updated with login and sid data')
-
-        self.cmd('sql mi ad-admin create --mi {managed_instance_name} -g {rg} -i {oid} -u {user}',
-                 checks=[
-                     self.check('login', '{user}'),
-                     self.check('sid', '{oid}')])
-
-        self.cmd('sql mi ad-only-auth enable -n {managed_instance_name} -g {rg}', checks=[])
-        self.cmd('sql mi ad-only-auth disable -n {managed_instance_name} -g {rg}', checks=[])
-        self.cmd('sql mi ad-only-auth get -n {managed_instance_name} -g {rg}', checks=[])
-
-
 class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
@@ -4806,18 +4781,17 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
-    @ManagedInstancePreparer()
-    def test_sql_mi_aad_admin(self, mi, rg):
-        self.skipTest("Skipping based on discussion with MI AAD team.")
+    @record_only
+    def test_sql_mi_aad_admin(self):
         print('Test is started...\n')
 
         self.kwargs.update({
-            'oid': '0ef94dba-c9bc-40d3-9ec2-6db192f3ce0c',
-            'oid2': 'b599ec4b-9e8e-4649-906f-d2685a6105fa',
-            'user': 'OneboxAuthUser1@cltestaad.ccsctp.net',
-            'user2': 'OneboxAuthUser2@cltestaad.ccsctp.net',
-            'managed_instance_name': mi,
-            'rg': rg
+            'oid': '03db4d3a-a1d3-42d1-8055-2452646dbc2a',
+            'oid2': '23716ccd-3bf5-4934-9773-20ce34909e2e',
+            'user': 'dmitar@aadsqlmi.net',
+            'user2': 'srdan@aadsqlmi.onmicrosoft.com',
+            'managed_instance_name': "migrantpermissionstest",
+            'rg': "srbozovi_test"
         })
 
         print('Arguments are updated with login and sid data')
@@ -4852,6 +4826,30 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
                      self.check('login', None)])
 
         print('Test is finished...\n')
+
+
+class SqlManagedInstanceAzureADOnlyAuthenticationsScenarioTest(ScenarioTest):
+    @record_only
+    def test_sql_mi_ad_only_auth(self):
+        print('Test is started...\n')
+
+        self.kwargs.update({
+            'oid': '03db4d3a-a1d3-42d1-8055-2452646dbc2a',
+            'user': 'dmitar@aadsqlmi.net',
+            'managed_instance_name': "migrantpermissionstest",
+            'rg': "srbozovi_test"
+        })
+
+        print('Arguments are updated with login and sid data')
+
+        self.cmd('sql mi ad-admin create --mi {managed_instance_name} -g {rg} -i {oid} -u {user}',
+                 checks=[
+                     self.check('login', '{user}'),
+                     self.check('sid', '{oid}')])
+
+        self.cmd('sql mi ad-only-auth enable -n {managed_instance_name} -g {rg}', checks=[])
+        self.cmd('sql mi ad-only-auth disable -n {managed_instance_name} -g {rg}', checks=[])
+        self.cmd('sql mi ad-only-auth get -n {managed_instance_name} -g {rg}', checks=[])
 
 
 class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
