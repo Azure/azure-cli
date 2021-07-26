@@ -1366,6 +1366,8 @@ def _validate_restore_disk_parameters(restore_only_osdisk, diskslist):
 
 
 def _validate_msi_used_for_restore_disks(vault_identity, use_system_assigned_msi, identity_id):
+    if vault_identity is None:
+        raise ArgumentUsageError("Please ensure that Selected MSI is enabled for the vault")
     if use_system_assigned_msi:
         if vault_identity.type is None or "systemassigned" not in vault_identity.type.lower():
             raise ArgumentUsageError("Please ensure that System MSI is enabled for the vault")
