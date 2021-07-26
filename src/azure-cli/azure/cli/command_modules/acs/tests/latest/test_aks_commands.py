@@ -94,6 +94,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         tags = "key1=value1"
         nodepool_labels = "label1=value1 label2=value2"
+        nodepool_tags = "tag1=tv1 tag2=tv2"
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -104,6 +105,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'client_secret': sp_password,
             'tags': tags,
             'nodepool_labels': nodepool_labels,
+            'nodepool_tags': nodepool_tags,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
 
@@ -111,7 +113,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
                      '--service-principal={service_principal} --client-secret={client_secret} --tags {tags} ' \
-                     '--nodepool-labels {nodepool_labels}'
+                     '--nodepool-labels {nodepool_labels} --nodepool-tags {nodepool_tags} ' \
+                     '--max-pods=100 --enable-rbac --admin-username=adminuser'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -141,9 +144,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].maxPods', 100),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('agentPoolProfiles[0].nodeLabels.label1', 'value1'),
             self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
+            self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
+            self.check('agentPoolProfiles[0].tags.tag2', 'tv2'),
+            self.check('linuxProfile.adminUsername', 'adminuser'),
+            self.check('enableRbac', True),
             self.exists('kubernetesVersion')
         ])
 
