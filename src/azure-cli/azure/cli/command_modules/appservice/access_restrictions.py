@@ -117,7 +117,8 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
                 break
         elif subnet:
             subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
-            if rule.vnet_subnet_resource_id.lower() == subnet_id.lower() and rule.action == action:
+            if (rule.vnet_subnet_resource_id and rule.vnet_subnet_resource_id.lower() == subnet_id.lower()
+                    and rule.action == action):
                 if rule_name and (not rule.name or (rule.name and rule.name.lower() != rule_name.lower())):
                     continue
                 rule_instance = rule
