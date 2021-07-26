@@ -154,7 +154,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                private_link_primary=None,
                                trusted_client_cert=None,
                                ssl_profile=None,
-                               ssl_profile_id=None):
+                               ssl_profile_id=None,
+                               ssl_cert_name=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -226,7 +227,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         firewall_policy, max_capacity, user_assigned_identity,
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
-        private_link_subnet_id, trusted_client_cert, ssl_profile, ssl_profile_id)
+        private_link_subnet_id, trusted_client_cert, ssl_profile, ssl_profile_id, ssl_cert_name)
 
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(

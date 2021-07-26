@@ -3,6 +3,23 @@
 Release History
 ===============
 
+2.26.1
+++++++
+
+**ACR**
+
+* Hotfix: `az acr build\connected-registry\pack\run\scope-map`: Fix the compatibility bug caused by SDK upgrade (#18853)
+
+**AKS**
+
+* Hotfix: `az aks create`: Fix the issue that `assign-kubelet-identity` option can't work (#18795)
+
+**Storage**
+
+* Hotfix: Fix issue caused by jwt upgrade. (#18811)
+* Hotfix: `az storage fs directory download`: Fix the issue with `--sas-token` to generate valid sas url (#18811)
+* Hotfix: `az storage blob copy start`: Fix the issue in copy from different account (#18730)
+
 2.26.0
 ++++++
 
