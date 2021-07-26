@@ -262,7 +262,6 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, lo
 
         parameters = mysql_flexibleservers.models.Server(
             location=location,
-            point_in_time_utc=restore_point_in_time,
             source_server_resource_id=source_server_id,
             create_mode="GeoRestore"
         )

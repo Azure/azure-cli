@@ -30,7 +30,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         'postgres': get_resource_name_completion_list('Microsoft.DBforPostgreSQL/servers')
     }
 
-    def _complex_params(command_group):
+    def _complex_params(command_group):  # pylint: disable=too-many-statements
         server_name_help = "Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. " + \
                            "Minimum 3 characters and maximum 63 characters."
         server_name_scope = ['{}'.format(command_group)]
