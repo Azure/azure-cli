@@ -437,7 +437,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
     with self.argument_context('acr connected-registry install') as c:
-        c.argument('parent_protocol', options_list=['--parent-protocol'], help='Required parameter to specify the parent protocol. Should be either "http" or "https".', required=True)
+        c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Required parameter to specify the parent protocol.', required=True)
 
 
 def _get_helm_default_install_location():
