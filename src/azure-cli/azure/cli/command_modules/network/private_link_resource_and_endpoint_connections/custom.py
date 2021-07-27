@@ -47,7 +47,7 @@ def register_providers():
     _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
     _register_one_provider('Microsoft.Sql/servers', '2018-06-01-preview', True)
     _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', True)
-    # "Microsoft.StorageSync/storageSyncServices", "2020-03-01", True
+    _register_one_provider("Microsoft.StorageSync/storageSyncServices", "2020-03-01", True)
     _register_one_provider("Microsoft.Synapse/workspaces", "2019-06-01-preview", True)
     _register_one_provider('Microsoft.Web/sites', '2019-08-01', False)
     # "Microsoft.Web/hostingEnvironments", "2020-10-01", True

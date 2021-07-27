@@ -2003,6 +2003,18 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, approve=False, rejected=False)
 
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_storage_sync")
+    def test_private_endpoint_connection_storage_sync(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'storagesync',
+            'list_num': 1,
+            'type': 'Microsoft.StorageSync/storageSyncServices',
+            'extra_create': '-l eastus'
+        })
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
 
 if __name__ == '__main__':
     unittest.main()
