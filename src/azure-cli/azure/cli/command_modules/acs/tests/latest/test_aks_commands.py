@@ -2496,15 +2496,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # create aks cluster
         create_cmd = 'aks create --resource-group={resource_group} --name={aks_name} --enable-managed-identity --generate-ssh-keys ' \
-                     '--vnet-subnet-id {vnet_id}/subnets/aks-subnet ' \
-                     '-a ingress-appgw --appgw-name gateway --appgw-subnet-id {vnet_id}/subnets/appgw-subnet --yes -o json'
+                     '--vnet-subnet-id {vnet_id}/subnets/aks-subnet -a ingress-appgw ' \
+                     '--appgw-name gateway --appgw-subnet-id {vnet_id}/subnets/appgw-subnet ' \
+                     '--appgw-watch-namespace=kube-system --yes -o json'
         aks_cluster = self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.ingressApplicationGateway.enabled', True),
             self.check(
                 'addonProfiles.ingressApplicationGateway.config.applicationGatewayName', "gateway"),
             self.check('addonProfiles.ingressApplicationGateway.config.subnetId',
-                       vnet_id + '/subnets/appgw-subnet')
+                       vnet_id + '/subnets/appgw-subnet'),
+            self.check('addonProfiles.ingressApplicationGateway.config.watchNamespace', 'kube-system')
         ]).get_output_in_json()
 
         addon_client_id = aks_cluster["addonProfiles"]["ingressApplicationGateway"]["identity"]["clientId"]
