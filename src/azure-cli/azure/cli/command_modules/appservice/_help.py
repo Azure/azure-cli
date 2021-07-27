@@ -692,7 +692,7 @@ short-summary: methods that list, add and remove hybrid-connections from functio
 
 helps['functionapp hybrid-connection add'] = """
 type: command
-short-summary: add a hybrid-connection to a functionapp
+short-summary: add an existing hybrid-connection to a functionapp
 examples:
   - name: add a hybrid-connection to a functionapp
     text: az functionapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
@@ -1751,7 +1751,7 @@ short-summary: methods that list, add and remove hybrid-connections from webapps
 
 helps['webapp hybrid-connection add'] = """
 type: command
-short-summary: add a hybrid-connection to a webapp
+short-summary: add an existing hybrid-connection to a webapp
 examples:
   - name: add a hybrid-connection to a webapp
     text: az webapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
