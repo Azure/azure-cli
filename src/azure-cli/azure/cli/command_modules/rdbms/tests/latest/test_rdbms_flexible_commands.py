@@ -30,6 +30,8 @@ from ..._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operati
 from ...flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network, DEFAULT_VNET_ADDRESS_PREFIX, DEFAULT_SUBNET_ADDRESS_PREFIX
 from ...flexible_server_custom_postgres import DbContext as PostgresDbContext
 from ...flexible_server_custom_mysql import DbContext as MysqlDbContext
+from ...flexible_server_custom_mysql import _determine_iops
+from ..._flexible_server_util import get_mysql_list_skus_info
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
@@ -66,183 +68,195 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
         return kwargs.get(self.resource_group_parameter_name)
 
 
-# class FlexibleServerMgmtScenarioTest(ScenarioTest):
+class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
-#     postgres_location = 'eastus2euap'
-#     mysql_location = 'eastus2euap'
+    postgres_location = 'eastus'
+    mysql_location = 'westus2'
 
-#     @AllowLargeResponse()
-#     @ResourceGroupPreparer(location=mysql_location)
-#     def test_mysql_flexible_server_iops_mgmt(self, resource_group):
-#         self._test_flexible_server_iops_mgmt('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_iops_mgmt(self, resource_group):
+        self._test_flexible_server_iops_mgmt('mysql', resource_group)
 
-#     @AllowLargeResponse()
-#     @ResourceGroupPreparer(location=postgres_location)
-#     def test_postgres_flexible_server_mgmt(self, resource_group):
-#         self._test_flexible_server_mgmt('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_mgmt('postgres', resource_group)
 
-#     @AllowLargeResponse()
-#     @ResourceGroupPreparer(location=mysql_location)
-#     def test_mysql_flexible_server_mgmt(self, resource_group):
-#         self._test_flexible_server_mgmt('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_mgmt('mysql', resource_group)
 
-#     def _test_flexible_server_mgmt(self, database_engine, resource_group):
+    def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
-#         if self.cli_ctx.local_context.is_on:
-#             self.cmd('local-context off')
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
 
-#         if database_engine == 'postgres':
-#             version = '12'
-#             storage_size = 128
-#             location = self.postgres_location
-#         elif database_engine == 'mysql':
-#             storage_size = 32
-#             version = '5.7'
-#             location = self.mysql_location
-#         tier = 'GeneralPurpose'
-#         sku_name = 'Standard_D2s_v3'
-#         location_result = 'East US 2 EUAP'
-#         backup_retention = 7
-#         database_name = 'testdb'
-#         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        if database_engine == 'postgres':
+            version = '12'
+            storage_size = 128
+            location = self.postgres_location
+            location_result = 'East US'
+            sku_name = 'Standard_D2s_v3'
+        elif database_engine == 'mysql':
+            storage_size = 32
+            version = '5.7'
+            location = self.mysql_location
+            location_result = 'West US 2'
+            sku_name = 'Standard_D2ds_v4'
+        tier = 'GeneralPurpose'        
+        backup_retention = 7
+        database_name = 'testdb'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
-#         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-#                   --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability Enabled \
-#                   --zone 1 --geo-redundant-backup Enabled --yes'.format(database_engine,
-#                   resource_group, server_name, backup_retention, sku_name, tier, storage_size, 'dbadmin', version, database_name))
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability Enabled \
+                  --zone 1 --public-access None'.format(database_engine,
+                  resource_group, server_name, backup_retention, sku_name, tier, storage_size, 'dbadmin', version, database_name))
 
-#         list_checks = [JMESPathCheck('name', server_name),
-#                         JMESPathCheck('location', location_result),  # location should be same as rg location
-#                         JMESPathCheck('resourceGroup', resource_group),
-#                         JMESPathCheck('sku.name', sku_name),
-#                         JMESPathCheck('sku.tier', tier),
-#                         JMESPathCheck('version', version),
-#                         JMESPathCheck('storage.storageSizeGb', storage_size),
-#                         JMESPathCheck('backup.backupRetentionDays', backup_retention)]
+        list_checks = [JMESPathCheck('name', server_name),
+                        JMESPathCheck('location', location_result),  # location should be same as rg location
+                        JMESPathCheck('resourceGroup', resource_group),
+                        JMESPathCheck('sku.name', sku_name),
+                        JMESPathCheck('sku.tier', tier),
+                        JMESPathCheck('version', version),
+                        JMESPathCheck('storage.storageSizeGb', storage_size),
+                        JMESPathCheck('backup.backupRetentionDays', backup_retention)]
 
-#         self.cmd('{} flexible-server show -g {} -n {}'
-#                  .format(database_engine, resource_group, server_name), checks=list_checks)
+        self.cmd('{} flexible-server show -g {} -n {}'
+                 .format(database_engine, resource_group, server_name), checks=list_checks)
 
-#         self.cmd('{} flexible-server db show -g {} -s {} -d {}'
-#                     .format(database_engine, resource_group, server_name, database_name), checks=[JMESPathCheck('name', database_name)])
+        self.cmd('{} flexible-server db show -g {} -s {} -d {}'
+                    .format(database_engine, resource_group, server_name, database_name), checks=[JMESPathCheck('name', database_name)])
 
-#         self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
-#                  .format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
+                 .format(database_engine, resource_group, server_name))
 
-#         self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
-#                  .format(database_engine, resource_group, server_name),
-#                  checks=[JMESPathCheck('storage.storageSizeGb', 256 )])
+        self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.storageSizeGb', 256 )])
 
-#         self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'
-#                  .format(database_engine, resource_group, server_name, backup_retention + 10),
-#                  checks=[JMESPathCheck('backup.backupRetentionDays', backup_retention + 10)])
+        self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'
+                 .format(database_engine, resource_group, server_name, backup_retention + 10),
+                 checks=[JMESPathCheck('backup.backupRetentionDays', backup_retention + 10)])
 
-#         if database_engine == 'postgres':
-#             tier = 'Burstable'
-#             sku_name = 'Standard_B1ms'
-#         elif database_engine == 'mysql':
-#             tier = 'GeneralPurpose'
-#             sku_name = 'Standard_D2s_v3'
+        if database_engine == 'postgres':
+            tier = 'Burstable'
+            sku_name = 'Standard_B1ms'
+        elif database_engine == 'mysql':
+            tier = 'MemoryOptimized'
+            sku_name = 'Standard_E2ds_v4'
+        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
+                 .format(database_engine, resource_group, server_name, tier, sku_name),
+                 checks=[JMESPathCheck('sku.tier', tier),
+                         JMESPathCheck('sku.name', sku_name)])
 
-#         self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
-#                  .format(database_engine, resource_group, server_name, tier, sku_name),
-#                  checks=[JMESPathCheck('sku.tier', tier),
-#                          JMESPathCheck('sku.name', sku_name)])
+        self.cmd('{} flexible-server update -g {} -n {} --tags keys=3'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('tags.keys', '3')])
 
-#         self.cmd('{} flexible-server update -g {} -n {} --tags key=3'
-#                  .format(database_engine, resource_group, server_name),
-#                  checks=[JMESPathCheck('tags.key', '3')])
+        self.cmd('{} flexible-server restart -g {} -n {}'
+                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+
+        self.cmd('{} flexible-server stop -g {} -n {}'
+                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+
+        self.cmd('{} flexible-server start -g {} -n {}'
+                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+
+        self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
+                 checks=[JMESPathCheck('type(@)', 'array')])
         
-#         if database_engine == 'mysql':
-#             self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'.format(
-#                 database_engine, resource_group, server_name),
-#                 expect_failure=True)
+        restore_server_name = 'restore-' + server_name
+        self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
+                 .format(database_engine, resource_group, restore_server_name, server_name),
+                 checks=[JMESPathCheck('name', restore_server_name)])
 
-#         self.cmd('{} flexible-server restart -g {} -n {}'
-#                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
+        connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
+                                     .format(database_engine, server_name)).get_output_in_json()
 
-#         self.cmd('{} flexible-server stop -g {} -n {}'
-#                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
+        self.assertIn('jdbc', connection_string['connectionStrings'])
+        self.assertIn('node.js', connection_string['connectionStrings'])
+        self.assertIn('php', connection_string['connectionStrings'])
+        self.assertIn('python', connection_string['connectionStrings'])
+        self.assertIn('ado.net', connection_string['connectionStrings'])
 
-#         self.cmd('{} flexible-server start -g {} -n {}'
-#                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
-
-#         self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
-#                  checks=[JMESPathCheck('type(@)', 'array')])
+        self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
+                 checks=[JMESPathCheck('type(@)', 'array')])
         
-#         restore_server_name = 'restore-' + server_name
-#         self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
-#                  .format(database_engine, resource_group, restore_server_name, server_name),
-#                  checks=[JMESPathCheck('name', restore_server_name)])
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
-#         connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
-#                                      .format(database_engine, server_name)).get_output_in_json()
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
 
-#         self.assertIn('jdbc', connection_string['connectionStrings'])
-#         self.assertIn('node.js', connection_string['connectionStrings'])
-#         self.assertIn('php', connection_string['connectionStrings'])
-#         self.assertIn('python', connection_string['connectionStrings'])
-#         self.assertIn('ado.net', connection_string['connectionStrings'])
+    def _test_flexible_server_iops_mgmt(self, database_engine, resource_group):
 
-#         self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
-#                  checks=[JMESPathCheck('type(@)', 'array')])
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
+
+        location = 'eastus2euap'
+        _, _, iops_info = get_mysql_list_skus_info(self, location)
+
+        # flexible-server create with user input
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        server_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
+        server_name_3 = self.create_random_name(SERVER_NAME_PREFIX + '3', SERVER_NAME_MAX_LENGTH)
+
+        # IOPS passed is within limit of max allowed by SKU but smaller than storage*3
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 200 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_name, location))
+
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                          checks=[JMESPathCheck('storage.iops', 400)]).get_output_in_json()
+
+        # SKU upgraded and IOPS value set smaller than free iops, max iops for the sku
+
+        iops = 400
+        iops_result = _determine_iops(storage_gb=result["storage"]["storageSizeGb"],
+                                      iops_info=iops_info,
+                                      iops_input=iops,
+                                      tier="Burstable",
+                                      sku_name="Standard_B1ms")
+        self.assertEqual(iops_result, 640)
+
+        # SKU downgraded and IOPS not specified
+        iops = result["storage"]["iops"]
+        iops_result = _determine_iops(storage_gb=result["storage"]["storageSizeGb"],
+                                      iops_info=iops_info,
+                                      iops_input=iops,
+                                      tier="Burstable",
+                                      sku_name="Standard_B1s")
+        self.assertEqual(iops_result, 400)
+
+        # IOPS passed is within limit of max allowed by SKU but smaller than default
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 30 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_name_2, location))
+
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
+                          checks=[JMESPathCheck('storage.iops', 390)]).get_output_in_json()
+
+        iops = 700
+        iops_result = _determine_iops(storage_gb=result["storage"]["storageSizeGb"],
+                                      iops_info=iops_info,
+                                      iops_input=iops,
+                                      tier="Burstable",
+                                      sku_name="Standard_B1ms")
+        self.assertEqual(iops_result, 640)
+
+        # IOPS passed is within limit of max allowed by SKU and bigger than default
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 40 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_name_3, location))
         
-#         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
-
-#         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
-
-#     def _test_flexible_server_iops_mgmt(self, database_engine, resource_group):
-
-#         if self.cli_ctx.local_context.is_on:
-#             self.cmd('local-context off')
-
-#         location = self.mysql_location
-
-#         # flexible-server create with user input
-#         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-#         server_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
-#         server_name_3 = self.create_random_name(SERVER_NAME_PREFIX + '3', SERVER_NAME_MAX_LENGTH)
-
-#         # IOPS passed is within limit of max allowed by SKU but smaller than storage*3
-#         self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 200 --tier Burstable --sku-name Standard_B1s'
-#                  .format(database_engine, resource_group, server_name, location))
-
-#         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-#                  checks=[JMESPathCheck('storage.iops', 320)])
-
-#         # SKU upgraded and IOPS value set smaller than free iops, max iops for the sku
-#         self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 400'
-#                  .format(database_engine, resource_group, server_name),
-#                  checks=[JMESPathCheck('storage.iops', 600)])
-
-#         # SKU downgraded and IOPS not specified
-#         self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1s'
-#                  .format(database_engine, resource_group, server_name),
-#                  checks=[JMESPathCheck('storage.iops', 320)])
-
-#         # IOPS passed is within limit of max allowed by SKU but smaller than default
-#         self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 30 --tier Burstable --sku-name Standard_B1s'
-#                  .format(database_engine, resource_group, server_name_2, location))
-
-#         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
-#                  checks=[JMESPathCheck('storage.iops', 100)])
-
-#         # SKU upgraded and IOPS value set bigger than max iops for the sku
-#         self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 700'
-#                  .format(database_engine, resource_group, server_name_2),
-#                  checks=[JMESPathCheck('storage.iops', 640)])
-
-#         # IOPS passed is within limit of max allowed by SKU and bigger than default
-#         self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 40 --tier Burstable --sku-name Standard_B1s'
-#                  .format(database_engine, resource_group, server_name_3, location))
-
-#         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_3),
-#                  checks=[JMESPathCheck('storage.iops', 120)])
-
-#         # SKU upgraded and IOPS value set lower than max iops for the sku but bigger than free iops
-#         self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --storage-size 300 --iops 500'
-#                  .format(database_engine, resource_group, server_name_3),
-#                  checks=[JMESPathCheck('storage.iops', 640)])
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_3),
+                 checks=[JMESPathCheck('storage.iops', 400)])
+        
+        iops = 500
+        iops_result = _determine_iops(storage_gb=300,
+                                      iops_info=iops_info,
+                                      iops_input=iops,
+                                      tier="Burstable",
+                                      sku_name="Standard_B1ms")
+        self.assertEqual(iops_result, 640)
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
@@ -250,13 +264,13 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus2euap'
     mysql_location = 'eastus2euap'
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # @ServerPreparer(engine_type='postgres', location=postgres_location)
-    # def test_postgres_flexible_server_proxy_resource(self, resource_group, server):
-    #     self._test_firewall_rule_mgmt('postgres', resource_group, server)
-    #     self._test_parameter_mgmt('postgres', resource_group, server)
-    #     self._test_database_mgmt('postgres', resource_group, server)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_proxy_resource(self, resource_group, server):
+        self._test_firewall_rule_mgmt('postgres', resource_group, server)
+        self._test_parameter_mgmt('postgres', resource_group, server)
+        self._test_database_mgmt('postgres', resource_group, server)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -514,95 +528,95 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name), checks=NoneCheck())
 
 
-# class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
+class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-#     mysql_location = 'eastus2euap'
+    mysql_location = 'eastus2euap'
 
-#     @ResourceGroupPreparer(location=mysql_location)
-#     def test_mysql_flexible_server_replica_mgmt(self, resource_group):
-#         self._test_flexible_server_replica_mgmt('mysql', resource_group)
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_replica_mgmt(self, resource_group):
+        self._test_flexible_server_replica_mgmt('mysql', resource_group)
 
-#     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group):
-#         location = self.mysql_location
-#         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-#         replicas = [self.create_random_name('azuredbclirep1', SERVER_NAME_MAX_LENGTH),
-#                     self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
+    def _test_flexible_server_replica_mgmt(self, database_engine, resource_group):
+        location = self.mysql_location
+        master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        replicas = [self.create_random_name('azuredbclirep1', SERVER_NAME_MAX_LENGTH),
+                    self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
 
-#         # create a server
-#         self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none'
-#                  .format(database_engine, resource_group, master_server, location, 256))
-#         result = self.cmd('{} flexible-server show -g {} --name {} '
-#                           .format(database_engine, resource_group, master_server),
-#                           checks=[JMESPathCheck('replicationRole', 'None')]).get_output_in_json()
-#         time.sleep(5 * 60)
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none'
+                 .format(database_engine, resource_group, master_server, location, 256))
+        result = self.cmd('{} flexible-server show -g {} --name {} '
+                          .format(database_engine, resource_group, master_server),
+                          checks=[JMESPathCheck('replicationRole', 'None')]).get_output_in_json()
+        time.sleep(5 * 60)
 
-#         # test replica create
-#         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
-#                  .format(database_engine, resource_group, replicas[0], result['id']),
-#                  checks=[
-#                      JMESPathCheck('name', replicas[0]),
-#                      JMESPathCheck('resourceGroup', resource_group),
-#                      JMESPathCheck('sku.tier', result['sku']['tier']),
-#                      JMESPathCheck('sku.name', result['sku']['name']),
-#                      JMESPathCheck('replicationRole', 'Replica'),
-#                      JMESPathCheck('sourceServerId', result['id']),
-#                      JMESPathCheck('replicaCapacity', '0')])
+        # test replica create
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                 .format(database_engine, resource_group, replicas[0], result['id']),
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.tier', result['sku']['tier']),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', 'Replica'),
+                     JMESPathCheck('sourceServerResourceId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
 
-#         # test replica list
-#         self.cmd('{} flexible-server replica list -g {} --name {}'
-#                  .format(database_engine, resource_group, master_server),
-#                  checks=[JMESPathCheck('length(@)', 1)])
+        # test replica list
+        self.cmd('{} flexible-server replica list -g {} --name {}'
+                 .format(database_engine, resource_group, master_server),
+                 checks=[JMESPathCheck('length(@)', 1)])
         
-#         # autogrow disable fail for replica server
-#         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'.format(
-#                  database_engine, resource_group, server_name),
-#                  expect_failure=True)
+        # autogrow disable fail for replica server
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'.format(
+                 database_engine, resource_group, master_server),
+                 expect_failure=True)
 
-#         # test replica stop
-#         self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
-#                  .format(database_engine, resource_group, replicas[0]),
-#                  checks=[
-#                      JMESPathCheck('name', replicas[0]),
-#                      JMESPathCheck('resourceGroup', resource_group),
-#                      JMESPathCheck('replicationRole', 'None'),
-#                      JMESPathCheck('sourceServerId', ''),
-#                      JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+        # test replica stop
+        self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
+                 .format(database_engine, resource_group, replicas[0]),
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('replicationRole', 'None'),
+                     JMESPathCheck('sourceServerResourceId', 'None'),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
-#         # test show server with replication info, master becomes normal server
-#         self.cmd('{} flexible-server show -g {} --name {}'
-#                  .format(database_engine, resource_group, master_server),
-#                  checks=[
-#                      JMESPathCheck('replicationRole', 'None'),
-#                      JMESPathCheck('sourceServerId', ''),
-#                      JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+        # test show server with replication info, master becomes normal server
+        self.cmd('{} flexible-server show -g {} --name {}'
+                 .format(database_engine, resource_group, master_server),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'None'),
+                     JMESPathCheck('sourceServerResourceId', 'None'),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
-#         # test delete master server
-#         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
-#                  .format(database_engine, resource_group, replicas[1], result['id']),
-#                  checks=[
-#                      JMESPathCheck('name', replicas[1]),
-#                      JMESPathCheck('resourceGroup', resource_group),
-#                      JMESPathCheck('sku.name', result['sku']['name']),
-#                      JMESPathCheck('replicationRole', 'Replica'),
-#                      JMESPathCheck('sourceServerId', result['id']),
-#                      JMESPathCheck('replicaCapacity', '0')])
+        # test delete master server
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                 .format(database_engine, resource_group, replicas[1], result['id']),
+                 checks=[
+                     JMESPathCheck('name', replicas[1]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', 'Replica'),
+                     JMESPathCheck('sourceServerResourceId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
 
-#         self.cmd('{} flexible-server delete -g {} --name {} --yes'
-#                  .format(database_engine, resource_group, master_server), checks=NoneCheck())
+        self.cmd('{} flexible-server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group, master_server), checks=NoneCheck())
 
-#         # test show server with replication info, replica was auto stopped after master server deleted
-#         self.cmd('{} flexible-server show -g {} --name {}'
-#                  .format(database_engine, resource_group, replicas[1]),
-#                  checks=[
-#                      JMESPathCheck('replicationRole', 'None'),
-#                      JMESPathCheck('sourceServerId', ''),
-#                      JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+        # test show server with replication info, replica was auto stopped after master server deleted
+        self.cmd('{} flexible-server show -g {} --name {}'
+                 .format(database_engine, resource_group, replicas[1]),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'None'),
+                     JMESPathCheck('sourceServerResourceId', 'None'),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
-#         # clean up servers
-#         self.cmd('{} flexible-server delete -g {} --name {} --yes'
-#                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
-#         self.cmd('{} flexible-server delete -g {} --name {} --yes'
-#                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
+        # clean up servers
+        self.cmd('{} flexible-server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
+        self.cmd('{} flexible-server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
 
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
@@ -622,43 +636,43 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('mysql', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
-    #     self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
+        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
-    #     self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
+        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
-    # @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_2')
-    # def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
-    #     self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_2')
+    def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
+        self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_1')
     @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_2')
     def test_mysql_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
         self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('mysql', resource_group_1, resource_group_2)
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_flexible_server_vnet_mgmt_prepare_private_network_vname_and_subnetname(self, resource_group):
         self._test_flexible_server_vnet_mgmt_prepare_private_network_vname_and_subnetname(resource_group)
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_flexible_server_vnet_mgmt_prepare_private_network_vnet(self, resource_group):
         self._test_flexible_server_vnet_mgmt_prepare_private_network_vnet(resource_group)
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_flexible_server_vnet_mgmt_prepare_private_network_subnet(self, resource_group):
         self._test_flexible_server_vnet_mgmt_prepare_private_network_subnet(resource_group)
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_flexible_server_vnet_mgmt_validator(self, resource_group):
@@ -1059,225 +1073,225 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         return resource_type
 
 
-# class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-#     postgres_location = 'eastus2euap'
-#     mysql_location = 'eastus2euap'
+class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
+    postgres_location = 'eastus2euap'
+    mysql_location = 'eastus2euap'
 
-#     @AllowLargeResponse()
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-#     def test_postgres_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
-#         self._test_flexible_server_existing_private_dns_zone('postgres', server_resource_group, vnet_resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    def test_postgres_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
+        self._test_flexible_server_existing_private_dns_zone('postgres', server_resource_group, vnet_resource_group)
 
-#     @AllowLargeResponse()
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-#     def test_mysql_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
-#         self._test_flexible_server_existing_private_dns_zone('mysql', server_resource_group, vnet_resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    def test_mysql_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
+        self._test_flexible_server_existing_private_dns_zone('mysql', server_resource_group, vnet_resource_group)
     
-#     @AllowLargeResponse()
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
-#     def test_postgres_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
-#         self._test_flexible_server_new_private_dns_zone('postgres', server_resource_group, vnet_resource_group, dns_resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
+    def test_postgres_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
+        self._test_flexible_server_new_private_dns_zone('postgres', server_resource_group, vnet_resource_group, dns_resource_group)
 
-#     @AllowLargeResponse()
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-#     @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
-#     def test_mysql_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
-#         self._test_flexible_server_new_private_dns_zone('mysql', server_resource_group, vnet_resource_group, dns_resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
+    def test_mysql_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
+        self._test_flexible_server_new_private_dns_zone('mysql', server_resource_group, vnet_resource_group, dns_resource_group)
     
-#     def _test_flexible_server_existing_private_dns_zone(self, database_engine, server_resource_group, vnet_resource_group):
-#         server_names = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
-#                         self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)]
-#         if database_engine == 'postgres':
-#             location = self.postgres_location
-#             delegation_service_name = "Microsoft.DBforPostgreSQL/flexibleServers"
-#             private_dns_zone_key = "privateDnsZoneArmResourceId"
-#         else:
-#             location = self.mysql_location
-#             delegation_service_name = "Microsoft.DBforMySQL/flexibleServers"
-#             private_dns_zone_key = "privateDnsZoneResourceId"
+    def _test_flexible_server_existing_private_dns_zone(self, database_engine, server_resource_group, vnet_resource_group):
+        server_names = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
+                        self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)]
+        if database_engine == 'postgres':
+            location = self.postgres_location
+            delegation_service_name = "Microsoft.DBforPostgreSQL/flexibleServers"
+            private_dns_zone_key = "privateDnsZoneArmResourceId"
+        else:
+            location = self.mysql_location
+            delegation_service_name = "Microsoft.DBforMySQL/flexibleServers"
+            private_dns_zone_key = "privateDnsZoneResourceId"
 
 
-#         server_group_vnet_name = 'servergrouptestvnet'
-#         server_group_subnet_name = 'servergrouptestsubnet'
-#         vnet_group_vnet_name = 'vnetgrouptestvnet'
-#         vnet_group_subnet_name = 'vnetgrouptestsubnet'
-#         vnet_prefix = '172.1.0.0/16'
-#         subnet_prefix = '172.1.0.0/24'
-#         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
-#                  server_resource_group, location, server_group_vnet_name, vnet_prefix, server_group_subnet_name, subnet_prefix))
-#         server_group_vnet = self.cmd('network vnet show -g {} -n {}'.format(
-#                                      server_resource_group, server_group_vnet_name)).get_output_in_json()
-#         server_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
-#                                        server_resource_group, server_group_subnet_name, server_group_vnet_name)).get_output_in_json()
-#         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
-#                  vnet_resource_group, location, vnet_group_vnet_name, vnet_prefix, vnet_group_subnet_name, subnet_prefix))
-#         vnet_group_vnet = self.cmd('network vnet show -g {} -n {}'.format(
-#                                    vnet_resource_group, vnet_group_vnet_name)).get_output_in_json()
-#         vnet_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
-#                                        vnet_resource_group, vnet_group_subnet_name, vnet_group_vnet_name)).get_output_in_json()
+        server_group_vnet_name = 'servergrouptestvnet'
+        server_group_subnet_name = 'servergrouptestsubnet'
+        vnet_group_vnet_name = 'vnetgrouptestvnet'
+        vnet_group_subnet_name = 'vnetgrouptestsubnet'
+        vnet_prefix = '172.1.0.0/16'
+        subnet_prefix = '172.1.0.0/24'
+        self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
+                 server_resource_group, location, server_group_vnet_name, vnet_prefix, server_group_subnet_name, subnet_prefix))
+        server_group_vnet = self.cmd('network vnet show -g {} -n {}'.format(
+                                     server_resource_group, server_group_vnet_name)).get_output_in_json()
+        server_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
+                                       server_resource_group, server_group_subnet_name, server_group_vnet_name)).get_output_in_json()
+        self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
+                 vnet_resource_group, location, vnet_group_vnet_name, vnet_prefix, vnet_group_subnet_name, subnet_prefix))
+        vnet_group_vnet = self.cmd('network vnet show -g {} -n {}'.format(
+                                   vnet_resource_group, vnet_group_vnet_name)).get_output_in_json()
+        vnet_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
+                                       vnet_resource_group, vnet_group_subnet_name, vnet_group_vnet_name)).get_output_in_json()
 
-#         # FQDN validator
-#         self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --vnet {} --subnet {} --yes'.format(
-#                  database_engine, server_resource_group, server_names[0], location, server_names[0] + '.' + database_engine + '.database.azure.com', server_group_vnet_name, server_group_subnet_name),
-#                  expect_failure=True)
+        # FQDN validator
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --vnet {} --subnet {} --yes'.format(
+                 database_engine, server_resource_group, server_names[0], location, server_names[0] + '.' + database_engine + '.database.azure.com', server_group_vnet_name, server_group_subnet_name),
+                 expect_failure=True)
 
-#         # validate wrong suffix
-#         dns_zone_incorrect_suffix = 'clitestincorrectsuffix.database.{}.azure.com'.format(database_engine)
-#         self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
-#             database_engine, server_resource_group, server_names[0], location, dns_zone_incorrect_suffix, server_group_subnet["id"]),
-#             expect_failure=True)
+        # validate wrong suffix
+        dns_zone_incorrect_suffix = 'clitestincorrectsuffix.database.{}.azure.com'.format(database_engine)
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
+            database_engine, server_resource_group, server_names[0], location, dns_zone_incorrect_suffix, server_group_subnet["id"]),
+            expect_failure=True)
 
-#         # existing private dns zone in server group, no link
-#         unlinked_dns_zone = 'clitestunlinked.{}.database.azure.com'.format(database_engine)
-#         self.cmd('network private-dns zone create -g {} --name {}'.format(
-#                  server_resource_group, unlinked_dns_zone))
+        # existing private dns zone in server group, no link
+        unlinked_dns_zone = 'clitestunlinked.{}.database.azure.com'.format(database_engine)
+        self.cmd('network private-dns zone create -g {} --name {}'.format(
+                 server_resource_group, unlinked_dns_zone))
 
-#         self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
-#             database_engine, server_resource_group, server_names[0], location, unlinked_dns_zone, server_group_subnet["id"]))
-#         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, server_resource_group, server_names[0])).get_output_in_json()
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
+            database_engine, server_resource_group, server_names[0], location, unlinked_dns_zone, server_group_subnet["id"]))
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, server_resource_group, server_names[0])).get_output_in_json()
 
-#         self.assertEqual(result["network"]["delegatedSubnetResourceId"],
-#                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-#                          self.get_subscription_id(), server_resource_group, server_group_vnet_name, server_group_subnet_name))
-#         if database_engine == 'postgres':
-#             self.assertEqual(result["network"][private_dns_zone_key],
-#                             '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
-#                             self.get_subscription_id(), server_resource_group, unlinked_dns_zone))
-#         self.cmd('network vnet show --id {}'.format(server_group_vnet['id']),
-#                  checks=[StringContainCheck(vnet_prefix)])
-#         self.cmd('network vnet subnet show --id {}'.format(server_group_subnet['id']),
-#                  checks=[JMESPathCheck('addressPrefix', subnet_prefix),
-#                          JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+        self.assertEqual(result["network"]["delegatedSubnetResourceId"],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), server_resource_group, server_group_vnet_name, server_group_subnet_name))
+        if database_engine == 'postgres':
+            self.assertEqual(result["network"][private_dns_zone_key],
+                            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                            self.get_subscription_id(), server_resource_group, unlinked_dns_zone))
+        self.cmd('network vnet show --id {}'.format(server_group_vnet['id']),
+                 checks=[StringContainCheck(vnet_prefix)])
+        self.cmd('network vnet subnet show --id {}'.format(server_group_subnet['id']),
+                 checks=[JMESPathCheck('addressPrefix', subnet_prefix),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
 
-#         # exisitng private dns zone in vnet group
-#         vnet_group_dns_zone = 'clitestvnetgroup.{}.database.azure.com'.format(database_engine)
-#         self.cmd('network private-dns zone create -g {} --name {}'.format(
-#                  vnet_resource_group, vnet_group_dns_zone))
-#         self.cmd('network private-dns link vnet create -g {} -n MyLinkName -z {} -v {} -e False'.format(
-#                  vnet_resource_group, vnet_group_dns_zone, vnet_group_vnet['id']
-#         ))
-#         self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
-#                  database_engine, server_resource_group, server_names[1], location, vnet_group_dns_zone, vnet_group_subnet["id"]))
-#         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, server_resource_group, server_names[1])).get_output_in_json()
+        # exisitng private dns zone in vnet group
+        vnet_group_dns_zone = 'clitestvnetgroup.{}.database.azure.com'.format(database_engine)
+        self.cmd('network private-dns zone create -g {} --name {}'.format(
+                 vnet_resource_group, vnet_group_dns_zone))
+        self.cmd('network private-dns link vnet create -g {} -n MyLinkName -z {} -v {} -e False'.format(
+                 vnet_resource_group, vnet_group_dns_zone, vnet_group_vnet['id']
+        ))
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
+                 database_engine, server_resource_group, server_names[1], location, vnet_group_dns_zone, vnet_group_subnet["id"]))
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, server_resource_group, server_names[1])).get_output_in_json()
 
-#         self.assertEqual(result["network"]["delegatedSubnetResourceId"],
-#                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-#                          self.get_subscription_id(), vnet_resource_group, vnet_group_vnet_name, vnet_group_subnet_name))
-#         if database_engine == 'postgres':
-#             self.assertEqual(result["network"][private_dns_zone_key],
-#                             '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
-#                             self.get_subscription_id(), vnet_resource_group, vnet_group_dns_zone))
-#         self.cmd('network vnet show --id {}'.format(vnet_group_vnet['id']),
-#                  checks=[StringContainCheck(vnet_prefix)])
-#         self.cmd('network vnet subnet show --id {}'.format(vnet_group_subnet['id']),
-#                  checks=[JMESPathCheck('addressPrefix', subnet_prefix),
-#                          JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
+        self.assertEqual(result["network"]["delegatedSubnetResourceId"],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), vnet_resource_group, vnet_group_vnet_name, vnet_group_subnet_name))
+        if database_engine == 'postgres':
+            self.assertEqual(result["network"][private_dns_zone_key],
+                            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                            self.get_subscription_id(), vnet_resource_group, vnet_group_dns_zone))
+        self.cmd('network vnet show --id {}'.format(vnet_group_vnet['id']),
+                 checks=[StringContainCheck(vnet_prefix)])
+        self.cmd('network vnet subnet show --id {}'.format(vnet_group_subnet['id']),
+                 checks=[JMESPathCheck('addressPrefix', subnet_prefix),
+                         JMESPathCheck('delegations[0].serviceName', delegation_service_name)])
         
-#         # delete all servers
-#         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_names[0]),
-#                  checks=NoneCheck())
+        # delete all servers
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, server_resource_group, server_names[0]),
+                 checks=NoneCheck())
 
-#         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_names[1]),
-#                  checks=NoneCheck())
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, server_resource_group, server_names[1]),
+                 checks=NoneCheck())
 
-#         time.sleep(15 * 60)
+        time.sleep(15 * 60)
 
-#     def _test_flexible_server_new_private_dns_zone(self, database_engine, server_resource_group, vnet_resource_group, dns_resource_group):
-#         server_names = ['clitest-private-dns-zone-test-3', 'clitest-private-dns-zone-test-4',
-#                         self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
-#                         self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
-#                         self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)]
-#         private_dns_zone_names = ["clitestdnszone1.private.{}.database.azure.com".format(database_engine),
-#                                   "clitestdnszone2.private.{}.database.azure.com".format(database_engine),
-#                                   "clitestdnszone3.private.{}.database.azure.com".format(database_engine)]
-#         if database_engine == 'postgres':
-#             location = self.postgres_location
-#             delegation_service_name = "Microsoft.DBforPostgreSQL/flexibleServers"
-#             private_dns_zone_key = "privateDnsZoneArmResourceId"
-#             db_context = PostgresDbContext(cmd=self,
-#                                            cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
-#                                            command_group='postgres')
-#         else:
-#             location = self.mysql_location
-#             delegation_service_name = "Microsoft.DBforMySQL/flexibleServers"
-#             db_context = MysqlDbContext(cmd=self,
-#                                         cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations,
-#                                         command_group='mysql')
-#             private_dns_zone_key = "privateDnsZoneResourceId"
+    def _test_flexible_server_new_private_dns_zone(self, database_engine, server_resource_group, vnet_resource_group, dns_resource_group):
+        server_names = ['clitest-private-dns-zone-test-3', 'clitest-private-dns-zone-test-4',
+                        self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
+                        self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
+                        self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)]
+        private_dns_zone_names = ["clitestdnszone1.private.{}.database.azure.com".format(database_engine),
+                                  "clitestdnszone2.private.{}.database.azure.com".format(database_engine),
+                                  "clitestdnszone3.private.{}.database.azure.com".format(database_engine)]
+        if database_engine == 'postgres':
+            location = self.postgres_location
+            delegation_service_name = "Microsoft.DBforPostgreSQL/flexibleServers"
+            private_dns_zone_key = "privateDnsZoneArmResourceId"
+            db_context = PostgresDbContext(cmd=self,
+                                           cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
+                                           command_group='postgres')
+        else:
+            location = self.mysql_location
+            delegation_service_name = "Microsoft.DBforMySQL/flexibleServers"
+            db_context = MysqlDbContext(cmd=self,
+                                        cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations,
+                                        command_group='mysql')
+            private_dns_zone_key = "privateDnsZoneResourceId"
 
-#         server_group_vnet_name = 'servergrouptestvnet'
-#         server_group_subnet_name = 'servergrouptestsubnet'
-#         vnet_group_vnet_name = 'vnetgrouptestvnet'
-#         vnet_group_subnet_name = 'vnetgrouptestsubnet'
-#         vnet_prefix = '172.1.0.0/16'
-#         subnet_prefix = '172.1.0.0/24'
-#         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
-#                  server_resource_group, location, server_group_vnet_name, vnet_prefix, server_group_subnet_name, subnet_prefix))
-#         server_group_vnet = self.cmd('network vnet show -g {} -n {}'.format(
-#                                      server_resource_group, server_group_vnet_name)).get_output_in_json()
-#         server_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
-#                                        server_resource_group, server_group_subnet_name, server_group_vnet_name)).get_output_in_json()
-#         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
-#                  vnet_resource_group, location, vnet_group_vnet_name, vnet_prefix, vnet_group_subnet_name, subnet_prefix))
-#         vnet_group_vnet = self.cmd('network vnet show -g {} -n {}'.format(
-#                                    vnet_resource_group, vnet_group_vnet_name)).get_output_in_json()
-#         vnet_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
-#                                        vnet_resource_group, vnet_group_subnet_name, vnet_group_vnet_name)).get_output_in_json()
-#         # no input, vnet in server rg
-#         dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[0], None, server_group_subnet["id"], location, True)
-#         self.assertEqual(dns_zone,
-#                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
-#                          self.get_subscription_id(), server_resource_group, server_names[0] + ".private." + database_engine + ".database.azure.com"))
+        server_group_vnet_name = 'servergrouptestvnet'
+        server_group_subnet_name = 'servergrouptestsubnet'
+        vnet_group_vnet_name = 'vnetgrouptestvnet'
+        vnet_group_subnet_name = 'vnetgrouptestsubnet'
+        vnet_prefix = '172.1.0.0/16'
+        subnet_prefix = '172.1.0.0/24'
+        self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
+                 server_resource_group, location, server_group_vnet_name, vnet_prefix, server_group_subnet_name, subnet_prefix))
+        server_group_vnet = self.cmd('network vnet show -g {} -n {}'.format(
+                                     server_resource_group, server_group_vnet_name)).get_output_in_json()
+        server_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
+                                       server_resource_group, server_group_subnet_name, server_group_vnet_name)).get_output_in_json()
+        self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
+                 vnet_resource_group, location, vnet_group_vnet_name, vnet_prefix, vnet_group_subnet_name, subnet_prefix))
+        vnet_group_vnet = self.cmd('network vnet show -g {} -n {}'.format(
+                                   vnet_resource_group, vnet_group_vnet_name)).get_output_in_json()
+        vnet_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
+                                       vnet_resource_group, vnet_group_subnet_name, vnet_group_vnet_name)).get_output_in_json()
+        # no input, vnet in server rg
+        dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[0], None, server_group_subnet["id"], location, True)
+        self.assertEqual(dns_zone,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                         self.get_subscription_id(), server_resource_group, server_names[0] + ".private." + database_engine + ".database.azure.com"))
 
-#         # no input, vnet in vnet rg
-#         dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[1], None, vnet_group_subnet["id"], location, True)
-#         self.assertEqual(dns_zone,
-#                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
-#                          self.get_subscription_id(), vnet_resource_group, server_names[1] + ".private." + database_engine + ".database.azure.com"))
+        # no input, vnet in vnet rg
+        dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[1], None, vnet_group_subnet["id"], location, True)
+        self.assertEqual(dns_zone,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                         self.get_subscription_id(), vnet_resource_group, server_names[1] + ".private." + database_engine + ".database.azure.com"))
  
-#         # new private dns zone, zone name (vnet in smae rg)
-#         dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[2], private_dns_zone_names[0],
-#                                             server_group_subnet["id"], location, True)
-#         self.assertEqual(dns_zone,
-#                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
-#                          self.get_subscription_id(), server_resource_group, private_dns_zone_names[0]))
+        # new private dns zone, zone name (vnet in smae rg)
+        dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[2], private_dns_zone_names[0],
+                                            server_group_subnet["id"], location, True)
+        self.assertEqual(dns_zone,
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                         self.get_subscription_id(), server_resource_group, private_dns_zone_names[0]))
 
-#         # new private dns zone in dns rg, zone id (vnet in diff rg)
-#         dns_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
-#                  self.get_subscription_id(), dns_resource_group, private_dns_zone_names[1])
-#         self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
-#                  database_engine, server_resource_group, server_names[3], location, dns_id, vnet_group_subnet["id"]))
-#         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, server_resource_group, server_names[3])).get_output_in_json()
-#         self.assertEqual(result["network"]["delegatedSubnetResourceId"],
-#                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-#                          self.get_subscription_id(), vnet_resource_group, vnet_group_vnet_name, vnet_group_subnet_name))
-#         if database_engine == 'postgres':
-#             self.assertEqual(result["network"][private_dns_zone_key], dns_id)
+        # new private dns zone in dns rg, zone id (vnet in diff rg)
+        dns_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                 self.get_subscription_id(), dns_resource_group, private_dns_zone_names[1])
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
+                 database_engine, server_resource_group, server_names[3], location, dns_id, vnet_group_subnet["id"]))
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, server_resource_group, server_names[3])).get_output_in_json()
+        self.assertEqual(result["network"]["delegatedSubnetResourceId"],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), vnet_resource_group, vnet_group_vnet_name, vnet_group_subnet_name))
+        if database_engine == 'postgres':
+            self.assertEqual(result["network"][private_dns_zone_key], dns_id)
 
-#         # new private dns zone, zone id vnet server same rg, zone diff rg
-#         dns_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
-#                  self.get_subscription_id(), dns_resource_group, private_dns_zone_names[2])
-#         self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
-#                  database_engine, server_resource_group, server_names[4], location, dns_id, vnet_group_subnet["id"]))
-#         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, server_resource_group, server_names[4])).get_output_in_json()
-#         self.assertEqual(result["network"]["delegatedSubnetResourceId"],
-#                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-#                          self.get_subscription_id(), server_resource_group, server_group_vnet_name, server_group_subnet_name))
-#         if database_engine == 'postgres':
-#             self.assertEqual(result["network"][private_dns_zone_key], dns_id)
+        # new private dns zone, zone id vnet server same rg, zone diff rg
+        dns_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                 self.get_subscription_id(), dns_resource_group, private_dns_zone_names[2])
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
+                 database_engine, server_resource_group, server_names[4], location, dns_id, server_group_subnet["id"]))
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, server_resource_group, server_names[4])).get_output_in_json()
+        self.assertEqual(result["network"]["delegatedSubnetResourceId"],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                         self.get_subscription_id(), server_resource_group, server_group_vnet_name, server_group_subnet_name))
+        if database_engine == 'postgres':
+            self.assertEqual(result["network"][private_dns_zone_key], dns_id)
 
-#         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_names[3]),
-#                  checks=NoneCheck())
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, server_resource_group, server_names[3]),
+                 checks=NoneCheck())
 
-#         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_names[4]),
-#                  checks=NoneCheck())
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, server_resource_group, server_names[4]),
+                 checks=NoneCheck())
 
-#         time.sleep(15 * 60)
+        time.sleep(15 * 60)
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):

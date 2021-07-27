@@ -190,9 +190,12 @@ def flexible_server_restore(cmd, client,
         id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
 
+        if not zone:
+            zone = source_server_object.availability_zone
+
         parameters = mysql_flexibleservers.models.Server(
             location=source_server_object.location,
-            point_in_time_utc=restore_point_in_time,
+            restore_point_in_time=restore_point_in_time,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
             availability_zone=zone
@@ -391,32 +394,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if auto_grow:
         instance.storage.storage_autogrow = auto_grow
 
-    # if maintenance_window:
-    #     logger.warning('If you are updating maintenancw window with other parameter, maintenance window will be updated first. Please update the other parameters later.')
-    #     # if disabled is pass in reset to default values
-    #     if maintenance_window.lower() == "disabled":
-    #         day_of_week = start_hour = start_minute = 0
-    #         custom_window = "Disabled"
-    #     else:
-    #         day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-    #         custom_window = "Enabled"
-
-    #     # set values - if maintenance_window when is None when created then create a new object
-    #     if instance.maintenance_window is None:
-    #         instance.maintenance_window = mysql_flexibleservers.models.MaintenanceWindow(
-    #             day_of_week=day_of_week,
-    #             start_hour=start_hour,
-    #             start_minute=start_minute,
-    #             custom_window=custom_window
-    #         )
-    #     else:
-    #         instance.maintenance_window.day_of_week = day_of_week
-    #         instance.maintenance_window.start_hour = start_hour
-    #         instance.maintenance_window.start_minute = start_minute
-    #         instance.maintenance_window.custom_window = custom_window
-
-    #     return ServerForUpdate(maintenance_window=instance.maintenance_window)
-
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
@@ -424,12 +401,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              high_availability=instance.high_availability,
                              maintenance_window=instance.maintenance_window,
                              tags=tags)
-
-    # if assign_identity:
-    #     if server_module_path.find('mysql'):
-    #         if instance.identity is None:
-    #             instance.identity = mysql_flexibleservers.models.Identity()
-    #         params.identity = instance.identity
 
     return params
 
@@ -457,18 +428,15 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
 
 def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_over=None):
     instance = client.get(resource_group_name, server_name)
-    if fail_over is not None and instance.high_availability.mode != "ZoneRedundant":
+    if fail_over is not None and instance.high_availability.mode not in ["ZoneRedundant", "Enabled"]:
         raise ArgumentUsageError("Failing over can only be triggered for zone redundant servers.")
 
     if fail_over is not None:
         if fail_over != 'Forced':
             raise InvalidArgumentValueError("Allowed failover parameters are 'Forced'.")
-        if fail_over == 'Forced':
-            fail_over = 'forcedFailover'
-        parameters = mysql_flexibleservers.models.RestartParameter(restart_with_failover=True,
-                                                                   failover_mode=fail_over)
+        parameters = mysql_flexibleservers.models.ServerRestartParameter(restart_with_failover='Enabled')
     else:
-        parameters = mysql_flexibleservers.models.RestartParameter(restart_with_failover=False)
+        parameters = mysql_flexibleservers.models.ServerRestartParameter(restart_with_failover='Disabled')
 
     return resolve_poller(
         client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'MySQL Server Restart')

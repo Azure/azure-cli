@@ -256,7 +256,7 @@ type: command
 short-summary: Geo-Restore a flexible server from backup.
 examples:
   - name: Restore 'testServer' to a different location as a new server 'testServerNew'.
-    text: az mysql flexible-server geo-restore --resource-group testGroup --name testServerNew --source-server testServer --location testLocation"
+    text: az mysql flexible-server geo-restore --resource-group testGroup --name testServerNew --source-server testServer --location testLocation
 """
 
 
