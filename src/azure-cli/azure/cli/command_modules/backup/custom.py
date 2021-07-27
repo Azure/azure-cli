@@ -24,6 +24,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo
 
+import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
@@ -824,8 +825,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     source_resource_id, target_rg_id,
                                     use_original_storage_account, restore_disk_lun_list,
                                     rehydration_duration, rehydration_priority, tier, disk_encryption_set_id,
-                                    encryption, recovery_point, use_secondary_region, use_system_assigned_msi,
-                                    identity_id):
+                                    encryption, recovery_point, use_secondary_region, mi_system_assigned,
+                                    mi_user_assigned):
 
     if disk_encryption_set_id is not None:
         if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
@@ -834,12 +835,12 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
 
     identity_info = None
-    if not (use_system_assigned_msi is None and identity_id is None):
+    if mi_system_assigned or mi_user_assigned:
         if not recovery_point.properties.is_managed_virtual_machine:
-            raise InvalidArgumentValueError("--require-msi-for-restore flag is not supported for unmanaged VMs.")
+            raise InvalidArgumentValueError("MI based restore is not supported for unmanaged VMs.")
         identity_info = IdentityInfo(
-            is_system_assigned_identity=use_system_assigned_msi is not None,
-            managed_identity_resource_id=identity_id)
+            is_system_assigned_identity=mi_system_assigned is not None,
+            managed_identity_resource_id=mi_user_assigned)
 
     if tier == 'VaultArchive':
         rehyd_duration = 'P' + str(rehydration_duration) + 'D'
@@ -881,8 +882,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
-                  rehydration_priority=None, disk_encryption_set_id=None, use_system_assigned_msi=None,
-                  identity_id=None):
+                  rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
+                  mi_user_assigned=None):
 
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM", use_secondary_region)
@@ -953,7 +954,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     if diskslist:
         restore_disk_lun_list = diskslist
 
-    _validate_msi_used_for_restore_disks(vault_identity, use_system_assigned_msi, identity_id)
+    validators.validate_mi_used_for_restore_disks(vault_identity, mi_system_assigned, mi_user_assigned)
 
     trigger_restore_properties = _get_trigger_restore_properties(rp_name, vault_location, _storage_account_id,
                                                                  _source_resource_id, target_rg_id,
@@ -963,11 +964,11 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                                                  properties.recovery_point_tier_details is None else
                                                                  rp_list[0].tier_type, disk_encryption_set_id,
                                                                  encryption, recovery_point, use_secondary_region,
-                                                                 use_system_assigned_msi, identity_id)
+                                                                 mi_system_assigned, mi_user_assigned)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     if use_secondary_region:
-        _validate_crr(target_rg_id, rehydration_priority)
+        validators.validate_crr(target_rg_id, rehydration_priority)
 
         azure_region = secondary_region_map[vault_location]
         aad_client = aad_properties_cf(cmd.cli_ctx)
@@ -1363,30 +1364,6 @@ def _validate_object(obj, error_message):
 def _validate_restore_disk_parameters(restore_only_osdisk, diskslist):
     if restore_only_osdisk and diskslist is not None:
         logger.warning("Value of diskslist parameter will be ignored as restore-only-osdisk is set to be true.")
-
-
-def _validate_msi_used_for_restore_disks(vault_identity, use_system_assigned_msi, identity_id):
-    if vault_identity is None:
-        raise ArgumentUsageError("Please ensure that Selected MSI is enabled for the vault")
-    if use_system_assigned_msi:
-        if vault_identity.type is None or "systemassigned" not in vault_identity.type.lower():
-            raise ArgumentUsageError("Please ensure that System MSI is enabled for the vault")
-    if identity_id:
-        if vault_identity.type is not None and "userassigned" in vault_identity.type.lower():
-            if identity_id.lower() not in (id.lower() for id in vault_identity.user_assigned_identities.keys()):
-                raise ArgumentUsageError("""
-                Vault does not have the specified User MSI. Please ensure you've provided the correct --identity-id.
-                """)
-        else:
-            raise ArgumentUsageError("Please ensure that User MSI is enabled for the vault")
-
-
-def _validate_crr(target_rg_id, rehydration_priority):
-    if target_rg_id is None:
-        raise RequiredArgumentMissingError("Please provide target resource group using --target-resource-group.")
-
-    if rehydration_priority is not None:
-        raise MutuallyExclusiveArgumentError("Archive restore isn't supported for secondary region.")
 
 
 # Tracking Utilities
