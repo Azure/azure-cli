@@ -206,6 +206,11 @@ examples:
     text: az sql db str-policy show -g mygroup -s myserver -n mydb
 """
 
+helps['sql db str-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the policy is set.
+"""
+
 helps['sql db ltr-policy'] = """
 type: group
 short-summary: Manage SQL database long term retention policy.
@@ -1364,6 +1369,49 @@ short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule
     text: az sql server firewall-rule update -g mygroup -s myserver -n myrule --start-ip-address 5.4.3.2 --end-ip-address 9.8.7.6
+"""
+
+helps['sql server outbound-firewall-rule'] = """
+type: group
+short-summary: Manage a server's outbound firewall rules.
+"""
+
+helps['sql server outbound-firewall-rule create'] = """
+type: command
+short-summary: Create a new outbound firewall rule.
+examples:
+  - name: Create a new outbound firewall rule
+    text: az sql server outbound-firewall-rule create -g mygroup -s myserver -n allowedFQDN
+  - name: Create a new outbound firewall rule
+    text: az sql server outbound-firewall-rule create -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
+"""
+
+helps['sql server outbound-firewall-rule list'] = """
+type: command
+short-summary: List a server's outbound firewall rules.
+examples:
+  - name: List a server's outbound firewall rules
+    text: az sql server outbound-firewall-rule list -g mygroup -s myserver
+"""
+
+helps['sql server outbound-firewall-rule show'] = """
+type: command
+short-summary: Show the details for an outbound firewall rule.
+examples:
+  - name: Show the outbound firewall rule
+    text: az sql server outbound-firewall-rule show -g mygroup -s myserver -n myrule
+  - name: Show the outbound firewall rule
+    text: az sql server outbound-firewall-rule show -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
+"""
+
+helps['sql server outbound-firewall-rule delete'] = """
+type: command
+short-summary: Delete the outbound firewall rule.
+examples:
+  - name: Delete the outbound firewall rule
+    text: az sql server outbound-firewall-rule delete -g mygroup -s myserver -n myrule
+  - name: Delete the outbound firewall rule
+    text: az sql server outbound-firewall-rule delete -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
 """
 
 helps['sql server key'] = """

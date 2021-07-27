@@ -308,29 +308,29 @@ class AppConfigKVScenarioTest(ScenarioTest):
         _create_config_store(self, self.kwargs)
 
         entry_key = "Color"
-        entry_value = "Red"
-        entry_content_type = 'text'
         entry_label = 'v1.0.0'
 
         self.kwargs.update({
             'key': entry_key,
-            'value': entry_value,
-            'label': entry_label,
-            'content_type': entry_content_type
+            'label': entry_label
         })
 
         # add a new key-value entry
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
-                 checks=[self.check('contentType', entry_content_type),
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} -y',
+                 checks=[self.check('contentType', ""),
                          self.check('key', entry_key),
-                         self.check('value', entry_value),
+                         self.check('value', ""),
                          self.check('label', entry_label)])
 
         # edit a key-value entry
         updated_entry_value = "Green"
+        entry_content_type = "text"
+
         self.kwargs.update({
-            'value': updated_entry_value
+            'value': updated_entry_value,
+            'content_type': entry_content_type
         })
+
         self.cmd('appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
                  checks=[self.check('contentType', entry_content_type),
                          self.check('key', entry_key),
@@ -377,6 +377,8 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         # set key-value entry with connection string, but to the original value
         # take a note of the deleted_time
+        entry_value = "Red"
+
         self.kwargs.update({
             'value': entry_value,
             'timestamp': _format_datetime(deleted_time)
@@ -1515,7 +1517,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         entry_feature = 'Beta'
         entry_label = 'v1'
-        default_description = None
+        default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"

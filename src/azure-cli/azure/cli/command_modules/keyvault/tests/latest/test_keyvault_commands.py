@@ -1863,7 +1863,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
         policy3_path = os.path.join(TEST_DIR, 'policy3.json')
-        cert_secret_path = os.path.join(TEST_DIR, 'cert_secret')
+        cert_secret_path = os.path.join(TEST_DIR, 'cert_secret.der')
         self.kwargs.update({
             'policy_path': policy_path,
             'policy2_path': policy2_path,
@@ -1889,10 +1889,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
             with open(policy3_path, "w") as f:
                 f.write(json.dumps(policy))
 
-        if not os.path.exists(cert_secret_path) or self.is_live:
-            if os.path.exists(cert_secret_path):
-                os.remove(cert_secret_path)
-            self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
+        self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
 
         self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy3_path}"',
                  checks=[
@@ -1901,6 +1898,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
                                 policy['secretProperties']['contentType'])
                  ])
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
+        if os.path.exists(cert_secret_path):
+            os.remove(cert_secret_path)
 
         # list certificates
         self.cmd('keyvault certificate list --vault-name {kv}',
