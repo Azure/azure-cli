@@ -161,14 +161,14 @@ def delete_feature(cmd,
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
     if key is not None:
-        feature_pattern = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+        key_filter = key
     elif feature is not None:
-        feature_pattern = feature
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
-                                               feature=feature_pattern,
+                                               key_filter=key_filter,
                                                label=SearchFilterOptions.EMPTY_LABEL if label is None else label)
 
     confirmation_message = "Found '{}' feature flags matching the specified feature and label. Are you sure you want to delete these feature flags?".format(len(retrieved_keyvalues))
@@ -271,16 +271,16 @@ def list_feature(cmd,
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
     if key is not None:
-        feature_pattern = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+        key_filter = key
     elif feature is not None:
-        feature_pattern = feature
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     else:
-        feature_pattern = SearchFilterOptions.ANY_KEY
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     try:
         retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
-                                                   feature=feature_pattern,
+                                                   key_filter=key_filter,
                                                    label=label if label else SearchFilterOptions.ANY_LABEL)
         retrieved_featureflags = []
         for kv in retrieved_keyvalues:
@@ -964,14 +964,14 @@ def __update_existing_key_value(azconfig_client,
 
 
 def __list_all_keyvalues(azconfig_client,
-                         feature,
+                         key_filter,
                          label=None):
     '''
         To get all keys by name or pattern
 
         Args:
             azconfig_client - AppConfig client making calls to the service
-            feature - Feature name or pattern
+            key_filter - Filter for the key of the feature flag
             label - Feature label or pattern
 
         Return:
@@ -983,14 +983,13 @@ def __list_all_keyvalues(azconfig_client,
     # (?:\\\\)*  Matches any number of occurrences of two backslashes
     # ,          Matches a comma
     unescaped_comma_regex = re.compile(r'(?<!\\)(?:\\\\)*,')
-    if unescaped_comma_regex.search(feature):
+    if unescaped_comma_regex.search(key_filter):
         raise CLIError("Comma separated feature names are not supported. Please provide escaped string if your feature name contains comma. \nSee \"az appconfig feature list -h\" for correct usage.")
 
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     label = prep_label_filter_for_url_encoding(label)
 
     try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key, label_filter=label)
+        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label)
     except HttpResponseError as exception:
         raise CLIError('Failed to read feature flag(s) that match the specified feature and label. ' + str(exception))
 
