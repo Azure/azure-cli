@@ -4811,12 +4811,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_network_cidr(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
-        ipprefix_name = self.create_random_name('cliaksipprefix', 20)
         self.kwargs.update({
             'name': aks_name,
             'resource_group': resource_group,
-            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
-            'ipprefix_name': ipprefix_name
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
         })
 
         # create
@@ -4830,6 +4828,52 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.serviceCidr', '10.0.0.0/16'),
             self.check('networkProfile.networkPlugin', 'kubenet'),
             self.check('networkProfile.networkPolicy', 'calico')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_attach_acr(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        acr_name = self.create_random_name('cliaksacr', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'acr_name': acr_name
+        })
+
+        # create acr
+        create_acr_cmd = 'acr create -n {acr_name} -g {resource_group} --sku basic'
+        self.cmd(create_acr_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--ssh-key-value={ssh_key_value} --attach-acr={acr_name}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('servicePrincipalProfile.clientId', sp_name)
+        ])
+
+        # install kubectl
+        try:
+            subprocess.call(["az", "aks", "install-cli"], shell=True)
+        except subprocess.CalledProcessError as err:
+            raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
+
+        # check acr
+        check_cmd = 'aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io'
+        self.cmd(check_cmd, checks=[
+            StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
         ])
 
         # delete
