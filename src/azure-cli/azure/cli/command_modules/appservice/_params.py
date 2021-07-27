@@ -323,6 +323,8 @@ def load_arguments(self, _):
                        help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
             c.argument('ftps_state', help="Set the Ftps state value for an app. Default value is 'AllAllowed'.",
                        arg_type=get_enum_type(FTPS_STATE_TYPES))
+            c.argument('vnet_route_all_enabled', help="Configure regional VNet integration to route all traffic to the VNet.",
+                       arg_type=get_three_state_flag(return_label=True))
             c.argument('generic_configurations', nargs='+',
                        help='provide site configuration list in a format of either `key=value` pair or `@<json_file>`')
 
@@ -636,6 +638,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
+        c.argument('skip_delegation_check', help="Skip check if you do not have permission or the VNet is in another subscription.",
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the webapp to deploy to.')
@@ -670,6 +674,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
+        c.argument('skip_delegation_check', help="Skip check if you do not have permission or the VNet is in another subscription.",
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance')

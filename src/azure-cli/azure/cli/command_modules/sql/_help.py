@@ -206,6 +206,11 @@ examples:
     text: az sql db str-policy show -g mygroup -s myserver -n mydb
 """
 
+helps['sql db str-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the policy is set.
+"""
+
 helps['sql db ltr-policy'] = """
 type: group
 short-summary: Manage SQL database long term retention policy.
