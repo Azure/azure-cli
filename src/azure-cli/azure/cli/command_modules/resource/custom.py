@@ -34,8 +34,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZUR
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
-    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory,
-    cf_providers)
+    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
 from azure.core.pipeline.policies import SansIOHTTPPolicy
@@ -1107,21 +1106,24 @@ def _get_auth_provider_latest_api_version(cli_ctx):
     return api_version
 
 
-def _update_provider(cli_ctx, namespace, registering, wait, properties=None, mg_id=None, accept_terms=None):
+def _update_provider(cmd, namespace, registering, wait, properties=None, mg_id=None, accept_terms=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
-    client = cf_providers(cli_ctx, None, api_version='2021-04-01')
+    rcf = _resource_client_factory(cmd.cli_ctx)
     is_rpaas = namespace.lower() in RPAAS_APIS
     if mg_id is None and registering:
         if is_rpaas and accept_terms:
             wait = True
-        r = client.register(namespace, properties=properties)
+        if cmd.supported_api_version(min_api='2021-04-01'):
+            r = rcf.providers.register(namespace, properties=properties)
+        else:
+            r = rcf.providers.register(namespace)
     elif mg_id and registering:
-        r = client.register_at_management_group_scope(namespace, mg_id)
+        r = rcf.providers.register_at_management_group_scope(namespace, mg_id)
         if r is None:
             return
     else:
-        r = client.unregister(namespace)
+        r = rcf.providers.unregister(namespace)
 
     if r.registration_state == target_state:
         return
@@ -1129,13 +1131,13 @@ def _update_provider(cli_ctx, namespace, registering, wait, properties=None, mg_
     if wait:
         while True:
             time.sleep(10)
-            rp_info = client.get(namespace)
+            rp_info = rcf.providers.get(namespace)
             if rp_info.registration_state == target_state:
                 break
         if is_rpaas and accept_terms and registering and mg_id is None:
             # call accept term API
             from azure.cli.core.util import send_raw_request
-            send_raw_request(cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
+            send_raw_request(cmd.cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
     else:
         action = 'Registering' if registering else 'Unregistering'
         msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
@@ -2124,14 +2126,14 @@ def list_resources(cmd, resource_group_name=None,
 
 def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
     properties = None
-    if consent_to_permissions:
-        from azure.mgmt.resource.resources.v2021_04_01.models import ProviderRegistrationRequest, ProviderConsentDefinition
+    if cmd.supported_api_version(min_api='2021-04-01') and consent_to_permissions:
+        ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest', 'ProviderConsentDefinition')
         properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
+    _update_provider(cmd, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=False, wait=wait)
+    _update_provider(cmd, resource_provider_namespace, registering=False, wait=wait)
 
 
 def list_provider_operations(cmd):
@@ -2140,8 +2142,8 @@ def list_provider_operations(cmd):
 
 
 def list_provider_permissions(cmd, resource_provider_namespace):
-    client = cf_providers(cmd.cli_ctx, None, api_version='2021-04-01')
-    return client.provider_permissions(resource_provider_namespace)
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.providers.provider_permissions(resource_provider_namespace)
 
 
 def show_provider_operations(cmd, resource_provider_namespace):
