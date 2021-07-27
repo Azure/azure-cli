@@ -1609,7 +1609,8 @@ def load_arguments(self, _):
 
         c.argument('connection_type',
                    options_list=['--connection-type', '-t'],
-                   arg_type=get_enum_type(ServerConnectionType))
+                   arg_type=get_enum_type(ServerConnectionType),
+                   help='The required parameters for updating a secure connection policy. The value is default',)
 
     #####
     #           sql server dns-alias
@@ -1715,7 +1716,8 @@ def load_arguments(self, _):
                    arg_type=server_param_type)
 
         c.argument('virtual_network_rule_name',
-                   options_list=['--name', '-n'])
+                   options_list=['--name', '-n'],
+                   help='The name of the virtual network rule.')
 
         c.argument('virtual_network_subnet_id',
                    options_list=['--subnet'],
