@@ -1703,6 +1703,14 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None):
     return instance
 
 
+def show_plan(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    serverfarm_url='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'.format(client.app_service_plans._config.subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    request_url= client.app_service_plans._client._base_url + serverfarm_url    
+    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    return response.json()    
+
+
 def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_workers=None, max_burst=None):
     instance = update_app_service_plan(instance, sku, number_of_workers)
     if max_burst is not None:
