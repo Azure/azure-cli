@@ -61,6 +61,12 @@ def load_arguments(self, _):
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
+    deployment_what_if_type = CLIArgumentType(options_list=['--what-if', '-w'], action='store_true',
+                                              help='Instruct the command to run deployment What-If.',
+                                              min_api='2019-07-01')
+    deployment_what_if_proceed_if_no_change_type = CLIArgumentType(options_list=['--proceed-if-no-change'], action='store_true',
+                                                                   help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.',
+                                                                   min_api='2019-07-01')
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
                                                             arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
                                                             min_api='2019-07-01')
@@ -143,7 +149,7 @@ def load_arguments(self, _):
 
     with self.argument_context('provider register') as c:
         c.argument('mg', help="The management group id to register.", options_list=['--management-group-id', '-m'])
-        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.")
+        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.", deprecate_info=c.deprecate(hide=True))
         c.argument('wait', action='store_true', help='wait for the registration to finish')
         c.argument('consent_to_permissions', options_list=['--consent-to-permissions', '-c'], action='store_true', help='A value indicating whether authorization is consented or not.')
 
@@ -304,6 +310,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -331,6 +339,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -370,6 +380,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -406,6 +418,8 @@ def load_arguments(self, _):
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
                    min_api="2019-10-01")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment mg what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -441,6 +455,8 @@ def load_arguments(self, _):
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
                    min_api="2019-10-01")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment tenant what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)

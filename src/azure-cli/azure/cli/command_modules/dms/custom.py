@@ -10,29 +10,30 @@ from knack.prompting import prompt, prompt_pass
 from knack.util import CLIError
 
 from azure.mgmt.datamigration.models import (DataMigrationService,
-                                             ServiceSku,
-                                             Project,
-                                             SqlConnectionInfo,
-                                             MigrateSqlServerSqlDbTaskProperties,
-                                             MySqlConnectionInfo,
-                                             MigrateMySqlAzureDbForMySqlSyncTaskProperties,
-                                             PostgreSqlConnectionInfo,
+                                             NameAvailabilityRequest,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties,
+                                             MigrateSqlServerSqlDbTaskProperties,
                                              MigrateSyncCompleteCommandInput,
-                                             MigrateSyncCompleteCommandProperties)
+                                             MigrateSyncCompleteCommandProperties,
+                                             MySqlConnectionInfo,
+                                             PostgreSqlConnectionInfo,
+                                             Project,
+                                             ProjectTask,
+                                             ServiceSku,
+                                             SqlConnectionInfo)
 from azure.cli.core.util import sdk_no_wait, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.dms._client_factory import dms_cf_projects
 from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sqldb_offline_input,
-                                                           get_migrate_mysql_to_azuredbformysql_sync_input,
                                                            get_migrate_postgresql_to_azuredbforpostgresql_sync_input)
 
 
 # region Service
 
 def check_service_name_availability(client, service_name, location):
+    parameters = NameAvailabilityRequest(name=service_name,
+                                         type='services')
     return client.check_name_availability(location=location,
-                                          name=service_name,
-                                          type='services')
+                                          parameters=parameters)
 
 
 def create_service(client,
@@ -49,7 +50,7 @@ def create_service(client,
                                       tags=tags)
 
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        parameters=parameters,
                        group_name=resource_group_name,
                        service_name=service_name)
@@ -57,7 +58,7 @@ def create_service(client,
 
 def delete_service(client, service_name, resource_group_name, delete_running_tasks=None, no_wait=False):
     return sdk_no_wait(no_wait,
-                       client.delete,
+                       client.begin_delete,
                        group_name=resource_group_name,
                        service_name=service_name,
                        delete_running_tasks=delete_running_tasks)
@@ -71,14 +72,14 @@ def list_services(client, resource_group_name=None):
 
 def start_service(client, service_name, resource_group_name, no_wait=False):
     return sdk_no_wait(no_wait,
-                       client.start,
+                       client.begin_start,
                        group_name=resource_group_name,
                        service_name=service_name)
 
 
 def stop_service(client, service_name, resource_group_name, no_wait=False):
     return sdk_no_wait(no_wait,
-                       client.stop,
+                       client.begin_stop,
                        group_name=resource_group_name,
                        service_name=service_name)
 
@@ -88,10 +89,11 @@ def stop_service(client, service_name, resource_group_name, no_wait=False):
 # region Project
 
 def check_project_name_availability(client, resource_group_name, service_name, project_name):
+    parameters = NameAvailabilityRequest(name=project_name,
+                                         type='projects')
     return client.check_children_name_availability(group_name=resource_group_name,
                                                    service_name=service_name,
-                                                   name=project_name,
-                                                   type='projects')
+                                                   parameters=parameters)
 
 
 def create_or_update_project(client,
@@ -138,10 +140,11 @@ def check_task_name_availability(client, resource_group_name, service_name, proj
     # /subscriptions/{subscription}/resourceGroups/{resourcegroup}/providers/Microsoft.DataMigration/services/{service}/projects/{project}/checkNameAvailability?api-version={version}  # pylint: disable=line-too-long
     # But check_children_name_availability only builds a URL that would check for projects, so we cheat a little by
     # making the service name include the project portion as well.
+    parameters = NameAvailabilityRequest(name=task_name,
+                                         type='tasks')
     return client.check_children_name_availability(group_name=resource_group_name,
                                                    service_name=service_name + '/projects/' + project_name,
-                                                   name=task_name,
-                                                   type='tasks')
+                                                   parameters=parameters)
 
 
 def create_task(cmd,
@@ -192,11 +195,12 @@ for the supported scenarios.")
                                                     enable_data_integrity_validation,
                                                     enable_query_analysis_validation)
 
+    parameters = ProjectTask(properties=task_properties)
     return client.create_or_update(group_name=resource_group_name,
                                    service_name=service_name,
                                    project_name=project_name,
                                    task_name=task_name,
-                                   properties=task_properties)
+                                   parameters=parameters)
 
 
 def list_tasks(client, resource_group_name, service_name, project_name, task_type=None):
@@ -271,7 +275,6 @@ def core_handles_scenario(
         task_type=""):
     # Add scenarios here after migrating them to the core from the extension.
     CoreScenarioTypes = [ScenarioType.sql_sqldb_offline,
-                         ScenarioType.mysql_azuremysql_online,
                          ScenarioType.postgres_azurepostgres_online]
     return get_scenario_type(source_platform, target_platform, task_type) in CoreScenarioTypes
 
@@ -367,9 +370,6 @@ def get_task_migration_properties(
     if st == ScenarioType.sql_sqldb_offline:
         TaskProperties = MigrateSqlServerSqlDbTaskProperties
         GetInput = get_migrate_sql_to_sqldb_offline_input
-    elif st == ScenarioType.mysql_azuremysql_online:
-        TaskProperties = MigrateMySqlAzureDbForMySqlSyncTaskProperties
-        GetInput = get_migrate_mysql_to_azuredbformysql_sync_input
     elif st == ScenarioType.postgres_azurepostgres_online:
         TaskProperties = MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties
         GetInput = get_migrate_postgresql_to_azuredbforpostgresql_sync_input

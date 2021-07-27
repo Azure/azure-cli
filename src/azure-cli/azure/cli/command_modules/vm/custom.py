@@ -1587,9 +1587,8 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Managed storage
     if blob_uri is None:
         try:
-            poller = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
-            uris = LongRunningOperation(cmd.cli_ctx)(poller)
-            blob_uri = uris.serial_console_log_blob_uri
+            boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
+            blob_uri = boot_diagnostics_data.serial_console_log_blob_uri
         except CloudError:
             pass
         if blob_uri is None:
@@ -3545,7 +3544,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                         data_vhds_storage_accounts[i] = resource_id(
                             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                             namespace='Microsoft.Storage', type='storageAccounts', name=storage_account)
-                data_disk_images = []
+                if data_disk_images is None:
+                    data_disk_images = []
                 for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
                     data_disk_images.append(GalleryDataDiskImage(
                         source=GalleryArtifactVersionSource(id=account, uri=uri), lun=lun))

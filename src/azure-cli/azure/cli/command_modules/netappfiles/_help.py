@@ -843,7 +843,7 @@ examples:
 
 helps['netappfiles volume pool-change'] = """
 type: command
-short-summary: Get the specified ANF volume.
+short-summary: Change pool for an Azure NetApp Files (ANF) volume.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
@@ -854,7 +854,7 @@ parameters:
   - name: --new-pool-resource-id -d
     short-summary: The resource id of the new ANF pool
 examples:
-  - name: Returns the properties of the given ANF volume
+  - name: This changes the pool for the volume myvolname from mypoolname to pool with the Id mynewresourceid
     text: >
         az netappfiles volume pool-change -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --new-pool-resource-id mynewresourceid
 """

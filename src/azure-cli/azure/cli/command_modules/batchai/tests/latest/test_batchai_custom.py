@@ -652,7 +652,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Update to manual scale Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', None, 2, 2)
         self.assertEqual(result.vm_size, 'Standard_NC6')
-        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(result.vm_priority, None)
         self.assertEqual(ImageReference(
             publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference
@@ -663,7 +663,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Update to manual scale Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 2, 2, 2)
         self.assertEqual(result.vm_size, 'Standard_NC6')
-        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(result.vm_priority, None)
         self.assertEqual(
             ImageReference(publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference)
@@ -672,7 +672,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Update to manual scale Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 2, None, None)
         self.assertEqual(result.vm_size, 'Standard_NC6')
-        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(result.vm_priority, None)
         self.assertEqual(
             ImageReference(publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference
@@ -682,7 +682,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Update to auto-scale with initial count Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 1, 0, 2)
         self.assertEqual(result.vm_size, 'Standard_NC6')
-        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(result.vm_priority, None)
         self.assertEqual(
             ImageReference(publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference)
