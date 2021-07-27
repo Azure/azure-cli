@@ -146,7 +146,7 @@ def cli_redis_patch_schedule_delete(client, resource_group_name, name):
 
 def cli_redis_list_cache(client, resource_group_name=None):
     cache_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
-        if resource_group_name else client.list()
+        if resource_group_name else client.list_by_subscription()
     return list(cache_list)
 
 

@@ -99,14 +99,14 @@ class RedisCacheTests(ScenarioTest):
         }
 
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --redis-version {redis_version}')
-        self.cmd('az redis show -n {name} -g {rg}', checks=[
+        result = self.cmd('az redis show -n {name} -g {rg}', checks=[
             self.check('name', '{name}'),
             self.check('provisioningState', 'Creating'),
             self.check('sku.name', '{sku}'),
             self.check('sku.family', basic_size[0]),
-            self.check('sku.capacity', basic_size[1:]),
-            self.check('redisVersion.split(".")[0]', '{redis_version}')
-        ])
+            self.check('sku.capacity', basic_size[1:])
+        ]).get_output_in_json()
+        self.check(result['redisVersion'].split('.')[0], '{redis_version}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_list_works(self, resource_group):
