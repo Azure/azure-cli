@@ -438,8 +438,6 @@ def _get_install_info(cmd,
     if parent_gateway_endpoint is None or parent_gateway_endpoint == '':
         parent_gateway_endpoint = "<parent gateway endpoint>"
     parent_id = connected_registry.parent.id
-    #if parent_protocol is None or parent_protocol not in ['http', 'https']:
-    #    raise CLIError("Invalid protocol. Parent endpoint protocol must be either 'http' or 'https'.")
     # if parent_id is not none, parent is a connected registry
     if parent_id:
         parent_endpoint_protocol = parent_protocol
