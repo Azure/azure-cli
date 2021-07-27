@@ -20,7 +20,7 @@ from azure.cli.command_modules.acs._format import version_to_tuple
 from azure.cli.command_modules.acs._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
 from .recording_processors import KeyReplacer
 
-from .custom_preparers import AKSCustomResourceGroupPreparer, AKSCustomVirtualNetworkPreparer
+from .custom_preparers import AKSCustomResourceGroupPreparer, AKSCustomVirtualNetworkPreparer, AKSCustomRoleBasedServicePrincipalPreparer
 # flake8: noqa
 
 
@@ -4834,9 +4834,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    # live only due to dependency `_add_role_assignment` is not mocked
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_attach_acr(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         acr_name = self.create_random_name('cliaksacr', 16)
