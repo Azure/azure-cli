@@ -2003,6 +2003,24 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, approve=False, rejected=False)
 
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_media_service")
+    @StorageAccountPreparer(name_prefix="testams")
+    @AllowLargeResponse()
+    def test_private_endpoint_connection_media_service(self, resource_group, storage_account):
+        storage_account = self.cmd('storage account show -n {account}'.format(account=storage_account)).get_output_in_json()
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'ams account',
+            'list_num': 3,
+            'resource': self.create_random_name('clitestams', 24),
+            'type': 'Microsoft.Media/mediaservices',
+            'extra_create': '--storage-account {storage_account} -l eastus'.format(
+                storage_account=storage_account['id'])
+        })
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
 
 if __name__ == '__main__':
     unittest.main()
