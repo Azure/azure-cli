@@ -5,45 +5,73 @@
 
 import time
 import unittest
-from azure.cli.testsdk import ScenarioTest,ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, record_only
 
 
 class TestBandwidth(ScenarioTest):
 
-    @unittest.skip('cannot run')
-    @ResourceGroupPreparer(key='rg')
+    @record_only()
     def test_bandwidth(self):
-        tag_key = self.create_random_name(prefix='key-', length=10)
-        tag_value = self.create_random_name(prefix='val-', length=10)
 
         self.kwargs.update({
-            'name': self.create_random_name(prefix='cli-', length=20),
+            'rg': 'dtest',
+            'name': 'dev1',
             'bwname': self.create_random_name(prefix='cli-', length=10),
             'sku': 'Edge',
             'location': 'eastus',
+            'days': 'Sunday',
+            'days-update': 'Monday',
+            'rate': '100',
+            'rate-update': '200',
+            'start': '00:00:00',
+            'start-update': '12:00:00',
+            'stop': '12:00:00',
+            'stop-update' : '23:00:00'
         })
 
-        self.cmd('databoxedge device create -l {location} --sku {sku} --name {name} -g {rg}', checks=[
-            self.check('name', '{name}'),
+        schedule = self.cmd('az databoxedge bandwidth-schedule create '
+                 '--device-name {name} --days {days} '
+                 '--name {bwname} --rate-in-mbps {rate} '
+                 '--resource-group {rg} --start {start} --stop {stop}',checks=[
+            self.check('days', ['Sunday']),
+            self.check('name', '{bwname}'),
+            self.check('rateInMbps', '{rate}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('deviceType', 'DataBoxEdgeDevice'),
-            self.check('sku.name', '{sku}'),
-            self.check('sku.tier', 'Standard'),
-            self.check('location', '{location}')
-        ])
-
-        self.cmd('az databoxedge bandwidth-schedule create '
-                 '--device-name {name} --days Sunday '
-                 '--name {bwname} --rate-in-mbps 100 '
-                 '--resource-group {rg} --start 0:0:0 --stop 12:00:00')
+            self.check('start', '{start}'),
+            self.check('stop', '{stop}')
+        ]).get_output_in_json()
 
         self.cmd('az databoxedge bandwidth-schedule update '
-                 '--device-name {name} --days Monday '
-                 '--name {bwname} --rate-in-mbps 150 '
-                 '--resource-group {rg} --start 12:00:00 --stop 23:00:00')
+                 '--device-name {name} --days {days-update} '
+                 '--name {bwname} --rate-in-mbps {rate-update} '
+                 '--resource-group {rg} --start {start-update} --stop {stop-update}',checks=[
+            self.check('id', schedule['id']),
+            self.check('days', ['Monday']),
+            self.check('name', '{bwname}'),
+            self.check('rateInMbps', '{rate-update}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('start', '{start-update}'),
+            self.check('stop', '{stop-update}')
+        ])
 
-        self.cmd('databoxedge bandwidth-schedule list -d {name} -g {rg}')
-        self.cmd('databoxedge bandwidth-schedule -d {name} -g {rg} --name {bwname}')
-        self.cmd('databoxedge bandwidth-schedule delete -n {name} -g {rg} --name {bwname} -y')
-        time.sleep(30)
+        self.cmd('databoxedge bandwidth-schedule list -d {name} -g {rg}', checks=[
+            self.check('[0].id', schedule['id']),
+            self.check('[0].days', ['Monday']),
+            self.check('[0].name', '{bwname}'),
+            self.check('[0].rateInMbps', '{rate-update}'),
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].start', '{start-update}'),
+            self.check('[0].stop', '{stop-update}')
+        ])
+        self.cmd('databoxedge bandwidth-schedule show -d {name} -g {rg} --name {bwname}', checks=[
+            self.check('id', schedule['id']),
+            self.check('days', ['Monday']),
+            self.check('name', '{bwname}'),
+            self.check('rateInMbps', '{rate-update}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('start', '{start-update}'),
+            self.check('stop', '{stop-update}')
+        ])
+        self.cmd('databoxedge bandwidth-schedule delete -d {name} -g {rg} --name {bwname} -y')
+        time.sleep(20)
         self.cmd('databoxedge bandwidth-schedule list -d {name} -g {rg}', checks=[self.is_empty()])
