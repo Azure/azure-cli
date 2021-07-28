@@ -4798,7 +4798,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         subscription_id = self.get_subscription_id()
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--ssh-key-value={ssh_key_value} --enable-node-public-ip --node-public-ip-prefix {ipprefix_id}'
+                     '--ssh-key-value={ssh_key_value} --enable-node-public-ip --node-public-ip-prefix-id {ipprefix_id}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].enableNodePublicIp', True),
@@ -5069,3 +5069,73 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             subprocess.call(["az", "extension", "remove", "--name", "azure-firewall"])
         except subprocess.CalledProcessError as err:
             raise CLIInternalError("Failed to uninstall azure-firewall extension with error: '{}'!".format(err))
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_node_osdisk_diskencryptionset(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        kv_name = self.create_random_name('cliakskv', 20)
+        key_name = self.create_random_name('cliakskey', 20)
+        des_name = self.create_random_name('cliaksdes', 20)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'kv_name': kv_name,
+            'key_name': key_name,
+            'des_name': des_name
+        })
+
+        # create key vault
+        create_kv_cmd = 'keyvault create -n {kv_name} -g {resource_group} --enable-purge-protection true --enable-soft-delete true'
+        self.cmd(create_kv_cmd, checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('name', kv_name)
+        ])
+
+        # create key
+        create_key_cmd = 'keyvault key create --vault-name {kv_name} --name {key_name} --protection software'
+        self.cmd(create_key_cmd, checks=[
+            self.check('attributes.enabled', True)
+        ])
+
+        # get key url and key vault id
+        get_kid_cmd = 'keyvault key show --vault-name {kv_name} --name {key_name}'
+        key_url = self.cmd(get_kid_cmd).get_output_in_json().get("key").get("kid")
+        subscription_id = self.get_subscription_id()
+        kv_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.KeyVault/vaults/{}".format(subscription_id, resource_group, kv_name)
+        self.kwargs.update({
+            'key_url': key_url,
+            'kv_id': kv_id
+        })
+
+        # create disk-encryption-set
+        create_des_cmd = 'disk-encryption-set create -n {des_name} -g {resource_group} --source-vault {kv_id} --key-url {key_url}'
+        self.cmd(create_des_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # get disk-encryption-set identity and id
+        get_des_identity_cmd = 'disk-encryption-set show -n {des_name}  -g {resource_group}'
+        des_identity = self.cmd(get_des_identity_cmd).get_output_in_json().get("identity").get("principalId")
+        des_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/diskEncryptionSets/{}".format(subscription_id, resource_group, des_name)
+        self.kwargs.update({
+            'des_identity': des_identity,
+            'des_id': des_id
+        })
+
+        # update key vault security policy settings
+        update_kv_cmd = 'keyvault set-policy -n {kv_name} -g {resource_group} --object-id {des_identity} --key-permissions wrapkey unwrapkey get'
+        self.cmd(update_kv_cmd, checks=[
+            self.check('properties.accessPolicies[1].objectId', des_identity)
+        ])
+
+        # create cluster
+        create_cmd = 'aks create -n {name} -g {resource_group} --ssh-key-value={ssh_key_value} --node-osdisk-diskencryptionset-id {des_id}'
+        self.cmd(create_cmd, checks=[
+            self.check('diskEncryptionSetId', des_id)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
