@@ -4677,7 +4677,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # install kubectl
         try:
-            subprocess.call(["az", "aks", "install-cli"], shell=True)
+            subprocess.call(["az", "aks", "install-cli"])
         except subprocess.CalledProcessError as err:
             raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
