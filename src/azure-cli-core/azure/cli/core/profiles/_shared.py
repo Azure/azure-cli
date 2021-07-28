@@ -8,6 +8,11 @@ from enum import Enum
 from functools import total_ordering
 from importlib import import_module
 
+from knack.log import get_logger
+
+
+logger = get_logger(__name__)
+
 
 class APIVersionException(Exception):
     def __init__(self, type_name, api_profile):
@@ -573,6 +578,8 @@ def _get_attr(sdk_path, mod_attr_path, checked=True):
                 op = getattr(op, part)
         return op
     except (ImportError, AttributeError) as ex:
+        import traceback
+        logger.debug(traceback.format_exc())
         if checked:
             return None
         raise ex
