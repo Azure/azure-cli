@@ -4870,7 +4870,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # install kubectl
         try:
-            subprocess.call(["az", "aks", "install-cli"], shell=True)
+            subprocess.call(["az", "aks", "install-cli"])
         except subprocess.CalledProcessError as err:
             raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
@@ -4883,3 +4883,189 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # live only due to role assignment is not mocked
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_outbound_type_udr(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        vnet_name = self.create_random_name('cliaksvnet', 20)
+        aks_subnet_name = self.create_random_name('cliakssubnet', 20)
+        fw_subnet_name = 'AzureFirewallSubnet'  # this must not be changed
+        fw_publicip_name = self.create_random_name('clifwpublicip', 20)
+        fw_name = self.create_random_name('cliaksfw', 20)
+        fw_ipconfig_name = self.create_random_name('cliaksfwipconfig', 20)
+        fw_route_table_name = self.create_random_name('cliaksfwrt', 20)
+        fw_route_name = self.create_random_name('cliaksfwrn', 20)
+        fw_route_internet_name = self.create_random_name('cliaksfwrin', 20)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'vnet_name': vnet_name,
+            'aks_subnet_name': aks_subnet_name,
+            'fw_subnet_name': fw_subnet_name,
+            'fw_publicip_name': fw_publicip_name,
+            'fw_name': fw_name,
+            'fw_ipconfig_name': fw_ipconfig_name,
+            'fw_route_table_name': fw_route_table_name,
+            'fw_route_name': fw_route_name,
+            'fw_route_internet_name': fw_route_internet_name
+        })
+
+        # dedicated virtual network with AKS subnet
+        aks_subnet_cmd = 'network vnet create -g {resource_group} -n {vnet_name} ' \
+                         '--address-prefixes 10.42.0.0/16 --subnet-name {aks_subnet_name} ' \
+                         '--subnet-prefix 10.42.1.0/24'
+        self.cmd(aks_subnet_cmd, checks=[
+            self.check('newVNet.provisioningState', 'Succeeded'),
+            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.42.0.0/16'),
+            self.check('newVNet.subnets[0].addressPrefix', '10.42.1.0/24'),
+            self.check('newVNet.subnets[0].name', aks_subnet_name),
+        ])
+
+        # dedicated subnet for Azure Firewall (Firewall name cannot be changed)
+        fw_subnet_cmd = 'network vnet subnet create -g {resource_group} --vnet-name {vnet_name} ' \
+                         '--address-prefixes 10.42.2.0/24 --name {fw_subnet_name}'
+        self.cmd(fw_subnet_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addressPrefix', '10.42.2.0/24'),
+            self.check('name', fw_subnet_name)
+        ])
+
+        # create public ip
+        public_ip_cmd = 'network public-ip create -g {resource_group} -n {fw_publicip_name} --sku Standard'
+        self.cmd(public_ip_cmd, checks=[
+            self.check('publicIp.name', fw_publicip_name),
+            self.check('publicIp.sku.name', 'Standard')
+        ])
+
+        # install Azure Firewall preview CLI extension
+        try:
+            subprocess.call(["az", "extension", "add", "--name", "azure-firewall"])
+        except subprocess.CalledProcessError as err:
+            raise CLIInternalError("Failed to install azure-firewall extension with error: '{}'!".format(err))
+
+        # deploy Azure Firewall
+        deploy_azfw_cmd = 'network firewall create -g {resource_group} -n {fw_name} --enable-dns-proxy true'
+        self.cmd(deploy_azfw_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', fw_name),
+            self.check('"Network.DNS.EnableProxy"', 'true') # pending verification
+        ])
+
+        # configure Firewall IP Config
+        config_fw_ip_config_cmd = 'network firewall ip-config create -g {resource_group} -f {fw_name} -n {fw_ipconfig_name} --public-ip-address {fw_publicip_name} --vnet-name {vnet_name}'
+        self.cmd(config_fw_ip_config_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        get_fw_public_ip_cmd = 'network public-ip show -g {resource_group} -n {fw_publicip_name}'
+        fw_public_ip = self.cmd(get_fw_public_ip_cmd).get_output_in_json()
+        fw_public_ip_address = fw_public_ip.get("ipAddress")
+
+        get_fw_private_ip_cmd = 'network firewall show -g {resource_group} -n {fw_name}'
+        fw_private_ip = self.cmd(get_fw_private_ip_cmd).get_output_in_json()
+        fw_private_ip_address = fw_private_ip.get("ipConfigurations")[0].get("privateIpAddress")
+
+        self.kwargs.update({
+            'fw_public_ip_address': fw_public_ip_address,
+            'fw_private_ip_address': fw_private_ip_address
+        })
+
+        # create UDR and add a route for Azure Firewall
+        create_route_table_cmd = 'network route-table create -g {resource_group} --name {fw_route_table_name}'
+        self.cmd(create_route_table_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        create_route_cmd = 'network route-table route create -g {resource_group} --name {fw_route_name} ' \
+                           '--route-table-name {fw_route_table_name} --address-prefix 0.0.0.0/0 ' \
+                           '--next-hop-type VirtualAppliance --next-hop-ip-address {fw_private_ip_address}'
+        self.cmd(create_route_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        create_route_internet_cmd = 'network route-table route create -g {resource_group} --name {fw_route_internet_name} ' \
+                                    '--route-table-name {fw_route_table_name} --address-prefix {fw_public_ip_address}/32 ' \
+                                    '--next-hop-type Internet'
+        self.cmd(create_route_internet_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # add FW Network Rules
+        create_udp_network_rule_cmd = "network firewall network-rule create -g {resource_group} -f {fw_name} " \
+                                      "--collection-name 'aksfwnr' -n 'apiudp' --protocols 'UDP' --source-addresses '*' " \
+                                      "--destination-addresses 'AzureCloud.{location}' --destination-ports 1194 " \
+                                      "--action allow --priority 100"
+        self.cmd(create_udp_network_rule_cmd, checks=[
+            self.check('destinationAddresses[0]', 'AzureCloud.{}'.format(resource_group_location))
+        ])
+
+        create_tcp_network_rule_cmd = "network firewall network-rule create -g {resource_group} -f {fw_name} " \
+                                      "--collection-name 'aksfwnr' -n 'apitcp' --protocols 'TCP' --source-addresses '*' " \
+                                      "--destination-addresses 'AzureCloud.{location}' --destination-ports 9000"
+        self.cmd(create_tcp_network_rule_cmd, checks=[
+            self.check('destinationAddresses[0]', 'AzureCloud.{}'.format(resource_group_location))
+        ])
+
+        create_time_newtork_rule_cmd = "network firewall network-rule create -g {resource_group} -f {fw_name} " \
+                                       "--collection-name 'aksfwnr' -n 'time' --protocols 'UDP' --source-addresses '*' " \
+                                       "--destination-fqdns 'ntp.ubuntu.com' --destination-ports 123"
+        self.cmd(create_time_newtork_rule_cmd, checks=[
+            self.check('destinationFqdns[0]', 'ntp.ubuntu.com')
+        ])
+
+        # add FW Application Rules
+        create_app_rule_cmd = "network firewall application-rule create -g {resource_group} -f {fw_name} " \
+                              "--collection-name 'aksfwar' -n 'fqdn' --protocols 'http=80' 'https=443' --source-addresses '*' " \
+                              "--fqdn-tags 'AzureKubernetesService' --action allow --priority 100"
+        self.cmd(create_app_rule_cmd, checks=[
+            self.check('fqdnTags[0]', 'AzureKubernetesService')
+        ])
+
+        # associate route table with next hop to Firewall to the AKS subnet
+        update_route_table_cmd = 'network vnet subnet update -g {resource_group} --vnet-name {vnet_name} --name {aks_subnet_name} --route-table {fw_route_table_name}'
+        self.cmd(update_route_table_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        subscription_id = self.get_subscription_id()
+        vnet_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}".format(subscription_id, resource_group, vnet_name)
+        vnet_subnet_id = "{}/subnets/{}".format(vnet_id, aks_subnet_name)
+        self.kwargs.update({
+            'vnet_id': vnet_id,
+            'vnet_subnet_id': vnet_subnet_id
+        })
+
+        # role assignment
+        role_assignment_cmd = 'role assignment create --assignee={service_principal} --scope {vnet_id} --role "Network Contributor"'
+        self.cmd(role_assignment_cmd, checks=[
+            self.check('scope', vnet_id)
+        ])
+
+        # create cluster
+        subscription_id = self.get_subscription_id()
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} --outbound-type userDefinedRouting --vnet-subnet-id {vnet_subnet_id} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--api-server-authorized-ip-ranges {fw_public_ip_address}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.outboundType', 'userDefinedRouting')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+        # uninstall Azure Firewall preview CLI extension
+        try:
+            subprocess.call(["az", "extension", "remove", "--name", "azure-firewall"])
+        except subprocess.CalledProcessError as err:
+            raise CLIInternalError("Failed to uninstall azure-firewall extension with error: '{}'!".format(err))
