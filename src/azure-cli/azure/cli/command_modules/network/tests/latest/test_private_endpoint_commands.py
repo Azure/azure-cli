@@ -2003,6 +2003,30 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, approve=False, rejected=False)
 
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_web")
+    def test_private_endpoint_connection_web(self, resource_group):
+
+        web_vnet = self.create_random_name('cli-vnet-web', 24)
+        web_subnet = self.create_random_name('cli-subnet-web', 24)
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'appservice ase',
+            'list_num': 1,
+            'type': 'Microsoft.Web/hostingEnvironments',
+            'extra_create': '--vnet-name {vnet} --subnet {subnet} --kind asev3'.format(
+                vnet=web_vnet,
+                subnet=web_subnet
+            ),
+            'web_vnet': web_vnet,
+            'web_subnet': web_subnet
+        })
+
+        self.cmd('network vnet create -g {rg} -n {web_vnet} --address-prefixes 10.1.0.0/16 '
+                 '--subnet-name {web_subnet} --subnet-prefixes 10.1.0.0/24')
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_service_bus")
     def test_private_endpoint_connection_service_bus(self, resource_group):
         self.kwargs.update({
