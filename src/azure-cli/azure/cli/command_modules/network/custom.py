@@ -2998,9 +2998,9 @@ def show_express_route_port_identity(cmd, resource_group_name, express_route_por
     return ports.identity
 
 
-def update_express_route_port_link(cmd, instance, express_route_port_name, link_name,
+def update_express_route_port_link(cmd, instance, parent, express_route_port_name, link_name,
                                    macsec_cak_secret_identifier=None, macsec_ckn_secret_identifier=None,
-                                   macsec_cipher=None, admin_state=None):
+                                   macsec_sci_state=None, macsec_cipher=None, admin_state=None):
     """
     :param cmd:
     :param instance: an instance of ExpressRoutePort
@@ -3012,30 +3012,22 @@ def update_express_route_port_link(cmd, instance, express_route_port_name, link_
     :param admin_state:
     :return:
     """
-    if len(instance.links) != 2:
-        raise CLIError("The number of ExpressRoute Links should be 2. "
-                       "Code may not perform as expected. Please contact us to update CLI.")
-
-    try:
-        link_index = [index for index, link in enumerate(instance.links) if link.name == link_name][0]
-    except Exception:
-        raise CLIError('ExpressRoute Link "{}" not found'.format(link_name))
-
-    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher]):
-        instance.links[link_index].mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
-        instance.links[link_index].mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
+    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher, macsec_sci_state]):
+        instance.mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
+        instance.mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
 
         # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
         # need to remove this conversion when the issue is fixed.
         if macsec_cipher is not None:
             macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
-            macsec_cipher = macsec_ciphers_tmp[macsec_cipher]
-        instance.links[link_index].mac_sec_config.cipher = macsec_cipher
+            macsec_cipher = macsec_ciphers_tmp.get(macsec_cipher, macsec_cipher)
+        instance.mac_sec_config.cipher = macsec_cipher
+        instance.mac_sec_config.sci_state = macsec_sci_state
 
     if admin_state is not None:
-        instance.links[link_index].admin_state = admin_state
+        instance.admin_state = admin_state
 
-    return instance
+    return parent
 # endregion
 
 
