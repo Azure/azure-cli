@@ -251,15 +251,6 @@ examples:
     text: az mysql flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --restore-time "2017-06-15T13:10:00Z"
 """
 
-helps['mysql flexible-server geo-restore'] = """
-type: command
-short-summary: Geo-Restore a flexible server from backup.
-examples:
-  - name: Restore 'testServer' to a different location as a new server 'testServerNew'.
-    text: az mysql flexible-server geo-restore --resource-group testGroup --name testServerNew --source-server testServer --location testLocation
-"""
-
-
 helps['mysql flexible-server show'] = """
 type: command
 short-summary: Get the details of a flexible server.

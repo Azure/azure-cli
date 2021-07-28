@@ -41,8 +41,7 @@ def flexible_server_create(cmd, client,
                            tags=None, database_name=None,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
-                           high_availability=None, zone=None,
-                           geo_redundant_backup=None, standby_availability_zone=None, yes=False):
+                           high_availability=None, zone=None, standby_availability_zone=None, yes=False):
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
@@ -98,8 +97,7 @@ def flexible_server_create(cmd, client,
 
     storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb)
 
-    backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
-                                                      geo_redundant_backup=geo_redundant_backup)
+    backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention)
 
     sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 

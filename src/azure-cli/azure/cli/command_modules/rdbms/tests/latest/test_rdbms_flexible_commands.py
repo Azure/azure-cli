@@ -378,15 +378,15 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
     postgres_location = 'eastus2euap'
     mysql_location = 'eastus2euap'
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # def test_postgres_flexible_server_mgmt_create_validator(self, resource_group):
-    #     self._test_mgmt_create_validator('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_mgmt_create_validator(self, resource_group):
+        self._test_mgmt_create_validator('postgres', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_mgmt_create_validator(self, resource_group):
-    #     self._test_mgmt_create_validator('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_mgmt_create_validator(self, resource_group):
+        self._test_mgmt_create_validator('mysql', resource_group)
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
