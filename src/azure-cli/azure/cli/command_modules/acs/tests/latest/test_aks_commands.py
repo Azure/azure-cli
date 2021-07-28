@@ -4822,12 +4822,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
                      '--ssh-key-value={ssh_key_value} --pod-cidr 10.244.0.0/16 --service-cidr 10.0.0.0/16 ' \
-                     '--docker-bridge-address 172.17.0.1/16 --network-plugin kubenet --network-policy calico'
+                     '--docker-bridge-address 172.17.0.1/16 --dns-service-ip 10.0.2.10 ' \
+                     '--network-plugin kubenet --network-policy calico'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('networkProfile.dockerBridgeCidr', '172.17.0.1/16'),
             self.check('networkProfile.podCidr', '10.244.0.0/16'),
             self.check('networkProfile.serviceCidr', '10.0.0.0/16'),
+            self.check('networkProfile.dnsServiceIp', '10.0.2.10'),
             self.check('networkProfile.networkPlugin', 'kubenet'),
             self.check('networkProfile.networkPolicy', 'calico')
         ])
@@ -5070,6 +5072,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         except subprocess.CalledProcessError as err:
             raise CLIInternalError("Failed to uninstall azure-firewall extension with error: '{}'!".format(err))
 
+    # live only due to key vault creation is not mocked
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_node_osdisk_diskencryptionset(self, resource_group, resource_group_location):
@@ -5134,6 +5138,74 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create -n {name} -g {resource_group} --ssh-key-value={ssh_key_value} --node-osdisk-diskencryptionset-id {des_id}'
         self.cmd(create_cmd, checks=[
             self.check('diskEncryptionSetId', des_id)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # need to register feature 'Microsoft.Compute/EncryptionAtHost'
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_enable_encryption(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} --enable-encryption-at-host'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].enableEncryptionAtHost', True)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_enable_azure_rbac(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} --enable-aad --enable-azure-rbac'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.enableAzureRbac', True),
+            self.check('aadProfile.managed', True),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_disable_rbac(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} --disable-rbac'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('enableRbac', False)
         ])
 
         # delete
