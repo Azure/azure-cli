@@ -17,7 +17,7 @@ from .recording_processors import StorageAccountSASReplacer
 
 from azure.cli.testsdk import (
     ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only,
-    record_only, KeyVaultPreparer)
+    KeyVaultPreparer, record_only)
 
 from knack.util import CLIError
 
@@ -2174,43 +2174,65 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
             ExpressRoutePortLOAContentReplacer()
         ])
 
-    def test_network_express_route_port_identity(self):
-        """
-        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
-        We run test manually for now. Any changes related to this command, please contract to Service team for help.
-        For ussage, run `az network express-route port identity --help` to get help.
-        """
-        pass
-
-    def test_network_express_route_port_config_macsec(self):
-        """
-        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
-        We run test manually for now. Any changes related to this command, please contract to Service team for help.
-        For ussage, run `az network express-route port link update --help` to get help.
-        """
-        pass
-
-    def test_network_express_route_port_config_adminstate(self):
-        """
-        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
-        We run test manually for now. Any changes related to this command, please contract to Service team for help.
-        For ussage, run `az network express-route port link update --help` to get help.
-        """
-        pass
-
-    @unittest.skip('rg not found')
     @AllowLargeResponse()
-    def test_network_express_route_port_generate_loa(self):
-        """
-        The ExpressRoutePort comes from service team and located in a different subscription. And it will be revoked after this feature.
-        So, this test is record only.
-        """
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_port', location='eastus')
+    @KeyVaultPreparer(name_prefix='test-er-port-kv', location='eastus')
+    def test_network_express_route_port(self, resource_group, key_vault):
         self.kwargs.update({
-            'rg': 'ER-AutoTriage-RG',
-            'er_port': 'ER-autotriage-erdirect',
+            'rg': resource_group,
+            'location': 'eastus',
+            'name': 'expressRouteTest',
+            'peeringRG': 'Equinix-Ashburn-DC2',
+            'encapsulation': 'QinQ',
+            'bandwidth': '10 Gbps',
+            'cipher': 'GcmAes128',
+            'kv': key_vault,
+            'CAK_name': 'CAK',
+            'CAK_value': 'b4355b9ccaf727d2ba7744ee991ce00e',
+            'CKN_name': 'CKN',
+            'CKN_value': '93e9ce8469eff0536784fc4ad253b5a6',
         })
+        self.kwargs['CAK_id'] = self.cmd('keyvault secret set --name {CAK_name} --vault-name {kv} --value {CAK_value}').get_output_in_json()['id']
+        self.kwargs['CKN_id'] = self.cmd('keyvault secret set --name {CKN_name} --vault-name {kv} --value {CKN_value}').get_output_in_json()['id']
+        identity = self.cmd('identity create -g {rg} -n {name}').get_output_in_json()
+        self.cmd('keyvault set-policy -n {kv} --secret-permissions get --object-id ' + identity['principalId'])
 
-        self.cmd('network express-route port generate-loa --customer-name MyCustomer -g {rg} --name {er_port} -f loa1')
+        self.cmd('network express-route port location list')
+
+        self.cmd('network express-route port location show -l {peeringRG}', checks=[
+            self.check('name', self.kwargs['peeringRG'])
+        ])
+
+        self.cmd('network express-route port create -g {rg} -n {name} --location {location} --peering-location {peeringRG} --encapsulation {encapsulation} --bandwidth {bandwidth}', checks=[
+            self.check('name', self.kwargs['name']),
+            self.check('length(links)', 2),
+        ])
+        self.cmd('network express-route port list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network express-route port show -g {rg} -n {name}')
+
+        self.cmd('network express-route port identity assign -g {rg} -n {name} --identity ' + identity['id'])
+
+        self.cmd('network express-route port identity show -g {rg} -n {name}')
+
+        self.cmd('network express-route port link list -g {rg} --port-name {name}', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('network express-route port link show -g {rg} --port-name {name} -n link1', checks=[
+            self.check('name', 'link1')
+        ])
+
+        self.cmd('network express-route port link update -g {rg} --port-name {name} -n link1 '
+                 '--macsec-ckn-secret-identifier {CKN_id} --macsec-cak-secret-identifier {CAK_id} '
+                 '--macsec-cipher {cipher} --admin-state', checks=[
+            self.check('adminState', 'Enabled'),
+            self.check('macSecConfig.cakSecretIdentifier', self.kwargs['CAK_id']),
+            self.check('macSecConfig.cknSecretIdentifier', self.kwargs['CKN_id']),
+            self.check('macSecConfig.cipher', self.kwargs['cipher']),
+        ])
+
+        self.cmd('network express-route port generate-loa --customer-name MyCustomer -g {rg} --name {name} -f loa1')
 
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):

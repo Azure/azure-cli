@@ -13,18 +13,21 @@ interactions:
       ParameterSetName:
       - --backup-management-type --workload-type -g -v -c -i
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520551,"title":"UserErrorRecoverySysScriptFailedToTriggerRestore","message":"Restore
+        failed because \"RecoverySys.py\" script failed to trigger restore.","recommendations":["Work
+        with SAP HANA team to fix this issue. Failure details are provided in the
+        \"Addition Details\" section below."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
-        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-06-21T12:06:22.1255061Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-07-26T12:06:21.8478251Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
         user and retry the operation."]},"protectedItemDataSourceId":"17592946582397","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-29T12:00:14.494Z","recoveryPointCount":16,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;archiveresourcegroup;archhanavm1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/archiveresourcegroup/providers/Microsoft.Compute/virtualMachines/archhanavm1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupPolicies/saphanaltr","lastRecoveryPoint":"2021-02-12T02:27:42.024Z","isArchiveEnabled":false}}'
@@ -32,11 +35,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2179'
+      - '2579'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:26 GMT
+      - Mon, 26 Jul 2021 17:27:03 GMT
       expires:
       - '-1'
       pragma:
@@ -52,7 +55,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '148'
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
@@ -72,29 +75,37 @@ interactions:
       ParameterSetName:
       - --backup-management-type --workload-type -g -v -c -i
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints?api-version=2021-06-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/117403551765423","name":"117403551765423","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-11T12:00:14.754Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
-        having active dependencies for restore is not eligible for Archive Move. "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112766743026087","name":"112766743026087","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-10T12:00:14.79Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":4,"extendedInfo":{"RehydratedRPExpiryTime":"2021-07-07T09:46:04.2869345Z"}}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        having active dependencies for restore is not eligible for Archive Move. "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112766743026087","name":"112766743026087","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-10T12:00:14.79Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":4,"extendedInfo":{"RehydratedRPExpiryTime":"2021-08-07T12:51:40.7455045Z"}}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
         is not eligible for archive move as it has already been moved to archive tier.
-        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119145683997902","name":"119145683997902","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-09T12:00:15.554Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119145683997902","name":"119145683997902","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-09T12:00:15.554Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":4,"extendedInfo":{"RehydratedRPExpiryTime":"2021-08-10T05:43:50.3542215Z"}}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
         is not eligible for archive move as it has already been moved to archive tier.
-        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116884148315522","name":"116884148315522","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-08T12:00:13.119Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/109855477669987","name":"109855477669987","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-07T12:00:15.774Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122854995757371","name":"122854995757371","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-06T12:00:12.877Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118492316144851","name":"118492316144851","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-05T12:00:13.909Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/110092463008623","name":"110092463008623","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-04T12:00:16.647Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112099468275258","name":"112099468275258","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-03T12:00:15.167Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/120101569339838","name":"120101569339838","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-02T12:00:15.279Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118475863557998","name":"118475863557998","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-01T12:00:15.009Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122258461196009","name":"122258461196009","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-31T12:00:16.729Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116584018931286","name":"116584018931286","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-30T12:00:15.915Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119021472543402","name":"119021472543402","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-29T12:00:14.494Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116884148315522","name":"116884148315522","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-08T12:00:13.119Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/109855477669987","name":"109855477669987","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-07T12:00:15.774Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122854995757371","name":"122854995757371","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-06T12:00:12.877Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118492316144851","name":"118492316144851","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-05T12:00:13.909Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/110092463008623","name":"110092463008623","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-04T12:00:16.647Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112099468275258","name":"112099468275258","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-03T12:00:15.167Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/120101569339838","name":"120101569339838","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-02T12:00:15.279Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118475863557998","name":"118475863557998","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-01T12:00:15.009Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122258461196009","name":"122258461196009","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-31T12:00:16.729Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116584018931286","name":"116584018931286","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-30T12:00:15.915Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119021472543402","name":"119021472543402","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-29T12:00:14.494Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '11253'
+      - '11706'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:27 GMT
+      - Mon, 26 Jul 2021 17:27:04 GMT
       expires:
       - '-1'
       pragma:
@@ -130,18 +141,21 @@ interactions:
       ParameterSetName:
       - -g -v -i -c --backup-management-type --is-ready-for-move --target-tier --query
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520551,"title":"UserErrorRecoverySysScriptFailedToTriggerRestore","message":"Restore
+        failed because \"RecoverySys.py\" script failed to trigger restore.","recommendations":["Work
+        with SAP HANA team to fix this issue. Failure details are provided in the
+        \"Addition Details\" section below."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
-        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-06-21T12:06:22.1255061Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-07-26T12:06:21.8478251Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
         user and retry the operation."]},"protectedItemDataSourceId":"17592946582397","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-29T12:00:14.494Z","recoveryPointCount":16,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;archiveresourcegroup;archhanavm1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/archiveresourcegroup/providers/Microsoft.Compute/virtualMachines/archhanavm1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupPolicies/saphanaltr","lastRecoveryPoint":"2021-02-12T02:27:42.024Z","isArchiveEnabled":false}}'
@@ -149,11 +163,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2179'
+      - '2579'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:28 GMT
+      - Mon, 26 Jul 2021 17:27:04 GMT
       expires:
       - '-1'
       pragma:
@@ -169,7 +183,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '148'
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
@@ -189,29 +203,37 @@ interactions:
       ParameterSetName:
       - -g -v -i -c --backup-management-type --is-ready-for-move --target-tier --query
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints?api-version=2021-06-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/117403551765423","name":"117403551765423","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-11T12:00:14.754Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
-        having active dependencies for restore is not eligible for Archive Move. "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112766743026087","name":"112766743026087","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-10T12:00:14.79Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":4,"extendedInfo":{"RehydratedRPExpiryTime":"2021-07-07T09:46:04.2869345Z"}}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        having active dependencies for restore is not eligible for Archive Move. "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112766743026087","name":"112766743026087","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-10T12:00:14.79Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":4,"extendedInfo":{"RehydratedRPExpiryTime":"2021-08-07T12:51:40.7455045Z"}}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
         is not eligible for archive move as it has already been moved to archive tier.
-        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119145683997902","name":"119145683997902","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-09T12:00:15.554Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119145683997902","name":"119145683997902","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-09T12:00:15.554Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":4,"extendedInfo":{"RehydratedRPExpiryTime":"2021-08-10T05:43:50.3542215Z"}}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
         is not eligible for archive move as it has already been moved to archive tier.
-        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116884148315522","name":"116884148315522","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-08T12:00:13.119Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/109855477669987","name":"109855477669987","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-07T12:00:15.774Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122854995757371","name":"122854995757371","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-06T12:00:12.877Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118492316144851","name":"118492316144851","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-05T12:00:13.909Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/110092463008623","name":"110092463008623","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-04T12:00:16.647Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112099468275258","name":"112099468275258","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-03T12:00:15.167Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/120101569339838","name":"120101569339838","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-02T12:00:15.279Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118475863557998","name":"118475863557998","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-01T12:00:15.009Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122258461196009","name":"122258461196009","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-31T12:00:16.729Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116584018931286","name":"116584018931286","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-30T12:00:15.915Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119021472543402","name":"119021472543402","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-29T12:00:14.494Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116884148315522","name":"116884148315522","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-08T12:00:13.119Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/109855477669987","name":"109855477669987","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-07T12:00:15.774Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122854995757371","name":"122854995757371","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-06T12:00:12.877Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118492316144851","name":"118492316144851","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-05T12:00:13.909Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/110092463008623","name":"110092463008623","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-04T12:00:16.647Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112099468275258","name":"112099468275258","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-03T12:00:15.167Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/120101569339838","name":"120101569339838","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-02T12:00:15.279Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118475863557998","name":"118475863557998","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-01T12:00:15.009Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122258461196009","name":"122258461196009","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-31T12:00:16.729Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116584018931286","name":"116584018931286","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-30T12:00:15.915Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119021472543402","name":"119021472543402","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-29T12:00:14.494Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '11253'
+      - '11706'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:29 GMT
+      - Mon, 26 Jul 2021 17:27:05 GMT
       expires:
       - '-1'
       pragma:
@@ -247,18 +269,21 @@ interactions:
       ParameterSetName:
       - -g -v -i -c --backup-management-type --tier --query
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520551,"title":"UserErrorRecoverySysScriptFailedToTriggerRestore","message":"Restore
+        failed because \"RecoverySys.py\" script failed to trigger restore.","recommendations":["Work
+        with SAP HANA team to fix this issue. Failure details are provided in the
+        \"Addition Details\" section below."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
-        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-06-21T12:06:22.1255061Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-07-26T12:06:21.8478251Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
         user and retry the operation."]},"protectedItemDataSourceId":"17592946582397","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-29T12:00:14.494Z","recoveryPointCount":16,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;archiveresourcegroup;archhanavm1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/archiveresourcegroup/providers/Microsoft.Compute/virtualMachines/archhanavm1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupPolicies/saphanaltr","lastRecoveryPoint":"2021-02-12T02:27:42.024Z","isArchiveEnabled":false}}'
@@ -266,11 +291,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2179'
+      - '2579'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:29 GMT
+      - Mon, 26 Jul 2021 17:27:07 GMT
       expires:
       - '-1'
       pragma:
@@ -306,29 +331,37 @@ interactions:
       ParameterSetName:
       - -g -v -i -c --backup-management-type --tier --query
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints?api-version=2021-06-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/117403551765423","name":"117403551765423","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-11T12:00:14.754Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
-        having active dependencies for restore is not eligible for Archive Move. "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112766743026087","name":"112766743026087","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-10T12:00:14.79Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":4,"extendedInfo":{"RehydratedRPExpiryTime":"2021-07-07T09:46:04.2869345Z"}}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        having active dependencies for restore is not eligible for Archive Move. "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112766743026087","name":"112766743026087","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-10T12:00:14.79Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":4,"extendedInfo":{"RehydratedRPExpiryTime":"2021-08-07T12:51:40.7455045Z"}}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
         is not eligible for archive move as it has already been moved to archive tier.
-        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119145683997902","name":"119145683997902","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-09T12:00:15.554Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119145683997902","name":"119145683997902","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-09T12:00:15.554Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":4,"extendedInfo":{"RehydratedRPExpiryTime":"2021-08-10T05:43:50.3542215Z"}}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
         is not eligible for archive move as it has already been moved to archive tier.
-        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116884148315522","name":"116884148315522","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-08T12:00:13.119Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/109855477669987","name":"109855477669987","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-07T12:00:15.774Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122854995757371","name":"122854995757371","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-06T12:00:12.877Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118492316144851","name":"118492316144851","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-05T12:00:13.909Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/110092463008623","name":"110092463008623","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-04T12:00:16.647Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112099468275258","name":"112099468275258","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-03T12:00:15.167Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/120101569339838","name":"120101569339838","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-02T12:00:15.279Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118475863557998","name":"118475863557998","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-01T12:00:15.009Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122258461196009","name":"122258461196009","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-31T12:00:16.729Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116584018931286","name":"116584018931286","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-30T12:00:15.915Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119021472543402","name":"119021472543402","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-29T12:00:14.494Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116884148315522","name":"116884148315522","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-08T12:00:13.119Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/109855477669987","name":"109855477669987","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-07T12:00:15.774Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122854995757371","name":"122854995757371","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-06T12:00:12.877Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118492316144851","name":"118492316144851","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-05T12:00:13.909Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        is not eligible for archive move as it has already been moved to archive tier.
+        "}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/110092463008623","name":"110092463008623","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-04T12:00:16.647Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/112099468275258","name":"112099468275258","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-03T12:00:15.167Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/120101569339838","name":"120101569339838","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-02T12:00:15.279Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/118475863557998","name":"118475863557998","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-01T12:00:15.009Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/122258461196009","name":"122258461196009","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-31T12:00:16.729Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116584018931286","name":"116584018931286","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-30T12:00:15.915Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119021472543402","name":"119021472543402","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-01-29T12:00:14.494Z","type":"Full","recoveryPointTierDetails":[{"type":2,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":true,"additionalInfo":""}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '11253'
+      - '11706'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:31 GMT
+      - Mon, 26 Jul 2021 17:27:08 GMT
       expires:
       - '-1'
       pragma:
@@ -362,20 +395,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520551,"title":"UserErrorRecoverySysScriptFailedToTriggerRestore","message":"Restore
+        failed because \"RecoverySys.py\" script failed to trigger restore.","recommendations":["Work
+        with SAP HANA team to fix this issue. Failure details are provided in the
+        \"Addition Details\" section below."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
-        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-06-21T12:06:22.1255061Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-07-26T12:06:21.8478251Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
         user and retry the operation."]},"protectedItemDataSourceId":"17592946582397","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-29T12:00:14.494Z","recoveryPointCount":16,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;archiveresourcegroup;archhanavm1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/archiveresourcegroup/providers/Microsoft.Compute/virtualMachines/archhanavm1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupPolicies/saphanaltr","lastRecoveryPoint":"2021-02-12T02:27:42.024Z","isArchiveEnabled":false}}'
@@ -383,11 +419,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2179'
+      - '2579'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:33 GMT
+      - Mon, 26 Jul 2021 17:27:09 GMT
       expires:
       - '-1'
       pragma:
@@ -403,7 +439,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '148'
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
@@ -425,30 +461,30 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints/116884148315522/move?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints/110092463008623/move?api-version=2021-06-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/operationsStatus/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/operationsStatus/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 22 Jun 2021 11:54:35 GMT
+      - Mon, 26 Jul 2021 17:27:10 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/operationResults/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/operationResults/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -474,17 +510,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -493,7 +529,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:36 GMT
+      - Mon, 26 Jul 2021 17:27:11 GMT
       expires:
       - '-1'
       pragma:
@@ -527,17 +563,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -546,7 +582,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:38 GMT
+      - Mon, 26 Jul 2021 17:27:12 GMT
       expires:
       - '-1'
       pragma:
@@ -580,17 +616,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -599,7 +635,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:39 GMT
+      - Mon, 26 Jul 2021 17:27:13 GMT
       expires:
       - '-1'
       pragma:
@@ -633,17 +669,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -652,7 +688,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:41 GMT
+      - Mon, 26 Jul 2021 17:27:15 GMT
       expires:
       - '-1'
       pragma:
@@ -686,17 +722,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -705,7 +741,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:42 GMT
+      - Mon, 26 Jul 2021 17:27:16 GMT
       expires:
       - '-1'
       pragma:
@@ -739,17 +775,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -758,7 +794,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:44 GMT
+      - Mon, 26 Jul 2021 17:27:18 GMT
       expires:
       - '-1'
       pragma:
@@ -792,17 +828,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -811,7 +847,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:45 GMT
+      - Mon, 26 Jul 2021 17:27:19 GMT
       expires:
       - '-1'
       pragma:
@@ -845,17 +881,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -864,7 +900,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:46 GMT
+      - Mon, 26 Jul 2021 17:27:21 GMT
       expires:
       - '-1'
       pragma:
@@ -898,17 +934,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -917,7 +953,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:48 GMT
+      - Mon, 26 Jul 2021 17:27:22 GMT
       expires:
       - '-1'
       pragma:
@@ -951,17 +987,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -970,7 +1006,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:49 GMT
+      - Mon, 26 Jul 2021 17:27:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1004,17 +1040,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1023,7 +1059,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:51 GMT
+      - Mon, 26 Jul 2021 17:27:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1057,17 +1093,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1076,7 +1112,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:52 GMT
+      - Mon, 26 Jul 2021 17:27:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1110,17 +1146,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1129,7 +1165,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:54 GMT
+      - Mon, 26 Jul 2021 17:27:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1163,17 +1199,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1182,7 +1218,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:55 GMT
+      - Mon, 26 Jul 2021 17:27:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1216,17 +1252,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1235,7 +1271,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:56 GMT
+      - Mon, 26 Jul 2021 17:27:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1269,17 +1305,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1288,7 +1324,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:58 GMT
+      - Mon, 26 Jul 2021 17:27:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1322,17 +1358,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1341,7 +1377,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:54:59 GMT
+      - Mon, 26 Jul 2021 17:27:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1375,17 +1411,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1394,7 +1430,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:01 GMT
+      - Mon, 26 Jul 2021 17:27:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1428,17 +1464,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1447,7 +1483,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:02 GMT
+      - Mon, 26 Jul 2021 17:27:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1481,17 +1517,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1500,7 +1536,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:04 GMT
+      - Mon, 26 Jul 2021 17:27:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1534,17 +1570,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1553,7 +1589,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:05 GMT
+      - Mon, 26 Jul 2021 17:27:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1587,17 +1623,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1606,7 +1642,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:08 GMT
+      - Mon, 26 Jul 2021 17:27:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1640,17 +1676,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1659,7 +1695,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:09 GMT
+      - Mon, 26 Jul 2021 17:27:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1693,17 +1729,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1712,7 +1748,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:11 GMT
+      - Mon, 26 Jul 2021 17:27:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1746,17 +1782,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1765,7 +1801,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:12 GMT
+      - Mon, 26 Jul 2021 17:27:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1799,17 +1835,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1818,7 +1854,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:13 GMT
+      - Mon, 26 Jul 2021 17:27:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1852,17 +1888,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1871,7 +1907,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:15 GMT
+      - Mon, 26 Jul 2021 17:27:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1905,17 +1941,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1924,7 +1960,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:16 GMT
+      - Mon, 26 Jul 2021 17:27:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1958,17 +1994,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -1977,7 +2013,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:18 GMT
+      - Mon, 26 Jul 2021 17:27:53 GMT
       expires:
       - '-1'
       pragma:
@@ -2011,17 +2047,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -2030,7 +2066,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:19 GMT
+      - Mon, 26 Jul 2021 17:27:55 GMT
       expires:
       - '-1'
       pragma:
@@ -2064,17 +2100,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -2083,7 +2119,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:21 GMT
+      - Mon, 26 Jul 2021 17:27:56 GMT
       expires:
       - '-1'
       pragma:
@@ -2117,17 +2153,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"InProgress","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -2136,7 +2172,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:22 GMT
+      - Mon, 26 Jul 2021 17:27:58 GMT
       expires:
       - '-1'
       pragma:
@@ -2170,26 +2206,26 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"InProgress","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","status":"Succeeded","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"2021-07-26T17:27:10.1810483Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"66a1047c-3de5-4f75-83c6-ca4858ebee74"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '304'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:23 GMT
+      - Mon, 26 Jul 2021 17:27:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2223,81 +2259,28 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
+      - -g -v -i -c --source-tier --destination-tier --name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupJobs/66a1047c-3de5-4f75-83c6-ca4858ebee74?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","status":"Succeeded","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"2021-06-22T11:54:35.3098617Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"7bfd7531-3eb1-473d-a3a5-300a7235b95a"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupJobs/66a1047c-3de5-4f75-83c6-ca4858ebee74","name":"66a1047c-3de5-4f75-83c6-ca4858ebee74","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJobV2","workloadType":"SAPHanaDatabase","duration":"PT48.6441528S","extendedInfo":{"tasksList":[],"propertyBag":{"Recovery
+        Point Time":"04/02/2021 12:00:16"}},"isUserTriggered":true,"entityFriendlyName":"systemdb
+        [BVTD2HSuse15]","backupManagementType":"AzureWorkload","operation":"MoveRecoveryPoint","status":"Completed","startTime":"2021-07-26T17:27:10.1810483Z","endTime":"2021-07-26T17:27:58.8252011Z","activityId":"b47fd04a-ee36-11eb-8e5e-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '304'
+      - '801'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:25 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '116'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup recoverypoint move
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -i -c --source-tier --destination-tier --rp-id
-      User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupJobs/7bfd7531-3eb1-473d-a3a5-300a7235b95a?api-version=2021-01-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupJobs/7bfd7531-3eb1-473d-a3a5-300a7235b95a","name":"7bfd7531-3eb1-473d-a3a5-300a7235b95a","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT49.9097973S","extendedInfo":{"tasksList":[],"propertyBag":{"Recovery
-        Point Time":"08/02/2021 12:00:13"}},"isUserTriggered":true,"entityFriendlyName":"systemdb
-        [BVTD2HSuse15]","backupManagementType":"AzureWorkload","operation":"MoveRecoveryPoint","status":"Completed","startTime":"2021-06-22T11:54:35.3098617Z","endTime":"2021-06-22T11:55:25.219659Z","activityId":"9a9fb936-d350-11eb-9267-00155d657312"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '798'
-      content-type:
-      - application/json
-      date:
-      - Tue, 22 Jun 2021 11:55:25 GMT
+      - Mon, 26 Jul 2021 17:28:01 GMT
       expires:
       - '-1'
       pragma:
@@ -2334,18 +2317,21 @@ interactions:
       ParameterSetName:
       - --vault-name -g --restore-mode --item-name --container-name --rp-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520551,"title":"UserErrorRecoverySysScriptFailedToTriggerRestore","message":"Restore
+        failed because \"RecoverySys.py\" script failed to trigger restore.","recommendations":["Work
+        with SAP HANA team to fix this issue. Failure details are provided in the
+        \"Addition Details\" section below."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
-        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-06-21T12:06:22.1255061Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-07-26T12:06:21.8478251Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
         user and retry the operation."]},"protectedItemDataSourceId":"17592946582397","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-29T12:00:14.494Z","recoveryPointCount":16,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;archiveresourcegroup;archhanavm1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/archiveresourcegroup/providers/Microsoft.Compute/virtualMachines/archhanavm1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupPolicies/saphanaltr","lastRecoveryPoint":"2021-02-12T02:27:42.024Z","isArchiveEnabled":false}}'
@@ -2353,11 +2339,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2179'
+      - '2579'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:26 GMT
+      - Mon, 26 Jul 2021 17:28:01 GMT
       expires:
       - '-1'
       pragma:
@@ -2393,18 +2379,21 @@ interactions:
       ParameterSetName:
       - --vault-name -g --restore-mode --item-name --container-name --rp-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3BArchiveResourceGroup%3BArchHanaVM1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520551,"title":"UserErrorRecoverySysScriptFailedToTriggerRestore","message":"Restore
+        failed because \"RecoverySys.py\" script failed to trigger restore.","recommendations":["Work
+        with SAP HANA team to fix this issue. Failure details are provided in the
+        \"Addition Details\" section below."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
-        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-06-21T12:06:22.1255061Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-07-26T12:06:21.8478251Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
         user and retry the operation."]},"protectedItemDataSourceId":"17592946582397","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-29T12:00:14.494Z","recoveryPointCount":16,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;archiveresourcegroup;archhanavm1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/archiveresourcegroup/providers/Microsoft.Compute/virtualMachines/archhanavm1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupPolicies/saphanaltr","lastRecoveryPoint":"2021-02-12T02:27:42.024Z","isArchiveEnabled":false}}'
@@ -2412,11 +2401,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2179'
+      - '2579'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:28 GMT
+      - Mon, 26 Jul 2021 17:28:02 GMT
       expires:
       - '-1'
       pragma:
@@ -2432,7 +2421,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '148'
+      - '149'
       x-powered-by:
       - ASP.NET
     status:
@@ -2452,15 +2441,15 @@ interactions:
       ParameterSetName:
       - --vault-name -g --restore-mode --item-name --container-name --rp-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints/119145683997902?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints/116884148315522?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119145683997902","name":"119145683997902","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-09T12:00:15.554Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116884148315522","name":"116884148315522","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-08T12:00:13.119Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
         is not eligible for archive move as it has already been moved to archive tier.
         "}}}}'
     headers:
@@ -2471,7 +2460,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:28 GMT
+      - Mon, 26 Jul 2021 17:28:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2507,18 +2496,21 @@ interactions:
       ParameterSetName:
       - -g -v --recovery-config --rehydration-priority
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb","name":"SAPHanaDatabase;h15;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"RestoreOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520551,"title":"UserErrorRecoverySysScriptFailedToTriggerRestore","message":"Restore
+        failed because \"RecoverySys.py\" script failed to trigger restore.","recommendations":["Work
+        with SAP HANA team to fix this issue. Failure details are provided in the
+        \"Addition Details\" section below."]}]},"BackupOperationStatusKPI":{"resourceHealthStatus":"PersistentDegraded","resourceHealthDetails":[{"code":520531,"title":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
-        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-06-21T12:06:22.1255061Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
+        user and retry the operation."]}]}},"friendlyName":"systemdb","serverName":"BVTD2HSuse15","parentName":"H15","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2021-07-26T12:06:21.8478251Z","lastBackupErrorDetail":{"code":"UserErrorHANASystemDBNotRunning","message":"SYSTEMDB
         for the SAP HANA instance is not in running state.","recommendations":["Please
         start the SAP HANA system by running the command ''HDB start'' as the sidadm
         user and retry the operation."]},"protectedItemDataSourceId":"17592946582397","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-29T12:00:14.494Z","recoveryPointCount":16,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;archiveresourcegroup;archhanavm1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/archiveresourcegroup/providers/Microsoft.Compute/virtualMachines/archhanavm1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupPolicies/saphanaltr","lastRecoveryPoint":"2021-02-12T02:27:42.024Z","isArchiveEnabled":false}}'
@@ -2526,11 +2518,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2179'
+      - '2579'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:29 GMT
+      - Mon, 26 Jul 2021 17:28:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2566,15 +2558,15 @@ interactions:
       ParameterSetName:
       - -g -v --recovery-config --rehydration-priority
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints/119145683997902?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints/116884148315522?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/119145683997902","name":"119145683997902","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-09T12:00:15.554Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/recoveryPoints/116884148315522","name":"116884148315522","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaRecoveryPoint","recoveryPointTimeInUTC":"2021-02-08T12:00:13.119Z","type":"Full","recoveryPointTierDetails":[{"type":3,"status":1}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
         is not eligible for archive move as it has already been moved to archive tier.
         "}}}}'
     headers:
@@ -2585,7 +2577,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:29 GMT
+      - Mon, 26 Jul 2021 17:28:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2627,28 +2619,28 @@ interactions:
       ParameterSetName:
       - -g -v --recovery-config --rehydration-priority
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints/119145683997902/restore?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Barchiveresourcegroup%3Barchhanavm1/protectedItems/SAPHanaDatabase%3Bh15%3Bsystemdb/recoveryPoints/116884148315522/restore?api-version=2021-06-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/operationsStatus/57b3ad0d-7ca4-4fb5-9247-a61c50c2e249?api-version=2021-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/operationsStatus/3b86cb58-f6a1-4ef3-8618-2591e0aec289?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 22 Jun 2021 11:55:31 GMT
+      - Mon, 26 Jul 2021 17:28:05 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/operationResults/57b3ad0d-7ca4-4fb5-9247-a61c50c2e249?api-version=2021-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;archiveresourcegroup;archhanavm1/protectedItems/SAPHanaDatabase;h15;systemdb/operationResults/3b86cb58-f6a1-4ef3-8618-2591e0aec289?api-version=2021-06-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -2656,7 +2648,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -2676,15 +2668,15 @@ interactions:
       ParameterSetName:
       - -g -v --recovery-config --rehydration-priority
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/57b3ad0d-7ca4-4fb5-9247-a61c50c2e249?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupOperations/3b86cb58-f6a1-4ef3-8618-2591e0aec289?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"57b3ad0d-7ca4-4fb5-9247-a61c50c2e249","name":"57b3ad0d-7ca4-4fb5-9247-a61c50c2e249","status":"Succeeded","startTime":"2021-06-22T11:55:31.3930539Z","endTime":"0001-01-01T00:00:00","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"57b3ad0d-7ca4-4fb5-9247-a61c50c2e249"}}'
+      string: '{"id":"3b86cb58-f6a1-4ef3-8618-2591e0aec289","name":"3b86cb58-f6a1-4ef3-8618-2591e0aec289","status":"Succeeded","startTime":"2021-07-26T17:28:06.0230243Z","endTime":"0001-01-01T00:00:00","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"3b86cb58-f6a1-4ef3-8618-2591e0aec289"}}'
     headers:
       cache-control:
       - no-cache
@@ -2693,7 +2685,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:33 GMT
+      - Mon, 26 Jul 2021 17:28:06 GMT
       expires:
       - '-1'
       pragma:
@@ -2729,26 +2721,26 @@ interactions:
       ParameterSetName:
       - -g -v --recovery-config --rehydration-priority
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.12.0 Azure-SDK-For-Python AZURECLI/2.24.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.14.0 Azure-SDK-For-Python AZURECLI/2.26.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupJobs/57b3ad0d-7ca4-4fb5-9247-a61c50c2e249?api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupJobs/3b86cb58-f6a1-4ef3-8618-2591e0aec289?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupJobs/57b3ad0d-7ca4-4fb5-9247-a61c50c2e249","name":"57b3ad0d-7ca4-4fb5-9247-a61c50c2e249","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT2.6043704S","extendedInfo":{"tasksList":[{"taskId":"Rehydrate
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ArchiveResourceGroup/providers/Microsoft.RecoveryServices/vaults/archiveccyvault1/backupJobs/3b86cb58-f6a1-4ef3-8618-2591e0aec289","name":"3b86cb58-f6a1-4ef3-8618-2591e0aec289","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJobV2","workloadType":"SAPHanaDatabase","duration":"PT1.3076918S","extendedInfo":{"tasksList":[{"taskId":"Rehydrate
         from Archive storage","status":"InProgress"}],"propertyBag":{"Rehydration
-        Priority":"High","Rehydrated Recovery Point Retention":"P15D"}},"isUserTriggered":true,"entityFriendlyName":"systemdb","backupManagementType":"AzureWorkload","operation":"RestoreWithRehydrate","status":"InProgress","startTime":"2021-06-22T11:55:31.3930539Z","activityId":"bcef53fa-d350-11eb-a986-00155d657312"}}'
+        Priority":"High","Rehydrated Recovery Point Retention":"P15D"}},"isUserTriggered":true,"entityFriendlyName":"systemdb","backupManagementType":"AzureWorkload","operation":"RestoreWithRehydrate","status":"InProgress","startTime":"2021-07-26T17:28:06.0230243Z","activityId":"d5373903-ee36-11eb-aff9-c8f750f92764"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '842'
+      - '844'
       content-type:
       - application/json
       date:
-      - Tue, 22 Jun 2021 11:55:33 GMT
+      - Mon, 26 Jul 2021 17:28:06 GMT
       expires:
       - '-1'
       pragma:
