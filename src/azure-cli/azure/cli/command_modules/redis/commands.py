@@ -60,7 +60,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_redis_firewall_create')
         g.command('delete', 'delete')
         g.show_command('show', 'get')
-        g.command('list', 'list_by_redis_resource')
+        g.command('list', 'list')
 
     with self.command_group('redis server-link', redis_linked_server, custom_command_type=redis_linked_server_custom) as g:
         g.custom_command('create', 'cli_redis_create_server_link')

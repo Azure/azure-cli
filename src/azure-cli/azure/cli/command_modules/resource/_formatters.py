@@ -72,7 +72,7 @@ def format_what_if_operation_result(what_if_operation_result, enable_color=True)
 def _format_noise_notice(builder):
     builder.append_line(
         """Note: The result may contain false positive predictions (noise).
-You can help us improve the accuracy of the result by opening an issue here: https://aka.ms/WhatIfIssues."""
+You can help us improve the accuracy of the result by opening an issue here: https://aka.ms/WhatIfIssues"""
     )
     builder.append_line()
 

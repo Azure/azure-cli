@@ -3759,6 +3759,32 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
+    def test_create_template_specs_bicep(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-create-template-spec', 60)
+        self.kwargs.update({
+            'template_spec_name': template_spec_name,
+            'tf': os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\'),
+            'resource_group_location': resource_group_location,
+            'description': '"AzCLI test root template spec from bicep"',
+            'version_description': '"AzCLI test version of root template spec from bicep"',
+        })
+
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --description {description} --version-description {version_description}', checks=[
+            self.check('location', "westus"),
+            self.check('mainTemplate.functions', []),
+            self.check("name", "1.0")
+        ]).get_output_in_json()
+
+        with self.assertRaises(IncorrectUsageError) as err:
+            self.cmd('ts create --name {template_spec_name} -g {rg} -l {resource_group_location} --template-file "{tf}"')
+            self.assertTrue("please provide --template-uri if --query-string is specified" in str(err.exception))
+
+        # clean up
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
+
     def _remove_bicep_cli(self):
         bicep_cli_path = self._get_bicep_cli_path()
         if os.path.isfile(bicep_cli_path):

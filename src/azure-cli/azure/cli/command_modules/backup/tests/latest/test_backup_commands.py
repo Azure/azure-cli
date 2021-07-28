@@ -770,7 +770,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['identity3'] = self.create_random_name('clitest-identity', 50)
         self.kwargs['identity3_id'] = self.cmd('identity create -n {identity3} -g {rg} --query id').get_output_in_json()
 
-        userMSI_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} {identity2_id} -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} {identity2_id} -g {rg} -n {vault}', checks=[
             self.check("identity.type", "UserAssigned"),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
@@ -781,7 +781,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(self.kwargs['identity1_id'], userMSI)
         self.assertIn(self.kwargs['identity2_id'], userMSI)
 
-        userMSI_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault}', checks=[
             self.check("identity.type", "SystemAssigned, UserAssigned"),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
@@ -791,7 +791,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(self.kwargs['identity1_id'], userMSI)
         self.assertIn(self.kwargs['identity2_id'], userMSI)
 
-        userMSI_json = self.cmd('backup vault identity assign --user-assigned {identity3_id} -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity assign --user-assigned {identity3_id} -g {rg} -n {vault}', checks=[
             self.check("identity.type", "SystemAssigned, UserAssigned"),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
@@ -803,7 +803,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(self.kwargs['identity2_id'], userMSI)
         self.assertIn(self.kwargs['identity3_id'], userMSI)
 
-        userMSI_json = self.cmd('backup vault identity remove --system-assigned --user-assigned {identity1_id} -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity remove --system-assigned --user-assigned {identity1_id} -g {rg} -n {vault}', checks=[
             self.check("identity.type", "UserAssigned"),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
@@ -813,7 +813,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(self.kwargs['identity2_id'], userMSI)
         self.assertIn(self.kwargs['identity3_id'], userMSI)
 
-        userMSI_json = self.cmd('backup vault identity assign --system-assigned --user-assigned {identity1_id} -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity assign --system-assigned --user-assigned {identity1_id} -g {rg} -n {vault}', checks=[
             self.check("identity.type", "SystemAssigned, UserAssigned"),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
@@ -824,19 +824,19 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(self.kwargs['identity2_id'], userMSI)
         self.assertIn(self.kwargs['identity3_id'], userMSI)
 
-        userMSI_json = self.cmd('backup vault identity remove --system-assigned --user-assigned -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity remove --system-assigned --user-assigned -g {rg} -n {vault}', checks=[
             self.check("identity.type", "None"),
             self.check("identity.userAssignedIdentities", None),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
 
-        userMSI_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault}', checks=[
             self.check("identity.type", "SystemAssigned"),
             self.check("identity.userAssignedIdentities", None),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
 
-        userMSI_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} {identity2_id} -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} {identity2_id} -g {rg} -n {vault}', checks=[
             self.check("identity.type", "SystemAssigned, UserAssigned"),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
@@ -846,7 +846,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(self.kwargs['identity1_id'], userMSI)
         self.assertIn(self.kwargs['identity2_id'], userMSI)
 
-        userMSI_json = self.cmd('backup vault identity remove --system-assigned -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity remove --system-assigned -g {rg} -n {vault}', checks=[
             self.check("identity.type", "UserAssigned"),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
@@ -856,7 +856,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(self.kwargs['identity1_id'], userMSI)
         self.assertIn(self.kwargs['identity2_id'], userMSI)
 
-        userMSI_json = self.cmd('backup vault identity remove --user-assigned -g {rg} -v {vault}', checks=[
+        userMSI_json = self.cmd('backup vault identity remove --user-assigned -g {rg} -n {vault}', checks=[
             self.check("identity.type", "None"),
             self.check("identity.userAssignedIdentities", None),
             self.check("properties.provisioningState", "Succeeded")
@@ -889,15 +889,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['identity2_principalid'] = self.cmd('identity show -n {identity2} -g {rg} --query principalId').get_output_in_json()
 
 
-        userMSI_v1_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} {identity2_id} -g {rg} -v {vault1}').get_output_in_json()
+        userMSI_v1_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} {identity2_id} -g {rg} -n {vault1}').get_output_in_json()
 
-        system_v1_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -v {vault1}').get_output_in_json()
+        system_v1_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault1}').get_output_in_json()
 
         self.kwargs['system1_principalid'] = system_v1_json['identity']['principalId']
 
-        userMSI1_v2_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} -g {rg} -v {vault2}').get_output_in_json()
+        userMSI1_v2_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} -g {rg} -n {vault2}').get_output_in_json()
 
-        system_v2_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -v {vault2}').get_output_in_json()
+        system_v2_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault2}').get_output_in_json()
 
         self.kwargs['system2_principalid'] = system_v2_json['identity']['principalId']
 
@@ -998,9 +998,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("unwrapKey", key_permissions)
 
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -v {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -n {vault1}')
 
-        self.cmd('backup vault encryption show -v {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1009,9 +1009,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity2_id} -g {rg} -v {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity2_id} -g {rg} -n {vault1}')
 
-        self.cmd('backup vault encryption show -v {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1020,9 +1020,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned -g {rg} -v {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned -g {rg} -n {vault1}')
 
-        self.cmd('backup vault encryption show -v {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key2_id}'),
@@ -1031,9 +1031,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} -g {rg} -v {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id {key1_id} -g {rg} -n {vault1}')
 
-        self.cmd('backup vault encryption show -v {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1043,9 +1043,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
 
-        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned --infrastructure-encryption Enabled -g {rg} -v {vault2}')
+        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned --infrastructure-encryption Enabled -g {rg} -n {vault2}')
 
-        self.cmd('backup vault encryption show -v {vault2} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n {vault2} -g {rg}', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Enabled"),
             self.check('properties.keyUri', '{key2_id}'),
@@ -1054,9 +1054,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -v {vault2}')
+        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -n {vault2}')
 
-        self.cmd('backup vault encryption show -v {vault2} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n {vault2} -g {rg}', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Enabled"),
             self.check('properties.keyUri', '{key1_id}'),
