@@ -819,6 +819,8 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='update_express_route_port_link',
                                  supports_no_wait=True,
+                                 child_collection_prop_name='links',
+                                 child_arg_name='link_name',
                                  min_api='2019-08-01')
 
     with self.command_group('network express-route port location', network_er_port_locations_sdk) as g:

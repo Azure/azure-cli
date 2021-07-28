@@ -382,14 +382,23 @@ def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
-                  rehydration_priority=None, disk_encryption_set_id=None):
+                  rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
+                  mi_user_assigned=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
+
+    if mi_system_assigned and mi_user_assigned:
+        raise MutuallyExclusiveArgumentError(
+            """
+            Both --mi-system-assigned and --mi-user-assigned can not be used together.
+            """)
+
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
                                 storage_account, target_resource_group, restore_to_staging_storage_account,
                                 restore_only_osdisk, diskslist, restore_as_unmanaged_disks, use_secondary_region,
-                                rehydration_duration, rehydration_priority, disk_encryption_set_id)
+                                rehydration_duration, rehydration_priority, disk_encryption_set_id,
+                                mi_system_assigned, mi_user_assigned)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,
