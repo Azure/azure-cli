@@ -5211,3 +5211,42 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_custom_monitoring_workspace(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        workspace_name = self.create_random_name('cliaksworkspace', 20)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'workspace_name': workspace_name
+        })
+
+        # create workspace
+        create_workspace_cmd = 'monitor log-analytics workspace create -g {resource_group} -n {workspace_name}'
+        self.cmd(create_workspace_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', workspace_name)
+        ])
+
+        # get workspace id
+        subscription_id = self.get_subscription_id()
+        workspace_id = "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}".format(subscription_id, resource_group, workspace_name)
+        self.kwargs.update({
+            'workspace_id': workspace_id
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} -a monitoring --workspace-resource-id {workspace_id}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.omsagent.enabled', True),
+            self.check('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID', workspace_id)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
