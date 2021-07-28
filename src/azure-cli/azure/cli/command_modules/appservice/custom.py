@@ -3317,10 +3317,6 @@ def list_hc(cmd, name, resource_group_name, slot=None):
 
 def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=None):
     HybridConnection = cmd.get_models('HybridConnection')
-    linux_webapp = show_webapp(cmd, resource_group_name, name, slot)
-    is_linux = linux_webapp.reserved
-    if is_linux:
-        return logger.warning("hybrid connections not supported on a linux app.")
 
     web_client = web_client_factory(cmd.cli_ctx)
     hy_co_client = hycos_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
@@ -3328,8 +3324,12 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
 
     hy_co_id = ''
     for n in namespace_client.list():
+        logger.warning(n.name)
         if n.name == namespace:
             hy_co_id = n.id
+
+    if hy_co_id == '':
+        raise ResourceNotFoundError('Azure Service Bus Relay namespace {} was not found.'.format(namespace))
 
     i = 0
     hy_co_resource_group = ''
