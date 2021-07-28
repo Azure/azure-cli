@@ -12,6 +12,7 @@ import copy
 
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
@@ -48,7 +49,7 @@ def set_feature(cmd,
                 auth_mode="key",
                 endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
 
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
     feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):] if feature is None else feature
@@ -156,7 +157,7 @@ def delete_feature(cmd,
                    auth_mode="key",
                    endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -221,7 +222,7 @@ def show_feature(cmd,
                  auth_mode="key",
                  endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -326,7 +327,7 @@ def lock_feature(cmd,
                  auth_mode="key",
                  endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -377,7 +378,7 @@ def unlock_feature(cmd,
                    auth_mode="key",
                    endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -428,7 +429,7 @@ def enable_feature(cmd,
                    auth_mode="key",
                    endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -490,7 +491,7 @@ def disable_feature(cmd,
                     auth_mode="key",
                     endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -558,7 +559,7 @@ def add_filter(cmd,
                auth_mode="key",
                endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -645,7 +646,7 @@ def delete_filter(cmd,
                   auth_mode="key",
                   endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -763,7 +764,7 @@ def show_filter(cmd,
                 auth_mode="key",
                 endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -829,7 +830,7 @@ def list_filter(cmd,
                 auth_mode="key",
                 endpoint=None):
     if key is None and feature is None:
-        raise CLIError("Please provide either `--key` or `--feature` value.")
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 

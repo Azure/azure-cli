@@ -9,6 +9,7 @@ import json
 import re
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
@@ -228,17 +229,17 @@ def validate_resolve_keyvault(namespace):
 def validate_feature(namespace):
     if namespace.feature is not None:
         if '%' in namespace.feature:
-            raise CLIError("Feature name cannot contain the '%' character.")
+            raise InvalidArgumentValueError("Feature name cannot contain the '%' character.")
         if not namespace.feature:
-            raise CLIError("Feature name cannot be empty.")
+            raise InvalidArgumentValueError("Feature name cannot be empty.")
 
 
 def validate_feature_key(namespace):
     if namespace.key is not None:
         input_key = str(namespace.key).lower()
         if '%' in input_key:
-            raise CLIError("Feature flag key cannot contain the '%' character.")
+            raise InvalidArgumentValueError("Feature flag key cannot contain the '%' character.")
         if not input_key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
-            raise CLIError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+            raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
         if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
-            raise CLIError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+            raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
