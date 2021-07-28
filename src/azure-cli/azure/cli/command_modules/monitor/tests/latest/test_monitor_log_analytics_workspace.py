@@ -273,9 +273,9 @@ class TestLogProfileScenarios(ScenarioTest):
         self.kwargs.update({
             'table_name': 'Syslog'
         })
-        # Disable checks due to service issue: https://github.com/Azure/azure-rest-api-specs/issues/12407
+
         self.cmd("monitor log-analytics workspace table update -g {rg} --workspace-name {name} -n {table_name} --retention-time 30 --debug", checks=[
-            # self.check('retentionInDays', 30)
+            self.check('retentionInDays', 30)
         ])
 
         self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
@@ -422,22 +422,21 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
                      ])
-        # Disable this test because msrest cannot deserialize content-type "text/plan".
-        # with self.assertRaisesRegexp(HttpResponseError, 'You have exceeded the number of allowed export rules in your workspace'):
-        #     self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
-        #              '--destination {sa_id_1} --enable -t {table_name}',
-        #              checks=[
-        #              ])
+        with self.assertRaisesRegexp(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
+            self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
+                     '--destination {sa_id_1} --enable -t {table_name}',
+                     checks=[
+                     ])
         with self.assertRaisesRegexp(HttpResponseError, 'Table ABC does not exist in the workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
                      ])
-        # with self.assertRaisesRegexp(HttpResponseError, 'You have exceeded the number of allowed export rules in your workspace'):
-        #     self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
-        #              '--destination {sa_id_1} --enable -t AppPerformanceCounters',
-        #              checks=[
-        #              ])
+        with self.assertRaisesRegexp(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
+            self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
+                     '--destination {sa_id_1} --enable -t AppPerformanceCounters',
+                     checks=[
+                     ])
         self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}', checks=[
         ])
 

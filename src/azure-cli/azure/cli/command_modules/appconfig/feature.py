@@ -54,7 +54,7 @@ def set_feature(cmd,
 
     default_value = {
         "id": feature,
-        "description": description,
+        "description": "" if description is None else description,
         "enabled": False,
         "conditions": default_conditions
     }
@@ -96,7 +96,9 @@ def set_feature(cmd,
                 feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
 
                 # User can only update description if the key already exists
-                feature_flag_value.description = description
+                if description is not None:
+                    feature_flag_value.description = description
+
                 set_kv = KeyValue(key=key,
                                   label=label,
                                   value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),

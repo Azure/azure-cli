@@ -142,7 +142,7 @@ def _unserialize_non_msi_token_payload(token_info):
     import jwt  # pylint: disable=import-error
 
     parsed_authority = urlparse(token_info['_authority'])
-    decode = jwt.decode(token_info['accessToken'], verify=False, algorithms=['RS256'])
+    decode = jwt.decode(token_info['accessToken'], algorithms=['RS256'], options={"verify_signature": False})
     return {
         'access_token': token_info['accessToken'],
         'refresh_token': token_info['refreshToken'],

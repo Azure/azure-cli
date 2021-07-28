@@ -61,6 +61,12 @@ def load_arguments(self, _):
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
+    deployment_what_if_type = CLIArgumentType(options_list=['--what-if', '-w'], action='store_true',
+                                              help='Instruct the command to run deployment What-If.',
+                                              min_api='2019-07-01')
+    deployment_what_if_proceed_if_no_change_type = CLIArgumentType(options_list=['--proceed-if-no-change'], action='store_true',
+                                                                   help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.',
+                                                                   min_api='2019-07-01')
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
                                                             arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
                                                             min_api='2019-07-01')
@@ -143,8 +149,9 @@ def load_arguments(self, _):
 
     with self.argument_context('provider register') as c:
         c.argument('mg', help="The management group id to register.", options_list=['--management-group-id', '-m'])
-        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.")
+        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.", deprecate_info=c.deprecate(hide=True))
         c.argument('wait', action='store_true', help='wait for the registration to finish')
+        c.argument('consent_to_permissions', options_list=['--consent-to-permissions', '-c'], action='store_true', help='A value indicating whether authorization is consented or not.')
 
     with self.argument_context('provider unregister') as c:
         c.argument('wait', action='store_true', help='wait for unregistration to finish')
@@ -183,31 +190,36 @@ def load_arguments(self, _):
         c.argument('scope', help='Scope to which this policy assignment applies.')
         c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
         c.argument('display_name', help='Display name of the policy assignment.')
+        c.argument('description', help='Description of the policy assignment.', min_api='2016-12-01')
         c.argument('policy', help='Name or id of the policy definition.', completer=get_policy_completion_list)
-
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment.')
         c.argument('params', options_list=['--params', '-p'], help='JSON formatted string or a path to a file or uri with parameter values of the policy rule.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
 
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
         c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition.')
         c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']), deprecate_info=c.deprecate(hide=True))
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
-
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Assigns a system assigned identity to the policy assignment.")
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
 
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
         c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(EnforcementMode))
+
+    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment.')
+
+    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
 
     with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
+
+    with self.argument_context('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as c:
+        c.argument('message', options_list=['--message', '-m'], help='Message that will be shown when a resource is denied by policy or evaluation details are inspected.')
+        c.argument('policy_definition_reference_id', options_list=['--policy-definition-reference-id', '-r'], help='Policy definition reference ID within the assigned initiative (policy set) that the message applies to.')
 
     with self.argument_context('policy set-definition', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
@@ -298,6 +310,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -325,6 +339,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -364,6 +380,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -400,6 +418,8 @@ def load_arguments(self, _):
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
                    min_api="2019-10-01")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment mg what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -435,6 +455,8 @@ def load_arguments(self, _):
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
                    min_api="2019-10-01")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment tenant what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)

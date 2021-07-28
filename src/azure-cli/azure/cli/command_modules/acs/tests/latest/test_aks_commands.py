@@ -4,17 +4,20 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import subprocess
 import tempfile
 import unittest
 
 from knack.util import CLIError
+from azure.cli.core.azclierror import CLIInternalError
 
 from azure.cli.testsdk import (
     ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, VirtualNetworkPreparer, ScenarioTest, live_only)
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (
-    StringContainCheck, StringContainCheckIgnoreCase)
+    StringCheck, StringContainCheck, StringContainCheckIgnoreCase)
 from azure.cli.command_modules.acs._format import version_to_tuple
+from azure.cli.command_modules.acs._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
 from .recording_processors import KeyReplacer
 
 from .custom_preparers import AKSCustomResourceGroupPreparer, AKSCustomVirtualNetworkPreparer
@@ -35,6 +38,51 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         super(AzureKubernetesServiceScenarioTest, self).__init__(
             method_name, recording_processors=[KeyReplacer()]
         )
+
+    @classmethod
+    def generate_ssh_keys(cls):
+        TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"  # pylint: disable=line-too-long
+        _, pathname = tempfile.mkstemp()
+        with open(pathname, 'w') as key_file:
+            key_file.write(TEST_SSH_KEY_PUB)
+        return pathname
+
+    def generate_vnet_subnet_id(self, resource_group):
+        vnet_name = self.create_random_name('clivnet', 16)
+        subnet_name = self.create_random_name('clisubnet', 16)
+        address_prefix = "192.168.0.0/16"
+        subnet_prefix = "192.168.0.0/24"
+        vnet_subnet = self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
+                               .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
+        return vnet_subnet.get("newVNet").get("subnets")[0].get("id")
+
+    def generate_ppg_id(self, resource_group, location):
+        ppg_name = self.create_random_name('clippg', 16)
+        ppg = self.cmd('az ppg create -n {} -g {} --location {}'
+                       .format(ppg_name, resource_group, location)).get_output_in_json()
+        return ppg.get("id")
+
+    def _get_versions(self, location):
+        """Return the previous and current Kubernetes minor release versions, such as ("1.11.6", "1.12.4")."""
+        versions = self._get_versions_by_location(location=location)
+        upgrade_version = versions[0]
+        # find the first version that doesn't start with the latest major.minor.
+        prefix = upgrade_version[:upgrade_version.rfind('.')]
+        create_version = next(x for x in versions if not x.startswith(prefix))
+        return create_version, upgrade_version
+
+    def _get_versions_by_location(self, location):
+        versions = self.cmd(
+            "az aks get-versions -l {} --query 'orchestrators[].orchestratorVersion'".format(location)).get_output_in_json()
+        # sort by semantic version, from newest to oldest
+        versions = sorted(versions, key=version_to_tuple, reverse=True)
+        return versions
+
+    def generate_user_assigned_identity_resource_id(self, resource_group):
+        identity_name = self.create_random_name('cli', 16)
+        identity = self.cmd('az identity create -g {} -n {}'.format(
+            resource_group, identity_name)).get_output_in_json()
+        return identity.get("id")
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -216,6 +264,57 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap', preserve_default_location=True)
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_edge_zone(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        kubernetes_version = "1.20.7"
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'edge_zone': 'microsoftrrdclab1',
+            'kubernetes_version': kubernetes_version,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--kubernetes-version {kubernetes_version} --edge-zone {edge_zone}'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.check('location', 'eastus2euap'),
+            self.check('extendedLocation.name', 'microsoftrrdclab1'),
+            self.check('extendedLocation.type', 'edgezone'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('kubernetesVersion', '{kubernetes_version}')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     # TODO: remove when issue #9392 is addressed.
     @live_only()
@@ -705,9 +804,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -797,9 +896,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check('apiServerAccessProfile.enablePrivateCluster', True),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -894,9 +993,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('apiServerAccessProfile.authorizedIpRanges',
                        ['1.2.3.4/32']),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -987,9 +1086,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -1006,13 +1105,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # update managed outbound IP
         self.cmd('aks update -g {resource_group} -n {name} --load-balancer-managed-outbound-ip-count 2', checks=[
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 2),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 2),
         ])
 
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 2),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 2),
         ])
 
         # scale up
@@ -1103,9 +1202,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.exists('networkProfile.loadBalancerProfile'),
-            self.exists('networkProfile.loadBalancerProfile.outboundIps'),
+            self.exists('networkProfile.loadBalancerProfile.outboundIPs'),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -1213,7 +1312,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists(
                 'networkProfile.loadBalancerProfile.outboundIpPrefixes'),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -1903,7 +2002,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001')
         ])
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
@@ -1913,7 +2012,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000002'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000002'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000003')
         ])
@@ -1940,7 +2039,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('aadProfile.managed', True),
             self.check('aadProfile.enableAzureRbac', False),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001')
         ])
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
@@ -1997,7 +2096,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000003'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000003'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000004')
         ])
@@ -2032,7 +2131,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000002')
         ])
@@ -2988,9 +3087,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3076,9 +3175,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check('apiServerAccessProfile.enablePrivateCluster', True),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3169,9 +3268,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('apiServerAccessProfile.authorizedIpRanges',
                        ['1.2.3.4/32']),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3258,9 +3357,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3277,13 +3376,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # update managed outbound IP
         self.cmd('aks update -g {resource_group} -n {name} --load-balancer-managed-outbound-ip-count 2', checks=[
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 2),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 2),
         ])
 
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 2),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 2),
         ])
 
         # scale up
@@ -3370,9 +3469,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.exists('networkProfile.loadBalancerProfile'),
-            self.exists('networkProfile.loadBalancerProfile.outboundIps'),
+            self.exists('networkProfile.loadBalancerProfile.outboundIPs'),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3476,7 +3575,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists(
                 'networkProfile.loadBalancerProfile.outboundIpPrefixes'),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3914,7 +4013,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001')
         ])
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
@@ -3924,7 +4023,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000002'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000002'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000003')
         ])
@@ -3968,7 +4067,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000003'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000003'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000004')
         ])
@@ -4002,7 +4101,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000002')
         ])
@@ -4273,47 +4372,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('addonProfiles.ACCSGXDevicePlugin.config', None)
         ])
 
-    @classmethod
-    def generate_ssh_keys(cls):
-        TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"  # pylint: disable=line-too-long
-        _, pathname = tempfile.mkstemp()
-        with open(pathname, 'w') as key_file:
-            key_file.write(TEST_SSH_KEY_PUB)
-        return pathname
-
-    def generate_vnet_subnet_id(self, resource_group):
-        vnet_name = self.create_random_name('clivnet', 16)
-        subnet_name = self.create_random_name('clisubnet', 16)
-        address_prefix = "192.168.0.0/16"
-        subnet_prefix = "192.168.0.0/24"
-        vnet_subnet = self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
-                               .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
-        return vnet_subnet.get("newVNet").get("subnets")[0].get("id")
-
-    def generate_ppg_id(self, resource_group, location):
-        ppg_name = self.create_random_name('clippg', 16)
-        ppg = self.cmd('az ppg create -n {} -g {} --location {}'
-                       .format(ppg_name, resource_group, location)).get_output_in_json()
-        return ppg.get("id")
-
-    def _get_versions(self, location):
-        """Return the previous and current Kubernetes minor release versions, such as ("1.11.6", "1.12.4")."""
-        versions = self.cmd(
-            "az aks get-versions -l westus2 --query 'orchestrators[].orchestratorVersion'").get_output_in_json()
-        # sort by semantic version, from newest to oldest
-        versions = sorted(versions, key=version_to_tuple, reverse=True)
-        upgrade_version = versions[0]
-        # find the first version that doesn't start with the latest major.minor.
-        prefix = upgrade_version[:upgrade_version.rfind('.')]
-        create_version = next(x for x in versions if not x.startswith(prefix))
-        return create_version, upgrade_version
-
-    def generate_user_assigned_identity_resource_id(self, resource_group):
-        identity_name = self.create_random_name('cli', 16)
-        identity = self.cmd('az identity create -g {} -n {}'.format(
-            resource_group, identity_name)).get_output_in_json()
-        return identity.get("id")
-
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_fqdn_subdomain(self, resource_group, resource_group_location):
@@ -4328,10 +4386,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'identity_name': identity_name,
             'subdomain_name': subdomain_name,
+            'location': resource_group_location
         })
 
         # create private dns zone
-        create_private_dns_zone = 'network private-dns zone create --resource-group={resource_group} --name="privatelink.westus2.azmk8s.io"'
+        create_private_dns_zone = 'network private-dns zone create --resource-group={resource_group} --name="privatelink.{location}.azmk8s.io"'
         zone = self.cmd(create_private_dns_zone, checks=[
             self.check('provisioningState', 'Succeeded')
         ]).get_output_in_json()
@@ -4427,8 +4486,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @RoleBasedServicePrincipalPreparer()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    @RoleBasedServicePrincipalPreparer()
     def test_aks_update_to_msi_cluster(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -4457,8 +4516,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @RoleBasedServicePrincipalPreparer()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    @RoleBasedServicePrincipalPreparer()
     def test_aks_update_to_msi_cluster_with_addons(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -4483,3 +4542,172 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_custom_kubelet_identity(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        control_plane_identity_name = self.create_random_name('cliakstest', 16)
+        kubelet_identity_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'control_plane_identity_name': control_plane_identity_name,
+            'kubelet_identity_name': kubelet_identity_name,
+        })
+
+        # create control plane identity
+        control_plane_identity = 'identity create --resource-group={resource_group} --name={control_plane_identity_name}'
+        c_identity = self.cmd(control_plane_identity, checks=[
+            self.check('name', control_plane_identity_name)
+        ]).get_output_in_json()
+        control_plane_identity_resource_id = c_identity["id"]
+        assert control_plane_identity_resource_id is not None
+        self.kwargs.update({
+            'control_plane_identity_resource_id': control_plane_identity_resource_id,
+        })
+
+        # create kubelet identity
+        kubelet_identity = 'identity create --resource-group={resource_group} --name={kubelet_identity_name}'
+        k_identity = self.cmd(kubelet_identity, checks=[
+            self.check('name', kubelet_identity_name)
+        ]).get_output_in_json()
+        kubelet_identity_resource_id = k_identity["id"]
+        assert kubelet_identity_resource_id is not None
+        self.kwargs.update({
+            'kubelet_identity_resource_id': kubelet_identity_resource_id,
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--node-count=1 --generate-ssh-keys --enable-managed-identity ' \
+                     '--assign-identity {control_plane_identity_resource_id} --assign-kubelet-identity {kubelet_identity_resource_id}'
+        self.cmd(create_cmd, checks=[
+            self.exists('identity'),
+            self.exists('identityProfile'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identityProfile.kubeletidentity.resourceId', kubelet_identity_resource_id),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_enable_utlra_ssd(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --node-vm-size Standard_D2s_v3 --zones 1 2 3 --enable-ultra-ssd'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_browse(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # test aks browse cmd
+        subscription_id = self.get_subscription_id()
+        browse_cmd = 'aks browse --resource-group={resource_group} --name={name} --listen-address=127.0.0.1 --listen-port=8080 --disable-browser'
+        self.cmd(browse_cmd, checks=[
+            StringCheck("Kubernetes resources view on https://portal.azure.com/#resource/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ContainerService/managedClusters/{}/workloads".format(subscription_id, resource_group, aks_name))
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # live only for the following reasons
+    # 1. execute `kubectl get pods` in subprocess and cannot be mocked by testsdk
+    # 2. rely on some environment variable to indicate the execution is under test environment (e.g. "PYTEST_CURRENT_TEST")
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_browse_legacy(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        # find the latest version lower than 1.19.0
+        versions = self._get_versions_by_location(resource_group_location)
+        try:
+            legacy_version = next(x for x in versions if version_to_tuple(x) < version_to_tuple('1.19.0'))
+        except StopIteration:
+            raise CLIInternalError("No version lower than '1.19.0' is supported in region '{}'!".format(resource_group_location))
+
+        self.kwargs.update({
+            'k8s_version': legacy_version,
+            'dashboard': "kube-dashboard",
+
+        })
+        # create legacy cluster and enable kube-dashboard addon
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value} ' \
+                     '-k {k8s_version} -a {dashboard}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('kubernetesVersion', legacy_version),
+            self.check('addonProfiles.{}.enabled'.format(CONST_KUBE_DASHBOARD_ADDON_NAME), True)
+        ])
+
+        # install kubectl
+        try:
+            subprocess.call(["az", "aks", "install-cli"])
+        except subprocess.CalledProcessError as err:
+            raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
+
+        # test aks browse cmd
+        browse_cmd = 'aks browse --resource-group={resource_group} --name={name} --listen-address=1.1.1.1 --listen-port=8080 --disable-browser'
+        self.cmd(browse_cmd, checks=[
+            StringCheck("Test Invalid Address! Test Passed!")
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # live only, otherwise the current recording mechanism will also record the binary files of
+    # kubectl and kubelogin resulting in the cassette file size exceeding 100MB
+    @live_only()
+    def test_aks_install_kubectl(self):
+        ctl_fd, ctl_temp_file = tempfile.mkstemp()
+        login_fd, login_temp_file = tempfile.mkstemp()
+        version = "latest"
+        install_cmd = 'aks install-cli --client-version={} --install-location={} --base-src-url={} ' \
+                      '--kubelogin-version={} --kubelogin-install-location={} --kubelogin-base-src-url={}'.format(version, ctl_temp_file, "", version, login_temp_file, "")
+
+        # install kubectl & kubelogin
+        try:
+            self.cmd(install_cmd, checks=[self.is_empty()])
+            self.assertGreater(os.path.getsize(ctl_temp_file), 0)
+            self.assertGreater(os.path.getsize(login_temp_file), 0)
+        finally:
+            os.close(ctl_fd)
+            os.close(login_fd)
+            os.remove(ctl_temp_file)
+            os.remove(login_temp_file)

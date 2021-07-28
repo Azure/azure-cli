@@ -29,6 +29,10 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         location = 'eastus'
         sku = 'standard'
+        tag_key = "key"
+        tag_value = "value"
+        tag = tag_key + '=' + tag_value
+        structured_tag = {tag_key: tag_value}
         system_assigned_identity = '[system]'
 
         self.kwargs.update({
@@ -36,35 +40,41 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': sku,
+            'tags': tag,
             'identity': system_assigned_identity
         })
 
-        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --assign-identity {identity}',
+        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --tags {tags} --assign-identity {identity}',
                          checks=[self.check('name', '{config_store_name}'),
                                  self.check('location', '{rg_loc}'),
                                  self.check('resourceGroup', resource_group),
                                  self.check('provisioningState', 'Succeeded'),
                                  self.check('sku.name', sku),
+                                 self.check('tags', structured_tag),
                                  self.check('identity.type', 'SystemAssigned')]).get_output_in_json()
+
         self.cmd('appconfig list -g {rg}',
                  checks=[self.check('[0].name', '{config_store_name}'),
                          self.check('[0].location', '{rg_loc}'),
                          self.check('[0].resourceGroup', resource_group),
                          self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[0].sku.name', sku),
+                         self.check('[0].tags', structured_tag),
                          self.check('[0].identity.type', 'SystemAssigned')])
+
         self.cmd('appconfig show -n {config_store_name} -g {rg}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku),
+                         self.check('tags', structured_tag),
                          self.check('identity.type', 'SystemAssigned')])
 
         tag_key = "Env"
         tag_value = "Prod"
         updated_tag = tag_key + '=' + tag_value
-        structered_tag = {tag_key: tag_value}
+        structured_tag = {tag_key: tag_value}
         self.kwargs.update({
             'updated_tag': updated_tag,
             'update_sku': sku   # we currently only can test on standard sku
@@ -74,7 +84,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
-                         self.check('tags', structered_tag),
+                         self.check('tags', structured_tag),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku)])
 
@@ -97,12 +107,68 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
-                         self.check('tags', structered_tag),
+                         self.check('tags', structured_tag),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku),
                          self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
+        self.kwargs.update({
+            'updated_tag': '""',
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --tags {updated_tag}',
+            checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('sku.name', sku),
+                    self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
+
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_local_auth(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='DisableLocalAuth', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'disable_local_auth': 'true'
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --disable-local-auth {disable_local_auth}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('disableLocalAuth', True)])
+
+        self.kwargs.update({
+            'key': 'test',
+            'disable_local_auth': 'false'
+        })
+
+        with self.assertRaisesRegex(CLIError, "Cannot find a read write access key for the App Configuration {}".format(config_store_name)):
+            self.cmd('appconfig kv set --key {key} -n {config_store_name} -y')
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --disable-local-auth {disable_local_auth}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('disableLocalAuth', False)])
+
+        self.cmd('appconfig kv set --key {key} -n {config_store_name} -y',
+                 checks=[self.check('key', '{key}')])
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_public_network_access(self, resource_group, location):
@@ -242,29 +308,29 @@ class AppConfigKVScenarioTest(ScenarioTest):
         _create_config_store(self, self.kwargs)
 
         entry_key = "Color"
-        entry_value = "Red"
-        entry_content_type = 'text'
         entry_label = 'v1.0.0'
 
         self.kwargs.update({
             'key': entry_key,
-            'value': entry_value,
-            'label': entry_label,
-            'content_type': entry_content_type
+            'label': entry_label
         })
 
         # add a new key-value entry
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
-                 checks=[self.check('contentType', entry_content_type),
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} -y',
+                 checks=[self.check('contentType', ""),
                          self.check('key', entry_key),
-                         self.check('value', entry_value),
+                         self.check('value', ""),
                          self.check('label', entry_label)])
 
         # edit a key-value entry
         updated_entry_value = "Green"
+        entry_content_type = "text"
+
         self.kwargs.update({
-            'value': updated_entry_value
+            'value': updated_entry_value,
+            'content_type': entry_content_type
         })
+
         self.cmd('appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
                  checks=[self.check('contentType', entry_content_type),
                          self.check('key', entry_key),
@@ -311,6 +377,8 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         # set key-value entry with connection string, but to the original value
         # take a note of the deleted_time
+        entry_value = "Red"
+
         self.kwargs.update({
             'value': entry_value,
             'timestamp': _format_datetime(deleted_time)
@@ -1449,7 +1517,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         entry_feature = 'Beta'
         entry_label = 'v1'
-        default_description = None
+        default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"

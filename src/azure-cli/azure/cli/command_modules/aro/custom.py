@@ -145,7 +145,11 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
 
     try:
         oc = client.get(resource_group_name, resource_name)
-    except (CloudError, HttpOperationError) as e:
+    except CloudError as e:
+        if e.status_code == 404:
+            raise ResourceNotFoundError(e.message) from e
+        logger.info(e.message)
+    except HttpOperationError as e:
         logger.info(e.message)
 
     aad = AADManager(cmd.cli_ctx)

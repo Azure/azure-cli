@@ -15,7 +15,7 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -787,15 +787,22 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
                 return
 
         # VMs need to be a supported image in the marketplace
-        # Ubuntu 16.04 | 18.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, CoreOS Linux, Debian "Stretch" with backports kernel
+        # Ubuntu 16.04 | 18.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, Flatcar, Debian "Stretch" with backports kernel
         # Oracle Linux 7.4, Windows Server 2016, Windows Server 2012R2
         publisher, offer, sku = namespace.os_publisher, namespace.os_offer, namespace.os_sku
         if not publisher:
             return
         publisher, offer, sku = publisher.lower(), offer.lower(), sku.lower()
+
+        if publisher == 'coreos' or offer == 'coreos':
+            from azure.cli.core.parser import InvalidArgumentValueError
+            raise InvalidArgumentValueError("As CoreOS is deprecated and there is no image in the marketplace any more,"
+                                            " please use Flatcar Container Linux instead.")
+
         distros = [('canonical', 'UbuntuServer', '^16.04|^18.04'),
                    ('suse', 'sles', '^12-sp3'), ('redhat', 'rhel', '^7.4'),
-                   ('openlogic', 'centos', '^7.4'), ('coreos', 'coreos', None), ('credativ', 'debian', '-backports'),
+                   ('openlogic', 'centos', '^7.4'), ('kinvolk', 'flatcar-container-linux-free', None),
+                   ('kinvolk', 'flatcar-container-linux', None), ('credativ', 'debian', '-backports'),
                    ('oracle', 'oracle-linux', '^7.4'), ('MicrosoftWindowsServer', 'WindowsServer', '^2016'),
                    ('MicrosoftWindowsServer', 'WindowsServer', '^2012-R2')]
         import re
@@ -984,10 +991,11 @@ def _validate_vm_vmss_create_auth(namespace, cmd=None):
 
     if namespace.admin_username is None:
         namespace.admin_username = get_default_admin_username()
-    namespace.admin_username = _validate_admin_username(namespace.admin_username, namespace.os_type)
+    if namespace.admin_username and namespace.os_type:
+        namespace.admin_username = _validate_admin_username(namespace.admin_username, namespace.os_type)
 
-    if not namespace.os_type:
-        raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
+    # if not namespace.os_type:
+    #     raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
 
     if not namespace.authentication_type:
         # if both ssh key and password, infer that authentication_type is all.
@@ -996,9 +1004,10 @@ def _validate_vm_vmss_create_auth(namespace, cmd=None):
         else:
             # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
             namespace.authentication_type = 'password' \
-                if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
+                if ((namespace.os_type and namespace.os_type.lower() == 'windows') or
+                    namespace.admin_password) else 'ssh'
 
-    if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
+    if namespace.os_type and namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
         raise CLIError('SSH not supported for Windows VMs.')
 
     # validate proper arguments supplied based on the authentication type
@@ -1024,7 +1033,7 @@ def _validate_vm_vmss_create_auth(namespace, cmd=None):
             namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
     elif namespace.authentication_type == 'all':
-        if namespace.os_type.lower() == 'windows':
+        if namespace.os_type and namespace.os_type.lower() == 'windows':
             raise CLIError('SSH not supported for Windows VMs. Use password authentication.')
 
         if not namespace.admin_password:
@@ -1389,82 +1398,134 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     # uniform_str = 'Uniform'
     flexible_str = 'Flexible'
     if namespace.orchestration_mode.lower() == flexible_str.lower():
-        validate_tags(namespace)
-        if not namespace.location:
-            get_default_location_from_resource_group(cmd, namespace)
+
         # The commentted parameters are also forbidden, but they have default values.
         # I don't know whether they are provided by user.
+
+        namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
+        # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
+        # namespace.disable_overprovision = True  # overprovisioning must be false for vmss flex preview
+        # namespace.single_placement_group = False  # SPG must be false for VMSS flex
+        namespace.upgrade_policy_mode = None
+        namespace.use_unmanaged_disk = None
+
         banned_params = [
-            namespace.accelerated_networking,
-            namespace.admin_password,
+            # namespace.accelerated_networking,
+            # namespace.admin_password,
             # namespace.admin_username,
-            namespace.application_gateway,
+            # namespace.application_gateway,
             # namespace.app_gateway_capacity,
             # namespace.app_gateway_sku,
-            namespace.app_gateway_subnet_address_prefix,
-            namespace.application_security_groups,
-            namespace.assign_identity,
-            namespace.authentication_type,
-            namespace.backend_pool_name,
-            namespace.backend_port,
-            namespace.computer_name_prefix,
-            namespace.custom_data,
-            namespace.data_caching,
-            namespace.data_disk_sizes_gb,
+            # namespace.app_gateway_subnet_address_prefix,
+            # namespace.application_security_groups,
+            # namespace.assign_identity,
+            # namespace.authentication_type,
+            # namespace.backend_pool_name,
+            # namespace.backend_port,
+            # namespace.computer_name_prefix,
+            # namespace.custom_data,
+            # namespace.data_caching,
+            # namespace.data_disk_sizes_gb,
             # namespace.disable_overprovision,
-            namespace.dns_servers,
-            namespace.ephemeral_os_disk,
-            namespace.eviction_policy,
+            # namespace.dns_servers,
+            # namespace.ephemeral_os_disk,
+            # namespace.eviction_policy,
             # namespace.generate_ssh_keys,
             namespace.health_probe,
-            namespace.image,
+            namespace.host_group,
+            # namespace.image,
             # namespace.instance_count,
-            namespace.load_balancer,
+            # namespace.load_balancer,
             namespace.nat_pool_name,
-            namespace.load_balancer_sku,
-            namespace.license_type,
-            namespace.max_price,
-            namespace.nsg,
-            namespace.os_caching,
-            namespace.os_disk_name,
-            namespace.os_type,
-            namespace.plan_name,
-            namespace.plan_product,
-            namespace.plan_promotion_code,
-            namespace.plan_publisher,
-            namespace.priority,
-            namespace.public_ip_address,
-            namespace.public_ip_address_allocation,
-            namespace.public_ip_address_dns_name,
+            # namespace.load_balancer_sku,
+            # namespace.license_type,
+            # namespace.max_price,
+            # namespace.nsg,
+            # namespace.os_caching,
+            # namespace.os_disk_name,
+            # namespace.os_type,
+            # namespace.plan_name,
+            # namespace.plan_product,
+            # namespace.plan_promotion_code,
+            # namespace.plan_publisher,
+            # namespace.priority,
+            # namespace.public_ip_address,
+            # namespace.public_ip_address_allocation,
+            # namespace.public_ip_address_dns_name,
             # namespace.public_ip_per_vm,
             # namespace.identity_role,
-            namespace.identity_scope,
-            namespace.secrets,
-            namespace.ssh_dest_key_path,
-            namespace.ssh_key_value,
+            # namespace.identity_scope,
+            namespace.scale_in_policy,
+            # namespace.secrets,
+            # namespace.ssh_dest_key_path,
+            # namespace.ssh_key_value,
             # namespace.storage_container_name,
-            namespace.storage_sku,
-            namespace.subnet,
-            namespace.subnet_address_prefix,
-            namespace.terminate_notification_time,
-            namespace.ultra_ssd_enabled,
+            # namespace.storage_sku,
+            # namespace.subnet,
+            # namespace.subnet_address_prefix,
+            # namespace.terminate_notification_time,
+            # namespace.ultra_ssd_enabled,
             # namespace.upgrade_policy_mode,
             # namespace.use_unmanaged_disk,
-            namespace.vm_domain_name,
-            namespace.vm_sku,
+            # namespace.vm_domain_name,
+            # namespace.vm_sku,
             # namespace.vnet_address_prefix,
-            namespace.vnet_name
+            # namespace.vnet_name,
+            namespace.user_data
         ]
         if any(param is not None for param in banned_params):
             raise CLIError('usage error: In VM mode, only name, resource-group, location, '
                            'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
+
+        # if namespace.platform_fault_domain_count is None:
+        #     raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
+
+        if namespace.tags is not None:
+            validate_tags(namespace)
+        _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
+        # validate_edge_zone(cmd, namespace)
+        if namespace.application_security_groups is not None:
+            validate_asg_names_or_ids(cmd, namespace)
+        if getattr(namespace, 'attach_os_disk', None) or namespace.image is not None:
+            _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
+        if namespace.vnet_name or namespace.subnet:
+            _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
+
+        if namespace.load_balancer is not None or namespace.application_gateway is not None:
+            _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
+        if namespace.public_ip_address is not None:
+            _validate_vmss_create_public_ip(cmd, namespace)
+        if namespace.nsg is not None:
+            _validate_vmss_create_nsg(cmd, namespace)
+        if namespace.accelerated_networking is not None:
+            _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
+        if any([namespace.admin_password, namespace.ssh_dest_key_path, namespace.generate_ssh_keys,
+                namespace.authentication_type, namespace.os_type]):
+            _validate_vm_vmss_create_auth(namespace, cmd)
+        if namespace.assign_identity == '[system]':
+            raise InvalidArgumentValueError('usage error: only user assigned indetity is suppoprted for Flex mode.')
+        if namespace.assign_identity is not None:
+            _validate_vm_vmss_msi(cmd, namespace)  # -- UserAssignedOnly
         _validate_proximity_placement_group(cmd, namespace)
+        _validate_vmss_terminate_notification(cmd, namespace)
+        if namespace.automatic_repairs_grace_period is not None:
+            _validate_vmss_create_automatic_repairs(cmd, namespace)
+        _validate_vmss_create_host_group(cmd, namespace)
+
+        if namespace.secrets is not None:
+            _validate_secrets(namespace.secrets, namespace.os_type)
+
+        if namespace.eviction_policy and not namespace.priority:
+            raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
         return
 
     # Uniform mode
+    if namespace.disable_overprovision is None:
+        namespace.disable_overprovision = False
     validate_tags(namespace)
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
