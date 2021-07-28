@@ -449,7 +449,8 @@ class IoTHubTest(ScenarioTest):
         assert hub_object_id
 
         # Allow time for RBAC and Identity Service
-        sleep(60)
+        if self.is_live:
+            sleep(60)
 
         # Test 'az iot hub update' with Identity-based fileUpload
         updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fsi [system] --fcs {2} --fc {3} --fnld 15'
@@ -722,7 +723,8 @@ class IoTHubTest(ScenarioTest):
         storage_id = self.cmd('storage account show -n {0} -g {1}'.format(storage_account, rg)).get_output_in_json()['id']
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'.format(storage_role, hub_identity, storage_id))
-        sleep(30)
+        if self.is_live:
+            sleep(30)
 
         # change to system identity - fail (needs identityBased auth type)
         self.cmd('iot hub update -n {0} -g {1} --fsi [system]'.format(hub, rg), expect_failure=True)
@@ -747,7 +749,8 @@ class IoTHubTest(ScenarioTest):
         # add a user identity, assign access to storage account
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'.format(storage_role, user_identity_id, storage_id))
-        sleep(30)
+        if self.is_live:
+            sleep(300)
         self.cmd('iot hub identity assign -n {0} -g {1} --user {2}'.format(hub, rg, user_identity), checks=[
             self.exists('userAssignedIdentities."{0}"'.format(user_identity)),
             self.check('type', IdentityType.system_assigned_user_assigned.value)])
@@ -812,8 +815,9 @@ class IoTHubTest(ScenarioTest):
                     self.cmd('role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'.format(role, identity_id, eh['id']))
 
         # RBAC propogation
-        from time import sleep
-        sleep(30)
+        if self.is_live:
+            from time import sleep
+            sleep(30)
 
         return ['sb://{0}.servicebus.windows.net'.format(ehNamespace), eventHub]
 
