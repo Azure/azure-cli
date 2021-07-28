@@ -103,21 +103,21 @@ def load_arguments(self, _):
 
     # Identity
     with self.argument_context('backup vault identity assign') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('system_assigned', system_assigned_type)
         c.argument('user_assigned', user_assigned_type)
 
     with self.argument_context('backup vault identity remove') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('system_assigned', system_assigned_remove_type)
         c.argument('user_assigned', user_assigned_remove_type)
 
     with self.argument_context('backup vault identity show') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
 
     # Encryption
     with self.argument_context('backup vault encryption') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
 
     with self.argument_context('backup vault encryption update') as c:
         c.argument('encryption_key_id', encryption_key_id_type)
@@ -126,7 +126,7 @@ def load_arguments(self, _):
         c.argument('mi_system_assigned', mi_system_assigned_type)
 
     with self.argument_context('backup vault encryption show') as c:
-        c.argument('vault_name', vault_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
 
     # Container
     with self.argument_context('backup container') as c:
@@ -341,10 +341,12 @@ def load_arguments(self, _):
         c.argument('diskslist', diskslist_type)
         c.argument('restore_only_osdisk', arg_type=get_three_state_flag(), help='Use this flag to restore only OS disks of a backed up VM.')
         c.argument('restore_as_unmanaged_disks', arg_type=get_three_state_flag(), help='Use this flag to specify to restore as unmanaged disks')
-        c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
-        c.argument('rehydration_duration', type=int, help='Set the maximum time, in days (between 10-30, both inclusive) for which the recovery point stays in hydrated state. Default: 15')
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to restore from a recoverypoint in secondary region.')
+        c.argument('rehydration_duration', type=int, help='Set the maximum time, in days (between 10-30, both inclusive) for which the recovery point stays in hydrated state.')
         c.argument('rehydration_priority', rehyd_priority_type)
         c.argument('disk_encryption_set_id', options_list=['--disk-encryption-set-id'], help='The disk encryption set id is used for encrypting restored disks. Please ensure access to disk encryption set id that is specified here.')
+        c.argument('mi_system_assigned', action='store_true', help='Use this flag to specify whether a system-assigned managed identity should be used for the restore operation. MI option is not applicable for restoring unmanaged disks.')
+        c.argument('mi_user_assigned', help='ARM ID of the user-assigned managed identity to use for the restore operation. Specify a value for this parameter if you do not want to use a system-assigned MI for restoring the backup item.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
@@ -365,7 +367,7 @@ def load_arguments(self, _):
     with self.argument_context('backup restore restore-azurewl') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('recovery_config', options_list=['--recovery-config'], help="""Specify the recovery configuration of a backed up item. The configuration object can be obtained from 'backup recoveryconfig show' command.""")
-        c.argument('rehydration_duration', type=int, help='Set the maximum time, in days (between 10-30, both inclusive) for which the recovery point stays in hydrated state. Default: 15')
+        c.argument('rehydration_duration', type=int, help='Set the maximum time, in days (between 10-30, both inclusive) for which the recovery point stays in hydrated state.')
         c.argument('rehydration_priority', rehyd_priority_type)
 
     # Recoveryconfig
