@@ -328,7 +328,7 @@ def _get_image_plan_info_if_exists(cmd, namespace):
                        "will be skipped", namespace.image, ex.message)
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, too-many-return-statements
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
         return 'create unmanaged OS disk created from generalized VHD'
