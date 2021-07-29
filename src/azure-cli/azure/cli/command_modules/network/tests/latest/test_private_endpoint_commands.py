@@ -2003,6 +2003,20 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, approve=False, rejected=False)
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_storage_sync")
+    def test_private_endpoint_connection_storage_sync(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'storagesync',
+            'list_num': 1,
+            'type': 'Microsoft.StorageSync/storageSyncServices',
+            'extra_create': '-l eastus'
+        })
+        # self.cmd('extension add -n storagesync')
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_web")
     def test_private_endpoint_connection_web(self, resource_group):
 
