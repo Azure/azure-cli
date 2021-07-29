@@ -61,6 +61,7 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         tenant_settings=instance.tenant_settings,
         shard_count=instance.shard_count,
         minimum_tls_version=instance.minimum_tls_version,
+        redis_version=instance.redis_version,
         sku=instance.sku,
         tags=instance.tags
     )
@@ -72,7 +73,7 @@ def cli_redis_create(cmd, client,
                      resource_group_name, name, location, sku, vm_size, tags=None,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
                      shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None,
-                     zones=None, replicas_per_master=None):
+                     zones=None, replicas_per_master=None, redis_version=None):
     # pylint:disable=line-too-long
     if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
         raise wrong_vmsize_error
@@ -94,6 +95,7 @@ def cli_redis_create(cmd, client,
         subnet_id=subnet_id,
         static_ip=static_ip,
         zones=zones,
+        redis_version=redis_version,
         tags=tags)
     return client.begin_create(resource_group_name, name, params)
 
@@ -144,7 +146,7 @@ def cli_redis_patch_schedule_delete(client, resource_group_name, name):
 
 def cli_redis_list_cache(client, resource_group_name=None):
     cache_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
-        if resource_group_name else client.list()
+        if resource_group_name else client.list_by_subscription()
     return list(cache_list)
 
 

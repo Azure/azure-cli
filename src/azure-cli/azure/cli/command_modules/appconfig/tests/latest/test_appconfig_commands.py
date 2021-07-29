@@ -950,7 +950,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         })
         # add a new feature flag entry
         self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} --label {label} -y',
-                 checks=[self.check('key', entry_feature),
+                 checks=[self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('label', entry_label)])
 
         # add a new label for same feature
@@ -958,7 +959,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'label': updated_label
         })
         self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} --label {label} -y',
-                 checks=[self.check('key', entry_feature),
+                 checks=[self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('label', updated_label)])
 
         # import all kv and features from src config store to dest config store
@@ -1342,7 +1344,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
         # Add a new feature flag
         entry_feature = 'Beta'
-        default_description = None
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
+        default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
@@ -1351,7 +1354,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
@@ -1516,6 +1520,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         _create_config_store(self, self.kwargs)
 
         entry_feature = 'Beta'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         entry_label = 'v1'
         default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
@@ -1531,7 +1536,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # add a brand new feature flag entry
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', entry_label),
                          self.check('state', default_state),
@@ -1544,7 +1550,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', updated_entry_description),
                          self.check('label', entry_label),
                          self.check('state', default_state),
@@ -1558,7 +1565,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', updated_label),
                          self.check('state', default_state),
@@ -1572,26 +1580,28 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} --label {label} --description "{description}" -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', updated_entry_description),
                          self.check('label', updated_label),
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
 
-        # show a feature flag with all 7 fields
+        # show a feature flag with all 8 fields
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
                                  checks=[self.check('locked', default_locked),
-                                         self.check('key', entry_feature),
+                                         self.check('name', entry_feature),
+                                         self.check('key', internal_feature_key),
                                          self.check('description', updated_entry_description),
                                          self.check('label', updated_label),
                                          self.check('state', default_state),
                                          self.check('conditions', default_conditions)]).get_output_in_json()
-        assert len(response_dict) == 7
+        assert len(response_dict) == 8
 
         # show a feature flag with field filtering
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label} --fields key label state locked',
                                  checks=[self.check('locked', default_locked),
-                                         self.check('key', entry_feature),
+                                         self.check('key', internal_feature_key),
                                          self.check('label', updated_label),
                                          self.check('state', default_state)]).get_output_in_json()
         assert len(response_dict) == 4
@@ -1611,9 +1621,10 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'label': any_label_pattern
         })
 
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --label {label} --fields key label state locked',
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --label {label} --fields key name label state locked',
                                  checks=[self.check('[0].locked', default_locked),
-                                         self.check('[0].key', entry_feature),
+                                         self.check('[0].name', entry_feature),
+                                         self.check('[0].key', internal_feature_key),
                                          self.check('[0].label', entry_label),
                                          self.check('[0].state', default_state)]).get_output_in_json()
         assert len(list_features) == 2
@@ -1624,6 +1635,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         # Add another feature with name starting with Beta, null label
         prefix_feature = 'BetaPrefix'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + prefix_feature
         null_label = None
 
         self.kwargs.update({
@@ -1632,7 +1644,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', prefix_feature),
+                         self.check('name', prefix_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state),
@@ -1640,6 +1653,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         # Add feature with name ending with Beta, null label
         suffix_feature = 'SuffixBeta'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + suffix_feature
 
         self.kwargs.update({
             'feature': suffix_feature
@@ -1647,7 +1661,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', suffix_feature),
+                         self.check('name', suffix_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state),
@@ -1655,6 +1670,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         # Add feature where name contains Beta, null label
         contains_feature = 'ThisBetaVersion'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + contains_feature
 
         self.kwargs.update({
             'feature': contains_feature
@@ -1662,7 +1678,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state),
@@ -1692,7 +1709,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
-                                 checks=[self.check('[0].key', prefix_feature),
+                                 checks=[self.check('[0].name', prefix_feature),
                                          self.check('[0].label', null_label)]).get_output_in_json()
         assert len(list_features) == 1
 
@@ -1741,7 +1758,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # IN CLI, since we support delete by key/label pattern matching, return is a list of deleted items
         deleted = self.cmd('appconfig feature delete --connection-string {connection_string}  --feature {feature} --label {label} -y',
                            checks=[self.check('[0].locked', default_locked),
-                                   self.check('[0].key', entry_feature),
+                                   self.check('[0].name', entry_feature),
                                    self.check('[0].description', updated_entry_description),
                                    self.check('[0].label', updated_label),
                                    self.check('[0].state', default_state)]).get_output_in_json()
@@ -1755,7 +1772,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         self.cmd('appconfig feature lock -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', updated_lock),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state)])
@@ -1763,7 +1780,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # Unlock feature - ThisBetaVersion
         self.cmd('appconfig feature unlock -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state)])
@@ -1772,7 +1789,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         on_state = 'on'
         self.cmd('appconfig feature enable -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', on_state)])
@@ -1780,7 +1797,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # Disable feature - ThisBetaVersion
         self.cmd('appconfig feature disable -n {config_store_name} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', contains_feature),
+                         self.check('name', contains_feature),
                          self.check('description', default_description),
                          self.check('label', null_label),
                          self.check('state', default_state)])
@@ -1793,6 +1810,96 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
         assert len(list_features) == 4
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_feature_namespacing(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='FeatureNamespaceTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        feature_name = 'Beta'
+        feature_prefix = 'MyApp:'
+        feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_prefix + feature_name
+        entry_label = 'v1'
+        default_description = ""
+        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_locked = False
+        default_state = "off"
+
+        self.kwargs.update({
+            'feature': feature_name,
+            'key': feature_key,
+            'description': default_description,
+            'label': entry_label
+        })
+
+        # add feature flag with a custom key
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --key {key}  --label {label} -y',
+                 checks=[self.check('locked', default_locked),
+                         self.check('name', feature_name),
+                         self.check('key', feature_key),
+                         self.check('description', default_description),
+                         self.check('label', entry_label),
+                         self.check('state', default_state),
+                         self.check('conditions', default_conditions)])
+
+        # Enable the same feature flag using --key
+        on_state = 'on'
+        self.cmd('appconfig feature enable -n {config_store_name} --key {key} --label {label} -y',
+                 checks=[self.check('locked', default_locked),
+                         self.check('name', feature_name),
+                         self.check('key', feature_key),
+                         self.check('description', default_description),
+                         self.check('label', entry_label),
+                         self.check('state', on_state)])
+
+        # Add new feature flag using --key only
+        feature_name_2 = "MyApp:GlobalFeature"
+        feature_key_2 = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_name_2
+        self.kwargs.update({
+            'key': feature_key_2,
+        })
+        self.cmd('appconfig feature set -n {config_store_name} --key {key}  --label {label} -y',
+                 checks=[self.check('locked', default_locked),
+                         self.check('name', feature_name_2),
+                         self.check('key', feature_key_2),
+                         self.check('description', default_description),
+                         self.check('label', entry_label),
+                         self.check('state', default_state),
+                         self.check('conditions', default_conditions)])
+
+        # List features using --key filter
+        key_pattern = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_prefix + "*"
+        any_label_pattern = "*"
+        self.kwargs.update({
+            'key': key_pattern,
+            'label': any_label_pattern
+        })
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --key {key} --label {label}').get_output_in_json()
+        assert len(list_features) == 2
+
+        # Invalid key
+        invalid_key = "InvalidFeatureKey"
+        self.kwargs.update({
+            'key': invalid_key
+        })
+
+        with self.assertRaisesRegexp(CLIError, "Feature flag key must start with the reserved prefix"):
+            self.cmd('appconfig feature set -n {config_store_name} --key {key}')
+
+        # Missing key and feature
+        with self.assertRaisesRegexp(CLIError, "Please provide either `--key` or `--feature` value."):
+            self.cmd('appconfig feature delete -n {config_store_name}')
+
 
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
@@ -1813,8 +1920,9 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         _create_config_store(self, self.kwargs)
 
         entry_feature = 'Color'
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         entry_label = 'Standard'
-        default_description = None
+        default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
@@ -1828,7 +1936,8 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         # add a brand new feature flag entry
         self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', entry_label),
                          self.check('state', default_state),
@@ -1902,7 +2011,8 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         # Show feature with all filters
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
                                  checks=[self.check('locked', default_locked),
-                                         self.check('key', entry_feature),
+                                         self.check('name', entry_feature),
+                                         self.check('key', internal_feature_key),
                                          self.check('description', default_description),
                                          self.check('label', entry_label),
                                          self.check('state', default_state)]).get_output_in_json()
@@ -1915,7 +2025,8 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         conditional_state = 'conditional'
         self.cmd('appconfig feature enable -n {config_store_name} --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('label', entry_label),
                          self.check('state', conditional_state)])
@@ -2063,9 +2174,9 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
         # validate feature name
         self.kwargs.update({
-            'feature': 'Bet@'
+            'feature': 'Beta%'
         })
-        with self.assertRaisesRegexp(CLIError, "Feature name is invalid. Only alphanumeric characters, '.', '-' and '_' are allowed."):
+        with self.assertRaisesRegexp(CLIError, "Feature name cannot contain the '%' character."):
             self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} -y')
 
         self.kwargs.update({
@@ -2133,7 +2244,8 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
         # add a feature flag
         entry_feature = 'Beta'
-        default_description = None
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
+        default_description = ""
         default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
@@ -2143,7 +2255,8 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
@@ -2175,7 +2288,8 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         # Since the logged in account also has "Contributor" role, providing --name instead of --endpoint should succeed
         self.cmd('appconfig feature show --name {config_store_name} --auth-mode login --feature {feature}',
                  checks=[self.check('locked', default_locked),
-                         self.check('key', entry_feature),
+                         self.check('name', entry_feature),
+                         self.check('key', internal_feature_key),
                          self.check('description', default_description),
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
