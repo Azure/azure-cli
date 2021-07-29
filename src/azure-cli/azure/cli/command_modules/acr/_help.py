@@ -1326,7 +1326,7 @@ helps['acr connected-registry install renew-credentials'] = """
 type: command
 short-summary: Retrieves information required to activate a connected registry, and renews the sync token credentials.
 examples:
-  - name: Sets http as the parent protocol, and prints the values in json format required to activate a connected registry and the newly generated sync token credentials.
+  - name: Set http as the parent protocol, and prints the values in json format required to activate a connected registry and the newly generated sync token credentials.
     text: >
         az acr connected-registry install renew-credentials -r mycloudregistry -n myconnectedregistry --parent-protocol http
 """
