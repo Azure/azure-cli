@@ -1951,6 +1951,615 @@ def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
                        'assignment')
 
 
+class AKSCreateContext:
+    # used to store intermediate variables (neither original function parameters nor model variables)
+    def __init__(self, data):
+        pass
+
+
+class AKSCreateModels:
+    # used to store models which would be used during the creation process
+    def __init__(self, cmd, resource_type=ResourceType.MGMT_CONTAINERSERVICE):
+        self.cmd = cmd
+        self.resource_type = resource_type
+        self.ManagedClusterWindowsProfile = self.cmd.get_models(
+            "ManagedClusterWindowsProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterSKU = self.cmd.get_models(
+            "ManagedClusterSKU",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ContainerServiceNetworkProfile = self.cmd.get_models(
+            "ContainerServiceNetworkProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ContainerServiceLinuxProfile = self.cmd.get_models(
+            "ContainerServiceLinuxProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterServicePrincipalProfile = self.cmd.get_models(
+            "ManagedClusterServicePrincipalProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ContainerServiceSshConfiguration = self.cmd.get_models(
+            "ContainerServiceSshConfiguration",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ContainerServiceSshPublicKey = self.cmd.get_models(
+            "ContainerServiceSshPublicKey",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterAADProfile = self.cmd.get_models(
+            "ManagedClusterAADProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterAgentPoolProfile = self.cmd.get_models(
+            "ManagedClusterAgentPoolProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterIdentity = self.cmd.get_models(
+            "ManagedClusterIdentity",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterPropertiesIdentityProfileValue = self.cmd.get_models(
+            "ManagedClusterPropertiesIdentityProfileValue",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedCluster = self.cmd.get_models(
+            "ManagedCluster",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = self.cmd.get_models(
+            "Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+
+
+class AKSCreateParameters:
+    # used to store original function parameters
+    def __init__(self, data):
+        for name, value in data.items():
+            setattr(self, name, self._wrap(value))
+
+    def _wrap(self, value):
+        if isinstance(value, (tuple, list, set)):
+            return type(value)([self._wrap(v) for v in value])
+        else:
+            return AKSCreateContext(value) if isinstance(value, dict) else value
+
+
+class AKSCreateDecorator():
+    def __init__(
+        self,
+        cmd,
+        client,
+        resource_type,
+        raw_parameters
+    ):
+        self.cmd = cmd
+        self.client = client
+        self.resource_type = resource_type
+        self.context = AKSCreateContext()
+        self.models = AKSCreateModels(cmd=self.cmd, resource_type=self.resource_type)
+        self.param = AKSCreateParameters(raw_parameters)
+        self.mc = None
+
+    def check_params(self):
+        _validate_ssh_key(self.param.no_ssh_key, self.param.ssh_key_value)
+        self.context.subscription_id = get_subscription_id(self.cmd.cli_ctx)
+        if self.param.dns_name_prefix and self.param.fqdn_subdomain:
+            raise MutuallyExclusiveArgumentError(
+                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+            )
+        if not self.param.dns_name_prefix and not self.param.fqdn_subdomain:
+            self.param.dns_name_prefix = _get_default_dns_prefix(
+                self.param.name, self.param.resource_group_name, self.context.subscription_id
+            )
+
+        self.context.rg_location = _get_rg_location(self.cmd.cli_ctx, self.param.resource_group_name)
+        if self.param.location is None:
+            self.param.location = self.context.rg_location
+
+        self.param.vm_set_type = _set_vm_set_type(self.param.vm_set_type, self.param.kubernetes_version)
+        self.param.load_balancer_sku = set_load_balancer_sku(
+            self.param.load_balancer_sku, self.param.kubernetes_version
+        )
+
+        if self.param.api_server_authorized_ip_ranges and self.param.load_balancer_sku == "basic":
+            raise CLIError(
+                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+            )
+
+    def set_up_agent_pool_profiles(self):
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            # Must be 12 chars or less before ACS RP adds to it
+            name=_trim_nodepoolname(self.param.nodepool_name),
+            tags=self.param.nodepool_tags,
+            node_labels=self.param.nodepool_labels,
+            count=int(self.param.node_count),
+            vm_size=self.param.node_vm_size,
+            os_type="Linux",
+            vnet_subnet_id=self.param.vnet_subnet_id,
+            proximity_placement_group_id=self.param.ppg,
+            availability_zones=self.param.zones,
+            enable_node_public_ip=self.param.enable_node_public_ip,
+            node_public_ip_prefix_id=self.param.node_public_ip_prefix_id,
+            enable_encryption_at_host=self.param.enable_encryption_at_host,
+            enable_ultra_ssd=self.param.enable_ultra_ssd,
+            max_pods=int(self.param.max_pods) if self.param.max_pods else None,
+            type=self.param.vm_set_type,
+            mode="System",
+        )
+        if self.param.node_osdisk_size:
+            agent_pool_profile.os_disk_size_gb = int(self.param.node_osdisk_size)
+
+        if self.param.node_osdisk_size:
+            agent_pool_profile.os_disk_type = self.param.node_osdisk_size
+
+        _check_cluster_autoscaler_flag(
+            self.param.enable_cluster_autoscaler,
+            self.param.min_count,
+            self.param.max_count,
+            self.param.node_count,
+            agent_pool_profile,
+        )
+
+        # update mc
+        self.mc.agent_pool_profiles = [agent_pool_profile]
+
+    def set_up_linux_profile(self):
+        self.context.linux_profile = None
+        # LinuxProfile is just used for SSH access to VMs, so omit it if --no-ssh-key was specified.
+        if not self.param.no_ssh_key:
+            ssh_config = self.models.ContainerServiceSshConfiguration(
+                public_keys=[self.ContainerServiceSshPublicKey(key_data=self.param.ssh_key_value)]
+            )
+            linux_profile = self.ContainerServiceLinuxProfile(
+                admin_username=self.param.admin_username, ssh=ssh_config
+            )
+
+        # update mc
+        self.mc.linux_profile = linux_profile
+
+    def set_up_windows_profile(self):
+        windows_profile = None
+        if self.param.windows_admin_username or self.param.windows_admin_password:
+            # To avoid that windows_admin_password is set but windows_admin_username is not
+            if self.param.windows_admin_username is None:
+                try:
+                    from knack.prompting import prompt
+                    self.param.windows_admin_username = prompt('windows_admin_username: ')
+                    # The validation for admin_username in ManagedClusterWindowsProfile will fail even if
+                    # users still set windows_admin_username to empty here
+                except NoTTYException:
+                    raise CLIError(
+                        'Please specify username for Windows in non-interactive mode.')
+
+            if self.param.windows_admin_password is None:
+                try:
+                    self.param.windows_admin_password = prompt_pass(
+                        msg='windows-admin-password: ', confirm=True)
+                except NoTTYException:
+                    raise CLIError(
+                        'Please specify both username and password in non-interactive mode.')
+
+            windows_license_type = None
+            if self.param.enable_ahub:
+                windows_license_type = 'Windows_Server'
+
+            windows_profile = self.models.ManagedClusterWindowsProfile(
+                admin_username=self.param.windows_admin_username,
+                admin_password=self.param.windows_admin_password,
+                license_type=windows_license_type)
+
+        # update mc
+        self.mc.windows_profile = windows_profile
+
+    def set_up_service_principal_profile(self):
+        # If customer explicitly provide a service principal, disable managed identity.
+        if self.param.service_principal and self.param.client_secret:
+            self.param.enable_managed_identity = False
+        # Skip create service principal profile for the cluster if the cluster
+        # enables managed identity and customer doesn't explicitly provide a service principal.
+        service_principal_profile = None
+        principal_obj = None
+        if not(self.param.enable_managed_identity and not self.param.service_principal and not self.param.client_secret):
+            principal_obj = _ensure_aks_service_principal(self.cmd.cli_ctx,
+                                                        service_principal=self.param.service_principal, client_secret=self.param.client_secret,
+                                                        subscription_id=self.context.subscription_id, dns_name_prefix=self.param.dns_name_prefix,
+                                                        fqdn_subdomain=self.param.fqdn_subdomain, location=self.param.location, name=self.param.name)
+            service_principal_profile = self.models.ManagedClusterServicePrincipalProfile(
+                client_id=principal_obj.get("service_principal"),
+                secret=principal_obj.get("client_secret"),
+                key_vault_secret_ref=None)
+
+        need_post_creation_vnet_permission_granting = False
+        if (self.param.vnet_subnet_id and not self.param.skip_subnet_role_assignment and
+                not subnet_role_assignment_exists(self.cmd.cli_ctx, self.param.vnet_subnet_id)):
+            # if service_principal_profile is None, then this cluster is an MSI cluster,
+            # and the service principal does not exist. Two cases:
+            # 1. For system assigned identity, we just tell user to grant the
+            # permission after the cluster is created to keep consistent with portal experience.
+            # 2. For user assigned identity, we can grant needed permission to
+            # user provided user assigned identity before creating managed cluster.
+            if service_principal_profile is None and not self.param.assign_identity:
+                msg = ('It is highly recommended to use USER assigned identity '
+                    '(option --assign-identity) when you want to bring your own'
+                    'subnet, which will have no latency for the role assignment to '
+                    'take effect. When using SYSTEM assigned identity, '
+                    'azure-cli will grant Network Contributor role to the '
+                    'system assigned identity after the cluster is created, and '
+                    'the role assignment will take some time to take effect, see '
+                    'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, '
+                    'proceed to create cluster with system assigned identity?')
+                if not self.param.yes and not prompt_y_n(msg, default="n"):
+                    return None
+                need_post_creation_vnet_permission_granting = True
+            else:
+                scope = self.param.vnet_subnet_id
+                identity_client_id = ""
+                if self.param.assign_identity:
+                    identity_client_id = _get_user_assigned_identity_client_id(
+                        self.cmd.cli_ctx, self.param.assign_identity)
+                else:
+                    identity_client_id = service_principal_profile.client_id
+                if not _add_role_assignment(self.cmd.cli_ctx, 'Network Contributor',
+                                            identity_client_id, scope=scope):
+                    logger.warning('Could not create a role assignment for subnet. '
+                                'Are you an Owner on this subscription?')
+
+        # update context
+        self.context.principal_obj = principal_obj
+        self.context.service_principal_profile = service_principal_profile
+        self.context.need_post_creation_vnet_permission_granting = need_post_creation_vnet_permission_granting
+
+        # update mc
+        self.mc.service_principal_profile = service_principal_profile
+
+    def build_lb_profile(self):
+        load_balancer_profile = create_load_balancer_profile(
+            self.cmd,
+            self.param.load_balancer_managed_outbound_ip_count,
+            self.param.load_balancer_outbound_ips,
+            self.param.load_balancer_outbound_ip_prefixes,
+            self.param.load_balancer_outbound_ports,
+            self.param.load_balancer_idle_timeout)
+
+        # update context
+        self.context.load_balancer_profile = load_balancer_profile
+
+    def process_attach_acr(self):
+        if self.param.attach_acr:
+            if self.param.enable_managed_identity:
+                if self.param.no_wait:
+                    raise CLIError('When --attach-acr and --enable-managed-identity are both specified, '
+                                    '--no-wait is not allowed, please wait until the whole operation succeeds.')
+                # Attach acr operation will be handled after the cluster is created
+            else:
+                _ensure_aks_acr(self.cmd.cli_ctx,
+                                client_id=self.context.service_principal_profile.client_id,
+                                acr_name_or_id=self.param.attach_acr,
+                                subscription_id=self.context.subscription_id)
+
+    def check_outbound_type(self):
+        self.param.outbound_type = _set_outbound_type(
+            self.param.outbound_type, self.param.vnet_subnet_id, self.param.load_balancer_sku, self.param.load_balancer_profile)
+
+    def set_up_network_profile(self):
+        network_profile = None
+        if any([self.param.network_plugin, self.param.pod_cidr, self.param.service_cidr, self.param.dns_service_ip,
+                self.param.docker_bridge_address, self.param.network_policy]):
+            if not self.param.network_plugin:
+                raise CLIError('Please explicitly specify the network plugin type')
+            if self.param.pod_cidr and self.param.network_plugin == "azure":
+                raise CLIError(
+                    'Please use kubenet as the network plugin type when pod_cidr is specified')
+            network_profile = self.models.ContainerServiceNetworkProfile(
+                network_plugin=self.param.network_plugin,
+                pod_cidr=self.param.pod_cidr,
+                service_cidr=self.param.service_cidr,
+                dns_service_ip=self.param.dns_service_ip,
+                docker_bridge_cidr=self.param.docker_bridge_address,
+                network_policy=self.param.network_policy,
+                load_balancer_sku=self.param.load_balancer_sku.lower(),
+                load_balancer_profile=self.context.load_balancer_profile,
+                outbound_type=self.param.outbound_type
+            )
+        else:
+            if self.param.load_balancer_sku.lower() == "standard" or self.context.load_balancer_profile:
+                network_profile = self.models.ContainerServiceNetworkProfile(
+                    network_plugin="kubenet",
+                    load_balancer_sku=self.param.load_balancer_sku.lower(),
+                    load_balancer_profile=self.context.load_balancer_profile,
+                    outbound_type=self.param.outbound_type,
+                )
+            if self.param.load_balancer_sku.lower() == "basic":
+                network_profile = self.models.ContainerServiceNetworkProfile(
+                    load_balancer_sku=self.param.load_balancer_sku.lower(),
+                )
+
+        # update mc
+        self.mc.network_profile = network_profile
+
+    def set_up_addon_profiles(self):
+        addon_profiles = _handle_addons_args(
+            self.cmd,
+            self.param.enable_addons,
+            self.context.subscription_id,
+            self.param.resource_group_name,
+            {},
+            self.param.workspace_resource_id,
+            self.param.aci_subnet_name,
+            self.param.vnet_subnet_id,
+            self.param.appgw_name,
+            self.param.appgw_subnet_cidr,
+            self.param.appgw_id,
+            self.param.appgw_subnet_id,
+            self.param.appgw_watch_namespace,
+            self.param.enable_sgxquotehelper
+        )
+        monitoring = False
+        if CONST_MONITORING_ADDON_NAME in addon_profiles:
+            monitoring = True
+            _ensure_container_insights_for_monitoring(
+                self.cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
+
+        # addon is in the list and is enabled
+        ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in addon_profiles and \
+            addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
+
+        os_type = 'Linux'
+        enable_virtual_node = False
+        if CONST_VIRTUAL_NODE_ADDON_NAME + os_type in addon_profiles:
+            enable_virtual_node = True
+
+        # update context
+        self.context.monitoring = monitoring
+        self.context.ingress_appgw_addon_enabled = ingress_appgw_addon_enabled
+        self.context.enable_virtual_node =enable_virtual_node
+
+        # update mc
+        self.mc.addon_profiles = addon_profiles
+
+    def set_up_aad_profile(self):
+        aad_profile = None
+        if self.param.enable_aad:
+            if any([self.param.aad_client_app_id, self.param.aad_server_app_id, self.param.aad_server_app_secret]):
+                raise CLIError('"--enable-aad" cannot be used together with '
+                            '"--aad-client-app-id/--aad-server-app-id/--aad-server-app-secret"')
+            if self.param.disable_rbac and self.param.enable_azure_rbac:
+                raise ArgumentUsageError(
+                    '"--enable-azure-rbac" can not be used together with "--disable-rbac"')
+            aad_profile = self.modles.ManagedClusterAADProfile(
+                managed=True,
+                enable_azure_rbac=self.param.enable_azure_rbac,
+                # ids -> i_ds due to track 2 naming issue
+                admin_group_object_i_ds=_parse_comma_separated_list(
+                    self.param.aad_admin_group_object_ids),
+                tenant_id=self.param.aad_tenant_id
+            )
+        else:
+            if self.param.enable_azure_rbac is True:
+                raise ArgumentUsageError(
+                    '"--enable-azure-rbac" can only be used together with "--enable-aad"')
+
+            if any([self.param.aad_client_app_id, self.param.aad_server_app_id, self.param.aad_server_app_secret, self.param.aad_tenant_id]):
+                if self.param.aad_tenant_id is None:
+                    profile = Profile(cli_ctx=self.cmd.cli_ctx)
+                    _, _, aad_tenant_id = profile.get_login_credentials()
+
+                aad_profile = self.models.ManagedClusterAADProfile(
+                    client_app_id=self.param.aad_client_app_id,
+                    server_app_id=self.param.aad_server_app_id,
+                    server_app_secret=self.param.aad_server_app_secret,
+                    tenant_id=aad_tenant_id
+                )
+
+        # update mc
+        self.mc.aad_profile = aad_profile
+
+    def set_up_api_server_access_profile(self):
+        api_server_access_profile = None
+        if self.param.enable_private_cluster and self.param.load_balancer_sku.lower() != "standard":
+            raise CLIError("Please use standard load balancer for private cluster")
+        if self.param.api_server_authorized_ip_ranges or self.param.enable_private_cluster:
+            api_server_access_profile = _populate_api_server_access_profile(
+                self.cmd,
+                self.param.api_server_authorized_ip_ranges,
+                enable_private_cluster=self.param.enable_private_cluster
+            )
+
+        # update mc
+        self.mc.api_server_access_profile = api_server_access_profile
+
+    def check_rbac(self):
+        # Check that both --disable-rbac and --enable-rbac weren't provided
+        if all([self.param.disable_rbac, self.param.enable_rbac]):
+            raise CLIError(
+                'specify either "--disable-rbac" or "--enable-rbac", not both.')
+
+    def set_up_identity(self):
+        identity = None
+        if not self.param.enable_managed_identity and self.param.assign_identity:
+            raise ArgumentUsageError(
+                '--assign-identity can only be specified when --enable-managed-identity is specified')
+        if self.param.enable_managed_identity and not self.param.assign_identity:
+            identity = self.models.ManagedClusterIdentity(
+                type="SystemAssigned"
+            )
+        elif self.param.enable_managed_identity and self.param.assign_identity:
+            user_assigned_identity = {
+                # pylint: disable=line-too-long
+                self.param.assign_identity: self.models.Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties()
+            }
+            identity = self.models.ManagedClusterIdentity(
+                type="UserAssigned",
+                user_assigned_identities=user_assigned_identity
+            )
+
+        # update mc
+        self.mc.identity = identity
+
+    def set_up_identity_profile(self):
+        identity_profile = None
+        if self.param.assign_kubelet_identity:
+            if not self.param.assign_identity:
+                # pylint: disable=line-too-long
+                raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
+            kubelet_identity = _get_user_assigned_identity(self.cmd.cli_ctx, self.param.assign_kubelet_identity)
+            identity_profile = {
+                # pylint: disable=line-too-long
+                'kubeletidentity': self.models.ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties(
+                    resource_id=self.param.assign_kubelet_identity,
+                    client_id=kubelet_identity.client_id,
+                    object_id=kubelet_identity.principal_id
+                )
+            }
+            cluster_identity_object_id = _get_user_assigned_identity_object_id(self.cmd.cli_ctx, self.param.assign_identity)
+            # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
+            _ensure_cluster_identity_permission_on_kubelet_identity(
+                self.cmd.cli_ctx,
+                cluster_identity_object_id,
+                self.param.assign_kubelet_identity)
+
+        # update mc
+        self.mc.identity_profile = identity_profile
+
+    def set_up_mc_with_params(self):
+        self.mc.location = self.param.location
+        self.mc.tags = self.param.tags
+        self.mc.dns_name_prefix = self.param.dns_name_prefix
+        self.mc.kubernetes_version = self.param.kubernetes_version
+        self.mc.enable_rbac = not self.param.disable_rbac
+        self.mc.cluster_autoscaler_profile = self.param.cluster_autoscaler_profile
+        self.mc.disk_encryption_set_id=self.param.node_osdisk_diskencryptionset_id
+
+    def set_up_private_dns_fqdn_subdomain(self):
+        use_custom_private_dns_zone = False
+        if self.param.private_dns_zone:
+            if not self.param.enable_private_cluster:
+                raise InvalidArgumentValueError("Invalid private dns zone for public cluster. "
+                                                "It should always be empty for public cluster")
+            self.mc.api_server_access_profile.private_dns_zone = self.param.private_dns_zone
+            from msrestazure.tools import is_valid_resource_id
+            if self.param.private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
+                if is_valid_resource_id(self.param.private_dns_zone):
+                    use_custom_private_dns_zone = True
+                else:
+                    raise InvalidArgumentValueError(
+                        self.param.private_dns_zone + " is not a valid Azure resource ID.")
+        if self.param.fqdn_subdomain:
+            if not use_custom_private_dns_zone:
+                raise ArgumentUsageError("--fqdn-subdomain should only be used for "
+                                        "private cluster with custom private dns zone")
+            self.mc.fqdn_subdomain = self.param.fqdn_subdomain
+
+    def set_up_sku(self):
+        if self.param.uptime_sla:
+            self.mc.sku = self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Paid"
+            )
+
+    def set_up_extended_location(self):
+        if self.param.edge_zone:
+            ExtendedLocation = self.cmd.get_models('ExtendedLocation',
+                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                            operation_group='managed_clusters')
+            ExtendedLocationTypes = self.cmd.get_models('ExtendedLocationTypes',
+                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                operation_group='managed_clusters')
+            self.mc.extended_location = ExtendedLocation(
+                name=self.param.edge_zone,
+                type=ExtendedLocationTypes.EDGE_ZONE
+            )
+
+    def build_custom_headers(self):
+        # Add AAD session key to header.
+        # If principal_obj is None, we will not add this header, this can happen
+        # when the cluster enables managed identity. In this case, the header is useless
+        # and that's OK to not add this header
+        custom_headers = None
+        if self.context.principal_obj:
+            custom_headers = {
+                'Ocp-Aad-Session-Key': self.context.principal_obj.get("aad_session_key")}
+
+        self.context.custom_headers = custom_headers
+
+    def set_up_mc(self):
+        self.check_params()
+        self.set_up_agent_pool_profiles()
+        self.set_up_linux_profile()
+        self.set_up_windows_profile()
+        self.set_up_service_principal_profile()
+        self.build_lb_profile()
+        self.process_attach_acr()
+        self.check_outbound_type()
+        self.set_up_network_profile()
+        self.set_up_addon_profiles()
+        self.set_up_aad_profile()
+        self.set_up_api_server_access_profile()
+        self.check_rbac()
+        self.set_up_identity()
+        self.set_up_identity_profile()
+        self.set_up_mc_with_params()
+        self.set_up_private_dns_fqdn_subdomain()
+        self.set_up_sku()
+        self.set_up_extended_location()
+        self.build_custom_headers()
+
+    def create_cluster(self):
+        # Due to SPN replication latency, we do a few retries here
+        max_retry = 30
+        retry_exception = Exception(None)
+        for _ in range(0, max_retry):
+            try:
+                created_cluster = _put_managed_cluster_ensuring_permission(
+                    self.cmd,
+                    self.client,
+                    self.context.subscription_id,
+                    self.param.resource_group_name,
+                    self.param.name,
+                    self.mc,
+                    self.context.monitoring,
+                    self.context.ingress_appgw_addon_enabled,
+                    self.context.enable_virtual_node,
+                    self.context.need_post_creation_vnet_permission_granting,
+                    self.param.vnet_subnet_id,
+                    self.param.enable_managed_identity,
+                    self.param.attach_acr,
+                    self.context.custom_headers,
+                    self.param.no_wait)
+                return created_cluster
+            except CloudError as ex:
+                retry_exception = ex
+                if 'not found in Active Directory tenant' in ex.message:
+                    time.sleep(3)
+                else:
+                    raise ex
+        raise retry_exception
+
+
+def _aks_create(cmd, client, resource_type=ResourceType.MGMT_CONTAINERSERVICE, raw_parameters={}):
+    aks_create_decorator = AKSCreateDecorator(cmd=cmd, client=client, resource_type=resource_type, raw_parameters=raw_parameters)
+    aks_create_decorator.set_up_mc()
+    return aks_create_decorator.create_cluster()
+
+
 # pylint: disable=too-many-statements,too-many-branches
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
