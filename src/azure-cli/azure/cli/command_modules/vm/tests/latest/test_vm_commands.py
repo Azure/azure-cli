@@ -4199,6 +4199,50 @@ class VMGalleryImage(ScenarioTest):
 
         self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
 
+    @ResourceGroupPreparer(location='eastus')
+    def test_create_vm_with_shared_gallery_image(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm', 16),
+            'vm_with_shared_gallery': self.create_random_name('vm_sg', 16),
+            'vm_with_shared_gallery_version': self.create_random_name('vm_sgv', 16),
+            'gallery': self.create_random_name('gellery', 16),
+            'image': self.create_random_name('image', 16),
+            'version': '1.1.2',
+            'captured': 'managedImage1',
+            'location': resource_group_location,
+            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',  # share the gallery to tester's subscription, so the tester can get shared galleries
+            'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
+        if self.is_live:
+            time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
+        self.kwargs['unique_name'] = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions').get_output_in_json()['identifier']['uniqueName']
+
+        self.cmd('sig share add --gallery-name {gallery} -g {rg} --subscription-ids {subId} --tenant-ids {tenantId}')
+
+        self.kwargs['shared_gallery_image_version'] = self.cmd('sig image-version show-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location} --gallery-image-version {version}').get_output_in_json()['uniqueId']
+
+        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
+
+        self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
+        ])
+
+        # gallery permissions must be reset, or the resource group can't be deleted
+        self.cmd('sig share reset --gallery-name {gallery} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
+
 
 # endregion
 
