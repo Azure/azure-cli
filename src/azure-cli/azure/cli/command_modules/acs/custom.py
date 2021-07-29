@@ -1557,7 +1557,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         jsonS, _ = output.communicate()
         kubectl_version = json.loads(jsonS)
-        kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
+        # Remove any non-numeric characters like + from minor version
+        kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
         kubectl_server_minor_version = int(
             kubectl_version["serverVersion"]["minor"])
         kubectl_server_patch = int(
