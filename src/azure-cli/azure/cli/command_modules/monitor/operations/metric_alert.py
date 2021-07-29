@@ -163,7 +163,7 @@ def create_metric_rule(client, resource_group_name, rule_name, target, condition
         RuleEmailAction(send_to_service_owners=email_service_owners, custom_emails=custom_emails)
     ] + (webhooks or [])
     rule = AlertRuleResource(
-        location=location, alert_rule_resource_name=rule_name, is_enabled=not disabled,
+        location=location, name_properties_name=rule_name, is_enabled=not disabled,
         condition=condition, tags=tags, description=description, actions=actions)
     return client.create_or_update(resource_group_name, rule_name, rule)
 

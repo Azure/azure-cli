@@ -36,21 +36,21 @@ def register_providers():
     _register_one_provider('microsoft.insights/privateLinkScopes', '2019-10-17-preview', True)
     _register_one_provider('Microsoft.KeyVault/managedHSMs', '2021-04-01-preview', True)
     _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
-    # "Microsoft.Media/mediaservices", "2020-05-01", True
+    _register_one_provider("Microsoft.Media/mediaservices", "2020-05-01", True)
     # "Microsoft.Migrate/assessmentProjects", "2020-05-01-preview", False
     # "Microsoft.Migrate/migrateProjects", "2020-06-01-preview", False
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
     # "Microsoft.OffAzure/masterSites", "2020-07-07", False
     # "Microsoft.Purview/accounts", "2020-12-01-preview", True
     _register_one_provider('Microsoft.Search/searchServices', '2020-08-01', True)
-    # "Microsoft.ServiceBus/namespaces", "2018-01-01-preview", True
+    _register_one_provider("Microsoft.ServiceBus/namespaces", "2018-01-01-preview", True)
     _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
     _register_one_provider('Microsoft.Sql/servers', '2018-06-01-preview', True)
     _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', True)
-    # "Microsoft.StorageSync/storageSyncServices", "2020-03-01", True
+    _register_one_provider("Microsoft.StorageSync/storageSyncServices", "2020-03-01", True)
     _register_one_provider("Microsoft.Synapse/workspaces", "2019-06-01-preview", True)
     _register_one_provider('Microsoft.Web/sites', '2019-08-01', False)
-    # "Microsoft.Web/hostingEnvironments", "2020-10-01", True
+    _register_one_provider("Microsoft.Web/hostingEnvironments", "2020-10-01", True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

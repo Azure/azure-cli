@@ -154,7 +154,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2020-09-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2020-10-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2021-04-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
@@ -217,7 +217,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
         ResourceType.MGMT_IOTHUB: '2021-03-31',
         ResourceType.MGMT_ARO: '2020-04-30',
-        ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
+        ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
         ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-05-01', {
             'container_services': '2017-07-01',

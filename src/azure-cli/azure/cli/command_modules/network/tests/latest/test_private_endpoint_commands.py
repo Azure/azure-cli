@@ -2019,6 +2019,74 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
         # Private Endpoint Connection of batch account doesn't have delete operation.
         _test_private_endpoint(self, approve=False, rejected=False, delete=False)
 
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_media_service")
+    @StorageAccountPreparer(name_prefix="testams")
+    @AllowLargeResponse()
+    def test_private_endpoint_connection_media_service(self, resource_group, storage_account):
+        storage_account = self.cmd('storage account show -n {account}'.format(account=storage_account)).get_output_in_json()
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'ams account',
+            'list_num': 3,
+            'resource': self.create_random_name('clitestams', 24),
+            'type': 'Microsoft.Media/mediaservices',
+            'extra_create': '--storage-account {storage_account} -l eastus'.format(
+                storage_account=storage_account['id'])
+        })
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_storage_sync")
+    def test_private_endpoint_connection_storage_sync(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'storagesync',
+            'list_num': 1,
+            'type': 'Microsoft.StorageSync/storageSyncServices',
+            'extra_create': '-l eastus'
+        })
+        # self.cmd('extension add -n storagesync')
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_web")
+    def test_private_endpoint_connection_web(self, resource_group):
+
+        web_vnet = self.create_random_name('cli-vnet-web', 24)
+        web_subnet = self.create_random_name('cli-subnet-web', 24)
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'appservice ase',
+            'list_num': 1,
+            'type': 'Microsoft.Web/hostingEnvironments',
+            'extra_create': '--vnet-name {vnet} --subnet {subnet} --kind asev3'.format(
+                vnet=web_vnet,
+                subnet=web_subnet
+            ),
+            'web_vnet': web_vnet,
+            'web_subnet': web_subnet
+        })
+
+        self.cmd('network vnet create -g {rg} -n {web_vnet} --address-prefixes 10.1.0.0/16 '
+                 '--subnet-name {web_subnet} --subnet-prefixes 10.1.0.0/24')
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_service_bus")
+    def test_private_endpoint_connection_service_bus(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'servicebus namespace',
+            'list_num': 1,
+            'type': 'Microsoft.ServiceBus/namespaces',
+            'extra_create': '-l eastus --sku Premium'
+        })
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
 
 if __name__ == '__main__':
     unittest.main()
