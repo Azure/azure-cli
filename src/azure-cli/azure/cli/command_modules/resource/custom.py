@@ -907,8 +907,8 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
 
     try:
         if cli_ctx.enable_color:
-            # Diabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
-            # is using. Unfortuanately, the colors that colorama supports are very limited, which doesn't meet our needs.
+            # Disabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
+            # is using. Unfortunately, the colors that colorama supports are very limited, which doesn't meet our needs.
             from colorama import deinit
             deinit()
 
