@@ -323,9 +323,9 @@ def load_arguments(self, _):
                    help='Space-separated list of permitted JSON web key operations.')
 
     # custom functions
-    for item in ['backup', 'download', 'import', 'restore']:
+    for item in ['backup', 'download', 'restore']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            if item in ['backup', 'download', 'import']:
+            if item in ['backup', 'download']:
                 c.argument('identifier', options_list=['--id'],
                            help='Id of the Vault or HSM. '
                                 'If specified all other \'Id\' arguments should be omitted.',
@@ -430,7 +430,7 @@ def load_arguments(self, _):
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
                 help='Include managed keys. Default: false')
 
-    for scope in ['create', 'set-attributes', 'show']:
+    for scope in ['create', 'import', 'set-attributes', 'show']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
                        required=False, completer=get_keyvault_name_completion_list('key'),
