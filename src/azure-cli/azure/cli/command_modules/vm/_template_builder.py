@@ -450,7 +450,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                     }
                 }
             },
-            'SharedGalleryImage':{
+            'SharedGalleryImage': {
                 "osDisk": {
                     "caching": os_caching,
                     "managedDisk": {
