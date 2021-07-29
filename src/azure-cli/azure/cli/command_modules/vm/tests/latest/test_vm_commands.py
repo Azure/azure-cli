@@ -5174,6 +5174,7 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
             'vm': 'vm1'
         })
         self.cmd('vm create -g {rg} -n {vm} --image centos --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password')
+
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --time 1730 --email "foo@bar.com" --webhook "https://example.com/"', checks=[
             self.check('name', 'shutdown-computevm-{vm}'),
             self.check('taskType', 'ComputeVmShutdownTask'),
@@ -5183,6 +5184,16 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
             self.check('notificationSettings.webhookUrl', 'https://example.com/'),
             self.check('notificationSettings.emailRecipient', 'foo@bar.com')
         ])
+
+        self.cmd('vm auto-shutdown -g {rg} -n {vm} --time 1730 --email "foo2@bar.com" ', checks=[
+            self.check('name', 'shutdown-computevm-{vm}'),
+            self.check('taskType', 'ComputeVmShutdownTask'),
+            self.check('status', 'Enabled'),
+            self.check('dailyRecurrence.time', '1730'),
+            self.check('notificationSettings.status', 'Enabled'),
+            self.check('notificationSettings.emailRecipient', 'foo2@bar.com')
+        ])
+
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --off')
 
 
