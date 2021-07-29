@@ -99,8 +99,9 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
             if(not os.path.commonpath([getattr(context, 'RootTemplateDirectory')]) ==
                os.path.commonpath([getattr(context, 'RootTemplateDirectory'), abs_local_path])):
                 raise BadRequestError('Unable to handle the reference to file ' + abs_local_path + 'from ' +
-                               template_abs_file_path + 'because it exists outside of the root template directory of ' +
-                               getattr(context, 'RootTemplateDirectory'))
+                                      template_abs_file_path +
+                                      'because it exists outside of the root template directory of ' +
+                                      getattr(context, 'RootTemplateDirectory'))
 
             # Convert the template relative path to one that is relative to our root
             # directory path, and then if we haven't already processed that template into
@@ -201,8 +202,8 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
             abs_local_path = os.path.abspath(local_path)
             if os.path.commonpath([target_dir]) != os.path.commonpath([target_dir, abs_local_path]):
                 raise BadRequestError('Unable to unpack linked template ' + getattr(artifact, 'path') +
-                               'because it would create a file outside of the target directory hierarchy of ' +
-                               target_dir)
+                                      'because it would create a file outside of the target directory hierarchy of ' +
+                                      target_dir)
 
         # Process each artifact:
 
