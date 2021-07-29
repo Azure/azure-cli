@@ -3480,6 +3480,14 @@ def create_lb_frontend_ip_configuration(
     return get_property(poller.result().frontend_ip_configurations, item_name)
 
 
+def update_lb_frontend_ip_configuration_setter(cmd, resource_group_name, load_balancer_name, parameters, gateway_lb):
+    aux_subscriptions = []
+    if gateway_lb is not None:
+        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
+    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).load_balancers
+    return client.begin_create_or_update(resource_group_name, load_balancer_name, parameters)
+
+
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
         private_ip_address_allocation=None, public_ip_address=None,
@@ -4303,6 +4311,14 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
     poller = ncf.network_interfaces.begin_create_or_update(
         resource_group_name, network_interface_name, nic)
     return get_property(poller.result().ip_configurations, ip_config_name)
+
+
+def update_nic_ip_config_setter(cmd, resource_group_name, network_interface_name, parameters, gateway_lb):
+    aux_subscriptions = []
+    if gateway_lb is not None:
+        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
+    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).network_interfaces
+    return client.begin_create_or_update(resource_group_name, network_interface_name, parameters)
 
 
 def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
