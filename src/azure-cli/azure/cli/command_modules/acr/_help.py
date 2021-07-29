@@ -1317,7 +1317,7 @@ helps['acr connected-registry install info'] = """
 type: command
 short-summary: Retrieves information required to activate a connected registry.
 examples:
-  - name: Sets http as the parent protocol, and prints the values required to activate a connected registry in json format
+  - name: Set http as the parent protocol, and prints the values required to activate a connected registry in json format
     text: >
         az acr connected-registry install info --registry mycloudregistry --name myconnectedregistry --parent-protocol http
 """
