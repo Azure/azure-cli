@@ -1059,6 +1059,11 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l westus --resource-type disks').get_output_in_json()
         self.assertTrue(result and len(result) == len([x for x in result if x['resourceType'] == 'disks']))
 
+    @AllowLargeResponse(size_kb=99999)
+    def test_list_compute_skus_partially_unavailable(self):
+        result = self.cmd('vm list-skus -l eastus --query "[?name==\'Standard_M64m\']"').get_output_in_json()
+        self.assertTrue(result and result[0]["restrictions"] and result[0]["restrictions"][0]["reasonCode"] == 'NotAvailableForSubscription')
+
 
 class VMExtensionScenarioTest(ScenarioTest):
 
