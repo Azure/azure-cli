@@ -31,6 +31,7 @@ from ._validators import (validate_policy_permissions,
                           validate_fileupload_sas_ttl,
                           validate_feedback_ttl,
                           validate_feedback_lock_duration,
+                          validate_fileupload_notification_lock_duration,
                           validate_feedback_max_delivery_count,
                           validate_c2d_max_delivery_count,
                           validate_c2d_ttl)
@@ -151,6 +152,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    arg_type=get_three_state_flag(),
                    help='A boolean indicating whether to log information about uploaded files to the'
                         ' messages/servicebound/filenotifications IoT Hub endpoint.')
+        c.argument('fileupload_notification_lock_duration',
+                   options_list=['--fileupload-notification-lock-duration', '--fnld'],
+                   type=int, validator=validate_fileupload_notification_lock_duration,
+                   help='The lock duration for the file upload notifications queue, between 5 and 300 seconds.')
         c.argument('fileupload_notification_max_delivery_count', type=int,
                    options_list=['--fileupload-notification-max-delivery-count', '--fnd'],
                    validator=validate_fileupload_notification_max_delivery_count,
@@ -164,12 +169,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    options_list=['--fileupload-storage-connectionstring', '--fcs'],
                    help='The connection string for the Azure Storage account to which files are uploaded.')
         c.argument('fileupload_storage_authentication_type',
+                   arg_type=get_enum_type(AuthenticationType),
                    options_list=['--fileupload-storage-auth-type', '--fsa'],
-                   help='The authentication type for the Azure Storage account to which files are uploaded. '
-                        'Possible values are keyBased and identityBased')
+                   help='The authentication type for the Azure Storage account to which files are uploaded.')
         c.argument('fileupload_storage_container_uri',
                    options_list=['--fileupload-storage-container-uri', '--fcu'],
-                   help='The container URI for the Azure Storage account to which files are uploaded.')
+                   help='The container URI for the Azure Storage account to which files are uploaded.',
+                   deprecate_info=c.deprecate(hide=True))
         c.argument('fileupload_storage_container_name',
                    options_list=['--fileupload-storage-container-name', '--fc'],
                    help='The name of the root container where you upload files. The container need not exist but'
