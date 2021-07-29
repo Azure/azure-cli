@@ -25,6 +25,7 @@ class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
         dev_setting_location="AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION",
         random_name_length=75,
         key="rg",
+        preserve_default_location=False,
     ):
         super(AKSCustomResourceGroupPreparer, self).__init__(
             name_prefix,
@@ -39,7 +40,7 @@ class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
 
         # use environment variable to modify the default value of location
         self.dev_setting_location = os.environ.get(dev_setting_location, None)
-        if self.dev_setting_location:
+        if not preserve_default_location and self.dev_setting_location:
             self.location = self.dev_setting_location
         else:
             self.dev_setting_location = location

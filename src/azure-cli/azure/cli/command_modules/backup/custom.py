@@ -22,8 +22,9 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
     JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
-    MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest
+    MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo
 
+import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
@@ -250,7 +251,7 @@ def remove_identity(client, resource_group_name, vault_name, system_assigned=Non
             if element in user_assigned:
                 remove_count_of_userMSI += 1
             totaluserMSI += 1
-        if len(user_assigned) == 0:
+        if not user_assigned:
             remove_count_of_userMSI = totaluserMSI
         for userMSI in user_assigned:
             user_assigned_identity[userMSI] = userid
@@ -824,13 +825,22 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     source_resource_id, target_rg_id,
                                     use_original_storage_account, restore_disk_lun_list,
                                     rehydration_duration, rehydration_priority, tier, disk_encryption_set_id,
-                                    encryption, recovery_point, use_secondary_region):
+                                    encryption, recovery_point, use_secondary_region, mi_system_assigned,
+                                    mi_user_assigned):
 
     if disk_encryption_set_id is not None:
         if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
-                recovery_point.properties.is_managed_virtual_machine and
-                not(recovery_point.properties.is_source_vm_encrypted) and use_secondary_region is None):
+               recovery_point.properties.is_managed_virtual_machine and
+               not(recovery_point.properties.is_source_vm_encrypted) and use_secondary_region is None):
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
+
+    identity_info = None
+    if mi_system_assigned or mi_user_assigned:
+        if not recovery_point.properties.is_managed_virtual_machine:
+            raise InvalidArgumentValueError("MI based restore is not supported for unmanaged VMs.")
+        identity_info = IdentityInfo(
+            is_system_assigned_identity=mi_system_assigned is not None,
+            managed_identity_resource_id=mi_user_assigned)
 
     if tier == 'VaultArchive':
         rehyd_duration = 'P' + str(rehydration_duration) + 'D'
@@ -848,7 +858,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             original_storage_account_option=use_original_storage_account,
             restore_disk_lun_list=restore_disk_lun_list,
             recovery_point_rehydration_info=rehydration_info,
-            disk_encryption_set_id=disk_encryption_set_id)
+            disk_encryption_set_id=disk_encryption_set_id,
+            identity_info=identity_info)
 
     else:
         trigger_restore_properties = IaasVMRestoreRequest(
@@ -861,7 +872,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             target_resource_group_id=target_rg_id,
             original_storage_account_option=use_original_storage_account,
             restore_disk_lun_list=restore_disk_lun_list,
-            disk_encryption_set_id=disk_encryption_set_id)
+            disk_encryption_set_id=disk_encryption_set_id,
+            identity_info=identity_info)
 
     return trigger_restore_properties
 
@@ -870,7 +882,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
-                  rehydration_priority=None, disk_encryption_set_id=None):
+                  rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
+                  mi_user_assigned=None):
 
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM", use_secondary_region)
@@ -889,6 +902,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
 
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
+    vault_identity = vault.identity
 
     encryption = backup_resource_encryption_config_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
 
@@ -940,6 +954,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     if diskslist:
         restore_disk_lun_list = diskslist
 
+    validators.validate_mi_used_for_restore_disks(vault_identity, mi_system_assigned, mi_user_assigned)
+
     trigger_restore_properties = _get_trigger_restore_properties(rp_name, vault_location, _storage_account_id,
                                                                  _source_resource_id, target_rg_id,
                                                                  use_original_storage_account, restore_disk_lun_list,
@@ -947,15 +963,12 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                                                  None if rp_list[0].
                                                                  properties.recovery_point_tier_details is None else
                                                                  rp_list[0].tier_type, disk_encryption_set_id,
-                                                                 encryption, recovery_point, use_secondary_region)
+                                                                 encryption, recovery_point, use_secondary_region,
+                                                                 mi_system_assigned, mi_user_assigned)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     if use_secondary_region:
-        if target_rg_id is None:
-            raise RequiredArgumentMissingError("Please provide target resource group using --target-resource-group.")
-
-        if rehydration_priority is not None:
-            raise MutuallyExclusiveArgumentError("Archive restore isn't supported for secondary region.")
+        validators.validate_crr(target_rg_id, rehydration_priority)
 
         azure_region = secondary_region_map[vault_location]
         aad_client = aad_properties_cf(cmd.cli_ctx)
