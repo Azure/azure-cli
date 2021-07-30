@@ -1,0 +1,142 @@
+interactions:
+- request:
+    body: '{"location": "southeastasia", "identity": {"type": "None"}, "properties":
+      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '338'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --storage-account -l
+      User-Agent:
+      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Southeast
+        Asia\",\"properties\":{\r\n    \"mediaServiceId\":\"09ef4391-1fd5-44b6-8789-a43fa2675928\",\"storageAccounts\":[\r\n
+        \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
+        \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
+        \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
+        \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
+        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-29T20:03:22.7012417Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-29T20:03:22.7012417Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"None\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1163'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Thu, 29 Jul 2021 20:03:25 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"description": "ExampleDescription", "options": [{"name":
+      "pon000005", "configuration": {"@odata.type": "#Microsoft.Media.ContentKeyPolicyWidevineConfiguration",
+      "widevineTemplate": "{\r\n   \"allowed_track_types\":\"SD_HD\",\r\n   \"content_key_specs\":[\r\n      {\r\n         \"track_type\":\"SD\",\r\n         \"security_level\":1,\r\n         \"required_output_protection\":{\r\n            \"hdcp\":\"HDCP_V2\"\r\n         }\r\n      }\r\n   ],\r\n   \"policy_overrides\":{\r\n      \"can_play\":true,\r\n      \"can_persist\":true,\r\n      \"can_renew\":false\r\n   }\r\n}"},
+      "restriction": {"@odata.type": "#Microsoft.Media.ContentKeyPolicyTokenRestriction",
+      "issuer": "Issuer", "audience": "Audience", "primaryVerificationKey": {"@odata.type":
+      "#Microsoft.Media.ContentKeyPolicyRsaTokenKey", "exponent": "AQAB", "modulus":
+      "nZo80sk7tL/IrSaBc3FJRq9l0B9qj0t7Ba4YKeRAHwUhrxLJLmZf2YEp9epLEUlhlwgTvJmrcW/aVPFuNsZY3q2SF6qt3nXWxArP/5EP4pNOMZWPW7gt5ImvF1YsSbhG+zQ9UjgKq/bPikfghc0mYlMv0WwPOu3q50czU18ygKE="},
+      "alternateVerificationKeys": [], "requiredClaims": [{"claimType": "foo", "claimValue":
+      "baz"}, {"claimType": "baz", "claimValue": "doo"}, {"claimType": "fus", "claimValue":
+      "rodahh"}], "restrictionTokenType": "Jwt", "openIdConnectDiscoveryDocument":
+      "adocument"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams content-key-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1295'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -a -n -g --description --issuer --audience --token-key --token-key-type --token-type
+        --widevine-template --token-claims --open-id-connect-discovery-document --policy-option-name
+      User-Agent:
+      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/contentKeyPolicies/pn000004?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\":\"pn000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/contentKeyPolicies/pn000004\",\"type\":\"Microsoft.Media/mediaservices/contentKeyPolicies\",\"properties\":{\r\n
+        \   \"policyId\":\"fc70ddaa-5983-483b-bbe9-75533cf42de9\",\"created\":\"2021-07-29T20:03:27.753Z\",\"lastModified\":\"2021-07-29T20:03:27.753Z\",\"description\":\"ExampleDescription\",\"options\":[\r\n
+        \     {\r\n        \"policyOptionId\":\"26f58b2f-65f9-44dd-bb10-0b3074e7ff52\",\"name\":\"pon000005\",\"configuration\":{\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.ContentKeyPolicyWidevineConfiguration\",\"widevineTemplate\":\"{\\r\\n
+        \  \\\"allowed_track_types\\\":\\\"SD_HD\\\",\\r\\n   \\\"content_key_specs\\\":[\\r\\n
+        \     {\\r\\n         \\\"track_type\\\":\\\"SD\\\",\\r\\n         \\\"security_level\\\":1,\\r\\n
+        \        \\\"required_output_protection\\\":{\\r\\n            \\\"hdcp\\\":\\\"HDCP_V2\\\"\\r\\n
+        \        }\\r\\n      }\\r\\n   ],\\r\\n   \\\"policy_overrides\\\":{\\r\\n
+        \     \\\"can_play\\\":true,\\r\\n      \\\"can_persist\\\":true,\\r\\n      \\\"can_renew\\\":false\\r\\n
+        \  }\\r\\n}\"\r\n        },\"restriction\":{\r\n          \"@odata.type\":\"#Microsoft.Media.ContentKeyPolicyTokenRestriction\",\"issuer\":\"Issuer\",\"audience\":\"Audience\",\"primaryVerificationKey\":{\r\n
+        \           \"@odata.type\":\"#Microsoft.Media.ContentKeyPolicyRsaTokenKey\",\"exponent\":null,\"modulus\":null\r\n
+        \         },\"alternateVerificationKeys\":[\r\n            \r\n          ],\"requiredClaims\":[\r\n
+        \           {\r\n              \"claimType\":\"foo\",\"claimValue\":\"baz\"\r\n
+        \           },{\r\n              \"claimType\":\"baz\",\"claimValue\":\"doo\"\r\n
+        \           },{\r\n              \"claimType\":\"fus\",\"claimValue\":\"rodahh\"\r\n
+        \           }\r\n          ],\"restrictionTokenType\":\"Jwt\",\"openIdConnectDiscoveryDocument\":\"adocument\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1840'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Thu, 29 Jul 2021 20:03:27 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -296,42 +296,41 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
-    #TODO scale error (might need custom)
-    # @ResourceGroupPreparer()
-    # @StorageAccountPreparer(parameter_name='storage_account_for_scale')
-    # def test_ams_streaming_endpoint_scale(self, storage_account_for_scale):
-    #     amsname = self.create_random_name(prefix='ams', length=12)
-    #     streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_scale')
+    def test_ams_streaming_endpoint_scale(self, storage_account_for_scale):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
 
-    #     self.kwargs.update({
-    #         'amsname': amsname,
-    #         'storageAccount': storage_account_for_scale,
-    #         'location': 'westindia',
-    #         'streamingEndpointName': streaming_endpoint_name,
-    #         'cdnProvider': 'StandardVerizon',
-    #         'cdnProfile': 'testProfile',
-    #         'description': 'test streaming description',
-    #         'maxCacheAge': 11,
-    #         'scaleUnits': 9,
-    #         'scaleUnits2': 10,
-    #         'tags': 'foo=bar',
-    #         'clientAccessPolicy': self._normalize_filename(_get_test_data_file('clientAccessPolicy.xml')),
-    #         'crossDomainPolicy': self._normalize_filename(_get_test_data_file('crossDomainPolicy.xml'))
-    #     })
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_scale,
+            'location': 'westindia',
+            'streamingEndpointName': streaming_endpoint_name,
+            'cdnProvider': 'StandardVerizon',
+            'cdnProfile': 'testProfile',
+            'description': 'test streaming description',
+            'maxCacheAge': 11,
+            'scaleUnits': 9,
+            'scaleUnits2': 10,
+            'tags': 'foo=bar',
+            'clientAccessPolicy': self._normalize_filename(_get_test_data_file('clientAccessPolicy.xml')),
+            'crossDomainPolicy': self._normalize_filename(_get_test_data_file('crossDomainPolicy.xml'))
+        })
 
-    #     self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-    #     self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
-    #         self.check('scaleUnits', '{scaleUnits}')
-    #     ])
+        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
+            self.check('scaleUnits', '{scaleUnits}')
+        ])
 
-    #     self.cmd('az ams streaming-endpoint scale -g {rg} -a {amsname} -n {streamingEndpointName} --scale-unit {scaleUnits2}')
+        self.cmd('az ams streaming-endpoint scale -g {rg} -a {amsname} -n {streamingEndpointName} --scale-unit {scaleUnits2}')
 
-    #     self.cmd('az ams streaming-endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
-    #         self.check('scaleUnits', '{scaleUnits2}')
-    #     ])
+        self.cmd('az ams streaming-endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
+            self.check('scaleUnits', '{scaleUnits2}')
+        ])
 
-    #     self.cmd('az ams streaming-endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
+        self.cmd('az ams streaming-endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')

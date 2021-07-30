@@ -9,7 +9,7 @@ from ._client_factory import (get_mediaservices_client, get_transforms_client,
                               get_streaming_policies_client, get_streaming_endpoints_client,
                               get_locations_client, get_live_events_client, get_live_outputs_client,
                               get_content_key_policies_client, get_asset_filters_client,
-                              get_account_filters_client)
+                              get_account_filters_client, sync_storage_keys)
 from ._exception_handler import ams_exception_handler
 
 
@@ -53,7 +53,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.custom_command('set-authentication', 'set_mediaservice_trusted_storage',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
-        g.command('sync-storage-keys', 'sync_storage_keys')
+        g.custom_command('sync-storage-keys', 'sync_storage_keys',
+                        custom_command_type=get_custom_sdk('account', sync_storage_keys))
 
     with self.command_group('ams account sp', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_command('create', 'create_or_update_assign_sp_to_mediaservice',
@@ -184,6 +185,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_streaming_endpoint',
                          custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
                          supports_no_wait=True)
+        g.custom_command('scale', 'scale',
+                        custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
         g.generic_update_command('update',
                                  setter_name='update_streaming_endpoint_setter',
                                  setter_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
@@ -193,7 +196,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_show_command('show', 'get_streaming_endpoint',
                               custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
         g.command('delete', 'begin_delete')
-        g.command('scale', 'begin_scale')
         g.wait_command('wait')
 
     with self.command_group('ams streaming-endpoint akamai', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:
