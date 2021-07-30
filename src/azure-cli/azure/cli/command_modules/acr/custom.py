@@ -159,7 +159,7 @@ def _handle_network_bypass(cmd, registry, allow_trusted_services):
 
 def _handle_export_policy(cmd, registry, allow_exports):
     if allow_exports is not None:
-        Policies, ExportPolicy, ExportPolicyStatus = cmd.get_models('Policies','ExportPolicy', 'ExportPolicyStatus')
+        Policies, ExportPolicy, ExportPolicyStatus = cmd.get_models('Policies', 'ExportPolicy', 'ExportPolicyStatus')
 
         if registry.policies is None:
             registry.policies = Policies()

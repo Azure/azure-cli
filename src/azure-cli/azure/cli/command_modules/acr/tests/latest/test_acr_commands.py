@@ -369,8 +369,51 @@ class AcrCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_acr_export_policy(self, resource_group):
-        pass
+        registry_1 = self.create_random_name('clireg', 20)
+        registry_2 = self.create_random_name('clireg', 20)
 
+        self.kwargs.update({
+            'registry_1': registry_1,
+            'registry_2': registry_2,
+            'sku': 'Premium',
+        })
+
+        self.cmd('acr create -n {registry_1} -g {rg} --sku {sku} --public-network-enabled false --allow-exports',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'Enabled')])  # case insensitive check
+
+        self.cmd('acr create -n {registry_1} -g {rg} --sku {sku} --public-network-enabled false --allow-exports true',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'enabled')])
+
+        # for export policy to be disabled, we need to disable public network access
+        self.cmd('acr create -n {registry_1} -g {rg} --sku {sku} --public-network-enabled false --allow-exports false',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'Disabled')])
+
+        # create/PUT should default to enabling export policy
+        self.cmd('acr create -n {registry_1} -g {rg} --sku {sku} --public-network-enabled false',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'Enabled')])
+
+        self.cmd('acr update -n {registry_1} -g {rg} --sku {sku} --allow-exports true',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'enabled')])
+
+        self.cmd('acr update -n {registry_1} -g {rg} --sku {sku} --allow-exports false',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'disabled')])
+
+        self.cmd('acr update -n {registry_1} -g {rg} --sku {sku}',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'Disabled')])
 
     @ResourceGroupPreparer()
     def test_acr_create_with_audits(self, resource_group):
