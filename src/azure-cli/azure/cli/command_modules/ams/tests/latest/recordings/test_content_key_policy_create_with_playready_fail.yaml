@@ -25,12 +25,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Japan
-        West\",\"properties\":{\r\n    \"mediaServiceId\":\"9663d5b9-8cea-41b9-bc7c-88465f408567\",\"storageAccounts\":[\r\n
+        West\",\"properties\":{\r\n    \"mediaServiceId\":\"a7789777-697e-41da-bc77-8095cea9cb0e\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
-        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T03:49:53.4885057Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T03:49:53.4885057Z\"\r\n
+        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:00:52.6229305Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:00:52.6229305Z\"\r\n
         \ },\"identity\":{\r\n    \"type\":\"None\"\r\n  }\r\n}"
     headers:
       cache-control:
@@ -40,7 +40,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 03:49:55 GMT
+      - Fri, 30 Jul 2021 19:00:54 GMT
       expires:
       - '-1'
       odata-version:
@@ -54,8 +54,72 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
+- request:
+    body: '{"properties": {"description": "ExampleDescription", "options": [{"name":
+      "pon000005", "configuration": {"@odata.type": "#Microsoft.Media.ContentKeyPolicyPlayReadyConfiguration",
+      "licenses": [{"allowTestDevices": true, "expirationDate": "2098-09-15T18:53:00.000Z",
+      "relativeBeginDate": "PT1H1M1S", "gracePeriod": "PT2H2M2S", "playRight": {"firstPlayExpiration":
+      "PT12H", "scmsRestriction": 1, "agcAndColorStripeRestriction": 2, "explicitAnalogTelevisionOutputRestriction":
+      {"bestEffort": true, "configurationData": 0}, "digitalVideoOnlyContentRestriction":
+      true, "imageConstraintForAnalogComponentVideoRestriction": false, "imageConstraintForAnalogComputerMonitorRestriction":
+      false, "allowPassingVideoContentToUnknownOutput": "Allowed", "uncompressedDigitalVideoOpl":
+      300, "compressedDigitalVideoOpl": 500, "analogVideoOpl": 200, "compressedDigitalAudioOpl":
+      300, "uncompressedDigitalAudioOpl": 300}, "licenseType": "Persistent", "contentKeyLocation":
+      {"@odata.type": "#Microsoft.Media.ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier",
+      "keyId": "12345678-aaaa-bbbb-cccc-ddddeeeeffff"}, "contentType": "Unspecified"}],
+      "responseCustomData": "custom data"}, "restriction": {"@odata.type": "#Microsoft.Media.ContentKeyPolicyOpenRestriction"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams content-key-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1261'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -a -n -g --open-restriction --play-ready-template --description --policy-option-name
+      User-Agent:
+      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/contentKeyPolicies/pn000004?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"error\": {\r\n    \"code\": \"BadRequest\",\r\n    \"message\":
+        \"PlayReady does not allow passing to unknown outputs if the DigitalVideoOnlyContentRestriction
+        is enabled.\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-language:
+      - en-US
+      content-length:
+      - '174'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 30 Jul 2021 19:00:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 400
+      message: Bad Request
 version: 1
