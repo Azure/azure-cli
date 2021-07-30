@@ -22,6 +22,7 @@ Release History
 
 * [BREAKING CHANGE] `appconfig feature set`: Set the value of parameter `--description` to empty string if it is not specified (#18907)
 * [BREAKING CHANGE] `az appconfig feature`: Support namespacing for feature flags and change output fields (#18990)
+* `az appconfig create`: Add tags support when creating resource (#18783)
 
 **App Service**
 
@@ -31,10 +32,6 @@ Release History
 * `az webapp hybrid-connection add`: Improve help/error message and unblock Linux (#18843)
 * `az webapp config access-restriction remove`: Fix #18947 issue removing service endpoint rules (#18986)
 * : Fix #17424: `az appservice plan show`: Provide correct exit status (#18994)
-
-**AppConfiguration**
-
-* Add tags support when creating resource (#18783)
 
 **ARM**
 
@@ -50,7 +47,7 @@ Release History
 * Add example for creating site extension to web app (#18935)
 * `az ts export`: Fix the issue that export template specs with no linked templates failed (#18928)
 
-**AzurePolicy**
+**PolicyInsights**
 
 * Migrate to track 2 SDK (#18740)
 
