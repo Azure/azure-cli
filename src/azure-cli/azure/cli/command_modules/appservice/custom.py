@@ -1704,11 +1704,12 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None):
 
 
 def show_plan(cmd, resource_group_name, name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
     serverfarm_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
-    subscription_id = client.app_service_plans._config.subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
-    request_url = client.app_service_plans._client._base_url + serverfarm_url
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + serverfarm_url
     response = send_raw_request(cmd.cli_ctx, "GET", request_url)
     return response.json()
 
