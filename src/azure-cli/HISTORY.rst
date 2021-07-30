@@ -22,7 +22,6 @@ Release History
 
 * [BREAKING CHANGE] `appconfig feature set`: Set the value of parameter `--description` to empty string if it is not specified (#18907)
 * [BREAKING CHANGE] `az appconfig feature`: Support namespacing for feature flags and change output fields (#18990)
-* Add tags support when creating resource (#18783)
 * `az appconfig create`: Add tags support when creating resource (#18783)
 
 **App Service**
@@ -85,9 +84,9 @@ Release History
 
 **IoT**
 
-* `az iot hub create/update`: Added checks to prevent bad file-upload identity parameters when hub doesn't have identity (#18966)
-* `az iot hub create/update`: Added `--fileupload-notification-lock-duration` parameter (#18966)
-* `az iot hub create/update`: Deprecated `fileupload-storage-container-uri` parameter (#18966)
+* `az iot hub create/update`: Add checks to prevent bad file-upload identity parameters when hub doesn't have identity (#18966)
+* `az iot hub create/update`: Add `--fileupload-notification-lock-duration` parameter (#18966)
+* `az iot hub create/update`: Deprecate `fileupload-storage-container-uri` parameter (#18966)
 * `az iot dps/hub certificate create`: Certificates will now always be uploaded in base64 encoding. (#18966)
 
 **Key Vault**
@@ -109,7 +108,7 @@ Release History
 
 **Network**
 
-* `az network application-gateway create`: Added `--ssl-certificate-name` argument (#18861)
+* `az network application-gateway create`: Add `--ssl-certificate-name` argument (#18861)
 * Private link add Microsoft.ServiceBus/namespaces provider (#18999)
 * `az network application-gateway waf-policy custom-rule match-condition add`: Add examples (#18957)
 * `az network express-route port link update`: Add `--macsec-sci-state` argument. (#18814)
