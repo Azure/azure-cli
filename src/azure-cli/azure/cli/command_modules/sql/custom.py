@@ -2956,6 +2956,7 @@ def db_threat_detection_policy_get(
         database_name=database_name,
         security_alert_policy_name=SecurityAlertPolicyName.DEFAULT)
 
+
 def db_threat_detection_policy_update(
         cmd,
         instance,
@@ -3928,6 +3929,7 @@ def server_dns_alias_set(
 #           sql server encryption-protector
 #####
 
+
 def encryption_protector_get(
         client,
         resource_group_name,
@@ -4551,6 +4553,7 @@ def mi_aad_only_enable(
             azure_ad_only_authentication=True
         )
     )
+
 
 def mi_aad_only_get(
         client,
