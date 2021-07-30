@@ -1515,7 +1515,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         email_addresses_expected = ['test1@example.com', 'test2@example.com']
         email_account_admins = True
 
-        self.cmd('sql db threat-policy update -g {} -s {} -n {} --security-alert-policy-name default'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
                  ' --state {} --storage-key {} --storage-endpoint {}'
                  ' --retention-days {} --email-addresses {} --disabled-alerts {}'
                  ' --email-account-admins {}'
@@ -1708,7 +1708,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
         audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
                                   'DATABASE_ROLE_MEMBER_CHANGE_GROUP']
 
-        self.cmd('sql server audit-policy update -g {} -n {} --blob-auditing-policy-name default'
+        self.cmd('sql server audit-policy update -g {} -n {}'
                  ' --state {} --blob-storage-target-state {} --storage-key {} --storage-endpoint={}'
                  ' --retention-days={} --actions {}'
                  .format(resource_group, server, state_enabled, state_enabled, key,
@@ -4679,16 +4679,6 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 #     'sql midb ltr-backup delete -l {loc} --mi {managed_instance_name} -d {database_name} -n \'{backup_name}\' --yes',
 #     checks=[NoneCheck()])
 
-# self.cmd(
-#     'sql midb ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg}',
-#     checks=[
-#         self.check('name', '{dest_database_name}')])
-
-# # test delete long term retention backup
-# self.cmd(
-#     'sql midb ltr-backup delete -l {loc} --mi {managed_instance_name} -d {database_name} -n \'{backup_name}\' --yes',
-#     checks=[NoneCheck()])
-
 
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()
@@ -4808,7 +4798,6 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                  expect_failure=True)
 
 
-# need specific setting for the oid
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
     def test_sql_mi_aad_admin(self):
@@ -5101,7 +5090,6 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
 
-# need to delete the MI, thus have to walkaround to test
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()
     def test_sql_virtual_cluster_mgmt(self, mi, rg):
@@ -5151,7 +5139,6 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
                      self.check('subnetId', '{subnet_id}')])
 
 
-# need another instance in different region in order to create Failover group
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
     @ManagedInstancePreparer(parameter_name="mi1")
     @ManagedInstancePreparer(parameter_name="mi2", is_geo_secondary=True)
@@ -5327,7 +5314,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         state_enabled = 'Enabled'
         retention_days = 30
 
-        self.cmd('sql db threat-policy update -g {} -s {} -n {} --security-alert-policy-name default'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
                  ' --state {} --storage-key {} --storage-endpoint {}'
                  ' --retention-days {} --email-addresses {} --disabled-alerts {}'
                  ' --email-account-admins {}'
@@ -5451,7 +5438,6 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('minimalTlsVersion', tls1_1)])
 
 
-# need rewrite the test
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
     @ManagedInstancePreparer()
     def test_sql_mi_failover_mgmt(self, mi, rg):
@@ -5467,10 +5453,7 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
 
-        self.cmd('sql mi delete -g {resource_group} -n {managed_instance_name} --yes', checks=NoneCheck())
 
-
-# not pass due to http reponse error
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
     @live_only()
     @AllowLargeResponse()
