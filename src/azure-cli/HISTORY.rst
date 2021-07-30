@@ -11,7 +11,7 @@ Release History
 * [BREAKING CHANGE] `az acr connected-registry install info`: Add a new required parameter `--parent-protocol`. (#18954)
 * [BREAKING CHANGE] `az acr connected-registry install renew-credentials`: Add a new required parameter `--parent-protocol`. (#18954)
 * `az acr import`: Support new parameter `--no-wait` (#18572)
-* Fix the Python SDK compatibility issue when migrating Track 2
+* Fix the Python SDK compatibility issue when migrating Track 2 (#18786)
 * `az acr build`: Make file .dockerignore include directories with `!` (#18821)
 
 **AKS**
@@ -44,7 +44,7 @@ Release History
 * `az deployment group/sub/mg/tenant create`: Add --proceed-if-no-change parameter to skip confirmation when --confirm-with-what-if is set and there's no changes in What-If results. (#18924)
 * Bump api-version from 2020-10-01 to 2021-04-01 (#18923)
 * `az ts create`: Make parameter `--template-file` support bicep file (#18888)
-* Add example for creating site extension to web app (#18935)
+* `az resource create`: Add example for creating site extension to web app (#18935)
 * `az ts export`: Fix the issue that export template specs with no linked templates failed (#18928)
 
 **PolicyInsights**
@@ -62,8 +62,8 @@ Release History
 
 **Compute **
 
-* Fix #18633: az sig image-version create does not support mixing disks, snapshots, and vhd (#18741)
-* Upgrade package version to fix securityProfile issue in `az vmss update` (#18788)
+* `az sig image-version create`: Support mixing disks, snapshots, and vhd (#18741)
+* `az vmss update`: Upgrade package version to fix securityProfile issue (#18788)
 * `az vm boot-diagnostics get-boot-log`: Fix crash when getting boot diagnostics log (#18830)
 * `az vm list-skus`: Fix the issue that it can't query the SKU which with partially zones available (#18939)
 * `az vm auto-shutdown`: Fix the issue that `--webhook` is required when `--email` is passed in (#18958)
@@ -104,7 +104,7 @@ Release History
 
 **NetAppFiles**
 
-* Update help description for pool-change (#18835)
+* `az netappfiles volume pool-change`: Update help description for pool-change (#18835)
 
 **Network**
 
