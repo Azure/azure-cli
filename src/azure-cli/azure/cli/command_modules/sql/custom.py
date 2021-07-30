@@ -2941,7 +2941,6 @@ def restore_long_term_retention_backup(
         resource_group_name=target_resource_group_name,
         parameters=kwargs)
 
-
 def db_threat_detection_policy_get(
         client,
         resource_group_name,
@@ -2956,22 +2955,6 @@ def db_threat_detection_policy_get(
         server_name=server_name,
         database_name=database_name,
         security_alert_policy_name=SecurityAlertPolicyName.DEFAULT)
-
-def db_threat_detection_policy_get(
-        client,
-        resource_group_name,
-        server_name,
-        database_name):
-    '''
-    Gets a threat detection policy.
-    '''
-
-    return client.get(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        database_name=database_name,
-        security_alert_policy_name=SecurityAlertPolicyName.DEFAULT)
-
 
 def db_threat_detection_policy_update(
         cmd,
@@ -3959,20 +3942,6 @@ def encryption_protector_get(
         encryption_protector_name=EncryptionProtectorName.CURRENT)
 
 
-def encryption_protector_get(
-        client,
-        resource_group_name,
-        server_name):
-    '''
-    Gets a server encryption protector.
-    '''
-
-    return client.get(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        encryption_protector_name=EncryptionProtectorName.CURRENT)
-
-
 def encryption_protector_update(
         client,
         resource_group_name,
@@ -4581,21 +4550,6 @@ def mi_aad_only_enable(
         parameters=ManagedInstanceAzureADOnlyAuthentication(
             azure_ad_only_authentication=True
         )
-    )
-
-
-def mi_aad_only_get(
-        client,
-        resource_group_name,
-        managed_instance_name):
-    '''
-    Gets the AAD-only setting
-    '''
-
-    return client.get(
-        resource_group_name=resource_group_name,
-        managed_instance_name=managed_instance_name,
-        authentication_name=AuthenticationName.DEFAULT
     )
 
 def mi_aad_only_get(
