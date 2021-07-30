@@ -682,7 +682,7 @@ jobs:
 
 - job: TestYumPackage
   displayName: Test Yum Package
-
+  timeoutInMinutes: 120
   dependsOn: BuildYumPackage
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
