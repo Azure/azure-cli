@@ -1706,9 +1706,9 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None):
 def show_plan(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
     serverfarm_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
-    subscription_id = client.app_service_plans._config.subscription_id # pylint: disable=protected-access
+    subscription_id = client.app_service_plans._config.subscription_id  # pylint: disable=protected-access
     serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
-    request_url = client.app_service_plans._client._base_url + serverfarm_url # pylint: disable=protected-access
+    request_url = client.app_service_plans._client._base_url + serverfarm_url  # pylint: disable=protected-access
     response = send_raw_request(cmd.cli_ctx, "GET", request_url)
     return response.json()
 
