@@ -47,10 +47,6 @@ Release History
 * `az resource create`: Add example for creating site extension to web app (#18935)
 * `az ts export`: Fix the issue that export template specs with no linked templates failed (#18928)
 
-**PolicyInsights**
-
-* Migrate to track 2 SDK (#18740)
-
 **Backup**
 
 * `az backup vault`: Add support for Customer Managed Keys(CMK) (#18733)
@@ -123,6 +119,10 @@ Release History
 
 * Add licenses to all Python packages (#18749)
 * Add SOCKS Proxy Support (#18931)
+
+**PolicyInsights**
+
+* Migrate to track 2 SDK (#18740)
 
 **RDBMS**
 
