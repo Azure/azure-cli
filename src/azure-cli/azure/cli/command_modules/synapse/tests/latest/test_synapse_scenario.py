@@ -302,6 +302,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql pool show --name {sql-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
+    @record_only()
     def test_sql_pool_restore_and_list_deleted(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -342,7 +343,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.greater_than("length([])", 0)
                  ])
 
-    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @record_only()
     def test_sql_pool_classification_and_recommendation(self):
         self.kwargs.update({
             'location': 'eastus2euap',
