@@ -1977,7 +1977,7 @@ def load_arguments(self, _):
                 'tier',
             ])
 
-        c.ignore('name')  # Hide sku name  
+        c.ignore('name')  # Hide sku name
 
         c.extra('vnet_name',
                 options_list=['--vnet-name'],
