@@ -11,17 +11,18 @@ Release History
 * [BREAKING CHANGE] `az acr connected-registry install info`: Add a new required parameter `--parent-protocol`. (#18954)
 * [BREAKING CHANGE] `az acr connected-registry install renew-credentials`: Add a new required parameter `--parent-protocol`. (#18954)
 * `az acr import`: Support new parameter `--no-wait` (#18572)
-* Fix some bugs on uncovered cmds (#18786)
+* Fix the Python SDK compatibility issue when migrating Track 2
 * `az acr build`: Make file .dockerignore include directories with `!` (#18821)
 
 **AKS**
 
 * `az aks check-acr`: Fix issues parsing certain client minor versions (#18727)
 
-**App Config**
+**AppConfig**
 
 * [BREAKING CHANGE] `appconfig feature set`: Set the value of parameter `--description` to empty string if it is not specified (#18907)
 * [BREAKING CHANGE] `az appconfig feature`: Support namespacing for feature flags and change output fields (#18990)
+* Add tags support when creating resource (#18783)
 * `az appconfig create`: Add tags support when creating resource (#18783)
 
 **App Service**
@@ -80,7 +81,7 @@ Release History
 
 **DMS**
 
-* `az dms project create/az dms project task create`: Removing MySQL projects/tasks for online migrations since they are no longer supported. (#18709)
+* `az dms project create/az dms project task create`: Remove MySQL projects/tasks for online migrations since they are no longer supported. (#18709)
 
 **IoT**
 
