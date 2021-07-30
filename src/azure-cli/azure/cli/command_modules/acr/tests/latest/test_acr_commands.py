@@ -366,6 +366,12 @@ class AcrCommandsTests(ScenarioTest):
         # Case 9: Import image from an Azure Container Registry with personal access token
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
 
+
+    @ResourceGroupPreparer()
+    def test_acr_export_policy(self, resource_group):
+        pass
+
+
     @ResourceGroupPreparer()
     def test_acr_create_with_audits(self, resource_group):
         registry_name = self.create_random_name('clireg', 20)
