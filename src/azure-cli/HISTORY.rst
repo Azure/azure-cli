@@ -8,11 +8,11 @@ Release History
 
 **ACR**
 
-* [BREAKING CHANGE] az acr connected-registry install info: Add a new required parameter --parent-protocol. (#18954)
-* [BREAKING CHANGE] az acr connected-registry install renew-credentials: Add a new required parameter --parent-protocol. (#18954)
-* `az acr import`: Support no-wait (#18572)
+* [BREAKING CHANGE] `az acr connected-registry install info`: Add a new required parameter `--parent-protocol`. (#18954)
+* [BREAKING CHANGE] `az acr connected-registry install renew-credentials`: Add a new required parameter `--parent-protocol`. (#18954)
+* `az acr import`: Support new parameter `--no-wait` (#18572)
 * Fix some bugs on uncovered cmds (#18786)
-* `az acr build`: Make .dockerignore include directories with `!` (#18821)
+* `az acr build`: Make file .dockerignore include directories with `!` (#18821)
 
 **AKS**
 
