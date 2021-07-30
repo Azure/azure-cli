@@ -130,7 +130,7 @@ Release History
 
 **Redis**
 
-* Add `--redis-version` param to `az redis create` and `az redis update` (#18996)
+* `az redis create\update`: Add new parameter `--redis-version` (#18996)
 
 **SQL**
 
@@ -142,13 +142,13 @@ Release History
 * Fix #18352: `az storage fs file list --exclude-dir` breaks with `--show-next-marker` (#18816)
 * `az storage fs generate-sas`:  Support generate sas token for file system in ADLS Gen2 account (#18768)
 * `az storage account blob-service-properties`: Support last access tracking policy (#18731)
-* Support Version level Worm (VLW) (#18540)
+* `storage container-rm migrate-vlw`: Support Version level Worm (VLW) (#18540)
 * `az storage copy` add new option `--cap-mbps` (#18344)
 
 **Synapse**
 
-* Workspace key update failure (#18719)
-* Reimport notebook Failure (#18718)
+* `synapse workspace key update`: Fix the issue that updating a workspace key failure due to parameter `--is-active-cmk` lost (#18719)
+* Reimport notebook failure (#18718)
 
 2.26.1
 ++++++
