@@ -1065,15 +1065,16 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         raise CLIError('usage error: --time is a required parameter')
     daily_recurrence = {'time': time}
     notification_settings = None
-    if email and not webhook:
-        raise CLIError('usage error: --webhook is a required parameter when --email exists')
-    if webhook:
+    if email or webhook:
         notification_settings = {
-            'emailRecipient': email,
-            'webhookUrl': webhook,
             'timeInMinutes': 30,
             'status': 'Enabled'
         }
+        if email:
+            notification_settings['emailRecipient'] = email
+        if webhook:
+            notification_settings['webhookUrl'] = webhook
+
     schedule = Schedule(status='Enabled',
                         target_resource_id=vm_id,
                         daily_recurrence=daily_recurrence,
@@ -1145,9 +1146,26 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
 def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_type=None):
     from ._vm_utils import list_sku_info
     result = list_sku_info(cmd.cli_ctx, location)
+    # pylint: disable=too-many-nested-blocks
     if not show_all:
-        result = [x for x in result if not [y for y in (x.restrictions or [])
-                                            if y.reason_code == 'NotAvailableForSubscription']]
+        available_skus = []
+        for sku_info in result:
+            is_available = True
+            if sku_info.restrictions:
+                for restriction in sku_info.restrictions:
+                    if restriction.reason_code == 'NotAvailableForSubscription':
+                        # The attribute location_info is not supported in versions 2017-03-30 and earlier
+                        if cmd.supported_api_version(max_api='2017-03-30'):
+                            is_available = False
+                            break
+                        # This SKU is not available only if all zones are restricted
+                        if not (set(sku_info.location_info[0].zones or []) -
+                                set(restriction.restriction_info.zones or [])):
+                            is_available = False
+                            break
+            if is_available:
+                available_skus.append(sku_info)
+        result = available_skus
     if resource_type:
         result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
     if size:
@@ -1587,9 +1605,8 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Managed storage
     if blob_uri is None:
         try:
-            poller = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
-            uris = LongRunningOperation(cmd.cli_ctx)(poller)
-            blob_uri = uris.serial_console_log_blob_uri
+            boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
+            blob_uri = boot_diagnostics_data.serial_console_log_blob_uri
         except CloudError:
             pass
         if blob_uri is None:

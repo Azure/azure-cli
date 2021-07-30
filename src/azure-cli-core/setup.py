@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.26.1"
+VERSION = "2.27.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -57,7 +57,7 @@ DEPENDENCIES = [
     'pkginfo>=1.5.0.1',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'requests~=2.25.1',
+    'requests[socks]~=2.25.1',
     'six~=1.12',
     'urllib3[secure]>=1.26.5',
 ]

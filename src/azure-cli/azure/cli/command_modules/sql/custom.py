@@ -23,7 +23,6 @@ from azure.mgmt.sql.models import (
     CapabilityStatus,
     ConnectionPolicyName,
     CreateMode,
-    DatabaseSecurityAlertPolicy,
     EncryptionProtector,
     EncryptionProtectorName,
     FailoverGroup,
@@ -36,7 +35,6 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroupReadWriteEndpoint,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
-    ManagedBackupShortTermRetentionPolicy,
     ManagedInstanceAzureADOnlyAuthentication,
     ManagedInstanceEncryptionProtector,
     ManagedInstanceExternalAdministrator,
@@ -44,10 +42,12 @@ from azure.mgmt.sql.models import (
     ManagedInstanceLongTermRetentionPolicyName,
     ManagedInstancePairInfo,
     ManagedShortTermRetentionPolicyName,
+    OutboundFirewallRule,
     PartnerInfo,
     PartnerRegionInfo,
     PerformanceLevelUnit,
     ResourceIdentity,
+    RestoreDetailsName,
     SecurityAlertPolicyName,
     SecurityAlertPolicyState,
     SensitivityLabel,
@@ -2714,7 +2714,7 @@ def update_long_term_retention(
     return policy
 
 
-def update_long_term_retention_get(
+def get_long_term_retention(
         client,
         resource_group_name,
         database_name,
@@ -2957,6 +2957,21 @@ def db_threat_detection_policy_get(
         database_name=database_name,
         security_alert_policy_name=SecurityAlertPolicyName.DEFAULT)
 
+def db_threat_detection_policy_get(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Gets a threat detection policy.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        security_alert_policy_name=SecurityAlertPolicyName.DEFAULT)
+
 
 def db_threat_detection_policy_update(
         cmd,
@@ -3002,6 +3017,21 @@ def db_threat_detection_policy_update(
         instance.email_account_admins = email_account_admins
 
     return instance
+
+
+def db_threat_detection_policy_update_setter(
+        client,
+        resource_group_name,
+        server_name,
+        database_name,
+        parameters):
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        security_alert_policy_name=SecurityAlertPolicyName.DEFAULT,
+        parameters=parameters)
 
 
 def db_sensitivity_label_show(
@@ -3460,6 +3490,18 @@ def instance_pool_create(
                        parameters=kwargs)
 
 
+def instance_pool_update(
+        instance,
+        tags=None):
+    '''
+    Updates a instance pool
+    '''
+
+    instance.tags = tags
+
+    return instance
+
+
 def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
     '''
     Validate if the sku family and edition input by user are permissible in the region using
@@ -3506,6 +3548,7 @@ def server_create(
         assign_identity=False,
         no_wait=False,
         enable_public_network=None,
+        restrict_outbound_network_access=None,
         key_id=None,
         user_assigned_identity_id=None,
         primary_user_assigned_identity_id=None,
@@ -3527,6 +3570,11 @@ def server_create(
     if enable_public_network is not None:
         kwargs['public_network_access'] = (
             ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
+
+    if restrict_outbound_network_access is not None:
+        kwargs['restrict_outbound_network_access'] = (
+            ServerNetworkAccessFlag.enabled if restrict_outbound_network_access
             else ServerNetworkAccessFlag.disabled)
 
     kwargs['key_id'] = key_id
@@ -3598,6 +3646,7 @@ def server_update(
         assign_identity=False,
         minimal_tls_version=None,
         enable_public_network=None,
+        restrict_outbound_network_access=None,
         primary_user_assigned_identity_id=None,
         key_id=None,
         identity_type=None,
@@ -3625,6 +3674,11 @@ def server_update(
     if enable_public_network is not None:
         instance.public_network_access = (
             ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
+
+    if restrict_outbound_network_access is not None:
+        instance.public_network_access = (
+            ServerNetworkAccessFlag.enabled if restrict_outbound_network_access
             else ServerNetworkAccessFlag.disabled)
 
     instance.primary_user_assigned_identity_id = (
@@ -3747,9 +3801,29 @@ def firewall_rule_create(
                                 end_ip_address=end_ip_address))
 
 
-#####
-#           sql server key
-#####
+#########################################################
+#           sql server outbound-firewall-rule           #
+#########################################################
+
+
+def outbound_firewall_rule_create(
+        client,
+        server_name,
+        resource_group_name,
+        outbound_rule_fqdn):
+    '''
+    Creates a new outbound firewall rule.
+    '''
+    return client.begin_create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        outbound_rule_fqdn=outbound_rule_fqdn,
+        parameters=OutboundFirewallRule())
+
+
+#########################################################
+#           sql server key                              #
+#########################################################
 
 
 def server_key_create(
@@ -3870,6 +3944,20 @@ def server_dns_alias_set(
 #####
 #           sql server encryption-protector
 #####
+
+def encryption_protector_get(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Gets a server encryption protector.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        encryption_protector_name=EncryptionProtectorName.CURRENT)
+
 
 def encryption_protector_get(
         client,
@@ -4430,10 +4518,12 @@ def mi_ad_admin_set(
     '''
 
     kwargs['tenant_id'] = _get_tenant_id()
+    kwargs['administrator_type'] = AdministratorType.ACTIVE_DIRECTORY
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY,
         parameters=kwargs
     )
 
@@ -4446,9 +4536,10 @@ def mi_ad_admin_delete(
     Deletes a managed instance active directory administrator.
     '''
 
-    return client.delete(
+    return client.begin_delete(
         resource_group_name=resource_group_name,
-        managed_instance_name=managed_instance_name
+        managed_instance_name=managed_instance_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY
     )
 
 
@@ -4492,6 +4583,20 @@ def mi_aad_only_enable(
         )
     )
 
+
+def mi_aad_only_get(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Gets the AAD-only setting
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        authentication_name=AuthenticationName.DEFAULT
+    )
 
 def mi_aad_only_get(
         client,
@@ -4658,7 +4763,7 @@ def get_short_term_retention_mi(
             database_name=database_name,
             managed_instance_name=managed_instance_name,
             resource_group_name=resource_group_name,
-            policy_name = ManagedShortTermRetentionPolicyName.DEFAULT)
+            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT)
 
     return policy
 
@@ -5031,6 +5136,22 @@ def managed_db_log_replay_complete_restore(
         resource_group_name=resource_group_name,
         parameters=kwargs)
 
+
+def managed_db_log_replay_get(
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name):
+    '''
+    Gets a log replay restore.
+    '''
+
+    return client.get(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        restore_details_name=RestoreDetailsName.DEFAULT)
+
 ###############################################
 #              sql failover-group             #
 ###############################################
@@ -5274,7 +5395,6 @@ def instance_failover_group_update(
 
 
 def instance_failover_group_failover(
-        cmd,
         client,
         resource_group_name,
         failover_group_name,
@@ -5284,11 +5404,8 @@ def instance_failover_group_failover(
     Failover an instance failover group.
     '''
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
     failover_group = client.get(
         resource_group_name=resource_group_name,
-        subscription_id=get_subscription_id(cmd.cli_ctx),
         failover_group_name=failover_group_name,
         location_name=location_name)
 
@@ -5297,9 +5414,9 @@ def instance_failover_group_failover(
 
     # Choose which failover method to use
     if allow_data_loss:
-        failover_func = client.force_failover_allow_data_loss
+        failover_func = client.begin_force_failover_allow_data_loss
     else:
-        failover_func = client.failover
+        failover_func = client.begin_failover
 
     return failover_func(
         resource_group_name=resource_group_name,
@@ -5311,7 +5428,7 @@ def instance_failover_group_failover(
 ###############################################
 
 
-def conn_policy_show(
+def show_conn_policy(
         client,
         resource_group_name,
         server_name):
@@ -5323,7 +5440,8 @@ def conn_policy_show(
         server_name=server_name,
         connection_policy_name=ConnectionPolicyName.DEFAULT)
 
-def conn_policy_update(
+
+def update_conn_policy(
         client,
         resource_group_name,
         server_name,
@@ -5398,6 +5516,7 @@ def tde_list_by_configuration(
 ###############################################
 #              sql server vnet-rule           #
 ###############################################
+
 
 def vnet_rule_begin_create_or_update(
         client,

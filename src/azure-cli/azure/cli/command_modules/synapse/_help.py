@@ -577,7 +577,8 @@ examples:
 
 helps['synapse workspace key update'] = """
 type: command
-short-summary: Update a workspace's key or update the state of key to change the workspace state from pending to success state when the workspace is first being provisioned.
+short-summary: Update a workspace's key.
+long-summary: Activate a workspace and change it's state from pending to success state when the workspace is first being provisioned through updating a workspace's key. Switching to another CMK after activating the workspace needs to execute 'az synapse workspace update' instead.
 examples:
   - name: Update a workspace's key.
     text: |-
@@ -1438,7 +1439,7 @@ examples:
   - name: Create a notebook.
     text: |-
         az synapse notebook create --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
+          --name testnotebook --file @path/notebook.ipynb
 """
 
 helps['synapse notebook set'] = """
@@ -1448,7 +1449,7 @@ examples:
   - name: Set an exist notebook.
     text: |-
         az synapse notebook set --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
+          --name testnotebook --file @path/notebook.ipynb
 """
 
 helps['synapse notebook import'] = """
@@ -1458,7 +1459,7 @@ examples:
   - name: Import a notebook.
     text: |-
         az synapse notebook import --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
+          --name testnotebook --file @path/notebook.ipynb
 """
 
 helps['synapse notebook show'] = """
