@@ -2941,6 +2941,7 @@ def restore_long_term_retention_backup(
         resource_group_name=target_resource_group_name,
         parameters=kwargs)
 
+
 def db_threat_detection_policy_get(
         client,
         resource_group_name,
