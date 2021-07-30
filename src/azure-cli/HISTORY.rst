@@ -56,7 +56,7 @@ Release History
 
 **Backup**
 
-* `backup vault`: Add support for Customer Managed Keys(CMK) (#18733)
+* `az backup vault`: Add support for Customer Managed Keys(CMK) (#18733)
 * `az backup restore restore-disks`: Add MSI usage in IaaS VM Restore (#18961)
 
 **CDN**
@@ -65,13 +65,13 @@ Release History
 
 **Compute **
 
-* Fix issue #18633: az sig image-version create does not support mixing disks, snapshots, and vhd (#18741)
+* Fix #18633: az sig image-version create does not support mixing disks, snapshots, and vhd (#18741)
 * Upgrade package version to fix securityProfile issue in `az vmss update` (#18788)
 * `az vm boot-diagnostics get-boot-log`: Fix crash when getting boot diagnostics log (#18830)
 * `az vm list-skus`: Fix the issue that it can't query the SKU which with partially zones available (#18939)
 * `az vm auto-shutdown`: Fix the issue that `--webhook` is required when `--email` is passed in (#18958)
 * `az vm create`: Support creating VM from shared gallery image (#19037)
-* `vm secret add`: Add note to use Azure Key Vault VM extension instead in help (#19045)
+* `az vm secret add`: Add note to use Azure Key Vault VM extension instead in help (#19045)
 
 **Container**
 
@@ -137,7 +137,7 @@ Release History
 
 **SQL**
 
-* BREAKING CHANGES: (#18637)
+* Update Microsoft.Sql to track2 SDK (#18637)
 * `az sql server outbound-firewall-rule create`: Azure CLI Commands for Outbound Firewall Rules (#18671)
 
 **Storage**
