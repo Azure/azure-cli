@@ -79,6 +79,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subscription_id = '4cac86b0-1e56-48c2-9df2-669a6d2d87c5'
     location = 'westeurope'
     subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance'
+    target_vnet_name = 'vnet-powershell-cli-testing'
+    target_subnet_name = 'ManagedInstance2'
+    target_subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(target_vnet_name, target_subnet_name)
     group = 'Committer-SwaggerAndGeneratedSDKs-MI-CLI'
     collation = "Serbian_Cyrillic_100_CS_AS"
 
