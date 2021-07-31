@@ -273,6 +273,7 @@ class AcrCommandsTests(ScenarioTest):
         # import image using no-wait
         self.cmd('acr import -n {source_registry_name} -r {resource_id} --source {source_image} --no-wait')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @record_only()
     def test_acr_image_import(self, resource_group):
@@ -291,8 +292,10 @@ class AcrCommandsTests(ScenarioTest):
         source_registry_name = self.create_random_name("sourceregistrysamesub", 40)
         registry_name = self.create_random_name("targetregistry", 20)
         token = self.cmd('account get-access-token').get_output_in_json()['accessToken']
-        service_principal_username = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
-        service_principal_password = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
+
+        # service principal creds to support import from resource_imageV1
+        service_principal_username = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
+        service_principal_password = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
 
         self.kwargs.update({
             'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
