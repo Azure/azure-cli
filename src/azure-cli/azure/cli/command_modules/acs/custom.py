@@ -1223,7 +1223,7 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
     current_context = addition.get('current-context', 'UNKNOWN')
     msg = 'Merged "{}" as current context in {}'.format(
         current_context, existing_file)
-    print(msg)
+    logger.warning(msg)
 
 
 def _get_host_name(acs_info):
@@ -1633,6 +1633,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         raise CLIError("Failed to check the ACR: {}".format(err))
     if output:
         print(output)
+        if os.getenv("PYTEST_CURRENT_TEST", None):
+            return output
     else:
         raise CLIError("Failed to check the ACR.")
 
