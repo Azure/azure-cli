@@ -52,7 +52,7 @@ def acr_create(cmd,
                zone_redundancy=None,
                allow_trusted_services=None,
                allow_exports=None,
-               tags=None):
+               tags=None):  # pylint: disable=too-many-locals
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
