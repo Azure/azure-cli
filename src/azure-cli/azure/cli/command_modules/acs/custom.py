@@ -2041,19 +2041,27 @@ class AKSCreateModels:
 
 
 class AKSCreateParameters:
-    # used to store original function parameters
+    # used to store original function parameters, in the form of attributes of this class, which can be
+    # obtained or set through a.xxx (a is an instance of this class, xxx is the original parameter name)
     def __init__(self, data):
         for name, value in data.items():
             setattr(self, name, value)
 
 
 class AKSCreateDecorator:
-    def __init__(self, cmd, client, models, raw_parameters):
+    def __init__(self, cmd, client, models, raw_parameters, resource_type=ResourceType.MGMT_CONTAINERSERVICE):
         self.cmd = cmd
         self.client = client
         self.models = models
-        self.context = AKSCreateContext()
         self.param = AKSCreateParameters(raw_parameters)
+        # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
+        # containerservice SDK, most models have been passed through the `modles` parameter (instantiatied
+        # from `AKSCreateModels` (or `PreviewAKSCreateModels` in aks-preview), where resource_type (i.e.,
+        # api version) has been specified), a very small number of models are instantiated through internal
+        # functions, one use case is that `api_server_access_profile` is initialized by function
+        # `_populate_api_server_access_profile` defined in `_helpers.py`
+        self.resource_type = resource_type
+        self.context = AKSCreateContext()
         self.mc = None
 
     def check_vm_set_type(self):
@@ -2501,6 +2509,7 @@ class AKSCreateDecorator:
                 self.cmd,
                 self.param.api_server_authorized_ip_ranges,
                 enable_private_cluster=self.param.enable_private_cluster,
+                resource_type=self.resource_type
             )
 
         # update mc
@@ -2630,7 +2639,8 @@ class AKSCreateDecorator:
             )
 
     def set_up_extended_location(self):
-        if self.param.edge_zone:
+        # aks-preview does not recognize this parameter
+        if getattr(self.param, "edge_zone", None):
             self.mc.extended_location = self.models.ExtendedLocation(
                 name=self.param.edge_zone,
                 type=self.models.ExtendedLocationTypes.EDGE_ZONE,
@@ -2641,7 +2651,7 @@ class AKSCreateDecorator:
         # If principal_obj is None, we will not add this header, this can happen
         # when the cluster enables managed identity. In this case, the header is useless
         # and that's OK to not add this header
-        custom_headers = None
+        custom_headers = {}
         if self.context.principal_obj:
             custom_headers = {
                 "Ocp-Aad-Session-Key": self.context.principal_obj.get(
