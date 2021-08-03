@@ -33,6 +33,7 @@ def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_
                            command_line_arguments=None,
                            reference_files=None, archives=None, configuration=None,
                            tags=None):
+    # pylint: disable-msg=too-many-locals
     client = cf_synapse_spark_batch(cmd.cli_ctx, workspace_name, spark_pool_name)
     file = main_definition_file
     class_name = main_class_name
