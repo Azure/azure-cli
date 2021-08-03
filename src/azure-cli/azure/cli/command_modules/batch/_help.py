@@ -68,6 +68,12 @@ examples:
     crafted: true
 """
 
+helps['batch account outbound-endpoints'] = """
+type: command
+short-summary: List an account's outbound network dependencies.
+long-summary: List the endpoints that a Batch Compute Node under this Batch Account may call as part of Batch service administration. If you are deploying a Pool inside of a virtual network that you specify, you must make sure your network allows outbound access to these endpoints. Failure to allow access to these endpoints may cause Batch to mark the affected nodes as unusable. For more information about creating a pool inside of a virtual network, see https://docs.microsoft.com/azure/batch/batch-virtual-network."
+"""
+
 helps['batch application'] = """
 type: group
 short-summary: Manage Batch applications.
@@ -201,6 +207,11 @@ short-summary: Manage Batch service options for a subscription at the region lev
 helps['batch location quotas'] = """
 type: group
 short-summary: Manage Batch service quotas at the region level.
+"""
+
+helps['batch location list-skus'] = """
+type: command
+short-summary: List virtual machine SKUs available in a location.
 """
 
 helps['batch node'] = """
