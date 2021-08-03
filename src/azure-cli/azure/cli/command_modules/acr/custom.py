@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-locals
+
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
@@ -52,7 +54,7 @@ def acr_create(cmd,
                zone_redundancy=None,
                allow_trusted_services=None,
                allow_exports=None,
-               tags=None):  # pylint: disable=too-many-locals
+               tags=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
