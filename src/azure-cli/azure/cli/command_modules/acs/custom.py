@@ -2028,7 +2028,7 @@ class AKSCreateModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ExtendedLocationTypes = self.cmd.get_models(
+        self.ExtendedLocation = self.cmd.get_models(
             "ExtendedLocation",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
