@@ -2062,7 +2062,6 @@ class AKSCreateDecorator:
         # `_populate_api_server_access_profile` defined in `_helpers.py`
         self.resource_type = resource_type
         self.context = AKSCreateContext()
-        self.mc = None
 
     def check_vm_set_type(self):
         self.param.vm_set_type = _set_vm_set_type(
@@ -2104,9 +2103,10 @@ class AKSCreateDecorator:
         self.context.subscription_id = subscription_id
 
     def init_mc(self):
-        self.mc = self.models.ManagedCluster(location=self.param.location)
+        mc = self.models.ManagedCluster(location=self.param.location)
+        return mc
 
-    def set_up_agent_pool_profiles(self):
+    def set_up_agent_pool_profiles(self, mc):
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             # Must be 12 chars or less before ACS RP adds to it
             name=_trim_nodepoolname(self.param.nodepool_name),
@@ -2143,9 +2143,10 @@ class AKSCreateDecorator:
         )
 
         # update mc
-        self.mc.agent_pool_profiles = [agent_pool_profile]
+        mc.agent_pool_profiles = [agent_pool_profile]
+        return mc
 
-    def set_up_linux_profile(self):
+    def set_up_linux_profile(self, mc):
         linux_profile = None
         # LinuxProfile is just used for SSH access to VMs, so omit it if --no-ssh-key was specified.
         if not self.param.no_ssh_key:
@@ -2161,9 +2162,10 @@ class AKSCreateDecorator:
             )
 
         # update mc
-        self.mc.linux_profile = linux_profile
+        mc.linux_profile = linux_profile
+        return mc
 
-    def set_up_windows_profile(self):
+    def set_up_windows_profile(self, mc):
         windows_profile = None
         if (
             self.param.windows_admin_username
@@ -2203,9 +2205,10 @@ class AKSCreateDecorator:
             )
 
         # update mc
-        self.mc.windows_profile = windows_profile
+        mc.windows_profile = windows_profile
+        return mc
 
-    def set_up_service_principal_profile(self):
+    def set_up_service_principal_profile(self, mc):
         # If customer explicitly provide a service principal, disable managed identity.
         if self.param.service_principal and self.param.client_secret:
             self.param.enable_managed_identity = False
@@ -2295,7 +2298,8 @@ class AKSCreateDecorator:
         )
 
         # update mc
-        self.mc.service_principal_profile = service_principal_profile
+        mc.service_principal_profile = service_principal_profile
+        return mc
 
     def build_lb_profile(self):
         load_balancer_profile = create_load_balancer_profile(
@@ -2335,7 +2339,7 @@ class AKSCreateDecorator:
             self.context.load_balancer_profile,
         )
 
-    def set_up_network_profile(self):
+    def set_up_network_profile(self, mc):
         network_profile = None
         if any(
             [
@@ -2383,9 +2387,10 @@ class AKSCreateDecorator:
                 )
 
         # update mc
-        self.mc.network_profile = network_profile
+        mc.network_profile = network_profile
+        return mc
 
-    def set_up_addon_profiles(self):
+    def set_up_addon_profiles(self, mc):
         addon_profiles = _handle_addons_args(
             self.cmd,
             self.param.enable_addons,
@@ -2426,9 +2431,10 @@ class AKSCreateDecorator:
         self.context.enable_virtual_node = enable_virtual_node
 
         # update mc
-        self.mc.addon_profiles = addon_profiles
+        mc.addon_profiles = addon_profiles
+        return mc
 
-    def set_up_aad_profile(self):
+    def set_up_aad_profile(self, mc):
         aad_profile = None
         if self.param.enable_aad:
             if any(
@@ -2490,9 +2496,10 @@ class AKSCreateDecorator:
                 )
 
         # update mc
-        self.mc.aad_profile = aad_profile
+        mc.aad_profile = aad_profile
+        return mc
 
-    def set_up_api_server_access_profile(self):
+    def set_up_api_server_access_profile(self, mc):
         api_server_access_profile = None
         if (
             self.param.enable_private_cluster
@@ -2513,7 +2520,8 @@ class AKSCreateDecorator:
             )
 
         # update mc
-        self.mc.api_server_access_profile = api_server_access_profile
+        mc.api_server_access_profile = api_server_access_profile
+        return mc
 
     def check_rbac(self):
         # Check that both --disable-rbac and --enable-rbac weren't provided
@@ -2522,7 +2530,7 @@ class AKSCreateDecorator:
                 'specify either "--disable-rbac" or "--enable-rbac", not both.'
             )
 
-    def set_up_identity(self):
+    def set_up_identity(self, mc):
         identity = None
         if (
             not self.param.enable_managed_identity
@@ -2547,9 +2555,10 @@ class AKSCreateDecorator:
             )
 
         # update mc
-        self.mc.identity = identity
+        mc.identity = identity
+        return mc
 
-    def set_up_identity_profile(self):
+    def set_up_identity_profile(self, mc):
         identity_profile = None
         if self.param.assign_kubelet_identity:
             if not self.param.assign_identity:
@@ -2579,21 +2588,23 @@ class AKSCreateDecorator:
             )
 
         # update mc
-        self.mc.identity_profile = identity_profile
+        mc.identity_profile = identity_profile
+        return mc
 
-    def set_up_mc_with_params(self):
-        self.mc.tags = self.param.tags
-        self.mc.dns_prefix = self.param.dns_name_prefix
-        self.mc.kubernetes_version = self.param.kubernetes_version
-        self.mc.enable_rbac = not self.param.disable_rbac
-        self.mc.auto_scaler_profile = (
+    def set_up_mc_with_params(self, mc):
+        mc.tags = self.param.tags
+        mc.dns_prefix = self.param.dns_name_prefix
+        mc.kubernetes_version = self.param.kubernetes_version
+        mc.enable_rbac = not self.param.disable_rbac
+        mc.auto_scaler_profile = (
             self.param.cluster_autoscaler_profile
         )
-        self.mc.disk_encryption_set_id = (
+        mc.disk_encryption_set_id = (
             self.param.node_osdisk_diskencryptionset_id
         )
+        return mc
 
-    def set_up_private_dns(self):
+    def set_up_private_dns(self, mc):
         use_custom_private_dns_zone = False
         if self.param.private_dns_zone:
             if not self.param.enable_private_cluster:
@@ -2601,7 +2612,8 @@ class AKSCreateDecorator:
                     "Invalid private dns zone for public cluster. "
                     "It should always be empty for public cluster"
                 )
-            self.mc.api_server_access_profile.private_dns_zone = (
+            # update mc
+            mc.api_server_access_profile.private_dns_zone = (
                 self.param.private_dns_zone
             )
             from msrestazure.tools import is_valid_resource_id
@@ -2622,29 +2634,36 @@ class AKSCreateDecorator:
 
         # update context
         self.context.use_custom_private_dns_zone = use_custom_private_dns_zone
+        return mc
 
-    def set_up_fqdn_subdomain(self):
+    def set_up_fqdn_subdomain(self, mc):
         if self.param.fqdn_subdomain:
             if not self.context.use_custom_private_dns_zone:
                 raise ArgumentUsageError(
                     "--fqdn-subdomain should only be used for "
                     "private cluster with custom private dns zone"
                 )
-            self.mc.fqdn_subdomain = self.param.fqdn_subdomain
+            # update mc
+            mc.fqdn_subdomain = self.param.fqdn_subdomain
+        return mc
 
-    def set_up_sku(self):
+    def set_up_sku(self, mc):
         if self.param.uptime_sla:
-            self.mc.sku = self.models.ManagedClusterSKU(
+            # update mc
+            mc.sku = self.models.ManagedClusterSKU(
                 name="Basic", tier="Paid"
             )
+        return mc
 
-    def set_up_extended_location(self):
+    def set_up_extended_location(self, mc):
         # aks-preview does not recognize this parameter
         if getattr(self.param, "edge_zone", None):
-            self.mc.extended_location = self.models.ExtendedLocation(
+            # update mc
+            mc.extended_location = self.models.ExtendedLocation(
                 name=self.param.edge_zone,
                 type=self.models.ExtendedLocationTypes.EDGE_ZONE,
             )
+        return mc
 
     def build_custom_headers(self):
         # Add AAD session key to header.
@@ -2662,31 +2681,32 @@ class AKSCreateDecorator:
         # update context
         self.context.custom_headers = custom_headers
 
-    def set_up_default_mc(self):
+    def construct_default_mc(self):
         self.check_params()
-        self.init_mc()
-        self.set_up_agent_pool_profiles()
-        self.set_up_linux_profile()
-        self.set_up_windows_profile()
-        self.set_up_service_principal_profile()
+        mc = self.init_mc()
+        mc = self.set_up_agent_pool_profiles(mc)
+        mc = self.set_up_linux_profile(mc)
+        mc = self.set_up_windows_profile(mc)
+        mc = self.set_up_service_principal_profile(mc)
         self.build_lb_profile()
         self.process_attach_acr()
         self.check_outbound_type()
-        self.set_up_network_profile()
-        self.set_up_addon_profiles()
-        self.set_up_aad_profile()
-        self.set_up_api_server_access_profile()
+        mc = self.set_up_network_profile(mc)
+        mc = self.set_up_addon_profiles(mc)
+        mc = self.set_up_aad_profile(mc)
+        mc = self.set_up_api_server_access_profile(mc)
         self.check_rbac()
-        self.set_up_identity()
-        self.set_up_identity_profile()
-        self.set_up_mc_with_params()
-        self.set_up_private_dns()
-        self.set_up_fqdn_subdomain()
-        self.set_up_sku()
-        self.set_up_extended_location()
+        mc = self.set_up_identity(mc)
+        mc = self.set_up_identity_profile(mc)
+        mc = self.set_up_mc_with_params(mc)
+        mc = self.set_up_private_dns(mc)
+        mc = self.set_up_fqdn_subdomain(mc)
+        mc = self.set_up_sku(mc)
+        mc = self.set_up_extended_location(mc)
         self.build_custom_headers()
+        return mc
 
-    def create_cluster(self):
+    def create_cluster(self, mc):
         # Due to SPN replication latency, we do a few retries here
         max_retry = 30
         retry_exception = Exception(None)
@@ -2698,7 +2718,7 @@ class AKSCreateDecorator:
                     self.context.subscription_id,
                     self.param.resource_group_name,
                     self.param.name,
-                    self.mc,
+                    mc,
                     self.context.monitoring,
                     self.context.ingress_appgw_addon_enabled,
                     self.context.enable_virtual_node,
@@ -2805,8 +2825,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         models=models,
         raw_parameters=raw_parameters,
     )
-    aks_create_decorator.set_up_default_mc()
-    return aks_create_decorator.create_cluster()
+    mc = aks_create_decorator.construct_default_mc()
+    return aks_create_decorator.create_cluster(mc)
 
 
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
