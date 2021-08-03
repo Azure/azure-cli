@@ -168,6 +168,17 @@ type: command
 short-summary: Update the properties of a Batch job. Unspecified properties which can be updated are reset to their defaults.
 """
 
+helps['batch job stop'] = """
+type: command
+short-summary: Stop a running Batch job.
+long-summary: Terminate the specified job, marking it as completed. When a Terminate Job request is received, the Batch service sets the job to the terminating state. The Batch service then terminates any running tasks associated with the job and runs any required job release tasks. Then the job moves into the completed state. If there are any tasks in the job in the active state, they will remain in the active state. Once a job is terminated, new tasks cannot be added and any remaining active tasks will not be scheduled.
+parameters:
+  - name: --terminate-reason
+    type: string
+    short-summary: Termination reason
+    long-summary: The text you want to appear as the job's TerminateReason. The default is 'UserTerminate'
+"""
+
 helps['batch job set'] = """
 type: command
 short-summary: Update the properties of a Batch job. Updating a property in a subgroup will reset the unspecified properties of that group.
