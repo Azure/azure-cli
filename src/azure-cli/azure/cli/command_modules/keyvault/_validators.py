@@ -525,9 +525,11 @@ def validate_key_id(entity_type):
             setattr(ns, pure_entity_type + '_name', ident.name)
             setattr(ns, 'name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
-            if ident.version and hasattr(ns, pure_entity_type + '_version'):
-                setattr(ns, pure_entity_type + '_version', ident.version)
-                setattr(ns, 'version', ident.version)
+            if ident.version:
+                if hasattr(ns, pure_entity_type + '_version'):
+                    setattr(ns, pure_entity_type + '_version', ident.version)
+                elif hasattr(ns, 'version'):
+                    setattr(ns, 'version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
                            '--name/-n NAME [--version VERSION]')
@@ -557,7 +559,7 @@ def validate_keyvault_resource_id(entity_type):
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
             setattr(ns, 'name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
-            if ident.version and hasattr(ns, pure_entity_type + '_version'):
+            if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
                 setattr(ns, 'version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '

@@ -180,7 +180,7 @@ def load_command_table(self, _):
                           doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_output)
         g.keyvault_command('show', 'get_key', transform=transform_key_output)
-        g.keyvault_custom('import', 'import_key')
+        g.keyvault_custom('import', 'import_key', transform=transform_key_output)
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_secrets',

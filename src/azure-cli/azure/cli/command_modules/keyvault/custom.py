@@ -1219,7 +1219,7 @@ def import_key(cmd, client, key_name=None,  # pylint: disable=too-many-locals
                byok_string=None, kty='RSA', curve=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    JsonWebKey = cmd.loader.get_sdk('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
 
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
