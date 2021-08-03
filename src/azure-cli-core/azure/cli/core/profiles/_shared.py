@@ -8,6 +8,11 @@ from enum import Enum
 from functools import total_ordering
 from importlib import import_module
 
+from knack.log import get_logger
+
+
+logger = get_logger(__name__)
+
 
 class APIVersionException(Exception):
     def __init__(self, type_name, api_profile):
@@ -56,6 +61,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
+    MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', 'IotCentralClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
     MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
@@ -83,7 +89,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
     MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
-    MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', None)
     MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
     MGMT_MAPS = ('azure.mgmt.maps', None)
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
@@ -216,8 +221,9 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
         ResourceType.MGMT_IOTHUB: '2021-03-31',
+        ResourceType.MGMT_IOTCENTRAL: '2018-09-01',
         ResourceType.MGMT_ARO: '2020-04-30',
-        ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
+        ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
         ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-05-01', {
             'container_services': '2017-07-01',
@@ -573,6 +579,8 @@ def _get_attr(sdk_path, mod_attr_path, checked=True):
                 op = getattr(op, part)
         return op
     except (ImportError, AttributeError) as ex:
+        import traceback
+        logger.debug(traceback.format_exc())
         if checked:
             return None
         raise ex

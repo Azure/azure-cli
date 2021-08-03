@@ -24,6 +24,7 @@ class StorageProfile(Enum):
     ManagedPirImage = 4  # this would be the main scenarios
     ManagedCustomImage = 5
     ManagedSpecializedOSDisk = 6
+    SharedGalleryImage = 7
 
 
 def build_deployment_resource(name, template, dependencies=None):
@@ -448,6 +449,19 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                         'id': attach_os_disk
                     }
                 }
+            },
+            'SharedGalleryImage': {
+                "osDisk": {
+                    "caching": os_caching,
+                    "managedDisk": {
+                        "storageAccountType": disk_info['os'].get('storageAccountType'),
+                    },
+                    "name": os_disk_name,
+                    "createOption": "fromImage"
+                },
+                "imageReference": {
+                    'sharedGalleryImageId': image_reference
+                }
             }
         }
         if os_disk_encryption_set is not None:
@@ -457,6 +471,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             storage_profiles['ManagedCustomImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set,
             }
+            storage_profiles['SharedGalleryImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set,
+            }
+
         profile = storage_profiles[storage_profile.name]
         if os_disk_size_gb:
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
