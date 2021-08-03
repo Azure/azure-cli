@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 PRIVACY_STATEMENT = """
 Welcome to Microsoft Graph CLI!
 ---------------------
-Use `mg -h` to see available commands.
+Use `mgc -h` to see available commands.
 
 """
 
@@ -36,7 +36,7 @@ ___  ____                           __ _     _____                 _
 Welcome to the Microsoft Graph CLI!
 
 
-Use `mg --version` to display the current version.
+Use `mgc --version` to display the current version.
 Here are the base commands:
 """
 
@@ -86,7 +86,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_az_find_message(command, enable_color):
         from colorama import Style
         indent = 0
-        message = 'For more specific examples, use: mg find "mg {}"'.format(command)
+        message = 'For more specific examples, use: mgc find "mgc {}"'.format(command)
         if enable_color:
             message = Style.BRIGHT + message + Style.RESET_ALL
         _print_indent(message + '\n', indent)
