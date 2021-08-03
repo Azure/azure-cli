@@ -167,13 +167,13 @@ def get_security_auto_provisioning_setting(client, resource_name):
 
 def update_security_auto_provisioning_setting(client, auto_provision, resource_name):
 
-    new_auto_provision = AutoProvisioningSetting(auto_provision = auto_provision)
+    new_auto_provision = AutoProvisioningSetting(auto_provision=auto_provision)
     return client.create(resource_name, new_auto_provision)
 
 
 def turn_off_security_auto_provisioning_setting(client, resource_name):
 
-    new_auto_provision = AutoProvisioningSetting(auto_provision = 'Off')
+    new_auto_provision = AutoProvisioningSetting(auto_provision='Off')
     return client.create(resource_name, new_auto_provision)
 
 
@@ -276,7 +276,7 @@ def get_security_pricing(client, resource_name):
 
 def create_security_pricing(client, resource_name, tier):
 
-    return client.update(resource_name, Pricing(pricing_tier = tier))
+    return client.update(resource_name, Pricing(pricing_tier=tier))
 
 # --------------------------------------------------------------------------------------------
 # Security Topology
@@ -316,8 +316,8 @@ def get_security_workspace_setting(client, resource_name):
 
 def create_security_workspace_setting(client, resource_name, target_workspace):
 
-    scope = '/subscriptions/' + client._config.subscription_id   
-    return client.create(resource_name, WorkspaceSetting(workspace_id = target_workspace, scope = scope))
+    scope = '/subscriptions/' + client._config.subscription_id
+    return client.create(resource_name, WorkspaceSetting(workspace_id=target_workspace, scope=scope))
 
 
 def delete_security_workspace_setting(client, resource_name):
@@ -337,7 +337,7 @@ def get_atp_setting(client, resource_group_name, storage_account_name):
 def update_atp_setting(client, resource_group_name, storage_account_name, is_enabled):
 
     return client.create(_construct_resource_id(client, resource_group_name, storage_account_name),
-                        AdvancedThreatProtectionSetting(is_enabled = is_enabled))
+                         AdvancedThreatProtectionSetting(is_enabled=is_enabled))
 
 
 def _construct_resource_id(client, resource_group_name, storage_account_name):
