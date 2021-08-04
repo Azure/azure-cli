@@ -850,7 +850,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         if nsg_type == 'new':
             if nsg_rule is None:
-                nsg_rule = 'RDP' if os_type.lower() == 'windows' else 'SSH'
+                if os_type:
+                    nsg_rule = 'RDP' if os_type.lower() == 'windows' else 'SSH'
             nsg = nsg or '{}NSG'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg))
             master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule))
@@ -979,7 +980,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
         master_template.add_secure_parameter('workspaceId', workspace_id)
-        if os_type.lower() == 'linux':
+        if not os_type:
+            logger.warning("Unknown OS type. Skip the connection step for log analytics workspace.")
+        elif os_type.lower() == 'linux':
             vm_mmaExtension_resource = build_vm_linux_log_analytics_workspace_agent(cmd, vm_name, location)
             master_template.add_resource(vm_mmaExtension_resource)
         elif os_type.lower() == 'windows':
