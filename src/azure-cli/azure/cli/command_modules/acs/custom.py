@@ -1956,6 +1956,7 @@ def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
                        'assignment')
 
 
+# pylint: disable=too-many-instance-attributes,too-few-public-methods
 class AKSCreateModels:
     # used to store models (i.e. the corresponding class of a certain api version specified by `resource_type`)
     # which would be used during the creation process
@@ -2012,6 +2013,7 @@ class AKSCreateModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
+        # pylint: disable=line-too-long
         self.ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties = self.cmd.get_models(
             "ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties",
             resource_type=self.resource_type,
@@ -2022,6 +2024,7 @@ class AKSCreateModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
+        # pylint: disable=line-too-long
         self.Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = self.cmd.get_models(
             "Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties",
             resource_type=self.resource_type,
@@ -2039,6 +2042,7 @@ class AKSCreateModels:
         )
 
 
+# pylint: disable=too-few-public-methods
 class AKSCreateParameters:
     # used to store original function parameters, in the form of attributes of this class, which can be
     # obtained or set through a.xxx (a is an instance of this class, xxx is the original parameter name)
@@ -2048,6 +2052,7 @@ class AKSCreateParameters:
             setattr(self, name, value)
 
 
+# pylint: disable=too-few-public-methods
 class AKSCreateContext:
     # used to store intermediate variables and parameters that are not specified by the user but are automatically
     # completed/patched (neither original function parameters nor models)
@@ -2102,18 +2107,18 @@ class AKSCreateDecorator:
             )
 
     def patch_vm_set_type(self):
-        self.param.vm_set_type = _set_vm_set_type(
-            # patch vm set type, will be overwritten in aks-preview
+        # pylint: disable=attribute-defined-outside-init
+        self.context.vm_set_type = _set_vm_set_type(
             self.param.vm_set_type, self.param.kubernetes_version
         )
 
     def patch_params(self):
         subscription_id = get_subscription_id(self.cmd.cli_ctx)
-        # patch subscription_id
+        # pylint: disable=attribute-defined-outside-init
         self.context.subscription_id = subscription_id
 
         if not self.param.dns_name_prefix and not self.param.fqdn_subdomain:
-            # patch dns_name_prefix
+            # pylint: disable=attribute-defined-outside-init
             self.context.dns_name_prefix = _get_default_dns_prefix(
                 self.param.name, self.param.resource_group_name, subscription_id
             )
@@ -2122,14 +2127,14 @@ class AKSCreateDecorator:
             self.cmd.cli_ctx, self.param.resource_group_name
         )
         if self.param.location is None:
-            # patch location
+            # pylint: disable=attribute-defined-outside-init
             self.context.location = rg_location
 
         # patch vm set type, will be overwritten in aks-preview
         self.patch_vm_set_type()
 
+        # pylint: disable=attribute-defined-outside-init
         self.context.load_balancer_sku = set_load_balancer_sku(
-            # patch load balancer sku
             self.param.load_balancer_sku, self.param.kubernetes_version
         )
 
