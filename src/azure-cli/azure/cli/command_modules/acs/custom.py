@@ -124,6 +124,11 @@ def which(binary):
     return None
 
 
+def setattrs(_self, **kwargs):
+    for k, v in kwargs.items():
+        setattr(_self, k, v)
+
+
 def wait_then_open(url):
     """
     Waits for a bit then opens a URL.  Useful for waiting for a proxy to come up, and then open the URL.
@@ -1951,6 +1956,166 @@ def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
                        'assignment')
 
 
+class AKSCreateContext:
+    # used to store intermediate variables (neither original function parameters nor model variables)
+    def __init__(self):
+        pass
+
+
+class AKSCreateModels:
+    # used to store models which would be used during the creation process
+    def __init__(self, cmd, resource_type=ResourceType.MGMT_CONTAINERSERVICE):
+        self.cmd = cmd
+        self.resource_type = resource_type
+        self.ManagedClusterWindowsProfile = self.cmd.get_models(
+            "ManagedClusterWindowsProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterSKU = self.cmd.get_models(
+            "ManagedClusterSKU",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ContainerServiceNetworkProfile = self.cmd.get_models(
+            "ContainerServiceNetworkProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ContainerServiceLinuxProfile = self.cmd.get_models(
+            "ContainerServiceLinuxProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterServicePrincipalProfile = self.cmd.get_models(
+            "ManagedClusterServicePrincipalProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ContainerServiceSshConfiguration = self.cmd.get_models(
+            "ContainerServiceSshConfiguration",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ContainerServiceSshPublicKey = self.cmd.get_models(
+            "ContainerServiceSshPublicKey",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterAADProfile = self.cmd.get_models(
+            "ManagedClusterAADProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterAgentPoolProfile = self.cmd.get_models(
+            "ManagedClusterAgentPoolProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterIdentity = self.cmd.get_models(
+            "ManagedClusterIdentity",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties = self.cmd.get_models(
+            "ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedCluster = self.cmd.get_models(
+            "ManagedCluster",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = self.cmd.get_models(
+            "Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ExtendedLocation = self.cmd.get_models(
+            "ExtendedLocation",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ExtendedLocationTypes = self.cmd.get_models(
+            "ExtendedLocationTypes",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+
+
+class AKSCreateParameters:
+    # used to store original function parameters, in the form of attributes of this class, which can be
+    # obtained or set through a.xxx (a is an instance of this class, xxx is the original parameter name)
+    def __init__(self, data):
+        for name, value in data.items():
+            setattr(self, name, value)
+
+
+class AKSCreateDecorator:
+    def __init__(self, cmd, client, models, raw_parameters, resource_type=ResourceType.MGMT_CONTAINERSERVICE):
+        self.cmd = cmd
+        self.client = client
+        self.models = models
+        self.param = AKSCreateParameters(raw_parameters)
+        # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
+        # containerservice SDK, most models have been passed through the `modles` parameter (instantiatied
+        # from `AKSCreateModels` (or `PreviewAKSCreateModels` in aks-preview), where resource_type (i.e.,
+        # api version) has been specified), a very small number of models are instantiated through internal
+        # functions, one use case is that `api_server_access_profile` is initialized by function
+        # `_populate_api_server_access_profile` defined in `_helpers.py`
+        self.resource_type = resource_type
+        self.context = AKSCreateContext()
+
+    def check_vm_set_type(self):
+        self.param.vm_set_type = _set_vm_set_type(
+            self.param.vm_set_type, self.param.kubernetes_version
+        )
+
+    def check_params(self):
+        _validate_ssh_key(self.param.no_ssh_key, self.param.ssh_key_value)
+        subscription_id = get_subscription_id(self.cmd.cli_ctx)
+        if self.param.dns_name_prefix and self.param.fqdn_subdomain:
+            raise MutuallyExclusiveArgumentError(
+                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+            )
+        if not self.param.dns_name_prefix and not self.param.fqdn_subdomain:
+            self.param.dns_name_prefix = _get_default_dns_prefix(
+                self.param.name, self.param.resource_group_name, subscription_id
+            )
+
+        rg_location = _get_rg_location(
+            self.cmd.cli_ctx, self.param.resource_group_name
+        )
+        if self.param.location is None:
+            self.param.location = rg_location
+
+        self.check_vm_set_type()
+        self.param.load_balancer_sku = set_load_balancer_sku(
+            self.param.load_balancer_sku, self.param.kubernetes_version
+        )
+
+        if (
+            self.param.api_server_authorized_ip_ranges and
+            self.param.load_balancer_sku == "basic"
+        ):
+            raise CLIError(
+                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+            )
+
+        # update context
+        self.context.subscription_id = subscription_id
+
+    def init_mc(self):
+        mc = self.models.ManagedCluster(location=self.param.location)
+        return mc
+
+    def construct_default_mc(self):
+        self.check_params()
+        mc = self.init_mc()
+        return mc
+
+
 # pylint: disable=too-many-statements,too-many-branches
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
@@ -2029,70 +2194,18 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
-    ManagedClusterWindowsProfile = cmd.get_models('ManagedClusterWindowsProfile',
-                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                  operation_group='managed_clusters')
-    ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
-                                       resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                       operation_group='managed_clusters')
-    ContainerServiceNetworkProfile = cmd.get_models('ContainerServiceNetworkProfile',
-                                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                    operation_group='managed_clusters')
-    ContainerServiceLinuxProfile = cmd.get_models('ContainerServiceLinuxProfile',
-                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                  operation_group='managed_clusters')
-    ManagedClusterServicePrincipalProfile = cmd.get_models('ManagedClusterServicePrincipalProfile',
-                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                           operation_group='managed_clusters')
-    ContainerServiceSshConfiguration = cmd.get_models('ContainerServiceSshConfiguration',
-                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                      operation_group='managed_clusters')
-    ContainerServiceSshPublicKey = cmd.get_models('ContainerServiceSshPublicKey',
-                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                  operation_group='managed_clusters')
-    ManagedClusterAADProfile = cmd.get_models('ManagedClusterAADProfile',
-                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                              operation_group='managed_clusters')
-    ManagedClusterAgentPoolProfile = cmd.get_models('ManagedClusterAgentPoolProfile',
-                                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                    operation_group='managed_clusters')
-    ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
-                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                            operation_group='managed_clusters')
-    ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties = cmd.get_models(
-        'ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        operation_group='managed_clusters')
-    ManagedCluster = cmd.get_models('ManagedCluster',
-                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                    operation_group='managed_clusters')
-    Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = cmd.get_models(
-        'Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        operation_group='managed_clusters')
+    raw_parameters = locals()
+    models = AKSCreateModels(cmd, ResourceType.MGMT_CONTAINERSERVICE)
+    aks_create_decorator = AKSCreateDecorator(
+        cmd=cmd,
+        client=client,
+        models=models,
+        raw_parameters=raw_parameters,
+    )
+    mc = aks_create_decorator.construct_default_mc()
+    subscription_id = aks_create_decorator.context.subscription_id
 
-    _validate_ssh_key(no_ssh_key, ssh_key_value)
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    if dns_name_prefix and fqdn_subdomain:
-        raise MutuallyExclusiveArgumentError(
-            '--dns-name-prefix and --fqdn-subdomain cannot be used at same time')
-    if not dns_name_prefix and not fqdn_subdomain:
-        dns_name_prefix = _get_default_dns_prefix(
-            name, resource_group_name, subscription_id)
-
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
-    if location is None:
-        location = rg_location
-
-    vm_set_type = _set_vm_set_type(vm_set_type, kubernetes_version)
-    load_balancer_sku = set_load_balancer_sku(
-        load_balancer_sku, kubernetes_version)
-
-    if api_server_authorized_ip_ranges and load_balancer_sku == "basic":
-        raise CLIError(
-            '--api-server-authorized-ip-ranges can only be used with standard load balancer')
-
-    agent_pool_profile = ManagedClusterAgentPoolProfile(
+    agent_pool_profile = aks_create_decorator.models.ManagedClusterAgentPoolProfile(
         # Must be 12 chars or less before ACS RP adds to it
         name=_trim_nodepoolname(nodepool_name),
         tags=nodepool_tags,
@@ -2123,9 +2236,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     linux_profile = None
     # LinuxProfile is just used for SSH access to VMs, so omit it if --no-ssh-key was specified.
     if not no_ssh_key:
-        ssh_config = ContainerServiceSshConfiguration(
-            public_keys=[ContainerServiceSshPublicKey(key_data=ssh_key_value)])
-        linux_profile = ContainerServiceLinuxProfile(
+        ssh_config = aks_create_decorator.models.ContainerServiceSshConfiguration(
+            public_keys=[aks_create_decorator.models.ContainerServiceSshPublicKey(key_data=ssh_key_value)])
+        linux_profile = aks_create_decorator.models.ContainerServiceLinuxProfile(
             admin_username=admin_username, ssh=ssh_config)
 
     windows_profile = None
@@ -2153,7 +2266,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         if enable_ahub:
             windows_license_type = 'Windows_Server'
 
-        windows_profile = ManagedClusterWindowsProfile(
+        windows_profile = aks_create_decorator.models.ManagedClusterWindowsProfile(
             admin_username=windows_admin_username,
             admin_password=windows_admin_password,
             license_type=windows_license_type)
@@ -2170,7 +2283,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                                       service_principal=service_principal, client_secret=client_secret,
                                                       subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
                                                       fqdn_subdomain=fqdn_subdomain, location=location, name=name)
-        service_principal_profile = ManagedClusterServicePrincipalProfile(
+        service_principal_profile = aks_create_decorator.models.ManagedClusterServicePrincipalProfile(
             client_id=principal_obj.get("service_principal"),
             secret=principal_obj.get("client_secret"),
             key_vault_secret_ref=None)
@@ -2241,7 +2354,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         if pod_cidr and network_plugin == "azure":
             raise CLIError(
                 'Please use kubenet as the network plugin type when pod_cidr is specified')
-        network_profile = ContainerServiceNetworkProfile(
+        network_profile = aks_create_decorator.models.ContainerServiceNetworkProfile(
             network_plugin=network_plugin,
             pod_cidr=pod_cidr,
             service_cidr=service_cidr,
@@ -2254,14 +2367,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
     else:
         if load_balancer_sku.lower() == "standard" or load_balancer_profile:
-            network_profile = ContainerServiceNetworkProfile(
+            network_profile = aks_create_decorator.models.ContainerServiceNetworkProfile(
                 network_plugin="kubenet",
                 load_balancer_sku=load_balancer_sku.lower(),
                 load_balancer_profile=load_balancer_profile,
                 outbound_type=outbound_type,
             )
         if load_balancer_sku.lower() == "basic":
-            network_profile = ContainerServiceNetworkProfile(
+            network_profile = aks_create_decorator.models.ContainerServiceNetworkProfile(
                 load_balancer_sku=load_balancer_sku.lower(),
             )
 
@@ -2304,7 +2417,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         if disable_rbac and enable_azure_rbac:
             raise ArgumentUsageError(
                 '"--enable-azure-rbac" can not be used together with "--disable-rbac"')
-        aad_profile = ManagedClusterAADProfile(
+        aad_profile = aks_create_decorator.models.ManagedClusterAADProfile(
             managed=True,
             enable_azure_rbac=enable_azure_rbac,
             # ids -> i_ds due to track 2 naming issue
@@ -2322,7 +2435,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 profile = Profile(cli_ctx=cmd.cli_ctx)
                 _, _, aad_tenant_id = profile.get_login_credentials()
 
-            aad_profile = ManagedClusterAADProfile(
+            aad_profile = aks_create_decorator.models.ManagedClusterAADProfile(
                 client_app_id=aad_client_app_id,
                 server_app_id=aad_server_app_id,
                 server_app_secret=aad_server_app_secret,
@@ -2349,15 +2462,15 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         raise ArgumentUsageError(
             '--assign-identity can only be specified when --enable-managed-identity is specified')
     if enable_managed_identity and not assign_identity:
-        identity = ManagedClusterIdentity(
+        identity = aks_create_decorator.models.ManagedClusterIdentity(
             type="SystemAssigned"
         )
     elif enable_managed_identity and assign_identity:
         user_assigned_identity = {
             # pylint: disable=line-too-long
-            assign_identity: Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties()
+            assign_identity: aks_create_decorator.models.Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties()
         }
-        identity = ManagedClusterIdentity(
+        identity = aks_create_decorator.models.ManagedClusterIdentity(
             type="UserAssigned",
             user_assigned_identities=user_assigned_identity
         )
@@ -2370,7 +2483,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
         identity_profile = {
             # pylint: disable=line-too-long
-            'kubeletidentity': ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties(
+            'kubeletidentity': aks_create_decorator.models.ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties(
                 resource_id=assign_kubelet_identity,
                 client_id=kubelet_identity.client_id,
                 object_id=kubelet_identity.principal_id
@@ -2383,25 +2496,25 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             cluster_identity_object_id,
             assign_kubelet_identity)
 
-    mc = ManagedCluster(
-        location=location,
-        tags=tags,
-        dns_prefix=dns_name_prefix,
-        kubernetes_version=kubernetes_version,
-        enable_rbac=not disable_rbac,
-        agent_pool_profiles=[agent_pool_profile],
-        linux_profile=linux_profile,
-        windows_profile=windows_profile,
-        service_principal_profile=service_principal_profile,
-        network_profile=network_profile,
-        addon_profiles=addon_profiles,
-        aad_profile=aad_profile,
-        auto_scaler_profile=cluster_autoscaler_profile,
-        api_server_access_profile=api_server_access_profile,
-        identity=identity,
-        disk_encryption_set_id=node_osdisk_diskencryptionset_id,
-        identity_profile=identity_profile
-    )
+    mc_kwargs = {
+        "tags": tags,
+        "dns_prefix": dns_name_prefix,
+        "kubernetes_version": kubernetes_version,
+        "enable_rbac": not disable_rbac,
+        "agent_pool_profiles": [agent_pool_profile],
+        "linux_profile": linux_profile,
+        "windows_profile": windows_profile,
+        "service_principal_profile": service_principal_profile,
+        "network_profile": network_profile,
+        "addon_profiles": addon_profiles,
+        "aad_profile": aad_profile,
+        "auto_scaler_profile": cluster_autoscaler_profile,
+        "api_server_access_profile": api_server_access_profile,
+        "identity": identity,
+        "disk_encryption_set_id": node_osdisk_diskencryptionset_id,
+        "identity_profile": identity_profile,
+    }
+    setattrs(mc, **mc_kwargs)
 
     use_custom_private_dns_zone = False
     if private_dns_zone:
@@ -2423,7 +2536,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         mc.fqdn_subdomain = fqdn_subdomain
 
     if uptime_sla:
-        mc.sku = ManagedClusterSKU(
+        mc.sku = aks_create_decorator.models.ManagedClusterSKU(
             name="Basic",
             tier="Paid"
         )
