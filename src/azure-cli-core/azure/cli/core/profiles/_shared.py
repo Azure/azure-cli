@@ -254,6 +254,7 @@ AZURE_API_PROFILES = {
             'policy_assignments': '2016-12-01',
             'policy_definitions': '2016-12-01'
         }),
+        ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
@@ -292,6 +293,7 @@ AZURE_API_PROFILES = {
             'policy_assignments': '2016-12-01',
             'policy_definitions': '2016-12-01'
         }),
+        ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2017-11-09',
@@ -322,6 +324,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
+        ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
         ResourceType.DATA_STORAGE_BLOB: '2017-04-17',
@@ -345,6 +348,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
+        ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2015-04-05',
         ResourceType.DATA_STORAGE_BLOB: '2015-04-05',

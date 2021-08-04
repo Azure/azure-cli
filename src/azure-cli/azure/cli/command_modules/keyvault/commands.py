@@ -39,15 +39,15 @@ def load_command_table(self, _):
     mgmt_pec_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_endpoint_connections)
     mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
     data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
+    data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
 
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
         private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
-        data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
     else:
-        mgmt_hsms_entity = private_data_entity = data_backup_entity = data_access_control_entity = data_key_entity = None
+        mgmt_hsms_entity = private_data_entity = data_backup_entity = data_access_control_entity = None
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
