@@ -1956,14 +1956,9 @@ def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
                        'assignment')
 
 
-class AKSCreateContext:
-    # used to store intermediate variables (neither original function parameters nor model variables)
-    def __init__(self):
-        pass
-
-
 class AKSCreateModels:
-    # used to store models which would be used during the creation process
+    # used to store models (i.e. the corresponding class of a certain api version specified by `resource_type`)
+    # which would be used during the creation process
     def __init__(self, cmd, resource_type=ResourceType.MGMT_CONTAINERSERVICE):
         self.cmd = cmd
         self.resource_type = resource_type
@@ -2047,9 +2042,17 @@ class AKSCreateModels:
 class AKSCreateParameters:
     # used to store original function parameters, in the form of attributes of this class, which can be
     # obtained or set through a.xxx (a is an instance of this class, xxx is the original parameter name)
+    # Note: the attributes of this class should not be modified once they are initialized
     def __init__(self, data):
         for name, value in data.items():
             setattr(self, name, value)
+
+
+class AKSCreateContext:
+    # used to store intermediate variables and parameters that are not specified by the user but are automatically
+    # completed/patched (neither original function parameters nor models)
+    def __init__(self):
+        pass
 
 
 class AKSCreateDecorator:
@@ -2058,6 +2061,7 @@ class AKSCreateDecorator:
         self.client = client
         self.models = models
         self.param = AKSCreateParameters(raw_parameters)
+        self.context = AKSCreateContext()
         # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
         # containerservice SDK, most models have been passed through the `modles` parameter (instantiatied
         # from `AKSCreateModels` (or `PreviewAKSCreateModels` in aks-preview), where resource_type (i.e.,
@@ -2065,36 +2069,30 @@ class AKSCreateDecorator:
         # functions, one use case is that `api_server_access_profile` is initialized by function
         # `_populate_api_server_access_profile` defined in `_helpers.py`
         self.resource_type = resource_type
-        self.context = AKSCreateContext()
 
-    def check_vm_set_type(self):
-        self.param.vm_set_type = _set_vm_set_type(
-            self.param.vm_set_type, self.param.kubernetes_version
-        )
+    def get_variable_from_param_and_context(self, variable_name, prefer_context=False):
+        variable = None
+        if prefer_context:
+            variable = getattr(self.context, variable_name, None)
+            if variable is None:
+                variable = getattr(self.param, variable_name, None)
+        else:
+            variable = getattr(self.param, variable_name, None)
+            if variable is None:
+                variable = getattr(self.context, variable_name, None)
+        return variable
 
     def check_params(self):
+        # check ssh key
         _validate_ssh_key(self.param.no_ssh_key, self.param.ssh_key_value)
-        subscription_id = get_subscription_id(self.cmd.cli_ctx)
+
+        # check dns name prefix and fqdn subdomain
         if self.param.dns_name_prefix and self.param.fqdn_subdomain:
             raise MutuallyExclusiveArgumentError(
                 "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
             )
-        if not self.param.dns_name_prefix and not self.param.fqdn_subdomain:
-            self.param.dns_name_prefix = _get_default_dns_prefix(
-                self.param.name, self.param.resource_group_name, subscription_id
-            )
 
-        rg_location = _get_rg_location(
-            self.cmd.cli_ctx, self.param.resource_group_name
-        )
-        if self.param.location is None:
-            self.param.location = rg_location
-
-        self.check_vm_set_type()
-        self.param.load_balancer_sku = set_load_balancer_sku(
-            self.param.load_balancer_sku, self.param.kubernetes_version
-        )
-
+        # check api server authorized ip range and load balancer sku
         if (
             self.param.api_server_authorized_ip_ranges and
             self.param.load_balancer_sku == "basic"
@@ -2103,15 +2101,48 @@ class AKSCreateDecorator:
                 "--api-server-authorized-ip-ranges can only be used with standard load balancer"
             )
 
-        # update context
+    def patch_vm_set_type(self):
+        self.param.vm_set_type = _set_vm_set_type(
+            # patch vm set type, will be overwritten in aks-preview
+            self.param.vm_set_type, self.param.kubernetes_version
+        )
+
+    def patch_params(self):
+        subscription_id = get_subscription_id(self.cmd.cli_ctx)
+        # patch subscription_id
         self.context.subscription_id = subscription_id
 
+        if not self.param.dns_name_prefix and not self.param.fqdn_subdomain:
+            # patch dns_name_prefix
+            self.context.dns_name_prefix = _get_default_dns_prefix(
+                self.param.name, self.param.resource_group_name, subscription_id
+            )
+
+        rg_location = _get_rg_location(
+            self.cmd.cli_ctx, self.param.resource_group_name
+        )
+        if self.param.location is None:
+            # patch location
+            self.context.location = rg_location
+
+        # patch vm set type, will be overwritten in aks-preview
+        self.patch_vm_set_type()
+
+        self.context.load_balancer_sku = set_load_balancer_sku(
+            # patch load balancer sku
+            self.param.load_balancer_sku, self.param.kubernetes_version
+        )
+
     def init_mc(self):
-        mc = self.models.ManagedCluster(location=self.param.location)
+        # initialize the `ManagedCluster` object with mandatory parameters (i.e. location)
+        location = self.get_variable_from_param_and_context("location")
+        mc = self.models.ManagedCluster(location=location)
         return mc
 
     def construct_default_mc(self):
+        # create the complete `ManagedCluster` object, implementing...
         self.check_params()
+        self.patch_params()
         mc = self.init_mc()
         return mc
 
@@ -2203,7 +2234,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         raw_parameters=raw_parameters,
     )
     mc = aks_create_decorator.construct_default_mc()
-    subscription_id = aks_create_decorator.context.subscription_id
+
+    # temporary hook since this function is under gradually refactoring
+    # the variables are still updated/patched by overwriting to reduce the modification of the original logic
+    subscription_id = aks_create_decorator.get_variable_from_param_and_context("subscription_id")
+    dns_name_prefix = aks_create_decorator.get_variable_from_param_and_context("dns_name_prefix")
+    location = aks_create_decorator.get_variable_from_param_and_context("location")
+    vm_set_type = aks_create_decorator.get_variable_from_param_and_context("vm_set_type")
+    load_balancer_sku = aks_create_decorator.get_variable_from_param_and_context("load_balancer_sku")
 
     agent_pool_profile = aks_create_decorator.models.ManagedClusterAgentPoolProfile(
         # Must be 12 chars or less before ACS RP adds to it
