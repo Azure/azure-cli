@@ -1644,8 +1644,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         raise CLIError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
         return output
-    else:
-        raise CLIError("Failed to check the ACR.")
+    raise CLIError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
