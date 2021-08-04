@@ -450,7 +450,7 @@ def _get_identity_object_from_type(
                     if umiDict is None:
                         umiDict = {identity: UserIdentity()}
                     else:
-                        umiDict[identity] = UserIdentity()
+                        umiDict[identity] = UserIdentity()  # pylint: disable=unsupported-assignment-operation
 
                 identityResult = ResourceIdentity(type=ResourceIdType.system_assigned_user_assigned.value,
                                                   user_assigned_identities=umiDict)
@@ -470,7 +470,7 @@ def _get_identity_object_from_type(
                     if umiDict is None:
                         umiDict = {identity: UserIdentity()}
                     else:
-                        umiDict[identity] = UserIdentity()
+                        umiDict[identity] = UserIdentity()  # pylint: disable=unsupported-assignment-operation
 
                 identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value,
                                                   user_assigned_identities=umiDict)
