@@ -5,7 +5,7 @@
 
 import unittest
 import os.path
-import mock
+from unittest import mock
 from six import StringIO
 
 from knack.util import CLIError
