@@ -9,7 +9,7 @@ import os
 import tempfile
 import time
 import datetime
-import mock
+from unittest import mock
 import unittest
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
