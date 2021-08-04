@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import os
 import subprocess
 import tempfile
@@ -83,6 +84,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         identity = self.cmd('az identity create -g {} -n {}'.format(
             resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
+
+    def _get_test_data_file(self, filename):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        return os.path.join(curr_dir, 'data', filename)
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -4691,11 +4696,19 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         except subprocess.CalledProcessError as err:
             raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
+        # create test hook file
+        hook_file_path = self._get_test_data_file("test_aks_browse_legacy_hook.json")
+        with open(hook_file_path, "w") as f:
+            json.dump("enabled", f)
+
         # test aks browse cmd
         browse_cmd = 'aks browse --resource-group={resource_group} --name={name} --listen-address=1.1.1.1 --listen-port=8080 --disable-browser'
         self.cmd(browse_cmd, checks=[
             StringCheck("Test Invalid Address! Test Passed!")
         ])
+
+        # delete test hook file
+        os.remove(hook_file_path)
 
         # delete
         self.cmd(

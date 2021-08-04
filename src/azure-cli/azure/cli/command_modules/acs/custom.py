@@ -124,6 +124,16 @@ def which(binary):
     return None
 
 
+def check_cmd_test_hook_file(filename):
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+    test_hook_file = os.path.join(curr_dir, 'tests/latest/data', filename)
+    if os.path.exists(test_hook_file):
+        with open(test_hook_file, "r") as f:
+            return json.load(f)
+    else:
+        return False
+
+
 def wait_then_open(url):
     """
     Waits for a bit then opens a URL.  Useful for waiting for a proxy to come up, and then open the URL.
@@ -1633,9 +1643,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     except subprocess.CalledProcessError as err:
         raise CLIError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
-        print(output)
-        if "test_aks_create_attach_acr" in os.getenv("PYTEST_CURRENT_TEST", "").lower():
-            return output
+        return output
     else:
         raise CLIError("Failed to check the ACR.")
 
@@ -1749,7 +1757,8 @@ def _aks_browse(
         logger.warning('Proxy running on %s', proxy_url)
 
     timeout = None
-    if "test_aks_browse_legacy" in os.getenv("PYTEST_CURRENT_TEST", "").lower():
+    test_hook = check_cmd_test_hook_file("test_aks_browse_legacy_hook.json")
+    if test_hook and test_hook == "enabled":
         timeout = 10
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
