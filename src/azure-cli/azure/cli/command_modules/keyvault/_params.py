@@ -37,10 +37,10 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, SasTokenType,
+    (JsonWebKeyOperation, JsonWebKeyType, SasTokenType,
      SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes,
      JsonWebKeyEncryptionAlgorithm) = self.get_models(
-         'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'SasTokenType',
+         'JsonWebKeyOperation', 'JsonWebKeyType', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          'JsonWebKeyEncryptionAlgorithm',
          resource_type=ResourceType.DATA_KEYVAULT)

@@ -46,10 +46,6 @@ KEYVAULT_TEMPLATE_STRINGS = {
         'azure.keyvault.keys._client#KeyClient{obj_name}',
 }
 
-CLIENT_VERSIONS = {
-    ResourceType.DATA_KEYVAULT_KEYS: '7.0'
-}
-
 
 def is_mgmt_plane(resource_type):
     return resource_type == ResourceType.MGMT_KEYVAULT
@@ -89,7 +85,7 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
 
 def get_client_api_version(cli_ctx, resource_type):
     if resource_type == ResourceType.DATA_KEYVAULT_KEYS:
-        return '7.0' if not is_azure_stack_profile(cli_ctx.cmd) else '2016-10-01'
+        return '7.0' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     return get_api_version(cli_ctx, resource_type)
 
 
@@ -129,8 +125,11 @@ def get_client(cli_ctx, resource_type, client_name=''):
     return ClientEntity(client_factory, command_type, operations_docs_tmpl, models_docs_tmpl)
 
 
-def is_azure_stack_profile(cmd):
-    return cmd.cli_ctx.cloud.profile in [
+def is_azure_stack_profile(cmd=None, cli_ctx=None):
+    cli_ctx = cmd.cli_ctx if cmd else cli_ctx
+    if not cli_ctx:
+        raise CLIError("Can't judge profile without cli_ctx!")
+    return cli_ctx.cloud.profile in [
         '2020-09-01-hybrid',
         '2019-03-01-hybrid',
         '2018-03-01-hybrid',
@@ -241,6 +240,9 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
 
     vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_KEYS)
+    command_args.pop('hsm_name', None)
+    command_args.pop('vault_base_url', None)
+    command_args.pop('identifier', None)
     return KeyClient(
         vault_url=vault_url, credential=credential, api_version=version)
 
@@ -255,7 +257,4 @@ def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_ty
         command_args.get('identifier', None)
     if not vault_url:
         raise RequiredArgumentMissingError('Please specify --hsm-name or --id')
-    command_args.pop('hsm_name', None)
-    command_args.pop('vault_base_url', None)
-    command_args.pop('identifier', None)
     return vault_url, credential, version

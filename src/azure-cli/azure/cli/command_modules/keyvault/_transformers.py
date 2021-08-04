@@ -60,7 +60,8 @@ def transform_key_decryption_output(output, **command_args):
     return output
 
 
-def transform_key_output(result, **command_args):  # pylint: disable=unused-argument
+# pylint: disable=unused-argument, protected-access
+def transform_key_output(result, **command_args):
     from azure.keyvault.keys import KeyVaultKey, JsonWebKey
     import base64
     if not isinstance(result, KeyVaultKey):
@@ -68,9 +69,9 @@ def transform_key_output(result, **command_args):  # pylint: disable=unused-argu
 
     if result.key and isinstance(result.key, JsonWebKey):
         for attr in result.key._FIELDS:
-            vaule = getattr(result.key, attr)
-            if vaule and isinstance(vaule, bytes):
-                setattr(result.key, attr, base64.b64encode(vaule))
+            value = getattr(result.key, attr)
+            if value and isinstance(value, bytes):
+                setattr(result.key, attr, base64.b64encode(value))
 
     output = {
         'attributes': result.properties._attributes,
