@@ -7,7 +7,7 @@ import os
 import unittest
 import datetime
 import isodate
-import mock
+from unittest import mock
 
 from azure.batch import models, operations, BatchServiceClient
 from azure.batch.batch_auth import SharedKeyCredentials

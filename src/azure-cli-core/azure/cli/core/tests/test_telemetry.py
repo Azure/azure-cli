@@ -41,7 +41,7 @@ class TestCoreTelemetry(unittest.TestCase):
         self.assertEqual(['-g', '--name', '-d', '--debug'], AzCliCommandInvoker._extract_parameter_names(args))
 
     def test_cloud_forbid_telemetry(self):
-        import mock
+        from unittest import mock
         import azure.cli.core.telemetry as telemetry
         from azure.cli.core.mock import DummyCli
         from knack.completion import ARGCOMPLETE_ENV_NAME

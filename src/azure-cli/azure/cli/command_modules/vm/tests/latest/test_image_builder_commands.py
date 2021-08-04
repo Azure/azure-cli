@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import time
 import unittest
-import mock
+from unittest import mock
 from knack.testsdk import record_only
 from knack.util import CLIError
 
