@@ -1223,7 +1223,7 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
     current_context = addition.get('current-context', 'UNKNOWN')
     msg = 'Merged "{}" as current context in {}'.format(
         current_context, existing_file)
-    print(msg)
+    logger.warning(msg)
 
 
 def _get_host_name(acs_info):
@@ -1557,7 +1557,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         jsonS, _ = output.communicate()
         kubectl_version = json.loads(jsonS)
-        kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
+        # Remove any non-numeric characters like + from minor version
+        kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
         kubectl_server_minor_version = int(
             kubectl_version["serverVersion"]["minor"])
         kubectl_server_patch = int(
@@ -1632,15 +1633,25 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         raise CLIError("Failed to check the ACR: {}".format(err))
     if output:
         print(output)
+        if os.getenv("PYTEST_CURRENT_TEST", None):
+            return output
     else:
         raise CLIError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
-               listen_address='127.0.0.1', listen_port='8001'):
+def _aks_browse(
+    cmd,
+    client,
+    resource_group_name,
+    name,
+    disable_browser=False,
+    listen_address="127.0.0.1",
+    listen_port="8001",
+    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
-                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                resource_type=resource_type,
                                                 operation_group='managed_clusters')
     # verify the kube-dashboard addon was not disabled
     instance = client.get(resource_group_name, name)
@@ -1650,6 +1661,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                           if k.lower() == CONST_KUBE_DASHBOARD_ADDON_NAME.lower()),
                          ManagedClusterAddonProfile(enabled=False))
 
+    return_msg = None
     # open portal view if addon is not enabled or k8s version >= 1.19.0
     if StrictVersion(instance.kubernetes_version) >= StrictVersion('1.19.0') or (not addon_profile.enabled):
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1665,10 +1677,11 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                 'To view the Kubernetes resources view, please open %s in a new tab', dashboardURL)
         else:
             logger.warning('Kubernetes resources view on %s', dashboardURL)
+            return_msg = "Kubernetes resources view on {}".format(dashboardURL)
 
         if not disable_browser:
             webbrowser.open_new_tab(dashboardURL)
-        return
+        return return_msg
 
     # otherwise open the kube-dashboard addon
     if not which('kubectl'):
@@ -1730,28 +1743,65 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     else:
         logger.warning('Proxy running on %s', proxy_url)
 
+    timeout = None
+    if os.getenv("PYTEST_CURRENT_TEST", None):
+        timeout = 10
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(dashboardURL)
     try:
         try:
             subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
-                                     listen_address, "--port", listen_port], stderr=subprocess.STDOUT)
+                                     listen_address, "--port", listen_port], stderr=subprocess.STDOUT, timeout=timeout)
         except subprocess.CalledProcessError as err:
             if err.output.find(b'unknown flag: --address'):
+                return_msg = "Test Invalid Address! "
                 if listen_address != '127.0.0.1':
                     logger.warning(
                         '"--address" is only supported in kubectl v1.13 and later.')
                     logger.warning(
                         'The "--listen-address" argument will be ignored.')
-                subprocess.call(["kubectl", "--kubeconfig",
-                                browse_path, "proxy", "--port", listen_port])
+                try:
+                    subprocess.call(["kubectl", "--kubeconfig",
+                                    browse_path, "proxy", "--port", listen_port], timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                    return_msg = return_msg if return_msg else ""
+                    return_msg += "Test Passed!"
+        except subprocess.TimeoutExpired:
+            logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+            return_msg = return_msg if return_msg else ""
+            return_msg += "Test Passed!"
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
     finally:
         if in_cloud_console():
             requests.post('http://localhost:8888/closeport/8001')
+    return return_msg
+
+
+# pylint: disable=too-many-statements,too-many-branches
+def aks_browse(
+    cmd,
+    client,
+    resource_group_name,
+    name,
+    disable_browser=False,
+    listen_address="127.0.0.1",
+    listen_port="8001",
+):
+
+    return _aks_browse(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        disable_browser=disable_browser,
+        listen_address=listen_address,
+        listen_port=listen_port,
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+    )
 
 
 def _trim_nodepoolname(nodepool_name):

@@ -452,6 +452,11 @@ def load_command_table(self, _):
         min_api='2020-08-01'
     )
 
+    network_nic_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_network_interfaces
+    )
+
     # endregion
 
     # region NetworkRoot
@@ -819,6 +824,8 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='update_express_route_port_link',
                                  supports_no_wait=True,
+                                 child_collection_prop_name='links',
+                                 child_arg_name='link_name',
                                  min_api='2019-08-01')
 
     with self.command_group('network express-route port location', network_er_port_locations_sdk) as g:
@@ -897,7 +904,8 @@ def load_command_table(self, _):
         g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
                                  getter_name='lb_get',
                                  getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
+                                 setter_name='update_lb_frontend_ip_configuration_setter',
+                                 setter_type=network_load_balancers_custom,
                                  custom_func_name='set_lb_frontend_ip_configuration',
                                  validator=process_lb_frontend_ip_namespace)
 
@@ -1051,7 +1059,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_nic_ip_config')
         g.generic_update_command('update',
                                  child_collection_prop_name='ip_configurations', child_arg_name='ip_config_name',
-                                 setter_name='begin_create_or_update',
+                                 setter_name='update_nic_ip_config_setter',
+                                 setter_type=network_nic_custom,
                                  custom_func_name='set_nic_ip_config')
         g.command('list', list_network_resource_property(resource, subresource), command_type=network_util)
         g.show_command('show', get_network_resource_property_entry(resource, subresource), command_type=network_util)

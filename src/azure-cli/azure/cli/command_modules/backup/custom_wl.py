@@ -582,30 +582,30 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     recovery_mode = recovery_config_object['recovery_mode']
     filepath = recovery_config_object['filepath']
 
-    recovery_point = common.show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name,
-                                                vault_name, container_uri, item_uri, recovery_point_id, item_type,
-                                                backup_management_type="AzureWorkload")
+    trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, None)
+    if log_point_in_time is None:
+        recovery_point = common.show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name,
+                                                    vault_name, container_uri, item_uri, recovery_point_id, item_type,
+                                                    backup_management_type="AzureWorkload")
 
-    rp_list = [recovery_point]
-    common.fetch_tier(rp_list)
+        rp_list = [recovery_point]
+        common.fetch_tier(rp_list)
 
-    if (rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive' and
-            rehydration_priority is None):
-        raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
-        parameters of rehydration duration and rehydration priority.""")
+        if (rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive' and
+                rehydration_priority is None):
+            raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
+            parameters of rehydration duration and rehydration priority.""")
 
-    if rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive':
-        # Construct trigger restore request object
-        trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority)
+        if rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive':
+            # normal rehydrated restore
+            trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time,
+                                                                       rehydration_priority)
 
-        rehyd_duration = 'P' + str(rehydration_duration) + 'D'
-        rehydration_info = RecoveryPointRehydrationInfo(rehydration_retention_duration=rehyd_duration,
-                                                        rehydration_priority=rehydration_priority)
+            rehyd_duration = 'P' + str(rehydration_duration) + 'D'
+            rehydration_info = RecoveryPointRehydrationInfo(rehydration_retention_duration=rehyd_duration,
+                                                            rehydration_priority=rehydration_priority)
 
-        trigger_restore_properties.recovery_point_rehydration_info = rehydration_info
-
-    else:
-        trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, None)
+            trigger_restore_properties.recovery_point_rehydration_info = rehydration_info
 
     trigger_restore_properties.recovery_type = restore_mode
 

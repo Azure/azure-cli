@@ -7,7 +7,7 @@
 # pylint: disable=too-few-public-methods
 
 import unittest
-import mock
+from unittest import mock
 from azure.cli.core.azclierror import ValidationError
 
 
@@ -211,6 +211,43 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                          subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
                                          location='westeurope')
+
+        # Assert begin_create_or_update is called with correct rg and deployment name
+        resource_client_mock.deployments.begin_create_or_update.assert_called_once()
+        call_args = resource_client_mock.deployments.begin_create_or_update.call_args
+        self.assertEqual(call_args[0][0], rg_name)
+        self.assertEqual(call_args[0][1], deployment_name)
+
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_network_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_v3_zone_create(self, ase_client_factory_mock, network_client_factory_mock,
+                                               resource_client_factory_mock, deployment_name_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+        vnet_name = 'mock_vnet_name'
+        subnet_name = 'mock_subnet_name'
+        deployment_name = 'mock_deployment_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_client_mock = mock.MagicMock()
+        resource_client_factory_mock.return_value = resource_client_mock
+
+        deployment_name_mock.return_value = deployment_name
+
+        network_client = mock.MagicMock()
+        network_client_factory_mock.return_value = network_client
+
+        subnet = Subnet(id=1, address_prefix='10.10.10.10/24')
+        hosting_delegation = Delegation(id=1, service_name='Microsoft.Web/hostingEnvironments')
+        subnet.delegations = [hosting_delegation]
+        network_client.subnets.get.return_value = subnet
+        create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
+                                         subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
+                                         location='westeurope', zone_redundant=True)
 
         # Assert begin_create_or_update is called with correct rg and deployment name
         resource_client_mock.deployments.begin_create_or_update.assert_called_once()

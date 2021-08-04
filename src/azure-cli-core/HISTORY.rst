@@ -3,10 +3,14 @@
 Release History
 ===============
 
-2.26.1.1
+2.27.0.1
 ++++++++
 
 * Migrate the authentication library from ADAL to MSAL.
+
+2.27.0
+++++++
+* Minor fixes
 
 2.26.1
 ++++++

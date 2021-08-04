@@ -1609,7 +1609,8 @@ def load_arguments(self, _):
 
         c.argument('connection_type',
                    options_list=['--connection-type', '-t'],
-                   arg_type=get_enum_type(ServerConnectionType))
+                   arg_type=get_enum_type(ServerConnectionType),
+                   help='The required parameters for updating a secure connection policy. The value is default',)
 
     #####
     #           sql server dns-alias
@@ -1715,7 +1716,8 @@ def load_arguments(self, _):
                    arg_type=server_param_type)
 
         c.argument('virtual_network_rule_name',
-                   options_list=['--name', '-n'])
+                   options_list=['--name', '-n'],
+                   help='The name of the virtual network rule.')
 
         c.argument('virtual_network_subnet_id',
                    options_list=['--subnet'],
@@ -1976,6 +1978,17 @@ def load_arguments(self, _):
             ])
 
         c.ignore('name')  # Hide sku name
+
+        c.extra('vnet_name',
+                options_list=['--vnet-name'],
+                help='The virtual network name',
+                validator=validate_subnet)
+
+        c.argument('virtual_network_subnet_id',
+                   options_list=['--subnet'],
+                   required=False,
+                   help='Name or ID of the subnet that allows access to an Azure Sql Managed Instance. '
+                   'If subnet name is provided, --vnet-name must be provided.')
 
     with self.argument_context('sql mi show') as c:
         c.argument('expand_ad_admin',
