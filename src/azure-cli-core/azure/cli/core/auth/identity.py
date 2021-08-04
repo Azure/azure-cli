@@ -125,7 +125,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                        "Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
                        "with `az login --use-device-code`.", self.msal_authority)
-        result = self.msal_app.acquire_token_interactive(scopes, prompt='select_account', **kwargs)
+
+        success_template, error_template = _read_response_templates()
+
+        result = self.msal_app.acquire_token_interactive(
+            scopes, prompt='select_account', success_template=success_template, error_template=error_template, **kwargs)
+
         if not result or 'error' in result:
             aad_error_handler(result)
         return check_result(result)
@@ -713,3 +718,16 @@ class MsalSecretStore:
         logger.warning("Secrets are serialized as plain text and saved to `msalSecrets.cache.json`.")
         with open(self._token_file + ".json", "w") as fd:
             fd.write(json.dumps(self._service_principal_creds))
+
+
+def _read_response_templates():
+    """Read from success.html and error.html to strings and pass them to MSAL. """
+    success_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages', 'success.html')
+    with open(success_file) as f:
+        success_template = f.read()
+
+    error_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages', 'error.html')
+    with open(error_file) as f:
+        error_template = f.read()
+
+    return success_template, error_template
