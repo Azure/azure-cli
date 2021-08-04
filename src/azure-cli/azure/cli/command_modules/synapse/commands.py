@@ -30,7 +30,6 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_integrationruntimecredentials_factory
     from ._client_factory import cf_synapse_client_integrationruntimeconnectioninfos_factory
     from ._client_factory import cf_synapse_client_integrationruntimestatus_factory
-
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
             operations_tmpl='azure.cli.command_modules.synapse.operations.{}#'.format(custom_module) + '{}',
@@ -177,6 +176,10 @@ def load_command_table(self, _):
 
     synapse_notebook_sdk = CliCommandType(
         operation_tmpl='azure.synapse.artifacts.operations#NotebookOperations.{}',
+        client_factory=None)
+    
+    synapse_managed_private_endpoints_sdk = CliCommandType(
+        operation_tmpl='azure.synapse.managedprivateendpoints.operations#ManagedPrivateEndpoints.{}',
         client_factory=None)
 
     # Management Plane Commands --Workspace
@@ -476,7 +479,15 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_notebooks')
         g.custom_show_command('show', 'get_notebook')
         g.custom_command('export', 'export_notebook')
-        g.custom_command('delete', 'delete_notebook', confirmation=True, supports_no_wait=True)
+        g.custom_command('delete', 'delete_notebook', confirmation=True, supports_no_wait=True) 
+
+    # Data Plane Commands --Managed private endpoints operations
+    with self.command_group('synapse managed-private-endpoints', synapse_managed_private_endpoints_sdk,
+                           custom_command_type=get_custom_sdk('managedprivateendpoints', None)) as g:
+        g.custom_show_command('show', 'get_Managed_private_endpoints')
+        g.custom_command('create', 'create_Managed_private_endpoints', supports_no_wait=True)
+        g.custom_command('list', 'list_Managed_private_endpoints')
+        g.custom_command('delete', 'delete_Managed_private_endpoints', confirmation=True, supports_no_wait=True)
 
     with self.command_group('synapse', is_preview=True):
         pass

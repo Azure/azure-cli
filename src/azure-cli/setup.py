@@ -134,6 +134,7 @@ DEPENDENCIES = [
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.6.0',
     'azure-synapse-spark~=0.2.0',
+    'azure-synapse-managedprivateendpoints~=0.3.0',
     'fabric~=2.4',
     'javaproperties==0.5.1',
     'jsmin~=2.2.2',

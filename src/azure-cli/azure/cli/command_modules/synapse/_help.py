@@ -1678,3 +1678,49 @@ examples:
         az synapse integration-runtime-node get-ip-address --workspace-name testsynapseworkspace --resource-group rg \\
           --name selfhostedintegrationruntime --node-name testnode
 """
+
+helps['synapse managed-private-endpoints'] = """
+type: group
+short-summary: Manage synapse managed private endpoints.
+"""
+
+helps['synapse managed-private-endpoints show'] = """
+type: command
+short-summary: Get a synapse managed private endpoints.
+examples:
+  - name: Get a synapse managed private endpoints.
+    text: |-
+        az synapse managed-private-endpoints show --workspace-name testsynapseworkspace \\
+          --managed-private-endpoint-name testendpointname 
+"""
+
+helps['synapse managed-private-endpoints create'] = """
+type: command
+short-summary: Create a synapse managed private endpoints.
+examples:
+  - name: Create a synapse managed private endpoints.
+    text: |-
+        az synapse managed-private-endpoints create --workspace-name testsynapseworkspace \\
+          --managed-private-endpoint-name testendpointname \\
+          --private-Link-Resource-Id '/subscriptions/yoursub/resourceGroups/myResourceGroup/providers/Microsoft.Storage/accounts/myStorageAccount' \\
+          --group_Id blob
+"""
+
+helps['synapse managed-private-endpoints list'] = """
+type: command
+short-summary: List synapse managed private endpoints in a workspace.
+examples:
+  - name: List a synapse managed private endpoints.
+    text: |-
+        az synapse-managed-private-endpoints list --workspace-name testsynapseworkspace 
+"""
+
+helps['synapse managed-private-endpoints delete'] = """
+type: command
+short-summary: delete synapse managed private endpoints in a workspace.
+examples:
+  - name: Delete a synapse managed private endpoints.
+    text: |-
+        az synapse-managed-private-endpoints delete --workspace-name testsynapseworkspace \\
+          --managed-private-endpoint-name testendpointname 
+"""

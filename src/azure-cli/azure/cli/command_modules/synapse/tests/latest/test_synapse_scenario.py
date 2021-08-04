@@ -1362,3 +1362,49 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
+
+    #@record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    def test_managed_private_endpoints(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspacepe',
+            'name': 'AzureDataLakeStoragePE',
+            'privateLinkResourceId': '/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Storage/storageAccounts/hozhao0917gen2',
+            'groupId': 'dfs'})
+        
+        #self._create_workspace("--enable-managed-virtual-network")
+
+        # create managed private endpoint
+        self.cmd(
+            'az synapse  managed-private-endpoints create --workspace-name {workspace} --managed-private-endpoint-name {name} --private-Link-Resource-Id {privateLinkResourceId} --group-Id {groupId}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # wait some time to improve robustness
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(90)
+        # get managed private endpoint
+        self.cmd(
+            'az synapse  managed-private-endpoints show --workspace-name {workspace} --managed-private-endpoint-name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list managed private endpoint
+        self.cmd(
+            'az synapse  managed-private-endpoints list --workspace-name {workspace}',
+           checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints')
+            ])
+        
+        # delete managed private endpoint
+        self.cmd(
+            'az synapse  managed-private-endpoints delete --workspace-name {workspace} --managed-private-endpoint-name {name} -y')
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(60)    
+        self.cmd(
+            'az synapse managed-private-endpoints show --workspace-name {workspace} --managed-private-endpoint-name {name}',
+            expect_failure=True)
