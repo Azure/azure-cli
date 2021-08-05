@@ -244,7 +244,7 @@ def is_available(status):
     Thus, only check whether status is not VISIBLE would return the correct value.
     '''
 
-    return status is not CapabilityStatus.VISIBLE
+    return status not in (CapabilityStatus.VISIBLE)
 
 
 def _filter_available(capabilities):
@@ -873,7 +873,7 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=Fa
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(
-        sku, server_version_capability.SUPPORTED_EDITIONS)
+        sku, server_version_capability.supported_editions)
 
     # Find performance level capability, based on requested sku properties
     performance_level_capability = _find_performance_level_capability(
@@ -3383,10 +3383,10 @@ def elastic_pool_list_capabilities(
         dtu = int(dtu)
 
     # Get capabilities tree from server
-    capabilities = client.list_by_location(location, CapabilityGroup.SUPPORTED_ELASTIC_POOL_EDITIONS)
+    capabilities = client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
 
     # Get subtree related to elastic pools
-    editions = _get_default_server_version(capabilities).SUPPORTED_ELASTIC_POOL_EDITIONS
+    editions = _get_default_server_version(capabilities).supported_elastic_pool_editions
 
     # Filter by edition
     if edition:
@@ -3508,11 +3508,11 @@ def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
 
     # Get default server version capability
     managed_instance_version_capability = _get_default_capability(
-        loc_capability.SUPPORTED_MANAGED_INSTANCE_VERSIONS)
+        loc_capability.supported_managed_instance_versions)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(
-        sku, managed_instance_version_capability.SUPPORTED_INSTANCE_POOL_EDITIONS)
+        sku, managed_instance_version_capability.supported_instance_pool_editions)
 
     # Find family level capability, based on requested sku properties
     _find_family_capability(
@@ -4177,10 +4177,10 @@ def _find_managed_instance_sku_from_capabilities(
     loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.SUPPORTED_MANAGED_INSTANCE_VERSIONS)
 
     # Get default server version capability
-    managed_instance_version_capability = _get_default_capability(loc_capability.SUPPORTED_MANAGED_INSTANCE_VERSIONS)
+    managed_instance_version_capability = _get_default_capability(loc_capability.supported_managed_instance_versions)
 
     # Find edition capability, based on requested sku properties
-    edition_capability = _find_edition_capability(sku, managed_instance_version_capability.SUPPORTED_EDITIONS)
+    edition_capability = _find_edition_capability(sku, managed_instance_version_capability.supported_editions)
 
     # Find family level capability, based on requested sku properties
     family_capability = _find_family_capability(sku, edition_capability.supported_families)
