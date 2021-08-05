@@ -236,11 +236,9 @@ def is_available(status):
     '''
     Returns True if the capability status is available (including default).
     There are four capability statuses:
-    VISIBLE: customer can see the slo but cannot use it
-    AVAILABLE: customer can see the slo and can use it
-    DEFAULT: customer can see the slo and can use it
-    DISABLED: removes the slo from the response, customer will never see it
-
+        VISIBLE: customer can see the slo but cannot use it
+        AVAILABLE: customer can see the slo and can use it
+        DEFAULT: customer can see the slo and can use it
     Thus, only check whether status is not VISIBLE would return the correct value.
     '''
 
