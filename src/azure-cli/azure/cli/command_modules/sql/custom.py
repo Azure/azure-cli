@@ -197,13 +197,13 @@ def _get_default_capability(capabilities, fallback_predicate=None):
     logger.debug('_get_default_capability: %s', capabilities)
 
     # Get default capability
-    r = next((c for c in capabilities if c.status == CapabilityStatus.default), None)
+    r = next((c for c in capabilities if c.status == CapabilityStatus.DEFAULT), None)
     if r:
         logger.debug('_get_default_capability found default: %s', r)
         return r
 
     # No default capability, so fallback to first available capability
-    r = next((c for c in capabilities if c.status == CapabilityStatus.available), None)
+    r = next((c for c in capabilities if c.status == CapabilityStatus.VISIBLE), None)
     if r:
         logger.debug('_get_default_capability found available: %s', r)
         return r
@@ -237,7 +237,7 @@ def is_available(status):
     Returns True if the capability status is available (including default).
     '''
 
-    return status not in (CapabilityStatus.visible, CapabilityStatus.visible.value)
+    return status not in (CapabilityStatus.VISIBLE)
 
 
 def _filter_available(capabilities):
@@ -859,14 +859,14 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=Fa
     # to find a matching capability and copy the sku from there.
 
     # Get location capability
-    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_editions)
+    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.SUPPORTED_EDITIONS)
 
     # Get default server version capability
     server_version_capability = _get_default_server_version(loc_capability)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(
-        sku, server_version_capability.supported_editions)
+        sku, server_version_capability.SUPPORTED_EDITIONS)
 
     # Find performance level capability, based on requested sku properties
     performance_level_capability = _find_performance_level_capability(
@@ -1129,7 +1129,7 @@ def db_create_replica(
     partner_database_name = partner_database_name or database_name
 
     # Set create mode
-    kwargs['create_mode'] = CreateMode.SECONDARY.value
+    kwargs['create_mode'] = CreateMode.SECONDARY
 
     # Some sku properties may be filled in from the command line. However
     # the sku tier must be the same as the source tier, so it is grabbed
@@ -1218,7 +1218,7 @@ def db_restore(
 
     kwargs['restore_point_in_time'] = restore_point_in_time
     kwargs['source_database_deletion_date'] = source_database_deletion_date
-    kwargs['create_mode'] = CreateMode.RESTORE.value if is_deleted else CreateMode.POINT_IN_TIME_RESTORE.value
+    kwargs['create_mode'] = CreateMode.RESTORE if is_deleted else CreateMode.POINT_IN_TIME_RESTORE
 
     # Check backup storage redundancy configurations
     location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
@@ -1263,7 +1263,7 @@ def db_failover(
 
     # If a replica is primary, then it has 1 or more links (to its secondaries).
     # If a replica is secondary, then it has exactly 1 link (to its primary).
-    primary_link = next((link for link in links if link.partner_role == FailoverGroupReplicationRole.primary), None)
+    primary_link = next((link for link in links if link.partner_role == FailoverGroupReplicationRole.PRIMARY), None)
     if not primary_link:
         # No link to a primary, so this must already be a primary. Do nothing.
         return
@@ -1308,7 +1308,7 @@ def db_list_capabilities(
         show_details = []
 
     # Get capabilities tree from server
-    capabilities = client.list_by_location(location, CapabilityGroup.supported_editions)
+    capabilities = client.list_by_location(location, CapabilityGroup.SUPPORTED_EDITIONS)
 
     # Get subtree related to databases
     editions = _get_default_server_version(capabilities).supported_editions
@@ -1459,7 +1459,7 @@ def _pad_sas_key(
     Adds ? prefix if it wasn't included.
     '''
 
-    if storage_key_type.lower() == StorageKeyType.shared_access_key.value.lower():  # pylint: disable=no-member
+    if storage_key_type.lower() == StorageKeyType.SHARED_ACCESS_KEY.value.lower():  # pylint: disable=no-member
         if storage_key[0] != '?':
             storage_key = '?' + storage_key
     return storage_key
@@ -1529,10 +1529,10 @@ def db_update(
     # actually ignores the value of service objective name (!!). We are trying to protect the CLI
     # user from this unintuitive behavior.
     if (elastic_pool_id and service_objective and
-            service_objective != ServiceObjectiveName.elastic_pool.value):
+            service_objective != ServiceObjectiveName.ELASTIC_POOL):
         raise CLIError('If elastic pool is specified, service objective must be'
                        ' unspecified or equal \'{}\'.'.format(
-                           ServiceObjectiveName.elastic_pool.value))
+                           ServiceObjectiveName.ELASTIC_POOL))
 
     # Update both elastic pool and sku. The service treats elastic pool and sku properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
@@ -1756,15 +1756,15 @@ def _check_audit_policy_state(
 
 
 def _is_audit_policy_state_enabled(state):
-    return _check_audit_policy_state(state, BlobAuditingPolicyState.enabled.value)
+    return _check_audit_policy_state(state, BlobAuditingPolicyState.ENABLED)
 
 
 def _is_audit_policy_state_disabled(state):
-    return _check_audit_policy_state(state, BlobAuditingPolicyState.disabled.value)
+    return _check_audit_policy_state(state, BlobAuditingPolicyState.DISABLED)
 
 
 def _is_audit_policy_state_none_or_disabled(state):
-    return state is None or _check_audit_policy_state(state, BlobAuditingPolicyState.disabled.value)
+    return state is None or _check_audit_policy_state(state, BlobAuditingPolicyState.DISABLED)
 
 
 def _get_diagnostic_settings_url(
@@ -1868,18 +1868,18 @@ def _audit_policy_show(
             server_name=server_name,
             database_name=database_name)
 
-    audit_policy.blob_storage_target_state = BlobAuditingPolicyState.disabled
-    audit_policy.event_hub_target_state = BlobAuditingPolicyState.disabled
-    audit_policy.log_analytics_target_state = BlobAuditingPolicyState.disabled
+    audit_policy.blob_storage_target_state = BlobAuditingPolicyState.DISABLED
+    audit_policy.event_hub_target_state = BlobAuditingPolicyState.DISABLED
+    audit_policy.log_analytics_target_state = BlobAuditingPolicyState.DISABLED
 
     # If audit policy's state is disabled there is nothing to do
     if _is_audit_policy_state_disabled(audit_policy.state):
         return audit_policy
 
     if not audit_policy.storage_endpoint:
-        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.disabled
+        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.DISABLED
     else:
-        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.enabled
+        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.ENABLED
 
     # If 'is_azure_monitor_target_enabled' is false there is no reason to request diagnostic settings
     if not audit_policy.is_azure_monitor_target_enabled:
@@ -1897,7 +1897,7 @@ def _audit_policy_show(
     # Initialize azure monitor properties
     if audit_diagnostic_setting is not None:
         if audit_diagnostic_setting.workspace_id is not None:
-            audit_policy.log_analytics_target_state = BlobAuditingPolicyState.enabled
+            audit_policy.log_analytics_target_state = BlobAuditingPolicyState.ENABLED
             audit_policy.log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
 
         if audit_diagnostic_setting.event_hub_authorization_rule_id is not None:
@@ -2924,7 +2924,7 @@ def restore_long_term_retention_backup(
         server_name=target_server_name,
         resource_group_name=target_resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP.value
+    kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
     kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
 
@@ -3238,7 +3238,7 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku, allow_reset
     # to find a matching capability and copy the sku from there.
 
     # Get location capability
-    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_elastic_pool_editions)
+    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.SUPPORTED_ELASTIC_POOL_EDITIONS)
 
     # Get default server version capability
     server_version_capability = _get_default_server_version(loc_capability)
@@ -3376,10 +3376,10 @@ def elastic_pool_list_capabilities(
         dtu = int(dtu)
 
     # Get capabilities tree from server
-    capabilities = client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
+    capabilities = client.list_by_location(location, CapabilityGroup.SUPPORTED_ELASTIC_POOL_EDITIONS)
 
     # Get subtree related to elastic pools
-    editions = _get_default_server_version(capabilities).supported_elastic_pool_editions
+    editions = _get_default_server_version(capabilities).SUPPORTED_ELASTIC_POOL_EDITIONS
 
     # Filter by edition
     if edition:
@@ -3497,15 +3497,15 @@ def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
 
     # Get location capability
     loc_capability = _get_location_capability(
-        cli_ctx, location, CapabilityGroup.supported_managed_instance_versions)
+        cli_ctx, location, CapabilityGroup.SUPPORTED_MANAGED_INSTANCE_VERSIONS)
 
     # Get default server version capability
     managed_instance_version_capability = _get_default_capability(
-        loc_capability.supported_managed_instance_versions)
+        loc_capability.SUPPORTED_MANAGED_INSTANCE_VERSIONS)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(
-        sku, managed_instance_version_capability.supported_instance_pool_editions)
+        sku, managed_instance_version_capability.SUPPORTED_INSTANCE_POOL_EDITIONS)
 
     # Find family level capability, based on requested sku properties
     _find_family_capability(
@@ -3554,13 +3554,13 @@ def server_create(
 
     if enable_public_network is not None:
         kwargs['public_network_access'] = (
-            ServerNetworkAccessFlag.enabled if enable_public_network
-            else ServerNetworkAccessFlag.disabled)
+            ServerNetworkAccessFlag.ENABLED if enable_public_network
+            else ServerNetworkAccessFlag.DISABLED)
 
     if restrict_outbound_network_access is not None:
         kwargs['restrict_outbound_network_access'] = (
-            ServerNetworkAccessFlag.enabled if restrict_outbound_network_access
-            else ServerNetworkAccessFlag.disabled)
+            ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
+            else ServerNetworkAccessFlag.DISABLED)
 
     kwargs['key_id'] = key_id
 
@@ -3658,13 +3658,13 @@ def server_update(
 
     if enable_public_network is not None:
         instance.public_network_access = (
-            ServerNetworkAccessFlag.enabled if enable_public_network
-            else ServerNetworkAccessFlag.disabled)
+            ServerNetworkAccessFlag.ENABLED if enable_public_network
+            else ServerNetworkAccessFlag.DISABLED)
 
     if restrict_outbound_network_access is not None:
         instance.public_network_access = (
-            ServerNetworkAccessFlag.enabled if restrict_outbound_network_access
-            else ServerNetworkAccessFlag.disabled)
+            ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
+            else ServerNetworkAccessFlag.DISABLED)
 
     instance.primary_user_assigned_identity_id = (
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
@@ -4167,13 +4167,13 @@ def _find_managed_instance_sku_from_capabilities(
     # to find a matching capability and copy the sku from there.
 
     # Get location capability
-    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_managed_instance_versions)
+    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.SUPPORTED_MANAGED_INSTANCE_VERSIONS)
 
     # Get default server version capability
-    managed_instance_version_capability = _get_default_capability(loc_capability.supported_managed_instance_versions)
+    managed_instance_version_capability = _get_default_capability(loc_capability.SUPPORTED_MANAGED_INSTANCE_VERSIONS)
 
     # Find edition capability, based on requested sku properties
-    edition_capability = _find_edition_capability(sku, managed_instance_version_capability.supported_editions)
+    edition_capability = _find_edition_capability(sku, managed_instance_version_capability.SUPPORTED_EDITIONS)
 
     # Find family level capability, based on requested sku properties
     family_capability = _find_family_capability(sku, edition_capability.supported_families)
@@ -4625,7 +4625,7 @@ def managed_db_restore(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.POINT_IN_TIME_RESTORE.value
+    kwargs['create_mode'] = CreateMode.POINT_IN_TIME_RESTORE
 
     if deleted_time:
         kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
@@ -5028,7 +5028,7 @@ def restore_long_term_retention_mi_backup(
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP.value
+    kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
 
     return client.begin_create_or_update(
@@ -5059,7 +5059,7 @@ def managed_db_log_replay_start(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.RESTORE_EXTERNAL_BACKUP.value
+    kwargs['create_mode'] = CreateMode.RESTORE_EXTERNAL_BACKUP
 
     if auto_complete and not last_backup_name:
         raise CLIError('Please specify a last backup name when using auto complete flag.')
