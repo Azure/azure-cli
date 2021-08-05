@@ -1376,7 +1376,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create managed private endpoint
         self.cmd(
-            'az synapse  managed-private-endpoints create --workspace-name {workspace} --managed-private-endpoint-name {name} --private-Link-Resource-Id {privateLinkResourceId} --group-Id {groupId}',
+            'az synapse  managed-private-endpoints create --workspace-name {workspace} --pe-name {name} --resource-id {privateLinkResourceId} --group-Id {groupId}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -1387,7 +1387,7 @@ class SynapseScenarioTests(ScenarioTest):
             time.sleep(90)
         # get managed private endpoint
         self.cmd(
-            'az synapse  managed-private-endpoints show --workspace-name {workspace} --managed-private-endpoint-name {name}',
+            'az synapse  managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -1401,10 +1401,10 @@ class SynapseScenarioTests(ScenarioTest):
         
         # delete managed private endpoint
         self.cmd(
-            'az synapse  managed-private-endpoints delete --workspace-name {workspace} --managed-private-endpoint-name {name} -y')
+            'az synapse  managed-private-endpoints delete --workspace-name {workspace} --pe-name {name} -y')
         if self.is_live or self.in_recording:
             import time
             time.sleep(60)    
         self.cmd(
-            'az synapse managed-private-endpoints show --workspace-name {workspace} --managed-private-endpoint-name {name}',
+            'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
