@@ -120,6 +120,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse spark pool show --name {spark-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
+    @record_only()
     @unittest.skip('(keyvaultfailure) KeyVault set-policy failed with Bad Request')
     def test_workspace_with_cmk(self):
         self.kwargs.update({
