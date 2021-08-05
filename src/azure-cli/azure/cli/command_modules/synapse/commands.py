@@ -484,7 +484,7 @@ def load_command_table(self, _):
 
     # Data Plane Commands --Managed private endpoints operations
     with self.command_group('synapse managed-private-endpoints', synapse_managed_private_endpoints_sdk,
-                             custom_command_type=get_custom_sdk('managedprivateendpoints', None)) as g:
+                            custom_command_type=get_custom_sdk('managedprivateendpoints', None)) as g:
         g.custom_show_command('show', 'get_Managed_private_endpoints')
         g.custom_command('create', 'create_Managed_private_endpoints', supports_no_wait=True)
         g.custom_command('list', 'list_Managed_private_endpoints')
