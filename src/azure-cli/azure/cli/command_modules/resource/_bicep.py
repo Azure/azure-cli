@@ -124,6 +124,16 @@ def ensure_bicep_installation(release_tag=None, stdout=True):
         raise ClientRequestError(f"Error while attempting to download Bicep CLI: {err}")
 
 
+def remove_bicep_installation():
+    system = platform.system()
+    installation_path = _get_bicep_installation_path(system)
+
+    if os.path.exists(installation_path):
+        os.remove(installation_path)
+    if os.path.exists(_bicep_version_check_file_path):
+        os.remove(_bicep_version_check_file_path)
+
+
 def is_bicep_file(file_path):
     return file_path.lower().endswith(".bicep")
 

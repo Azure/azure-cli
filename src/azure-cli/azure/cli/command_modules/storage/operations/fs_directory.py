@@ -6,6 +6,7 @@
 """Custom operations for storage file datalake"""
 
 from azure.cli.core.profiles import ResourceType
+
 from knack.util import todict
 
 

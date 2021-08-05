@@ -124,7 +124,8 @@ class IndeterminateStandardOut(ProgressViewBase):
             pass
 
     def clear(self):
-        self.out.write('%s\r' % EMPTY_LINE)
+        self.spinner.clear()
+        self.out.flush()
 
     def flush(self):
         self.out.flush()

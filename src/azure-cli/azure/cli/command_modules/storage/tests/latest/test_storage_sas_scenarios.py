@@ -151,3 +151,111 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob exists -c {} -n {} --account-name {} --sas-token {}'
                  .format(container, blob_name, storage_account, sas),
                  checks=JMESPathCheck('exists', False))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(hns=True, kind='StorageV2')
+    def test_storage_fs_sas_scenario(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        account_info = self.get_account_info(resource_group, storage_account)
+        file_system = self.create_file_system(account_info)
+
+        self.kwargs.update({
+            'expiry': expiry,
+            'account': storage_account,
+            'fs': file_system,
+            'local_file': self.create_temp_file(128, full_random=False),
+            'file': self.create_random_name('file', 16),
+            'directory': self.create_random_name('dir', 16)
+        })
+
+        # ----account key----
+        # test sas-token for a file system
+        fs_sas = self.storage_cmd('storage fs generate-sas -n {} --https-only --permissions dlrwopm --expiry {} -otsv',
+                                  account_info, file_system, expiry).output.strip()
+        self.kwargs['fs_sas'] = fs_sas
+
+        self.cmd('storage fs directory list -f {fs} --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 0)
+        ])
+        self.cmd('storage fs directory create -f {fs} -n {directory} --account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs directory list -f {fs} --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        self.cmd('storage fs file list -f {fs} --path {directory} --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 0)
+        ])
+        self.cmd('storage fs file upload -f {fs} -s "{local_file}" -p {directory}/{file} '
+                 '--account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs file list -f {fs} --path {directory} --account-name {account} --sas-token "{fs_sas}"',
+                 checks=[self.check('length(@)', 1)])
+
+        self.cmd('storage fs file move -f {fs} --new-path {fs}/{file} -p {directory}/{file} '
+                 '--account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs file list -f {fs} --path {directory} --exclude-dir --account-name {account} '
+                 '--sas-token "{fs_sas}"', checks=[self.check('length(@)', 0)])
+
+        self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 1)])
+
+        # ----connection string----
+        # test sas-token for a file system
+        connection_str = self.cmd('storage account show-connection-string -n {account}  --query connectionString '
+                                  '-otsv').output.strip()
+        self.kwargs['con_str'] = connection_str
+
+        sas = self.cmd('storage fs generate-sas -n {fs} --https-only --permissions dlrwop '
+                       '--connection-string {con_str} --expiry {expiry} -otsv').output.strip()
+        self.kwargs['fs_sas'] = sas
+
+        self.kwargs['new_dir'] = self.create_random_name('ndir', 16)
+        self.kwargs['new_file'] = self.create_random_name('nfile', 16)
+
+        self.cmd('storage fs directory list -f {fs} --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('storage fs directory create -f {fs} -n {new_dir} --account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs directory list -f {fs} --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 2)
+        ])
+
+        self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('storage fs file upload -f {fs} -s "{local_file}" -p {new_file} '
+                 '--account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 2)
+        ])
+
+        # ----stored access policy----
+        # test sas-token for a file system
+        self.kwargs['policy'] = self.create_random_name(prefix='policy', length=16)
+        self.cmd('storage container policy create -n {policy} -c {fs} --permissions dlrw '
+                 '--connection-string {con_str} --expiry {expiry} -otsv')
+
+        sas = self.cmd('storage fs generate-sas -n {fs} --https-only --policy-name {policy} '
+                       '--connection-string {con_str} -otsv').output.strip()
+        self.kwargs['fs_sas'] = sas
+
+        self.kwargs['new_dir1'] = self.create_random_name('ndir1', 16)
+        self.kwargs['new_file1'] = self.create_random_name('nfile1', 16)
+
+        self.cmd('storage fs directory list -f {fs} --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('storage fs directory create -f {fs} -n {new_dir1} --account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs directory list -f {fs} --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 3)
+        ])
+
+        self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('storage fs file upload -f {fs} -s "{local_file}" -p {new_file1} '
+                 '--account-name {account} --sas-token "{fs_sas}"')
+        self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
+            self.check('length(@)', 3)
+        ])
