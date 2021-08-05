@@ -237,7 +237,7 @@ def is_available(status):
     Returns True if the capability status is available (including default).
     '''
 
-    return status not in (CapabilityStatus.VISIBLE)
+    return status not in (CapabilityStatus.VISIBLE, CapabilityStatus.AVAILABLE)
 
 
 def _filter_available(capabilities):
