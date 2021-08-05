@@ -244,7 +244,7 @@ def is_available(status):
     Thus, only check whether status is not VISIBLE would return the correct value.
     '''
 
-    return status not in (CapabilityStatus.VISIBLE)
+    return status not in CapabilityStatus.VISIBLE
 
 
 def _filter_available(capabilities):
