@@ -67,7 +67,7 @@ def load_command_table(self, _):
     with self.command_group('bot', botOperations_commandType) as g:
         g.custom_command('update', 'update')
 
-    for channel in ['facebook', 'email', 'msteams', 'skype', 'kik', 'directline', 'telegram', 'sms', 'slack']:
+    for channel in ['facebook', 'email', 'msteams', 'skype', 'kik', 'directline', 'telegram', 'sms', 'slack', 'telephony']:
         with self.command_group('bot {}'.format(channel), channelOperationsCreate_commandType, is_preview=True) as g:
             g.command('create', '{}_create'.format(channel))
             if channel == 'directline':

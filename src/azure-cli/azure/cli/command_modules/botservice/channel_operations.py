@@ -198,7 +198,7 @@ def slack_create(client, resource_group_name, resource_name, client_id, client_s
 
 class ChannelOperations:  # pylint: disable=too-few-public-methods
     def __init__(self):
-        for channel in ['facebook', 'email', 'msTeams', 'skype', 'kik', 'webChat', 'directLine', 'telegram', 'sms', 'slack']:  # pylint: disable=line-too-long
+        for channel in ['facebook', 'email', 'msTeams', 'skype', 'kik', 'webChat', 'directLine', 'telegram', 'sms', 'slack', 'telephony']:  # pylint: disable=line-too-long
             channelName = '{}Channel'.format(channel)
             channelName = channelName[:1].upper() + channelName[1:]
 
