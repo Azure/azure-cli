@@ -685,7 +685,7 @@ def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, de
 
 def set_functionapp(cmd, resource_group_name, name, **kwargs):
     instance = kwargs['parameters']
-    if 'function' not in instance.kind:
+    if not instance or 'function' not in instance.kind:
         raise ValidationError('Not a function app to update')
     client = web_client_factory(cmd.cli_ctx)
     return client.web_apps.begin_create_or_update(resource_group_name, name, site_envelope=instance)
