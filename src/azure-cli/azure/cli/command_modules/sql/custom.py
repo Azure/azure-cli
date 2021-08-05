@@ -203,7 +203,7 @@ def _get_default_capability(capabilities, fallback_predicate=None):
         return r
 
     # No default capability, so fallback to first available capability
-    r = next((c for c in capabilities if c.status == CapabilityStatus.VISIBLE), None)
+    r = next((c for c in capabilities if c.status == CapabilityStatus.AVAILABLE), None)
     if r:
         logger.debug('_get_default_capability found available: %s', r)
         return r
@@ -235,9 +235,16 @@ def _assert_capability_available(capability):
 def is_available(status):
     '''
     Returns True if the capability status is available (including default).
+    There are four capability statuses:
+    VISIBLE: customer can see the slo but cannot use it
+    AVAILABLE: customer can see the slo and can use it
+    DEFAULT: customer can see the slo and can use it
+    DISABLED: removes the slo from the response, customer will never see it
+
+    Thus, only check whether status is not VISIBLE would return the correct value.
     '''
 
-    return status not in (CapabilityStatus.VISIBLE, CapabilityStatus.AVAILABLE)
+    return status is not CapabilityStatus.VISIBLE
 
 
 def _filter_available(capabilities):
