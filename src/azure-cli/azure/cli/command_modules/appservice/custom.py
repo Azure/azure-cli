@@ -634,6 +634,8 @@ def update_webapp(instance, client_affinity_enabled=None, https_only=None):
 
 
 def update_functionapp(cmd, instance, plan=None, force=False):
+    if not instance or 'function' not in instance.kind:
+        raise ValidationError('Not a function app to update')
     client = web_client_factory(cmd.cli_ctx)
     if plan is not None:
         if is_valid_resource_id(plan):
@@ -685,8 +687,6 @@ def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, de
 
 def set_functionapp(cmd, resource_group_name, name, **kwargs):
     instance = kwargs['parameters']
-    if not instance or 'function' not in instance.kind:
-        raise ValidationError('Not a function app to update')
     client = web_client_factory(cmd.cli_ctx)
     return client.web_apps.begin_create_or_update(resource_group_name, name, site_envelope=instance)
 
