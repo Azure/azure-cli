@@ -258,6 +258,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
             self.__empty_wwwroot_folder_except_for_node_modules()
 
         with open(os.path.realpath(os.path.expanduser(zip_file_path)), 'rb') as fs:
+            print(zip_file_path)
             zip_content = fs.read()
             self.__logger.info('Source code read, uploading to Kudu.')
             r = requests.post(zip_url, data=zip_content, headers=headers)

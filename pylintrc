@@ -1,21 +1,38 @@
 [MASTER]
-ignore-patterns=test_*,azure_devops_build_*
+ignore=tests,generated,vendored_sdks,privates
+ignore-patterns=test.*,azure_devops_build.*
 reports=no
 
 [MESSAGES CONTROL]
 # For all codes, run 'pylint --list-msgs' or go to 'https://pylint.readthedocs.io/en/latest/reference_guide/features.html'
-# locally-disabled: Warning locally suppressed using disable-msg
 # cyclic-import: because of https://github.com/PyCQA/pylint/issues/850
+# import-outside-toplevel: Lazy import to improve performance
+# locally-disabled: Warning locally suppressed using disable-msg
 # too-many-arguments: Due to the nature of the CLI many commands have large arguments set which reflect in large arguments set in corresponding methods.
 disable=
-    missing-docstring,
-    locally-disabled,
-    fixme,
+    arguments-out-of-order,
+    bad-option-value,
+    consider-using-with,
     cyclic-import,
-    too-many-arguments,
-    invalid-name,
     duplicate-code,
-    bad-option-value
+    fixme,
+    import-outside-toplevel,
+    inconsistent-return-statements,
+    invalid-name,
+    invalid-str-returned,
+    locally-disabled,
+    missing-docstring,
+    missing-kwoa,
+    no-member,
+    no-value-for-parameter,
+    raise-missing-from,
+    subprocess-run-check,
+    super-with-arguments,
+    too-many-arguments,
+    too-many-function-args,
+    too-many-lines,
+    using-constant-test,
+    wrong-import-order,
 
 [FORMAT]
 max-line-length=120

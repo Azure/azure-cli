@@ -41,6 +41,21 @@ def aks_list_table_format(results):
     return [_aks_table_format(r) for r in results]
 
 
+def aks_run_command_result_format(cmdResult):
+    result = OrderedDict()
+    if cmdResult['provisioningState'] == "Succeeded":
+        result['exit code'] = cmdResult['exitCode']
+        result['logs'] = cmdResult['logs']
+        return result
+    if cmdResult['provisioningState'] == "Failed":
+        result['provisioning state'] = cmdResult['provisioningState']
+        result['reason'] = cmdResult['reason']
+        return result
+    result['provisioning state'] = cmdResult['provisioningState']
+    result['started At'] = cmdResult['startedAt']
+    return result
+
+
 def osa_list_table_format(results):
     """"Format a list of OpenShift managed clusters as summary results for display with "-o table"."""
     return [_osa_table_format(r) for r in results]
@@ -116,7 +131,8 @@ def aks_versions_table_format(result):
     }""")
 
     # use ordered dicts so headers are predictable
-    results = parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
+    results = parsed.search(result, Options(
+        dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
     return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
 
 
@@ -135,7 +151,8 @@ def _custom_functions(preview_versions):
             """Custom JMESPath `sort_versions` function that sorts an array of strings as software versions."""
             try:
                 return sorted(versions, key=version_to_tuple)
-            except (TypeError, ValueError):  # if it wasn't sortable, return the input so the pipeline continues
+            # if it wasn't sortable, return the input so the pipeline continues
+            except (TypeError, ValueError):
                 return versions
 
         @functions.signature({'types': ['array']})

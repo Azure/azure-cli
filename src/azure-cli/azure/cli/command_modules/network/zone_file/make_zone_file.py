@@ -24,9 +24,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # pylint: skip-file
-from __future__ import print_function
-
-
 def make_zone_file(json_obj):
     """
     Generate the DNS zonefile, given a json-encoded description of the

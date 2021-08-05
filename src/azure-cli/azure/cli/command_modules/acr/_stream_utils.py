@@ -78,6 +78,7 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
     if not no_format:
         colorama.init()
 
+    log_exist = False
     stream = BytesIO()
     metadata = {}
     start = 0
@@ -92,10 +93,18 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
     # Try to get the initial properties so there's no waiting.
     # If the storage call fails, we'll just sleep and try again after.
     try:
-        props = blob_service.get_blob_properties(
+        # Need to call "exists" API to prevent storage SDK logging BlobNotFound error
+        log_exist = blob_service.exists(
             container_name=container_name, blob_name=blob_name)
-        metadata = props.metadata
-        available = props.properties.content_length
+
+        if log_exist:
+            props = blob_service.get_blob_properties(
+                container_name=container_name, blob_name=blob_name)
+            metadata = props.metadata
+            available = props.properties.content_length
+        else:
+            # Wait a little bit before checking the existence again
+            time.sleep(1)
     except (AttributeError, AzureHttpError):
         pass
 
@@ -140,10 +149,14 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
                 return
 
         try:
-            props = blob_service.get_blob_properties(
-                container_name=container_name, blob_name=blob_name)
-            metadata = props.metadata
-            available = props.properties.content_length
+            if log_exist:
+                props = blob_service.get_blob_properties(
+                    container_name=container_name, blob_name=blob_name)
+                metadata = props.metadata
+                available = props.properties.content_length
+            else:
+                log_exist = blob_service.exists(
+                    container_name=container_name, blob_name=blob_name)
         except AzureHttpError as ae:
             if ae.status_code != 404:
                 raise CLIError(ae)

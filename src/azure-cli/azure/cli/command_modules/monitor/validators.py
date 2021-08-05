@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+
 from knack.util import CLIError
 
 
@@ -138,6 +140,68 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
     return _validator
 
 
+def validate_metrics_alert_dimension(namespace):
+    from azure.cli.command_modules.monitor.grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion
+    for keyword, value in dim_op_conversion.items():
+        if namespace.operator == value:
+            namespace.operator = keyword
+
+
+def validate_metrics_alert_condition(namespace):
+    from azure.cli.command_modules.monitor.grammar.metric_alert.MetricAlertConditionValidator import op_conversion, \
+        agg_conversion, sens_conversion
+    for keyword, value in agg_conversion.items():
+        if namespace.aggregation == value:
+            namespace.aggregation = keyword
+            break
+    for keyword, value in op_conversion.items():
+        if namespace.operator == value:
+            namespace.operator = keyword
+            break
+
+    if namespace.condition_type == 'static':
+        if namespace.threshold is None:
+            raise RequiredArgumentMissingError('Parameter --threshold is required for static threshold.')
+        if namespace.operator not in ('=', '!=', '>', '>=', '<', '<='):
+            raise InvalidArgumentValueError('Parameter --operator {} is invalid for static threshold.'.format(
+                op_conversion[namespace.operator]
+            ))
+    elif namespace.condition_type == 'dynamic':
+        if namespace.operator not in ('>', '<', '><'):
+            raise InvalidArgumentValueError('Parameter --operator {} is invalid for dynamic threshold.'.format(
+                op_conversion[namespace.operator]
+            ))
+        if namespace.alert_sensitivity is None:
+            raise RequiredArgumentMissingError('Parameter --sensitivity is required for dynamic threshold.')
+        for keyword, value in sens_conversion.items():
+            if namespace.alert_sensitivity == value:
+                namespace.alert_sensitivity = keyword
+                break
+
+        if namespace.number_of_evaluation_periods is None:
+            setattr(namespace, 'number_of_evaluation_periods', 4)
+
+        if namespace.number_of_evaluation_periods < 1 or namespace.number_of_evaluation_periods > 6:
+            raise InvalidArgumentValueError('Parameter --num-periods {} should in range 1-6.'.format(
+                namespace.number_of_evaluation_periods
+            ))
+
+        if namespace.min_failing_periods_to_alert is None:
+            setattr(namespace, 'min_failing_periods_to_alert', min(4, namespace.number_of_evaluation_periods))
+
+        if namespace.min_failing_periods_to_alert < 1 or namespace.min_failing_periods_to_alert > 6:
+            raise InvalidArgumentValueError('Parameter --num-violations {} should in range 1-6.'.format(
+                namespace.min_failing_periods_to_alert
+            ))
+
+        if namespace.min_failing_periods_to_alert > namespace.number_of_evaluation_periods:
+            raise InvalidArgumentValueError(
+                'Parameter --num-violations {} should be less than or equal to parameter --num-periods {}.'.format(
+                    namespace.min_failing_periods_to_alert, namespace.number_of_evaluation_periods))
+    else:
+        raise NotImplementedError()
+
+
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
@@ -234,6 +298,8 @@ def process_action_group_detail_for_creation(namespace):
         'azure_function_receivers': [r for r in receivers if isinstance(r, AzureFunctionReceiver)],
         'tags': ns.get('tags') or None
     }
+    if hasattr(namespace, 'tags'):
+        del namespace.tags
 
     ns['action_group'] = ActionGroupResource(**action_group_resource_properties)
 

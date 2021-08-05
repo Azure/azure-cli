@@ -54,4 +54,7 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
 def cf_network(cli_ctx):
     from azure.mgmt.network import NetworkManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, NetworkManagementClient, api_version="2018-08-01")
+    from azure.cli.core.profiles import AD_HOC_API_VERSIONS, ResourceType
+    return get_mgmt_service_client(cli_ctx, NetworkManagementClient,
+                                   api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]
+                                   ['container_network'])

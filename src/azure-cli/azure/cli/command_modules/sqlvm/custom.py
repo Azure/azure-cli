@@ -127,13 +127,10 @@ def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None
 def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_virtual_machine_group_name,
                             resource_group_name, availability_group_name, ip_address, subnet_resource_id,
                             load_balancer_resource_id, probe_port, sql_virtual_machine_instances, port=1433,
-                            public_ip_address_resource_id=None, vnet_name=None):
+                            public_ip_address_resource_id=None, vnet_name=None):  # pylint: disable=unused-argument
     '''
     Creates an availability group listener
     '''
-    # Not using vnet, just for validation
-    vnet_name = vnet_name
-
     # Create the private ip address
     private_ip_object = PrivateIPAddress(ip_address=ip_address,
                                          subnet_resource_id=subnet_resource_id
@@ -170,7 +167,7 @@ def aglistener_update(instance, sql_virtual_machine_instances=None):
 
 
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
-def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql_server_license_type,
+def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None,
                  location=None, sql_image_sku=None, enable_auto_patching=None, sql_management_mode="LightWeight",
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,

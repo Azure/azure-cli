@@ -4,17 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 import json
+import logging
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
-                                            Notebook)
+                                            NotebookResource)
 from azure.cli.core.util import sdk_no_wait, CLIError
-from .sparkpool import get_spark_pool
-from .workspace import get_resource_group_by_workspace_name
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
-                               cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_client_bigdatapool_factory,
-                               cf_synapse_client_workspace_factory)
+                               cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
@@ -214,13 +212,10 @@ def delete_data_flow(cmd, workspace_name, data_flow_name, no_wait=False):
 def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_name, spark_pool_name=None,
                               executor_size="Small", executor_count=2, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
+    spark_pool_client = cf_synapse_spark_pool(cmd.cli_ctx, workspace_name)
     if spark_pool_name is not None:
         endpoint = '{}{}{}'.format("https://", workspace_name, cmd.cli_ctx.cloud.suffixes.synapse_analytics_endpoint)
-        resource_group_name = get_resource_group_by_workspace_name(cmd,
-                                                                   cf_synapse_client_workspace_factory(cmd.cli_ctx),
-                                                                   workspace_name)
-        spark_pool_info = get_spark_pool(cmd, cf_synapse_client_bigdatapool_factory(cmd.cli_ctx), resource_group_name,
-                                         workspace_name, spark_pool_name)
+        spark_pool_info = spark_pool_client.get(spark_pool_name)
         metadata = definition_file['metadata']
         options = {}
         options['auth'] = {'type': 'AAD',
@@ -245,7 +240,7 @@ def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_nam
                                                                          executor_memory=options['memory'],
                                                                          executor_cores=options['cores'],
                                                                          num_executors=executor_count)
-    properties = Notebook.from_dict(definition_file)
+    properties = NotebookResource(name=notebook_name, properties=definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_notebook,
                        notebook_name, properties, polling=True)
 
@@ -261,13 +256,6 @@ def get_notebook(cmd, workspace_name, notebook_name):
 
 
 def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
-    def write_to_file(notebook, path):
-        try:
-            with open(path, 'w') as f:
-                json.dump(notebook.properties.as_dict(), f, indent=4)
-        except IOError:
-            raise CLIError('Unable to export to file: {}'.format(path))
-
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
     if notebook_name is not None:
         notebook = client.get_notebook(notebook_name)
@@ -280,6 +268,77 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
             path = os.path.join(output_folder, notebook.name + '.ipynb')
             print(notebook.properties.as_dict())
             write_to_file(notebook, path)
+
+
+def metadata_processing(notebook_properties, displayedWidgets):
+    synapseWidgetNotebookMetadataVersion = '0.1'
+    metadata = {}
+    notebook_properties_metadata = {}
+    for key in list(notebook_properties.keys()):
+        if key == 'metadata':
+            notebook_properties_metadata = notebook_properties['metadata']
+
+    if notebook_properties_metadata is None:
+        return metadata, displayedWidgets
+
+    for elementkey in list(notebook_properties_metadata.keys()):
+        if elementkey == 'language_info':
+            if notebook_properties_metadata['language_info'] and \
+                    'codemirror_mode' in notebook_properties_metadata['language_info']:
+                notebook_properties_metadata['language_info'].pop('codemirror_mode')
+            metadata['language_info'] = notebook_properties_metadata['language_info']
+        elif elementkey == 'description':
+            metadata['description'] = notebook_properties_metadata['description']
+        elif elementkey == 'saveOutput':
+            metadata['save_output'] = notebook_properties_metadata['saveOutput']
+        elif elementkey == 'kernelspec':
+            metadata['kernelspec'] = notebook_properties_metadata['kernelspec']
+        elif elementkey == 'synapse_widget' and \
+                'state' in notebook_properties_metadata['synapse_widget']:
+            for ekey in list(notebook_properties_metadata['synapse_widget']['state'].keys()):
+                for i in reversed(range(len(displayedWidgets))):
+                    if displayedWidgets[i]['widget_id'] == ekey:
+                        displayedWidgets.pop(i)
+            metadata['synapse_widget'] = notebook_properties_metadata['synapse_widget']
+            metadata['synapse_widget']['version'] = synapseWidgetNotebookMetadataVersion
+    return metadata, displayedWidgets
+
+
+def write_to_file(notebook, path):
+    try:
+        notebook_properties = notebook.properties.as_dict()
+        livyStatementMetaOutputContentType = 'application/vnd.livy.statement-meta+json'
+        synapseWidgetViewOutputContentType = 'application/vnd.synapse.widget-view+json'
+        notebook_result = {}
+        displayedWidgets = []
+        notebook_result['nbformat'] = 4
+        notebook_result['nbformat_minor'] = 2
+        for cell in notebook_properties['cells']:
+            if cell['cell_type'] == 'code' and cell['outputs']:
+                for output in cell['outputs']:
+                    if output['output_type'] == 'display_data' and \
+                            synapseWidgetViewOutputContentType in output['data']:
+                        displayedWidgets.append(output["data"]["application/vnd.synapse.widget-view+json"])
+
+        metadata_results, displayedWidgets_results = \
+            metadata_processing(notebook_properties, displayedWidgets)
+
+        if len(displayedWidgets_results) > 0:
+            logging.info('Detected widget with missing data.')
+
+        for cell in notebook_properties['cells']:
+            if cell['cell_type'] == 'code' and cell['outputs']:
+                for output in cell['outputs']:
+                    if output['output_type'] == 'display_data' and output['data'] and \
+                            livyStatementMetaOutputContentType in output['data']:
+                        output['data'].pop(livyStatementMetaOutputContentType)
+
+        notebook_result['metadata'] = metadata_results
+        notebook_result['cells'] = notebook_properties['cells']
+        with open(path, 'w') as f:
+            json.dump(notebook_result, f, indent=4)
+    except IOError:
+        raise CLIError('Unable to export to file: {}'.format(path))
 
 
 def delete_notebook(cmd, workspace_name, notebook_name, no_wait=False):

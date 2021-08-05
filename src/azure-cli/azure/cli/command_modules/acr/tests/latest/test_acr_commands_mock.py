@@ -9,10 +9,10 @@ except ImportError:
     from urllib import urlencode
 import json
 import unittest
-import mock
+from unittest import mock
 import sys
 
-from azure.mgmt.containerregistry.v2018_09_01.models import Registry, Sku
+from azure.mgmt.containerregistry.v2019_05_01.models import Registry, Sku
 
 from azure.cli.command_modules.acr.repository import (
     acr_repository_list,

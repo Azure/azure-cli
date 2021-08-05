@@ -24,3 +24,11 @@ def check_udfs_folder(conf):
     if udfs_folder_name not in paths:
         paths.append(udfs_folder_name)
     conf[SPARK_DOTNET_ASSEMBLY_SEARCH_PATHS_KEY] = ','.join(paths)
+
+
+def get_tenant_id():
+    from azure.cli.core._profile import Profile
+    profile = Profile()
+    sub = profile.get_subscription()
+    tenant_id = sub['tenantId']
+    return tenant_id

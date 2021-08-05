@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
-import mock
+from unittest import mock
 import unittest
 import datetime
 import dateutil
@@ -18,34 +18,38 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
     @AllowLargeResponse(8192)
     def test_sp_create_scenario(self):
         self.kwargs['display_name'] = self.create_random_name('clisp-test-', 20)
-        self.kwargs['app_id_uri'] = 'http://' + self.kwargs['display_name']
+
         # create app through express option
-        self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
-                 checks=self.check('name', '{app_id_uri}'))
+        result = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
+                          checks=self.check('displayName', '{display_name}')).get_output_in_json()
+
+        self.assertEqual(result['name'], result['appId'])
+        self.kwargs['app_id'] = result['appId']
 
         # show/list app
-        self.cmd('ad app show --id {app_id_uri}',
-                 checks=self.check('identifierUris[0]', '{app_id_uri}'))
-        self.cmd('ad app list --identifier-uri {app_id_uri}', checks=[
-            self.check('[0].identifierUris[0]', '{app_id_uri}'),
+        self.cmd('ad app show --id {app_id}', checks=self.check('identifierUris', []))
+
+        self.cmd('ad app list --app-id {app_id}', checks=[
+            self.check('[0].identifierUris', []),
             self.check('length([*])', 1)
         ])
         self.assertTrue(len(self.cmd('ad app list').get_output_in_json()) <= 100)
         self.cmd('ad app list --show-mine')
+
         # show/list sp
-        self.cmd('ad sp show --id {app_id_uri}',
-                 checks=self.check('servicePrincipalNames[0]', '{app_id_uri}'))
-        self.cmd('ad sp list --spn {app_id_uri}', checks=[
-            self.check('[0].servicePrincipalNames[0]', '{app_id_uri}'),
+        self.cmd('ad sp show --id {app_id}',
+                 checks=self.check('servicePrincipalNames[0]', '{app_id}'))
+        self.cmd('ad sp list --spn {app_id}', checks=[
+            self.check('[0].servicePrincipalNames[0]', '{app_id}'),
             self.check('length([*])', 1),
         ])
-        self.cmd('ad sp credential reset -n {app_id_uri}',
-                 checks=self.check('name', '{app_id_uri}'))
+        self.cmd('ad sp credential reset -n {app_id}',
+                 checks=self.check('name', '{app_id}'))
         # cleanup
-        self.cmd('ad sp delete --id {app_id_uri}')  # this would auto-delete the app as well
-        self.cmd('ad sp list --spn {app_id_uri}',
+        self.cmd('ad sp delete --id {app_id}')  # this would auto-delete the app as well
+        self.cmd('ad sp list --spn {app_id}',
                  checks=self.is_empty())
-        self.cmd('ad app list --identifier-uri {app_id_uri}',
+        self.cmd('ad app list --app-id {app_id}',
                  checks=self.is_empty())
         self.assertTrue(len(self.cmd('ad sp list').get_output_in_json()) <= 100)
         self.cmd('ad sp list --show-mine')
@@ -287,43 +291,48 @@ class CreateForRbacScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_revoke_sp_for_rbac(self):
         self.kwargs['display_name'] = self.create_random_name(prefix='cli-graph', length=14)
-        self.kwargs['name'] = 'http://' + self.kwargs['display_name']
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('ad sp create-for-rbac -n {display_name}')
+            result = self.cmd('ad sp create-for-rbac -n {display_name}').get_output_in_json()
+            self.kwargs['app_id'] = result['appId']
 
-            self.cmd('ad sp list --spn {name}')
+            self.cmd('ad sp list --spn {app_id}',
+                     checks=self.check('length([*])', 1))
 
-            self.cmd('ad app list --identifier-uri {name}')
+            self.cmd('ad app list --app-id {app_id}',
+                     checks=self.check('length([*])', 1))
 
-            result = self.cmd('role assignment list --assignee {name}').get_output_in_json()
+            result = self.cmd('role assignment list --assignee {app_id}').get_output_in_json()
             object_id = result[0]['principalId']
 
-            self.cmd('ad sp delete --id {name}')
+            self.cmd('ad sp delete --id {app_id}')
 
             result2 = self.cmd('role assignment list --all').get_output_in_json()
             self.assertFalse([a for a in result2 if a['id'] == object_id])
 
-            self.cmd('ad sp list --spn {name}',
+            self.cmd('ad sp list --spn {app_id}',
                      checks=self.check('length([])', 0))
-            self.cmd('ad app list --identifier-uri {name}',
+            self.cmd('ad app list --app-id {app_id}',
                      checks=self.check('length([])', 0))
 
     @AllowLargeResponse()
     def test_create_for_rbac_idempotent(self):
         self.kwargs['display_name'] = self.create_random_name(prefix='sp_', length=14)
-        self.kwargs['name'] = 'http://' + self.kwargs['display_name']
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             try:
-                self.cmd('ad sp create-for-rbac -n {display_name}')
-                self.cmd('ad sp create-for-rbac -n {display_name}')
-                result = self.cmd('ad sp list --spn {name}').get_output_in_json()
+                result1 = self.cmd('ad sp create-for-rbac -n {display_name}').get_output_in_json()
+                result2 = self.cmd('ad sp create-for-rbac -n {display_name}').get_output_in_json()
+                self.assertEqual(result1['appId'], result2['appId'])
+
+                self.kwargs['app_id'] = result1['appId']
+                result = self.cmd('ad sp list --spn {app_id}').get_output_in_json()
                 self.assertEqual(1, len(result))
-                result = self.cmd('role assignment list --assignee {name}').get_output_in_json()
+
+                result = self.cmd('role assignment list --assignee {app_id}').get_output_in_json()
                 self.assertEqual(1, len(result))
             finally:
-                self.cmd('ad sp delete --id {name}')
+                self.cmd('ad sp delete --id {app_id}')
 
 
 class GraphGroupScenarioTest(ScenarioTest):
@@ -530,60 +539,58 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             'display_name2': self.create_random_name('cli-app-', 15),
             'test_pwd': 'verysecretpwd123*'
         }
-        self.kwargs['app'] = 'http://' + self.kwargs['display_name']
-        self.kwargs['app2'] = 'http://' + self.kwargs['display_name2']
-        app_id = None
-        app_id2 = None
+
         try:
             result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
-            app_id = result['appId']
+            self.kwargs['app_id'] = result['appId']
 
-            result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
+            result = self.cmd('ad sp credential list --id {app_id}').get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad sp credential reset -n {app} --password {test_pwd} --append --credential-description newCred1')
-            self.cmd('ad sp credential list --id {app}', checks=[
+            self.cmd('ad sp credential reset -n {app_id} --password {test_pwd} --append --credential-description newCred1')
+            self.cmd('ad sp credential list --id {app_id}', checks=[
                 self.check('length([*])', 2),
                 self.check('[0].customKeyIdentifier', 'newCred1'),
                 self.check('[1].customKeyIdentifier', 'rbac')  # auto configured by create-for-rbac
             ])
-            self.cmd('ad sp credential delete --id {app} --key-id ' + key_id)
-            result = self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
+            self.cmd('ad sp credential delete --id {app_id} --key-id ' + key_id)
+            result = self.cmd('ad sp credential list --id {app_id}', checks=self.check('length([*])', 1)).get_output_in_json()
             self.assertTrue(result[0]['keyId'] != key_id)
 
             # try the same through app commands
-            result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
+            result = self.cmd('ad app credential list --id {app_id}', checks=self.check('length([*])', 1)).get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad app credential reset --id {app} --password {test_pwd} --append --credential-description newCred2')
-            result = self.cmd('ad app credential list --id {app}', checks=[
+            self.cmd('ad app credential reset --id {app_id} --password {test_pwd} --append --credential-description newCred2')
+            result = self.cmd('ad app credential list --id {app_id}', checks=[
                 self.check('length([*])', 2),
                 self.check('[0].customKeyIdentifier', 'newCred2'),
                 self.check('[1].customKeyIdentifier', 'newCred1')
             ])
-            self.cmd('ad app credential delete --id {app} --key-id ' + key_id)
-            self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
+            self.cmd('ad app credential delete --id {app_id} --key-id ' + key_id)
+            self.cmd('ad app credential list --id {app_id}', checks=self.check('length([*])', 1))
 
             # try use --end-date
-            self.cmd('ad sp credential reset -n {app} --password {test_pwd} --end-date "2100-12-31T11:59:59+00:00" --credential-description newCred3')
-            self.cmd('ad app credential reset --id {app} --password {test_pwd} --end-date "2100-12-31" --credential-description newCred4')
+            self.cmd('ad sp credential reset -n {app_id} --password {test_pwd} --end-date "2100-12-31T11:59:59+00:00" --credential-description newCred3')
+            self.cmd('ad app credential reset --id {app_id} --password {test_pwd} --end-date "2100-12-31" --credential-description newCred4')
 
             # ensure we can update other properties #7728
-            self.cmd('ad app update --id {app} --set groupMembershipClaims=All')
-            self.cmd('ad app show --id {app}', checks=self.check('groupMembershipClaims', 'All'))
+            self.cmd('ad app update --id {app_id} --set groupMembershipClaims=All')
+            self.cmd('ad app show --id {app_id}', checks=self.check('groupMembershipClaims', 'All'))
 
             # ensure we can update SP's properties #5948
-            self.cmd('az ad sp update --id {app} --set appRoleAssignmentRequired=true')
-            self.cmd('az ad sp show --id {app}')
+            self.cmd('az ad sp update --id {app_id} --set appRoleAssignmentRequired=true')
+            self.cmd('az ad sp show --id {app_id}')
 
             result = self.cmd('ad sp create-for-rbac --name {display_name2} --skip-assignment --years 10').get_output_in_json()
-            app_id2 = result['appId']
-            result = self.cmd('ad sp credential list --id {app2}', checks=self.check('length([*])', 1)).get_output_in_json()
+            self.kwargs['app_id2'] = result['appId']
+
+            result = self.cmd('ad sp credential list --id {app_id2}', checks=self.check('length([*])', 1)).get_output_in_json()
             diff = dateutil.parser.parse(result[0]['endDate']).replace(tzinfo=None) - datetime.datetime.utcnow()
             self.assertTrue(diff.days > 1)  # it is just a smoke test to verify the credential does get applied
         finally:
-            if app_id:
-                self.cmd('ad app delete --id ' + app_id)
-            if app_id2:
-                self.cmd('ad app delete --id ' + app_id2)
+            if self.kwargs.get('app_id'):
+                self.cmd('ad app delete --id {app_id}')
+            if self.kwargs.get('app_id2'):
+                self.cmd('ad app delete --id {app_id2}')
 
 
 class GraphAppRequiredAccessScenarioTest(ScenarioTest):

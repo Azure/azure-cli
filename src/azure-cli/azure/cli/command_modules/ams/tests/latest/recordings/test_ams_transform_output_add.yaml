@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "japaneast", "properties": {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}}'
+      "type": "Primary"}]}, "identity": {"type": "None"}}'
     headers:
       Accept:
       - application/json
@@ -12,33 +12,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '304'
+      - '334'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g --storage-account -l
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Japan
-        East\",\"properties\":{\r\n    \"mediaServiceId\":\"5209a90e-2fef-4cd2-bb4d-dca4ac341f1e\",\"storageAccounts\":[\r\n
+        East\",\"properties\":{\r\n    \"mediaServiceId\":\"0db51218-ee72-47d5-8d29-5d0a8a5646c0\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+        \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
+        \     \"type\":\"SystemKey\"\r\n    }\r\n  },\"identity\":{\r\n    \"type\":\"None\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '666'
+      - '784'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:09 GMT
+      - Thu, 21 Jan 2021 04:17:16 GMT
       expires:
       - '-1'
       odata-version:
@@ -52,7 +54,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -76,15 +78,15 @@ interactions:
       - -a -n -g --preset
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:47:11.4061435Z\",\"lastModified\":\"2020-09-25T21:47:11.4061435Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-21T04:17:17.9679249Z\",\"lastModified\":\"2021-01-21T04:17:17.9679249Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -96,7 +98,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:10 GMT
+      - Thu, 21 Jan 2021 04:17:18 GMT
       expires:
       - '-1'
       odata-version:
@@ -110,7 +112,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1190'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -129,15 +131,15 @@ interactions:
       - -a -n -g --preset --on-error --relative-priority
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:47:11.4061435Z\",\"lastModified\":\"2020-09-25T21:47:11.4061435Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-21T04:17:17.9679249Z\",\"lastModified\":\"2021-01-21T04:17:17.9679249Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -149,7 +151,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:12 GMT
+      - Thu, 21 Jan 2021 04:17:19 GMT
       expires:
       - '-1'
       odata-version:
@@ -206,15 +208,15 @@ interactions:
       - -a -n -g --preset --on-error --relative-priority
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:47:11.4061435Z\",\"lastModified\":\"2020-09-25T21:47:12.7927842Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-21T04:17:17.9679249Z\",\"lastModified\":\"2021-01-21T04:17:19.5399961Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -237,7 +239,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:12 GMT
+      - Thu, 21 Jan 2021 04:17:19 GMT
       expires:
       - '-1'
       odata-version:
@@ -255,7 +257,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -271,18 +273,18 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -a -n -g --preset --audio-language
+      - -a -n -g --preset --audio-language --audio-analysis-mode
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:47:11.4061435Z\",\"lastModified\":\"2020-09-25T21:47:12.7927842Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-21T04:17:17.9679249Z\",\"lastModified\":\"2021-01-21T04:17:19.5399961Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -305,7 +307,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:13 GMT
+      - Thu, 21 Jan 2021 04:17:20 GMT
       expires:
       - '-1'
       odata-version:
@@ -335,9 +337,9 @@ interactions:
       1.0}]}, "codecs": [{"@odata.type": "#Microsoft.Media.AacAudio", "channels":
       2, "samplingRate": 48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type":
       "#Microsoft.Media.H264Video", "keyFrameInterval": "PT2S", "stretchMode": "AutoSize",
-      "sceneChangeDetection": false, "complexity": "Balanced", "layers": [{"width":
-      "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer", "bitrate":
-      2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
+      "syncMode": "Auto", "sceneChangeDetection": false, "complexity": "Balanced",
+      "layers": [{"width": "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer",
+      "bitrate": 2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
       true, "profile": "Auto", "level": "auto", "bufferWindow": "PT5S", "referenceFrames":
       3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "@odata.type":
       "#Microsoft.Media.H264Layer", "bitrate": 1000000, "maxBitrate": 1000000, "bFrames":
@@ -345,7 +347,7 @@ interactions:
       "bufferWindow": "PT5S", "referenceFrames": 3, "entropyMode": "Cabac"}]}], "formats":
       [{"filenamePattern": "{Basename}_{Bitrate}{Extension}", "@odata.type": "#Microsoft.Media.Mp4Format",
       "outputFiles": []}]}}, {"preset": {"@odata.type": "#Microsoft.Media.AudioAnalyzerPreset",
-      "audioLanguage": "es-ES"}}]}}'
+      "audioLanguage": "es-ES", "mode": "Basic"}}]}}'
     headers:
       Accept:
       - application/json
@@ -356,22 +358,22 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1592'
+      - '1629'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -a -n -g --preset --audio-language
+      - -a -n -g --preset --audio-language --audio-analysis-mode
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:47:11.4061435Z\",\"lastModified\":\"2020-09-25T21:47:14.1554621Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-21T04:17:17.9679249Z\",\"lastModified\":\"2021-01-21T04:17:21.1766467Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -386,17 +388,18 @@ interactions:
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\",\"experimentalOptions\":{\r\n
+        \           \"basicAudioEnabled\":\"true\"\r\n          }\r\n        }\r\n
+        \     }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2375'
+      - '2467'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:13 GMT
+      - Thu, 21 Jan 2021 04:17:20 GMT
       expires:
       - '-1'
       odata-version:
@@ -414,7 +417,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -430,18 +433,18 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -a -n -g --preset --audio-language --insights-to-extract
+      - -a -n -g --preset --audio-language --insights-to-extract --video-analysis-mode
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:47:11.4061435Z\",\"lastModified\":\"2020-09-25T21:47:14.1554621Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-21T04:17:17.9679249Z\",\"lastModified\":\"2021-01-21T04:17:21.1766467Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -456,17 +459,18 @@ interactions:
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\",\"experimentalOptions\":{\r\n
+        \           \"basicAudioEnabled\":\"true\"\r\n          }\r\n        }\r\n
+        \     }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2375'
+      - '2467'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:15 GMT
+      - Thu, 21 Jan 2021 04:17:21 GMT
       expires:
       - '-1'
       odata-version:
@@ -496,9 +500,9 @@ interactions:
       1.0}]}, "codecs": [{"@odata.type": "#Microsoft.Media.AacAudio", "channels":
       2, "samplingRate": 48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type":
       "#Microsoft.Media.H264Video", "keyFrameInterval": "PT2S", "stretchMode": "AutoSize",
-      "sceneChangeDetection": false, "complexity": "Balanced", "layers": [{"width":
-      "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer", "bitrate":
-      2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
+      "syncMode": "Auto", "sceneChangeDetection": false, "complexity": "Balanced",
+      "layers": [{"width": "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer",
+      "bitrate": 2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
       true, "profile": "Auto", "level": "auto", "bufferWindow": "PT5S", "referenceFrames":
       3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "@odata.type":
       "#Microsoft.Media.H264Layer", "bitrate": 1000000, "maxBitrate": 1000000, "bFrames":
@@ -507,8 +511,9 @@ interactions:
       [{"filenamePattern": "{Basename}_{Bitrate}{Extension}", "@odata.type": "#Microsoft.Media.Mp4Format",
       "outputFiles": []}]}}, {"onError": "StopProcessingJob", "relativePriority":
       "Normal", "preset": {"@odata.type": "#Microsoft.Media.AudioAnalyzerPreset",
-      "audioLanguage": "es-ES"}}, {"preset": {"@odata.type": "#Microsoft.Media.VideoAnalyzerPreset",
-      "audioLanguage": "en-US", "insightsToExtract": "AudioInsightsOnly"}}]}}'
+      "audioLanguage": "es-ES", "mode": "Basic", "experimentalOptions": {"basicAudioEnabled":
+      "true"}}}, {"preset": {"@odata.type": "#Microsoft.Media.VideoAnalyzerPreset",
+      "audioLanguage": "en-US", "mode": "Basic", "insightsToExtract": "AudioInsightsOnly"}}]}}'
     headers:
       Accept:
       - application/json
@@ -519,22 +524,22 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1791'
+      - '1899'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -a -n -g --preset --audio-language --insights-to-extract
+      - -a -n -g --preset --audio-language --insights-to-extract --video-analysis-mode
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:47:11.4061435Z\",\"lastModified\":\"2020-09-25T21:47:15.5548595Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-21T04:17:17.9679249Z\",\"lastModified\":\"2021-01-21T04:17:22.718543Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -549,19 +554,21 @@ interactions:
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
-        \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\",\"experimentalOptions\":{\r\n
+        \           \"basicAudioEnabled\":\"true\"\r\n          }\r\n        }\r\n
+        \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"mode\":\"Basic\",\"experimentalOptions\":{\r\n
+        \           \"basicAudioEnabled\":\"true\"\r\n          },\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
         \       }\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2603'
+      - '2786'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:15 GMT
+      - Thu, 21 Jan 2021 04:17:22 GMT
       expires:
       - '-1'
       odata-version:
@@ -579,7 +586,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -598,15 +605,15 @@ interactions:
       - -a -n -g --preset --resolution
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:47:11.4061435Z\",\"lastModified\":\"2020-09-25T21:47:15.5548595Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-21T04:17:17.9679249Z\",\"lastModified\":\"2021-01-21T04:17:22.718543Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -621,19 +628,21 @@ interactions:
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
-        \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\",\"experimentalOptions\":{\r\n
+        \           \"basicAudioEnabled\":\"true\"\r\n          }\r\n        }\r\n
+        \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"mode\":\"Basic\",\"experimentalOptions\":{\r\n
+        \           \"basicAudioEnabled\":\"true\"\r\n          },\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
         \       }\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2603'
+      - '2786'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:16 GMT
+      - Thu, 21 Jan 2021 04:17:23 GMT
       expires:
       - '-1'
       odata-version:
@@ -663,9 +672,9 @@ interactions:
       1.0}]}, "codecs": [{"@odata.type": "#Microsoft.Media.AacAudio", "channels":
       2, "samplingRate": 48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type":
       "#Microsoft.Media.H264Video", "keyFrameInterval": "PT2S", "stretchMode": "AutoSize",
-      "sceneChangeDetection": false, "complexity": "Balanced", "layers": [{"width":
-      "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer", "bitrate":
-      2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
+      "syncMode": "Auto", "sceneChangeDetection": false, "complexity": "Balanced",
+      "layers": [{"width": "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer",
+      "bitrate": 2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
       true, "profile": "Auto", "level": "auto", "bufferWindow": "PT5S", "referenceFrames":
       3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "@odata.type":
       "#Microsoft.Media.H264Layer", "bitrate": 1000000, "maxBitrate": 1000000, "bFrames":
@@ -674,10 +683,12 @@ interactions:
       [{"filenamePattern": "{Basename}_{Bitrate}{Extension}", "@odata.type": "#Microsoft.Media.Mp4Format",
       "outputFiles": []}]}}, {"onError": "StopProcessingJob", "relativePriority":
       "Normal", "preset": {"@odata.type": "#Microsoft.Media.AudioAnalyzerPreset",
-      "audioLanguage": "es-ES"}}, {"onError": "StopProcessingJob", "relativePriority":
-      "Normal", "preset": {"@odata.type": "#Microsoft.Media.VideoAnalyzerPreset",
-      "audioLanguage": "en-US", "insightsToExtract": "AudioInsightsOnly"}}, {"preset":
-      {"@odata.type": "#Microsoft.Media.FaceDetectorPreset", "resolution": "SourceResolution"}}]}}'
+      "audioLanguage": "es-ES", "mode": "Basic", "experimentalOptions": {"basicAudioEnabled":
+      "true"}}}, {"onError": "StopProcessingJob", "relativePriority": "Normal", "preset":
+      {"@odata.type": "#Microsoft.Media.VideoAnalyzerPreset", "audioLanguage": "en-US",
+      "mode": "Basic", "experimentalOptions": {"basicAudioEnabled": "true"}, "insightsToExtract":
+      "AudioInsightsOnly"}}, {"preset": {"@odata.type": "#Microsoft.Media.FaceDetectorPreset",
+      "resolution": "SourceResolution"}}]}}'
     headers:
       Accept:
       - application/json
@@ -688,22 +699,22 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1955'
+      - '2117'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -a -n -g --preset --resolution
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:47:11.4061435Z\",\"lastModified\":\"2020-09-25T21:47:16.8906108Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-21T04:17:17.9679249Z\",\"lastModified\":\"2021-01-21T04:17:24.2723958Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -718,9 +729,11 @@ interactions:
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
-        \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\",\"experimentalOptions\":{\r\n
+        \           \"basicAudioEnabled\":\"true\"\r\n          }\r\n        }\r\n
+        \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"mode\":\"Basic\",\"experimentalOptions\":{\r\n
+        \           \"basicAudioEnabled\":\"true\"\r\n          },\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.FaceDetectorPreset\",\"resolution\":\"SourceResolution\"\r\n
         \       }\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -728,11 +741,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2798'
+      - '2982'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:47:16 GMT
+      - Thu, 21 Jan 2021 04:17:24 GMT
       expires:
       - '-1'
       odata-version:
@@ -750,7 +763,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1189'
+      - '1198'
     status:
       code: 200
       message: OK

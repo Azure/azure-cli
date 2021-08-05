@@ -32,11 +32,9 @@ class MonitorArgumentContext(AzArgumentContext):
 class MonitorCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.command_modules.monitor._exception_handler import monitor_exception_handler
         from azure.cli.core.profiles import ResourceType
         monitor_custom = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
-            exception_handler=monitor_exception_handler)
+            operations_tmpl='azure.cli.command_modules.monitor.custom#{}')
         super(MonitorCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_MONITOR,
                                                     argument_context_cls=MonitorArgumentContext,

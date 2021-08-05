@@ -5,10 +5,13 @@
 
 from enum import Enum
 from azure.cli.core.util import CLIError
-from ._utils import get_resource_group_name_by_registry_name, parse_actions_from_repositories
+from ._utils import (
+    get_resource_group_name_by_registry_name,
+    parse_scope_map_actions
+)
 
 
-class ScopeMapActions(Enum):
+class RepoScopeMapActions(Enum):
     CONTENT_DELETE = 'content/delete'
     CONTENT_READ = 'content/read'
     CONTENT_WRITE = 'content/write'
@@ -16,24 +19,38 @@ class ScopeMapActions(Enum):
     METADATA_WRITE = 'metadata/write'
 
 
+class GatewayScopeMapActions(Enum):
+    CONFIG_READ = 'config/read'
+    CONFIG_WRITE = 'config/write'
+    MESSAGES_READ = 'message/read'
+    MESSAGES_WRITE = 'message/write'
+
+
 def acr_scope_map_create(cmd,
                          client,
                          registry_name,
                          scope_map_name,
-                         repository_actions_list,
+                         repository_actions_list=None,
+                         gateway_actions_list=None,
                          resource_group_name=None,
                          description=None):
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
-    actions = parse_actions_from_repositories(repository_actions_list)
+    actions = parse_scope_map_actions(repository_actions_list, gateway_actions_list)
 
-    return client.create(
+    ScopeMap = cmd.get_models('ScopeMap')
+
+    scope_map = ScopeMap(
+        actions=actions,
+        description=description
+    )
+
+    return client.begin_create(
         resource_group_name,
         registry_name,
         scope_map_name,
-        actions,
-        description
+        scope_map
     )
 
 
@@ -53,7 +70,7 @@ def acr_scope_map_delete(cmd,
             return None
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    return client.delete(resource_group_name, registry_name, scope_map_name)
+    return client.begin_delete(resource_group_name, registry_name, scope_map_name)
 
 
 def acr_scope_map_update(cmd,
@@ -62,10 +79,12 @@ def acr_scope_map_update(cmd,
                          scope_map_name,
                          add_repository=None,
                          remove_repository=None,
+                         add_gateway=None,
+                         remove_gateway=None,
                          resource_group_name=None,
                          description=None):
 
-    if not (add_repository or remove_repository or description):
+    if not (add_repository or remove_repository or add_gateway or remove_gateway or description):
         raise CLIError('No scope map properties to update.')
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
@@ -73,10 +92,9 @@ def acr_scope_map_update(cmd,
     current_scope_map = acr_scope_map_show(cmd, client, registry_name, scope_map_name, resource_group_name)
     current_actions = current_scope_map.actions
 
-    if add_repository or remove_repository:
-        add_actions_set = set(parse_actions_from_repositories(add_repository)) if add_repository else set()
-        remove_actions_set = set(parse_actions_from_repositories(remove_repository)) if remove_repository else set()
-
+    if add_repository or remove_repository or add_gateway or remove_gateway:
+        add_actions_set = set(parse_scope_map_actions(add_repository, add_gateway))
+        remove_actions_set = set(parse_scope_map_actions(remove_repository, remove_gateway))
         # Duplicate actions can lead to inconsistency based on order of operations (set subtraction isn't associative).
         # Eg: ({A, B} - {B}) U {B, C} = {A, B, C},  ({A, B} U {B, C}) - {B}  = {A, C}
         duplicate_actions = set.intersection(add_actions_set, remove_actions_set)
@@ -90,13 +108,15 @@ def acr_scope_map_update(cmd,
         final_actions_set = set(current_scope_map.actions).union(add_actions_set).difference(remove_actions_set)
         current_actions = list(final_actions_set)
 
-    return client.update(
-        resource_group_name,
-        registry_name,
-        scope_map_name,
-        description,
-        current_actions
+    ScopeMapUpdateParameters = cmd.get_models('ScopeMapUpdateParameters')
+    scope_map_update_parameters = ScopeMapUpdateParameters(
+        description=description,
+        actions=current_actions
     )
+    return client.begin_update(resource_group_name,
+                               registry_name,
+                               scope_map_name,
+                               scope_map_update_parameters)
 
 
 def acr_scope_map_show(cmd,

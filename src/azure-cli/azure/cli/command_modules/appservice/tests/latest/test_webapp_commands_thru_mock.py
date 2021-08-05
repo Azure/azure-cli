@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-import mock
+from unittest import mock
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -19,7 +19,6 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          _match_host_names_from_cert,
                                                          bind_ssl_cert,
                                                          list_publish_profiles,
-                                                         config_source_control,
                                                          show_webapp,
                                                          get_streaming_log,
                                                          download_historical_logs,
@@ -30,7 +29,6 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          create_managed_ssl_cert)
 
 # pylint: disable=line-too-long
-from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
 from azure.cli.core.profiles import ResourceType
 
 
@@ -172,49 +170,6 @@ class TestWebappMocked(unittest.TestCase):
         # assert, we return the virtual ip from the ip based ssl binding
         resolve_hostname_mock.assert_called_with('myweb.com')
 
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.vsts_cd_provider.ContinuousDeliveryManager', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.vsts_cd_provider.Profile', autospec=True)
-    def test_config_source_control_vsts(self, profile_mock, cd_manager_mock, client_factory_mock):
-        # Mock the result of get auth token (avoiding REST call)
-        profile = mock.Mock()
-        profile.get_subscription.return_value = {'id': 'id1', 'name': 'sub1', 'tenantId': 'tenant1'}
-        profile.get_current_account_user.return_value = None
-        profile.get_login_credentials.return_value = None, None, None
-        profile.get_access_token_for_resource.return_value = None
-        profile_mock.return_value = profile
-
-        # Mock the cd manager class so no REST calls are made
-        cd_manager = mock.Mock()
-        status = ContinuousDeliveryResult(None, None, None, None, None, None, "message1", None,
-                                          None, None)
-        cd_manager.setup_continuous_delivery.return_value = status
-        cd_manager_mock.return_value = cd_manager
-
-        # Mock the client and set the location
-        client = mock.Mock()
-        client_factory_mock.return_value = client
-        cmd_mock = _get_test_cmd()
-        Site = cmd_mock.get_models('Site')
-        site = Site(name='antarctica', location='westus')
-        site.default_host_name = 'myweb.com'
-        client.web_apps.get.return_value = site
-
-        config_source_control(mock.MagicMock(), 'group1', 'myweb', 'http://github.com/repo1', None, None, None,
-                              None, None, 'ASPNet', 'working_directory', 'Gulp', 'Django',
-                              'Python 2.7.12 x64', True, 'https://account1.visualstudio.com',
-                              None, 'slot1', None, None)
-        cd_app_type_details = {
-            'cd_app_type': 'ASPNet',
-            'app_working_dir': 'working_directory',
-            'nodejs_task_runner': 'Gulp',
-            'python_framework': 'Django',
-            'python_version': 'Python 2.7.12 x64'
-        }
-        cd_manager.setup_continuous_delivery.assert_called_with('slot1', cd_app_type_details,
-                                                                'https://account1.visualstudio.com',
-                                                                True, None, None, None)
-
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_update_site_config(self, site_op_mock):
         cmd_mock = _get_test_cmd()
@@ -236,7 +191,8 @@ class TestWebappMocked(unittest.TestCase):
         # action
         result = list_publish_profiles(mock.MagicMock(), 'myRG', 'myweb', 'slot1')
         # assert
-        site_op_mock.assert_called_with(mock.ANY, 'myRG', 'myweb', 'list_publishing_profile_xml_with_secrets', 'slot1')
+        site_op_mock.assert_called_with(mock.ANY, 'myRG', 'myweb', 'list_publishing_profile_xml_with_secrets', 'slot1',
+                                        {'format': 'WebDeploy'})
         self.assertTrue(result[0]['publishUrl'].startswith('ftp://123'))
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
@@ -309,7 +265,7 @@ class TestWebappMocked(unittest.TestCase):
             self.fail('test exception was not thrown')
         except ErrorToExitInfiniteLoop:
             # assert
-            site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
+            site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'begin_list_publishing_credentials', None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_restore_deleted_webapp(self, site_op_mock):
@@ -386,7 +342,7 @@ class TestWebappMocked(unittest.TestCase):
         download_historical_logs(cmd_mock, 'rg', 'web1')
 
         # assert
-        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
+        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'begin_list_publishing_credentials', None)
         get_log_mock.assert_called_with(test_scm_url + '/dump', 'great_user', 'secret_password', None)
 
     def test_valid_linux_create_options(self):

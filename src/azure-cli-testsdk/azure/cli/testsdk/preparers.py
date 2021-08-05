@@ -68,6 +68,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if self.dev_setting_name:
+            self.test_class_instance.kwargs[self.key] = self.dev_setting_name
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
 
@@ -147,33 +148,47 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 # pylint: disable=too-many-instance-attributes
 class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku='standard', location='westus', parameter_name='key_vault',
-                 resource_group_parameter_name='resource_group', skip_delete=True,
-                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv'):
-        super(KeyVaultPreparer, self).__init__(name_prefix, 24)
+    def __init__(self, name_prefix='clitest', sku='standard', location='westus', enable_soft_delete=True,
+                 parameter_name='key_vault', resource_group_parameter_name='resource_group', skip_delete=False,
+                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv', name_len=24, additional_params=None):
+        super(KeyVaultPreparer, self).__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
+        self.enable_soft_delete = enable_soft_delete
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
         self.parameter_name = parameter_name
         self.key = key
+        self.additional_params = additional_params
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            template = 'az keyvault create -n {} -g {} -l {} --sku {}'
+            template = 'az keyvault create -n {} -g {} -l {} --sku {} '
+            if self.enable_soft_delete:
+                template += '--enable-soft-delete --retention-days 7 '
+            if self.additional_params:
+                template += self.additional_params
             self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
+            self.test_class_instance.kwargs[self.key] = name
             return {self.parameter_name: name}
 
-        self.test_class_instance.kwargs[self.key] = name
+        self.test_class_instance.kwargs[self.key] = self.dev_setting_name
         return {self.parameter_name: self.dev_setting_name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {} --yes'.format(name, group))
+            self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {}'.format(name, group))
+            if self.enable_soft_delete:
+                from azure.core.exceptions import HttpResponseError
+                try:
+                    self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
+                except HttpResponseError:
+                    # purge operation will fail with HttpResponseError when --enable-purge-protection
+                    pass
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -266,7 +281,7 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
 
 # pylint: disable=too-many-instance-attributes
 class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest.vn',
+    def __init__(self, name_prefix='clitest.vn', location='westus',
                  parameter_name='virtual_network',
                  resource_group_parameter_name='resource_group',
                  resource_group_key=KEY_RESOURCE_GROUP,
@@ -278,6 +293,7 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         super(VirtualNetworkPreparer, self).__init__(
             name_prefix, random_name_length)
         self.cli_ctx = get_dummy_cli()
+        self.location = location
         self.parameter_name = parameter_name
         self.key = key
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -295,8 +311,8 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value)
                          for key, value in tags.items()])
-        template = 'az network vnet create --resource-group {} --name {} --subnet-name default --tag ' + tags
-        self.live_only_execute(self.cli_ctx, template.format(self._get_resource_group(**kwargs), name))
+        template = 'az network vnet create --resource-group {} --location {} --name {} --subnet-name default --tag ' + tags
+        self.live_only_execute(self.cli_ctx, template.format(self._get_resource_group(**kwargs), self.location, name))
 
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name}

@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, record_only
 
 
 class AzureReservationsTests(ScenarioTest):
@@ -33,6 +33,7 @@ class AzureReservationsTests(ScenarioTest):
         self.assertTrue(reservation['type'])
         self.assertTrue(reservation['type'] == 'Microsoft.Capacity/reservationOrders/reservations')
 
+    @record_only()  # This test relies on a subscription id with the existing reservation orders
     def test_get_applied_reservation_order_ids(self):
         self.kwargs.update({
             'subscription': '00000000-0000-0000-0000-000000000000'
@@ -42,6 +43,7 @@ class AzureReservationsTests(ScenarioTest):
         for order_id in result['reservationOrderIds']['value']:
             self.assertIn('/providers/Microsoft.Capacity/reservationorders/', order_id)
 
+    @record_only()  # This test relies on the existing reservation order
     def test_list_reservation_order(self):
         reservation_order_list = self.cmd('reservations reservation-order list').get_output_in_json()
         self.assertIsNotNone(reservation_order_list)
@@ -52,6 +54,7 @@ class AzureReservationsTests(ScenarioTest):
             for reservation in order['reservations']:
                 self.assertTrue(reservation['id'])
 
+    @record_only()  # This test relies on the existing reservation order
     def test_get_reservation_order(self):
         self.kwargs.update({
             'reservation_order_id': '0a47417c-cd30-4f67-add6-d631583e09f3'
@@ -62,6 +65,7 @@ class AzureReservationsTests(ScenarioTest):
         self.assertIn('/providers/microsoft.capacity/reservationOrders/', reservation_order['id'])
         self.assertGreater(reservation_order['etag'], 0)
 
+    @record_only()  # This test relies on the existing reservation order
     def test_list_reservation(self):
         self.kwargs.update({
             'reservation_order_id': '0a47417c-cd30-4f67-add6-d631583e09f3'
@@ -74,6 +78,7 @@ class AzureReservationsTests(ScenarioTest):
             self.assertGreater(reservation['etag'], 0)
             self.assertEqual('Microsoft.Capacity/reservationOrders/reservations', reservation['type'])
 
+    @record_only()  # This test relies on the existing reservation order
     def test_get_reservation(self):
         self.kwargs.update({
             'reservation_order_id': '0a47417c-cd30-4f67-add6-d631583e09f3',
@@ -86,6 +91,7 @@ class AzureReservationsTests(ScenarioTest):
         self.assertGreater(reservation['properties']['quantity'], 0)
         self.assertEqual('Microsoft.Capacity/reservationOrders/reservations', reservation['type'])
 
+    @record_only()  # This test relies on the existing reservation order
     def test_list_reservation_history(self):
         self.kwargs.update({
             'reservation_order_id': '0a47417c-cd30-4f67-add6-d631583e09f3',
@@ -99,6 +105,7 @@ class AzureReservationsTests(ScenarioTest):
             name_format = '{}/{}'.format(self.kwargs['reservation_order_id'], self.kwargs['reservation_id'])
             self.assertIn(name_format, entry['name'])
 
+    @record_only()  # This test relies on a subscription with reservation permissions
     def test_get_catalog(self):
         self.kwargs.update({
             'subscription': '00000000-0000-0000-0000-000000000000',
@@ -114,6 +121,7 @@ class AzureReservationsTests(ScenarioTest):
             self.assertIsNotNone(entry['resourceType'])
             self.assertIsNotNone(entry['name'])
 
+    @record_only()  # This test relies on the existing reservation order
     def test_update_reservation(self):
         self.kwargs.update({
             'reservation_order_id': 'fe1341ea-4820-4ac9-9352-4136a6d8a252',
@@ -132,6 +140,7 @@ class AzureReservationsTests(ScenarioTest):
                                       ' --instance-flexibility {instance_flexibility}').get_output_in_json()
         self.assertEqual('Shared', shared_reservation['properties']['appliedScopeType'])
 
+    @record_only()  # This test relies on the existing reservation order
     def test_split_and_merge(self):
         self.kwargs.update({
             'reservation_order_id': '0af601f3-7868-44ee-b833-4d2e64ad3d70',
@@ -171,6 +180,7 @@ class AzureReservationsTests(ScenarioTest):
             if 'Succeeded' in item['properties']['provisioningState']:
                 self.assertEqual(quantity_sum, item['properties']['quantity'])
 
+    @record_only()  # This test relies on a subscription with reservation permissions
     def test_calculate_reservation_order(self):
         self.kwargs.update({
             'subid': 'd3ae48e5-dbb2-4618-afd4-fb1b8559cb80',
@@ -192,6 +202,7 @@ class AzureReservationsTests(ScenarioTest):
         self.assertIsNotNone(response['properties']['reservationOrderId'])
         self.assertEqual('standard_b1ls', response['properties']['skuDescription'])
 
+    @record_only()  # This test relies on a subscription with reservation purchase permissions
     def test_purchase_reservation_order(self):
         self.kwargs.update({
             'roid': 'd4ef7ec2-941c-4da7-8ec9-2f148255a0dc',

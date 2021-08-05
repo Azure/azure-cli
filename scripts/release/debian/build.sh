@@ -33,6 +33,8 @@ $PYTHON_SRC_DIR/*/configure --srcdir $PYTHON_SRC_DIR/* --prefix $WORKDIR/python_
 make
 make install
 
+$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip==21.0.1
+
 export PATH=$PATH:$WORKDIR/python_env/bin
 
 find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps

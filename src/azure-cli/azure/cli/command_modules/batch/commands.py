@@ -54,11 +54,12 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_account')
         g.custom_command('create', 'create_account', supports_no_wait=True)
         g.custom_command('set', 'update_account')
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('login', 'login_account')
         g.command('autostorage-keys sync', 'synchronize_auto_storage_keys')
         g.command('keys list', 'get_keys', table_transformer=account_keys_list_table_format)
-        g.command('keys renew', 'regenerate_key', table_transformer=account_keys_renew_table_format)
+        # g.command('keys renew', 'regenerate_key', table_transformer=account_keys_renew_table_format)
+        g.custom_command('keys renew', 'renew_accounts_keys', table_transformer=account_keys_renew_table_format)
 
     with self.command_group('batch application', get_mgmt_type('application'), client_factory=get_mgmt_factory('application')) as g:
         g.command('list', 'list', table_transformer=application_list_table_format)
@@ -71,7 +72,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_application_package')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
-        g.command('activate', 'activate')
+        # g.command('activate', 'activate')
+        g.custom_command('activate', 'activate_application_package')
         g.command('list', 'list')
 
     with self.command_group('batch location quotas', get_mgmt_type('location')) as g:

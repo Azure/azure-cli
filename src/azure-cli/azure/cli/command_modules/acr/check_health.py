@@ -3,15 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import re
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom import get_docker_command
 from ._docker_utils import _get_aad_token
 from .helm import get_helm_command
-from ._utils import get_registry_by_name
+from ._utils import get_registry_by_name, resolve_identity_client_id
 from ._errors import ErrorClass
 
 logger = get_logger(__name__)
@@ -125,22 +123,14 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
 # Get current CLI version
 def _get_cli_version():
-    from pkg_resources import working_set
-
-    # working_set.by_key is a dictionary with component names as key
-    cli_component_name = "azure-cli"
-    cli_version = "not found"
-
-    if cli_component_name in working_set.by_key:
-        cli_version = working_set.by_key[cli_component_name].version
-
-    logger.warning('Azure CLI version: %s', cli_version)
+    from azure.cli.core import __version__ as core_version
+    logger.warning('Azure CLI version: %s', core_version)
 
 
 # Get helm versions
 def _get_helm_version(ignore_errors):
     from ._errors import HELM_VERSION_ERROR
-    from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+    from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
 
     # Helm command check
     helm_command, error = get_helm_command(is_diagnostics_context=True)
@@ -167,7 +157,7 @@ def _get_helm_version(ignore_errors):
     logger.warning("Helm version: %s", output)
 
     # Display an error message if the current helm version < min required version
-    if match_obj and LooseVersion(output) < LooseVersion(MIN_HELM_VERSION):
+    if match_obj and parse(output) < parse(MIN_HELM_VERSION):
         obsolete_ver_error = HELM_VERSION_ERROR.set_error_message(
             "Current Helm client version is not recommended. Please upgrade your Helm client to at least version {}."
             .format(MIN_HELM_VERSION))
@@ -177,7 +167,7 @@ def _get_helm_version(ignore_errors):
 def _get_notary_version(ignore_errors):
     from ._errors import NOTARY_VERSION_ERROR
     from .notary import get_notary_command
-    from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+    from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
 
     # Notary command check
     notary_command, error = get_notary_command(is_diagnostics_context=True)
@@ -204,9 +194,9 @@ def _get_notary_version(ignore_errors):
     logger.warning("Notary version: %s", output)
 
     # Display error if the current version does not match the recommended version
-    if match_obj and LooseVersion(output) != LooseVersion(RECOMMENDED_NOTARY_VERSION):
+    if match_obj and parse(output) != parse(RECOMMENDED_NOTARY_VERSION):
         version_msg = "upgrade"
-        if LooseVersion(output) > LooseVersion(RECOMMENDED_NOTARY_VERSION):
+        if parse(output) > parse(RECOMMENDED_NOTARY_VERSION):
             version_msg = "downgrade"
         obsolete_ver_error = NOTARY_VERSION_ERROR.set_error_message(
             "Current notary version is not recommended. Please {} your notary client to version {}."
@@ -295,11 +285,13 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
     print_pass("Fetch access token for registry '{}'".format(login_server))
 
 
-def _check_health_connectivity(cmd, registry_name, ignore_errors):
+def _check_registry_health(cmd, registry_name, ignore_errors):
     if registry_name is None:
         logger.warning("Registry name must be provided to check connectivity.")
         return
 
+    registry = None
+    # Connectivity
     try:
         registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
         login_server = registry.login_server.rstrip('/')
@@ -318,9 +310,97 @@ def _check_health_connectivity(cmd, registry_name, ignore_errors):
     if status_validated:
         _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
 
+    # CMK settings
+    if registry and registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
+        client_id = registry.encryption.key_vault_properties.identity
+        valid_identity = False
+        if registry.identity:
+            valid_identity = (client_id == 'system') and bool(registry.identity.principal_id)  # use system identity?
+            if not valid_identity and registry.identity.user_assigned_identities:
+                for k, v in registry.identity.user_assigned_identities.items():
+                    if v.client_id == client_id:
+                        from msrestazure.azure_exceptions import CloudError
+                        try:
+                            valid_identity = (resolve_identity_client_id(cmd.cli_ctx, k) == client_id)
+                        except CloudError:
+                            pass
+        if not valid_identity:
+            from ._errors import CMK_MANAGED_IDENTITY_ERROR
+            _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
+
+
+def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
+    import socket
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    if registry_name is None:
+        raise CLIError("Registry name must be provided to verify DNS routings of its private endpoints")
+
+    registry = None
+
+    # retrieve registry
+    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
+
+    if not registry.private_endpoint_connections:
+        raise CLIError('Registry "{}" doesn\'t have private endpoints to verify DNS routings.'.format(registry_name))
+
+    if is_valid_resource_id(vnet_of_private_endpoint):
+        res = parse_resource_id(vnet_of_private_endpoint)
+        if not res.get("type") or res.get("type").lower() != 'virtualnetworks' or not res.get('name'):
+            raise CLIError('"{}" is not a valid resource id of a virtual network'.format(vnet_of_private_endpoint))
+    else:
+        res = parse_resource_id(registry.id)
+        vnet_of_private_endpoint = resource_id(name=vnet_of_private_endpoint, resource_group=res['resource_group'],
+                                               namespace='Microsoft.Network', type='virtualNetworks',
+                                               subscription=res['subscription'])
+
+    # retrieve FQDNs for registry and its data endpoint
+    pe_ids = [e.private_endpoint.id for e in registry.private_endpoint_connections if e.private_endpoint]
+    dns_mappings = {}
+    for pe_id in pe_ids:
+        res = parse_resource_id(pe_id)
+        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK,
+                                                 subscription_id=res['subscription'])
+        pe = network_client.private_endpoints.get(res['resource_group'], res['name'])
+        if pe.subnet.id.lower().startswith(vnet_of_private_endpoint.lower()):
+            nic_id = pe.network_interfaces[0].id
+            nic_res = parse_resource_id(nic_id)
+            nic = network_client.network_interfaces.get(nic_res['resource_group'], nic_res['name'])
+            for dns_config in nic.ip_configurations:
+                if dns_config.private_link_connection_properties.fqdns[0] in dns_mappings:
+                    err = ('Registry "{}" has more than one private endpoint in the vnet of "{}".'
+                           ' DNS routing will be unreliable')
+                    raise CLIError(err.format(registry_name, vnet_of_private_endpoint))
+                dns_mappings[dns_config.private_link_connection_properties.fqdns[0]] = dns_config.private_ip_address
+
+    dns_ok = True
+    if not dns_mappings:
+        err = ('Registry "{}" doesn\'t have private endpoints in the vnet of "{}".'
+               ' Please make sure you provided correct vnet')
+        raise CLIError(err.format(registry_name, vnet_of_private_endpoint))
+
+    for fqdn in dns_mappings:
+        try:
+            result = socket.gethostbyname(fqdn)
+            if result != dns_mappings[fqdn]:
+                err = 'DNS routing to registry "%s" through private IP is incorrect. Expect: %s, Actual: %s'
+                logger.warning(err, registry_name, dns_mappings[fqdn], result)
+                dns_ok = False
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning('Error resolving DNS for %s. Ex: %s', fqdn, e)
+            dns_ok = False
+
+    if dns_ok:
+        print_pass('DNS routing to private endpoint')
+    else:
+        raise CLIError('DNS routing verification failed')
+
 
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
+                     vnet=None,
                      ignore_errors=False,
                      yes=False,
                      registry_name=None):
@@ -332,7 +412,10 @@ def acr_check_health(cmd,  # pylint: disable useless-return
         _get_docker_status_and_version(ignore_errors, yes)
         _get_cli_version()
 
-    _check_health_connectivity(cmd, registry_name, ignore_errors)
+    _check_registry_health(cmd, registry_name, ignore_errors)
+
+    if vnet:
+        _check_private_endpoint(cmd, registry_name, vnet)
 
     if not in_cloud_console:
         _get_helm_version(ignore_errors)

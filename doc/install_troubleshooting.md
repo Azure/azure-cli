@@ -9,7 +9,7 @@ These are issues we have closed because we cannot address them within the CLI du
 lsb_release does not return the correct base distribution version
 -----------------------------------------------------------------
 
-Some Ubuntu- or Debian-derived distributions such as Linux Mint may not return the correct version name from `lsb_release`. This value is used in the install process to determine the package to install. If you know the code name of the Ubuntu or Debian version your distribution is derived from, you can set the `AZ_REPO` value manually when [adding the repository](https://docs.microsoft.com/cli/azure/install-azure-cli-apt?view=azure-cli-latest#set-release). Otherwise, look up information for your distribution on how to determine the base distribution code name and set `AZ_REPO` to the correct value.
+Some Ubuntu- or Debian-derived distributions such as Linux Mint may not return the correct version name from `lsb_release`. This value is used in the install process to determine the package to install. If you know the code name of the Ubuntu or Debian version your distribution is derived from, you can set the `AZ_REPO` value manually when [adding the repository](https://docs.microsoft.com/cli/azure/install-azure-cli-apt#set-release). Otherwise, look up information for your distribution on how to determine the base distribution code name and set `AZ_REPO` to the correct value.
 
 
 No package for your Debian-based distribution
@@ -17,7 +17,7 @@ No package for your Debian-based distribution
 
 Sometimes it may be a while after a distribution is released before there's an Azure CLI package available for it. The Azure CLI is designed to be resilient with regards to future versions of dependencies and rely on as few of them as possible. If there's no package available for your base distribution, try a package for an earlier distribution.
 
-To do this, set the value of `AZ_REPO` manually when [adding the repository](https://docs.microsoft.com/cli/azure/install-azure-cli-apt?view=azure-cli-latest#set-release). For Ubuntu distributions use the `bionic` repository, and for Debian distributions
+To do this, set the value of `AZ_REPO` manually when [adding the repository](https://docs.microsoft.com/cli/azure/install-azure-cli-apt#set-release). For Ubuntu distributions use the `bionic` repository, and for Debian distributions
 use `stretch`. Distributions released before Ubuntu Trusty and Debian Wheezy are not supported.
 
 

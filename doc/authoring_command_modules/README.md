@@ -20,64 +20,35 @@ The document provides instructions and guidelines on how to author command modul
 <a name="heading_set_up"></a>Set Up
 ------
 
-Create you dev environment if you haven't already. This is how to do that.  
+Create your dev environment if you haven't already. This is how to do that.  
 
 Clone the repo, enter the repo directory then create your virtual environment.  
 
 For example:
 ```
 git clone https://github.com/Azure/azure-cli.git
-cd azure-cli
-virtualenv env
+git clone https://github.com/Azure/azure-cli-extensions.git
+python -m venv env
 source env/bin/activate
-python scripts/dev_setup.py
+azdev setup -c azure-cli -r azure-cli-extensions
 ```
+For more information, see https://github.com/Azure/azure-cli-dev-tools#setting-up-your-development-environment.
 
 After this, you should be able to run the CLI with `az`.
 
 [Author your command module...](#heading_author_command_mod)
 
-Now, install your command module into the environment with pip in editable mode.  
-Where `<path_to_your_command_module>` is the path to the directory containing your `setup.py` file.
-```
-pip install -e <path_to_your_command_module>
-```
-
-If installation was successful, you should be able to run `pip list` and see your command module.
-```
-$ pip list
-...
-azure-cli-example (0.0.1, /Users/myuser/Repos/azure-cli-example)
-...
-```
-
-Also, you can run `az` and if your command module contributes any commands, they should appear.
+If your command module contributes any commands, they should appear when running `az`.
 If your commands aren't showing with `az`, use `az --debug` to help debug. There could have been an exception
 thrown whilst attempting to load your module.
 
 
 <a name="heading_author_command_mod"></a>Authoring command modules
 ------
-Currently, all command modules should start with `azure-cli-`.  
-When the CLI loads, it search for packages installed that start with that prefix.
 
-The `example_module_template` directory gives an example command module with other useful examples.
-
-Command modules should have the following structure:
-```
-.
-|-- README.rst
-|-- azure
-|   |-- __init__.py
-|   `-- cli
-|       |-- __init__.py
-|       `-- command_modules
-|           |-- __init__.py
-|           `-- <MODULE_NAME>
-|               `-- __init__.py
-`-- setup.py
-`-- HISTORY.rst
-```
+There are two options to initialize a command module:
+1. Use [Azure CLI Code Generator tool](https://github.com/Azure/autorest.az#how-does-azure-cli-code-generator-work) to generate code automatically.
+2. [Create a module with `azdev cli create`](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4).
 
 **Create an \_\_init__.py for your module**
 

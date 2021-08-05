@@ -28,8 +28,7 @@ COPY . .
 RUN mkdir -p ./bin/pypi && \
     BUILD_STAGINGDIRECTORY=/azure-cli/bin/pypi ./scripts/release/pypi/build.sh && \
     if [ -d ./privates ]; then find ./privates -name '*.whl' | xargs pip install; fi && \
-    find ./bin/pypi -name '*.whl' | xargs pip install && \
-    pip install --force-reinstall urllib3==1.24.2
+    find ./bin/pypi -name '*.whl' | xargs pip install &&
 
 ARG cli_version=0.0.0-dev
 ARG cli_version_revision=1

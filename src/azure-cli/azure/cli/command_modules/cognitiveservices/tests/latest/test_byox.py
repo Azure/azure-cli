@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.decorators import serial_test
 
 
 class CognitiveServicesByoxTests(ScenarioTest):
@@ -40,13 +40,16 @@ class CognitiveServicesByoxTests(ScenarioTest):
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)
 
+        self.kwargs.update({
+            'sname': self.create_random_name(prefix='cs_cli_test_', length=16)
+        })
+
         # test to create cognitive services account
         self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} '
                  '--assign-identity --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
-                         self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded')])
+                         self.check('sku.name', '{sku}')])
         self.cmd('az cognitiveservices account update -n {sname} -g {rg} --storage {storageIds}').get_output_in_json()
         account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
 
@@ -58,14 +61,15 @@ class CognitiveServicesByoxTests(ScenarioTest):
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)
 
+    @serial_test()
     @ResourceGroupPreparer()
     def test_cognitiveservices_encryption(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
 
         self.kwargs.update({
             'sname': sname,
-            'kind': 'Face',
-            'sku': 'E0',
+            'kind': 'FormRecognizer',
+            'sku': 'S0',
             'location': 'centraluseuap',
             'encryption': '{\\\"keySource\\\":\\\"Microsoft.CognitiveServices\\\"}'
         })
@@ -76,13 +80,11 @@ class CognitiveServicesByoxTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Creating')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
-        for i in range(10):
-            time.sleep(15)
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
+
+        account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
+
 
         self.assertEqual(account['identity']['type'], 'SystemAssigned')
         self.assertTrue(account['properties']['encryption'] is not None)
@@ -102,13 +104,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Creating')])
-
-        for i in range(10):
-            time.sleep(0.1)  # when generating recording, use a large value such as 15
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('az cognitiveservices account update -n {sname} -g {rg} --encryption {encryption}')
 

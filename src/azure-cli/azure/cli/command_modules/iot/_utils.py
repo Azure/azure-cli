@@ -5,7 +5,6 @@
 
 from os.path import exists, join
 import base64
-import random
 from OpenSSL import crypto
 
 
@@ -46,16 +45,15 @@ def open_certificate(certificate_path):
     if certificate_path.endswith('.pem') or certificate_path.endswith('.cer'):
         with open(certificate_path, "rb") as cert_file:
             certificate = cert_file.read()
-            try:
-                certificate = certificate.decode("utf-8")
-            except UnicodeError:
-                certificate = base64.b64encode(certificate).decode("utf-8")
+        certificate = base64.b64encode(certificate).decode("utf-8")
     return certificate
 
 
-def generateKey(byteLength=32):
-    key = ''
-    while byteLength > 0:
-        key += chr(random.randrange(1, 128))
-        byteLength -= 1
-    return base64.b64encode(key.encode()).decode('utf-8')
+def generate_key(byte_length=32):
+    """
+    Generate cryptographically secure device key.
+    """
+    import secrets
+
+    token_bytes = secrets.token_bytes(byte_length)
+    return base64.b64encode(token_bytes).decode("utf8")

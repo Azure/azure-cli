@@ -11,11 +11,12 @@ from knack.log import get_logger
 
 from msrest.exceptions import DeserializationError
 
-from azure.mgmt.batch import BatchManagementClient
+from azure.mgmt.batch import BatchManagement
 from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountUpdateParameters,
-                                     AutoStorageBaseProperties,
+                                     AutoStorageBaseProperties, ActivateApplicationPackageParameters,
                                      Application, EncryptionProperties,
-                                     KeyVaultProperties, BatchAccountIdentity)
+                                     KeyVaultProperties, BatchAccountIdentity,
+                                     BatchAccountRegenerateKeyParameters)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
@@ -99,7 +100,7 @@ def create_account(client,
         parameters.key_vault_reference = {'id': keyvault, 'url': keyvault_url}
         parameters.pool_allocation_mode = 'UserSubscription'
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name,
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name=resource_group_name,
                        account_name=account_name, parameters=parameters)
 
 
@@ -171,6 +172,13 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
             }
 
 
+def renew_accounts_keys(client, resource_group_name, account_name, key_name=None):
+    parameters = BatchAccountRegenerateKeyParameters(key_name=key_name)
+
+    return client.regenerate_key(resource_group_name=resource_group_name,
+                                 account_name=account_name, parameters=parameters)
+
+
 @transfer_doc(Application)
 def update_application(client,
                        resource_group_name, account_name, application_name, allow_updates=None,
@@ -215,7 +223,7 @@ def create_application_package(cmd, client,
                                resource_group_name, account_name, application_name, version_name,
                                package_file):
     # create application if not exist
-    mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
+    mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagement)
     try:
         mgmt_client.application.get(resource_group_name, account_name, application_name)
     except Exception:  # pylint:disable=broad-except
@@ -228,8 +236,16 @@ def create_application_package(cmd, client,
     _upload_package_blob(cmd.cli_ctx, package_file, result.storage_url)
 
     # activate the application package
-    client.activate(resource_group_name, account_name, application_name, version_name, "zip")
+    parameters = ActivateApplicationPackageParameters(format="zip")
+    client.activate(resource_group_name, account_name, application_name, version_name, parameters)
     return client.get(resource_group_name, account_name, application_name, version_name)
+
+
+@transfer_doc(ApplicationPackageOperations.activate)
+def activate_application_package(client, resource_group_name, account_name, application_name, version_name, f_ormat):
+    # activate the application package
+    parameters = ActivateApplicationPackageParameters(format=f_ormat)
+    return client.activate(resource_group_name, account_name, application_name, version_name, parameters)
 
 
 # Data plane custom commands

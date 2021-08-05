@@ -246,3 +246,55 @@ def transform_restore_policy_output(result):
     if hasattr(result, 'restore_policy') and hasattr(result.restore_policy, 'last_enabled_time'):
         del result.restore_policy.last_enabled_time
     return result
+
+
+def transform_response_with_bytearray(response):
+    """ transform bytearray to string """
+    from msrest import Serializer
+    for item in response:
+        if response[item] and isinstance(response[item], (bytes, bytearray)):
+            response[item] = Serializer.serialize_bytearray(response[item])
+    return response
+
+
+def transform_share_rm_output(result):
+    if hasattr(result, 'snapshot_time') and result.snapshot_time:
+        snapshot = result.snapshot_time
+        result.snapshot_time = snapshot.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+    return result
+
+
+def transform_share_rm_list_output(result):
+    new_result = []
+    for item in result:
+        new_result.append(transform_share_rm_output(item))
+    return new_result
+
+
+def transform_container_json_output(result):
+    result = todict(result)
+    new_result = {
+        "metadata": result.pop('metadata', None),
+        "name": result.pop('name', None),
+        "properties": {
+            "etag": result.pop('etag', None),
+            "hasImmutabilityPolicy": result.pop('hasImmutabilityPolicy', None),
+            "hasLegalHold": result.pop('hasLegalHold', None),
+            "lastModified": result.pop('lastModified', None),
+            "lease": result.pop('lease', None),
+            "publicAccess": result.pop('publicAccess', None)
+        }
+    }
+    new_result.update(result)
+    return new_result
+
+
+def transform_container_list_output(result):
+    for i, item in enumerate(result):
+        if isinstance(item, dict) and 'nextMarker' in item:
+            continue
+        try:
+            result[i] = transform_container_json_output(item)
+        except KeyError:  # Deal with BlobPrefix object when there is delimiter specified
+            result[i] = {"name": item.name}
+    return result

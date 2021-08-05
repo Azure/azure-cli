@@ -3,8 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-locals
+
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.util import user_confirmation
 
 from ._constants import get_managed_sku, get_premium_sku
 from ._utils import (
@@ -12,7 +15,7 @@ from ._utils import (
     validate_managed_registry,
     validate_sku_update,
     get_resource_group_name_by_registry_name,
-    user_confirmation
+    resolve_identity_client_id
 )
 from ._docker_utils import get_login_credentials, EMPTY_GUID
 from .network_rule import NETWORK_RULE_NOT_SUPPORTED
@@ -23,7 +26,11 @@ SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
 
 
 def acr_check_name(client, registry_name):
-    return client.check_name_availability(registry_name)
+    registry = {
+        'name': registry_name,
+        'type': 'Microsoft.ContainerRegistry/registries'
+    }
+    return client.check_name_availability(registry)
 
 
 def acr_list(client, resource_group_name=None):
@@ -40,11 +47,14 @@ def acr_create(cmd,
                location=None,
                admin_enabled=False,
                default_action=None,
-               tags=None,
                workspace=None,
                identity=None,
                key_encryption_key=None,
-               public_network_enabled=None):
+               public_network_enabled=None,
+               zone_redundancy=None,
+               allow_trusted_services=None,
+               allow_exports=None,
+               tags=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -53,7 +63,8 @@ def acr_create(cmd,
         raise CLIError("Classic SKU is no longer supported. Please select a managed SKU.")
 
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
-    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
+    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
+                        zone_redundancy=zone_redundancy, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
 
@@ -63,7 +74,10 @@ def acr_create(cmd,
     if identity or key_encryption_key:
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
 
-    lro_poller = client.create(resource_group_name, registry_name, registry)
+    _handle_network_bypass(cmd, registry, allow_trusted_services)
+    _handle_export_policy(cmd, registry, allow_exports)
+
+    lro_poller = client.begin_create(resource_group_name, registry_name, registry)
 
     if workspace:
         from msrestazure.tools import is_valid_resource_id, resource_id
@@ -85,7 +99,7 @@ def acr_create(cmd,
 def acr_delete(cmd, client, registry_name, resource_group_name=None, yes=False):
     user_confirmation("Are you sure you want to delete the registry '{}'?".format(registry_name), yes)
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    return client.delete(resource_group_name, registry_name)
+    return client.begin_delete(resource_group_name, registry_name)
 
 
 def acr_show(cmd, client, registry_name, resource_group_name=None):
@@ -100,6 +114,9 @@ def acr_update_custom(cmd,
                       default_action=None,
                       data_endpoint_enabled=None,
                       public_network_enabled=None,
+                      allow_trusted_services=None,
+                      anonymous_pull_enabled=None,
+                      allow_exports=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -121,12 +138,39 @@ def acr_update_custom(cmd,
     if public_network_enabled is not None:
         _configure_public_network_access(cmd, instance, public_network_enabled)
 
+    if anonymous_pull_enabled is not None:
+        instance.anonymous_pull_enabled = anonymous_pull_enabled
+
+    _handle_network_bypass(cmd, instance, allow_trusted_services)
+    _handle_export_policy(cmd, instance, allow_exports)
+
     return instance
 
 
 def _configure_public_network_access(cmd, registry, enabled):
     PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
     registry.public_network_access = (PublicNetworkAccess.enabled if enabled else PublicNetworkAccess.disabled)
+
+
+def _handle_network_bypass(cmd, registry, allow_trusted_services):
+    if allow_trusted_services is not None:
+        NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions')
+        registry.network_rule_bypass_options = (NetworkRuleBypassOptions.azure_services
+                                                if allow_trusted_services else NetworkRuleBypassOptions.none)
+
+
+def _handle_export_policy(cmd, registry, allow_exports):
+    if allow_exports is not None:
+        Policies, ExportPolicy, ExportPolicyStatus = cmd.get_models('Policies', 'ExportPolicy', 'ExportPolicyStatus')
+
+        if registry.policies is None:
+            registry.policies = Policies()
+
+        status = ExportPolicyStatus.DISABLED if not allow_exports else ExportPolicyStatus.ENABLED
+        try:
+            registry.policies.export_policy.status = status
+        except AttributeError:
+            registry.policies.export_policy = ExportPolicy(status=status)
 
 
 def acr_update_get(cmd):
@@ -148,7 +192,7 @@ def acr_update_set(cmd,
 
     validate_sku_update(cmd, registry.sku.name, parameters.sku)
 
-    return client.update(resource_group_name, registry_name, parameters)
+    return client.begin_update(resource_group_name, registry_name, parameters)
 
 
 def acr_show_endpoints(cmd,
@@ -242,6 +286,8 @@ def acr_login(cmd,
                        'docker commands, to avoid authentication errors, use all lowercase.')
 
     from subprocess import PIPE, Popen
+    logger.debug("Invoking '%s --username %s --password <redacted> %s'",
+                 docker_command, username, login_server)
     p = Popen([docker_command, "login",
                "--username", username,
                "--password", password,
@@ -401,7 +447,7 @@ def _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_
                                             resource_group=resource_group_name,
                                             resource=identity)
 
-    identity_client_id = _resolve_identity_client_id(cmd.cli_ctx, identity)
+    identity_client_id = resolve_identity_client_id(cmd.cli_ctx, identity)
 
     KeyVaultProperties, EncryptionProperty = cmd.get_models('KeyVaultProperties', 'EncryptionProperty')
     registry.encryption = EncryptionProperty(status='enabled', key_vault_properties=KeyVaultProperties(
@@ -439,7 +485,7 @@ def assign_identity(cmd, client, registry_name, identities, resource_group_name=
             r = _ensure_identity_resource_id(subscription_id, resource_group_name, r)
             registry.identity.user_assigned_identities[r] = {}
 
-    return client.update(resource_group_name, registry_name, registry)
+    return client.begin_update(resource_group_name, registry_name, registry)
 
 
 def show_identity(cmd, client, registry_name, resource_group_name=None):
@@ -458,11 +504,14 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         raise CLIError("The registry {} has no system or user assigned identities.".format(registry_name))
 
     if remove_system_identity:
-        if registry.identity.type == ResourceIdentityType.user_assigned:
+        if registry.identity.type.lower() == ResourceIdentityType.user_assigned.lower():
             raise CLIError("The registry does not have a system identity assigned.")
         registry.identity.type = (ResourceIdentityType.none
-                                  if registry.identity.type == ResourceIdentityType.system_assigned
+                                  if registry.identity.type.lower() == ResourceIdentityType.system_assigned.lower()
                                   else ResourceIdentityType.user_assigned)
+        # if we have no system assigned identitiy then set identity object to none
+        registry.identity.principal_id = None
+        registry.identity.tenant_id = None
 
     if remove_user_identities:
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -489,11 +538,11 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         if not registry.identity.user_assigned_identities:
             registry.identity.user_assigned_identities = None  # required for put
             registry.identity.type = (ResourceIdentityType.none
-                                      if registry.identity.type == ResourceIdentityType.user_assigned
+                                      if registry.identity.type.lower() == ResourceIdentityType.user_assigned.lower()
                                       else ResourceIdentityType.system_assigned)
 
     # this method should be named create_or_update as it calls the PUT method
-    return client.create(resource_group_name, registry_name, registry)
+    return client.begin_create(resource_group_name, registry_name, registry)
 
 
 def show_encryption(cmd, client, registry_name, resource_group_name=None):
@@ -519,11 +568,11 @@ def rotate_key(cmd, client, registry_name, identity=None, key_encryption_key=Non
                 identity = _ensure_identity_resource_id(subscription_id=get_subscription_id(cmd.cli_ctx),
                                                         resource_group=resource_group_name,
                                                         resource=identity)
-                client_id = _resolve_identity_client_id(cmd.cli_ctx, identity)
+                client_id = resolve_identity_client_id(cmd.cli_ctx, identity)
 
         registry.encryption.key_vault_properties.identity = client_id
 
-    return client.update(resource_group_name, registry_name, registry)
+    return client.begin_update(resource_group_name, registry_name, registry)
 
 
 def _analyze_identities(identities):
@@ -540,16 +589,6 @@ def _ensure_identity_resource_id(subscription_id, resource_group, resource):
                        namespace='Microsoft.ManagedIdentity',
                        type='userAssignedIdentities',
                        name=resource)
-
-
-def _resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
-    from azure.mgmt.msi import ManagedServiceIdentityClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.tools import parse_resource_id
-
-    res = parse_resource_id(managed_identity_resource_id)
-    client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
-    return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
 
 
 def list_private_link_resources(cmd, client, registry_name, resource_group_name=None):

@@ -11,6 +11,9 @@ EXECUTOR_SIZE = {'Small': {'Cores': 4, 'Memory': '28g'}, 'Medium': {'Cores': 8, 
 SPARK_DOTNET_ASSEMBLY_SEARCH_PATHS_KEY = 'spark.yarn.appMasterEnv.DOTNET_ASSEMBLY_SEARCH_PATHS'
 SPARK_DOTNET_UDFS_FOLDER_NAME = 'udfs'
 SPARK_SERVICE_ENDPOINT_API_VERSION = '2019-11-01-priview'
+AdministratorType = "activeDirectory"
+ITEM_NAME_MAPPING = {'bigDataPools': '{bigDataPoolName}', 'integrationRuntimes': '{integrationRuntimeName}',
+                     'linkedServices': '{linkedServiceName}', 'credentials': '{credentialName}'}
 
 
 class SynapseSqlCreateMode(str, Enum):
@@ -37,3 +40,40 @@ class SparkStatementLanguage(str, Enum):
     SparkDotNet = 'SparkDotNet'
     CSharp = 'CSharp'
     SQL = 'SQL'
+
+
+# pylint: disable=too-few-public-methods
+class SqlPoolConnectionClientType(str, Enum):
+    '''
+    Types of SQL clients whose connection strings we can generate.
+    '''
+
+    AdoDotNet = 'ado.net'
+    Jdbc = 'jdbc'
+    Php = 'php'
+    Odbc = 'odbc'
+    PhpPdo = 'php_pdo'
+
+
+class SqlPoolConnectionClientAuthenticationType(str, Enum):
+    '''
+    Types of SQL client authentication mechanisms for connection strings
+    that we can generate.
+    '''
+
+    SqlPassword = 'SqlPassword'
+    ActiveDirectoryPassword = 'ADPassword'
+    ActiveDirectoryIntegrated = 'ADIntegrated'
+
+
+class PrincipalType(str, Enum):
+    user = "User"
+    group = "Group"
+    service_principal = "ServicePrincipal"
+
+
+class ItemType(str, Enum):
+    bigDataPools = "bigDataPools"
+    integrationRuntimes = "integrationRuntimes"
+    credentials = "credentials"
+    linkedServices = "linkedServices"
