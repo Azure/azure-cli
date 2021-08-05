@@ -29,7 +29,7 @@ def _update_mapper(existing, new, keys):
 # pylint: disable=unused-argument
 # account update - active_directory is amended with subgroup commands
 def create_account(client, account_name, resource_group_name, location, tags=None, encryption=None):
-    account_encryption = AccountEncryption(key_source=encryption)
+    account_encryption = AccountEncryption(key_source=encryption) if encryption is not None else None
     body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
     return client.begin_create_or_update(resource_group_name, account_name, body)
 
@@ -40,7 +40,8 @@ def create_account(client, account_name, resource_group_name, location, tags=Non
 def add_active_directory(instance, account_name, resource_group_name, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
-                         security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, tags=None):
+                         security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, tags=None,
+                         administrators=None):
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
@@ -48,7 +49,8 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                                        server_root_ca_certificate=server_root_ca_cert, aes_encryption=aes_encryption,
                                        ldap_signing=ldap_signing, security_operators=security_operators,
                                        ldap_over_tls=ldap_over_tls,
-                                       allow_local_nfs_users_with_ldap=allow_local_ldap_users)
+                                       allow_local_nfs_users_with_ldap=allow_local_ldap_users,
+                                       administrators=administrators)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
     _update_mapper(instance, body, ['active_directories'])
@@ -88,8 +90,14 @@ def patch_account(instance, account_name, resource_group_name, tags=None, encryp
 
 
 # ---- POOL ----
-def create_pool(client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None, qos_type=None):
-    body = CapacityPool(service_level=service_level, size=int(size) * tib_scale, location=location, tags=tags, qos_type=qos_type)
+def create_pool(client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None,
+                qos_type=None, cool_access=None):
+    body = CapacityPool(service_level=service_level,
+                        size=int(size) * tib_scale,
+                        location=location,
+                        tags=tags,
+                        qos_type=qos_type,
+                        cool_access=cool_access)
     return client.begin_create_or_update(resource_group_name, account_name, pool_name, body)
 
 
@@ -114,7 +122,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   has_root_access=None, snapshot_dir_visible=None,
                   smb_encryption=None, smb_continuously_avl=None, encryption_key_source=None,
                   rule_index=None, unix_read_only=None, unix_read_write=None, cifs=None,
-                  allowed_clients=None, ldap_enabled=None):
+                  allowed_clients=None, ldap_enabled=None, chown_mode=None, cool_access=None, coolness_period=None,
+                  unix_permissions=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
@@ -150,7 +159,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                                          kerberos5i_read_write=kerberos5i_rw,
                                          kerberos5p_read_only=kerberos5p_r,
                                          kerberos5p_read_write=kerberos5p_rw,
-                                         has_root_access=has_root_access)
+                                         has_root_access=has_root_access,
+                                         chown_mode=chown_mode)
         rules.append(export_policy)
 
         volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
@@ -198,20 +208,33 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         smb_encryption=smb_encryption,
         smb_continuously_available=smb_continuously_avl,
         encryption_key_source=encryption_key_source,
-        ldap_enabled=ldap_enabled)
+        ldap_enabled=ldap_enabled,
+        cool_access=cool_access,
+        coolness_period=coolness_period,
+        unix_permissions=unix_permissions)
 
     return client.begin_create_or_update(resource_group_name, account_name, pool_name, volume_name, body)
 
 
 # -- volume update
-def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None,
-                 backup_enabled=False, backup_policy_id=None, policy_enforced=False, throughput_mibps=None):
+def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=False,
+                 backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None):
+    data_protection = None
+    backup = None
+    snapshot = None
+    if vault_id is not None:
+        backup = VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
+                                        backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
+    if snapshot_policy_id is not None:
+        snapshot = VolumeSnapshotProperties(snapshot_policy_id=snapshot_policy_id)
+
+    if backup is not None or snapshot is not None:
+        data_protection = VolumePatchPropertiesDataProtection(backup=backup, snapshot=snapshot)
+
     params = VolumePatch(
         usage_threshold=None if usage_threshold is None else int(usage_threshold) * gib_scale,
         service_level=service_level,
-        data_protection=None if vault_id is None else VolumePatchPropertiesDataProtection(
-            backup=VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
-                                          backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)),
+        data_protection=data_protection,
         tags=tags)
     if throughput_mibps is not None:
         params.throughput_mibps = throughput_mibps
@@ -338,13 +361,15 @@ def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_po
 
 
 # ---- VOLUME BACKUPS ----
-def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location):
-    body = Backup(location=location)
+def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location,
+                  use_existing_snapshot=None):
+    body = Backup(location=location, use_existing_snapshot=use_existing_snapshot)
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
 
-def update_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, tags=None):
-    body = BackupPatch(tags=tags)
+def update_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, tags=None, label=None,
+                  use_existing_snapshot=None):
+    body = BackupPatch(tags=tags, label=label, use_existing_snapshot=use_existing_snapshot)
     return client.begin_update(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
 
@@ -374,4 +399,4 @@ def patch_backup_policy(client, resource_group_name, account_name, backup_policy
         yearly_backups_to_keep=yearly_backups,
         enabled=enabled,
         tags=tags)
-    return client.update(resource_group_name, account_name, backup_policy_name, body)
+    return client.begin_update(resource_group_name, account_name, backup_policy_name, body)

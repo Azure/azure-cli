@@ -399,7 +399,7 @@ long-summary: >-
     If needed, use the --role argument to explicitly create a role assignment.
 parameters:
   - name: --name -n
-    short-summary: A URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
+    short-summary: Display name of the service principal. If not present, default to azure-cli-%Y-%m-%d-%H-%M-%S where the suffix is the time of creation.
   - name: --cert
     short-summary: Certificate to use for credentials.
     long-summary: When used with `--keyvault,` indicates the name of the cert to use or create. Otherwise, supply a PEM or DER formatted public certificate string. Use `@{path}` to load from a file. Do not include private key info.

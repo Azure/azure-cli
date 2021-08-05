@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.command_modules.profile.custom import list_subscriptions, get_access_token, login
 from azure.cli.core.mock import DummyCli

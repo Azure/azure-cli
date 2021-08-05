@@ -346,12 +346,12 @@ examples:
 
 helps['keyvault private-endpoint-connection'] = """
 type: group
-short-summary: Manage vault private endpoint connections.
+short-summary: Manage vault/HSM private endpoint connections.
 """
 
 helps['keyvault private-endpoint-connection approve'] = """
 type: command
-short-summary: Approve a private endpoint connection request for a Key Vault.
+short-summary: Approve a private endpoint connection request for a Key Vault/HSM.
 examples:
   - name: Approve a private endpoint connection request for a Key Vault by ID.
     text: |
@@ -367,11 +367,14 @@ examples:
     text: |
         name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
         az keyvault private-endpoint-connection approve -g myrg --vault-name mykv --name $name
+  - name: Approve a private endpoint connection request for a HSM using hsm name and connection name.
+    text: |
+        az keyvault private-endpoint-connection approve -g myrg --hsm-name myhsm --name myconnection
 """
 
 helps['keyvault private-endpoint-connection reject'] = """
 type: command
-short-summary: Reject a private endpoint connection request for a Key Vault.
+short-summary: Reject a private endpoint connection request for a Key Vault/HSM.
 examples:
   - name: Reject a private endpoint connection request for a Key Vault by ID.
     text: |
@@ -387,11 +390,14 @@ examples:
     text: |
         name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
         az keyvault private-endpoint-connection reject -g myrg --vault-name mystorageaccount --name $name
+  - name: Reject a private endpoint connection request for a HSM using hsm name and connection name.
+    text: |
+        az keyvault private-endpoint-connection reject -g myrg --hsm-name myhsm --name myconnection
 """
 
 helps['keyvault private-endpoint-connection delete'] = """
 type: command
-short-summary: Delete the specified private endpoint connection associated with a Key Vault.
+short-summary: Delete the specified private endpoint connection associated with a Key Vault/HSM.
 examples:
   - name: Delete a private endpoint connection request for a Key Vault by ID.
     text: |
@@ -400,18 +406,21 @@ examples:
     text: |
         id = (az keyvault show -n mykv --query "privateEndpointConnections[0].id")
         az keyvault private-endpoint-connection delete --id $id
-  - name: Delete a private endpoint connection request for a Key Vault using account name and connection name.
+  - name: Delete a private endpoint connection request for a Key Vault using vault name and connection name.
     text: |
         az keyvault private-endpoint-connection delete -g myrg --vault-name mykv --name myconnection
-  - name: Delete a private endpoint connection request for a Key Vault using account name and connection name.
+  - name: Delete a private endpoint connection request for a Key Vault using vault name and connection name.
     text: |
         name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
         az keyvault private-endpoint-connection delete -g myrg --vault-name mykv --name $name
+  - name: Delete a private endpoint connection request for a HSM using hsm name and connection name.
+    text: |
+        az keyvault private-endpoint-connection delete -g myrg --hsm-name myhsm --name myconnection
 """
 
 helps['keyvault private-endpoint-connection show'] = """
 type: command
-short-summary: Show details of a private endpoint connection associated with a Key Vault.
+short-summary: Show details of a private endpoint connection associated with a Key Vault/HSM.
 examples:
   - name: Show details of a private endpoint connection request for a Key Vault by ID.
     text: |
@@ -443,16 +452,19 @@ examples:
 
 helps['keyvault private-link-resource'] = """
 type: group
-short-summary: Manage vault private link resources.
+short-summary: Manage vault/HSM private link resources.
 """
 
 helps['keyvault private-link-resource list'] = """
 type: command
-short-summary: List the private link resources supported for a Key Vault.
+short-summary: List the private link resources supported for a Key Vault/HSM.
 examples:
   - name: Get the private link resources that need to be created for a Key Vault.
     text: |
         az keyvault private-link-resource list --vault-name mykv
+  - name: Get the private link resources that need to be created for a HSM.
+    text: |
+        az keyvault private-link-resource list --hsm-name myhsm
 """
 
 helps['keyvault recover'] = """

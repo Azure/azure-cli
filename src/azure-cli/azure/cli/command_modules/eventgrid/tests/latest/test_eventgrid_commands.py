@@ -670,6 +670,43 @@ class EventGridTests(ScenarioTest):
 
         self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
 
+    @ResourceGroupPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap', kind='StorageV2')
+    def test_event_subscription_with_delivery_identity(self, resource_group):
+        scope = self.cmd('az group show -n {} -o json'.format(resource_group)).get_output_in_json()['id']
+        event_subscription_name = self.create_random_name(prefix='cli', length=40)
+        eventhub_id = '/subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/DevExpRg/providers/Microsoft.eventhub/namespaces/devexpeh/eventhubs/eventhub1'
+
+        self.kwargs.update({
+            'event_subscription_name': event_subscription_name,
+            'eventhub_id': eventhub_id,
+            'location': 'centraluseuap',
+            'scope': scope,
+        })
+
+        self.kwargs['source_resource_id'] = self.cmd('storage account show -n {sa}').get_output_in_json()['id']
+        
+        # Create an eventsubscription with eventhub as destination
+        self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint-type eventhub --endpoint {eventhub_id}', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # Turn on delivery with resource identity
+        self.cmd('az eventgrid event-subscription update --source-resource-id {source_resource_id} --name {event_subscription_name} --delivery-identity systemassigned --delivery-identity-endpoint-type eventhub --delivery-identity-endpoint {eventhub_id}', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # Turn off delivery with resource identity
+        self.cmd('az eventgrid event-subscription update --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint-type eventhub --endpoint {eventhub_id}', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
+
+
     @ResourceGroupPreparer()
     @unittest.skip('Will be re-enabled once global operations are enabled for 2020-01-01-preview API version')
     def test_create_event_subscriptions_to_arm_resource_group(self, resource_group):
@@ -984,8 +1021,8 @@ class EventGridTests(ScenarioTest):
         # self.cmd('az eventgrid event-subscription delete  --source-resource-id {source_resource_id} --name {event_subscription_name4}')
         self.cmd('az storage account delete -y -g {rg} -n {sa}')
 
-    @ResourceGroupPreparer(name_prefix='clieventgridrg', location='centraluseuap')
-    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='clieventgridrg', location='eastus2euap')
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='eastus2euap')
     def test_create_event_subscriptions_with_20200101_features(self, resource_group):
         event_subscription_name1 = 'CliTestEventGridEventsubscription1'
         event_subscription_name2 = 'CliTestEventGridEventsubscription2'
@@ -1017,7 +1054,7 @@ class EventGridTests(ScenarioTest):
             'endpoint_baseurl_for_validation': endpoint_baseurl_for_validation,
             'azure_active_directory_tenant_id': azure_active_directory_tenant_id,
             'azure_active_directory_application_id_or_uri': azure_active_directory_application_id_or_uri,
-            'location': 'centraluseuap'
+            'location': 'eastus2euap'
         })
 
         self.kwargs['source_resource_id'] = self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']

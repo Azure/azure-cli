@@ -36,7 +36,6 @@ def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_
     file = main_definition_file
     class_name = main_class_name
     arguments = command_line_arguments
-    configuration = configuration
     # dotnet spark
     if language.upper() == SparkBatchLanguage.SparkDotNet.upper() or language.upper() == SparkBatchLanguage.CSharp.upper():
         file = DOTNET_FILE
