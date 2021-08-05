@@ -1691,7 +1691,7 @@ examples:
   - name: Get a synapse managed private endpoints.
     text: |-
         az synapse managed-private-endpoints show --workspace-name testsynapseworkspace \\
-          --managed-private-endpoint-name testendpointname
+          --pe-name testendpointname
 """
 
 helps['synapse managed-private-endpoints create'] = """
@@ -1701,8 +1701,8 @@ examples:
   - name: Create a synapse managed private endpoints.
     text: |-
         az synapse managed-private-endpoints create --workspace-name testsynapseworkspace \\
-          --managed-private-endpoint-name testendpointname \\
-          --private-Link-Resource-Id '/subscriptions/yoursub/resourceGroups/myResourceGroup/providers/Microsoft.Storage/accounts/myStorageAccount' \\
+          --pe-name testendpointname \\
+          --resource-id '/subscriptions/yoursub/resourceGroups/myResourceGroup/providers/Microsoft.Storage/accounts/myStorageAccount' \\
           --group-Id blob
 """
 
@@ -1722,5 +1722,5 @@ examples:
   - name: Delete a synapse managed private endpoints.
     text: |-
         az synapse managed-private-endpoints delete --workspace-name testsynapseworkspace \\
-          --managed-private-endpoint-name testendpointname
+          --pe-name testendpointname
 """

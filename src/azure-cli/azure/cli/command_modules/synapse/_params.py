@@ -737,11 +737,11 @@ def load_arguments(self, _):
     for scope in ['show', 'create', 'delete']:
         with self.argument_context('synapse managed-private-endpoints ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-            c.argument('managed_private_endpoint_name', help='The managed private endpoint name.')
+            c.argument('managed_private_endpoint_name', options_list=['--pe-name'], help='The managed private endpoint name.')
 
     with self.argument_context('synapse managed-private-endpoints list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     with self.argument_context('synapse managed-private-endpoints create') as c:
-        c.argument('private_Link_Resource_Id', help='The ARM resource ID of the resource to which the managed private endpoint is created. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}')
+        c.argument('private_Link_Resource_Id', options_list=['--resource-id'], help='The ARM resource ID of the resource to which the managed private endpoint is created. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}')
         c.argument('group_Id', help='The groupId to which the managed private endpoint is created')
