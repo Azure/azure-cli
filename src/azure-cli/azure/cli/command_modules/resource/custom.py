@@ -2105,6 +2105,7 @@ def unregister_feature(client, resource_provider_namespace, feature_name):
                    "to get the change propagated", feature_name, resource_provider_namespace)
     return client.unregister(resource_provider_namespace, feature_name)
 
+
 def list_feature_registrations(client, resource_provider_namespace=None):
     if resource_provider_namespace:
         return client.list_by_subscription(provider_namespace=resource_provider_namespace)

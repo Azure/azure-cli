@@ -91,6 +91,7 @@ def cf_deployment_operations(cli_ctx, _):
 def cf_features(cli_ctx, _):
     return _resource_feature_client_factory(cli_ctx).features
 
+
 def cf_feature_registrations(cli_ctx, _):
     return _resource_feature_client_factory(cli_ctx).subscription_feature_registrations
 
