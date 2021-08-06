@@ -235,7 +235,7 @@ def _assert_capability_available(capability):
 def is_available(status):
     '''
     Returns True if the capability status is available (including default).
-    There are four capability statuses:
+    There are three capability statuses:
         VISIBLE: customer can see the slo but cannot use it
         AVAILABLE: customer can see the slo and can use it
         DEFAULT: customer can see the slo and can use it
