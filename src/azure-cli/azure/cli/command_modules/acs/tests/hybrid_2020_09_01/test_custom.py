@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: skip-file
-import mock
+from unittest import mock
 import os
 import platform
 import requests
