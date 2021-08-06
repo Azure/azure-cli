@@ -4701,18 +4701,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         with open(hook_file_path, "w") as f:
             json.dump("enabled", f)
 
-        # test aks browse cmd
-        browse_cmd = 'aks browse --resource-group={resource_group} --name={name} --listen-address=1.1.1.1 --listen-port=8080 --disable-browser'
-        self.cmd(browse_cmd, checks=[
-            StringCheck("Test Invalid Address! Test Passed!")
-        ])
+        try:
+            # test aks browse cmd
+            browse_cmd = 'aks browse --resource-group={resource_group} --name={name} --listen-address=1.1.1.1 --listen-port=8080 --disable-browser'
+            self.cmd(browse_cmd, checks=[
+                StringCheck("Test Invalid Address! Test Passed!")
+            ])
+        # clean up test hook file even if test failed
+        finally:
+            if os.path.exists(hook_file_path):
+                # delete file
+                os.remove(hook_file_path)
 
-        # delete test hook file
-        os.remove(hook_file_path)
-
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+            # delete cluster
+            self.cmd(
+                'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     # live only, otherwise the current recording mechanism will also record the binary files of
     # kubectl and kubelogin resulting in the cassette file size exceeding 100MB
