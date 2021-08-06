@@ -441,14 +441,13 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         os.makedirs(install_dir)
 
     system = platform.system()
-    cpu_architecture = platform.machine()
     if system == 'Windows':
         sub_dir, binary_name = 'windows_amd64', 'kubelogin.exe'
     elif system == 'Linux':
         # TODO: Support ARM CPU here
         sub_dir, binary_name = 'linux_amd64', 'kubelogin'
     elif system == 'Darwin':
-        if cpu_architecture == 'arm64':
+        if platform.machine() == 'arm64':
             sub_dir, binary_name = 'darwin_arm64', 'kubelogin'
         else:
             sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
