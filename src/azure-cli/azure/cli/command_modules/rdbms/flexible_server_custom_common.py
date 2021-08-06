@@ -163,6 +163,20 @@ def migration_delete_func(cmd, client, resource_group_name, server_name, migrati
     return r.json()
 
 
+def migration_check_name_availability(cmd, client, resource_group_name, server_name, migration_name):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    if not yes:
+        user_confirmation(
+            "Are you sure you want to delete the migration '{0}' on target server '{1}', resource group '{2}'".format(
+                migration_name, server_name, resource_group_name))
+
+    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/checkMigrationNameAvailability?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name))
+
+    return r.json()
+
+
 def firewall_rule_delete_func(client, resource_group_name, server_name, firewall_rule_name, yes=None):
     result = None
     if not yes:
