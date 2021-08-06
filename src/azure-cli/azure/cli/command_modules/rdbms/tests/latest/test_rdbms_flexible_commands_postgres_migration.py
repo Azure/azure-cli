@@ -34,7 +34,7 @@ logger = get_logger(__name__)
 class MigrationScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    def test_postgres_server_migration(self):
+    def test_postgres_flexible_server_migration(self):
         self._test_server_migration('postgres')
 
     def _test_server_migration(self, database_engine):
