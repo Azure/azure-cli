@@ -115,7 +115,7 @@ DEPENDENCIES = [
     'azure-mgmt-redis~=12.0.0',
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource==18.1.0',
+    'azure-mgmt-resource==19.0.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=0.6.0',
