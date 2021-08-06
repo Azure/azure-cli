@@ -2056,8 +2056,103 @@ class AKSCreateParameters:
 class AKSCreateContext:
     # used to store intermediate variables and parameters that are not specified by the user but are automatically
     # completed/patched (neither original function parameters nor models)
-    def __init__(self):
-        pass
+    def __init__(self, cmd, client, raw_parameters):
+        self.cmd = cmd
+        self.client = client
+        self.raw_param = AKSCreateParameters(raw_parameters)
+        self.cached_param = dict()
+        self.intermediates = dict()
+        self.dynamic_inference_indicator = object()
+
+    def set_intermediate_variable(self, variable_name, value, overwrite_exists=False):
+        if variable_name in self.intermediates:
+            if overwrite_exists:
+                logger.debug("The intermediate variable '{}' already exists, the original value '{}' is overwritten with the new value '{}'!".format(variable_name, self.intermediates.get(variable_name), value))
+                self.intermediates[variable_name] = value
+            else:
+                logger.warning("The intermediate variable '{}' already exists, but it is not specified to be overwritten! Original value '{}', new value '{}'!".format(variable_name, self.intermediates.get(variable_name), value))
+        else:
+            self.intermediates[variable_name] = value
+
+    def get_intermediate_variable(self, variable_name, default_value=None):
+        if variable_name not in self.intermediates:
+            logger.warning("The intermediate variable '{}' does not exist! Return default value '{}'!".format(variable_name, default_value))
+        return self.intermediates.get(variable_name, default_value)
+
+    def get_param(self, parameter_name, read_cache=False, read_raw=False, default_value=None):
+        if read_cache and read_raw:
+            raise CLIError("Cannot read raw and and cached parameter at the same time!")
+        if not read_cache and not read_raw:
+            logger.debug("Unspecified reading method, return default value '{}' for parameter '{}'!".format(default_value, parameter_name))
+        value = default_value
+        if read_raw:
+            value = getattr(self.raw_param, parameter_name, default_value)
+        if read_cache:
+            value = self.cached_param.get(parameter_name, default_value)
+        return value
+
+    def _get_param_wrapper(self, parameter_name, dynamic_inference, read_cache, read_raw, default_value):
+        if not dynamic_inference and not read_cache and not read_raw:
+            logger.warning("No read method is specified, and dynamic inference is not enabled! Return default value '{}' for parameter '{}'!".format(default_value, parameter_name))
+            return default_value
+        if read_cache or read_raw:
+            return self.get_param(parameter_name=parameter_name, read_cache=read_cache, read_raw=read_raw, default_value=default_value)
+        return self.dynamic_inference_indicator
+
+    def get_vm_set_type(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
+        parameter_name = "vm_set_type"
+        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
+        if wrapper_result != self.dynamic_inference_indicator:
+            return wrapper_result
+
+        vm_set_type = _set_vm_set_type(vm_set_type=self.get_param("vm_set_type", read_raw=True), kubernetes_version=self.get_param("kubernetes_version", read_raw=True))
+        self.cached_param[parameter_name, vm_set_type]
+        return vm_set_type
+
+    def get_dns_name_prefix(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
+        parameter_name = "dns_name_prefix"
+        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
+        if wrapper_result != self.dynamic_inference_indicator:
+            return wrapper_result
+
+        dns_name_prefix = _get_default_dns_prefix(name=self.get_param("name", read_raw=True), resource_group_name=self.get_param("resource_group_name", read_raw=True), subscription_id=self.get_intermediate_variable("subscription_id"))
+        if dns_name_prefix and self.get_param("fqdn_subdomain", read_raw=True):
+            raise MutuallyExclusiveArgumentError("--dns-name-prefix and --fqdn-subdomain cannot be used at same time")
+        self.cached_param[parameter_name, dns_name_prefix]
+        return dns_name_prefix
+
+    def get_location(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
+        parameter_name = "location"
+        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
+        if wrapper_result != self.dynamic_inference_indicator:
+            return wrapper_result
+
+        location = self.get_param("location", read_raw=True)
+        if location is None:
+            location = _get_rg_location(self.cmd.cli_ctx, self.get_param("resource_group_name", read_raw=True))
+        self.cached_param[parameter_name, location]
+        return location
+
+    def get_load_balancer_sku(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
+        parameter_name = "load_balancer_sku"
+        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
+        if wrapper_result != self.dynamic_inference_indicator:
+            return wrapper_result
+
+        load_balancer_sku = set_load_balancer_sku(load_balancer_sku=self.get_param("load_balancer_sku", read_raw=True), kubernetes_version=self.get_param("kubernetes_version", read_raw=True))
+        self.cached_param[parameter_name, load_balancer_sku]
+        return load_balancer_sku
+
+    def get_fqdn_subdomain(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
+        parameter_name = "fqdn_subdomain"
+        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
+        if wrapper_result != self.dynamic_inference_indicator:
+            return wrapper_result
+
+        fqdn_subdomain = self.get_param(parameter_name, read_raw=True)
+        if dns_name_prefix and self.get_param("fqdn_subdomain", read_raw=True):
+            raise MutuallyExclusiveArgumentError("--dns-name-prefix and --fqdn-subdomain cannot be used at same time")
+        return fqdn_subdomain
 
 
 class AKSCreateDecorator:
@@ -2065,8 +2160,7 @@ class AKSCreateDecorator:
         self.cmd = cmd
         self.client = client
         self.models = models
-        self.param = AKSCreateParameters(raw_parameters)
-        self.context = AKSCreateContext()
+        self.context = AKSCreateContext(cmd, client, raw_parameters)
         # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
         # containerservice SDK, most models have been passed through the `modles` parameter (instantiatied
         # from `AKSCreateModels` (or `PreviewAKSCreateModels` in aks-preview), where resource_type (i.e.,
@@ -2089,10 +2183,10 @@ class AKSCreateDecorator:
 
     def check_params(self):
         # check ssh key
-        _validate_ssh_key(self.param.no_ssh_key, self.param.ssh_key_value)
+        _validate_ssh_key(self.context.get_param("no_ssh_key", read_raw=True), self.context.get_param("ssh_key_value", read_raw=True))
 
         # check dns name prefix and fqdn subdomain
-        if self.param.dns_name_prefix and self.param.fqdn_subdomain:
+        if self.context.get_param("dns_name_prefix", read_raw=True) and self.context.get_param("fqdn_subdomain", read_raw=True):
             raise MutuallyExclusiveArgumentError(
                 "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
             )
