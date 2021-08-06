@@ -1124,6 +1124,11 @@ examples:
     text: az feature unregister --namespace Microsoft.Compute --name GalleryPreview
 """
 
+helps['feature registration'] = """
+type: group
+short-summary: Manage resource provider feature registrations.
+"""
+
 helps['feature registration list'] = """
 type: command
 short-summary: List feature registrations.
