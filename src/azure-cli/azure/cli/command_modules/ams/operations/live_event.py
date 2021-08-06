@@ -118,7 +118,7 @@ def stop(cmd, client, resource_group_name, account_name, live_event_name,
 
     parameters = LiveEventActionInput(remove_outputs_on_stop=remove_outputs_on_stop)
     LongRunningOperation(cmd.cli_ctx)(client.begin_stop(resource_group_name, account_name, live_event_name,
-                                                  parameters))
+                                                        parameters))
 
     return client.get(resource_group_name, account_name, live_event_name)
 

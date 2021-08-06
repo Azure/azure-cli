@@ -16,11 +16,11 @@ def create_live_output(client, resource_group_name, account_name, live_event_nam
         fragments_per_ts_segment = Hls(fragments_per_ts_segment=fragments_per_ts_segment)
 
     return client.begin_create(resource_group_name=resource_group_name, account_name=account_name,
-                         live_event_name=live_event_name, live_output_name=live_output_name,
-                         parameters=LiveOutput(asset_name=asset_name, manifest_name=manifest_name,
-                                               archive_window_length=archive_window_length,
-                                               description=description, hls=fragments_per_ts_segment,
-                                               output_snap_time=output_snap_time))
+                               live_event_name=live_event_name, live_output_name=live_output_name,
+                               parameters=LiveOutput(asset_name=asset_name, manifest_name=manifest_name,
+                                                     archive_window_length=archive_window_length,
+                                                     description=description, hls=fragments_per_ts_segment,
+                                                     output_snap_time=output_snap_time))
 
 
 def get_live_output(client, resource_group_name, account_name, live_event_name, live_output_name):

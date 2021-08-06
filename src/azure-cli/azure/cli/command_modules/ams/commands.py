@@ -54,7 +54,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('set-authentication', 'set_mediaservice_trusted_storage',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.custom_command('sync-storage-keys', 'sync_storage_keys',
-                        custom_command_type=get_custom_sdk('account', sync_storage_keys))
+                         custom_command_type=get_custom_sdk('account', sync_storage_keys))
 
     with self.command_group('ams account sp', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_command('create', 'create_or_update_assign_sp_to_mediaservice',
@@ -186,7 +186,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
                          supports_no_wait=True)
         g.custom_command('scale', 'scale',
-                        custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
         g.generic_update_command('update',
                                  setter_name='update_streaming_endpoint_setter',
                                  setter_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),

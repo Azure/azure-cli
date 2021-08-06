@@ -88,6 +88,10 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
 
     _assign_role(cmd, role, sp_oid, ams.id)
 
+    print('+++ams+++', ams.id)
+
+    print('***client***', client)
+
     return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
                             tenant, app_id, app_display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
                             cmd.cli_ctx.cloud.endpoints.active_directory,

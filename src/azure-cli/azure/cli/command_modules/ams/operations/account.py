@@ -5,7 +5,8 @@
 
 from knack.util import CLIError
 
-from azure.mgmt.media.models import (ApiError, MediaService, MediaServiceIdentity, StorageAccount, CheckNameAvailabilityInput, AccountFilter, SyncStorageKeysInput)
+from azure.mgmt.media.models import (ApiError, MediaService, MediaServiceIdentity, StorageAccount,
+                                     CheckNameAvailabilityInput, SyncStorageKeysInput)
 
 
 def get_mediaservice(client, account_name, resource_group_name=None):
@@ -55,9 +56,11 @@ def remove_mediaservice_secondary_storage(client, resource_group_name, account_n
                                          ams.location,
                                          ams.tags)
 
+
 def sync_storage_keys(client, resource_group_name, account_name, id):
-    parameters = SyncStorageKeysInput(id = id)
+    parameters = SyncStorageKeysInput(id=id)
     return client.sync_storage_keys(resource_group_name, account_name, parameters)
+
 
 def set_mediaservice_trusted_storage(client, resource_group_name, account_name,
                                      storage_auth):
