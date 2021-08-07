@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only
-import mock
+from unittest import mock
 import unittest
 from msrestazure.tools import resource_id
 

@@ -7,7 +7,7 @@ from ..rule_decorators import help_file_entry_rule
 from ..linter import RuleError
 from ..util import LinterError
 import shlex
-import mock
+from unittest import mock
 import re
 
 # 'az' space then repeating runs of quoted tokens or non quoted characters
