@@ -8,6 +8,7 @@ import time
 
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest)
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
@@ -21,7 +22,8 @@ class BatchMgmtScenarioTests(ScenarioTest):
             StorageSASReplacer()
         ])
 
-    @ResourceGroupPreparer(location='northeurope')
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus')
     def test_batch_general_arm_cmd(self, resource_group):
         storage_name = self.create_random_name(prefix='clibatchteststor', length=24)
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
@@ -29,7 +31,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'str_n': storage_name,
-            'loc': 'northeurope',
+            'loc': 'eastus',
             'acc': account_name,
             'ip': resource_group + 'ip',
             'poolname': 'batch_account_cmd_pool'
@@ -82,12 +84,28 @@ class BatchMgmtScenarioTests(ScenarioTest):
         self.assertEqual(self.cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
         self.assertEqual(self.cli_ctx.config.get('batch', 'access_key'), keys2.get_output_in_json()['primary'])
 
+        self.cmd('batch account outbound-endpoints -g {rg} -n {acc}').assert_with_checks([
+            self.check('length(@)', 4),
+            self.check('[0].category', 'Azure Batch'),
+            self.check('[1].category', 'Azure Storage'),
+            self.check('[2].category', 'Microsoft Package Repository'),
+            self.check('[3].category', 'Azure Key Vault'),
+            self.check('length([0].endpoints)', 2),
+            self.check('ends_with([0].endpoints[0].domainName, `batch.azure.com`)', True) 
+        ])
+
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {acc} --yes')
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
-            [self.check('accountQuota', 3)])
+            [self.check('accountQuota', 1000)])
+
+        self.cmd('batch location list-skus -l {loc} --query "[0:20]"').assert_with_checks([
+            self.check('length(@)', 20), # Ensure at least 20 entries
+            self.check('[?name==`Basic_A2`] | [0].familyName', 'basicAFamily'),
+            self.check('[?name==`Basic_A2`] | [0].capabilities[?name==`vCPUs`] | [0].value', 2)
+        ])
 
 
 class BatchMgmtApplicationScenarioTests(ScenarioTest):
@@ -97,7 +115,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
             StorageSASReplacer()
         ])
 
-    @ResourceGroupPreparer(location='ukwest')
+    @ResourceGroupPreparer(location='eastus')
     def test_batch_application_cmd(self, resource_group):
         storage_name = self.create_random_name(prefix='clibatchteststor', length=24)
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
@@ -107,7 +125,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'str_n': storage_name,
-            'loc': 'ukwest',
+            'loc': 'eastus',
             'acc': account_name,
             'app': 'testapp',
             'app_p': '1.0',
