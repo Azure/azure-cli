@@ -447,7 +447,10 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         # TODO: Support ARM CPU here
         sub_dir, binary_name = 'linux_amd64', 'kubelogin'
     elif system == 'Darwin':
-        sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
+        if platform.machine() == 'arm64':
+            sub_dir, binary_name = 'darwin_arm64', 'kubelogin'
+        else:
+            sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
     else:
         raise CLIError(
             'Proxy server ({}) does not exist on the cluster.'.format(system))
