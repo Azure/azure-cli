@@ -52,7 +52,9 @@ from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ValidationError,
-                                       UnauthorizedError)
+                                       UnauthorizedError,
+                                       AzureInternalError,
+                                       FileOperationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -1641,10 +1643,10 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
             stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as err:
-        raise CLIError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
+        raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
         return output
-    raise CLIError("Failed to check the ACR.")
+    raise AzureInternalError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -1693,7 +1695,7 @@ def _aks_browse(
 
     # otherwise open the kube-dashboard addon
     if not which('kubectl'):
-        raise CLIError('Can not find kubectl executable in PATH')
+        raise FileOperationError('Can not find kubectl executable in PATH')
 
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(cmd, client, resource_group_name,
@@ -1708,12 +1710,12 @@ def _aks_browse(
             stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as err:
-        raise CLIError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
+        raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
     if dashboard_pod:
         # remove any "pods/" or "pod/" prefix from the name
         dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
     else:
-        raise CLIError("Couldn't find the Kubernetes dashboard pod.")
+        raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
 
     # find the port
     try:
@@ -1727,7 +1729,7 @@ def _aks_browse(
         # output format: "'{port}'"
         dashboard_port = int((dashboard_port.replace("'", "")))
     except subprocess.CalledProcessError as err:
-        raise CLIError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
+        raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
 
     # use https if dashboard container is using https
     if dashboard_port == 8443:
@@ -1787,9 +1789,9 @@ def _aks_browse(
                     return_msg = return_msg if return_msg else ""
                     return_msg += "Test Passed!"
                 except subprocess.CalledProcessError as new_err:
-                    raise CLIError('Could not open proxy: {} Command output: {}'.format(new_err, new_err.output))
+                    raise AzureInternalError('Could not open proxy: {} Command output: {}'.format(new_err, new_err.output))
             else:
-                raise CLIError('Could not open proxy: {} Command output: {}'.format(err, err.output))
+                raise AzureInternalError('Could not open proxy: {} Command output: {}'.format(err, err.output))
         except subprocess.TimeoutExpired:
             logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
             return_msg = return_msg if return_msg else ""
