@@ -124,14 +124,14 @@ def which(binary):
     return None
 
 
-def check_cmd_test_hook_file(filename):
+def get_cmd_test_hook_data(filename):
+    hook_data = ""
     curr_dir = os.path.dirname(os.path.realpath(__file__))
-    test_hook_file = os.path.join(curr_dir, 'tests/latest/data', filename)
-    if os.path.exists(test_hook_file):
-        with open(test_hook_file, "r") as f:
-            return json.load(f)
-    else:
-        return False
+    test_hook_file_path = os.path.join(curr_dir, 'tests/latest/data', filename)
+    if os.path.exists(test_hook_file_path):
+        with open(test_hook_file_path, "r") as f:
+            hook_data = json.load(f)
+    return hook_data
 
 
 def wait_then_open(url):
@@ -1756,8 +1756,8 @@ def _aks_browse(
         logger.warning('Proxy running on %s', proxy_url)
 
     timeout = None
-    test_hook = check_cmd_test_hook_file("test_aks_browse_legacy_hook.json")
-    if test_hook and test_hook == "enabled":
+    test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy_hook.json")
+    if test_hook_data and test_hook_data == "enabled":
         timeout = 10
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:

@@ -85,7 +85,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
 
-    def _get_test_data_file(self, filename):
+    def get_test_data_file_path(self, filename):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         return os.path.join(curr_dir, 'data', filename)
 
@@ -4697,7 +4697,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
         # create test hook file
-        hook_file_path = self._get_test_data_file("test_aks_browse_legacy_hook.json")
+        hook_file_path = self.get_test_data_file_path("test_aks_browse_legacy_hook.json")
         with open(hook_file_path, "w") as f:
             json.dump("enabled", f)
 
