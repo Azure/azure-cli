@@ -4177,8 +4177,6 @@ class VMGalleryImage(ScenarioTest):
         })
 
         # Prepare image in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
         self.cmd(
@@ -5419,8 +5417,6 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
         })
 
         # Prepare sig in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-keys --subscription {aux_sub}')
         self.cmd(
@@ -5463,8 +5459,6 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
         })
 
         # Prepare sig in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
         self.cmd(

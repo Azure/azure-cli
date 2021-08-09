@@ -210,7 +210,6 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
             'ext_rg': another_resource_group,
         })
 
-        self.cmd('group create -l eastus -n {ext_rg} --subscription {ext_sub}')
         sa1_json = self.cmd('storage account create -n {sa} -g {ext_rg} -l eastus --sku Standard_LRS --kind Storage --subscription {ext_sub}').get_output_in_json()
         sa2_json = self.cmd('storage account create -n {sa2} -g {rg} -l eastus --sku Standard_LRS --kind Storage').get_output_in_json()
         self.kwargs.update({

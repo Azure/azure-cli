@@ -3392,8 +3392,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'rg': another_resource_group,
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
-        self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['rg']))
+
         self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['image']))
@@ -3517,8 +3516,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'rg': another_resource_group,
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
-        self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['rg']))
+
         self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['image']))
