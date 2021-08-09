@@ -3360,7 +3360,9 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
 class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
-    def test_group_deployment_cross_tenant(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus',
+                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+    def test_group_deployment_cross_tenant(self, resource_group, another_resource_group):
         # Prepare Network Interface
         self.kwargs.update({
             'vm_rg': resource_group,
@@ -3387,7 +3389,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
             'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
+            'rg': another_resource_group,
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
         self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
@@ -3483,7 +3485,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             self.cmd('group deployment create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" --aux-subs "{aux_sub}"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_group_cross_tenant', location='eastus')
-    def test_deployment_group_cross_tenant(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_group_cross_tenant', location='eastus',
+                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+    def test_deployment_group_cross_tenant(self, resource_group, another_resource_group):
         # Prepare Network Interface
         self.kwargs.update({
             'vm_rg': resource_group,
@@ -3510,7 +3514,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
             'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
+            'rg': another_resource_group,
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
         self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
