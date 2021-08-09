@@ -4424,7 +4424,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # assign
-        import mock
+        from unittest import mock
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             assignment = self.cmd(
                 'role assignment create --assignee-object-id={identity_id} --role "Private DNS Zone Contributor" --scope={zone_id} --assignee-principal-type ServicePrincipal').get_output_in_json()

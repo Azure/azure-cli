@@ -10,7 +10,7 @@ import platform
 import tempfile
 import time
 import unittest
-import mock
+from unittest import mock
 import uuid
 
 import six

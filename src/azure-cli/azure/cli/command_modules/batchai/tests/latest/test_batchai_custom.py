@@ -30,7 +30,7 @@ from azure.mgmt.batchai.models import (
     SshConfiguration, ImageReference, ScaleSettings, ManualScaleSettings, AutoScaleSettings, ResourceId, SetupTask
 )
 # Some valid ssh public key value.
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 SSH_KEY = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKUDnWeK6rx36apNE9ij1iAXn68FKXLTW0009XK/7dyMewlNfXi6Z2opnxHDD' \
           'YWucMluU0dsvBR22OuYH2RHriPJTi1jN3aZ0zZSrlH/W4MSNQKlG/AnrjJPA3xfYjIKLGuKBqSIvMsmrkuDfIfMaDnPcxb+GzM1' \
