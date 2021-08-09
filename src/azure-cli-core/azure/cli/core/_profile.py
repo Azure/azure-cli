@@ -19,7 +19,7 @@ from knack.util import CLIError
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
-    is_windows, is_wsl, scopes_to_resource
+    is_windows, is_wsl, scopes_to_resource, resource_to_scopes
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -717,7 +717,6 @@ class Profile:
                                                                                    use_cert_sn_issuer)
             except adal.AdalError as ex:
                 from azure.cli.core.adal_authentication import adal_error_handler
-                from azure.cli.core.util import resource_to_scopes
                 adal_error_handler(ex, scopes=resource_to_scopes(resource))
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
