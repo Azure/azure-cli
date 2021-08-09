@@ -393,6 +393,26 @@ class NetworkPublicIpWithSku(ScenarioTest):
             self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
 
 
+class NetworkCustomIpPrefix(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_custom_ip_prefix', location='eastus2')
+    def test_network_custom_ip_prefix(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'prefix': 'prefix1'
+        })
+
+        # Test custom prefix CRUD
+        self.cmd('network custom-ip prefix create -g {rg} -n {prefix} --cidr 40.40.40.0/24')
+        self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+        self.cmd('network custom-ip prefix list -g {rg}',
+                 check=self.check('length(@)', 1))
+        self.cmd('network custom-ip prefix delete -g {rg} -n {prefix}')
+        self.cmd('network custom-ip prefix list -g {rg}',
+                 check=self.is_empty())
+
+
 class NetworkPublicIpPrefix(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix', location='eastus2')

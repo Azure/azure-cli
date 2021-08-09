@@ -1714,6 +1714,11 @@ def load_arguments(self, _):
         c.argument('network_profile_name', network_profile_name, options_list=['--name', '-n'])
     # endregion
 
+    # region CustomIpPrefix
+    with self.argument_context('network custom-ip prefix') as c:
+        c.argument('custom_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/customIpPrefixes'), id_part='name', help='The name of the custom IP prefix.')
+    # endregion
+
     # region PublicIPAddresses
     with self.argument_context('network public-ip') as c:
         c.argument('public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')

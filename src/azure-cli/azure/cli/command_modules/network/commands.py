@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long,too-many-lines
 
-from azure.cli.core.commands import DeploymentOutputLongRunningOperation
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, client_factory
 from azure.cli.core.commands.arm import (
     deployment_validate_table_format, handle_template_based_exception)
 from azure.cli.core.commands import CliCommandType
@@ -30,7 +30,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
     cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
-    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections)
+    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -442,6 +442,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#VirtualApplianceSitesOperations.{}',
         client_factory=cf_virtual_appliance_sites,
         min_api='2020-05-01'
+    )
+
+    network_custom_ip_prefix_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
+        client_factory=cf_custom_ip_prefixes,
+        min_api='2021-02-01'
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
@@ -1206,6 +1212,15 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)
         g.custom_show_command('show', 'show_nw_troubleshooting_result', validator=process_nw_troubleshooting_show_namespace)
     # endregion
+
+    # region CustomIpPrefix
+    with self.command_group('network custom-ip prefix', network_custom_ip_prefix_sdk, client_factory=cf_custom_ip_prefixes) as g:
+        g.custom_command('create', 'create_custom_ip_prefix')
+        g.command('delete', 'begin_delete')
+        g.custom_command('list', 'list_custom_ip_prefixes')
+        g.show_command('show')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix')
+    # endRegion
 
     # region PublicIPAddresses
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
