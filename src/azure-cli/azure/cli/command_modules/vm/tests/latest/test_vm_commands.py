@@ -20,6 +20,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
     StorageAccountPreparer, JMESPathCheck, StringContainCheck, VirtualNetworkPreparer, KeyVaultPreparer)
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -4161,7 +4162,7 @@ class VMGalleryImage(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2')
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2',
-                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
     def test_sig_image_version_cross_tenant(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
@@ -4169,8 +4170,8 @@ class VMGalleryImage(ScenarioTest):
             'another_rg': another_resource_group,
             'vm': self.create_random_name('cli_test_image_version_', 40),
             'image_name': self.create_random_name('cli_test_image_version_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
             'sig_name': self.create_random_name('cli_test_image_version_', 40),
             'image_definition_name': self.create_random_name('cli_test_image_version_', 40),
             'version': '0.1.0'
@@ -5403,7 +5404,7 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_', location='westus2')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2',
-                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
     def test_vm_cross_tenant_update(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
@@ -5411,8 +5412,8 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
             'another_rg': another_resource_group,
             'another_vm': self.create_random_name('cli_test_vm_cross_tenant_', 40),
             'image_name': self.create_random_name('cli_test_vm_cross_tenant_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
             'vm': self.create_random_name('cli_test_vm_cross_tenant_', 40)
         })
 
@@ -5441,7 +5442,7 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2',
-                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
     def test_vmss_cross_tenant_update(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
@@ -5449,8 +5450,8 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
             'another_rg': another_resource_group,
             'vm': self.create_random_name('cli_test_vmss_update_', 40),
             'image_name': self.create_random_name('cli_test_vmss_update_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
             'sig_name': self.create_random_name('cli_test_vmss_update_', 40),
             'image_definition_name_1': self.create_random_name('cli_test_vmss_update_', 40),
             'image_definition_name_2': self.create_random_name('cli_test_vmss_update_', 40),
