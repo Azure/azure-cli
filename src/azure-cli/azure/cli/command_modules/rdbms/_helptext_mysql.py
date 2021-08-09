@@ -249,11 +249,6 @@ short-summary: Restore a flexible server from backup.
 examples:
   - name: Restore 'testServer' to a specific point-in-time as a new server 'testServerNew'.
     text: az mysql flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --restore-time "2017-06-15T13:10:00Z"
-  - name: Restore 'testServer2' to 'testServerNew', where 'testServerNew' is in a different resource group from 'testServer2'.
-    text: |
-        az mysql flexible-server restore --resource-group testGroup --name testServerNew \\
-          --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testServer2" \\
-          --restore-time "2017-06-15T13:10:00Z"
 """
 
 helps['mysql flexible-server show'] = """
@@ -317,4 +312,27 @@ short-summary: Show the connection strings for a MySQL flexible-server database.
 examples:
   - name: Show connection strings for cmd and programming languages.
     text: az mysql flexible-server show-connection-string -s testServer -u username -p password -d databasename
+"""
+
+helps['mysql flexible-server deploy'] = """
+type: group
+short-summary: Enable and run github action workflow for MySQL server
+"""
+
+helps['mysql flexible-server deploy setup'] = """
+type: command
+short-summary: Create github action workflow file for MySQL server.
+examples:
+  - name: Create github action workflow file for MySQL server.
+    text: az mysql flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
+  - name: Create github action workflow file for MySQL server and push it to the remote repository
+    text: az mysql flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
+"""
+
+helps['mysql flexible-server deploy run'] = """
+type: command
+short-summary: Run an existing workflow in your github repository
+examples:
+  - name: Run an existing workflow in your github repository
+    text: az mysql flexible-server deploy run --action-name testAction --branch userBranch
 """

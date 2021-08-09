@@ -75,7 +75,7 @@ _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
 
-_USE_VENDORED_SUBSCRIPTION_SDK = True
+_USE_VENDORED_SUBSCRIPTION_SDK = False
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -301,6 +301,7 @@ class Profile:
         """Build an empty Subscription which will be used as a tenant account.
         API version doesn't matter as only specified attributes are preserved by _normalize_properties."""
         if _USE_VENDORED_SUBSCRIPTION_SDK:
+            # pylint: disable=no-name-in-module, import-error
             from azure.cli.core.vendored_sdks.subscriptions.models import Subscription
             SubscriptionType = Subscription
         else:
@@ -357,7 +358,7 @@ class Profile:
         token_entry = msi_creds.token
         token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
 
         subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
@@ -381,7 +382,7 @@ class Profile:
 
         _, token, _ = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
 
         subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
@@ -567,8 +568,9 @@ class Profile:
                 if sub[_TENANT_ID] != account[_TENANT_ID]:
                     external_tenants_info.append(sub[_TENANT_ID])
 
-        if external_tenants_info and (identity_type or in_cloud_console()):
-            raise CLIError("Cross-tenant authentication is not supported by managed identity and Cloud Shell. "
+        if external_tenants_info and \
+                (in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID) or identity_type):
+            raise CLIError("Cross-tenant authentication is not supported by managed identity and Cloud Shell account. "
                            "Please run `az login` with a user account or a service principal.")
 
         if identity_type is None:
@@ -624,6 +626,19 @@ class Profile:
         import posixpath
         authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
 
+        # Raise error for managed identity and Cloud Shell
+        not_support_message = "VM SSH currently doesn't support {}."
+
+        # managed identity
+        managed_identity_type, _ = Profile._try_parse_msi_account_name(account)
+        if managed_identity_type:
+            raise CLIError(not_support_message.format("managed identity"))
+
+        # Cloud Shell
+        if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            raise CLIError(not_support_message.format("Cloud Shell"))
+
+        # user
         if identity_type == _USER:
             # Use ARM as resource to get the refresh token from ADAL token cache
             resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -643,6 +658,7 @@ class Profile:
                 token_entry = self._login_with_authorization_code_flow(tenant, scopes_to_resource(scopes))
                 result = cred.acquire_token_by_refresh_token(token_entry['refreshToken'], scopes, data=data)
 
+        # service principal
         elif identity_type == _SERVICE_PRINCIPAL:
             from azure.cli.core.msal_authentication import ServicePrincipalCredential
 
@@ -650,8 +666,9 @@ class Profile:
             sp_credential = self._creds_cache.retrieve_cred_for_service_principal(sp_id)
             cred = ServicePrincipalCredential(sp_id, secret_or_certificate=sp_credential, authority=authority)
             result = cred.get_token(scopes=scopes, data=data)
+
         else:
-            raise CLIError("Identity type {} is currently unsupported".format(identity_type))
+            raise CLIError("Unknown identity type {}".format(identity_type))
 
         if 'error' in result:
             from azure.cli.core.auth.util import aad_error_handler
@@ -1043,6 +1060,7 @@ class SubscriptionFinder:
         """
         if _USE_VENDORED_SUBSCRIPTION_SDK:
             # Use vendered subscription SDK to decouple from `resource` command module
+            # pylint: disable=no-name-in-module, import-error
             from azure.cli.core.vendored_sdks.subscriptions import SubscriptionClient
             client_type = SubscriptionClient
         else:

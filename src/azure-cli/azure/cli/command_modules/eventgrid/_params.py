@@ -233,6 +233,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid topic key') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic', id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('key_name', help='Key name to regenerate key1 or key2')
 
     with self.argument_context('eventgrid topic list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -245,6 +246,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid domain key') as c:
         c.argument('domain_name', arg_type=domain_name_type, options_list=['--name', '-n'], id_part=None)
+        c.argument('key_name', help='Key name to regenerate key1 or key2')
 
     with self.argument_context('eventgrid domain topic') as c:
         c.argument('domain_name', arg_type=domain_name_type, id_part='name')
@@ -278,6 +280,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid partner namespace key') as c:
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, help='Name of the partner namespace', id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaces'))
+        c.argument('key_name', help='Key name to regenerate key1 or key2')
 
     with self.argument_context('eventgrid partner namespace show') as c:
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, options_list=['--name', '-n'], id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaces'))
@@ -350,10 +353,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('event_subscription_name', arg_type=name_type, options_list=['--name', '-n'], help='Name of the event subscription.')
         c.argument('endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default='webhook'))
         c.argument('event_delivery_schema', arg_type=get_enum_type(['eventgridschema', 'custominputschema', 'cloudeventschemav1_0']), help='The schema in which events should be delivered for this event subscription. By default, events will be delivered in the same schema in which they are published (based on the corresponding topic\'s input schema).')
-        c.argument('max_delivery_attempts', help="Maximum number of delivery attempts. Must be a number between 1 and 30.")
-        c.argument('max_events_per_batch', help="Maximum number of events in a batch. Must be a number between 1 and 5000.")
-        c.argument('preferred_batch_size_in_kilobytes', help="Preferred batch size in kilobytes. Must be a number between 1 and 1024.")
-        c.argument('event_ttl', help="Event time to live (in minutes). Must be a number between 1 and 1440.")
+        c.argument('max_delivery_attempts', type=int, help="Maximum number of delivery attempts. Must be a number between 1 and 30.")
+        c.argument('max_events_per_batch', type=int, help="Maximum number of events in a batch. Must be a number between 1 and 5000.")
+        c.argument('preferred_batch_size_in_kilobytes', type=int, help="Preferred batch size in kilobytes. Must be a number between 1 and 1024.")
+        c.argument('event_ttl', type=int, help="Event time to live (in minutes). Must be a number between 1 and 1440.")
         c.argument('deadletter_endpoint', help="The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.")
         c.argument('advanced_filter', arg_group="Filtering", action=EventSubscriptionAddFilter, nargs='+')
         c.argument('expiration_date', help="Date or datetime (in UTC, e.g. '2018-11-30T11:59:59+00:00' or '2018-11-30') after which the event subscription would expire. By default, there is no expiration for the event subscription.")
@@ -388,10 +391,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('event_subscription_name', arg_type=name_type, options_list=['--name', '-n'], help='Name of the event subscription.')
         c.argument('endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default='webhook'))
         c.argument('event_delivery_schema', arg_type=get_enum_type(['eventgridschema', 'custominputschema', 'cloudeventschemav1_0']), help='The schema in which events should be delivered for this event subscription. By default, events will be delivered in the same schema in which they are published (based on the corresponding topic\'s input schema).')
-        c.argument('max_delivery_attempts', help="Maximum number of delivery attempts. Must be a number between 1 and 30.")
-        c.argument('max_events_per_batch', help="Maximum number of events in a batch. Must be a number between 1 and 5000.")
-        c.argument('preferred_batch_size_in_kilobytes', help="Preferred batch size in kilobytes. Must be a number between 1 and 1024.")
-        c.argument('event_ttl', help="Event time to live (in minutes). Must be a number between 1 and 1440.")
+        c.argument('max_delivery_attempts', type=int, help="Maximum number of delivery attempts. Must be a number between 1 and 30.")
+        c.argument('max_events_per_batch', type=int, help="Maximum number of events in a batch. Must be a number between 1 and 5000.")
+        c.argument('preferred_batch_size_in_kilobytes', type=int, help="Preferred batch size in kilobytes. Must be a number between 1 and 1024.")
+        c.argument('event_ttl', type=int, help="Event time to live (in minutes). Must be a number between 1 and 1440.")
         c.argument('deadletter_endpoint', help="The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.")
         c.argument('advanced_filter', arg_group="Filtering", action=EventSubscriptionAddFilter, nargs='+')
         c.argument('expiration_date', help="Date or datetime (in UTC, e.g. '2018-11-30T11:59:59+00:00' or '2018-11-30') after which the event subscription would expire. By default, there is no expiration for the event subscription.")

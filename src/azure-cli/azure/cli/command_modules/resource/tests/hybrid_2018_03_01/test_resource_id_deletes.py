@@ -21,9 +21,8 @@ class ResourceDeleteTests(ScenarioTest):
                  .format(vm_name, resource_group, tag_name, username, password, 'password'))
 
         rsrc_list = self.cmd('resource list --tag {} --query [].id'.format(tag_name)).get_output_in_json()
-
         self.cmd('resource delete --ids {}'.format(' '.join(rsrc_list)))
-        self.cmd('resource list --tag {}'.format(tag_name), checks=[JMESPathCheck('length([])', 0)])
+        self.cmd('resource wait --ids {} --deleted --timeout 300'.format(''.join(rsrc_list)))
 
 
 if __name__ == '__main__':

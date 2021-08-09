@@ -34,14 +34,6 @@ def servicefabric_service_client_factory(cli_ctx, kwargs):
     return servicefabric_client_factory(cli_ctx, **kwargs).services
 
 
-def servicefabric_managed_clusters_client_factory(cli_ctx, kwargs):
-    return servicefabric_client_factory(cli_ctx, **kwargs).managed_clusters
-
-
-def servicefabric_node_types_client_factory(cli_ctx, kwargs):
-    return servicefabric_client_factory(cli_ctx, **kwargs).node_types
-
-
 def resource_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -82,6 +74,14 @@ def servicefabric_managed_client_factory(cli_ctx, **_):
 
 def servicefabric_managed_client_factory_all(cli_ctx, kwargs):
     return servicefabric_managed_client_factory(cli_ctx, **kwargs)
+
+
+def servicefabric_managed_cluster_client_factory(cli_ctx, kwargs):
+    return servicefabric_managed_client_factory(cli_ctx, **kwargs).managed_clusters
+
+
+def servicefabric_managed_node_type_client_factory(cli_ctx, kwargs):
+    return servicefabric_managed_client_factory(cli_ctx, **kwargs).node_types
 
 
 def servicefabric_managed_application_type_client_factory(cli_ctx, kwargs):

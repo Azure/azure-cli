@@ -14,6 +14,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, \
     RequiredArgumentMissingError
 from knack.log import get_logger
+from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id
 from msrestazure.tools import parse_resource_id
 from msrestazure.tools import resource_id
@@ -27,9 +28,9 @@ def validate_cidr(key):
         if cidr is not None:
             try:
                 ipaddress.IPv4Network(cidr)
-            except ValueError:
+            except ValueError as e:
                 raise InvalidArgumentValueError("Invalid --%s '%s'." %
-                                                (key.replace('_', '-'), cidr))
+                                                (key.replace('_', '-'), cidr)) from e
 
     return _validate_cidr
 
@@ -38,17 +39,20 @@ def validate_client_id(namespace):
     if namespace.client_id is not None:
         try:
             uuid.UUID(namespace.client_id)
-        except ValueError:
-            raise InvalidArgumentValueError("Invalid --client-id '%s'." % namespace.client_id)
+        except ValueError as e:
+            raise InvalidArgumentValueError("Invalid --client-id '%s'." % namespace.client_id) from e
 
         if namespace.client_secret is None or not str(namespace.client_secret):
             raise RequiredArgumentMissingError('Must specify --client-secret with --client-id.')
 
 
-def validate_client_secret(namespace):
-    if namespace.client_secret is not None:
-        if namespace.client_id is None or not str(namespace.client_id):
-            raise RequiredArgumentMissingError('Must specify --client-id with --client-secret.')
+def validate_client_secret(isCreate):
+    def _validate_client_secret(namespace):
+        if isCreate and namespace.client_secret is not None:
+            if namespace.client_id is None or not str(namespace.client_id):
+                raise RequiredArgumentMissingError('Must specify --client-id with --client-secret.')
+
+    return _validate_client_secret
 
 
 def validate_cluster_resource_group(cmd, namespace):
@@ -84,13 +88,12 @@ def validate_pull_secret(namespace):
         try:
             if not isinstance(json.loads(namespace.pull_secret), dict):
                 raise Exception()
-        except:
-            raise InvalidArgumentValueError("Invalid --pull-secret.")
+        except Exception as e:
+            raise InvalidArgumentValueError("Invalid --pull-secret.") from e
 
 
 def validate_subnet(key):
     def _validate_subnet(cmd, namespace):
-        from azure.core.exceptions import HttpResponseError
         subnet = getattr(namespace, key)
 
         if not is_valid_resource_id(subnet):
@@ -134,8 +137,8 @@ def validate_subnet(key):
         try:
             client.subnets.get(parts['resource_group'],
                                parts['name'], parts['child_name_1'])
-        except HttpResponseError as err:
-            raise CLIInternalError(err.message)
+        except CloudError as err:
+            raise CLIInternalError(err.message) from err
 
     return _validate_subnet
 
@@ -156,14 +159,6 @@ def validate_subnets(master_subnet, worker_subnet):
     if master_parts['child_name_1'].lower() == worker_parts['child_name_1'].lower():
         raise InvalidArgumentValueError("--master-subnet name '%s' must not equal --worker-subnet name '%s'." %
                                         (master_parts['child_name_1'], worker_parts['child_name_1']))
-
-    return resource_id(
-        subscription=master_parts['subscription'],
-        resource_group=master_parts['resource_group'],
-        namespace='Microsoft.Network',
-        type='virtualNetworks',
-        name=master_parts['name'],
-    )
 
 
 def validate_visibility(key):
@@ -207,3 +202,9 @@ def validate_worker_vm_disk_size_gb(namespace):
     if namespace.worker_vm_disk_size_gb:
         if namespace.worker_vm_disk_size_gb < 128:
             raise InvalidArgumentValueError('--worker-vm-disk-size-gb must be greater than or equal to 128.')
+
+
+def validate_refresh_cluster_credentials(namespace):
+    if namespace.refresh_cluster_credentials:
+        if namespace.client_secret is not None or namespace.client_id is not None:
+            raise RequiredArgumentMissingError('--client-id and --client-secret must be not set with --refresh-credentials.')  # pylint: disable=line-too-long

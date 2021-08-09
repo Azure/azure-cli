@@ -20,7 +20,6 @@ from .custom import get_site_configs
 
 logger = get_logger(__name__)
 
-NETWORK_API_VERSION = '2019-02-01'
 ALLOWED_HTTP_HEADER_NAMES = ['x-forwarded-host', 'x-forwarded-for', 'x-azure-fdid', 'x-fd-healthprobe']
 
 
@@ -59,7 +58,11 @@ def add_webapp_access_restriction(
         subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, vnet_rg)
         if not ignore_missing_vnet_service_endpoint:
             _ensure_subnet_service_endpoint(cmd.cli_ctx, subnet_id)
-
+        # check for duplicates
+        for rule in list(access_rules):
+            if rule.vnet_subnet_resource_id and rule.vnet_subnet_resource_id.lower() == subnet_id.lower():
+                raise ArgumentUsageError('Service endpoint rule for: ' + subnet_id + ' already exists. '
+                                         'Cannot add duplicate service endpoint rules.')
         rule_instance = IpSecurityRestriction(
             name=rule_name, vnet_subnet_resource_id=subnet_id,
             priority=priority, action=action, tag='Default', description=description)
@@ -114,7 +117,8 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
                 break
         elif subnet:
             subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
-            if rule.vnet_subnet_resource_id == subnet_id and rule.action == action:
+            if (rule.vnet_subnet_resource_id and
+                    rule.vnet_subnet_resource_id.lower() == subnet_id.lower() and rule.action == action):
                 if rule_name and (not rule.name or (rule.name and rule.name.lower() != rule_name.lower())):
                     continue
                 rule_instance = rule
@@ -164,6 +168,7 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
 
 
 def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
+    from azure.cli.core.profiles import AD_HOC_API_VERSIONS, ResourceType
     subnet_id_parts = parse_resource_id(subnet_id)
     subnet_subscription_id = subnet_id_parts['subscription']
     subnet_resource_group = subnet_id_parts['resource_group']
@@ -175,7 +180,8 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
                                  ' Use --ignore-missing-endpoint or -i to'
                                  ' skip validation and manually verify service endpoint.')
 
-    vnet_client = network_client_factory(cli_ctx, api_version=NETWORK_API_VERSION)
+    vnet_client = network_client_factory(cli_ctx, api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]
+                                         ['appservice_ensure_subnet'])
     subnet_obj = vnet_client.subnets.get(subnet_resource_group, subnet_vnet_name, subnet_name)
     subnet_obj.service_endpoints = subnet_obj.service_endpoints or []
     service_endpoint_exists = False

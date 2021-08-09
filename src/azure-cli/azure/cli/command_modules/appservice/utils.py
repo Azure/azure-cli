@@ -5,6 +5,7 @@
 
 import time
 from knack.util import CLIError
+from azure.cli.core.azclierror import (RequiredArgumentMissingError)
 
 
 def str2bool(v):
@@ -53,6 +54,14 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
+def normalize_sku_for_staticapp(sku):
+    if sku.lower() == 'free':
+        return 'Free'
+    if sku.lower() == 'standard':
+        return 'Standard'
+    raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
+
+
 def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
     def decorate(func):
         def call(*args, **kwargs):
@@ -67,3 +76,11 @@ def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
                 time.sleep(interval_sec)
         return call
     return decorate
+
+
+def raise_missing_token_suggestion():
+    pat_documentation = "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"
+    raise RequiredArgumentMissingError("GitHub access token is required to authenticate to your repositories. "
+                                       "If you need to create a Github Personal Access Token, "
+                                       "please run with the '--login-with-github' flag or follow "
+                                       "the steps found at the following link:\n{0}".format(pat_documentation))

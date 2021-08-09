@@ -3,6 +3,40 @@
 Release History
 ===============
 
+2.27.0
+++++++
+* Minor fixes
+
+2.26.1
+++++++
+* No changes
+
+2.26.0
+++++++
+* Minor fixes
+
+2.25.0
+++++++
+* Fix #18360 and #18262: Write to stderr issue (#18414)
+
+2.24.2
+++++++
+* No changes
+
+2.24.1
+++++++
+* No changes
+
+2.24.0
+++++++
+* Fix issue #16798: Azure CLI output is corrupted! (#18065)
+
+2.23.0
+++++++
+* Display allowed values in error message when enum validation fails (#17621)
+* Refactor AzCommandGroup (#17387)
+* Add a linter rule for `service_name.json` (#17428)
+
 2.22.1
 ++++++
 * Minor fixes

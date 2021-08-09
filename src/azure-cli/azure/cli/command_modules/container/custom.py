@@ -8,11 +8,12 @@
 import errno
 try:
     import msvcrt
+    from ._vt_helper import enable_vt_mode
 except ImportError:
     # Not supported for Linux machines.
     pass
+import os
 import platform
-import select
 import shlex
 import signal
 import sys
@@ -371,6 +372,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     return None, {}
 
 
+# pylint: disable=unsupported-assignment-operation
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
@@ -404,7 +406,7 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
     api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
 
     return sdk_no_wait(no_wait,
-                       resource_client.resources.create_or_update,
+                       resource_client.resources.begin_create_or_update,
                        resource_group_name,
                        "Microsoft.ContainerInstance",
                        '',
@@ -567,8 +569,8 @@ def container_export(cmd, resource_group_name, name, file):
                                              '',
                                              "containerGroups",
                                              name,
-                                             container_group_client.api_version,
-                                             False).__dict__
+                                             container_group_client.api_version).__dict__
+
     # Remove unwanted properites
     resource['properties'].pop('instanceView', None)
     resource.pop('sku', None)
@@ -601,7 +603,7 @@ def container_export(cmd, resource_group_name, name, file):
         yaml.safe_dump(resource, f, default_flow_style=False)
 
 
-def container_exec(cmd, resource_group_name, name, exec_command, container_name=None, terminal_row_size=20, terminal_col_size=80):
+def container_exec(cmd, resource_group_name, name, exec_command, container_name=None):
     """Start exec for a container. """
 
     container_client = cf_container(cmd.cli_ctx)
@@ -613,82 +615,124 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
         if container_name is None:
             container_name = container_group.containers[0].name
 
-        terminal_size = ContainerExecRequestTerminalSize(rows=terminal_row_size, cols=terminal_col_size)
+        terminalsize = os.get_terminal_size()
+        terminal_size = ContainerExecRequestTerminalSize(rows=terminalsize.lines, cols=terminalsize.columns)
 
         execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_command, terminal_size)
 
         if platform.system() is WINDOWS_NAME:
-            _start_exec_pipe_win(execContainerResponse.web_socket_uri, execContainerResponse.password)
+            _start_exec_pipe_windows(execContainerResponse.web_socket_uri, execContainerResponse.password)
         else:
-            _start_exec_pipe(execContainerResponse.web_socket_uri, execContainerResponse.password)
+            _start_exec_pipe_linux(execContainerResponse.web_socket_uri, execContainerResponse.password)
 
     else:
         raise CLIError('--container-name required when container group has more than one container.')
 
 
-def _start_exec_pipe_win(web_socket_uri, password):
+def _start_exec_pipe_windows(web_socket_uri, password):
+    import colorama
+    colorama.deinit()
+    enable_vt_mode()
+    buff = bytearray()
+    lock = threading.Lock()
 
-    def _on_ws_open(ws):
+    def _on_ws_open_windows(ws):
         ws.send(password)
-        t = threading.Thread(target=_capture_stdin, args=[ws])
-        t.daemon = True
-        t.start()
+        readKeyboard = threading.Thread(target=_capture_stdin, args=[_getch_windows, buff, lock], daemon=True)
+        readKeyboard.start()
+        flushKeyboard = threading.Thread(target=_flush_stdin, args=[ws, buff, lock], daemon=True)
+        flushKeyboard.start()
+    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_windows, on_message=_on_ws_msg)
+    # in windows, msvcrt.getch doesn't give us ctrl+C so we have to manually catch it with kb interrupt and send it over the socket
+    websocketRun = threading.Thread(target=ws.run_forever)
+    websocketRun.start()
+    while websocketRun.is_alive():
+        try:
+            time.sleep(0.01)
+        except KeyboardInterrupt:
+            try:
+                ws.send(b'\x03')  # CTRL-C character (ETX character)
+            finally:
+                pass
+    colorama.reinit()
 
-    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open, on_message=_on_ws_msg)
 
+def _start_exec_pipe_linux(web_socket_uri, password):
+    stdin_fd = sys.stdin.fileno()
+    old_tty = termios.tcgetattr(stdin_fd)
+    old_winch_handler = signal.getsignal(signal.SIGWINCH)
+    tty.setraw(stdin_fd)
+    tty.setcbreak(stdin_fd)
+    buff = bytearray()
+    lock = threading.Lock()
+
+    def _on_ws_open_linux(ws):
+        ws.send(password)
+        readKeyboard = threading.Thread(target=_capture_stdin, args=[_getch_linux, buff, lock], daemon=True)
+        readKeyboard.start()
+        flushKeyboard = threading.Thread(target=_flush_stdin, args=[ws, buff, lock], daemon=True)
+        flushKeyboard.start()
+    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_linux, on_message=_on_ws_msg)
     ws.run_forever()
+    termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_tty)
+    signal.signal(signal.SIGWINCH, old_winch_handler)
 
 
 def _on_ws_msg(ws, msg):
-    sys.stdout.write(msg)
+    if isinstance(msg, str):
+        msg = msg.encode()
+    sys.stdout.buffer.write(msg)
     sys.stdout.flush()
 
 
-def _capture_stdin(ws):
+def _capture_stdin(getch_func, buff, lock):
+    # this method will fill up the buffer from one thread (using the lock)
     while True:
-        if msvcrt.kbhit:
-            x = msvcrt.getch()
-            ws.send(x)
+        try:
+            x = getch_func()
+            lock.acquire()
+            buff.extend(x)
+            lock.release()
+        finally:
+            if lock.locked():
+                lock.release()
 
 
-def _start_exec_pipe(web_socket_uri, password):
-    ws = websocket.create_connection(web_socket_uri)
+def _flush_stdin(ws, buff, lock):
+    # this method will flush the buffer out to the websocket (using the lock)
+    while True:
+        time.sleep(0.01)
+        try:
+            if len(buff) == 0:
+                continue
+            lock.acquire()
+            x = bytes(buff)
+            buff.clear()
+            lock.release()
+            ws.send(x, opcode=0x2)  # OPCODE_BINARY = 0x2
+        except (OSError, IOError, websocket.WebSocketConnectionClosedException) as e:
+            if isinstance(e, websocket.WebSocketConnectionClosedException):
+                pass
+            elif e.errno == 9:  # [Errno 9] Bad file descriptor
+                pass
+            elif e.args and e.args[0] == errno.EINTR:
+                pass
+            else:
+                raise
+        finally:
+            if lock.locked():
+                lock.release()
 
-    oldtty = termios.tcgetattr(sys.stdin)
-    old_handler = signal.getsignal(signal.SIGWINCH)
 
-    try:
-        tty.setraw(sys.stdin.fileno())
-        tty.setcbreak(sys.stdin.fileno())
-        ws.send(password)
-        while True:
-            try:
-                if not _cycle_exec_pipe(ws):
-                    break
-            except (select.error, IOError) as e:
-                if e.args and e.args[0] == errno.EINTR:
-                    pass
-                else:
-                    raise
-    except websocket.WebSocketException:
-        pass
-    finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
-        signal.signal(signal.SIGWINCH, old_handler)
+def _getch_windows():
+    while not msvcrt.kbhit():
+        time.sleep(0.01)
+    return msvcrt.getch()
 
 
-def _cycle_exec_pipe(ws):
-    r, _, _ = select.select([ws.sock, sys.stdin], [], [])
-    if ws.sock in r:
-        data = ws.recv()
-        sys.stdout.write(data)
-        sys.stdout.flush()
-    if sys.stdin in r:
-        x = sys.stdin.read(1)
-        if not x:
-            return True
-        ws.send(x)
-    return True
+def _getch_linux():
+    ch = sys.stdin.read(1)
+    return ch.encode()
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):

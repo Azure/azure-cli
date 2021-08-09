@@ -692,7 +692,7 @@ short-summary: methods that list, add and remove hybrid-connections from functio
 
 helps['functionapp hybrid-connection add'] = """
 type: command
-short-summary: add a hybrid-connection to a functionapp
+short-summary: add an existing hybrid-connection to a functionapp
 examples:
   - name: add a hybrid-connection to a functionapp
     text: az functionapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
@@ -1092,7 +1092,7 @@ parameters:
   - name: --settings
     short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
   - name: --slot-settings
-    short-summary: Space-separated slot appsettings in KEY=VALUE format. Use @{file} to load from a file.
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 """
 
 helps['webapp config backup'] = """
@@ -1246,9 +1246,9 @@ examples:
   - name: turn on "alwaysOn"
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --always-on true
-  - name: turn on "alwaysOn" through a json with content "{"alwaysOn", true}"
+  - name: turn on "alwaysOn" through a json with content '{"alwaysOn", true}'
     text: >
-        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "{"alwaysOn": true}"
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations '{"alwaysOn": true}'
 
 """
 
@@ -1458,10 +1458,10 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a java|11|Java SE|8 runtime using '|' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using '|' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|8"
-  - name: Create a web app with a java|11|Java SE|8 runtime using ':' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using ':' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:8"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
@@ -1715,6 +1715,35 @@ examples:
         az webapp deployment user show
 """
 
+helps['webapp deployment github-actions'] = """
+type: group
+short-summary: Configure GitHub Actions for a webapp
+"""
+
+helps['webapp deployment github-actions add'] = """
+type: command
+short-summary: Add a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified webapp.
+examples:
+  - name: Add GitHub Actions to a specified repository, providing personal access token
+    text: >
+        az webapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --token MyPersonalAccessToken
+  - name: Add GitHub Actions to a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az webapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --login-with-github
+"""
+
+helps['webapp deployment github-actions remove'] = """
+type: command
+short-summary: Remove and disconnect the GitHub Actions workflow file from the specified repository.
+examples:
+  - name: Remove GitHub Actions from a specified repository, providing personal access token
+    text: >
+        az webapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --token MyPersonalAccessToken
+  - name: Remove GitHub Actions from a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az webapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --login-with-github
+"""
+
 helps['webapp hybrid-connection'] = """
 type: group
 short-summary: methods that list, add and remove hybrid-connections from webapps
@@ -1722,7 +1751,7 @@ short-summary: methods that list, add and remove hybrid-connections from webapps
 
 helps['webapp hybrid-connection add'] = """
 type: command
-short-summary: add a hybrid-connection to a webapp
+short-summary: add an existing hybrid-connection to a webapp
 examples:
   - name: add a hybrid-connection to a webapp
     text: az webapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
@@ -1868,6 +1897,11 @@ short-summary: List deployments associated with web app
 examples:
   - name: List the deployment logs
     text: az webapp log deployment list --name MyWebApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp log'] = """
+type: group
+short-summary: Manage function app logs.
 """
 
 helps['functionapp log deployment'] = """
@@ -2141,7 +2175,7 @@ examples:
 
 helps['appservice ase'] = """
 type: group
-short-summary: Manage App Service Environments v2
+short-summary: Manage App Service Environments
 """
 
 helps['appservice ase list'] = """
@@ -2164,7 +2198,7 @@ helps['appservice ase show'] = """
 
 helps['appservice ase list-addresses'] = """
     type: command
-    short-summary: List VIPs associated with an app service environment.
+    short-summary: List VIPs associated with an app service environment v2.
     examples:
     - name: List VIPs for an app service environments.
       text: az appservice ase list-addresses --name MyAseName
@@ -2194,8 +2228,7 @@ helps['appservice ase create'] = """
     - name: Create External app service environments v2 with large front-ends and scale factor of 10 in existing resource group and vNet.
       text: |
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --front-end-sku I3 --front-end-scale-factor 10 \\
-            --virtual-ip-type External
+            --subnet MyAseSubnet --front-end-sku I3 --front-end-scale-factor 10 --virtual-ip-type External
     - name: Create vNet and app service environment v2, but do not create network security group and route table in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
@@ -2215,33 +2248,31 @@ helps['appservice ase create'] = """
           az group create -g ASEv3ResourceGroup --location westeurope
 
           az network vnet create -g ASEv3ResourceGroup -n MyASEv3VirtualNetwork \\
-            --address-prefixes 10.0.0.0/16 --subnet-name Inbound --subnet-prefixes 10.0.0.0/24
-
-          az network vnet subnet create -g ASEv3ResourceGroup --vnet-name MyASEv3VirtualNetwork \\
-            --name Outbound --address-prefixes 10.0.1.0/24
+            --address-prefixes 10.0.0.0/16 --subnet-name MyASEv3Subnet --subnet-prefixes 10.0.0.0/24
 
           az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
-            --vnet-name MyASEv3VirtualNetwork --subnet Outbound --kind asev3
+            --vnet-name MyASEv3VirtualNetwork --subnet MyASEv3Subnet --kind asev3
+    - name: Create External zone redundant app service environment v3 with default values.
+      text: |
+          az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
+            --vnet-name MyASEv3VirtualNetwork --subnet MyASEv3Subnet --kind asev3 \\
+            --zone-redundant --virtual-ip-type External
 """
 
 helps['appservice ase create-inbound-services'] = """
     type: command
-    short-summary: Create the inbound services needed in preview for ASEv3 (private endpoint and DNS) or Private DNS Zone for Internal ASEv2.
+    short-summary: Private DNS Zone for Internal ASEv2.
     examples:
-    - name: Create private endpoint, Private DNS Zone, A records and ensure subnet network policy.
+    - name: Create Private DNS Zone and A records.
       text: |
           az appservice ase create-inbound-services -n MyASEName -g ASEResourceGroup \\
             --vnet-name MyASEVirtualNetwork --subnet MyAseSubnet
-    - name: Create private endpoint and ensure subnet network policy (ASEv3), but do not create DNS Zone and records.
-      text: |
-          az appservice ase create-inbound-services -n MyASEv3Name -g ASEv3ResourceGroup \\
-            --vnet-name MyASEv3VirtualNetwork --subnet Inbound --skip-dns
 """
 
 
 helps['appservice ase update'] = """
     type: command
-    short-summary: Update app service environment.
+    short-summary: Update app service environment v2.
     examples:
     - name: Update app service environment with medium front-ends and scale factor of 10.
       text: |
@@ -2293,12 +2324,12 @@ helps['staticwebapp list'] = """
       text: az staticwebapp list
 """
 
-helps['staticwebapp browse'] = """
+helps['staticwebapp show'] = """
     type: command
     short-summary: Show details of a static app.
     examples:
     - name: Show static app in a subscription.
-      text: az staticwebapp browse -n MyStaticAppName
+      text: az staticwebapp show -n MyStaticAppName
 """
 
 helps['staticwebapp create'] = """
@@ -2307,7 +2338,18 @@ helps['staticwebapp create'] = """
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
-       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master -t MyAccessToken
+    - name: Create static app in a subscription, retrieving token interactively
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master --login-with-github
+"""
+
+helps['staticwebapp update'] = """
+    type: command
+    short-summary: Update a static app. Return the app updated.
+    examples:
+    - name: Update static app to standard sku.
+      text: az staticwebapp update -n MyStaticAppName --sku Standard
 """
 
 helps['staticwebapp disconnect'] = """
@@ -2324,6 +2366,8 @@ helps['staticwebapp reconnect'] = """
     examples:
     - name: Connect a repo and branch to static app.
       text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --token MyAccessToken
+    - name: Connect a repo and branch to static app, retrieving token interactively
+      text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --login-with-github
 """
 
 helps['staticwebapp delete'] = """

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 import unittest
-import mock
+from unittest import mock
 import os
 import time
 import tempfile
@@ -14,6 +14,7 @@ import datetime
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
+from azure.cli.testsdk.checkers import JMESPathPatternCheck
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -42,7 +43,7 @@ class FunctionappACRScenarioTest(ScenarioTest):
             resource_group, acr_registry_name))
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'.format(
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime {}'.format(
             resource_group, functionapp, storage_account, plan, runtime))
         creds = self.cmd('acr credential show -n {} -g {}'.format(
             acr_registry_name, resource_group)).get_output_in_json()
@@ -95,7 +96,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         password = acr_creds['passwords'][0]['value']
         self.cmd(
             'functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime {}'
                  ' --deployment-container-image-name {}.azurecr.io/image-name:latest --docker-registry-server-user {}'
                  ' --docker-registry-server-password {}'.format(resource_group, functionapp, storage_account, plan, runtime,
                                                                 acr_registry_name, username, password))
@@ -141,7 +142,7 @@ class FunctionappACRDeploymentScenarioTest(ScenarioTest):
             resource_group, acr_registry_name))
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'.format(
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime {}'.format(
             resource_group, functionapp, storage_account, plan, runtime))
         creds = self.cmd('acr credential show -g {} -n {}'.format(
             resource_group, acr_registry_name)).get_output_in_json()
@@ -433,7 +434,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionapplinuxconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime node'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --functions-version 3 --runtime node'
                  .format(resource_group, functionapp_name, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -476,7 +477,9 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell')])
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell'),
+            JMESPathPatternCheck("[?name=='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'].value|[0]", ".+" + storage_account + "{1}.+"),
+            JMESPathPatternCheck("[?name=='WEBSITE_CONTENTSHARE'].value|[0]", "^" + functionapp_name.lower()[0:50])])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
@@ -509,7 +512,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --runtime node'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 3 --runtime node'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -563,7 +566,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --runtime node --runtime-version 8'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 3 --runtime node --runtime-version 14'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -573,7 +576,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~8')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~14')])
 
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
@@ -738,7 +741,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp, plan, storage_account), checks=[
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp, plan, storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
         result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
@@ -748,7 +751,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|10')])
+            JMESPathCheck('linuxFxVersion', 'Node|14')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
@@ -763,7 +766,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node --runtime-version 10'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node --runtime-version 14'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -775,7 +778,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|10')])
+            JMESPathCheck('linuxFxVersion', 'Node|14')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -937,7 +940,6 @@ class FunctionAppServicePlanLinux(ScenarioTest):
 
 
 class FunctionAppSlotTests(ScenarioTest):
-    @unittest.skip("Function app slot shouldn't use webapp")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_slot_appsetting_update(self, resource_group, storage_account):
@@ -948,7 +950,7 @@ class FunctionAppSlotTests(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp, plan,
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp, plan,
                                                                                         storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
@@ -966,7 +968,6 @@ class FunctionAppSlotTests(ScenarioTest):
         ])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
-    @unittest.skip("Function app slot shouldn't use webapp")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_slot_swap(self, resource_group, storage_account):
@@ -977,7 +978,7 @@ class FunctionAppSlotTests(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp,
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp,
                                                                                         plan,
                                                                                         storage_account), checks=[
             JMESPathCheck('name', functionapp)
@@ -1361,6 +1362,106 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('functionapp delete -n {functionapp_name}')
         self.cmd('functionapp plan delete -n {plan_name} -y')
 
+class FunctionappIdentityTest(ScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_assign_system_identity(self, resource_group, storage_account):
+        scope = '/subscriptions/{}/resourcegroups/{}'.format(
+            self.get_subscription_id(), resource_group)
+        role = 'Reader'
+        plan_name = self.create_random_name('func-msi-plan', 20)
+        functionapp_name = self.create_random_name('func-msi', 20)
+        self.cmd(
+            'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan_name, storage_account))
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            result = self.cmd('functionapp identity assign -g {} -n {} --role {} --scope {}'.format(
+                resource_group, functionapp_name, role, scope)).get_output_in_json()
+            self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+                self.check('principalId', result['principalId'])
+            ])
+
+        self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['principalId']), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].roleDefinitionName', role)
+        ])
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group,
+                                                           functionapp_name), checks=self.check('principalId', result['principalId']))
+        self.cmd(
+            'functionapp identity remove -g {} -n {}'.format(resource_group, functionapp_name))
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group,
+                                                           functionapp_name), checks=self.is_empty())
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_assign_user_identity(self, resource_group, storage_account):
+        plan_name = self.create_random_name('func-msi-plan', 20)
+        functionapp_name = self.create_random_name('func-msi', 20)
+        identity_name = self.create_random_name('id1', 8)
+
+        msi_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name), checks=[
+            self.check('name', identity_name)]).get_output_in_json()
+        self.cmd(
+            'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, functionapp_name))
+        result = self.cmd('functionapp identity assign -g {} -n {} --identities {}'.format(
+            resource_group, functionapp_name, msi_result['id'])).get_output_in_json()
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            self.check('principalId', result['principalId']),
+            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
+        ])
+
+        self.cmd('functionapp identity remove -g {} -n {} --identities {}'.format(
+            resource_group, functionapp_name, msi_result['id']))
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            self.check('principalId', result['principalId']),
+            self.check('userAssignedIdentities', None),
+        ])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_remove_identity(self, resource_group, storage_account):
+        plan_name = self.create_random_name('func-msi-plan', 20)
+        functionapp_name = self.create_random_name('func-msi', 20)
+        identity_name = self.create_random_name('id1', 8)
+        identity2_name = self.create_random_name('id1', 8)
+
+        msi_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name), checks=[
+            self.check('name', identity_name)]).get_output_in_json()
+        msi2_result = self.cmd('identity create -g {} -n {}'.format(
+            resource_group, identity2_name)).get_output_in_json()
+        self.cmd(
+            'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        self.cmd('functionapp identity assign -g {} -n {} --identities [system] {} {}'.format(
+            resource_group, functionapp_name, msi_result['id'], msi2_result['id']))
+
+        result = self.cmd('functionapp identity remove -g {} -n {} --identities {}'.format(
+            resource_group, functionapp_name, msi2_result['id'])).get_output_in_json()
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            self.check('principalId', result['principalId']),
+            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
+        ])
+
+        self.cmd('functionapp identity remove -g {} -n {}'.format(resource_group, functionapp_name))
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            self.check('principalId', None),
+            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
+        ])
+
+        self.cmd('functionapp identity remove -g {} -n {} --identities [system] {}'.format(
+            resource_group, functionapp_name, msi_result['id']))
+        self.cmd('functionapp identity show -g {} -n {}'.format(
+            resource_group, functionapp_name), checks=self.is_empty())
 
 if __name__ == '__main__':
     unittest.main()

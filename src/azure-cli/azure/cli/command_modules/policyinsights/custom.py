@@ -94,7 +94,7 @@ def list_policy_events(
             subscription_id,
             query_options)
 
-    return events.value
+    return events
 
 
 def list_policy_states(
@@ -195,7 +195,7 @@ def list_policy_states(
             subscription_id,
             query_options)
 
-    return states.value
+    return states
 
 
 def summarize_policy_states(
@@ -283,10 +283,10 @@ def trigger_policy_scan(
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if resource_group_name:
-        return sdk_no_wait(no_wait, client.trigger_resource_group_evaluation,
+        return sdk_no_wait(no_wait, client.begin_trigger_resource_group_evaluation,
                            subscription_id, resource_group_name)
 
-    return sdk_no_wait(no_wait, client.trigger_subscription_evaluation,
+    return sdk_no_wait(no_wait, client.begin_trigger_subscription_evaluation,
                        subscription_id)
 
 
@@ -475,12 +475,12 @@ def show_policy_metadata(cmd, client, resource_name):   # pylint: disable=unused
 def list_policy_metadata(cmd, client, top_value=None):   # pylint: disable=unused-argument
     if top_value is not None:
         from azure.mgmt.policyinsights.models import QueryOptions
-        page_iter = client.list(QueryOptions(top=top_value))
+        page_iter = client.list(QueryOptions(top=top_value)).by_page()
         results = []
 
         while len(results) < top_value:
             try:
-                results.extend(list(page_iter.advance_page()))
+                results += list(next(page_iter))
             except StopIteration:
                 break
 
