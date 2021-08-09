@@ -352,7 +352,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if not accounts:
             raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
                            "another application that uses Single Sign-On. "
-                           "Please run `mg login` to re-login.".format(username))
+                           "Please run `mgc login` to re-login.".format(username))
         account = accounts[0]
         auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
                                            account['home_account_id'], username)
@@ -368,7 +368,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             return ClientSecretCredential(self.tenant_id, client_id, client_secret, **self._credential_kwargs)
         if certificate_path:
             return CertificateCredential(self.tenant_id, client_id, certificate_path, **self._credential_kwargs)
-        raise CLIError("Secret of service principle {} not found. Please run 'mg login'".format(client_id))
+        raise CLIError("Secret of service principle {} not found. Please run 'mgc login'".format(client_id))
 
     def get_environment_credential(self):
         username = os.environ.get('AZURE_USERNAME')
@@ -467,7 +467,7 @@ class AdalCredentialCache:
             except (CLIError, ValueError) as ex:
                 raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
                                "https://github.com/microsoftgraph/msgraph-cli/issues. At the same time, you can clean "
-                               "up by running 'mg account clear' and then 'mg login'. (Inner Error: {})".format(ex))
+                               "up by running 'mgc account clear' and then 'mgc login'. (Inner Error: {})".format(ex))
         return []
 
     def _delete_token_file(self):
@@ -501,7 +501,7 @@ class AdalCredentialCache:
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
-                           "Please run 'mg login' for this service principal."
+                           "Please run 'mgc login' for this service principal."
                            .format(sp_id))
         matched_with_tenant = [x for x in matched if tenant == x[_SERVICE_PRINCIPAL_TENANT]]
         if matched_with_tenant:
@@ -678,7 +678,7 @@ class MsalSecretStore:
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
-                           "Please run 'mg login' for this service principal."
+                           "Please run 'mgc login' for this service principal."
                            .format(sp_id))
         matched_with_tenant = [x for x in matched if tenant == x[_SERVICE_PRINCIPAL_TENANT]]
         if matched_with_tenant:
@@ -750,7 +750,7 @@ class MsalSecretStore:
             except Exception as ex:
                 raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
                                "https://github.com/microsoftgraph/msgraph-cli/issues. At the same time, you can clean "
-                               "up by running 'mg account clear' and then 'mg login'. (Inner Error: {})".format(ex))
+                               "up by running 'mgc account clear' and then 'mgc login'. (Inner Error: {})".format(ex))
 
     def _build_persistence(self):
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/blob/0.2.2/sample/persistence_sample.py

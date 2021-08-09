@@ -597,7 +597,7 @@ class AzCliCommandInvoker(CommandInvoker):
                     local_context_args.append((options[0], value))
             if local_context_args:
                 logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
-                               'run `mg local-context off` to turn it off.',
+                               'run `mgc local-context off` to turn it off.',
                                self.cli_ctx.local_context.effective_working_directory())
                 args_str = []
                 for name, value in local_context_args:
@@ -1400,7 +1400,7 @@ def register_cache_arguments(cli_ctx):
                     nargs='?',
                     action=CacheAction,
                     help='Temporarily store the object in the local cache instead of sending to Microsoft Graph. '
-                         'Use `mg cache` commands to view/clear.',
+                         'Use `mgc cache` commands to view/clear.',
                     is_preview=True
                 )
 

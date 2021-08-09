@@ -238,7 +238,7 @@ resource_group_name_type = CLIArgumentType(
     options_list=['--resource-group', '-g'],
     completer=get_resource_group_completion_list,
     id_part='resource_group',
-    help="Name of resource group. You can configure the default group using `mg configure --defaults group=<name>`",
+    help="Name of resource group. You can configure the default group using `mgc configure --defaults group=<name>`",
     configured_default='group',
     local_context_attribute=LocalContextAttribute(
         name='resource_group_name',
@@ -254,8 +254,8 @@ def get_location_type(cli_ctx):
         options_list=['--location', '-l'],
         completer=get_location_completion_list,
         type=get_location_name_type(cli_ctx),
-        help="Location. Values from: `mg account list-locations`. "
-             "You can configure the default location using `mg configure --defaults location=<location>`.",
+        help="Location. Values from: `mgc account list-locations`. "
+             "You can configure the default location using `mgc configure --defaults location=<location>`.",
         metavar='LOCATION',
         configured_default='location',
         local_context_attribute=LocalContextAttribute(
