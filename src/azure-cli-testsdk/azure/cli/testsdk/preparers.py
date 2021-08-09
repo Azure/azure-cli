@@ -79,7 +79,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
         template = 'az group create --location {} --name {} --tag ' + tags
         if self.subscription:
-            template += '--subscription '.format(self.subscription)
+            template += ' --subscription {} '.format(self.subscription)
         self.live_only_execute(self.cli_ctx, template.format(self.location, name))
 
         self.test_class_instance.kwargs[self.key] = name
@@ -90,7 +90,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if not self.dev_setting_name:
             template = 'az group delete --name {} --yes --no-wait '
             if self.subscription:
-                template += '--subscription '.format(self.subscription)
+                template += ' --subscription {} '.format(self.subscription)
             self.live_only_execute(self.cli_ctx, template.format(name))
 
 
