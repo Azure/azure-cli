@@ -1789,9 +1789,17 @@ def _aks_browse(
                     return_msg = return_msg if return_msg else ""
                     return_msg += "Test Passed!"
                 except subprocess.CalledProcessError as new_err:
-                    raise AzureInternalError('Could not open proxy: {} Command output: {}'.format(new_err, new_err.output))
+                    raise AzureInternalError(
+                        "Could not open proxy: {} Command output: {}".format(
+                            new_err, new_err.output
+                        )
+                    )
             else:
-                raise AzureInternalError('Could not open proxy: {} Command output: {}'.format(err, err.output))
+                raise AzureInternalError(
+                    "Could not open proxy: {} Command output: {}".format(
+                        err, err.output
+                    )
+                )
         except subprocess.TimeoutExpired:
             logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
             return_msg = return_msg if return_msg else ""
