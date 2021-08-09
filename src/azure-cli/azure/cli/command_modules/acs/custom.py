@@ -31,6 +31,7 @@ from distutils.version import StrictVersion
 from math import isnan
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
+import functools
 
 # pylint: disable=import-error
 import yaml
@@ -1958,8 +1959,8 @@ def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class AKSCreateModels:
-    # used to store models (i.e. the corresponding class of a certain api version specified by `resource_type`)
-    # which would be used during the creation process
+    # Used to store models (i.e. the corresponding class of a certain api version specified by `resource_type`)
+    # which would be used during the creation process.
     def __init__(self, cmd, resource_type=ResourceType.MGMT_CONTAINERSERVICE):
         self.cmd = cmd
         self.resource_type = resource_type
@@ -2044,9 +2045,9 @@ class AKSCreateModels:
 
 # pylint: disable=too-few-public-methods
 class AKSCreateParameters:
-    # used to store original function parameters, in the form of attributes of this class, which can be
-    # obtained or set through a.xxx (a is an instance of this class, xxx is the original parameter name)
-    # Note: the attributes of this class should not be modified once they are initialized
+    # Used to store original function parameters, in the form of attributes of this class, which can be
+    # obtained through a.xxx (a is an instance of this class, xxx is the original parameter name).
+    # Note: The attributes of this class should not be modified once they are initialized.
     def __init__(self, data):
         for name, value in data.items():
             setattr(self, name, value)
@@ -2054,17 +2055,91 @@ class AKSCreateParameters:
 
 # pylint: disable=too-few-public-methods
 class AKSCreateContext:
-    # used to store intermediate variables and parameters that are not specified by the user but are automatically
-    # completed/patched (neither original function parameters nor models)
+    # Used to store dynamically inferred/completed parameters (i.e. not specified by the user), intermediate
+    # variables and a copy of the original function parameters.
+    # To dynamically infer/complete a parameter or check the validity of a parameter, please provide a function
+    # named `get_xxx`, where `xxx` is the parameter name.
+    # Attention: When checking the validity of parameters in the `get_xxx` function, please use the `get_param`
+    # function to obtain the values of other parameters to be checked to avoid circular calls.
+    # Note: The update of parameters and intermediate variables in the command implementation should be achieved
+    # by operating the instance of this class.
     def __init__(self, cmd, client, raw_parameters):
         self.cmd = cmd
         self.client = client
         self.raw_param = AKSCreateParameters(raw_parameters)
-        self.cached_param = dict()
+        self.cached_param = self.init_cached_param()
         self.intermediates = dict()
-        self.dynamic_inference_indicator = object()
+        self.count = dict()
 
-    def set_intermediate_variable(self, variable_name, value, overwrite_exists=False):
+    # initialize the cached parameter values to the original parameter values passed by the function
+    def init_cached_param(self):
+        cache = dict()
+        for k, v in vars(self.raw_param).items():
+            cache[k] = v
+        return cache
+
+    # TODO: clean up count
+    def form_unique_tuple(self, raw_value, cached_value, force_update):
+        unique_tuple = (raw_value, cached_value, force_update)
+        return unique_tuple
+
+    def remove_count(self, parameter_name, unique_tuple):
+        self.count[parameter_name].discard(unique_tuple)
+
+    def make_count(self, parameter_name, unique_tuple):
+        parameter_set = self.count.get(parameter_name, set())
+        if parameter_set and unique_tuple in parameter_set:
+            return True
+        else:
+            parameter_set.add(unique_tuple)
+            self.count[parameter_name] = parameter_set
+        return False
+
+    # This decorator wraps the method of reading the value of a specific parameter from the cache or the
+    # original value passed by function, so that the `get_xxx` function only needs to implement the logic of
+    # dynamic inference/completion or validity check.
+    # The dynamic inference/completion will be triggered when the `force_update` parameter is specified as
+    # `True` or the cached value is the same as the original value.
+    def get_cached_parameter_decorator(func):
+        @functools.wraps(func)
+        def wrapper(self, force_update=False, keep_cache=False, read_raw=False, default_value=None, **kwargs):
+            # function name should follow the naming method of `get_xxx`, and `xxx` is the parameter name
+            parameter_name = func.__name__[4:]
+            kwargs["parameter_name"] = parameter_name
+
+            # fetch raw and cached value
+            raw_value = self.get_param(parameter_name, read_raw=True, default_value=default_value)
+            cached_value = self.get_param(parameter_name, read_raw=False, default_value=default_value)
+
+            unique_tuple = self.form_unique_tuple(raw_value, cached_value, force_update)
+            is_loop = self.make_count(parameter_name, unique_tuple)
+            if is_loop:
+                self.remove_count(parameter_name, unique_tuple)
+                return raw_value if read_raw else cached_value
+            else:
+                # call the function for dynamic inference/completion
+                if force_update or cached_value == raw_value:
+                    value = func(self, force_update, **kwargs)
+                    self.remove_count(parameter_name, unique_tuple)
+                    # update cache
+                    if not keep_cache:
+                        self.cached_param[parameter_name] = value
+                    return value
+
+                # otherwise, read from cache (by default) or the original value passed by function
+                self.remove_count(parameter_name, unique_tuple)
+                return raw_value if read_raw else cached_value
+        return wrapper
+
+    def get_param(self, parameter_name, read_raw=False, default_value=None):
+        value = default_value
+        if read_raw:
+            value = getattr(self.raw_param, parameter_name, default_value)
+        else:
+            value = self.cached_param.get(parameter_name, default_value)
+        return value
+
+    def set_intermediate(self, variable_name, value, overwrite_exists=False):
         if variable_name in self.intermediates:
             if overwrite_exists:
                 logger.debug("The intermediate variable '{}' already exists, the original value '{}' is overwritten with the new value '{}'!".format(variable_name, self.intermediates.get(variable_name), value))
@@ -2074,85 +2149,57 @@ class AKSCreateContext:
         else:
             self.intermediates[variable_name] = value
 
-    def get_intermediate_variable(self, variable_name, default_value=None):
+    def get_intermediate(self, variable_name, default_value=None):
         if variable_name not in self.intermediates:
             logger.warning("The intermediate variable '{}' does not exist! Return default value '{}'!".format(variable_name, default_value))
         return self.intermediates.get(variable_name, default_value)
 
-    def get_param(self, parameter_name, read_cache=False, read_raw=False, default_value=None):
-        if read_cache and read_raw:
-            raise CLIError("Cannot read raw and and cached parameter at the same time!")
-        if not read_cache and not read_raw:
-            logger.debug("Unspecified reading method, return default value '{}' for parameter '{}'!".format(default_value, parameter_name))
-        value = default_value
-        if read_raw:
-            value = getattr(self.raw_param, parameter_name, default_value)
-        if read_cache:
-            value = self.cached_param.get(parameter_name, default_value)
-        return value
-
-    def _get_param_wrapper(self, parameter_name, dynamic_inference, read_cache, read_raw, default_value):
-        if not dynamic_inference and not read_cache and not read_raw:
-            logger.warning("No read method is specified, and dynamic inference is not enabled! Return default value '{}' for parameter '{}'!".format(default_value, parameter_name))
-            return default_value
-        if read_cache or read_raw:
-            return self.get_param(parameter_name=parameter_name, read_cache=read_cache, read_raw=read_raw, default_value=default_value)
-        return self.dynamic_inference_indicator
-
-    def get_vm_set_type(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
-        parameter_name = "vm_set_type"
-        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
-        if wrapper_result != self.dynamic_inference_indicator:
-            return wrapper_result
-
-        vm_set_type = _set_vm_set_type(vm_set_type=self.get_param("vm_set_type", read_raw=True), kubernetes_version=self.get_param("kubernetes_version", read_raw=True))
-        self.cached_param[parameter_name, vm_set_type]
-        return vm_set_type
-
-    def get_dns_name_prefix(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
-        parameter_name = "dns_name_prefix"
-        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
-        if wrapper_result != self.dynamic_inference_indicator:
-            return wrapper_result
-
-        dns_name_prefix = _get_default_dns_prefix(name=self.get_param("name", read_raw=True), resource_group_name=self.get_param("resource_group_name", read_raw=True), subscription_id=self.get_intermediate_variable("subscription_id"))
-        if dns_name_prefix and self.get_param("fqdn_subdomain", read_raw=True):
-            raise MutuallyExclusiveArgumentError("--dns-name-prefix and --fqdn-subdomain cannot be used at same time")
-        self.cached_param[parameter_name, dns_name_prefix]
-        return dns_name_prefix
-
-    def get_location(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
-        parameter_name = "location"
-        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
-        if wrapper_result != self.dynamic_inference_indicator:
-            return wrapper_result
-
-        location = self.get_param("location", read_raw=True)
+    @get_cached_parameter_decorator
+    def get_location(self, force_update=False, **kwargs):
+        # location = self.get_param("location")
+        location = self.get_location()
         if location is None:
-            location = _get_rg_location(self.cmd.cli_ctx, self.get_param("resource_group_name", read_raw=True))
-        self.cached_param[parameter_name, location]
+            location = _get_rg_location(self.cmd.cli_ctx, self.get_param("resource_group_name"))
         return location
 
-    def get_load_balancer_sku(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
-        parameter_name = "load_balancer_sku"
-        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
-        if wrapper_result != self.dynamic_inference_indicator:
-            return wrapper_result
+    @get_cached_parameter_decorator
+    def get_dns_name_prefix(self, force_update=False, **kwargs):
+        dns_name_prefix = self.get_param("dns_name_prefix")
+        # parameter check
+        if dns_name_prefix and self.get_param("fqdn_subdomain"):
+            raise MutuallyExclusiveArgumentError("--dns-name-prefix and --fqdn-subdomain cannot be used at same time")
+        if not self.get_param("fqdn_subdomain"):
+            dns_name_prefix = _get_default_dns_prefix(name=self.get_param("name"), resource_group_name=self.get_param("resource_group_name"), subscription_id=self.get_intermediate("subscription_id"))
+        return dns_name_prefix
 
-        load_balancer_sku = set_load_balancer_sku(load_balancer_sku=self.get_param("load_balancer_sku", read_raw=True), kubernetes_version=self.get_param("kubernetes_version", read_raw=True))
-        self.cached_param[parameter_name, load_balancer_sku]
-        return load_balancer_sku
-
-    def get_fqdn_subdomain(self, dynamic_inference=False, read_cache=False, read_raw=False, default_value=None):
-        parameter_name = "fqdn_subdomain"
-        wrapper_result = self._get_param_wrapper(parameter_name, dynamic_inference, read_cache, read_raw, default_value)
-        if wrapper_result != self.dynamic_inference_indicator:
-            return wrapper_result
-
-        fqdn_subdomain = self.get_param(parameter_name, read_raw=True)
-        if dns_name_prefix and self.get_param("fqdn_subdomain", read_raw=True):
+    @get_cached_parameter_decorator
+    def get_fqdn_subdomain(self, force_update=False, **kwargs):
+        fqdn_subdomain = self.get_param("fqdn_subdomain")
+        # parameter check
+        if fqdn_subdomain and self.get_param("dns_name_prefix"):
             raise MutuallyExclusiveArgumentError("--dns-name-prefix and --fqdn-subdomain cannot be used at same time")
         return fqdn_subdomain
+
+    @get_cached_parameter_decorator
+    def get_vm_set_type(self, force_update=False, **kwargs):
+        vm_set_type = _set_vm_set_type(vm_set_type=self.get_param("vm_set_type"), kubernetes_version=self.get_param("kubernetes_version"))
+        return vm_set_type
+
+    @get_cached_parameter_decorator
+    def get_load_balancer_sku(self, force_update=False, **kwargs):
+        load_balancer_sku = set_load_balancer_sku(sku=self.get_param("load_balancer_sku"), kubernetes_version=self.get_param("kubernetes_version"))
+        # parameter check
+        if load_balancer_sku == "basic" and self.get_param("api_server_authorized_ip_ranges"):
+            raise MutuallyExclusiveArgumentError("--api-server-authorized-ip-ranges can only be used with standard load balancer")
+        return load_balancer_sku
+
+    @get_cached_parameter_decorator
+    def get_api_server_authorized_ip_ranges(self, force_update=False, **kwargs):
+        api_server_authorized_ip_ranges = self.get_param("api_server_authorized_ip_ranges")
+        # parameter check
+        if api_server_authorized_ip_ranges and self.get_param("load_balancer_sku") == "basic":
+            raise MutuallyExclusiveArgumentError("--api-server-authorized-ip-ranges can only be used with standard load balancer")
+        return api_server_authorized_ip_ranges
 
 
 class AKSCreateDecorator:
@@ -2160,6 +2207,7 @@ class AKSCreateDecorator:
         self.cmd = cmd
         self.client = client
         self.models = models
+        # store the context in the process of assemble the ManagedCluster object
         self.context = AKSCreateContext(cmd, client, raw_parameters)
         # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
         # containerservice SDK, most models have been passed through the `modles` parameter (instantiatied
@@ -2169,79 +2217,25 @@ class AKSCreateDecorator:
         # `_populate_api_server_access_profile` defined in `_helpers.py`
         self.resource_type = resource_type
 
-    def get_variable_from_param_and_context(self, variable_name, prefer_context=False):
-        variable = None
-        if prefer_context:
-            variable = getattr(self.context, variable_name, None)
-            if variable is None:
-                variable = getattr(self.param, variable_name, None)
-        else:
-            variable = getattr(self.param, variable_name, None)
-            if variable is None:
-                variable = getattr(self.context, variable_name, None)
-        return variable
-
-    def check_params(self):
-        # check ssh key
-        _validate_ssh_key(self.context.get_param("no_ssh_key", read_raw=True), self.context.get_param("ssh_key_value", read_raw=True))
-
-        # check dns name prefix and fqdn subdomain
-        if self.context.get_param("dns_name_prefix", read_raw=True) and self.context.get_param("fqdn_subdomain", read_raw=True):
-            raise MutuallyExclusiveArgumentError(
-                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
-            )
-
-        # check api server authorized ip range and load balancer sku
-        if (
-            self.param.api_server_authorized_ip_ranges and
-            self.param.load_balancer_sku == "basic"
-        ):
-            raise CLIError(
-                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-            )
-
-    def patch_vm_set_type(self):
-        # pylint: disable=attribute-defined-outside-init
-        self.context.vm_set_type = _set_vm_set_type(
-            self.param.vm_set_type, self.param.kubernetes_version
-        )
-
-    def patch_params(self):
-        subscription_id = get_subscription_id(self.cmd.cli_ctx)
-        # pylint: disable=attribute-defined-outside-init
-        self.context.subscription_id = subscription_id
-
-        if not self.param.dns_name_prefix and not self.param.fqdn_subdomain:
-            # pylint: disable=attribute-defined-outside-init
-            self.context.dns_name_prefix = _get_default_dns_prefix(
-                self.param.name, self.param.resource_group_name, subscription_id
-            )
-
-        rg_location = _get_rg_location(
-            self.cmd.cli_ctx, self.param.resource_group_name
-        )
-        if self.param.location is None:
-            # pylint: disable=attribute-defined-outside-init
-            self.context.location = rg_location
-
-        # patch vm set type, will be overwritten in aks-preview
-        self.patch_vm_set_type()
-
-        # pylint: disable=attribute-defined-outside-init
-        self.context.load_balancer_sku = set_load_balancer_sku(
-            self.param.load_balancer_sku, self.param.kubernetes_version
-        )
-
     def init_mc(self):
+        # check ssh key
+        _validate_ssh_key(self.context.get_param("no_ssh_key"), self.context.get_param("ssh_key_value"))
+
+        # get subscription id and store as intermediate
+        subscription_id = get_subscription_id(self.cmd.cli_ctx)
+        self.context.set_intermediate("subscription_id", subscription_id, overwrite_exists=True)
+
         # initialize the `ManagedCluster` object with mandatory parameters (i.e. location)
-        location = self.get_variable_from_param_and_context("location")
+        location = self.context.get_location()
         mc = self.models.ManagedCluster(location=location)
         return mc
 
     def construct_default_mc(self):
-        # create the complete `ManagedCluster` object, implementing...
-        self.check_params()
-        self.patch_params()
+        # An all-in-one function used to create the complete `ManagedCluster` object, which will later be
+        # passed as a parameter to the underlying SDK (mgmt-containerservice) to send the actual request.
+        # Note: to reduce the risk of regression introduced by refactoring, this function is not complete
+        # and is being implemented gradually.
+        # initialize the `ManagedCluster` object
         mc = self.init_mc()
         return mc
 
@@ -2336,11 +2330,13 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     # temporary hook since this function is under gradually refactoring
     # the variables are still updated/patched by overwriting to reduce the modification of the original logic
-    subscription_id = aks_create_decorator.get_variable_from_param_and_context("subscription_id")
-    dns_name_prefix = aks_create_decorator.get_variable_from_param_and_context("dns_name_prefix")
-    location = aks_create_decorator.get_variable_from_param_and_context("location")
-    vm_set_type = aks_create_decorator.get_variable_from_param_and_context("vm_set_type")
-    load_balancer_sku = aks_create_decorator.get_variable_from_param_and_context("load_balancer_sku")
+    subscription_id = aks_create_decorator.context.get_intermediate("subscription_id")
+    location = aks_create_decorator.context.get_location()
+    dns_name_prefix = aks_create_decorator.context.get_dns_name_prefix()
+    fqdn_subdomain = aks_create_decorator.context.get_fqdn_subdomain()
+    vm_set_type = aks_create_decorator.context.get_vm_set_type()
+    load_balancer_sku = aks_create_decorator.context.get_load_balancer_sku()
+    api_server_authorized_ip_ranges = aks_create_decorator.context.get_api_server_authorized_ip_ranges()
 
     agent_pool_profile = aks_create_decorator.models.ManagedClusterAgentPoolProfile(
         # Must be 12 chars or less before ACS RP adds to it
