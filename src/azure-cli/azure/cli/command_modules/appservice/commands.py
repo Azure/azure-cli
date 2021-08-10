@@ -157,9 +157,9 @@ def load_command_table(self, _):
 
     with self.command_group('webapp config storage-account') as g:
         g.custom_command('list', 'get_azure_storage_accounts', exception_handler=empty_on_404, is_preview=True)
-        g.custom_command('add', 'add_azure_storage_account', is_preview=True)
-        g.custom_command('update', 'update_azure_storage_account', is_preview=True)
-        g.custom_command('delete', 'delete_azure_storage_accounts', is_preview=True)
+        g.custom_command('add', 'add_azure_storage_account')
+        g.custom_command('update', 'update_azure_storage_account')
+        g.custom_command('delete', 'delete_azure_storage_accounts')
 
     with self.command_group('webapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
