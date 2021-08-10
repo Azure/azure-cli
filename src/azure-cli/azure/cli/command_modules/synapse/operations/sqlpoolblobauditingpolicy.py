@@ -112,7 +112,6 @@ def sqlserver_blob_auditing_policy_update(
     # this property is only for ServerBlobAuditingPolicy
     if queue_delay_milliseconds is not None:
         instance.queue_delay_ms = queue_delay_milliseconds
-    print('6666666666666666')
     return instance
 
 
@@ -203,7 +202,6 @@ def _audit_policy_update(
 
             if audit_actions_and_groups is not None:
                 instance.audit_actions_and_groups = audit_actions_and_groups
-            print("77777777777777")
             if not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []:
                 instance.audit_actions_and_groups = [
                     "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
@@ -217,7 +215,6 @@ def _audit_policy_update(
                 category_name=category_name,
                 log_analytics_target_state=log_analytics_target_state,
                 event_hub_target_state=event_hub_target_state)
-        print("8888888888888888888888")
         return instance
     except Exception as err:
         logger.debug(err)
@@ -251,7 +248,6 @@ def _audit_policy_update_apply_blob_storage_details(
     else:
         is_storage_secondary_key_in_use = False
     if blob_storage_target_state is None:
-        print('=======-------------=====')
         # Original audit policy has no storage_endpoint
         if not instance.storage_endpoint:
             instance.storage_endpoint = None
@@ -267,13 +263,10 @@ def _audit_policy_update_apply_blob_storage_details(
                 resource_group_name=storage_resource_group,
                 use_secondary_key=is_storage_secondary_key_in_use)
     elif _is_audit_policy_state_enabled(blob_storage_target_state):
-        print('=====================-------------')
         if storage_account is not None:
             storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
             storage_endpoint = _get_storage_endpoint(cmd.cli_ctx, storage_account, storage_resource_group)
-            print('--------=====================-------------')
             storage_account_subscription_id = _find_storage_account_subscription_id(cmd.cli_ctx, storage_account)
-        print('2222222222')
         if storage_endpoint is not None:
             instance.storage_endpoint = storage_endpoint
 
@@ -281,10 +274,8 @@ def _audit_policy_update_apply_blob_storage_details(
             instance.storage_account_subscription_id = storage_account_subscription_id
 
         if storage_account_access_key is not None:
-            print('4444444444')
             instance.storage_account_access_key = storage_account_access_key
         elif storage_endpoint is not None:
-            print('333333333333')
             # Resolve storage_account if not provided
             if storage_account is None:
                 storage_account = _get_storage_account_name(storage_endpoint)
@@ -299,7 +290,6 @@ def _audit_policy_update_apply_blob_storage_details(
 
         if retention_days is not None:
             instance.retention_days = retention_days
-        print('999999999999')
 
 def _find_storage_account_resource_id(cli_ctx, name):
     '''
@@ -461,8 +451,6 @@ def _get_diagnostic_settings(
         cmd=cmd, resource_group_name=resource_group_name,
         workspace_name=workspace_name, sqlpool_name=sqlpool_name)
     azure_monitor_client = cf_monitor(cmd.cli_ctx)
-    print ('----------------')
-    print(diagnostic_settings_url)
     return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
 
 
