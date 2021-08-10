@@ -51,7 +51,6 @@ class SynapseScenarioTests(ScenarioTest):
 
         # delete workspace with workspace name
         self.cmd('az synapse workspace delete --name {workspace} --resource-group {rg} --yes')
-        import time
         time.sleep(120)
         self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}', expect_failure=True)
 
@@ -159,7 +158,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', 'default'),
                 self.check('type', 'Microsoft.Synapse/workspaces/keys')
             ])
-        import time
         time.sleep(120)
 
         # create workspace key
@@ -668,7 +666,6 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse workspace firewall-rule delete --name {ruleName} --workspace-name {workspace} '
             '--resource-group {rg} --yes')
-        import time
         time.sleep(20)
         self.cmd('az synapse workspace firewall-rule show --name {ruleName} --workspace-name {workspace} '
                  '--resource-group {rg}', expect_failure=True)
@@ -699,7 +696,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ]
         )
-        import time
         time.sleep(20)
 
         # create spark pool
@@ -739,7 +735,6 @@ class SynapseScenarioTests(ScenarioTest):
         # cancel a spark batch job with batch id
         self.cmd('az synapse spark job cancel --livy-id {batch-id} --workspace-name {workspace} '
                  '--spark-pool-name {spark-pool} --yes')
-        import time
         time.sleep(60)
         self.cmd('az synapse spark job show --livy-id {batch-id} --workspace-name {workspace} '
                  '--spark-pool-name {spark-pool}',
@@ -769,7 +764,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ]
         )
-        import time
         time.sleep(20)
 
         # create spark pool
@@ -794,7 +788,6 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs['session-id'] = create_result['id']
 
         # wait for creating spark session
-        import time
         time.sleep(360)
 
         # get a spark session
@@ -850,7 +843,6 @@ class SynapseScenarioTests(ScenarioTest):
         # delete/cancel a spark session
         self.cmd('az synapse spark session cancel --livy-id {session-id} --workspace-name {workspace} '
                  '--spark-pool-name {spark-pool} --yes')
-        import time
         time.sleep(120)
         self.cmd('az synapse spark session show --livy-id {session-id} --workspace-name {workspace} '
                  '--spark-pool-name {spark-pool}',
@@ -878,7 +870,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ]
         )
-        import time
         time.sleep(20)
 
         self.cmd(
@@ -974,7 +965,6 @@ class SynapseScenarioTests(ScenarioTest):
 
         # Wait some time to improve robustness
         if self.is_live or self.in_recording:
-            import time
             time.sleep(60)
 
         # create synapse workspace
@@ -996,7 +986,6 @@ class SynapseScenarioTests(ScenarioTest):
 
         # Wait some time to improve robustness
         if self.is_live or self.in_recording:
-            import time
             time.sleep(60)
 
         # create storage account
@@ -1024,7 +1013,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ]
         )
-        import time
         time.sleep(20)
 
         # create linked service
@@ -1069,7 +1057,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ]
         )
-        import time
         time.sleep(20)
 
         self.kwargs['file'] = ('{\\"properties\\":{\\"linkedServiceName\\":{\\"referenceName\\":\\"' + self.kwargs[
@@ -1140,7 +1127,6 @@ class SynapseScenarioTests(ScenarioTest):
         # cancel pipeline run
         self.cmd(
             'az synapse pipeline-run cancel --workspace-name {workspace} --run-id {runId} -y')
-        import time
         time.sleep(20)
 
         # get pipeline run by run id
@@ -1211,7 +1197,6 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('status', 'Provisioning')
             ])
-        import time
         time.sleep(20)
 
         # get event subscription status
