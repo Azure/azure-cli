@@ -2053,7 +2053,6 @@ class AKSCreateParameters:
             setattr(self, name, value)
 
 
-# pylint: disable=too-few-public-methods
 class AKSCreateContext:
     # Used to store dynamically inferred/completed parameters (i.e. not specified by the user), intermediate
     # variables and a copy of the original function parameters.
@@ -2072,13 +2071,14 @@ class AKSCreateContext:
         # record the state of the parameters before dynamic inference to avoid infinite recursion
         self.param_dynamic_inference_record = dict()
 
-    # initialize the cached parameter values to the original parameter values passed by the function
     def init_cached_param(self):
+        # initialize the cached parameter values to the original parameter values passed by the function
         cache = dict()
         for k, v in vars(self.raw_param).items():
             cache[k] = v
         return cache
 
+    # pylint: disable=no-self-use
     def assemble_param_state_tuple(self, raw_value, cached_value, force_update):
         # the parameter state tuple consists of the raw value, cached value and the forced update indicator
         state_tuple = (raw_value, cached_value, force_update)
@@ -2095,17 +2095,18 @@ class AKSCreateContext:
         parameter_set = self.param_dynamic_inference_record.get(parameter_name, set())
         if parameter_set and state_tuple in parameter_set:
             return True
-        else:
-            parameter_set.add(state_tuple)
-            self.param_dynamic_inference_record[parameter_name] = parameter_set
+        # update record
+        parameter_set.add(state_tuple)
+        self.param_dynamic_inference_record[parameter_name] = parameter_set
         return False
 
-    # This decorator wraps the method of reading the value of a specific parameter from the cache or the
-    # original value passed by function, so that the `get_xxx` function only needs to implement the logic of
-    # dynamic inference/completion or validity check.
-    # The dynamic inference/completion will be triggered when the `force_update` parameter is specified as
-    # `True` or the cached value is the same as the original value.
+    # pylint: disable=no-self-argument
     def get_cached_parameter_decorator(func):
+        # This decorator wraps the method of reading the value of a specific parameter from the cache or the
+        # original value passed by function, so that the `get_xxx` function only needs to implement the logic of
+        # dynamic inference/completion or validity check.
+        # The dynamic inference/completion will be triggered when the `force_update` parameter is specified as
+        # `True` or the cached value is the same as the original value.
         @functools.wraps(func)
         def wrapper(self, force_update=False, keep_cache=False, read_raw=False, default_value=None, **kwargs):
             # function name should follow the naming method of `get_xxx`, and `xxx` is the parameter name
@@ -2145,16 +2146,30 @@ class AKSCreateContext:
     def set_intermediate(self, variable_name, value, overwrite_exists=False):
         if variable_name in self.intermediates:
             if overwrite_exists:
-                logger.debug("The intermediate variable '{}' already exists, the original value '{}' is overwritten with the new value '{}'!".format(variable_name, self.intermediates.get(variable_name), value))
+                msg = "The intermediate '{}' is overwritten! Original value: '{}', new value: '{}'!".format(
+                    variable_name, self.intermediates.get(variable_name), value
+                )
+                logger.debug(msg)
                 self.intermediates[variable_name] = value
-            else:
-                logger.warning("The intermediate variable '{}' already exists, but it is not specified to be overwritten! Original value '{}', new value '{}'!".format(variable_name, self.intermediates.get(variable_name), value))
+            elif self.intermediates.get(variable_name) != value:
+                msg = (
+                    "The intermediate '{}' already exists, but overwrite is not enabled! "
+                    "Original value: '{}', candidate value: '{}'!".format(
+                        variable_name, self.intermediates.get(variable_name), value
+                    )
+                )
+                # warning level log will be output to the console, which may cause confusion to users
+                logger.warning(msg)
         else:
             self.intermediates[variable_name] = value
 
     def get_intermediate(self, variable_name, default_value=None):
         if variable_name not in self.intermediates:
-            logger.warning("The intermediate variable '{}' does not exist! Return default value '{}'!".format(variable_name, default_value))
+            msg = "The intermediate '{}' does not exist! Return default value '{}'!".format(
+                variable_name, default_value
+            )
+            # warning level log will be output to the console, which may cause confusion to users
+            logger.warning(msg)
         return self.intermediates.get(variable_name, default_value)
 
     @get_cached_parameter_decorator
@@ -2171,9 +2186,15 @@ class AKSCreateContext:
         # parameter check, the parameter checking mechanism here is slightly different here
         # when `--fqdn-subdomain` is not specified (in the raw parameter), this parameter (dns_name_prefix) should be completed
         if dns_name_prefix and self.get_param("fqdn_subdomain"):
-            raise MutuallyExclusiveArgumentError("--dns-name-prefix and --fqdn-subdomain cannot be used at same time")
+            raise MutuallyExclusiveArgumentError(
+                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+            )
         if not self.get_param("fqdn_subdomain"):
-            dns_name_prefix = _get_default_dns_prefix(name=self.get_param("name"), resource_group_name=self.get_param("resource_group_name"), subscription_id=self.get_intermediate("subscription_id"))
+            dns_name_prefix = _get_default_dns_prefix(
+                name=self.get_param("name"),
+                resource_group_name=self.get_param("resource_group_name"),
+                subscription_id=self.get_intermediate("subscription_id"),
+            )
         return dns_name_prefix
 
     @get_cached_parameter_decorator
@@ -2181,20 +2202,30 @@ class AKSCreateContext:
         fqdn_subdomain = self.get_param("fqdn_subdomain")
         # parameter check
         if fqdn_subdomain and self.get_param("dns_name_prefix"):
-            raise MutuallyExclusiveArgumentError("--dns-name-prefix and --fqdn-subdomain cannot be used at same time")
+            raise MutuallyExclusiveArgumentError(
+                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+            )
         return fqdn_subdomain
 
     @get_cached_parameter_decorator
     def get_vm_set_type(self, force_update=False, **kwargs):
-        vm_set_type = _set_vm_set_type(vm_set_type=self.get_param("vm_set_type"), kubernetes_version=self.get_param("kubernetes_version"))
+        vm_set_type = _set_vm_set_type(
+            vm_set_type=self.get_param("vm_set_type"),
+            kubernetes_version=self.get_param("kubernetes_version")
+        )
         return vm_set_type
 
     @get_cached_parameter_decorator
     def get_load_balancer_sku(self, force_update=False, **kwargs):
-        load_balancer_sku = set_load_balancer_sku(sku=self.get_param("load_balancer_sku"), kubernetes_version=self.get_param("kubernetes_version"))
+        load_balancer_sku = set_load_balancer_sku(
+            sku=self.get_param("load_balancer_sku"),
+            kubernetes_version=self.get_param("kubernetes_version"),
+        )
         # parameter check
         if load_balancer_sku == "basic" and self.get_param("api_server_authorized_ip_ranges"):
-            raise MutuallyExclusiveArgumentError("--api-server-authorized-ip-ranges can only be used with standard load balancer")
+            raise MutuallyExclusiveArgumentError(
+                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+            )
         return load_balancer_sku
 
     @get_cached_parameter_decorator
@@ -2202,7 +2233,9 @@ class AKSCreateContext:
         api_server_authorized_ip_ranges = self.get_param("api_server_authorized_ip_ranges")
         # parameter check
         if api_server_authorized_ip_ranges and self.get_param("load_balancer_sku") == "basic":
-            raise MutuallyExclusiveArgumentError("--api-server-authorized-ip-ranges can only be used with standard load balancer")
+            raise MutuallyExclusiveArgumentError(
+                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+            )
         return api_server_authorized_ip_ranges
 
 
