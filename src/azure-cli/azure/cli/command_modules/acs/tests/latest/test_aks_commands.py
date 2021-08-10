@@ -4697,9 +4697,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
         # create test hook file
-        hook_file_path = self.get_test_data_file_path("test_aks_browse_legacy_hook.json")
+        hook_file_path = self.get_test_data_file_path("test_aks_browse_legacy.hook")
+        test_hook_data = {
+            "configs": {
+                "enableTimeout": True,
+                "timeoutInterval": 10,
+            }
+        }
         with open(hook_file_path, "w") as f:
-            json.dump("enabled", f)
+            json.dump(test_hook_data, f)
 
         try:
             # test aks browse cmd
