@@ -5,8 +5,10 @@
 
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.decorators import Completer
+from azure.cli.command_modules.acs._helpers import AKSCMDDecorator
 
 
+@AKSCMDDecorator
 @Completer
 def get_k8s_upgrades_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     """Return Kubernetes versions available for upgrading an existing cluster."""
@@ -22,6 +24,7 @@ def get_k8s_upgrades(cli_ctx, resource_group, name):
     return results['control_plane_profile']['upgrades']
 
 
+@AKSCMDDecorator
 @Completer
 def get_k8s_versions_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     """Return Kubernetes versions available for provisioning a new cluster."""
@@ -39,6 +42,7 @@ def get_k8s_versions(cli_ctx, location):
     return search('orchestrators[*].orchestrator_version', results)
 
 
+@AKSCMDDecorator
 @Completer
 def get_vm_size_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     """Return the intersection of the VM sizes allowed by the ACS SDK with those returned by the Compute Service."""

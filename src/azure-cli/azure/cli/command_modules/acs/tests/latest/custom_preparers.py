@@ -142,26 +142,6 @@ class AKSCustomVirtualNetworkPreparer(VirtualNetworkPreparer):
 class AKSCustomRoleBasedServicePrincipalPreparer(
     RoleBasedServicePrincipalPreparer
 ):
-    def __init__(
-        self,
-        name_prefix="clitest",
-        skip_assignment=True,
-        parameter_name="sp_name",
-        parameter_password="sp_password",
-        dev_setting_sp_name="AZURE_CLI_TEST_DEV_SP_NAME",
-        dev_setting_sp_password="AZURE_CLI_TEST_DEV_SP_PASSWORD",
-        key="sp",
-    ):
-        super(AKSCustomRoleBasedServicePrincipalPreparer, self).__init__(
-            name_prefix,
-            skip_assignment,
-            parameter_name,
-            parameter_password,
-            dev_setting_sp_name,
-            dev_setting_sp_password,
-            key,
-        )
-
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_sp_name:
             command = "az ad sp create-for-rbac -n {}{}".format(
@@ -181,21 +161,20 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
             ] = self.parameter_password
             return {
                 self.parameter_name: name,
-                self.parameter_password: self.result.get("password")
-                or GraphClientPasswordReplacer.PWD_REPLACEMENT,
+                self.parameter_password: self.result.get("password") or
+                GraphClientPasswordReplacer.PWD_REPLACEMENT,
             }
-        else:
-            # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live and
-            # play-back. see SingleValueReplacer.process_request, AbstractPreparer.__call__._preparer_wrapper
-            # and ScenarioTest.create_random_name. This is so that when self.create_random_name is called for the
-            # first time during live or playback, it would have the same value.
-            # In short, the default sp preparer in live mode does not call moniker, which leads to inconsistent counts.
-            _ = self.moniker
-            self.test_class_instance.kwargs[self.key] = self.dev_setting_sp_name
-            self.test_class_instance.kwargs[
-                "{}_pass".format(self.key)
-            ] = self.dev_setting_sp_password
-            return {
-                self.parameter_name: self.dev_setting_sp_name,
-                self.parameter_password: self.dev_setting_sp_password,
-            }
+        # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between
+        # live and play-back. see SingleValueReplacer.process_request, AbstractPreparer.__call__._preparer_wrapper
+        # and ScenarioTest.create_random_name. This is so that when self.create_random_name is called for the
+        # first time during live or playback, it would have the same value.
+        # In short, the default sp preparer in live mode does not call moniker, which leads to inconsistent counts.
+        _ = self.moniker
+        self.test_class_instance.kwargs[self.key] = self.dev_setting_sp_name
+        self.test_class_instance.kwargs[
+            "{}_pass".format(self.key)
+        ] = self.dev_setting_sp_password
+        return {
+            self.parameter_name: self.dev_setting_sp_name,
+            self.parameter_password: self.dev_setting_sp_password,
+        }

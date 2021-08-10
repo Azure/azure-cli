@@ -9,16 +9,14 @@ import os.path
 import re
 from math import isnan, isclose
 from ipaddress import ip_network
-
-# pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
 
 from azure.cli.core.profiles import ResourceType
-
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError
 import azure.cli.core.keys as keys
+from azure.cli.command_modules.acs._helpers import AKSCMDDecorator
 
 
 logger = get_logger(__name__)
@@ -108,6 +106,7 @@ def validate_k8s_version(namespace):
                            'such as "1.11.8" or "1.12.6"')
 
 
+@AKSCMDDecorator
 def validate_cluster_autoscaler_profile(cmd, namespace):
     """ Validates that cluster autoscaler profile is acceptable by:
         1. Extracting the key[=value] format to map
@@ -120,6 +119,7 @@ def validate_cluster_autoscaler_profile(cmd, namespace):
             _validate_cluster_autoscaler_key(cmd, key)
 
 
+@AKSCMDDecorator
 def _validate_cluster_autoscaler_key(cmd, key):
     if not key:
         raise CLIError('Empty key specified for cluster-autoscaler-profile')

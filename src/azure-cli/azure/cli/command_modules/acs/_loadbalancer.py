@@ -3,12 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
-
-# pylint: disable=no-name-in-module,import-error
-from azure.cli.core.profiles import ResourceType
-
+from distutils.version import StrictVersion
 from knack.log import get_logger
+
+from azure.cli.core.profiles import ResourceType
+from azure.cli.command_modules.acs._helpers import AKSCMDDecorator
 
 logger = get_logger(__name__)
 
@@ -24,6 +23,7 @@ def set_load_balancer_sku(sku, kubernetes_version):
     return "standard"
 
 
+@AKSCMDDecorator
 def update_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                  outbound_ports, idle_timeout, profile):
     """parse and update an existing load balancer profile"""
@@ -34,6 +34,7 @@ def update_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, o
                                            outbound_ports, idle_timeout, profile)
 
 
+@AKSCMDDecorator
 def create_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                  outbound_ports, idle_timeout):
     """parse and build load balancer profile"""
@@ -49,6 +50,7 @@ def create_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, o
                                            outbound_ports, idle_timeout, profile)
 
 
+@AKSCMDDecorator
 def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes, outbound_ports,
                                     idle_timeout, profile):
     """configure a load balancer with customer supplied values"""
@@ -108,6 +110,7 @@ def is_load_balancer_profile_provided(managed_outbound_ip_count, outbound_ips, i
                 idle_timeout])
 
 
+@AKSCMDDecorator
 def _get_load_balancer_outbound_ips(cmd, load_balancer_outbound_ips):
     """parse load balancer profile outbound IP ids and return an array of references to the outbound IP resources"""
     load_balancer_outbound_ip_resources = None
@@ -120,6 +123,7 @@ def _get_load_balancer_outbound_ips(cmd, load_balancer_outbound_ips):
     return load_balancer_outbound_ip_resources
 
 
+@AKSCMDDecorator
 def _get_load_balancer_outbound_ip_prefixes(cmd, load_balancer_outbound_ip_prefixes):
     """parse load balancer profile outbound IP prefix ids and return an array \
     of references to the outbound IP prefix resources"""

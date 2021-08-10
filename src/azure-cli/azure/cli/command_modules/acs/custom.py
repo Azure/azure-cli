@@ -80,7 +80,7 @@ from ._client_factory import cf_agent_pools
 from ._client_factory import get_msi_client
 
 from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type,
-                       _parse_comma_separated_list)
+                       _parse_comma_separated_list, AKSCMDDecorator)
 
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
@@ -146,6 +146,7 @@ def wait_then_open_async(url):
     t.start()
 
 
+@AKSCMDDecorator
 def acs_browse(cmd, client, resource_group_name, name, disable_browser=False, ssh_key_file=None):
     """
     Opens a browser to the web interface for the cluster orchestrator
@@ -164,6 +165,7 @@ def acs_browse(cmd, client, resource_group_name, name, disable_browser=False, ss
         cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file)
 
 
+@AKSCMDDecorator
 def _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file):
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
 
@@ -177,6 +179,7 @@ def _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disab
         'Unsupported orchestrator type {} for browse'.format(orchestrator_type))
 
 
+@AKSCMDDecorator
 def k8s_browse(cmd, client, name, resource_group_name, disable_browser=False, ssh_key_file=None):
     """
     Launch a proxy and browse the Kubernetes web UI.
@@ -204,6 +207,7 @@ def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy"])
 
 
+@AKSCMDDecorator
 def dcos_browse(cmd, client, name, resource_group_name, disable_browser=False, ssh_key_file=None):
     """
     Creates an SSH tunnel to the Azure container service, and opens the Mesosphere DC/OS dashboard in the browser.
@@ -262,6 +266,7 @@ def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
         proxy.disable_http_proxy()
 
 
+@AKSCMDDecorator
 def acs_install_cli(cmd, client, resource_group_name, name, install_location=None, client_version=None):
     acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
@@ -303,6 +308,7 @@ def _unzip(src, dest):
         raise CLIError('The current system is not supported.')
 
 
+@AKSCMDDecorator
 def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
     """
     Downloads the dcos command line from Mesosphere
@@ -335,6 +341,7 @@ def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
             'Connection error while attempting to download client ({})'.format(err))
 
 
+@AKSCMDDecorator
 def k8s_install_cli(cmd, client_version='latest', install_location=None, base_src_url=None,
                     kubelogin_version='latest', kubelogin_install_location=None,
                     kubelogin_base_src_url=None):
@@ -343,6 +350,7 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
                           kubelogin_install_location, kubelogin_base_src_url)
 
 
+@AKSCMDDecorator
 def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None):
     """
     Install kubectl, a command-line interface for Kubernetes clusters.
@@ -409,6 +417,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
                        install_dir, cli)
 
 
+@AKSCMDDecorator
 def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None):
     """
     Install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
@@ -517,6 +526,7 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     return service_principal, aad_session_key
 
 
+@AKSCMDDecorator
 def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
     # AAD can have delays in propagating data, so sleep and retry
     hook = cmd.cli_ctx.get_progress_controller(True)
@@ -654,6 +664,7 @@ def _get_default_dns_prefix(name, resource_group_name, subscription_id):
     return '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
 
 
+@AKSCMDDecorator
 def list_acs_locations(cmd, client):
     return {
         "productionRegions": regions_in_prod,
@@ -824,6 +835,7 @@ def _get_user_assigned_identity_object_id(cli_ctx, resource_id):
     return _get_user_assigned_identity(cli_ctx, resource_id).principal_id
 
 
+@AKSCMDDecorator
 # pylint: disable=too-many-locals
 def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
                location=None, admin_username="azureuser", api_version=None, master_profile=None,
@@ -1059,6 +1071,7 @@ def load_service_principals(config_path):
         return None
 
 
+@AKSCMDDecorator
 def _invoke_deployment(cmd, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
     DeploymentProperties = cmd.get_models(
@@ -1086,6 +1099,7 @@ def _invoke_deployment(cmd, resource_group_name, deployment_name, template, para
     return sdk_no_wait(no_wait, smc.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
+@AKSCMDDecorator
 def k8s_get_credentials(cmd, client, name, resource_group_name,
                         path=os.path.join(os.path.expanduser(
                             '~'), '.kube', 'config'),
@@ -1289,6 +1303,7 @@ def _mkdir_p(path):
             raise
 
 
+@AKSCMDDecorator
 def update_acs(cmd, client, resource_group_name, container_service_name, new_agent_count):
     instance = client.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
@@ -1303,6 +1318,7 @@ def update_acs(cmd, client, resource_group_name, container_service_name, new_age
     return client.begin_create_or_update(resource_group_name, container_service_name, instance)
 
 
+@AKSCMDDecorator
 def list_container_services(cmd, client, resource_group_name=None):
     ''' List Container Services. '''
     svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
@@ -1433,12 +1449,14 @@ def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=
     return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
+@AKSCMDDecorator
 def create_role_assignment(cmd, role, assignee, is_service_principal, resource_group_name=None, scope=None):
     return _create_role_assignment(cmd,
                                    role, assignee, resource_group_name,
                                    scope, resolve_assignee=is_service_principal)
 
 
+@AKSCMDDecorator
 def _create_role_assignment(cmd, role, assignee,
                             resource_group_name=None, scope=None, resolve_assignee=True):
     from azure.cli.core.profiles import get_sdk
@@ -1539,6 +1557,7 @@ def _update_dict(dict1, dict2):
     return cp
 
 
+@AKSCMDDecorator
 def subnet_role_assignment_exists(cmd, scope):
     network_contributor_role_id = "4d97b98b-1d4f-4787-a291-c67834d212e7"
 
@@ -1552,6 +1571,7 @@ def subnet_role_assignment_exists(cmd, scope):
     return False
 
 
+@AKSCMDDecorator
 def aks_check_acr(cmd, client, resource_group_name, name, acr):
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
@@ -1650,7 +1670,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         raise CLIError("Failed to check the ACR.")
 
 
-# pylint: disable=too-many-statements,too-many-branches
+# pylint: disable=too-many-statements,too-many-branches,too-many-locals
 def _aks_browse(
     cmd,
     client,
@@ -1923,6 +1943,7 @@ def _add_ingress_appgw_addon_role_assignment(result, cmd):
                                    'Are you an Owner on this subscription?', vnet_id, CONST_INGRESS_APPGW_ADDON_NAME)
 
 
+@AKSCMDDecorator
 def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
     # Remove trailing "/subnets/<SUBNET_NAME>" to get the vnet id
     vnet_id = vnet_subnet_id.rpartition('/')[0]
@@ -1962,8 +1983,9 @@ def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
                        'assignment')
 
 
-# pylint: disable=too-many-statements,too-many-branches
-def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
+@AKSCMDDecorator
+# pylint: disable=too-many-statements,too-many-branches,too-many-locals
+def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
                dns_name_prefix=None,
                location=None,
                admin_username="azureuser",
@@ -2491,6 +2513,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     raise retry_exception
 
 
+@AKSCMDDecorator
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -2510,6 +2533,8 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
+@AKSCMDDecorator
+# pylint: disable=too-many-locals
 def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       workspace_resource_id=None,
                       subnet_name=None,
@@ -2587,10 +2612,12 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
     return result
 
 
+@AKSCMDDecorator
 def aks_get_versions(cmd, client, location):
     return client.list_orchestrators(location, resource_type='managedClusters')
 
 
+@AKSCMDDecorator
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser(
                             '~'), '.kube', 'config'),
@@ -2620,6 +2647,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
         raise CLIError("Fail to find kubeconfig file.")
 
 
+@AKSCMDDecorator
 def aks_list(cmd, client, resource_group_name=None):
     if resource_group_name:
         managed_clusters = client.list_by_resource_group(resource_group_name)
@@ -2628,11 +2656,13 @@ def aks_list(cmd, client, resource_group_name=None):
     return _remove_nulls(list(managed_clusters))
 
 
+@AKSCMDDecorator
 def aks_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
     return _remove_nulls([mc])[0]
 
 
+@AKSCMDDecorator
 def aks_update_credentials(cmd, client, resource_group_name, name,
                            reset_service_principal=False,
                            reset_aad=False,
@@ -2675,6 +2705,7 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                        name, parameters)
 
 
+@AKSCMDDecorator
 def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
     instance = client.get(resource_group_name, name)
 
@@ -2696,7 +2727,8 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
 
-# pylint: disable=inconsistent-return-statements
+@AKSCMDDecorator
+# pylint: disable=inconsistent-return-statements,too-many-locals
 def aks_update(cmd, client, resource_group_name, name,
                enable_cluster_autoscaler=False,
                disable_cluster_autoscaler=False,
@@ -3006,6 +3038,7 @@ def aks_update(cmd, client, resource_group_name, name,
         no_wait)
 
 
+@AKSCMDDecorator
 # pylint: disable=unused-argument,inconsistent-return-statements,too-many-return-statements
 def aks_upgrade(cmd,
                 client,
@@ -3103,6 +3136,7 @@ def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name,
     )
 
 
+@AKSCMDDecorator
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
     colorama.init()
 
@@ -3128,6 +3162,7 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
     return _print_command_result(cmd.cli_ctx, commandResultFuture.result(300))
 
 
+@AKSCMDDecorator
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
     if not command_id:
         raise ValidationError('CommandID cannot be empty.')
@@ -3227,6 +3262,7 @@ DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
 DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces.custom'
 
 
+@AKSCMDDecorator
 def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None,
                        endpoint_type='Public', prompt=False):
     """
@@ -3262,6 +3298,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
             raise CLIError(ae)
 
 
+@AKSCMDDecorator
 def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
     """
     Remove Azure Dev Spaces from a managed Kubernetes cluster.
@@ -3285,10 +3322,12 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             raise CLIError(ae)
 
 
+@AKSCMDDecorator
 def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
     return sdk_no_wait(no_wait, client.begin_rotate_cluster_certificates, resource_group_name, name)
 
 
+@AKSCMDDecorator
 def _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable,
                    workspace_resource_id=None,
                    subnet_name=None,
@@ -3418,6 +3457,7 @@ def _get_azext_module(extension_name, module_name):
         raise CLIError(ie)
 
 
+@AKSCMDDecorator
 def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
                         workspace_resource_id=None,
                         aci_subnet_name=None,
@@ -3504,6 +3544,7 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     return addon_profiles
 
 
+@AKSCMDDecorator
 def _install_dev_spaces_extension(cmd, extension_name):
     try:
         from azure.cli.core.extension import operations
@@ -3513,6 +3554,7 @@ def _install_dev_spaces_extension(cmd, extension_name):
     return True
 
 
+@AKSCMDDecorator
 def _update_dev_spaces_extension(cmd, extension_name, extension_module):
     from azure.cli.core.extension import ExtensionNotInstalledException
     try:
@@ -3532,6 +3574,7 @@ def _update_dev_spaces_extension(cmd, extension_name, extension_module):
     return True
 
 
+@AKSCMDDecorator
 def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     from azure.cli.core.extension import (
         ExtensionNotInstalledException, get_extension)
@@ -3544,6 +3587,7 @@ def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     return True
 
 
+@AKSCMDDecorator
 def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name):
     # mapping for azure public cloud
     # log analytics workspaces cannot be created in WCUS region due to capacity limits
@@ -3735,6 +3779,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     return ws_resource_id
 
 
+@AKSCMDDecorator
 def _ensure_container_insights_for_monitoring(cmd, addon):
     # Workaround for this addon key which has been seen lowercased in the wild.
     for key in list(addon.config):
@@ -3856,6 +3901,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
                               validate=False, no_wait=False, subscription_id=subscription_id)
 
 
+@AKSCMDDecorator
 def _ensure_aks_acr(cmd,
                     client_id,
                     acr_name_or_id,
@@ -3891,15 +3937,19 @@ def _ensure_aks_acr(cmd,
     return
 
 
+@AKSCMDDecorator
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     return instance
 
 
+@AKSCMDDecorator
 def aks_agentpool_list(cmd, client, resource_group_name, cluster_name):
     return client.list(resource_group_name, cluster_name)
 
 
+@AKSCMDDecorator
+# pylint: disable=too-many-locals
 def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_name,
                       kubernetes_version=None,
                       zones=None,
@@ -4008,6 +4058,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     )
 
 
+@AKSCMDDecorator
 def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
                         nodepool_name,
                         node_count=3,
@@ -4030,6 +4081,7 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
     )
 
 
+@AKSCMDDecorator
 def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           nodepool_name,
                           kubernetes_version='',
@@ -4070,6 +4122,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     )
 
 
+@AKSCMDDecorator
 def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
                          enable_cluster_autoscaler=False,
                          disable_cluster_autoscaler=False,
@@ -4149,6 +4202,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
     )
 
 
+@AKSCMDDecorator
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                          nodepool_name,
                          no_wait=False):
@@ -4166,10 +4220,12 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
 
 
+@AKSCMDDecorator
 def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_name, nodepool_name):
     return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
 
 
+@AKSCMDDecorator
 def _ensure_aks_acr_role_assignment(cmd,
                                     client_id,
                                     registry_id,
@@ -4234,6 +4290,7 @@ def _ensure_aks_service_principal(cli_ctx,
     }
 
 
+@AKSCMDDecorator
 def _ensure_osa_aad(cmd,
                     cli_ctx,
                     aad_client_app_id=None,
@@ -4511,6 +4568,7 @@ def _validate_aci_location(norm_location):
                        ' The available locations are "{}"'.format(','.join(aci_locations)))
 
 
+@AKSCMDDecorator
 def osa_list(cmd, client, resource_group_name=None):
     if resource_group_name:
         managed_clusters = client.list_by_resource_group(resource_group_name)
@@ -4528,6 +4586,7 @@ def _format_workspace_id(workspace_id):
     return workspace_id
 
 
+@AKSCMDDecorator
 def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
                      location=None,
                      compute_vm_size="Standard_D4s_v3",
@@ -4679,6 +4738,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         raise ex
 
 
+@AKSCMDDecorator
 def openshift_show(cmd, client, resource_group_name, name):
     logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
@@ -4686,6 +4746,7 @@ def openshift_show(cmd, client, resource_group_name, name):
     return _remove_osa_nulls([mc])[0]
 
 
+@AKSCMDDecorator
 def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
     logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
@@ -4707,6 +4768,7 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
+@AKSCMDDecorator
 def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
     OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
                                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -4722,6 +4784,7 @@ def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_i
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
+@AKSCMDDecorator
 def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
     OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
                                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
