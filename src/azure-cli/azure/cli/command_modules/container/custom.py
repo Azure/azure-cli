@@ -703,7 +703,7 @@ def _flush_stdin(ws, buff, lock):
     while True:
         time.sleep(0.01)
         try:
-            if len(buff) == 0:
+            if not buff:
                 continue
             lock.acquire()
             x = bytes(buff)
