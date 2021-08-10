@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 from knack.util import CLIError, todict
 from knack.log import get_logger
 from msrest.serialization import TZ_UTC
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ApplicationUpdateParameters,
                                     GraphErrorException,
@@ -21,6 +21,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.cli.command_modules.ams._client_factory import (_graph_client_factory, _auth_client_factory)
 from azure.cli.command_modules.ams._utils import (_gen_guid, _is_guid)
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 logger = get_logger(__name__)
 
@@ -61,6 +62,8 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
                                                xml=False, years=None):
     ams = client.get(resource_group_name, account_name)
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     sp_name = _create_sp_name(account_name, sp_name)
@@ -88,11 +91,7 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
 
     _assign_role(cmd, role, sp_oid, ams.id)
 
-    print('+++ams+++', ams.id)
-
-    print('***client***', client)
-
-    return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
+    return _build_sp_result(subscription_id, ams.location, resource_group_name, account_name,
                             tenant, app_id, app_display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
                             cmd.cli_ctx.cloud.endpoints.active_directory,
                             cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
@@ -175,7 +174,7 @@ def list_role_assignments(cmd, assignee_object_id, scope=None):
                 i['principalName'] = ''
                 if principal_dics.get(i['principalId']):
                     i['principalName'] = principal_dics[i['principalId']]
-        except (CloudError, GraphErrorException) as ex:
+        except (HttpResponseError, GraphErrorException) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 

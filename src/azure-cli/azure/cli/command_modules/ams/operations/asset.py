@@ -20,7 +20,7 @@ def create_asset(client, account_name, resource_group_name, asset_name, alternat
 
 
 def get_sas_urls(client, resource_group_name, account_name, asset_name, permissions=AssetContainerPermission.read.value,
-                 expiry_time=(datetime.now()+timedelta(hours=23))):
+                 expiry_time=(datetime.now() + timedelta(hours=23))):
     parameters = ListContainerSasInput(permissions=permissions, expiry_time=expiry_time)
     return client.list_container_sas(resource_group_name, account_name,
                                      asset_name, parameters).asset_container_sas_urls

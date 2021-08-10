@@ -172,7 +172,7 @@ def create_cross_site_access_policies(client_access_policy, cross_domain_policy)
     return policies
 
 
-def scale(cmd, client, resource_group_name, account_name, streaming_endpoint_name, scale_units):
+def scale(client, resource_group_name, account_name, streaming_endpoint_name, scale_units):
     parameters = StreamingEntityScaleUnit(scale_unit=scale_units)
 
     return client.begin_scale(resource_group_name, account_name, streaming_endpoint_name, parameters)

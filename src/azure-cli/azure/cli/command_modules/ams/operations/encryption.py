@@ -5,7 +5,7 @@
 
 # pylint: disable=redefined-builtin
 
-from azure.cli.core.azclierror import BadRequestError
+from azure.core.exceptions import HttpResponseError
 from azure.mgmt.media.models import (MediaService, AccountEncryption, KeyVaultProperties,
                                      ApiError)
 
@@ -36,4 +36,4 @@ def set_encryption(client, resource_group_name, account_name, key_type=None,
         if ex.message == '(BadRequest) Access to the Customer Key was forbidden.':
             recommendation = 'Please use the Azure Portal to grant the key vault access to the media account.'\
                              'For more information please visit https://aka.ms/keyvaultaccess'
-        raise BadRequestError(ex, recommendation)
+        raise HttpResponseError(ex, recommendation)

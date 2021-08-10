@@ -57,8 +57,8 @@ def remove_mediaservice_secondary_storage(client, resource_group_name, account_n
                                          ams.tags)
 
 
-def sync_storage_keys(client, resource_group_name, account_name, id):
-    parameters = SyncStorageKeysInput(id=id)
+def sync_storage_keys(client, resource_group_name, account_name, storage_account_id):
+    parameters = SyncStorageKeysInput(id=storage_account_id)
     return client.sync_storage_keys(resource_group_name, account_name, parameters)
 
 
