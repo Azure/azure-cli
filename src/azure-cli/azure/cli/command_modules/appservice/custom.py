@@ -798,10 +798,10 @@ def assign_identity(cmd, resource_group_name, name, assign_identities=None, role
 
 
 def show_identity(cmd, resource_group_name, name, slot=None):
-    op = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    if not op:
+    web_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not web_app:
         raise ResourceNotFoundError("Unable to find App {} in resource group {}".format(name, resource_group_name))
-    return op.identity
+    return web_app.identity
 
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
