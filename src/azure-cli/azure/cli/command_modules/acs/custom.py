@@ -2069,7 +2069,8 @@ class AKSCreateContext:
         self.raw_param = AKSCreateParameters(raw_parameters)
         self.cached_param = self.init_cached_param()
         self.intermediates = dict()
-        self.count = dict()
+        # record the state of the parameters before dynamic inference to avoid infinite recursion
+        self.param_dynamic_inference_record = dict()
 
     # initialize the cached parameter values to the original parameter values passed by the function
     def init_cached_param(self):
@@ -2078,21 +2079,25 @@ class AKSCreateContext:
             cache[k] = v
         return cache
 
-    # TODO: clean up count
-    def form_unique_tuple(self, raw_value, cached_value, force_update):
-        unique_tuple = (raw_value, cached_value, force_update)
-        return unique_tuple
+    def assemble_param_state_tuple(self, raw_value, cached_value, force_update):
+        # the parameter state tuple consists of the raw value, cached value and the forced update indicator
+        state_tuple = (raw_value, cached_value, force_update)
+        return state_tuple
 
-    def remove_count(self, parameter_name, unique_tuple):
-        self.count[parameter_name].discard(unique_tuple)
+    def delete_param_dynamic_inference_record(self, parameter_name, state_tuple):
+        # the state tuple may have been deleted when recursion loop is detected, so we adopt the discard
+        # method here, which would not throw an exception when the element to be deleted does not exist
+        self.param_dynamic_inference_record[parameter_name].discard(state_tuple)
 
-    def make_count(self, parameter_name, unique_tuple):
-        parameter_set = self.count.get(parameter_name, set())
-        if parameter_set and unique_tuple in parameter_set:
+    def check_and_update_param_dynamic_inference_record(self, parameter_name, state_tuple):
+        # check whether there is a identical state tuple corresponding to the parameter, if exists,
+        # it means that a recursion loop is detected and should be terminated, otherwise a record is added
+        parameter_set = self.param_dynamic_inference_record.get(parameter_name, set())
+        if parameter_set and state_tuple in parameter_set:
             return True
         else:
-            parameter_set.add(unique_tuple)
-            self.count[parameter_name] = parameter_set
+            parameter_set.add(state_tuple)
+            self.param_dynamic_inference_record[parameter_name] = parameter_set
         return False
 
     # This decorator wraps the method of reading the value of a specific parameter from the cache or the
@@ -2111,23 +2116,21 @@ class AKSCreateContext:
             raw_value = self.get_param(parameter_name, read_raw=True, default_value=default_value)
             cached_value = self.get_param(parameter_name, read_raw=False, default_value=default_value)
 
-            unique_tuple = self.form_unique_tuple(raw_value, cached_value, force_update)
-            is_loop = self.make_count(parameter_name, unique_tuple)
-            if is_loop:
-                self.remove_count(parameter_name, unique_tuple)
-                return raw_value if read_raw else cached_value
-            else:
+            # get parameter state tuple and check recursion loop
+            state_tuple = self.assemble_param_state_tuple(raw_value, cached_value, force_update)
+            is_recursion_loop = self.check_and_update_param_dynamic_inference_record(parameter_name, state_tuple)
+            if not is_recursion_loop and (force_update or cached_value == raw_value):
                 # call the function for dynamic inference/completion
                 if force_update or cached_value == raw_value:
                     value = func(self, force_update, **kwargs)
-                    self.remove_count(parameter_name, unique_tuple)
                     # update cache
                     if not keep_cache:
                         self.cached_param[parameter_name] = value
+                    self.delete_param_dynamic_inference_record(parameter_name, state_tuple)
                     return value
-
+            else:
                 # otherwise, read from cache (by default) or the original value passed by function
-                self.remove_count(parameter_name, unique_tuple)
+                self.delete_param_dynamic_inference_record(parameter_name, state_tuple)
                 return raw_value if read_raw else cached_value
         return wrapper
 
@@ -2165,7 +2168,8 @@ class AKSCreateContext:
     @get_cached_parameter_decorator
     def get_dns_name_prefix(self, force_update=False, **kwargs):
         dns_name_prefix = self.get_param("dns_name_prefix")
-        # parameter check
+        # parameter check, the parameter checking mechanism here is slightly different here
+        # when `--fqdn-subdomain` is not specified (in the raw parameter), this parameter (dns_name_prefix) should be completed
         if dns_name_prefix and self.get_param("fqdn_subdomain"):
             raise MutuallyExclusiveArgumentError("--dns-name-prefix and --fqdn-subdomain cannot be used at same time")
         if not self.get_param("fqdn_subdomain"):
