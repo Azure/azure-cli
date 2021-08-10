@@ -803,6 +803,7 @@ def show_identity(cmd, resource_group_name, name, slot=None):
         raise ValidationError("Unable to find App {} in resource group {}".format(name, resource_group_name))
     return op
 
+
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
     IdentityType = cmd.get_models('ManagedServiceIdentityType')
     UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
