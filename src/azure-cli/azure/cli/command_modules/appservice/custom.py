@@ -801,7 +801,7 @@ def show_identity(cmd, resource_group_name, name, slot=None):
     op = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not op:
         raise ResourceNotFoundError("Unable to find App {} in resource group {}".format(name, resource_group_name))
-    return op
+    return op.identity
 
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
