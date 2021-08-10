@@ -256,38 +256,8 @@ def load_arguments(self, _):
             c.argument('repo_url', options_list=['--repo-url', '-u'],
                        help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
             c.argument('branch', help='the branch name of the repository')
-            c.argument('private_repo_username', arg_group='VSTS CD Provider',
-                       help='Username for the private repository')
-            c.argument('private_repo_password', arg_group='VSTS CD Provider',
-                       help='Password for the private repository')
-            c.argument('cd_app_type', arg_group='VSTS CD Provider',
-                       help='Web application framework you used to develop your app. Default is AspNet.',
-                       arg_type=get_enum_type(['AspNet', 'AspNetCore', 'NodeJS', 'PHP', 'Python']))
-            c.argument('app_working_dir', arg_group='VSTS CD Provider',
-                       help='Working directory of the application. Default will be root of the repo')
-            c.argument('nodejs_task_runner', arg_group='VSTS CD Provider',
-                       help='Task runner for nodejs. Default is None',
-                       arg_type=get_enum_type(['None', 'Gulp', 'Grunt']))
-            c.argument('python_framework', arg_group='VSTS CD Provider',
-                       help='Framework used for Python application. Default is Django',
-                       arg_type=get_enum_type(['Bottle', 'Django', 'Flask']))
-            c.argument('python_version', arg_group='VSTS CD Provider',
-                       help='Python version used for application. Default is Python 3.5.3 x86',
-                       arg_type=get_enum_type(['Python 2.7.12 x64', 'Python 2.7.12 x86', 'Python 2.7.13 x64',
-                                               'Python 2.7.13 x86', 'Python 3.5.3 x64', 'Python 3.5.3 x86',
-                                               'Python 3.6.0 x64', 'Python 3.6.0 x86', 'Python 3.6.2 x64',
-                                               'Python 3.6.1 x86']))
-            c.argument('cd_project_url', arg_group='VSTS CD Provider',
-                       help='URL of the Visual Studio Team Services (VSTS) project to use for continuous delivery. URL should be in format `https://<accountname>.visualstudio.com/<projectname>`')
-            c.argument('cd_account_create', arg_group='VSTS CD Provider',
-                       help="To create a new Visual Studio Team Services (VSTS) account if it doesn't exist already",
-                       action='store_true')
-            c.argument('test', arg_group='VSTS CD Provider',
-                       help='Name of the web app to be used for load testing. If web app is not available, it will be created. Default: Disable')
-            c.argument('slot_swap', arg_group='VSTS CD Provider',
-                       help='Name of the slot to be used for deployment and later promote to production. If slot is not available, it will be created. Default: Not configured')
             c.argument('repository_type', help='repository type',
-                       arg_type=get_enum_type(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
+                       arg_type=get_enum_type(['git', 'mercurial', 'github', 'externalgit', 'localgit']))
             c.argument('git_token', help='Git access token required for auto sync')
             c.argument('github_action', options_list=['--github-action'], help='If using github action, default to False')
         with self.argument_context(scope + ' identity') as c:
@@ -353,6 +323,8 @@ def load_arguments(self, _):
                        help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
             c.argument('ftps_state', help="Set the Ftps state value for an app. Default value is 'AllAllowed'.",
                        arg_type=get_enum_type(FTPS_STATE_TYPES))
+            c.argument('vnet_route_all_enabled', help="Configure regional VNet integration to route all traffic to the VNet.",
+                       arg_type=get_three_state_flag(return_label=True))
             c.argument('generic_configurations', nargs='+',
                        help='provide site configuration list in a format of either `key=value` pair or `@<json_file>`')
 
@@ -410,6 +382,20 @@ def load_arguments(self, _):
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
+
+    with self.argument_context('webapp deployment github-actions')as c:
+        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('resource_group', arg_type=resource_group_name_type, options_list=['--resource-group', '-g'])
+        c.argument('repo', help='The GitHub repository to which the workflow file will be added. In the format: <owner>/<repository-name>')
+        c.argument('token', help='A Personal Access Token with write access to the specified repository. For more information: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line')
+        c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the production slot if not specified.')
+        c.argument('branch', options_list=['--branch', '-b'], help='The branch to which the workflow file will be added. Defaults to "master" if not specified.')
+        c.argument('login_with_github', help='Interactively log in with Github to retrieve the Personal Access Token', action='store_true')
+
+    with self.argument_context('webapp deployment github-actions add')as c:
+        c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework|Version, e.g. "PHP|5.6". Use "az webapp list-runtimes" for available list.')
+        c.argument('force', options_list=['--force', '-f'], help='When true, the command will overwrite any workflow file with a conflicting name.', action='store_true')
+
     with self.argument_context('webapp log config') as c:
         c.argument('application_logging', help='configure application logging',
                    arg_type=get_enum_type(['filesystem', 'azureblobstorage', 'off']))
@@ -652,6 +638,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
+        c.argument('skip_delegation_check', help="Skip check if you do not have permission or the VNet is in another subscription.",
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the webapp to deploy to.')
@@ -686,6 +674,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
+        c.argument('skip_delegation_check', help="Skip check if you do not have permission or the VNet is in another subscription.",
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance')
@@ -924,19 +914,21 @@ def load_arguments(self, _):
         c.argument('ignore_subnet_size_validation', arg_type=get_three_state_flag(),
                    help='Do not check if subnet is sized according to recommendations.')
         c.argument('ignore_route_table', arg_type=get_three_state_flag(),
-                   help='Configure route table manually.')
+                   help='Configure route table manually. Applies to ASEv2 only.')
         c.argument('ignore_network_security_group', arg_type=get_three_state_flag(),
-                   help='Configure network security group manually.')
+                   help='Configure network security group manually. Applies to ASEv2 only.')
         c.argument('force_route_table', arg_type=get_three_state_flag(),
-                   help='Override route table for subnet')
+                   help='Override route table for subnet. Applies to ASEv2 only.')
         c.argument('force_network_security_group', arg_type=get_three_state_flag(),
-                   help='Override network security group for subnet')
+                   help='Override network security group for subnet. Applies to ASEv2 only.')
         c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
-                   help='Scale of front ends to app service plan instance ratio.', default=15)
+                   help='Scale of front ends to app service plan instance ratio. Applies to ASEv2 only.', default=15)
         c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
-                   help='Size of front end servers.')
+                   help='Size of front end servers. Applies to ASEv2 only.')
         c.argument('os_preference', arg_type=get_enum_type(ASE_OS_PREFERENCE_TYPES),
                    help='Determine if app service environment should start with Linux workers. Applies to ASEv2 only.')
+        c.argument('zone_redundant', arg_type=get_three_state_flag(),
+                   help='Configure App Service Environment as Zone Redundant. Applies to ASEv3 only.')
     with self.argument_context('appservice ase delete') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:

@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.24.2"
+VERSION = "2.27.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -55,9 +55,9 @@ DEPENDENCIES = [
     'msal>=1.10.0,<2.0.0',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
-    'PyJWT==1.7.1',
+    'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'requests~=2.22',
+    'requests[socks]~=2.25.1',
     'six~=1.12',
     'urllib3[secure]>=1.26.5',
 ]
@@ -66,20 +66,15 @@ DEPENDENCIES = [
 if not sys.platform.startswith('cygwin'):
     DEPENDENCIES.append('psutil~=5.8')
 
-TESTS_REQUIRE = [
-    'mock'
-]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
-with open('HISTORY.rst', 'r', encoding='utf-8') as f:
-    HISTORY = f.read()
 
 setup(
     name='azure-cli-core',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Core Module',
-    long_description=README + '\n\n' + HISTORY,
+    long_description=README,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
@@ -89,9 +84,5 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.6.0',
-    extras_require={
-        "test": TESTS_REQUIRE,
-    },
-    tests_require=TESTS_REQUIRE,
     package_data={'azure.cli.core': ['auth_landing_pages/*.html']}
 )

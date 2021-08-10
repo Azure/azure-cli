@@ -42,7 +42,7 @@ def acr_network_rule_add(cmd,
 
     RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
     parameters = RegistryUpdateParameters(network_rule_set=rules)
-    return client.update(resource_group_name, registry_name, parameters)
+    return client.begin_update(resource_group_name, registry_name, parameters)
 
 
 def acr_network_rule_remove(cmd,
@@ -67,7 +67,7 @@ def acr_network_rule_remove(cmd,
 
     RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
     parameters = RegistryUpdateParameters(network_rule_set=rules)
-    return client.update(resource_group_name, registry_name, parameters)
+    return client.begin_update(resource_group_name, registry_name, parameters)
 
 
 def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):

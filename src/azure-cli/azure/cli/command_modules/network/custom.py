@@ -154,7 +154,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                private_link_primary=None,
                                trusted_client_cert=None,
                                ssl_profile=None,
-                               ssl_profile_id=None):
+                               ssl_profile_id=None,
+                               ssl_cert_name=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -226,7 +227,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         firewall_policy, max_capacity, user_assigned_identity,
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
-        private_link_subnet_id, trusted_client_cert, ssl_profile, ssl_profile_id)
+        private_link_subnet_id, trusted_client_cert, ssl_profile, ssl_profile_id, ssl_cert_name)
 
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
@@ -2656,7 +2657,7 @@ def _validate_ipv6_address_prefixes(prefixes):
             if version is None:
                 version = type(network)
             else:
-                if not isinstance(network, version):
+                if not isinstance(network, version):  # pylint: disable=isinstance-second-argument-not-valid-type
                     raise CLIError("usage error: '{}' incompatible mix of IPv4 and IPv6 address prefixes."
                                    .format(prefixes))
         except ValueError:
@@ -2997,9 +2998,9 @@ def show_express_route_port_identity(cmd, resource_group_name, express_route_por
     return ports.identity
 
 
-def update_express_route_port_link(cmd, instance, express_route_port_name, link_name,
+def update_express_route_port_link(cmd, instance, parent, express_route_port_name, link_name,
                                    macsec_cak_secret_identifier=None, macsec_ckn_secret_identifier=None,
-                                   macsec_cipher=None, admin_state=None):
+                                   macsec_sci_state=None, macsec_cipher=None, admin_state=None):
     """
     :param cmd:
     :param instance: an instance of ExpressRoutePort
@@ -3011,30 +3012,22 @@ def update_express_route_port_link(cmd, instance, express_route_port_name, link_
     :param admin_state:
     :return:
     """
-    if len(instance.links) != 2:
-        raise CLIError("The number of ExpressRoute Links should be 2. "
-                       "Code may not perform as expected. Please contact us to update CLI.")
-
-    try:
-        link_index = [index for index, link in enumerate(instance.links) if link.name == link_name][0]
-    except Exception:
-        raise CLIError('ExpressRoute Link "{}" not found'.format(link_name))
-
-    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher]):
-        instance.links[link_index].mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
-        instance.links[link_index].mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
+    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher, macsec_sci_state]):
+        instance.mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
+        instance.mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
 
         # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
         # need to remove this conversion when the issue is fixed.
         if macsec_cipher is not None:
             macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
-            macsec_cipher = macsec_ciphers_tmp[macsec_cipher]
-        instance.links[link_index].mac_sec_config.cipher = macsec_cipher
+            macsec_cipher = macsec_ciphers_tmp.get(macsec_cipher, macsec_cipher)
+        instance.mac_sec_config.cipher = macsec_cipher
+        instance.mac_sec_config.sci_state = macsec_sci_state
 
     if admin_state is not None:
-        instance.links[link_index].admin_state = admin_state
+        instance.admin_state = admin_state
 
-    return instance
+    return parent
 # endregion
 
 
@@ -3485,6 +3478,14 @@ def create_lb_frontend_ip_configuration(
     upsert_to_collection(lb, 'frontend_ip_configurations', new_config, 'name')
     poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
     return get_property(poller.result().frontend_ip_configurations, item_name)
+
+
+def update_lb_frontend_ip_configuration_setter(cmd, resource_group_name, load_balancer_name, parameters, gateway_lb):
+    aux_subscriptions = []
+    if is_valid_resource_id(gateway_lb):
+        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
+    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).load_balancers
+    return client.begin_create_or_update(resource_group_name, load_balancer_name, parameters)
 
 
 def set_lb_frontend_ip_configuration(
@@ -4310,6 +4311,14 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
     poller = ncf.network_interfaces.begin_create_or_update(
         resource_group_name, network_interface_name, nic)
     return get_property(poller.result().ip_configurations, ip_config_name)
+
+
+def update_nic_ip_config_setter(cmd, resource_group_name, network_interface_name, parameters, gateway_lb):
+    aux_subscriptions = []
+    if is_valid_resource_id(gateway_lb):
+        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
+    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).network_interfaces
+    return client.begin_create_or_update(resource_group_name, network_interface_name, parameters)
 
 
 def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
@@ -6989,7 +6998,8 @@ def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, n
 def create_virtual_hub(cmd, client,
                        resource_group_name,
                        virtual_hub_name,
-                       hosted_subnet=None,
+                       hosted_subnet,
+                       public_ip_address=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -7012,7 +7022,10 @@ def create_virtual_hub(cmd, client,
     vhub_poller = client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
-    ip_config = HubIpConfiguration(subnet=SubResource(id=hosted_subnet))
+    ip_config = HubIpConfiguration(
+        subnet=SubResource(id=hosted_subnet),
+        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+    )
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
         vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(
@@ -7046,8 +7059,11 @@ def update_virtual_hub(cmd, instance,
 def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wait=False):
     from azure.cli.core.commands import LongRunningOperation
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
-    poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
-    LongRunningOperation(cmd.cli_ctx)(poller)
+    ip_configs = list(vhub_ip_config_client.list(resource_group_name, virtual_hub_name))
+    if ip_configs:
+        ip_config = ip_configs[0]   # There will always be only 1
+        poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
+        LongRunningOperation(cmd.cli_ctx)(poller)
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name)
 
 

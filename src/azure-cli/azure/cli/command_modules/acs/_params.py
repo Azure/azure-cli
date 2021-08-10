@@ -10,8 +10,9 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
-    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type)
+    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type, edge_zone_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
+from azure.cli.core.profiles import ResourceType
 from knack.arguments import CLIArgumentType
 
 from ._completers import (
@@ -23,7 +24,7 @@ from ._validators import (
     validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
-    validate_ppg, validate_assign_identity, validate_max_surge)
+    validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity)
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, \
     CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, \
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE, \
@@ -157,7 +158,7 @@ def load_arguments(self, _):
                    completer=FilesCompleter(), help='Path to an SSH key file to use.')
 
     # AKS command argument configuration
-    with self.argument_context('aks') as c:
+    with self.argument_context('aks', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('resource_name', name_type, help='Name of the managed cluster.',
                    completer=get_resource_name_completion_list('Microsoft.ContainerService/ManagedClusters'))
         c.argument('name', name_type, help='Name of the managed cluster.',
@@ -167,7 +168,7 @@ def load_arguments(self, _):
         c.argument('node_count', options_list=['--node-count', '-c'], type=int)
         c.argument('tags', tags_type)
 
-    with self.argument_context('aks create') as c:
+    with self.argument_context('aks create', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('name', validator=validate_linux_host_name)
         c.argument('kubernetes_version',
                    completer=get_k8s_versions_completion_list)
@@ -188,6 +189,7 @@ def load_arguments(self, _):
         c.argument('aad_tenant_id')
         c.argument('dns_service_ip')
         c.argument('docker_bridge_address')
+        c.argument('edge_zone', edge_zone_type)
         c.argument('load_balancer_sku', type=str,
                    validator=validate_load_balancer_sku)
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
@@ -251,6 +253,8 @@ def load_arguments(self, _):
         c.argument('aci_subnet_name')
         c.argument('enable_encryption_at_host', options_list=[
                    '--enable-encryption-at-host'], action='store_true')
+        c.argument('enable_ultra_ssd', options_list=[
+                   '--enable-ultra-ssd'], action='store_true')
         c.argument('appgw_name', options_list=[
                    '--appgw-name'], arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', options_list=[
@@ -261,11 +265,12 @@ def load_arguments(self, _):
                    '--appgw-subnet-id'], arg_group='Application Gateway')
         c.argument('appgw_watch_namespace', options_list=[
                    '--appgw-watch-namespace'], arg_group='Application Gateway')
+        c.argument('assign_kubelet_identity', validator=validate_assign_kubelet_identity)
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_sgxquotehelper', action='store_true')
 
-    with self.argument_context('aks update') as c:
+    with self.argument_context('aks update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
         c.argument('detach_acr', acr_arg_type, validator=validate_acr)
 
@@ -303,10 +308,10 @@ def load_arguments(self, _):
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
-    with self.argument_context('aks disable-addons') as c:
+    with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
 
-    with self.argument_context('aks enable-addons') as c:
+    with self.argument_context('aks enable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
         c.argument('subnet_name', options_list=[
                    '--subnet-name', '-s'], help='Name of an existing subnet to use with the virtual-node add-on.')
@@ -322,7 +327,7 @@ def load_arguments(self, _):
                    '--appgw-watch-namespace'], arg_group='Application Gateway')
         c.argument('enable_sgxquotehelper', action='store_true')
 
-    with self.argument_context('aks get-credentials') as c:
+    with self.argument_context('aks get-credentials', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
         c.argument('context_name', options_list=['--context'],
                    help='If specified, overwrite the default context name.')
@@ -356,17 +361,17 @@ def load_arguments(self, _):
         c.argument('aad_server_app_secret')
         c.argument('aad_tenant_id')
 
-    with self.argument_context('aks upgrade') as c:
+    with self.argument_context('aks upgrade', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('kubernetes_version',
                    completer=get_k8s_upgrades_completion_list)
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
-    with self.argument_context('aks scale') as c:
+    with self.argument_context('aks scale', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('nodepool_name', type=str,
                    help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
 
-    with self.argument_context('aks nodepool') as c:
+    with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('cluster_name', type=str, help='The cluster name.')
 
     for scope in ['aks nodepool add']:
@@ -399,13 +404,15 @@ def load_arguments(self, _):
                 [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]))
             c.argument('enable_encryption_at_host', options_list=[
                        '--enable-encryption-at-host'], action='store_true')
+            c.argument('enable_ultra_ssd', options_list=[
+                       '--enable-ultra-ssd'], action='store_true')
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
             c.argument('nodepool_name', type=str, options_list=[
                        '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
 
-    with self.argument_context('aks nodepool update') as c:
+    with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
                    "--enable-cluster-autoscaler", "-e"], action='store_true')
         c.argument('disable_cluster_autoscaler', options_list=[
@@ -439,7 +446,7 @@ def load_arguments(self, _):
                    '--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
     # OpenShift command argument configuration
-    with self.argument_context('openshift') as c:
+    with self.argument_context('openshift', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='open_shift_managed_clusters') as c:
         c.argument('resource_name', name_type, help='Name of the managed OpenShift cluster.',
                    completer=get_resource_name_completion_list('Microsoft.ContainerService/OpenShiftManagedClusters'))
         c.argument('name', name_type, help='Name of the managed OpenShift cluster.',
@@ -448,14 +455,14 @@ def load_arguments(self, _):
                    '--compute-count', '-c'], type=int, default=4)
         c.argument('tags', tags_type)
 
-    with self.argument_context('openshift create') as c:
+    with self.argument_context('openshift create', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='open_shift_managed_clusters') as c:
         c.argument('name', validator=validate_linux_host_name)
         c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
         c.argument('customer_admin_group_id', options_list=[
                    '--customer-admin-group-id'])
         c.argument('workspace_id')
 
-    with self.argument_context('openshift monitor enable') as c:
+    with self.argument_context('openshift monitor enable', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='open_shift_managed_clusters') as c:
         c.argument(
             'workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')
 

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 import unittest
-import mock
+from unittest import mock
 import os
 import time
 import tempfile
@@ -13,7 +13,7 @@ import datetime
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
-                               StorageAccountPreparer, JMESPathCheck, live_only)
+                               StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -1196,10 +1196,10 @@ class WebappSSLCertTest(ScenarioTest):
 
 class WebappSSLImportCertTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_webapp_ssl_import(self, resource_group):
+    @KeyVaultPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, name_prefix='kv-ssl-test', name_len=20)
+    def test_webapp_ssl_import(self, resource_group, key_vault):
         plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
-        kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
         # Cert Generated using
         # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
@@ -1211,13 +1211,12 @@ class WebappSSLImportCertTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        self.cmd('keyvault create -g {} -n {}'.format(resource_group, kv_name))
         self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(
-            resource_group, kv_name, 'Microsoft.Azure.WebSites'))
+            resource_group, key_vault, 'Microsoft.Azure.WebSites'))
         self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
-            cert_name, kv_name, pfx_file, cert_password))
+            cert_name, key_vault, pfx_file, cert_password))
 
-        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
+        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, key_vault, cert_name), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
@@ -1599,6 +1598,8 @@ class WebappNetworkConnectionTests(ScenarioTest):
         namespace_name = self.create_random_name('hcnamespace', 24)
         hyco_name = self.create_random_name('hcname', 24)
         um = "[{{\\\"key\\\":\\\"endpoint\\\",\\\"value\\\":\\\"vmsq1:80\\\"}}]"
+        slot = "stage"
+        slot_webapp_name = "{}-{}".format(webapp_name, slot)
 
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
@@ -1614,11 +1615,26 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', hyco_name)
         ])
+
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(
+            resource_group, webapp_name, slot_webapp_name))
+        self.cmd('webapp hybrid-connection add -g {} -n {} --namespace {} --hybrid-connection {} --slot {}'.format(
+            resource_group, webapp_name, namespace_name, hyco_name, slot_webapp_name))
+        self.cmd('webapp hybrid-connection list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name), checks=[
+            JMESPathCheck('length(@)', 1)
+        ])
         self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {}'.format(
             resource_group, webapp_name, namespace_name, hyco_name))
         self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
+        self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {} --slot {}'.format(
+            resource_group, webapp_name, namespace_name, hyco_name, slot_webapp_name))
+        self.cmd(
+            'webapp hybrid-connection list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name),
+            checks=[
+                JMESPathCheck('length(@)', 0)
+            ])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -1627,6 +1643,8 @@ class WebappNetworkConnectionTests(ScenarioTest):
         plan = self.create_random_name('swiftplan', 24)
         subnet_name = self.create_random_name('swiftsubnet', 24)
         vnet_name = self.create_random_name('swiftname', 24)
+        slot = "stage"
+        slot_webapp_name = "{}-{}".format(webapp_name, slot)
 
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
             resource_group, vnet_name, subnet_name))
@@ -1640,9 +1658,22 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name)
         ])
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(
+            resource_group, webapp_name, slot_webapp_name))
+        self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {} --slot {}'.format(
+            resource_group, webapp_name, vnet_name, subnet_name, slot_webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+        self.cmd(
+            'webapp vnet-integration remove -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
 
@@ -1754,6 +1785,31 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_vnetRouteAll(self, resource_group):
+        webapp_name = self.create_random_name('swiftwebapp', 24)
+        plan = self.create_random_name('swiftplan', 24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        subnet = self.cmd('network vnet subnet update -g {} --vnet {} --name {} --delegations Microsoft.Web/serverfarms'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, webapp_name, vnet_name, subnet['id']))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+        self.cmd('webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+       
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
 
 class WebappDeploymentLogsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -1842,6 +1898,17 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('deployer', 'OneDeploy'),
             JMESPathCheck('message', 'OneDeploy'),
             JMESPathCheck('complete', True)
+        ])
+
+
+class DomainScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_domain_create(self, resource_group):
+        contacts = os.path.join(TEST_DIR, 'domain-contact.json')
+        self.cmd("appservice domain create -g {} --hostname {} --contact-info=@\'{}\' --dryrun".format(
+            resource_group, "testuniquedomainname1.com", contacts)
+        ).assert_with_checks([
+            JMESPathCheck('agreement_keys', "['DNRA', 'DNPA']")
         ])
 
 
