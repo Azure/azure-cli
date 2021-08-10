@@ -33,9 +33,66 @@ definition_file_arg_type = CLIArgumentType(options_list=['--file'], completer=Fi
                                            type=shell_safe_json_parse,
                                            help='Properties may be supplied from a JSON file using the `@{path}` syntax or a JSON string.')
 time_format_help = 'Time should be in following format: "YYYY-MM-DDTHH:MM:SS".'
-storage_arg_group = "Storage"
-policy_arg_group = 'Policy'
 
+storage_arg_group = "Storage"
+log_analytics_arg_group = "Log Analytics"
+event_hub_arg_group = "Event Hub"
+
+def _configure_security_policy_storage_params(arg_ctx):
+    arg_ctx.argument('storage_account',
+                     options_list=['--storage-account'],
+                     arg_group=storage_arg_group,
+                     help='Name of the storage account.')
+
+    arg_ctx.argument('storage_account_access_key',
+                     options_list=['--storage-key'],
+                     arg_group=storage_arg_group,
+                     help='Access key for the storage account.')
+
+    arg_ctx.argument('storage_endpoint',
+                     arg_group=storage_arg_group,
+                     help='The storage account endpoint.')
+
+blob_storage_target_state_param_type = CLIArgumentType(
+    arg_group=storage_arg_group,
+    options_list=['--blob-storage-target-state', '--bsts'],
+    configured_default='sql-server',
+    help='Indicate whether blob storage is a destination for audit records.',
+    arg_type=get_enum_type(BlobAuditingPolicyState))
+
+log_analytics_target_state_param_type = CLIArgumentType(
+    arg_group=log_analytics_arg_group,
+    options_list=['--log-analytics-target-state', '--lats'],
+    configured_default='sql-server',
+    help='Indicate whether log analytics is a destination for audit records.',
+    arg_type=get_enum_type(BlobAuditingPolicyState))
+
+log_analytics_workspace_resource_id_param_type = CLIArgumentType(
+    arg_group=log_analytics_arg_group,
+    options_list=['--log-analytics-workspace-resource-id', '--lawri'],
+    configured_default='sql-server',
+    help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace '
+         'to which you would like to send Audit Logs.')
+
+event_hub_target_state_param_type = CLIArgumentType(
+    arg_group=event_hub_arg_group,
+    options_list=['--event-hub-target-state', '--ehts'],
+    configured_default='sql-server',
+    help='Indicate whether event hub is a destination for audit records.',
+    arg_type=get_enum_type(BlobAuditingPolicyState))
+
+event_hub_authorization_rule_id_param_type = CLIArgumentType(
+    arg_group=event_hub_arg_group,
+    options_list=['--event-hub-authorization-rule-id', '--ehari'],
+    configured_default='sql-server',
+    help='The resource Id for the event hub authorization rule.')
+
+event_hub_param_type = CLIArgumentType(
+    arg_group=event_hub_arg_group,
+    options_list=['--event-hub', '--eh'],
+    configured_default='sql-server',
+    help='The name of the event hub. If none is specified '
+         'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
 def _configure_security_or_audit_policy_storage_params(arg_ctx):
     arg_ctx.argument('storage_account',
@@ -243,6 +300,7 @@ def load_arguments(self, _):
     with self.argument_context('synapse sql pool threat-policy update') as c:
         _configure_security_or_audit_policy_storage_params(c)
         notification_arg_group = 'Notification'
+        policy_arg_group = 'Policy'
 
         c.argument('state',
                    arg_group=policy_arg_group,
@@ -278,6 +336,9 @@ def load_arguments(self, _):
     for scope in ['synapse sql pool audit-policy', 'synapse sql audit-policy']:
         with self.argument_context(scope + ' update') as c:
             _configure_security_or_audit_policy_storage_params(c)
+
+            policy_arg_group = 'Policy'
+
             c.argument('storage_account_subscription_id', arg_group=storage_arg_group,
                        options_list=['--storage-subscription'],
                        help='The subscription id of storage account')
@@ -307,6 +368,55 @@ def load_arguments(self, _):
         c.argument('queue_delay_milliseconds', type=int,
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
+
+        c.argument('storage_account',
+                   options_list=['--storage-account'],
+                   arg_group=storage_arg_group,
+                   help='Name of the storage account.')
+
+        c.argument('storage_account_access_key',
+                   options_list=['--storage-key'],
+                   arg_group=storage_arg_group,
+                   help='Access key for the storage account.')
+
+        c.argument('storage_endpoint',
+                   arg_group=storage_arg_group,
+                   help='The storage account endpoint.')
+        _configure_security_policy_storage_params(c)
+
+        policy_arg_group = 'Policy'
+
+        c.argument('state',
+                   arg_group=policy_arg_group,
+                   help='Auditing policy state',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('audit_actions_and_groups',
+                   options_list=['--actions'],
+                   arg_group=policy_arg_group,
+                   help='List of actions and action groups to audit.',
+                   nargs='+')
+
+        c.argument('retention_days',
+                   arg_group=policy_arg_group,
+                   help='The number of days to retain audit logs.')
+
+        c.argument('blob_storage_target_state',
+                   blob_storage_target_state_param_type)
+
+        c.argument('log_analytics_target_state',
+                   log_analytics_target_state_param_type)
+
+        c.argument('log_analytics_workspace_resource_id',
+                   log_analytics_workspace_resource_id_param_type)
+
+        c.argument('event_hub_target_state',
+                   event_hub_target_state_param_type)
+
+        c.argument('event_hub_authorization_rule_id',
+                   event_hub_authorization_rule_id_param_type)
+
+        c.argument('event_hub', event_hub_param_type)
 
     with self.argument_context('synapse sql audit-policy') as c:
         c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
@@ -732,3 +842,4 @@ def load_arguments(self, _):
                    help='Enable or disable the self-hosted integration runtime auto-update.')
         c.argument('update_delay_offset',
                    help='The time of the day for the self-hosted integration runtime auto-update.')
+
