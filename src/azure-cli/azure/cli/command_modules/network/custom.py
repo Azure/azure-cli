@@ -3482,7 +3482,7 @@ def create_lb_frontend_ip_configuration(
 
 def update_lb_frontend_ip_configuration_setter(cmd, resource_group_name, load_balancer_name, parameters, gateway_lb):
     aux_subscriptions = []
-    if gateway_lb is not None:
+    if is_valid_resource_id(gateway_lb):
         aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
     client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).load_balancers
     return client.begin_create_or_update(resource_group_name, load_balancer_name, parameters)
@@ -4315,7 +4315,7 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
 
 def update_nic_ip_config_setter(cmd, resource_group_name, network_interface_name, parameters, gateway_lb):
     aux_subscriptions = []
-    if gateway_lb is not None:
+    if is_valid_resource_id(gateway_lb):
         aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
     client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).network_interfaces
     return client.begin_create_or_update(resource_group_name, network_interface_name, parameters)
