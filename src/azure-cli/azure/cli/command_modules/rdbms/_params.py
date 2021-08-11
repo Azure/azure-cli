@@ -573,19 +573,19 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('properties', options_list=['--properties', '-b'],
                                help='Request properties. Use @{file} to load from a file. For quoting issues in different terminals, '
                                'see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
-                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
-                               help='Name or ID of the migration.')
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
                 elif scope == "show":
-                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
-                               help='Name or ID of the migration.')
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
                     c.argument('level', options_list=['--level'], required=False,
                                help='Specify the level of migration details requested. Valid values are Active and All. Active is the default.')
                 elif scope == "list":
                     c.argument('migration_filter', options_list=['--filter'], required=False,
                                help='Indicate whether all the migrations or just the Active migrations are returned. Active is the default. Valid values are: Active, All.')
                 elif scope == "update":
-                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
-                               help='Name or ID of the migration.')
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
                     c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
                                help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
                     c.argument('db_names', nargs='+', options_list=['--db-names', '--dbs'], required=False,
@@ -595,8 +595,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
                                help='Cut-over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
                 elif scope == "delete":
-                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
-                               help='Name or ID of the migration.')
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
                     c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
 
     _flexible_server_params('postgres')
