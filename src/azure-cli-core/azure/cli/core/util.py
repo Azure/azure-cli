@@ -1272,3 +1272,23 @@ def is_modern_terminal():
     """In addition to knack.util.is_modern_terminal, detect Cloud Shell."""
     import knack.util
     return knack.util.is_modern_terminal() or in_cloud_console()
+
+
+def rmtree_with_retry(path):
+    # A workaround for https://bugs.python.org/issue33240
+    # Retry shutil.rmtree several times, but even if it fails after several retries, don't block the command execution.
+    retry_num = 3
+    import time
+    while True:
+        try:
+            import shutil
+            shutil.rmtree(path)
+            return
+        except OSError as err:
+            if retry_num > 0:
+                logger.warning("Failed to delete '%s': %s. Retrying ...", path, err)
+                retry_num -= 1
+                time.sleep(1)
+            else:
+                logger.warning("Failed to delete '%s': %s. You may try to delete it manually.", path, err)
+                break
