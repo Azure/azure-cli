@@ -2475,7 +2475,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                user_data=None, network_api_version=None):
+                user_data=None, network_api_version=None, spot_restore_enabled=None, spot_restore_timeout=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2728,7 +2728,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
-            orchestration_mode=orchestration_mode, network_api_version=network_api_version)
+            orchestration_mode=orchestration_mode, network_api_version=network_api_version,
+            spot_restore_enabled=spot_restore_enabled, spot_restore_timeout=spot_restore_timeout)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2997,13 +2998,13 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
-                protect_from_scale_in=None, protect_from_scale_set_actions=None,
+                protect_from_scale_in=None, protect_from_scale_set_actions=None, spot_restore_policy=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
                 scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None,
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, max_batch_instance_percent=None,
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
-                user_data=None, **kwargs):
+                user_data=None, spot_restore_enabled=None, spot_restore_timeout=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
