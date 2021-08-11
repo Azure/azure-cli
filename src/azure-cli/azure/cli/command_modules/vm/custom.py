@@ -2998,7 +2998,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
-                protect_from_scale_in=None, protect_from_scale_set_actions=None, spot_restore_policy=None,
+                protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
                 scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None,
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, max_batch_instance_percent=None,
@@ -3078,6 +3078,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if scale_in_policy is not None:
         ScaleInPolicy = cmd.get_models('ScaleInPolicy')
         vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy)
+
+    if spot_restore_enabled is not None:
+        vmss.spot_restore_policy.enabled = spot_restore_enabled
+
+    if spot_restore_timeout is not None:
+        vmss.spot_restore_policy.restore_timeout = spot_restore_timeout
 
     if priority is not None:
         vmss.virtual_machine_profile.priority = priority
