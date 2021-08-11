@@ -4305,17 +4305,19 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('proximityPlacementGroupId', '{ppg}')
         ])
 
-    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_stop_and_start(self, resource_group, resource_group_location):
+        # This is the only test case in which the `--generate-ssh-keys` option is enabled in the `aks create` command.
+        # Please do not enable this option in other test cases to avoid race conditions during concurrent testing.
+        # For more details, please refer to issue #18854.
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name
         })
 
-        create_cmd = 'aks create --resource-group={resource_group} --name={name}'
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --generate-ssh-keys'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -4656,10 +4658,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
-            'name': aks_name
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
         })
 
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --node-vm-size Standard_D2s_v3 --zones 1 2 3 --enable-ultra-ssd'
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --node-vm-size Standard_D2s_v3 ' \
+                     '--zones 1 2 3 --enable-ultra-ssd --ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
