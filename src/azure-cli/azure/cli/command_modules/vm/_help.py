@@ -599,7 +599,7 @@ examples:
 
 helps['sig image-definition'] = """
 type: group
-short-summary: create an image definition
+short-summary: Manage shared gallery image with VM
 """
 
 helps['sig image-definition create'] = """
@@ -609,6 +609,28 @@ examples:
   - name: Create a linux image defintion
     text: |
         az sig image-definition create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --publisher GreatPublisher --offer GreatOffer --sku GreatSku --os-type linux
+"""
+
+helps['sig image-definition list-shared'] = """
+type: command
+short-summary: List shared gallery images by subscription id or tenant id.
+examples:
+  - name: List shared images by subscription id.
+    text: |-
+           az sig image-definition list-shared --gallery-unique-name "galleryUniqueName" --location "myLocation"
+  - name: List shared images by tenant id.
+    text: |-
+           az sig image-definition list-shared --gallery-unique-name "galleryUniqueName" --location "myLocation" --shared-to tenant
+"""
+
+helps['sig image-definition show-shared'] = """
+type: command
+short-summary: Get a shared gallery image.
+examples:
+  - name: Get a shared gallery image.
+    text: |-
+           az sig image-definition show-shared --gallery-image-definition "myGalleryImageName" \
+--gallery-unique-name "galleryUniqueName" --location "myLocation"
 """
 
 helps['sig image-definition update'] = """
@@ -623,7 +645,7 @@ examples:
 
 helps['sig image-version'] = """
 type: group
-short-summary: create a new version from an image defintion
+short-summary: Manage shared gallery image version with VM
 """
 
 helps['sig image-version create'] = """
@@ -684,6 +706,30 @@ examples:
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-vhd-uri <vhd-uri> --os-vhd-storage-account account
 """
 
+helps['sig image-version list-shared'] = """
+type: command
+short-summary: List shared gallery image versions by subscription id or tenant id.
+examples:
+  - name: List shared image versions by subscription id.
+    text: |-
+           az sig image-version list-shared --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
+"galleryUniqueName" --location "myLocation"
+  - name: List shared image versions by tenant id.
+    text: |-
+           az sig image-version list-shared --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
+"galleryUniqueName" --location "myLocation" --shared-to tenant
+"""
+
+helps['sig image-version show-shared'] = """
+type: command
+short-summary: Get a shared gallery image version.
+examples:
+  - name: Get a shared gallery image version.
+    text: |-
+           az sig image-version show-shared --gallery-image-definition "myGalleryImageName" \
+--gallery-image-version "myGalleryImageVersionName" --gallery-unique-name "galleryUniqueName" --location "myLocation"
+"""
+
 helps['sig image-version update'] = """
 type: command
 short-summary: update a share image version
@@ -722,9 +768,75 @@ examples:
     crafted: true
 """
 
+helps['sig list-shared'] = """
+type: command
+short-summary: List shared galleries by subscription id or tenant id.
+examples:
+  - name: List shared galleries by subscription id.
+    text: |-
+           az sig list-shared --location "myLocation"
+  - name: List shared galleries by tenant id.
+    text: |-
+           az sig list-shared --location "myLocation" --shared-to tenant
+"""
+
 helps['sig list'] = """
 type: command
 short-summary: list share image galleries.
+"""
+
+helps['sig share'] = """
+type: group
+short-summary: Manage gallery sharing profile
+"""
+
+helps['sig share add'] = """
+type: command
+short-summary: Add sharing id to the sharing profile of a gallery.
+examples:
+  - name: Add sharing id to the sharing profile of a gallery.
+    text: |-
+           az sig share add --gallery-name "myGalleryName" --resource-group "myResourceGroup" \
+--subscription-ids "34a4ab42-0d72-47d9-bd1a-aed207386dac" "380fd389-260b-41aa-bad9-0a83108c370b" \
+--tenant-ids "c24c76aa-8897-4027-9b03-8f7928b54ff6"
+"""
+
+helps['sig share remove'] = """
+type: command
+short-summary: Remove sharing profile of a gallery.
+examples:
+  - name: Remove sharing ID to the sharing profile of a gallery.
+    text: |-
+           az sig share remove --gallery-name "myGalleryName" --resource-group "myResourceGroup" \
+--subscription-ids "34a4ab42-0d72-47d9-bd1a-aed207386dac" "380fd389-260b-41aa-bad9-0a83108c370b" \
+--tenant-ids "c24c76aa-8897-4027-9b03-8f7928b54ff6"
+"""
+
+helps['sig share reset'] = """
+type: command
+short-summary: Reset sharing profile of a gallery.
+examples:
+  - name: Reset sharing profile of a gallery.
+    text: |-
+           az sig share reset --gallery-name "myGalleryName" --resource-group "myResourceGroup"
+"""
+
+helps['sig share wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a shared gallery is met.
+examples:
+  - name: Place the CLI in a waiting state until the gallery sharing object is updated.
+    text: |
+        az sig share wait --updated -g MyResourceGroup --gallery-name Gallery
+"""
+
+helps['sig show-shared'] = """
+type: command
+short-summary: Get a shared gallery.
+examples:
+  - name: Get a shared gallery.
+    text: |-
+           az sig show-shared --gallery-unique-name "galleryUniqueName" --location "myLocation"
 """
 
 helps['sig update'] = """
@@ -1024,11 +1136,12 @@ parameters:
   - name: --image
     type: string
     short-summary: >
-        The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI.
+        The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI. In addition, it also supports shared gallery image.
         This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
       - az vm image show
+      - az sig image-version show-shared
   - name: --size
     populator-commands:
       - az vm list-sizes
@@ -1097,6 +1210,9 @@ examples:
   - name: Create multiple VMs. In this example, 3 VMs are created. They are MyVm0, MyVm1, MyVm2.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image centos --count 3
+  - name: Create a VM from shared gallery image.
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
 """
 
 helps['vm deallocate'] = """
@@ -2027,6 +2143,7 @@ short-summary: Manage VM secrets.
 helps['vm secret add'] = """
 type: command
 short-summary: Add a secret to a VM.
+long-summary: 'To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-windows) instead of `az vm secret add`.'
 examples:
   - name: Add a secret to a VM. (autogenerated)
     text: |

@@ -8,7 +8,7 @@ from collections import namedtuple
 import os
 import sys
 import unittest
-import mock
+from unittest import mock
 import tempfile
 import json
 
@@ -270,20 +270,20 @@ class TestUtils(unittest.TestCase):
                          generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_not_called()
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertEqual(request.method, 'PUT')
         self.assertEqual(request.url, 'https://myaccount.blob.core.windows.net/mycontainer/myblob?timeout=30&sv=2019-02-02&srt=s&ss=bf')
         self.assertEqual(request.body, '{"b1": "v1"}')
         # Verify no Authorization header
         self.assertDictEqual(dict(request.headers), expected_header)
-        self.assertEqual(send_mock.call_args.kwargs["verify"], not should_disable_connection_verify())
+        self.assertEqual(send_mock.call_args[1]["verify"], not should_disable_connection_verify())
 
         # Test Authorization header is skipped
         send_raw_request(cli_ctx, 'GET', full_arm_rest_url, body=test_body, skip_authorization_header=True,
                          generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_not_called()
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertDictEqual(dict(request.headers), expected_header)
 
         # Test Authorization header is already provided
@@ -292,7 +292,7 @@ class TestUtils(unittest.TestCase):
                          generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_not_called()
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertDictEqual(dict(request.headers), {**expected_header, 'Authorization': 'Basic ABCDE'})
 
         # Test Authorization header is auto appended
@@ -301,7 +301,7 @@ class TestUtils(unittest.TestCase):
                          generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
         # Test ARM Subscriptions - List
@@ -311,7 +311,7 @@ class TestUtils(unittest.TestCase):
                          generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertEqual(request.url, test_arm_endpoint.rstrip('/') + '/subscriptions?api-version=2020-01-01')
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
@@ -322,7 +322,7 @@ class TestUtils(unittest.TestCase):
                          generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertEqual(request.url, test_arm_endpoint.rstrip('/') + '/tenants?api-version=2020-01-01')
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
@@ -332,7 +332,7 @@ class TestUtils(unittest.TestCase):
                          generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertEqual(request.url, full_arm_rest_url)
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
@@ -341,7 +341,7 @@ class TestUtils(unittest.TestCase):
         send_raw_request(cli_ctx, 'GET', full_arm_rest_url)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertEqual(request.url, full_arm_rest_url)
 
         # Test full ARM URL with port
@@ -351,7 +351,7 @@ class TestUtils(unittest.TestCase):
         send_raw_request(cli_ctx, 'GET', full_arm_rest_url_with_port)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertEqual(request.url, 'https://management.azure.com:443/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01')
 
         # Test non-ARM APIs
@@ -360,7 +360,7 @@ class TestUtils(unittest.TestCase):
         url = 'https://graph.windows.net/00000002-0000-0000-0000-000000000000/applications/00000003-0000-0000-0000-000000000000?api-version=1.6'
         send_raw_request(cli_ctx, 'PATCH', url, body=test_body, generated_client_request_id_name=None)
         get_raw_token_mock.assert_called_with(mock.ANY, 'https://graph.windows.net/')
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertEqual(request.method, 'PATCH')
         self.assertEqual(request.url, url)
 
@@ -368,7 +368,7 @@ class TestUtils(unittest.TestCase):
         url = 'https://graph.microsoft.com/beta/appRoleAssignments/01'
         send_raw_request(cli_ctx, 'PATCH', url, body=test_body, generated_client_request_id_name=None)
         get_raw_token_mock.assert_called_with(mock.ANY, 'https://graph.microsoft.com/')
-        request = send_mock.call_args.args[1]
+        request = send_mock.call_args[0][1]
         self.assertEqual(request.method, 'PATCH')
         self.assertEqual(request.url, url)
 
@@ -377,7 +377,7 @@ class TestUtils(unittest.TestCase):
             send_raw_request(cli_ctx, 'GET', full_arm_rest_url, headers={'user-agent=ARG-UA'})
 
             get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
-            request = send_mock.call_args.args[1]
+            request = send_mock.call_args[0][1]
             self.assertEqual(request.headers['User-Agent'], get_az_rest_user_agent() + ' env-ua ARG-UA')
 
     def test_scopes_to_resource(self):
@@ -496,7 +496,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertIn(err_msg, mock_logger_error.call_args.args[0])
+        self.assertIn(err_msg, mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
@@ -514,7 +514,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args.args[0])
+        self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
@@ -531,8 +531,8 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertIn(err_msg, mock_logger_error.call_args.args[0])
-        self.assertIn(err_code, mock_logger_error.call_args.args[0])
+        self.assertIn(err_msg, mock_logger_error.call_args[0][0])
+        self.assertIn(err_code, mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
@@ -552,7 +552,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertIn(expected_message, mock_logger_error.call_args.args[0])
+        self.assertIn(expected_message, mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
@@ -570,7 +570,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertIn(str(mock.call(mock_http_error).args[0]), mock_logger_error.call_args.args[0])
+        self.assertIs(str(mock_http_error), mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
@@ -587,7 +587,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertIn(str(mock.call(mock_http_error).args[0]), mock_logger_error.call_args.args[0])
+        self.assertIn(str(mock_http_error), mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
 
     @staticmethod

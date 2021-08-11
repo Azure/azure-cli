@@ -15,23 +15,30 @@ from knack.log import get_logger
 from msrest.paging import Paged
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
-from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName
+from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
+    CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity
 from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
     AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
     IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
     JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
-    BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties
+    BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
+    MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo
 
+import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
+    MutuallyExclusiveArgumentError, ArgumentUsageError, ValidationError
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
     cross_region_restore_cf, backup_crr_job_details_cf, crr_operation_status_cf, backup_crr_jobs_cf,
-    backup_protected_items_crr_cf, protection_container_operation_results_cf)
+    backup_protected_items_crr_cf, protection_container_operation_results_cf, _backup_client_factory,
+    recovery_points_recommended_cf, backup_resource_encryption_config_cf)
+
+import azure.cli.command_modules.backup.custom_common as common
 
 logger = get_logger(__name__)
 
@@ -100,7 +107,7 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None):
     vault_sku = Sku(name=SkuName.standard)
     vault_properties = VaultProperties()
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
-    return client.create_or_update(resource_group_name, vault_name, vault)
+    return client.begin_create_or_update(resource_group_name, vault_name, vault)
 
 
 def _force_delete_vault(cmd, vault_name, resource_group_name):
@@ -181,6 +188,199 @@ def list_vaults(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list_by_subscription_id()
+
+
+def assign_identity(client, resource_group_name, vault_name, system_assigned=None, user_assigned=None):
+    vault_details = client.get(resource_group_name, vault_name)
+
+    curr_identity_details = vault_details.identity
+    curr_identity_type = 'none'
+    identity_type = 'none'
+    user_assigned_identity = None
+
+    if curr_identity_details is not None:
+        curr_identity_type = curr_identity_details.type.lower()
+
+    if user_assigned is not None:
+        userid = UserIdentity()
+        user_assigned_identity = dict()
+        for userMSI in user_assigned:
+            user_assigned_identity[userMSI] = userid
+        if system_assigned is not None or curr_identity_type in ["systemassigned", "systemassigned, userassigned"]:
+            identity_type = "systemassigned,userassigned"
+        else:
+            identity_type = "userassigned"
+    elif system_assigned is not None:
+        if curr_identity_type in ["systemassigned, userassigned", "userassigned"]:
+            identity_type = "systemassigned,userassigned"
+        else:
+            identity_type = "systemassigned"
+    else:
+        raise RequiredArgumentMissingError(
+            """
+            Invalid parameters, no operation specified.
+            """)
+
+    identity_data = IdentityData(type=identity_type, user_assigned_identities=user_assigned_identity)
+    vault = PatchVault(identity=identity_data)
+    return client.begin_update(resource_group_name, vault_name, vault)
+
+
+def remove_identity(client, resource_group_name, vault_name, system_assigned=None, user_assigned=None):
+    vault_details = client.get(resource_group_name, vault_name)
+
+    curr_identity_details = vault_details.identity
+    curr_identity_type = 'none'
+    user_assigned_identity = None
+    identity_type = 'none'
+
+    if curr_identity_details is not None:
+        curr_identity_type = curr_identity_details.type.lower()
+
+    if user_assigned is not None:
+        if curr_identity_type not in ["userassigned", "systemassigned, userassigned"]:
+            raise ArgumentUsageError(
+                """
+                There are no user assigned identities to be removed.
+                """)
+        userid = None
+        remove_count_of_userMSI = 0
+        totaluserMSI = 0
+        user_assigned_identity = dict()
+        for element in curr_identity_details.user_assigned_identities.keys():
+            if element in user_assigned:
+                remove_count_of_userMSI += 1
+            totaluserMSI += 1
+        if not user_assigned:
+            remove_count_of_userMSI = totaluserMSI
+        for userMSI in user_assigned:
+            user_assigned_identity[userMSI] = userid
+        if system_assigned is not None:
+            if curr_identity_type != "systemassigned, userassigned":
+                raise ArgumentUsageError(
+                    """
+                    System assigned identity is not enabled for Recovery Services Vault.
+                    """)
+            if remove_count_of_userMSI == totaluserMSI:
+                identity_type = 'none'
+                user_assigned_identity = None
+            else:
+                identity_type = "userassigned"
+        else:
+            if curr_identity_type == 'systemassigned, userassigned':
+                if remove_count_of_userMSI == totaluserMSI:
+                    identity_type = 'systemassigned'
+                    user_assigned_identity = None
+                else:
+                    identity_type = 'systemassigned,userassigned'
+            else:
+                if remove_count_of_userMSI == totaluserMSI:
+                    identity_type = 'none'
+                    user_assigned_identity = None
+                else:
+                    identity_type = 'userassigned'
+    elif system_assigned is not None:
+        return _remove_system_identity(client, resource_group_name, vault_name, curr_identity_type)
+    else:
+        raise RequiredArgumentMissingError(
+            """
+            Invalid parameters, no operation specified.
+            """)
+
+    identity_data = IdentityData(type=identity_type, user_assigned_identities=user_assigned_identity)
+    vault = PatchVault(identity=identity_data)
+    return client.begin_update(resource_group_name, vault_name, vault)
+
+
+def _remove_system_identity(client, resource_group_name, vault_name, curr_identity_type):
+    user_assigned_identity = None
+    identity_type = 'none'
+    if curr_identity_type not in ["systemassigned", "systemassigned, userassigned"]:
+        raise ArgumentUsageError(
+            """
+            System assigned identity is not enabled for Recovery Services Vault.
+            """)
+    if curr_identity_type == 'systemassigned':
+        identity_type = 'none'
+    else:
+        identity_type = 'userassigned'
+
+    identity_data = IdentityData(type=identity_type, user_assigned_identities=user_assigned_identity)
+    vault = PatchVault(identity=identity_data)
+    return client.begin_update(resource_group_name, vault_name, vault)
+
+
+def show_identity(client, resource_group_name, vault_name):
+    return client.get(resource_group_name, vault_name).identity
+
+
+def update_encryption(cmd, client, resource_group_name, vault_name, encryption_key_id, infrastructure_encryption=None,
+                      mi_user_assigned=None, mi_system_assigned=None):
+    keyVaultproperties = CmkKeyVaultProperties(key_uri=encryption_key_id)
+
+    vault_details = client.get(resource_group_name, vault_name)
+    encryption_details = backup_resource_encryption_config_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
+    encryption_type = encryption_details.properties.encryption_at_rest_type
+    identity_details = vault_details.identity
+    identity_type = 'none'
+
+    if identity_details is not None:
+        identity_type = identity_details.type.lower()
+    if identity_details is None or identity_type == 'none':
+        raise ValidationError(
+            """
+            Please enable identities of Recovery Services Vault
+            """)
+
+    if encryption_type != "CustomerManaged":
+        if mi_system_assigned is None and mi_user_assigned is None:
+            raise RequiredArgumentMissingError(
+                """
+                Please provide user assigned identity id using --identity-id paramter or set --use-system-assigned flag
+                """)
+        if infrastructure_encryption is None:
+            infrastructure_encryption = "Disabled"
+    if mi_user_assigned is not None and mi_system_assigned:
+        raise MutuallyExclusiveArgumentError(
+            """
+            Both --identity-id and --use-system-assigned parameters can't be given at the same time.
+            """)
+
+    kekIdentity = None
+    is_identity_present = False
+    if mi_user_assigned is not None:
+        if identity_type not in ["userassigned", "systemassigned, userassigned"]:
+            raise ArgumentUsageError(
+                """
+                Please add user assigned identity for Recovery Services Vault.
+                """)
+        if mi_user_assigned in identity_details.user_assigned_identities.keys():
+            is_identity_present = True
+        if not is_identity_present:
+            raise InvalidArgumentValueError(
+                """
+                This user assigned identity not available for Recovery Services Vault.
+                """)
+
+    if mi_system_assigned:
+        if identity_type not in ["systemassigned", "systemassigned, userassigned"]:
+            raise ArgumentUsageError(
+                """
+                Please make sure that system assigned identity is enabled for Recovery Services Vault
+                """)
+    if mi_user_assigned is not None or mi_system_assigned:
+        kekIdentity = CmkKekIdentity(user_assigned_identity=mi_user_assigned,
+                                     use_system_assigned_identity=mi_system_assigned)
+    encryption_data = VaultPropertiesEncryption(key_vault_properties=keyVaultproperties, kek_identity=kekIdentity,
+                                                infrastructure_encryption=infrastructure_encryption)
+    vault_properties = VaultProperties(encryption=encryption_data)
+    vault = PatchVault(properties=vault_properties)
+    client.begin_update(resource_group_name, vault_name, vault).result()
+
+
+def show_encryption(client, resource_group_name, vault_name):
+    encryption_config_response = client.get(vault_name, resource_group_name)
+    return encryption_config_response
 
 
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
@@ -525,9 +725,12 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
 
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
-                         use_secondary_region=None):
+                         use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
+                         recommended_for_archive=None):
+
     if cmd.name.split()[2] == 'show-log-chain':
-        raise InvalidArgumentValueError("show-log-chain is supported by AzureWorkload backup management type only.")
+        raise ArgumentUsageError("show-log-chain is supported by AzureWorkload backup management type only.")
+
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -541,11 +744,51 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
     if use_secondary_region:
         client = recovery_points_crr_cf(cmd.cli_ctx)
 
-    # Get recovery points
-    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
-    paged_recovery_points = _get_list_from_paged_response(recovery_points)
+    if recommended_for_archive:
+        if is_ready_for_move is False:
+            raise InvalidArgumentValueError(
+                """
+                All the recommended archivable recovery points are by default ready for
+                move. Please provide the correct value for --is-ready-for-move.
+                """)
 
-    return paged_recovery_points
+        client = recovery_points_recommended_cf(cmd.cli_ctx)
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri)
+
+    else:
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                                      filter_string)
+
+    paged_recovery_points = _get_list_from_paged_response(recovery_points)
+    common.fetch_tier(paged_recovery_points)
+
+    if use_secondary_region:
+        paged_recovery_points = [item for item in paged_recovery_points if item.properties.recovery_point_tier_details
+                                 is None or (item.properties.recovery_point_tier_details is not None and
+                                             item.tier_type != 'VaultArchive')]
+
+    recovery_point_list = common.check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move)
+    recovery_point_list = common.filter_rp_based_on_tier(recovery_point_list, tier)
+    return recovery_point_list
+
+
+def move_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_name, source_tier,
+                         destination_tier):
+
+    container_uri = _get_protection_container_uri_from_id(item_name.id)
+    item_uri = _get_protected_item_uri_from_id(item_name.id)
+
+    if source_tier not in common.tier_type_map.keys():
+        raise InvalidArgumentValueError('This source tier-type is not accepted by move command at present.')
+
+    parameters = MoveRPAcrossTiersRequest(source_tier_type=common.tier_type_map[source_tier],
+                                          target_tier_type=common.tier_type_map[destination_tier])
+
+    result = _backup_client_factory(cmd.cli_ctx).move_recovery_point(vault_name, resource_group_name, fabric_name,
+                                                                     container_uri, item_uri, rp_name, parameters,
+                                                                     raw=True, polling=False).result()
+
+    return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def _should_use_original_storage_account(recovery_point, restore_to_staging_storage_account):
@@ -578,17 +821,90 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
     return use_original_storage_account
 
 
+def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
+                                    source_resource_id, target_rg_id,
+                                    use_original_storage_account, restore_disk_lun_list,
+                                    rehydration_duration, rehydration_priority, tier, disk_encryption_set_id,
+                                    encryption, recovery_point, use_secondary_region, mi_system_assigned,
+                                    mi_user_assigned):
+
+    if disk_encryption_set_id is not None:
+        if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
+               recovery_point.properties.is_managed_virtual_machine and
+               not(recovery_point.properties.is_source_vm_encrypted) and use_secondary_region is None):
+            raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
+
+    identity_info = None
+    if mi_system_assigned or mi_user_assigned:
+        if not recovery_point.properties.is_managed_virtual_machine:
+            raise InvalidArgumentValueError("MI based restore is not supported for unmanaged VMs.")
+        identity_info = IdentityInfo(
+            is_system_assigned_identity=mi_system_assigned is not None,
+            managed_identity_resource_id=mi_user_assigned)
+
+    if tier == 'VaultArchive':
+        rehyd_duration = 'P' + str(rehydration_duration) + 'D'
+        rehydration_info = RecoveryPointRehydrationInfo(rehydration_retention_duration=rehyd_duration,
+                                                        rehydration_priority=rehydration_priority)
+
+        trigger_restore_properties = IaasVMRestoreWithRehydrationRequest(
+            create_new_cloud_service=True,
+            recovery_point_id=rp_name,
+            recovery_type='RestoreDisks',
+            region=vault_location,
+            storage_account_id=storage_account_id,
+            source_resource_id=source_resource_id,
+            target_resource_group_id=target_rg_id,
+            original_storage_account_option=use_original_storage_account,
+            restore_disk_lun_list=restore_disk_lun_list,
+            recovery_point_rehydration_info=rehydration_info,
+            disk_encryption_set_id=disk_encryption_set_id,
+            identity_info=identity_info)
+
+    else:
+        trigger_restore_properties = IaasVMRestoreRequest(
+            create_new_cloud_service=True,
+            recovery_point_id=rp_name,
+            recovery_type='RestoreDisks',
+            region=vault_location,
+            storage_account_id=storage_account_id,
+            source_resource_id=source_resource_id,
+            target_resource_group_id=target_rg_id,
+            original_storage_account_option=use_original_storage_account,
+            restore_disk_lun_list=restore_disk_lun_list,
+            disk_encryption_set_id=disk_encryption_set_id,
+            identity_info=identity_info)
+
+    return trigger_restore_properties
+
+
 # pylint: disable=too-many-locals
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
-                  diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None):
+                  diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
+                  rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
+                  mi_user_assigned=None):
+
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM", use_secondary_region)
     _validate_item(item)
+
     recovery_point = show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name, vault_name,
                                          container_name, item_name, rp_name, "AzureIaasVM", "VM", use_secondary_region)
+
+    rp_list = [recovery_point]
+    common.fetch_tier(rp_list)
+
+    if (rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive' and
+            rehydration_priority is None):
+        raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
+        parameters of rehydration duration and rehydration priority.""")
+
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
+    vault_identity = vault.identity
+
+    encryption = backup_resource_encryption_config_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -638,20 +954,22 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     if diskslist:
         restore_disk_lun_list = diskslist
 
-    trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
-                                                      recovery_point_id=rp_name,
-                                                      recovery_type='RestoreDisks',
-                                                      region=vault_location,
-                                                      storage_account_id=_storage_account_id,
-                                                      source_resource_id=_source_resource_id,
-                                                      target_resource_group_id=target_rg_id,
-                                                      original_storage_account_option=use_original_storage_account,
-                                                      restore_disk_lun_list=restore_disk_lun_list)
+    validators.validate_mi_used_for_restore_disks(vault_identity, mi_system_assigned, mi_user_assigned)
+
+    trigger_restore_properties = _get_trigger_restore_properties(rp_name, vault_location, _storage_account_id,
+                                                                 _source_resource_id, target_rg_id,
+                                                                 use_original_storage_account, restore_disk_lun_list,
+                                                                 rehydration_duration, rehydration_priority,
+                                                                 None if rp_list[0].
+                                                                 properties.recovery_point_tier_details is None else
+                                                                 rp_list[0].tier_type, disk_encryption_set_id,
+                                                                 encryption, recovery_point, use_secondary_region,
+                                                                 mi_system_assigned, mi_user_assigned)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     if use_secondary_region:
-        if target_rg_id is None:
-            raise RequiredArgumentMissingError("Please provide target resource group using --target-resource-group.")
+        validators.validate_crr(target_rg_id, rehydration_priority)
+
         azure_region = secondary_region_map[vault_location]
         aad_client = aad_properties_cf(cmd.cli_ctx)
         aad_result = aad_client.get(azure_region)
@@ -663,12 +981,13 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
         trigger_restore_properties.region = azure_region
         result = crr_client.trigger(azure_region, crr_access_token, trigger_restore_properties, raw=True,
                                     polling=False).result()
+
         return _track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
 
     # Trigger restore
     result = client.trigger(vault_name, resource_group_name, fabric_name,
                             container_uri, item_uri, rp_name,
-                            trigger_restore_request, raw=True)
+                            trigger_restore_request, raw=True, polling=False).result()
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -1163,15 +1482,19 @@ def _get_filter_string(filter_dict):
 def _get_query_dates(end_date, start_date):
     query_start_date = None
     query_end_date = None
+
     if start_date and end_date:
         query_start_date = start_date
         query_end_date = end_date
+
     elif not start_date and end_date:
         query_end_date = end_date
         query_start_date = query_end_date - timedelta(days=30)
+
     elif start_date and not end_date:
         query_start_date = start_date
         query_end_date = query_start_date + timedelta(days=30)
+
     return query_end_date, query_start_date
 
 # JSON Utilities

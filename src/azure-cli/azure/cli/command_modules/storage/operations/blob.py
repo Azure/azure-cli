@@ -19,6 +19,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
 from knack.log import get_logger
 from knack.util import CLIError
 from .._transformers import transform_response_with_bytearray
+from ..util import get_datetime_from_string
 
 logger = get_logger(__name__)
 
@@ -57,7 +58,7 @@ def extend_immutability_policy(cmd, client, container_name, account_name, if_mat
 
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
                         metadata=None, public_access=None, fail_on_exist=False,
-                        default_encryption_scope=None, deny_encryption_scope_override=None):
+                        default_encryption_scope=None, deny_encryption_scope_override=None, enable_vlw=None):
     if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
                                              account_name=account_name, container_name=container_name):
         raise CLIError('The specified container already exists.')
@@ -68,6 +69,10 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
                                        default_encryption_scope=default_encryption_scope,
                                        deny_encryption_scope_override=deny_encryption_scope_override,
                                        metadata=metadata)
+        if enable_vlw is not None:
+            ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
+                                                            resource_type=ResourceType.MGMT_STORAGE)
+            blob_container.immutable_storage_with_versioning = ImmutableStorageWithVersioning(enabled=enable_vlw)
         return client.create(resource_group_name=resource_group_name, account_name=account_name,
                              container_name=container_name, blob_container=blob_container)
     return client.create(resource_group_name=resource_group_name, account_name=account_name,
@@ -149,6 +154,27 @@ def list_blobs(client, delimiter=None, include=None, marker=None, num_results=No
         generator = client.list_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
 
     pages = generator.by_page(continuation_token=marker)  # BlobPropertiesPaged
+    result = list_generator(pages=pages, num_results=num_results)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
+
+    return result
+
+
+def list_containers(client, include_metadata=False, include_deleted=False, marker=None,
+                    num_results=None, prefix=None, show_next_marker=None, **kwargs):
+    from ..track2_util import list_generator
+
+    generator = client.list_containers(name_starts_with=prefix, include_metadata=include_metadata,
+                                       include_deleted=include_deleted, results_per_page=num_results, **kwargs)
+
+    pages = generator.by_page(continuation_token=marker)  # ContainerPropertiesPaged
     result = list_generator(pages=pages, num_results=num_results)
 
     if show_next_marker:
@@ -689,7 +715,7 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
     from urllib.parse import quote
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            _get_datetime_from_string(start) if start else datetime.utcnow(), _get_datetime_from_string(expiry))
+            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
         sas_token = client.generate_blob_shared_access_signature(
             container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
             protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
@@ -714,7 +740,7 @@ def generate_container_shared_access_signature(client, container_name, permissio
     user_delegation_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            _get_datetime_from_string(start) if start else datetime.utcnow(), _get_datetime_from_string(expiry))
+            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
 
     return client.generate_container_shared_access_signature(
         container_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
@@ -758,17 +784,6 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
     except AzureException as ex:
         error_template = 'Failed to copy file {} to container {}. {}'
         raise CLIError(error_template.format(source_file_name, destination_container, ex))
-
-
-def _get_datetime_from_string(dt_str):
-    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
-                             '%Y-%m-%dT%HZ', '%Y-%m-%d']
-    for form in accepted_date_formats:
-        try:
-            return datetime.strptime(dt_str, form)
-        except ValueError:
-            continue
-    raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))
 
 
 def show_blob_v2(cmd, client, lease_id=None, **kwargs):

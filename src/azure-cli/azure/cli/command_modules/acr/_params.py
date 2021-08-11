@@ -47,12 +47,13 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, \
-        BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, \
+    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, \
         TokenStatus, ZoneRedundancy = self.get_models(
             'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
-            'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType',
             'TokenStatus', 'ZoneRedundancy')
+    TaskStatus, BaseImageTriggerType, SourceRegistryLoginMode, UpdateTriggerPayloadType = self.get_models(
+        'TaskStatus', 'BaseImageTriggerType', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', operation_group='tasks')
+    RunStatus = self.get_models('RunStatus', operation_group='runs')
 
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
@@ -77,6 +78,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('cmd', options_list=['--__cmd__'])
         c.argument('cmd_value', help="Commands to execute.", options_list=['--cmd'])
         c.argument('zone_redundancy', is_preview=True, arg_type=get_enum_type(ZoneRedundancy), help="Indicates whether or not zone redundancy should be enabled for this registry or replication. For more information, such as supported locations, please visit https://aka.ms/acr/az. Zone-redundancy cannot be updated. Defaults to 'Disabled'.")
+        c.argument('allow_exports', arg_type=get_three_state_flag(), is_preview=True, help="Configure exportPolicy to allow/disallow artifacts from being exported from this registry. Artifacts can be exported via import or transfer operations. For more information, please visit https://aka.ms/acr/export-policy.")
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:
@@ -105,6 +107,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('target_tags', options_list=['--image', '-t'], help="The name and tag of the image using the format: '-t repo/image:tag'. Multiple tags are supported by passing -t multiple times.", action='append')
         c.argument('repository', help='The repository name for a manifest-only copy of images. Multiple copies supported by passing --repository multiple times.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
+        c.argument('no_wait', help="Do not wait for the import to complete and return immediately after queuing the import.", action='store_true')
 
     with self.argument_context('acr config content-trust') as c:
         c.argument('registry_name', options_list=['--registry', '-r', c.deprecate(target='-n', redirect='-r', hide=True), c.deprecate(target='--name', redirect='--registry', hide=True)])
@@ -433,6 +436,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
         c.argument('remove_repos', options_list=['--remove'], nargs='*', required=False,
                    help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
+
+    with self.argument_context('acr connected-registry install') as c:
+        c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Required parameter to specify the parent protocol.', required=True)
 
 
 def _get_helm_default_install_location():

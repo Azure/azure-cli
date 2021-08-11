@@ -199,14 +199,14 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
 def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
     result = None
     if resource_group_name is None or server_name is None or database_name is None:
-        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
+        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name. "
                        "If your parameter persistence is turned ON, make sure these three parameters exist in "
                        "persistent parameters using \'az config param-persist show\'. "
                        "If your parameter persistence is turned OFF, consider passing them explicitly.")
     if not yes:
         user_confirmation(
-            "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
-                                                                                              resource_group_name), yes=yes)
+            "Are you sure you want to delete the database '{0}' of server '{1}'".format(database_name,
+                                                                                        server_name), yes=yes)
 
     try:
         result = client.begin_delete(resource_group_name, server_name, database_name)

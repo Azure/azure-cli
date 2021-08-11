@@ -14,7 +14,9 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
-                                                          cf_disk_encryption_set)
+                                                          cf_disk_encryption_set, cf_shared_galleries,
+                                                          cf_gallery_sharing_profile, cf_shared_gallery_image,
+                                                          cf_shared_gallery_image_version)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -487,6 +489,53 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_image_version', supports_no_wait=True)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait')
+
+    vm_shared_gallery = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._shared_galleries_operations#SharedGalleriesOperations.{}',
+        client_factory=cf_shared_galleries,
+        operation_group='shared_galleries'
+    )
+    with self.command_group('sig', vm_shared_gallery) as g:
+        g.custom_command('list-shared', 'sig_shared_gallery_list', client_factory=cf_shared_galleries,
+                         is_experimental=True, operation_group='shared_galleries', min_api='2020-09-30')
+        g.command('show-shared', 'get', is_experimental=True, operation_group='shared_galleries', min_api='2020-09-30')
+
+    vm_gallery_sharing_profile = CliCommandType(
+        operations_tmpl=(
+            'azure.mgmt.compute.operations._gallery_sharing_profile_operations#GallerySharingProfileOperations.{}'
+        ),
+        client_factory=cf_gallery_sharing_profile,
+        operation_group='shared_galleries'
+    )
+    with self.command_group('sig share', vm_gallery_sharing_profile,
+                            client_factory=cf_gallery_sharing_profile,
+                            operation_group='shared_galleries',
+                            is_experimental=True, min_api='2020-09-30') as g:
+        g.custom_command('add', 'sig_share_update', supports_no_wait=True)
+        g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
+        g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
+        g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
+
+    vm_shared_gallery_image = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._shared_gallery_images_operations#SharedGalleryImagesOperations.'
+        '{}',
+        client_factory=cf_shared_gallery_image,
+        operation_group='shared_galleries')
+    with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30', operation_group='shared_galleries',
+                            client_factory=cf_shared_gallery_image) as g:
+        g.custom_command('list-shared', 'sig_shared_image_definition_list', is_experimental=True)
+        g.command('show-shared', 'get', is_experimental=True)
+
+    vm_shared_gallery_image_version = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._shared_gallery_image_versions_operations#SharedGalleryImageVers'
+        'ionsOperations.{}',
+        client_factory=cf_shared_gallery_image_version,
+        operation_group='shared_galleries')
+    with self.command_group('sig image-version', vm_shared_gallery_image_version, min_api='2020-09-30',
+                            operation_group='shared_galleries',
+                            client_factory=cf_shared_gallery_image_version) as g:
+        g.custom_command('list-shared', 'sig_shared_image_version_list', is_experimental=True)
+        g.command('show-shared', 'get', is_experimental=True)
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         g.show_command('show', 'get')

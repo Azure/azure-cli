@@ -188,7 +188,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('login', 'acr_login')
 
     with self.command_group('acr', acr_import_util) as g:
-        g.command('import', 'acr_import')
+        g.command('import', 'acr_import', supports_no_wait=True)
 
     with self.command_group('acr credential', acr_cred_util) as g:
         g.show_command('show', 'acr_credential_show')

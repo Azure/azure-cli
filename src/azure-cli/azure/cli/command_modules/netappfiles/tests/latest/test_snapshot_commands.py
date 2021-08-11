@@ -10,6 +10,11 @@ VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
 LOCATION = "southcentralusstage"
 VNET_LOCATION = "southcentralus"
 
+# No tidy up of tests required. The resource group is automatically removed
+
+# As a refactoring consideration for the future, consider use of authoring patterns described here
+# https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md#sample-5-get-more-from-resourcegrouppreparer
+
 
 class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):

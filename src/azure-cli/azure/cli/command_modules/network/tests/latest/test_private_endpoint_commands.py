@@ -8,10 +8,9 @@ import time
 import unittest
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, record_only)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, live_only, record_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
-from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
 from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 from azure_devtools.scenario_tests import AllowLargeResponse
@@ -21,14 +20,13 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_plr')
-    def test_private_link_resource_keyvault(self, resource_group):
+    @KeyVaultPreparer(name_prefix='cli-test-kv-plr-', location='centraluseuap')
+    def test_private_link_resource_keyvault(self, resource_group, key_vault):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-plr-', 24),
             'loc': 'centraluseuap',
             'rg': resource_group
         })
 
-        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
         self.cmd('network private-link-resource list '
                  '--name {kv} '
                  '-g {rg} '
@@ -52,9 +50,9 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='centraluseuap')
     def test_private_endpoint_connection_keyvault(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-pe-', 24),
             'loc': 'centraluseuap',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
@@ -64,8 +62,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         })
 
         # Prepare vault and network
-        keyvault = _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete').get_output_in_json()
-        self.kwargs['kv_id'] = keyvault['id']
+        self.kwargs['kv_id'] = self.cmd('keyvault show -n {kv} -g {rg} --query "id" -otsv').output
         self.cmd('network vnet create '
                  '-n {vnet} '
                  '-g {rg} '
@@ -723,73 +720,6 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest):
         self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
         return filepath
 
-    # Currently private-link-resource and private-endpoint-connection are whitelist only features so scenario tests are limited
-    @ResourceGroupPreparer(location='westcentralus')
-    def test_private_link_resource_batch_account(self, resource_group, batch_account_name='testplinksbatch'):
-        self.kwargs.update({
-            'vnet_name': self.create_random_name('testvnet', 20),
-            'subnet_name': self.create_random_name('testsubnet', 20),
-            'second_endpoint_name': self.create_random_name('priv_endpoint', 25),
-            'second_endpoint_conn_name': self.create_random_name('priv_endpointconn', 25),
-            'approval_desc': 'You are approved!',
-            'rejection_desc': 'You are rejected!',
-            'rg': resource_group,
-            'acc_n': batch_account_name,
-            'loc': 'westcentralus'
-        })
-        account = self.cmd('batch account create -g {rg} -n {acc_n} -l {loc} --public-network-access disabled').assert_with_checks([
-            self.check('name', '{acc_n}'),
-            self.check('location', '{loc}'),
-            self.check('resourceGroup', '{rg}')]).get_output_in_json()
-        self.kwargs['acc_id'] = account['id']
-        # create subnet with disabled endpoint network policies
-        self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
-
-        # add an endpoint and then reject it
-        self.cmd(
-            'network private-endpoint create '
-            '-n {second_endpoint_name} '
-            '-g {rg} '
-            '--subnet {subnet_name} '
-            '--vnet-name {vnet_name} '
-            '--private-connection-resource-id {acc_id} '
-            '--group-ids batchAccount '
-            '--connection-name {second_endpoint_conn_name} '
-            '--manual-request').get_output_in_json()
-        private_endpoints = self.cmd('network private-endpoint-connection list --name {acc_n} --resource-group {rg} --type Microsoft.Batch/batchAccounts', checks=[
-            self.check('length(@)', 1)
-        ]).get_output_in_json()
-        self.cmd('batch account show --name {acc_n} --resource-group {rg}', checks=[
-            self.check('length(privateEndpointConnections[*])', 1),
-            self.check('privateEndpointConnections[0].id', private_endpoints[0]['id'])
-        ])
-        self.kwargs['pe_id'] = private_endpoints[0]["id"]
-        self.kwargs['pe_name'] = private_endpoints[0]['name']
-
-        self.cmd(
-            'network private-endpoint-connection approve --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts '
-            '--description "{approval_desc}"')
-        self.cmd(
-            'network private-endpoint-connection show --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts',
-            checks=[
-                self.check('name', '{pe_name}'),
-                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
-                self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}')])
-
-        self.cmd('network private-endpoint-connection reject --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts '
-                 '--description "{rejection_desc}"')
-        self.cmd('network private-endpoint-connection show --id {pe_id}',
-                 checks=[
-                     self.check('id', '{pe_id}'),
-                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')])
-
-        # Test delete
-        self.cmd('network private-endpoint-connection delete --id {pe_id} -y')
-        self.cmd('network private-endpoint delete -n {second_endpoint_name} -g {rg}')
-
-
 class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_plr')
     def test_private_link_resource_cosmosdb(self, resource_group):
@@ -965,7 +895,7 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
         })
 
         scope_id = self.cmd(
-            'az eventgrid topic create --name {topic_name} --resource-group {rg} --location {location} --public-network-access disabled',
+            'eventgrid topic create --name {topic_name} --resource-group {rg} --location {location} --public-network-access disabled',
             checks=[
                 self.check('type', 'Microsoft.EventGrid/topics'),
                 self.check('name', self.kwargs['topic_name']),
@@ -1010,11 +940,11 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
             'rg': resource_group
         })
 
-        self.cmd('az network vnet create --resource-group {resource_group_net} --location {location} --name {vnet_name} --address-prefix 10.0.0.0/16')
-        self.cmd('az network vnet subnet create --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24')
-        self.cmd('az network vnet subnet update --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
+        self.cmd('network vnet create --resource-group {resource_group_net} --location {location} --name {vnet_name} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24')
+        self.cmd('network vnet subnet update --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
 
-        scope = self.cmd('az eventgrid topic create --name {topic_name} --resource-group {rg} --location {location} --public-network-access disabled', checks=[
+        scope = self.cmd('eventgrid topic create --name {topic_name} --resource-group {rg} --location {location} --public-network-access disabled', checks=[
             self.check('type', 'Microsoft.EventGrid/topics'),
             self.check('name', self.kwargs['topic_name']),
             self.check('provisioningState', 'Succeeded'),
@@ -1031,39 +961,39 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
         })
 
         # Create private endpoint
-        self.cmd('az network private-endpoint create --resource-group {resource_group_net} --name {private_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} --private-connection-resource-id {scope} --location {location} --group-ids topic --connection-name {connection_name}')
+        self.cmd('network private-endpoint create --resource-group {resource_group_net} --name {private_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} --private-connection-resource-id {scope} --location {location} --group-ids topic --connection-name {connection_name}')
 
-        server_pec_id = self.cmd('az eventgrid topic show --name {topic_name} --resource-group {rg}').get_output_in_json()['privateEndpointConnections'][0]['id']
+        server_pec_id = self.cmd('eventgrid topic show --name {topic_name} --resource-group {rg}').get_output_in_json()['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
         self.kwargs.update({
             'server_pec_name': server_pec_name,
         })
-        self.cmd('az network private-endpoint-connection list --resource-group {rg} --name {topic_name} --type Microsoft.EventGrid/topics',
+        self.cmd('network private-endpoint-connection list --resource-group {rg} --name {topic_name} --type Microsoft.EventGrid/topics',
                  checks=[
                      self.check('length(@)', 1)
                  ])
-        self.cmd('az network private-endpoint-connection show --resource-group {rg} --resource-name {topic_name} --name {server_pec_name} --type Microsoft.EventGrid/topics')
+        self.cmd('network private-endpoint-connection show --resource-group {rg} --resource-name {topic_name} --name {server_pec_name} --type Microsoft.EventGrid/topics')
 
-        self.cmd('az network private-endpoint-connection approve --resource-group {rg} --resource-name {topic_name} '
+        self.cmd('network private-endpoint-connection approve --resource-group {rg} --resource-name {topic_name} '
                  '--name {server_pec_name} --type Microsoft.EventGrid/topics --description "{approval_description}"',
                  checks=[
                      self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
                      self.check('properties.privateLinkServiceConnectionState.description', '{approval_description}')
                  ])
-        self.cmd('az network private-endpoint-connection reject --resource-group {rg} --resource-name {topic_name} '
+        self.cmd('network private-endpoint-connection reject --resource-group {rg} --resource-name {topic_name} '
                  '--name {server_pec_name} --type Microsoft.EventGrid/topics --description "{rejection_description}"',
                  checks=[
                      self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
                      self.check('properties.privateLinkServiceConnectionState.description', '{rejection_description}')
                  ])
 
-        self.cmd('az network private-endpoint-connection delete --resource-group {rg} --resource-name {topic_name} --name {server_pec_name} --type Microsoft.EventGrid/topics -y')
+        self.cmd('network private-endpoint-connection delete --resource-group {rg} --resource-name {topic_name} --name {server_pec_name} --type Microsoft.EventGrid/topics -y')
 
-        self.cmd('az network private-endpoint delete --resource-group {resource_group_net} --name {private_endpoint_name}')
-        self.cmd('az network vnet subnet delete --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name}')
-        self.cmd('az network vnet delete --resource-group {resource_group_net} --name {vnet_name}')
-        self.cmd('az eventgrid topic delete --name {topic_name} --resource-group {rg}')
+        self.cmd('network private-endpoint delete --resource-group {resource_group_net} --name {private_endpoint_name}')
+        self.cmd('network vnet subnet delete --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name}')
+        self.cmd('network vnet delete --resource-group {resource_group_net} --name {vnet_name}')
+        self.cmd('eventgrid topic delete --name {topic_name} --resource-group {rg}')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_event_grid_pec', location='centraluseuap')
@@ -1082,11 +1012,11 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
             'rg': resource_group
         })
 
-        self.cmd('az network vnet create --resource-group {resource_group_net} --location {location} --name {vnet_name} --address-prefix 10.0.0.0/16')
-        self.cmd('az network vnet subnet create --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24')
-        self.cmd('az network vnet subnet update --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
+        self.cmd('network vnet create --resource-group {resource_group_net} --location {location} --name {vnet_name} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24')
+        self.cmd('network vnet subnet update --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
 
-        scope = self.cmd('az eventgrid domain create --name {domain_name} --resource-group {rg} --location {location} --public-network-access disabled', checks=[
+        scope = self.cmd('eventgrid domain create --name {domain_name} --resource-group {rg} --location {location} --public-network-access disabled', checks=[
             self.check('type', 'Microsoft.EventGrid/domains'),
             self.check('name', self.kwargs['domain_name']),
             self.check('provisioningState', 'Succeeded'),
@@ -1103,39 +1033,39 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
         })
 
         # Create private endpoint
-        self.cmd('az network private-endpoint create --resource-group {resource_group_net} --name {private_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} --private-connection-resource-id {scope} --location {location} --group-ids domain --connection-name {connection_name}')
+        self.cmd('network private-endpoint create --resource-group {resource_group_net} --name {private_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} --private-connection-resource-id {scope} --location {location} --group-ids domain --connection-name {connection_name}')
 
-        server_pec_id = self.cmd('az eventgrid domain show --name {domain_name} --resource-group {rg}').get_output_in_json()['privateEndpointConnections'][0]['id']
+        server_pec_id = self.cmd('eventgrid domain show --name {domain_name} --resource-group {rg}').get_output_in_json()['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
         self.kwargs.update({
             'server_pec_name': server_pec_name,
         })
-        self.cmd('az network private-endpoint-connection list --resource-group {rg} --name {domain_name} --type Microsoft.EventGrid/domains',
+        self.cmd('network private-endpoint-connection list --resource-group {rg} --name {domain_name} --type Microsoft.EventGrid/domains',
                  checks=[
                      self.check('length(@)', 1)
                  ])
-        self.cmd('az network private-endpoint-connection show --resource-group {rg} --resource-name {domain_name} --name {server_pec_name} --type Microsoft.EventGrid/domains')
+        self.cmd('network private-endpoint-connection show --resource-group {rg} --resource-name {domain_name} --name {server_pec_name} --type Microsoft.EventGrid/domains')
 
-        self.cmd('az network private-endpoint-connection approve --resource-group {rg} --resource-name {domain_name} '
+        self.cmd('network private-endpoint-connection approve --resource-group {rg} --resource-name {domain_name} '
                  '--name {server_pec_name} --type Microsoft.EventGrid/domains --description "{approval_description}"',
                  checks=[
                      self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
                      self.check('properties.privateLinkServiceConnectionState.description', '{approval_description}')
                  ])
-        self.cmd('az network private-endpoint-connection reject --resource-group {rg} --resource-name {domain_name} '
+        self.cmd('network private-endpoint-connection reject --resource-group {rg} --resource-name {domain_name} '
                  '--name {server_pec_name} --type Microsoft.EventGrid/domains --description "{rejection_description}"',
                  checks=[
                      self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
                      self.check('properties.privateLinkServiceConnectionState.description', '{rejection_description}')
                  ])
 
-        self.cmd('az network private-endpoint-connection delete --resource-group {rg} --resource-name {domain_name} --name {server_pec_name} --type Microsoft.EventGrid/domains -y')
+        self.cmd('network private-endpoint-connection delete --resource-group {rg} --resource-name {domain_name} --name {server_pec_name} --type Microsoft.EventGrid/domains -y')
 
-        self.cmd('az network private-endpoint delete --resource-group {resource_group_net} --name {private_endpoint_name}')
-        self.cmd('az network vnet subnet delete --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name}')
-        self.cmd('az network vnet delete --resource-group {resource_group_net} --name {vnet_name}')
-        self.cmd('az eventgrid domain delete --name {domain_name} --resource-group {rg}')
+        self.cmd('network private-endpoint delete --resource-group {resource_group_net} --name {private_endpoint_name}')
+        self.cmd('network vnet subnet delete --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name}')
+        self.cmd('network vnet delete --resource-group {resource_group_net} --name {vnet_name}')
+        self.cmd('eventgrid domain delete --name {domain_name} --resource-group {rg}')
 
 
 class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
@@ -1867,7 +1797,7 @@ class NetworkPrivateLinkSearchScenarioTest(ScenarioTest):
         self.cmd("az network private-endpoint-connection delete --id {pec_id} -y")
 
 
-def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, group_id=True):
+def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, group_id=True, delete=True):
     self.kwargs.update({
         'vnet': self.create_random_name('cli-vnet-', 24),
         'subnet': self.create_random_name('cli-subnet-', 24),
@@ -1916,8 +1846,9 @@ def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, gr
                  '--resource-name {resource} --type {type}',
                  checks=self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'))
 
-    self.cmd('network private-endpoint-connection delete --name {name} -g {rg} '
-             '--resource-name {resource} --type {type} -y')
+    if delete:
+        self.cmd('network private-endpoint-connection delete --name {name} -g {rg} '
+                 '--resource-name {resource} --type {type} -y')
 
 
 # Rely on other modules. The test may be broken when other modules bump sdk. At that time, run the failed test in live.
@@ -2002,6 +1933,88 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
             'list_num': 1,
             'type': 'Microsoft.Sql/servers',
             'extra_create': '--admin-user admin123 --admin-password SecretPassword123',
+        })
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_batch_account")
+    def test_private_endpoint_connection_batch_account(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'batch account',
+            'resource': self.create_random_name(prefix='clibatchtestacct', length=24),
+            'list_num': 1,
+            'type': 'Microsoft.Batch/batchAccounts',
+            'extra_create': '-l eastus --public-network-access Disabled',
+        })
+
+        # Private Endpoint Connection of batch account doesn't have delete operation.
+        _test_private_endpoint(self, approve=False, rejected=False, delete=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_media_service")
+    @StorageAccountPreparer(name_prefix="testams")
+    @AllowLargeResponse()
+    def test_private_endpoint_connection_media_service(self, resource_group, storage_account):
+        storage_account = self.cmd('storage account show -n {account}'.format(account=storage_account)).get_output_in_json()
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'ams account',
+            'list_num': 3,
+            'resource': self.create_random_name('clitestams', 24),
+            'type': 'Microsoft.Media/mediaservices',
+            'extra_create': '--storage-account {storage_account} -l eastus'.format(
+                storage_account=storage_account['id'])
+        })
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_storage_sync")
+    def test_private_endpoint_connection_storage_sync(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'storagesync',
+            'list_num': 1,
+            'type': 'Microsoft.StorageSync/storageSyncServices',
+            'extra_create': '-l eastus'
+        })
+        # self.cmd('extension add -n storagesync')
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_web")
+    def test_private_endpoint_connection_web(self, resource_group):
+
+        web_vnet = self.create_random_name('cli-vnet-web', 24)
+        web_subnet = self.create_random_name('cli-subnet-web', 24)
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'appservice ase',
+            'list_num': 1,
+            'type': 'Microsoft.Web/hostingEnvironments',
+            'extra_create': '--vnet-name {vnet} --subnet {subnet} --kind asev3'.format(
+                vnet=web_vnet,
+                subnet=web_subnet
+            ),
+            'web_vnet': web_vnet,
+            'web_subnet': web_subnet
+        })
+
+        self.cmd('network vnet create -g {rg} -n {web_vnet} --address-prefixes 10.1.0.0/16 '
+                 '--subnet-name {web_subnet} --subnet-prefixes 10.1.0.0/24')
+
+        _test_private_endpoint(self, approve=False, rejected=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_service_bus")
+    def test_private_endpoint_connection_service_bus(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'servicebus namespace',
+            'list_num': 1,
+            'type': 'Microsoft.ServiceBus/namespaces',
+            'extra_create': '-l eastus --sku Premium'
         })
 
         _test_private_endpoint(self, approve=False, rejected=False)
