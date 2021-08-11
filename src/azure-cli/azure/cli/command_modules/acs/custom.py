@@ -2070,6 +2070,10 @@ class AKSCreateContext:
         self.intermediates = dict()
         # record the state of the parameters before dynamic inference to avoid infinite recursion
         self.param_dynamic_inference_record = dict()
+        self.mc = None
+
+    def attach_mc(self, mc):
+        self.mc = mc
 
     def init_cached_param(self):
         # initialize the cached parameter values to the original parameter values passed by the function
@@ -2099,6 +2103,29 @@ class AKSCreateContext:
         parameter_set.add(state_tuple)
         self.param_dynamic_inference_record[parameter_name] = parameter_set
         return False
+
+    def get_decorator(func):
+        @functools.wraps(func)
+        def wrapper(self, **kwargs):
+            # function name should follow the naming method of `get_xxx`, and `xxx` is the parameter name
+            # patch parameter name
+            parameter_name = func.__name__[4:]
+            kwargs["parameter_name"] = parameter_name
+            # patch default value
+            # read the original value passed by the command
+            raw_value = getattr(self.raw_param, parameter_name)
+            # try to read from intermediates, when the parameter has been dynamically completed but
+            # has not been decorated into the mc object
+            # the intermediate value will (and should) be cleared in time after it is decorated into the mc object
+            intermediate = self.get_intermediate(parameter_name, None)
+            if intermediate:
+                default_value = intermediate
+            else:
+                default_value = raw_value
+            kwargs["default_value"] = default_value
+            # call func
+            return func(self, **kwargs)
+        return wrapper
 
     # pylint: disable=no-self-argument
     def get_cached_parameter_decorator(func):
@@ -2172,6 +2199,9 @@ class AKSCreateContext:
             logger.warning(msg)
         return self.intermediates.get(variable_name, default_value)
 
+    def remove_intermediate(self, variable_name):
+        self.intermediates.pop(variable_name, None)
+
     @get_cached_parameter_decorator
     def get_location(self, force_update=False, **kwargs):
         # location = self.get_param("location")
@@ -2180,20 +2210,42 @@ class AKSCreateContext:
             location = _get_rg_location(self.cmd.cli_ctx, self.get_param("resource_group_name"))
         return location
 
-    @get_cached_parameter_decorator
-    def get_dns_name_prefix(self, force_update=False, **kwargs):
-        dns_name_prefix = self.get_param("dns_name_prefix")
-        # parameter check, the parameter checking mechanism here is slightly different here
-        # when `--fqdn-subdomain` is not specified (in the raw parameter), this parameter (dns_name_prefix) should be completed
-        if dns_name_prefix and self.get_param("fqdn_subdomain"):
-            raise MutuallyExclusiveArgumentError(
-                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
-            )
-        if not self.get_param("fqdn_subdomain"):
+    def get_dns_name_prefix(self, parameter_name=None, default_value=None, **kwargs):
+        # set the default value to the original value passed by the command
+        dns_name_prefix = kwargs["default_value"]
+        # try to read the value from the mc object
+        if self.mc:
+            if self.mc.dns_prefix:
+                # update the value to the value passed to the mc object earlier
+                dns_name_prefix = self.mc.dns_prefix
+                # clean up intermediate
+                self.remove_intermediate(parameter_name)
+        # try to read from intermediates, when the parameter has been dynamically completed but
+        # has not been placed in the mc object
+        if not dns_name_prefix:
+            intermediate = self.get_intermediate("dns_name_prefix", None)
+            if intermediate:
+                dns_name_prefix = intermediate
+
+        # enable dynamic completion if the `force_update` parameter is specified when calling this getter
+        dynamic_completion = kwargs.get("force_update", False)
+        # check whether the parameter meet the conditions of dynamic completion
+        if not dns_name_prefix and not self.get_fqdn_subdomain():
+            dynamic_completion = True
+        # In case the user does not specify the parameter and it meets the conditions of automatic completion,
+        # necessary information is dynamically completed.
+        if dynamic_completion:
             dns_name_prefix = _get_default_dns_prefix(
                 name=self.get_param("name"),
                 resource_group_name=self.get_param("resource_group_name"),
                 subscription_id=self.get_intermediate("subscription_id"),
+            )
+            # add to intermediate
+            self.set_intermediate(parameter_name, dns_name_prefix)
+        # validation
+        if dns_name_prefix and self.get_fqdn_subdomain():
+            raise MutuallyExclusiveArgumentError(
+                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
             )
         return dns_name_prefix
 
