@@ -1433,7 +1433,7 @@ def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
                                                                   host_name_binding=binding)
 
     return client.web_apps.create_or_update_host_name_binding_slot(resource_group_name=resource_group_name,
-                                                                   name=webapp.name,host_name=hostname,
+                                                                   name=webapp.name, host_name=hostname,
                                                                    slot=slot, host_name_binding=binding)
 
 
