@@ -3,6 +3,20 @@
 Release History
 ===============
 
+2.27.1
+++++++
+
+**ARM**
+
+* Hotfix: Fix #19124: `az deployment what-if`: Handle unsupported and no effect change types (#19144)
+
+**Batch**
+
+[Batch] Upgrade batch data-plane to [azure-batch 11.0.0](https://pypi.org/project/azure-batch/) (#19100)
+[Batch] Upgrade batch management-plane to [azure-batch-mgmt 16.0.0](https://pypi.org/project/azure-mgmt-batch/16.0.0/) (#19100)
+[Batch] `az batch location`: Add `list-skus` command to list SKUs available in a location (#19100)
+[Batch] `az batch account`: Add `outbound-endpoints` command to list outbound network dependencies (#19100)
+
 2.27.0
 ++++++
 
