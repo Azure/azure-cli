@@ -28,7 +28,7 @@ from msrestazure.azure_exceptions import CloudError
 def list_security_tasks(client, resource_group_name=None):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     if resource_group_name:
         return client.tasks.list_by_resource_group(resource_group_name)
@@ -39,7 +39,7 @@ def list_security_tasks(client, resource_group_name=None):
 def get_security_task(client, resource_name, resource_group_name=None):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     if resource_group_name:
         return client.tasks.get_resource_group_level_task(resource_group_name, resource_name)
@@ -54,7 +54,7 @@ def get_security_task(client, resource_name, resource_group_name=None):
 def list_security_alerts(client, resource_group_name=None, location=None):
 
     if location:
-        client._config.asc_location = location
+        client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
             return client.list_resource_group_level_alerts_by_region(resource_group_name)
@@ -69,7 +69,7 @@ def list_security_alerts(client, resource_group_name=None, location=None):
 
 def get_security_alert(client, location, resource_name, resource_group_name=None):
 
-    client._config.asc_location = location
+    client._config.asc_location = location  # pylint: disable=protected-access
 
     if resource_group_name:
         return client.get_resource_group_level_alerts(resource_name, resource_group_name)
@@ -79,7 +79,7 @@ def get_security_alert(client, location, resource_name, resource_group_name=None
 
 def update_security_alert(client, location, resource_name, status, resource_group_name=None):
 
-    client._config.asc_location = location
+    client._config.asc_location = location  # pylint: disable=protected-access
 
     if resource_group_name:
         if status == "Dismiss":
@@ -184,7 +184,7 @@ def turn_off_security_auto_provisioning_setting(client, resource_name):
 def list_security_discovered_security_solutions(client):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.discovered_security_solutions.list()
 
@@ -192,7 +192,7 @@ def list_security_discovered_security_solutions(client):
 def get_security_discovered_security_solution(client, resource_name, resource_group_name):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.discovered_security_solutions.get(resource_group_name, resource_name)
 
@@ -204,7 +204,7 @@ def get_security_discovered_security_solution(client, resource_name, resource_gr
 def list_security_external_security_solutions(client):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.external_security_solutions.list()
 
@@ -212,7 +212,7 @@ def list_security_external_security_solutions(client):
 def get_security_external_security_solution(client, resource_name, resource_group_name):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.external_security_solutions.get(resource_group_name, resource_name)
 
@@ -224,7 +224,7 @@ def get_security_external_security_solution(client, resource_name, resource_grou
 def list_security_jit_network_access_policies(client, resource_group_name=None, location=None):
 
     if location:
-        client._config.asc_location = location
+        client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
             return client.list_by_resource_group_and_region(resource_group_name)
@@ -239,7 +239,7 @@ def list_security_jit_network_access_policies(client, resource_group_name=None, 
 
 def get_security_jit_network_access_policy(client, location, resource_name, resource_group_name):
 
-    client._config.asc_location = location
+    client._config.asc_location = location  # pylint: disable=protected-access
 
     return client.get(resource_group_name, resource_name)
 
@@ -255,7 +255,7 @@ def list_security_locations(client):
 
 def get_security_location(client, resource_name):
 
-    client._config.asc_location = resource_name
+    client._config.asc_location = resource_name  # pylint: disable=protected-access
 
     return client.get()
 
@@ -286,7 +286,7 @@ def create_security_pricing(client, resource_name, tier):
 def list_security_topology(client):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.topology.list()
 
@@ -294,7 +294,7 @@ def list_security_topology(client):
 def get_security_topology(client, resource_name, resource_group_name):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.topology.get(resource_group_name, resource_name)
 
@@ -316,7 +316,7 @@ def get_security_workspace_setting(client, resource_name):
 
 def create_security_workspace_setting(client, resource_name, target_workspace):
 
-    scope = '/subscriptions/' + client._config.subscription_id
+    scope = '/subscriptions/' + client._config.subscription_id  # pylint: disable=protected-access
     return client.create(resource_name, WorkspaceSetting(workspace_id=target_workspace, scope=scope))
 
 
@@ -343,7 +343,7 @@ def update_atp_setting(client, resource_group_name, storage_account_name, is_ena
 def _construct_resource_id(client, resource_group_name, storage_account_name):
 
     return resource_id(
-        subscription=client._config.subscription_id,
+        subscription=client._config.subscription_id,  # pylint: disable=protected-access
         resource_group=resource_group_name,
         namespace='Microsoft.Storage',
         type='storageAccounts',
@@ -448,13 +448,13 @@ def _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name,
 
 def list_security_assessments(client):
 
-    return client.list(scope='/subscriptions/' + client._config.subscription_id)
+    return client.list(scope='/subscriptions/' + client._config.subscription_id)  # pylint: disable=protected-access
 
 
 def get_security_assessment(client, resource_name, assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = '/subscriptions/' + client._config.subscription_id
+        assessed_resource_id = '/subscriptions/' + client._config.subscription_id  # pylint: disable=protected-access
 
     return client.get(assessed_resource_id,
                       assessment_name=resource_name)
@@ -469,7 +469,7 @@ def create_security_assessment(client,
                                assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = resource_id(subscription=client._config.subscription_id)
+        assessed_resource_id = resource_id(subscription=client._config.subscription_id)  # pylint: disable=protected-access
 
     resource_details = AzureResourceDetails(source="Azure")
 
@@ -490,7 +490,7 @@ def create_security_assessment(client,
 def delete_security_assessment(client, resource_name, assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = resource_id(subscription=client._config.subscription_id)
+        assessed_resource_id = resource_id(subscription=client._config.subscription_id)  # pylint: disable=protected-access
 
     return client.delete(assessment_name=resource_name,
                          resource_id=assessed_resource_id)
@@ -543,7 +543,7 @@ def delete_security_assessment_metadata(client, resource_name):
 def list_security_sub_assessments(client, assessment_name=None, assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = '/subscriptions/' + client._config.subscription_id
+        assessed_resource_id = '/subscriptions/' + client._config.subscription_id  # pylint: disable=protected-access
         return client.list_all(scope=assessed_resource_id)
 
     return client.list(scope=assessed_resource_id, assessment_name=assessment_name)
@@ -552,7 +552,7 @@ def list_security_sub_assessments(client, assessment_name=None, assessed_resourc
 def get_security_sub_assessment(client, resource_name, assessment_name, assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = '/subscriptions/' + client._config.subscription_id
+        assessed_resource_id = '/subscriptions/' + client._config.subscription_id  # pylint: disable=protected-access
 
     return client.get(sub_assessment_name=resource_name,
                       assessment_name=assessment_name,
@@ -613,7 +613,7 @@ def list_security_adaptive_network_hardenings(client,
 def list_security_allowed_connections(client):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.allowed_connections.list()
 
@@ -621,7 +621,7 @@ def list_security_allowed_connections(client):
 def get_security_allowed_connections(client, resource_name, resource_group_name):
 
     for loc in client.locations.list():
-        client._config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.allowed_connections.get(resource_group_name, resource_name)
 
