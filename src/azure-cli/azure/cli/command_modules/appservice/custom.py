@@ -1430,8 +1430,8 @@ def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
 
-    return client.web_apps.create_or_update_host_name_binding_slot(resource_group_name, webapp.name, hostname, binding,
-                                                                   slot)
+    return client.web_apps.create_or_update_host_name_binding_slot(resource_group_name, webapp.name, hostname, slot,
+                                                                   binding)
 
 
 def delete_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
