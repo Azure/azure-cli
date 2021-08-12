@@ -407,10 +407,10 @@ class NetworkCustomIpPrefix(ScenarioTest):
         self.cmd('network custom-ip prefix create -g {rg} -n {prefix} --cidr 40.40.40.0/24')
         self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
         self.cmd('network custom-ip prefix list -g {rg}',
-                 check=self.check('length(@)', 1))
+                 checks=self.check('length(@)', 1))
         self.cmd('network custom-ip prefix delete -g {rg} -n {prefix}')
         self.cmd('network custom-ip prefix list -g {rg}',
-                 check=self.is_empty())
+                 checks=self.is_empty())
 
 
 class NetworkPublicIpPrefix(ScenarioTest):
