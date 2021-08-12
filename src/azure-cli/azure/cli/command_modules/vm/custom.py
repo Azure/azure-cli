@@ -1838,6 +1838,7 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 # region VirtualMachines Images
 def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None,
                    all=False):  # pylint: disable=redefined-builtin
+    edge_zone_client = get_mgmt_service_client(cmd.cli_ctx, VirtualMachineImagesEdgeZoneOperations)
     load_thru_services = all
 
     if load_thru_services:
