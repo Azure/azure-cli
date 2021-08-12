@@ -685,7 +685,7 @@ def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, de
 
 def set_functionapp(cmd, resource_group_name, name, **kwargs):
     instance = kwargs['parameters']
-    if 'function' not in instance.kind:
+    if not instance or 'function' not in instance.kind:
         raise ValidationError('Not a function app to update')
     client = web_client_factory(cmd.cli_ctx)
     return client.web_apps.begin_create_or_update(resource_group_name, name, site_envelope=instance)
@@ -798,7 +798,10 @@ def assign_identity(cmd, resource_group_name, name, assign_identities=None, role
 
 
 def show_identity(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
+    web_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not web_app:
+        raise ResourceNotFoundError("Unable to find App {} in resource group {}".format(name, resource_group_name))
+    return web_app.identity
 
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
