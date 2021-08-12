@@ -203,7 +203,7 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type([CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                                                             CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
-        c.argument('auto_upgrade_channel', arg_type=get_enum_type([CONST_RAPID_UPGRADE_CHANNEL, CONST_STABLE_UPGRADE_CHANNEL, CONST_PATCH_UPGRADE_CHANNEL, CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NONE_UPGRADE_CHANNEL]))
+        c.argument('auto_upgrade_channel', arg_type=get_enum_type([rapid, stable, patch, node-image, none]))
         c.argument('enable_cluster_autoscaler', action='store_true')
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile,
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
