@@ -375,7 +375,6 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 # pylint: disable=unsupported-assignment-operation
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
-    container_group_client = cf_container_groups(cli_ctx)
     cg_defintion = None
 
     try:
@@ -402,8 +401,6 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
     if not location:
         location = resource_client.resource_groups.get(resource_group_name).location
     cg_defintion['location'] = location
-
-    api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
 
     return sdk_no_wait(no_wait,
                        resource_client.resources.begin_create_or_update,
@@ -495,7 +492,7 @@ def _create_gitrepo_volume(gitrepo_url, gitrepo_dir, gitrepo_revision):
     return Volume(name=GITREPO_VOLUME_NAME, git_repo=gitrepo_volume) if gitrepo_url else None
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statementsgi
 def _create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_path):
     """Create Azure File volume mount. """
     if azure_file_volume_mount_path:
@@ -560,7 +557,6 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 def container_export(cmd, resource_group_name, name, file):
     api_version = "2021-03-01"
     resource_client = cf_resource(cmd.cli_ctx)
-    container_group_client = cf_container_groups(cmd.cli_ctx)
     resource = resource_client.resources.get(resource_group_name,
                                              "Microsoft.ContainerInstance",
                                              '',
