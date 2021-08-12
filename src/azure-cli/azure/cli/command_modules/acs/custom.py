@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from typing import Any
 import colorama
 import base64
 import binascii
@@ -47,7 +48,7 @@ import requests
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
-from azure.cli.core.azclierror import (ResourceNotFoundError,
+from azure.cli.core.azclierror import (CLIInternalError, ResourceNotFoundError,
                                        ClientRequestError,
                                        ArgumentUsageError,
                                        InvalidArgumentValueError,
@@ -2053,6 +2054,25 @@ class AKSCreateParameters:
             setattr(self, name, value)
 
 
+def safe_list_get(li: list, idx: int, default: Any = None):
+    try:
+        return li[idx]
+    except IndexError:
+        return default
+
+
+parameter_name_to_mc_property_name_mapping = {
+    "ssh_key_value": ["linux_profile", "ssh", "public_keys", [0], "key_data"],
+    "dns_name_prefix": ["dns_prefix"],
+    "location": ["location"],
+    "kubernetes_version": ["kubernetes_version"],
+    "vm_set_type": ["agent_pool_profiles", [0], "type"],
+    "load_balancer_sku": ["network_profile", "load_balancer_sku"],
+    "api_server_authorized_ip_ranges": ["api_server_access_profile", "authorized_ip_ranges"],
+    "fqdn_subdomain": ["fqdn_subdomain"],
+}
+
+
 class AKSCreateContext:
     # Used to store dynamically inferred/completed parameters (i.e. not specified by the user), intermediate
     # variables and a copy of the original function parameters.
@@ -2066,109 +2086,43 @@ class AKSCreateContext:
         self.cmd = cmd
         self.client = client
         self.raw_param = AKSCreateParameters(raw_parameters)
-        self.cached_param = self.init_cached_param()
         self.intermediates = dict()
-        # record the state of the parameters before dynamic inference to avoid infinite recursion
-        self.param_dynamic_inference_record = dict()
         self.mc = None
 
     def attach_mc(self, mc):
         self.mc = mc
 
-    def init_cached_param(self):
-        # initialize the cached parameter values to the original parameter values passed by the function
-        cache = dict()
-        for k, v in vars(self.raw_param).items():
-            cache[k] = v
-        return cache
+    def get_property_value_from_mc(self, parameter_name, default_value=None):
+        property_value = default_value
+        relative_property_names = parameter_name_to_mc_property_name_mapping.get(parameter_name, None)
+        if self.mc and relative_property_names:
+            current_obj = self.mc
+            for property_name in relative_property_names:
+                if type(property_name) == str:
+                    current_obj = getattr(current_obj, property_name, None)
+                elif type(property_name) == list:
+                    current_obj = safe_list_get(current_obj, property_name, None)
+                elif type(property_name) == set:
+                    current_obj = current_obj.get(property_name.pop(), None)
+                else:
+                    raise CLIInternalError("Failed to get property value!")
+                if current_obj is None:
+                    break
+            if current_obj is not None:
+                # update the value to the value passed to the `mc` object earlier
+                property_value = current_obj
+                # clean up intermediate if `mc` has been decorated
+                self.remove_intermediate(parameter_name)
+        return property_value
 
-    # pylint: disable=no-self-use
-    def assemble_param_state_tuple(self, raw_value, cached_value, force_update):
-        # the parameter state tuple consists of the raw value, cached value and the forced update indicator
-        state_tuple = (raw_value, cached_value, force_update)
-        return state_tuple
-
-    def delete_param_dynamic_inference_record(self, parameter_name, state_tuple):
-        # the state tuple may have been deleted when recursion loop is detected, so we adopt the discard
-        # method here, which would not throw an exception when the element to be deleted does not exist
-        self.param_dynamic_inference_record[parameter_name].discard(state_tuple)
-
-    def check_and_update_param_dynamic_inference_record(self, parameter_name, state_tuple):
-        # check whether there is a identical state tuple corresponding to the parameter, if exists,
-        # it means that a recursion loop is detected and should be terminated, otherwise a record is added
-        parameter_set = self.param_dynamic_inference_record.get(parameter_name, set())
-        if parameter_set and state_tuple in parameter_set:
-            return True
-        # update record
-        parameter_set.add(state_tuple)
-        self.param_dynamic_inference_record[parameter_name] = parameter_set
-        return False
-
-    def get_decorator(func):
-        @functools.wraps(func)
-        def wrapper(self, **kwargs):
-            # function name should follow the naming method of `get_xxx`, and `xxx` is the parameter name
-            # patch parameter name
-            parameter_name = func.__name__[4:]
-            kwargs["parameter_name"] = parameter_name
-            # patch default value
-            # read the original value passed by the command
-            raw_value = getattr(self.raw_param, parameter_name)
-            # try to read from intermediates, when the parameter has been dynamically completed but
-            # has not been decorated into the mc object
-            # the intermediate value will (and should) be cleared in time after it is decorated into the mc object
-            intermediate = self.get_intermediate(parameter_name, None)
-            if intermediate:
-                default_value = intermediate
-            else:
-                default_value = raw_value
-            kwargs["default_value"] = default_value
-            # call func
-            return func(self, **kwargs)
-        return wrapper
-
-    # pylint: disable=no-self-argument
-    def get_cached_parameter_decorator(func):
-        # This decorator wraps the method of reading the value of a specific parameter from the cache or the
-        # original value passed by function, so that the `get_xxx` function only needs to implement the logic of
-        # dynamic inference/completion or validity check.
-        # The dynamic inference/completion will be triggered when the `force_update` parameter is specified as
-        # `True` or the cached value is the same as the original value.
-        @functools.wraps(func)
-        def wrapper(self, force_update=False, keep_cache=False, read_raw=False, default_value=None, **kwargs):
-            # function name should follow the naming method of `get_xxx`, and `xxx` is the parameter name
-            parameter_name = func.__name__[4:]
-            kwargs["parameter_name"] = parameter_name
-
-            # fetch raw and cached value
-            raw_value = self.get_param(parameter_name, read_raw=True, default_value=default_value)
-            cached_value = self.get_param(parameter_name, read_raw=False, default_value=default_value)
-
-            # get parameter state tuple and check recursion loop
-            state_tuple = self.assemble_param_state_tuple(raw_value, cached_value, force_update)
-            is_recursion_loop = self.check_and_update_param_dynamic_inference_record(parameter_name, state_tuple)
-            if not is_recursion_loop and (force_update or cached_value == raw_value):
-                # call the function for dynamic inference/completion
-                if force_update or cached_value == raw_value:
-                    value = func(self, force_update, **kwargs)
-                    # update cache
-                    if not keep_cache:
-                        self.cached_param[parameter_name] = value
-                    self.delete_param_dynamic_inference_record(parameter_name, state_tuple)
-                    return value
-            else:
-                # otherwise, read from cache (by default) or the original value passed by function
-                self.delete_param_dynamic_inference_record(parameter_name, state_tuple)
-                return raw_value if read_raw else cached_value
-        return wrapper
-
-    def get_param(self, parameter_name, read_raw=False, default_value=None):
-        value = default_value
-        if read_raw:
-            value = getattr(self.raw_param, parameter_name, default_value)
-        else:
-            value = self.cached_param.get(parameter_name, default_value)
-        return value
+    def get_intermediate(self, variable_name, default_value=None):
+        if variable_name not in self.intermediates:
+            msg = "The intermediate '{}' does not exist! Return default value '{}'!".format(
+                variable_name, default_value
+            )
+            # warning level log will be output to the console, which may cause confusion to users
+            # logger.warning(msg)
+        return self.intermediates.get(variable_name, default_value)
 
     def set_intermediate(self, variable_name, value, overwrite_exists=False):
         if variable_name in self.intermediates:
@@ -2190,42 +2144,80 @@ class AKSCreateContext:
         else:
             self.intermediates[variable_name] = value
 
-    def get_intermediate(self, variable_name, default_value=None):
-        if variable_name not in self.intermediates:
-            msg = "The intermediate '{}' does not exist! Return default value '{}'!".format(
-                variable_name, default_value
-            )
-            # warning level log will be output to the console, which may cause confusion to users
-            logger.warning(msg)
-        return self.intermediates.get(variable_name, default_value)
-
     def remove_intermediate(self, variable_name):
         self.intermediates.pop(variable_name, None)
 
-    @get_cached_parameter_decorator
-    def get_location(self, force_update=False, **kwargs):
-        # location = self.get_param("location")
-        location = self.get_location()
-        if location is None:
-            location = _get_rg_location(self.cmd.cli_ctx, self.get_param("resource_group_name"))
-        return location
+    # pylint: disable=no-self-argument
+    def getter_decorator(func):
+        @functools.wraps(func)
+        def wrapper(self, **kwargs):
+            # parse and patch paramter name from function name, the getter function should be named similar to
+            # `get_xxx`, where `xxx` is the parameter name
+            parameter_name = func.__name__[4:]
+            kwargs["parameter_name"] = parameter_name
+            # read the original value passed by the command
+            raw_value = getattr(self.raw_param, parameter_name)
+            # Try to read from intermediates, the intermediate only exists when the parameter value has been
+            # dynamically completed but has not been decorated into the `mc` object.
+            # Note: The intermediate value should be cleared immediately after it is decorated into the
+            # `mc` object.
+            intermediate = self.get_intermediate(parameter_name, None)
+            # try to read the property value corresponding to the parameter from the `mc` object
+            mc_property = self.get_property_value_from_mc(parameter_name, None)
+            if mc_property is not None:
+                default_value = mc_property
+            elif intermediate is not None:
+                default_value = intermediate
+            else:
+                default_value = raw_value
+            # If the corresponding value is obtained from the `mc` object, the default value of the parameter
+            # is set to the property value; otherwise if the intermediate value is obtained (the corresponding
+            # "parameter name - value" pair exists in the intermediates dictionary and its value is not None),
+            # the default value is set to the intermediate value; otherwise it is set to the raw value.
+            # patch default value
+            kwargs["default_value"] = default_value
+            # call the getter func
+            return func(self, **kwargs)
+        return wrapper
 
-    def get_dns_name_prefix(self, parameter_name=None, default_value=None, **kwargs):
-        # set the default value to the original value passed by the command
+    @getter_decorator
+    def get_resource_group_name(self, enable_validation=False, **kwargs):
+        # Note: This parameter will not be decorated into the `mc` object.
+        # get the default value supplemented by the decorator
+        resource_group_name = kwargs["default_value"]
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return resource_group_name
+
+    @getter_decorator
+    def get_name(self, enable_validation=False, **kwargs):
+        # Note: This parameter will not be decorated into the `mc` object.
+        # get the default value supplemented by the decorator
+        name = kwargs["default_value"]
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return name
+
+    @getter_decorator
+    def get_ssh_key_value(self, enable_validation=False, **kwargs):
+        # get the default value supplemented by the decorator
+        ssh_key_value = kwargs["default_value"]
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            _validate_ssh_key(no_ssh_key=self.get_no_ssh_key(), ssh_key_value=ssh_key_value)
+        return ssh_key_value
+
+    @getter_decorator
+    def get_dns_name_prefix(self, enable_validation=False, **kwargs):
+        # get the parameter name supplemented by the decorator
+        parameter_name = kwargs["parameter_name"]
+        # get the default value supplemented by the decorator
         dns_name_prefix = kwargs["default_value"]
-        # try to read the value from the mc object
-        if self.mc:
-            if self.mc.dns_prefix:
-                # update the value to the value passed to the mc object earlier
-                dns_name_prefix = self.mc.dns_prefix
-                # clean up intermediate
-                self.remove_intermediate(parameter_name)
-        # try to read from intermediates, when the parameter has been dynamically completed but
-        # has not been placed in the mc object
-        if not dns_name_prefix:
-            intermediate = self.get_intermediate("dns_name_prefix", None)
-            if intermediate:
-                dns_name_prefix = intermediate
 
         # enable dynamic completion if the `force_update` parameter is specified when calling this getter
         dynamic_completion = kwargs.get("force_update", False)
@@ -2236,59 +2228,145 @@ class AKSCreateContext:
         # necessary information is dynamically completed.
         if dynamic_completion:
             dns_name_prefix = _get_default_dns_prefix(
-                name=self.get_param("name"),
-                resource_group_name=self.get_param("resource_group_name"),
+                name=self.get_name(),
+                resource_group_name=self.get_resource_group_name(),
                 subscription_id=self.get_intermediate("subscription_id"),
             )
             # add to intermediate
-            self.set_intermediate(parameter_name, dns_name_prefix)
+            self.set_intermediate(parameter_name, dns_name_prefix, overwrite_exists=True)
+
         # validation
-        if dns_name_prefix and self.get_fqdn_subdomain():
-            raise MutuallyExclusiveArgumentError(
-                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
-            )
+        if enable_validation:
+            if dns_name_prefix and self.get_fqdn_subdomain():
+                raise MutuallyExclusiveArgumentError(
+                    "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+                )
         return dns_name_prefix
 
-    @get_cached_parameter_decorator
-    def get_fqdn_subdomain(self, force_update=False, **kwargs):
-        fqdn_subdomain = self.get_param("fqdn_subdomain")
-        # parameter check
-        if fqdn_subdomain and self.get_param("dns_name_prefix"):
-            raise MutuallyExclusiveArgumentError(
-                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
-            )
-        return fqdn_subdomain
+    @getter_decorator
+    def get_location(self, enable_validation=False, **kwargs):
+        # get the parameter name supplemented by the decorator
+        parameter_name = kwargs["parameter_name"]
+        # get the default value supplemented by the decorator
+        location = kwargs["default_value"]
 
-    @get_cached_parameter_decorator
-    def get_vm_set_type(self, force_update=False, **kwargs):
-        vm_set_type = _set_vm_set_type(
-            vm_set_type=self.get_param("vm_set_type"),
-            kubernetes_version=self.get_param("kubernetes_version")
-        )
+        # enable dynamic completion if the `force_update` parameter is specified when calling this getter
+        dynamic_completion = kwargs.get("force_update", False)
+        # check whether the parameter meet the conditions of dynamic completion
+        if location is None:
+            dynamic_completion = True
+        # In case the user does not specify the parameter and it meets the conditions of automatic completion,
+        # necessary information is dynamically completed.
+        if dynamic_completion:
+            location = _get_rg_location(self.cmd.cli_ctx, self.get_resource_group_name())
+            # add to intermediate
+            self.set_intermediate(parameter_name, location, overwrite_exists=True)
+
+        # this parameter does not need validation
+        return location
+
+    @getter_decorator
+    def get_kubernetes_version(self, enable_validation=False, **kwargs):
+        # Note: This parameter will not be decorated into the `mc` object.
+        # get the default value supplemented by the decorator
+        kubernetes_version = kwargs["default_value"]
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return kubernetes_version
+
+    @getter_decorator
+    def get_no_ssh_key(self, enable_validation=False, **kwargs):
+        # get the default value supplemented by the decorator
+        no_ssh_key = kwargs["default_value"]
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            _validate_ssh_key(no_ssh_key=no_ssh_key, ssh_key_value=self.get_ssh_key_value())
+        return no_ssh_key
+
+    @getter_decorator
+    def get_vm_set_type(self, enable_validation=False, **kwargs):
+        # get the parameter name supplemented by the decorator
+        parameter_name = kwargs["parameter_name"]
+        # get the default value supplemented by the decorator
+        vm_set_type = kwargs["default_value"]
+
+        # enable dynamic completion if the `force_update` parameter is specified when calling this getter
+        dynamic_completion = kwargs.get("force_update", False)
+        # check whether the parameter meet the conditions of dynamic completion
+        if not vm_set_type:
+            dynamic_completion = True
+        if dynamic_completion:
+            vm_set_type = _set_vm_set_type(
+                vm_set_type=vm_set_type,
+                kubernetes_version=self.get_kubernetes_version()
+            )
+            # add to intermediate
+            self.set_intermediate(parameter_name, vm_set_type, overwrite_exists=True)
+
+        # this parameter does not need validation
         return vm_set_type
 
-    @get_cached_parameter_decorator
-    def get_load_balancer_sku(self, force_update=False, **kwargs):
-        load_balancer_sku = set_load_balancer_sku(
-            sku=self.get_param("load_balancer_sku"),
-            kubernetes_version=self.get_param("kubernetes_version"),
-        )
-        # parameter check
-        if load_balancer_sku == "basic" and self.get_param("api_server_authorized_ip_ranges"):
-            raise MutuallyExclusiveArgumentError(
-                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+    @getter_decorator
+    def get_load_balancer_sku(self, enable_validation=False, **kwargs):
+        # get the parameter name supplemented by the decorator
+        parameter_name = kwargs["parameter_name"]
+        # get the default value supplemented by the decorator
+        load_balancer_sku = kwargs["default_value"]
+
+        # enable dynamic completion if the `force_update` parameter is specified when calling this getter
+        dynamic_completion = kwargs.get("force_update", False)
+        # check whether the parameter meet the conditions of dynamic completion
+        if not load_balancer_sku:
+            dynamic_completion = True
+        if dynamic_completion:
+            load_balancer_sku = set_load_balancer_sku(
+                sku=load_balancer_sku,
+                kubernetes_version=self.get_kubernetes_version(),
             )
+            # add to intermediate
+            self.set_intermediate(parameter_name, load_balancer_sku, overwrite_exists=True)
+
+        # validation
+        if enable_validation:
+            if load_balancer_sku == "basic" and self.get_api_server_authorized_ip_ranges():
+                raise MutuallyExclusiveArgumentError(
+                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+                )
         return load_balancer_sku
 
-    @get_cached_parameter_decorator
-    def get_api_server_authorized_ip_ranges(self, force_update=False, **kwargs):
-        api_server_authorized_ip_ranges = self.get_param("api_server_authorized_ip_ranges")
-        # parameter check
-        if api_server_authorized_ip_ranges and self.get_param("load_balancer_sku") == "basic":
-            raise MutuallyExclusiveArgumentError(
-                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-            )
+    @getter_decorator
+    def get_api_server_authorized_ip_ranges(self, enable_validation=False, **kwargs):
+        # get the default value supplemented by the decorator
+        api_server_authorized_ip_ranges = kwargs["default_value"]
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            if api_server_authorized_ip_ranges and self.get_load_balancer_sku() == "basic":
+                raise MutuallyExclusiveArgumentError(
+                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+                )
         return api_server_authorized_ip_ranges
+
+    @getter_decorator
+    def get_fqdn_subdomain(self, enable_validation=False, **kwargs):
+        # get the default value supplemented by the decorator
+        fqdn_subdomain = kwargs["default_value"]
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            if fqdn_subdomain and self.get_dns_name_prefix():
+                raise MutuallyExclusiveArgumentError(
+                    "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+                )
+        return fqdn_subdomain
 
 
 class AKSCreateDecorator:
@@ -2307,16 +2385,12 @@ class AKSCreateDecorator:
         self.resource_type = resource_type
 
     def init_mc(self):
-        # check ssh key
-        _validate_ssh_key(self.context.get_param("no_ssh_key"), self.context.get_param("ssh_key_value"))
-
         # get subscription id and store as intermediate
         subscription_id = get_subscription_id(self.cmd.cli_ctx)
         self.context.set_intermediate("subscription_id", subscription_id, overwrite_exists=True)
 
         # initialize the `ManagedCluster` object with mandatory parameters (i.e. location)
-        location = self.context.get_location()
-        mc = self.models.ManagedCluster(location=location)
+        mc = self.models.ManagedCluster(location=self.context.get_location())
         return mc
 
     def construct_default_mc(self):
@@ -2420,12 +2494,17 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     # temporary hook since this function is under gradually refactoring
     # the variables are still updated/patched by overwriting to reduce the modification of the original logic
     subscription_id = aks_create_decorator.context.get_intermediate("subscription_id")
-    location = aks_create_decorator.context.get_location()
-    dns_name_prefix = aks_create_decorator.context.get_dns_name_prefix()
-    fqdn_subdomain = aks_create_decorator.context.get_fqdn_subdomain()
-    vm_set_type = aks_create_decorator.context.get_vm_set_type()
-    load_balancer_sku = aks_create_decorator.context.get_load_balancer_sku()
-    api_server_authorized_ip_ranges = aks_create_decorator.context.get_api_server_authorized_ip_ranges()
+    resource_group_name = aks_create_decorator.context.get_resource_group_name(enable_validation=True)
+    name = aks_create_decorator.context.get_name(enable_validation=True)
+    ssh_key_value = aks_create_decorator.context.get_ssh_key_value(enable_validation=True)
+    dns_name_prefix = aks_create_decorator.context.get_dns_name_prefix(enable_validation=True)
+    location = aks_create_decorator.context.get_location(enable_validation=True)
+    kubernetes_version = aks_create_decorator.context.get_kubernetes_version(enable_validation=True)
+    no_ssh_key = aks_create_decorator.context.get_no_ssh_key(enable_validation=True)
+    vm_set_type = aks_create_decorator.context.get_vm_set_type(enable_validation=True)
+    load_balancer_sku = aks_create_decorator.context.get_load_balancer_sku(enable_validation=True)
+    api_server_authorized_ip_ranges = aks_create_decorator.context.get_api_server_authorized_ip_ranges(enable_validation=True)
+    fqdn_subdomain = aks_create_decorator.context.get_fqdn_subdomain(enable_validation=True)
 
     agent_pool_profile = aks_create_decorator.models.ManagedClusterAgentPoolProfile(
         # Must be 12 chars or less before ACS RP adds to it
