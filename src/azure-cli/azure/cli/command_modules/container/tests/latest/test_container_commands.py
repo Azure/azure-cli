@@ -227,7 +227,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         registry_username = 'clitestregistry1'
         registry_server = '{}.azurecr.io'.format(registry_username)
         image = '{}/nginx:latest'.format(registry_server)
-        password = '5+36OCtbIwfy8g5glC4bQQrFsfmMc3iD'
+        password = 'gne5giZg1OG+D1YPFjZEV4RnWHLaX2vk'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
@@ -268,7 +268,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_container_create_with_vnet(self, resource_group, resource_group_location):
         from msrestazure.tools import resource_id
-        from msrestazure.azure_exceptions import CloudError
+        from azure.core.exceptions import HttpResponseError
         from knack.util import CLIError
 
         test_sub_id = '00000000-0000-0000-0000-000000000000'
@@ -300,7 +300,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                      '--subnet {subnet_name} ')
 
         # Network Profile doesn't exists from name
-        with self.assertRaisesRegexp(CloudError, "Azure Error: NetworkProfileNotFound"):
+        with self.assertRaisesRegexp(HttpResponseError, 'NetworkProfileNotFound'):
             self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
                      '--network-profile {network_profile_name} ')
 

@@ -219,7 +219,7 @@ def create_container(cmd,
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
-    lro = sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name,
+    lro = sdk_no_wait(no_wait, container_group_client.begin_create_or_update, resource_group_name,
                       name, cgroup)
 
     if assign_identity is not None and identity_scope:
@@ -408,11 +408,7 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
     return sdk_no_wait(no_wait,
                        resource_client.resources.begin_create_or_update,
                        resource_group_name,
-                       "Microsoft.ContainerInstance",
-                       '',
-                       "containerGroups",
                        name,
-                       api_version,
                        cg_defintion)
 
 
@@ -562,6 +558,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 
 
 def container_export(cmd, resource_group_name, name, file):
+    api_version = "2021-03-01"
     resource_client = cf_resource(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     resource = resource_client.resources.get(resource_group_name,
@@ -569,7 +566,7 @@ def container_export(cmd, resource_group_name, name, file):
                                              '',
                                              "containerGroups",
                                              name,
-                                             container_group_client.api_version).__dict__
+                                             api_version).__dict__
 
     # Remove unwanted properites
     resource['properties'].pop('instanceView', None)
@@ -597,7 +594,7 @@ def container_export(cmd, resource_group_name, name, file):
         resource['properties']['containers'][i]['properties'].pop('instanceView', None)
 
     # Add the api version
-    resource['apiVersion'] = container_group_client.api_version
+    resource['apiVersion'] = api_version
 
     with open(file, 'w+') as f:
         yaml.safe_dump(resource, f, default_flow_style=False)
