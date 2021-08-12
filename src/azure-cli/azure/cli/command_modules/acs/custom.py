@@ -2004,8 +2004,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='managed_clusters')
     ManagedClusterAutoUpgradeProfile = cmd.get_models('ManagedClusterAutoUpgradeProfile',
-                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                              operation_group='managed_clusters')
+                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                      operation_group='managed_clusters')
     ManagedClusterAgentPoolProfile = cmd.get_models('ManagedClusterAgentPoolProfile',
                                                     resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                     operation_group='managed_clusters')
@@ -2665,8 +2665,8 @@ def aks_update(cmd, client, resource_group_name, name,
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='managed_clusters')
     ManagedClusterAutoUpgradeProfile = cmd.get_models('ManagedClusterAutoUpgradeProfile',
-                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                              operation_group='managed_clusters')
+                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                      operation_group='managed_clusters')
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
