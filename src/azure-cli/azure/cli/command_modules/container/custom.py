@@ -397,13 +397,13 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
 
     cg_defintion['name'] = name
 
-    location = location or cg_defintion.get('location', None)
-    if not location:
-        location = resource_client.resource_groups.get(resource_group_name).location
+    if cg_defintion.get('location'):
+        location = cg_defintion.get('location')
     cg_defintion['location'] = location
 
     return sdk_no_wait(no_wait, container_group_client.begin_create_or_update, resource_group_name,
-                      name, cg_defintion)
+                       name, cg_defintion)
+
 
 # pylint: disable=inconsistent-return-statements
 def _create_resource_requirements(cpu, memory):
