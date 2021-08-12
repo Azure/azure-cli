@@ -361,6 +361,17 @@ def update_disk_sku_info(info_dict, skus):
             _update(info_dict, lun, value)
 
 
+def is_shared_gallery_image_id(image_reference):
+    if not image_reference:
+        return False
+
+    shared_gallery_id_pattern = re.compile(r'^/SharedGalleries/[^/]*/Images/[^/]*/Versions/.*$', re.IGNORECASE)
+    if shared_gallery_id_pattern.match(image_reference):
+        return True
+
+    return False
+
+
 class ArmTemplateBuilder20190401(ArmTemplateBuilder):
 
     def __init__(self):
