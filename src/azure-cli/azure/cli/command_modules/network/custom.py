@@ -2485,6 +2485,79 @@ def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, 
                           keep_empty_record_set=keep_empty_record_set)
 
 
+def _check_a_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.ipv4_address == record.ipv4_address:
+            return True
+    return False
+
+
+def _check_aaaa_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.ipv6_address == record.ipv6_address:
+            return True
+    return False
+
+
+def _check_caa_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r.flags == record.flags \
+            and r.tag == record.tag \
+            and r.value == record.value):
+            return True
+    return False
+
+
+def _check_cname_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.cname == record.cname:
+            return True
+    return False
+
+
+def _check_mx_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r.preference == record.preference \
+            and r.exchange == record.exchange):
+            return True
+    return False
+
+
+def _check_ns_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.nsdname == record.nsdname:
+            return True
+    return False
+
+
+def _check_ptr_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.ptrdname == record.ptrdname:
+            return True
+    return False
+
+
+def _check_srv_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r.priority == record.priority \
+            and r.weight == record.weight \
+            and r.port == record.port \
+            and r.target == record.target):
+            return True
+    return False
+
+
+def _check_txt_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.value == record.value:
+            return True
+    return False
+
+
+def _record_exist_func(record_type):
+    return globals()["_check_{}_record_exist".format(record_type)]
+
+
 def _add_record(record_set, record, record_type, is_list=False):
     record_property = _type_to_property_name(record_type)
 
@@ -2493,7 +2566,10 @@ def _add_record(record_set, record, record_type, is_list=False):
         if record_list is None:
             setattr(record_set, record_property, [])
             record_list = getattr(record_set, record_property)
-        record_list.append(record)
+
+        _record_exist = _record_exist_func(record_type)
+        if not _record_exist(record, record_list):
+            record_list.append(record)
     else:
         setattr(record_set, record_property, record)
 
@@ -2503,6 +2579,9 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     from azure.core.exceptions import HttpResponseError
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
+
+    if record_type == 'srv':
+        breakpoint()
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except HttpResponseError:
