@@ -16,6 +16,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AdvancedThreatProtectionSetting,
                                         RuleResultsInput,
                                         RulesResultsInput)
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
@@ -314,9 +315,9 @@ def get_security_workspace_setting(client, resource_name):
     return client.get(resource_name)
 
 
-def create_security_workspace_setting(client, resource_name, target_workspace):
+def create_security_workspace_setting(cmd, client, resource_name, target_workspace):
 
-    scope = '/subscriptions/' + client._config.subscription_id  # pylint: disable=protected-access
+    scope = '/subscriptions/' + get_subscription_id(cmd.cli_ctx)
     return client.create(resource_name, WorkspaceSetting(workspace_id=target_workspace, scope=scope))
 
 
@@ -329,21 +330,21 @@ def delete_security_workspace_setting(client, resource_name):
 # Security ATP
 # --------------------------------------------------------------------------------------------
 
-def get_atp_setting(client, resource_group_name, storage_account_name):
+def get_atp_setting(cmd, client, resource_group_name, storage_account_name):
 
-    return client.get(_construct_resource_id(client, resource_group_name, storage_account_name))
+    return client.get(_construct_resource_id(cmd, resource_group_name, storage_account_name))
 
 
-def update_atp_setting(client, resource_group_name, storage_account_name, is_enabled):
+def update_atp_setting(cmd, client, resource_group_name, storage_account_name, is_enabled):
 
-    return client.create(_construct_resource_id(client, resource_group_name, storage_account_name),
+    return client.create(_construct_resource_id(cmd, resource_group_name, storage_account_name),
                          AdvancedThreatProtectionSetting(is_enabled=is_enabled))
 
 
-def _construct_resource_id(client, resource_group_name, storage_account_name):
+def _construct_resource_id(cmd, resource_group_name, storage_account_name):
 
     return resource_id(
-        subscription=client._config.subscription_id,  # pylint: disable=protected-access
+        subscription=get_subscription_id(cmd.cli_ctx),
         resource_group=resource_group_name,
         namespace='Microsoft.Storage',
         type='storageAccounts',
@@ -436,31 +437,26 @@ def _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name,
     raise MutuallyExclusiveArgumentError('Please specify all of (--vm-name, --agent-id, --vm-uuid) for On-Premise resources, or none, other resource types')
 
 
-# def _get_va_sql_api_version():
-
-#     return "2020-07-01-preview"
-
-
 # --------------------------------------------------------------------------------------------
 # Security Assessments
 # --------------------------------------------------------------------------------------------
 
 
-def list_security_assessments(client):
+def list_security_assessments(cmd, client):
 
-    return client.list(scope='/subscriptions/' + client._config.subscription_id)  # pylint: disable=protected-access
+    return client.list(scope='/subscriptions/' + get_subscription_id(cmd.cli_ctx))
 
 
-def get_security_assessment(client, resource_name, assessed_resource_id=None):
+def get_security_assessment(cmd, client, resource_name, assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = '/subscriptions/' + client._config.subscription_id  # pylint: disable=protected-access
-
+        assessed_resource_id = '/subscriptions/' + get_subscription_id(cmd.cli_ctx)
     return client.get(assessed_resource_id,
                       assessment_name=resource_name)
 
 
-def create_security_assessment(client,
+def create_security_assessment(cmd,
+                               client,
                                resource_name,
                                status_code,
                                status_cause=None,
@@ -469,7 +465,7 @@ def create_security_assessment(client,
                                assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = resource_id(subscription=client._config.subscription_id)  # pylint: disable=protected-access
+        assessed_resource_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx))
 
     resource_details = AzureResourceDetails(source="Azure")
 
@@ -487,10 +483,10 @@ def create_security_assessment(client,
                                    assessment=new_assessment)
 
 
-def delete_security_assessment(client, resource_name, assessed_resource_id=None):
+def delete_security_assessment(cmd, client, resource_name, assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = resource_id(subscription=client._config.subscription_id)  # pylint: disable=protected-access
+        assessed_resource_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx))
 
     return client.delete(assessment_name=resource_name,
                          resource_id=assessed_resource_id)
@@ -540,19 +536,19 @@ def delete_security_assessment_metadata(client, resource_name):
 # --------------------------------------------------------------------------------------------
 
 
-def list_security_sub_assessments(client, assessment_name=None, assessed_resource_id=None):
+def list_security_sub_assessments(cmd, client, assessment_name=None, assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = '/subscriptions/' + client._config.subscription_id  # pylint: disable=protected-access
+        assessed_resource_id = '/subscriptions/' + get_subscription_id(cmd.cli_ctx)
         return client.list_all(scope=assessed_resource_id)
 
     return client.list(scope=assessed_resource_id, assessment_name=assessment_name)
 
 
-def get_security_sub_assessment(client, resource_name, assessment_name, assessed_resource_id=None):
+def get_security_sub_assessment(cmd, client, resource_name, assessment_name, assessed_resource_id=None):
 
     if assessed_resource_id is None:
-        assessed_resource_id = '/subscriptions/' + client._config.subscription_id  # pylint: disable=protected-access
+        assessed_resource_id = '/subscriptions/' + get_subscription_id(cmd.cli_ctx)
 
     return client.get(sub_assessment_name=resource_name,
                       assessment_name=assessment_name,
