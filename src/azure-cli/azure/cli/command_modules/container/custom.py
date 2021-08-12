@@ -492,7 +492,7 @@ def _create_gitrepo_volume(gitrepo_url, gitrepo_dir, gitrepo_revision):
     return Volume(name=GITREPO_VOLUME_NAME, git_repo=gitrepo_volume) if gitrepo_url else None
 
 
-# pylint: disable=inconsistent-return-statementsgi
+# pylint: disable=inconsistent-return-statements
 def _create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_path):
     """Create Azure File volume mount. """
     if azure_file_volume_mount_path:
