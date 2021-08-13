@@ -24,7 +24,8 @@ def create_workspace_sql_aad_admin(cmd, client, resource_group_name, workspace_n
     tenant_id = get_tenant_id()
     workspace_aad_admin_info = WorkspaceAadAdminInfo(id=workspace_id, login=login_name, sid=object_id,
                                                      administrator_type=AdministratorType, tenant_id=tenant_id)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, workspace_aad_admin_info)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name,
+                       workspace_aad_admin_info)
 
 
 def update_workspace_sql_aad_admin(instance, login_name=None, object_id=None):

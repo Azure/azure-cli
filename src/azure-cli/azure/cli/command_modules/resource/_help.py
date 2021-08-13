@@ -1321,9 +1321,13 @@ short-summary: Manage Azure locks.
 helps['lock create'] = """
 type: command
 short-summary: Create a lock.
-long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource.'
+long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource. \
+                For how to add locks at different levels, please refer to the following examples.'
 examples:
   - name: Create a read-only subscription level lock.
+    text: >
+        az lock create --name lockName --lock-type ReadOnly
+  - name: Create a read-only resource group level lock.
     text: >
         az lock create --name lockName --resource-group group --lock-type ReadOnly
   - name: Create a read-only resource level lock on a vnet resource.
@@ -1339,10 +1343,18 @@ examples:
 helps['lock delete'] = """
 type: command
 short-summary: Delete a lock.
+long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource. \
+                For how to delete locks at different levels, please refer to the following examples.'
 examples:
-  - name: Delete a resource group-level lock
+  - name: Delete a subscription level lock
+    text: >
+        az lock delete --name lockName
+  - name: Delete a resource group level lock
     text: >
         az lock delete --name lockName --resource-group group
+  - name: Delete a resource level lock
+    text: >
+        az lock delete --name lockName --resource-group group --resource resourceName --resource-type resourceType
 """
 
 helps['lock list'] = """
@@ -1521,6 +1533,15 @@ examples:
         az policy assignment create --name myPolicy --policy {PolicyName} --enforcement-mode 'DoNotEnforce'
 """
 
+helps['policy assignment update'] = """
+type: command
+short-summary: Update a resource policy assignment.
+examples:
+  - name: Update a resource policy assignment's description.
+    text: |
+        az policy assignment update --name myPolicy --description 'My policy description'
+"""
+
 helps['policy assignment delete'] = """
 type: command
 short-summary: Delete a resource policy assignment.
@@ -1561,6 +1582,44 @@ examples:
     text: |
         az policy assignment identity show --name MyPolicyAssignment --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup'
     crafted: true
+"""
+
+helps['policy assignment non-compliance-message'] = """
+type: group
+short-summary: Manage a policy assignment's non-compliance messages.
+"""
+
+helps['policy assignment non-compliance-message create'] = """
+type: command
+short-summary: Add a non-compliance message to a policy assignment.
+examples:
+  - name: Add a non-compliance message to a policy assignment.
+    text: >
+        az policy assignment non-compliance-message create -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+  - name: Add a non-compliance message for a specific policy in an assigned policy set definition.
+    text: >
+        az policy assignment non-compliance-message create -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
+"""
+
+helps['policy assignment non-compliance-message list'] = """
+type: command
+short-summary: List the non-compliance messages for a policy assignment.
+examples:
+  - name: List the non-compliance messages for a policy assignment.
+    text: >
+        az policy assignment non-compliance-message list -g MyResourceGroup -n MyPolicyAssignment
+"""
+
+helps['policy assignment non-compliance-message delete'] = """
+type: command
+short-summary: Remove one or more non-compliance messages from a policy assignment.
+examples:
+  - name: Remove non-compliance messages from a policy assignment that contain a specific message and no policy definition reference ID.
+    text: >
+        az policy assignment non-compliance-message delete -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+  - name: Remove non-compliance messages from a policy assignment that contain a specific message and a specific policy definition reference ID.
+    text: >
+        az policy assignment non-compliance-message delete -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
 """
 
 helps['policy assignment list'] = """
@@ -1846,6 +1905,16 @@ examples:
         az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
 """
 
+helps['provider permission'] = """
+type: group
+short-summary: Manage permissions for a provider.
+"""
+
+helps['provider permission list'] = """
+type: command
+short-summary: List permissions from a provider.
+"""
+
 helps['provider operation'] = """
 type: group
 short-summary: Get provider operations metadatas.
@@ -1919,6 +1988,13 @@ examples:
   - name: Create a resource by using the latest api-version whether this version is a preview version.
     text: >
         az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile --latest-include-preview
+  - name: Create a site extension to a web app
+    text: |
+        az resource create -g myRG --api-version "2018-02-01" \\
+            --name "{sitename+slot}/siteextensions/Contrast.NetCore.Azure.SiteExtension"  \\
+                --resource-type Microsoft.Web/sites/siteextensions --is-full-object \\
+                    --properties "{ \\"id\\": \\"Contrast.NetCore.Azure.SiteExtension\\", \\
+                        \\"location\\": \\"West US\\", \\"version\\": \\"1.9.0\\" }"
 """
 
 helps['resource delete'] = """
@@ -2398,6 +2474,11 @@ examples:
     text: az bicep install
   - name: Install a specific version of Bicep CLI.
     text: az bicep install --version v0.2.212
+"""
+
+helps['bicep uninstall'] = """
+type: command
+short-summary: Uninstall Bicep CLI.
 """
 
 helps['bicep upgrade'] = """

@@ -4,9 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+
+import uuid
 from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
@@ -75,6 +80,89 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
         parameters)
 
 
+def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_name=None):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    if migration_name is None:
+        # Convert a UUID to a string of hex digits in standard form
+        migration_name = str(uuid.uuid4())
+
+    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
+
+    return r.json()
+
+
+def migration_show_func(cmd, client, resource_group_name, server_name, migration_name, level="Default"):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name, level))
+
+    return r.json()
+
+
+def migration_list_func(cmd, client, resource_group_name, server_name, migration_filter="Active"):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations?migrationListFilter={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_filter))
+
+    return r.json()
+
+
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    operationSpecified = False
+    if setup_logical_replication is True:
+        operationSpecified = True
+        properties = "{\"properties\": {\"setupLogicalReplicationOnSourceDBIfNeeded\": \"true\"} }"
+
+    if db_names is not None:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        prefix = "{ \"properties\": { \"dBsToMigrate\": ["
+        db_names_str = "\"" + "\", \"".join(db_names) + "\""
+        suffix = "] } }"
+        properties = prefix + db_names_str + suffix
+
+    if overwrite_dbs is True:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
+
+    if cutover is True:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        properties = "{\"properties\": {\"triggerCutover\": \"true\"} }"
+
+    if operationSpecified is False:
+        raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
+
+    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
+
+    return r.json()
+
+
+def migration_delete_func(cmd, client, resource_group_name, server_name, migration_name, yes=None):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    if not yes:
+        user_confirmation(
+            "Are you sure you want to delete the migration '{0}' on target server '{1}', resource group '{2}'".format(
+                migration_name, server_name, resource_group_name))
+
+    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name))
+
+    return r.json()
+
+
 def firewall_rule_delete_func(client, resource_group_name, server_name, firewall_rule_name, yes=None):
     result = None
     if not yes:
@@ -111,14 +199,14 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
 def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
     result = None
     if resource_group_name is None or server_name is None or database_name is None:
-        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
+        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name. "
                        "If your parameter persistence is turned ON, make sure these three parameters exist in "
                        "persistent parameters using \'az config param-persist show\'. "
                        "If your parameter persistence is turned OFF, consider passing them explicitly.")
     if not yes:
         user_confirmation(
-            "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
-                                                                                              resource_group_name), yes=yes)
+            "Are you sure you want to delete the database '{0}' of server '{1}'".format(database_name,
+                                                                                        server_name), yes=yes)
 
     try:
         result = client.begin_delete(resource_group_name, server_name, database_name)
@@ -195,7 +283,6 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
     if allow_push:
         logger.warning("Pushing the created action file to origin %s branch", branch)
         run_subprocess("git push origin {}".format(branch))
-        github_actions_run(action_name, branch)
     else:
         logger.warning('You did not set --allow-push parameter. Please push the prepared file %s to your remote repo and run "deploy run" command to activate the workflow.', action_path)
 
@@ -203,7 +290,7 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
 def github_actions_run(action_name, branch):
 
     gitcli_check_and_login()
-    logger.warning("Created event for %s.yml in branch %s", action_name, branch)
+    logger.warning("Created an event for %s.yml in branch %s", action_name, branch)
     run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
 
 

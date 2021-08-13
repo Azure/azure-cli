@@ -5,6 +5,11 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = "eastus2euap"
 
+# No tidy up of tests required. The resource group is automatically removed
+
+# As a refactoring consideration for the future, consider use of authoring patterns described here
+# https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md#sample-5-get-more-from-resourcegrouppreparer
+
 
 class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_')

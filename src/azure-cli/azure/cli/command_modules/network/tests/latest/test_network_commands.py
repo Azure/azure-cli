@@ -17,7 +17,7 @@ from .recording_processors import StorageAccountSASReplacer
 
 from azure.cli.testsdk import (
     ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only,
-    record_only)
+    KeyVaultPreparer, record_only)
 
 from knack.util import CLIError
 
@@ -555,6 +555,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_identity')
+    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
     def test_network_app_gateway_with_identity(self, resource_group):
 
         self.kwargs.update({
@@ -563,7 +564,6 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
             'one_off_identity': 'id1',
             'access_identity': 'id2',
             'ip': 'ip1',
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
             'cert': 'MyCertificate'
         })
 
@@ -574,10 +574,8 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
             'access_identity_principal': access_identity_result['principalId']
         })
 
-        self.cmd('keyvault create -g {rg} -n {kv} --sku premium')
         self.cmd('keyvault set-policy -g {rg} -n {kv} '
                  '--object-id {access_identity_principal} --secret-permissions get list set')
-        self.cmd('keyvault update -n {kv} --enable-soft-delete -g {rg}')
 
         # create a certificate
         keyvault_cert_policy = self.cmd('az keyvault certificate get-default-policy').get_output_in_json()
@@ -625,6 +623,56 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
         self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gw} -n cert1 --keyvault-secret {secret_id}', checks=[
             self.check('trustedRootCertificates[0].keyVaultSecretId', '{secret_id}')
+        ])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_cert_name_')
+    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
+    def test_network_app_gateway_with_cert_name(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'gw': 'gateway',
+            'access_identity': 'id1',
+            'ip': 'ip1',
+            'cert': 'MyCertificate',
+            'ssl_cert_name': 'TestCertName'
+        })
+
+        # create a managed identity
+        access_identity_result = self.cmd('identity create -g {rg} -n {access_identity}').get_output_in_json()
+        self.kwargs.update({
+            'access_identity_principal': access_identity_result['principalId']
+        })
+
+        self.cmd('keyvault set-policy -g {rg} -n {kv} '
+                 '--object-id {access_identity_principal} --secret-permissions get list set')
+
+        # create a certificate
+        keyvault_cert_policy = self.cmd('az keyvault certificate get-default-policy').get_output_in_json()
+        self.kwargs.update({
+            'keyvault_cert_policy': keyvault_cert_policy
+        })
+        self.cmd('keyvault certificate create '
+                 '--vault-name {kv} '
+                 '--name {cert} '
+                 '--policy "{keyvault_cert_policy}"')
+        cert_result = self.cmd('keyvault certificate show --vault-name {kv} --name {cert}').get_output_in_json()
+        self.kwargs.update({
+            'secret_id': cert_result['sid']
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+
+        # create application-gateway with one_off_identity
+        self.cmd('network application-gateway create '
+                 '-g {rg} -n {gw} '
+                 '--sku Standard_v2 --public-ip-address {ip} '
+                 '--identity {access_identity} '
+                 '--frontend-port 1000 '
+                 '--key-vault-secret-id {secret_id} '
+                 '--ssl-certificate-name {ssl_cert_name}', checks=[
+            self.check('applicationGateway.sslCertificates[0].name', self.kwargs['ssl_cert_name']),
+            self.check('applicationGateway.sslCertificates[0].properties.keyVaultSecretId', self.kwargs['secret_id']),
         ])
 
 
@@ -2126,43 +2174,65 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
             ExpressRoutePortLOAContentReplacer()
         ])
 
-    def test_network_express_route_port_identity(self):
-        """
-        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
-        We run test manually for now. Any changes related to this command, please contract to Service team for help.
-        For ussage, run `az network express-route port identity --help` to get help.
-        """
-        pass
-
-    def test_network_express_route_port_config_macsec(self):
-        """
-        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
-        We run test manually for now. Any changes related to this command, please contract to Service team for help.
-        For ussage, run `az network express-route port link update --help` to get help.
-        """
-        pass
-
-    def test_network_express_route_port_config_adminstate(self):
-        """
-        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
-        We run test manually for now. Any changes related to this command, please contract to Service team for help.
-        For ussage, run `az network express-route port link update --help` to get help.
-        """
-        pass
-
-    @unittest.skip('rg not found')
     @AllowLargeResponse()
-    def test_network_express_route_port_generate_loa(self):
-        """
-        The ExpressRoutePort comes from service team and located in a different subscription. And it will be revoked after this feature.
-        So, this test is record only.
-        """
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_port', location='eastus')
+    @KeyVaultPreparer(name_prefix='test-er-port-kv', location='eastus')
+    def test_network_express_route_port(self, resource_group, key_vault):
         self.kwargs.update({
-            'rg': 'ER-AutoTriage-RG',
-            'er_port': 'ER-autotriage-erdirect',
+            'rg': resource_group,
+            'location': 'eastus',
+            'name': 'expressRouteTest',
+            'peeringRG': 'Equinix-Ashburn-DC2',
+            'encapsulation': 'QinQ',
+            'bandwidth': '10 Gbps',
+            'cipher': 'GcmAes128',
+            'kv': key_vault,
+            'CAK_name': 'CAK',
+            'CAK_value': 'b4355b9ccaf727d2ba7744ee991ce00e',
+            'CKN_name': 'CKN',
+            'CKN_value': '93e9ce8469eff0536784fc4ad253b5a6',
         })
+        self.kwargs['CAK_id'] = self.cmd('keyvault secret set --name {CAK_name} --vault-name {kv} --value {CAK_value}').get_output_in_json()['id']
+        self.kwargs['CKN_id'] = self.cmd('keyvault secret set --name {CKN_name} --vault-name {kv} --value {CKN_value}').get_output_in_json()['id']
+        identity = self.cmd('identity create -g {rg} -n {name}').get_output_in_json()
+        self.cmd('keyvault set-policy -n {kv} --secret-permissions get --object-id ' + identity['principalId'])
 
-        self.cmd('network express-route port generate-loa --customer-name MyCustomer -g {rg} --name {er_port} -f loa1')
+        self.cmd('network express-route port location list')
+
+        self.cmd('network express-route port location show -l {peeringRG}', checks=[
+            self.check('name', self.kwargs['peeringRG'])
+        ])
+
+        self.cmd('network express-route port create -g {rg} -n {name} --location {location} --peering-location {peeringRG} --encapsulation {encapsulation} --bandwidth {bandwidth}', checks=[
+            self.check('name', self.kwargs['name']),
+            self.check('length(links)', 2),
+        ])
+        self.cmd('network express-route port list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network express-route port show -g {rg} -n {name}')
+
+        self.cmd('network express-route port identity assign -g {rg} -n {name} --identity ' + identity['id'])
+
+        self.cmd('network express-route port identity show -g {rg} -n {name}')
+
+        self.cmd('network express-route port link list -g {rg} --port-name {name}', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('network express-route port link show -g {rg} --port-name {name} -n link1', checks=[
+            self.check('name', 'link1')
+        ])
+
+        self.cmd('network express-route port link update -g {rg} --port-name {name} -n link1 '
+                 '--macsec-ckn-secret-identifier {CKN_id} --macsec-cak-secret-identifier {CAK_id} '
+                 '--macsec-cipher {cipher} --admin-state', checks=[
+            self.check('adminState', 'Enabled'),
+            self.check('macSecConfig.cakSecretIdentifier', self.kwargs['CAK_id']),
+            self.check('macSecConfig.cknSecretIdentifier', self.kwargs['CKN_id']),
+            self.check('macSecConfig.cipher', self.kwargs['cipher']),
+        ])
+
+        self.cmd('network express-route port generate-loa --customer-name MyCustomer -g {rg} --name {name} -f loa1')
 
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
@@ -3847,6 +3917,7 @@ class NetworkVirtualHubRouter(ScenarioTest):
             'rg': resource_group,
             'location': resource_group_location,
             'vnet': 'vnet2',
+            'vhr_ip1': 'vhrip1',
             'subnet1': 'RouteServerSubnet',
             'vrouter': 'vrouter2',
             'peer': 'peer1'
@@ -3861,13 +3932,14 @@ class NetworkVirtualHubRouter(ScenarioTest):
         # which will block subnet is assigned to the virtual router
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove networkSecurityGroup')
         vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
+        self.cmd('network public-ip create -g {rg} -n {vhr_ip1}')
 
         self.kwargs.update({
             'subnet1_id': vnet['subnets'][0]['id']
         })
 
         self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
-                 '--hosted-subnet {subnet1_id}',
+                 '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1}',
                  checks=[
                      self.check('type', 'Microsoft.Network/virtualHubs'),
                      self.check('ipConfigurations', None),
@@ -4493,7 +4565,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 
 
 class NetworkWatcherScenarioTest(ScenarioTest):
-    import mock
+    from unittest import mock
 
     def _mock_thread_count():
         return 1
@@ -5112,7 +5184,7 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
 
         self.cmd('network lb create -g {rg} -n {lb} --sku Standard --public-ip-address {ip}')
         self.cmd('network lb create -g {rg} -n {lb1} --sku Gateway --vnet-name {vnet} --subnet {subnet} ')
-        self.cmd('network public-ip create -g {rg} -n {ip}1 --sku standard')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku standard')
         self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n {fip} --public-ip-address {ip1}',
                  checks=self.not_exists('gatewayLoadBalancer'))
         result = self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n {fip} '
@@ -5121,6 +5193,9 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
         self.kwargs['id'] = result['id']
         self.cmd('network lb frontend-ip update -g {rg} --lb-name {lb} -n {fip} --gateway-lb {id}',
                  checks=self.exists('gatewayLoadBalancer'))
+
+        self.cmd("network lb frontend-ip update -g {rg} --lb-name {lb} -n {fip} --gateway-lb ''",
+                 checks=self.check('gatewayLoadBalancer', None))
 
     @ResourceGroupPreparer(name_prefix='test_network_nic_front_ip', location='eastus2euap')
     def test_network_nic_front_ip(self, resource_group):

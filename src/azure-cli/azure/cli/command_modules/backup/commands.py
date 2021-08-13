@@ -8,7 +8,7 @@ from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_p
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
     job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_cf, \
     item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
-    protection_containers_cf, protection_intent_cf  # pylint: disable=unused-variable
+    protection_containers_cf, protection_intent_cf, backup_resource_encryption_config_cf  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._format import (
     transform_container_list, transform_policy_list, transform_item_list, transform_job_list,
     transform_recovery_point_list, transform_container, transform_item, transform_protectable_item_list, transform_job,
@@ -34,6 +34,11 @@ def load_command_table(self, _):
         g.custom_command('backup-properties show', 'get_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('backup-properties set', 'set_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('delete', 'delete_vault', confirmation=True)
+        g.custom_command('identity assign', 'assign_identity')
+        g.custom_command('identity remove', 'remove_identity')
+        g.custom_command('identity show', 'show_identity')
+        g.custom_command('encryption update', 'update_encryption')
+        g.custom_command('encryption show', 'show_encryption', client_factory=backup_resource_encryption_config_cf)
 
     with self.command_group('backup container', backup_custom_base, client_factory=protection_containers_cf) as g:
         g.show_command('show', 'show_container', client_factory=backup_protection_containers_cf, table_transformer=transform_container)
@@ -89,7 +94,8 @@ def load_command_table(self, _):
     with self.command_group('backup recoverypoint', backup_custom_base, client_factory=recovery_points_cf) as g:
         g.show_command('show', 'show_recovery_point')
         g.command('list', 'list_recovery_points', table_transformer=transform_recovery_point_list)
-        g.show_command('show-log-chain', 'list_recovery_points', table_transformer=transform_log_chain_list)
+        g.command('move', 'move_recovery_points')
+        g.show_command('show-log-chain', 'show_log_chain_recovery_points', table_transformer=transform_log_chain_list)
 
     with self.command_group('backup restore', backup_custom_base, client_factory=restores_cf) as g:
         g.command('restore-disks', 'restore_disks')

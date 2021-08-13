@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.command_modules.appservice.static_sites import \
     list_staticsites, show_staticsite, delete_staticsite, create_staticsites, CLIError, disconnect_staticsite, \
@@ -98,7 +98,7 @@ class TestStaticAppCommands(unittest.TestCase):
             tags=tags)
 
         self.staticapp_client.create_or_update_static_site.assert_called_once()
-        arg_list = self.staticapp_client.create_or_update_static_site.call_args.kwargs
+        arg_list = self.staticapp_client.create_or_update_static_site.call_args[1]
         self.assertEqual(self.name1, arg_list["name"])
         self.assertEqual(self.rg1, arg_list["resource_group_name"])
         self.assertEqual(self.location1, arg_list["static_site_envelope"].location)
@@ -119,7 +119,7 @@ class TestStaticAppCommands(unittest.TestCase):
             self.source1, self.branch1, self.token1, sku='standard')
 
         self.staticapp_client.create_or_update_static_site.assert_called_once()
-        arg_list = self.staticapp_client.create_or_update_static_site.call_args.kwargs
+        arg_list = self.staticapp_client.create_or_update_static_site.call_args[1]
         self.assertEqual('Standard', arg_list["static_site_envelope"].sku.name)
 
     def test_create_staticapp_missing_token(self):
@@ -146,7 +146,7 @@ class TestStaticAppCommands(unittest.TestCase):
         update_staticsite(self.mock_cmd, self.name1, self.source2, self.branch2, self.token2, tags=tags, sku=sku)
 
         self.staticapp_client.update_static_site.assert_called_once()
-        arg_list = self.staticapp_client.update_static_site.call_args.kwargs
+        arg_list = self.staticapp_client.update_static_site.call_args[1]
         self.assertEqual(self.name1, arg_list["name"])
         self.assertEqual(self.source2, arg_list["static_site_envelope"].repository_url)
         self.assertEqual(self.branch2, arg_list["static_site_envelope"].branch)
@@ -163,7 +163,7 @@ class TestStaticAppCommands(unittest.TestCase):
         update_staticsite(self.mock_cmd, self.name1)
 
         self.staticapp_client.update_static_site.assert_called_once()
-        arg_list = self.staticapp_client.update_static_site.call_args.kwargs
+        arg_list = self.staticapp_client.update_static_site.call_args[1]
         self.assertEqual(self.name1, arg_list["name"])
         self.assertEqual(self.source1, arg_list["static_site_envelope"].repository_url)
         self.assertEqual(self.branch1, arg_list["static_site_envelope"].branch)
@@ -379,7 +379,7 @@ class TestStaticAppCommands(unittest.TestCase):
         invite_staticsite_users(self.mock_cmd, self.name1, authentication_provider, user_details, self.hostname1,
                                 roles, invitation_expiration_in_hours, self.rg1)
 
-        arg_list = self.staticapp_client.create_user_roles_invitation_link.call_args.args
+        arg_list = self.staticapp_client.create_user_roles_invitation_link.call_args[0]
 
         self.assertEqual(self.rg1, arg_list[0])
         self.assertEqual(self.name1, arg_list[1])
@@ -400,7 +400,7 @@ class TestStaticAppCommands(unittest.TestCase):
         invite_staticsite_users(self.mock_cmd, self.name1, authentication_provider, user_details, self.hostname1,
                                 roles, invitation_expiration_in_hours)
 
-        arg_list = self.staticapp_client.create_user_roles_invitation_link.call_args.args
+        arg_list = self.staticapp_client.create_user_roles_invitation_link.call_args[0]
 
         self.assertEqual(self.rg1, arg_list[0])
         self.assertEqual(self.name1, arg_list[1])

@@ -20,8 +20,7 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
-from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
-from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
 
@@ -1598,14 +1597,8 @@ def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certifica
 
 
 def _get_keyVault_not_arm_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
-
-    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
-    return client
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def _create_keyvault(cmd,

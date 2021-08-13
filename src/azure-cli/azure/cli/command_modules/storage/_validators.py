@@ -387,6 +387,120 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     namespace.copy_source = uri
 
 
+def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements, too-many-locals
+    from .util import create_short_lived_blob_sas, create_short_lived_blob_sas_v2, create_short_lived_file_sas
+    from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
+        MutuallyExclusiveArgumentError
+    usage_string = \
+        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
+        '\n\t   --source-uri [--source-sas]' \
+        '\n\tOR --source-container --source-blob [--source-account-name & sas] [--source-snapshot]' \
+        '\n\tOR --source-container --source-blob [--source-account-name & key] [--source-snapshot]' \
+        '\n\tOR --source-share --source-path' \
+        '\n\tOR --source-share --source-path [--source-account-name & sas]' \
+        '\n\tOR --source-share --source-path [--source-account-name & key]'
+
+    ns = vars(namespace)
+
+    # source as blob
+    container = ns.pop('source_container', None)
+    blob = ns.pop('source_blob', None)
+    snapshot = ns.pop('source_snapshot', None)
+
+    # source as file
+    share = ns.pop('source_share', None)
+    path = ns.pop('source_path', None)
+    file_snapshot = ns.pop('file_snapshot', None)
+
+    # source credential clues
+    source_account_name = ns.pop('source_account_name', None)
+    source_account_key = ns.pop('source_account_key', None)
+    source_sas = ns.pop('source_sas', None)
+
+    # source in the form of an uri
+    uri = ns.get('source_url', None)
+    if uri:
+        if any([container, blob, snapshot, share, path, file_snapshot, source_account_name,
+                source_account_key]):
+            raise InvalidArgumentValueError(usage_string.format(
+                'Unused parameters are given in addition to the source URI'))
+        if source_sas:
+            source_sas = source_sas.lstrip('?')
+            uri = '{}{}{}'.format(uri, '?', source_sas)
+            namespace.copy_source = uri
+        return
+
+    # ensure either a file or blob source is specified
+    valid_blob_source = container and blob and not share and not path and not file_snapshot
+    valid_file_source = share and path and not container and not blob and not snapshot
+
+    if not valid_blob_source and not valid_file_source:
+        raise RequiredArgumentMissingError(usage_string.format('Neither a valid blob or file source is specified'))
+    if valid_blob_source and valid_file_source:
+        raise MutuallyExclusiveArgumentError(usage_string.format(
+            'Ambiguous parameters, both blob and file sources are specified'))
+
+    validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
+
+    if not source_account_name:
+        if source_account_key:
+            raise RequiredArgumentMissingError(usage_string.format(
+                'Source account key is given but account name is not'))
+        # assume that user intends to copy blob in the same account
+        source_account_name = ns.get('account_name', None)
+
+    # determine if the copy will happen in the same storage account
+    same_account = False
+
+    if not source_account_key and not source_sas:
+        if source_account_name == ns.get('account_name', None):
+            same_account = True
+            source_account_key = ns.get('account_key', None)
+            source_sas = ns.get('sas_token', None)
+        else:
+            # the source account is different from destination account but the key is missing try to query one.
+            try:
+                source_account_key = _query_account_key(cmd.cli_ctx, source_account_name)
+            except ValueError:
+                raise RequiredArgumentMissingError('Source storage account {} not found.'.format(source_account_name))
+
+    # Both source account name and either key or sas (or both) are now available
+    if not source_sas:
+        # generate a sas token even in the same account when the source and destination are not the same kind.
+        if valid_file_source and (ns.get('container_name', None) or not same_account):
+            dir_name, file_name = os.path.split(path) if path else (None, '')
+            source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
+                                                     dir_name, file_name)
+        elif valid_blob_source and (ns.get('share_name', None) or not same_account):
+            prefix = cmd.command_kwargs['resource_type'].value[0]
+            # is_storagev2() is used to distinguish if the command is in track2 SDK
+            # If yes, we will use get_login_credentials() as token credential
+            if is_storagev2(prefix):
+                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container,
+                                                            blob)
+            else:
+                source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
+
+    query_params = []
+    if source_sas:
+        query_params.append(source_sas.lstrip('?'))
+    if snapshot:
+        query_params.append('snapshot={}'.format(snapshot))
+    if file_snapshot:
+        query_params.append('sharesnapshot={}'.format(file_snapshot))
+
+    uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
+        source_account_name,
+        'blob' if valid_blob_source else 'file',
+        container if valid_blob_source else share,
+        encode_for_url(blob if valid_blob_source else path),
+        '?' if query_params else '',
+        '&'.join(query_params),
+        cmd.cli_ctx.cloud.suffixes.storage_endpoint)
+
+    namespace.source_url = uri
+
+
 def validate_blob_type(namespace):
     if not namespace.blob_type:
         namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
@@ -647,12 +761,30 @@ def validate_metadata(namespace):
 
 
 def get_permission_help_string(permission_class):
-    allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
+    allowed_values = get_permission_allowed_values(permission_class)
     return ' '.join(['({}){}'.format(x[0], x[1:]) for x in allowed_values])
 
 
+def get_permission_allowed_values(permission_class):
+    if permission_class:
+        instance = permission_class()
+
+        allowed_values = [x.lower() for x in dir(instance) if not x.startswith('_')]
+        if 'from_string' in allowed_values:
+            allowed_values.remove('from_string')
+        for i, item in enumerate(allowed_values):
+            if item == 'delete_previous_version':
+                allowed_values[i] = 'x' + item
+            if item == 'manage_access_control':
+                allowed_values[i] = 'permissions'
+            if item == 'manage_ownership':
+                allowed_values[i] = 'ownership'
+        return allowed_values
+    return None
+
+
 def get_permission_validator(permission_class):
-    allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
+    allowed_values = get_permission_allowed_values(permission_class)
     allowed_string = ''.join(x[0] for x in allowed_values)
 
     def validator(namespace):
@@ -661,7 +793,10 @@ def get_permission_validator(permission_class):
                 help_string = get_permission_help_string(permission_class)
                 raise ValueError(
                     'valid values are {} or a combination thereof.'.format(help_string))
-            namespace.permission = permission_class(_str=namespace.permission)
+            if hasattr(permission_class, 'from_string'):
+                namespace.permission = permission_class.from_string(namespace.permission)
+            else:
+                namespace.permission = permission_class(_str=namespace.permission)
 
     return validator
 
@@ -860,7 +995,7 @@ def process_blob_upload_batch_parameters(cmd, namespace):
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
-    namespace.source_files = [c for c in glob_files_locally(namespace.source, namespace.pattern)]
+    namespace.source_files = list(glob_files_locally(namespace.source, namespace.pattern))
 
     # 4. determine blob type
     if namespace.blob_type is None:
@@ -1646,9 +1781,12 @@ def validate_fs_directory_download_source_url(cmd, namespace):
     if namespace.source_path:
         file_client = client.get_file_client(file_path=namespace.source_path)
         url = file_client.url
-    namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
-                                        account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                        service='blob', resource_types='co', permissions='rl')
+    if _is_valid_uri(url):
+        namespace.source = url
+    else:
+        namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                            account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                            service='blob', resource_types='co', permissions='rl')
     del namespace.source_fs
     del namespace.source_path
 
