@@ -293,18 +293,15 @@ def flexible_server_update_custom_func(cmd, client, instance,
             custom_window = "Enabled"
 
         # set values - if maintenance_window when is None when created then create a new object
-        if instance.maintenance_window is None:
-            instance.maintenance_window = mysql_flexibleservers.models.MaintenanceWindow(
-                day_of_week=day_of_week,
-                start_hour=start_hour,
-                start_minute=start_minute,
-                custom_window=custom_window
-            )
-        else:
-            instance.maintenance_window.day_of_week = day_of_week
-            instance.maintenance_window.start_hour = start_hour
-            instance.maintenance_window.start_minute = start_minute
-            instance.maintenance_window.custom_window = custom_window
+        instance.maintenance_window.day_of_week = day_of_week
+        instance.maintenance_window.start_hour = start_hour
+        instance.maintenance_window.start_minute = start_minute
+        instance.maintenance_window.custom_window = custom_window
+        
+        params = ServerForUpdate(maintenance_window=instance.maintenance_window)
+        logger.warning("You can update maintenance window only when updating maintenance window. Please update other properties separately if you are updating them as well.")
+        print(params.maintenance_window)
+        return params
 
     if high_availability:
         if high_availability.lower() == "enabled":
@@ -338,6 +335,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              tags=tags)
 
     return params
+    # print(params.maintenance_window)
 
 
 def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
