@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long,too-many-lines
 
-from azure.cli.core.commands import DeploymentOutputLongRunningOperation, client_factory
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import (
     deployment_validate_table_format, handle_template_based_exception)
 from azure.cli.core.commands import CliCommandType
@@ -1215,7 +1215,7 @@ def load_command_table(self, _):
 
     # region CustomIpPrefix
     with self.command_group('network custom-ip prefix', network_custom_ip_prefix_sdk, client_factory=cf_custom_ip_prefixes, is_preview=True, min_api='2020-06-01') as g:
-        g.custom_command('create', 'create_custom_ip_prefix')
+        g.custom_command('create', 'create_custom_ip_prefix', supports_no_wait=True)
         g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_custom_ip_prefixes')
         g.show_command('show')

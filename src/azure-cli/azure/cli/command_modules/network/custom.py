@@ -5816,7 +5816,7 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 # region CustomIpPrefix
 def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_name, location=None,
                             cidr=None, tags=None, zone=None, signed_message=None, authorization_message=None,
-                            custom_ip_prefix_parent=None):
+                            custom_ip_prefix_parent=None, no_wait=False):
 
     CustomIpPrefix = cmd.get_models('CustomIpPrefix')
     prefix = CustomIpPrefix(
@@ -5832,9 +5832,9 @@ def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_n
         try:
             prefix.custom_ip_prefix_parent = client.get(resource_group_name, custom_ip_prefix_name)
         except ResourceNotFoundError:
-            raise ResourceNotFoundError("Custom ip prefix parent {} is'nt exist".format(custom_ip_prefix_name))
+            raise ResourceNotFoundError("Custom ip prefix parent {} doesn't exist".format(custom_ip_prefix_name))
 
-    return client.begin_create_or_update(resource_group_name, custom_ip_prefix_name, prefix)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, custom_ip_prefix_name, prefix)
 
 
 def update_custom_ip_prefix(instance, tags=None):
