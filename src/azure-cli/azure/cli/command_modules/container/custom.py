@@ -374,7 +374,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 
 # pylint: disable=unsupported-assignment-operation
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
-    container_group_client = cf_container_groups(cli_ctx)
+    resource_client = cf_resource(cli_ctx)
     cg_defintion = None
 
     try:
@@ -401,8 +401,17 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
         location = cg_defintion.get('location')
     cg_defintion['location'] = location
 
-    return sdk_no_wait(no_wait, container_group_client.begin_create_or_update, resource_group_name,
-                       name, cg_defintion)
+    api_version = cg_defintion.get('apiVersion', None) or "2021-03-01"
+
+    return sdk_no_wait(no_wait,
+                       resource_client.resources.begin_create_or_update,
+                       resource_group_name,
+                       "Microsoft.ContainerInstance",
+                       '',
+                       "containerGroups",
+                       name,
+                       api_version,
+                       cg_defintion)
 
 
 # pylint: disable=inconsistent-return-statements
