@@ -1873,7 +1873,7 @@ class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 
 # convert to ScenarioTest and re-record when #6009 is fixed
 class NetworkWatcherScenarioTest(LiveScenarioTest):
-    import mock
+    from unittest import mock
 
     def _mock_thread_count():
         return 1

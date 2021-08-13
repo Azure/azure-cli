@@ -75,3 +75,19 @@ GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file_
                                                          '../resources/GenerateRandomAppNames.json'))
 
 PUBLIC_CLOUD = "AzureCloud"
+
+LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'AppService/linux/nodejs-webapp-on-azure.yml',
+    'python': 'AppService/linux/python-webapp-on-azure.yml',
+    'dotnetcore': 'AppService/linux/aspnet-core-webapp-on-azure.yml',
+    'java': 'AppService/linux/java-jar-webapp-on-azure.yml',
+    'tomcat': 'AppService/linux/java-war-webapp-on-azure.yml'
+}
+
+WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'AppService/windows/nodejs-webapp-on-azure.yml',
+    'python': 'AppService/windows/python-webapp-on-azure.yml',
+    'dotnetcore': 'AppService/windows/aspnet-core-webapp-on-azure.yml',
+    'java': 'AppService/windows/java-jar-webapp-on-azure.yml',
+    'tomcat': 'AppService/windows/java-war-webapp-on-azure.yml'
+}

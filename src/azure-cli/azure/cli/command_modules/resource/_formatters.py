@@ -72,7 +72,7 @@ def format_what_if_operation_result(what_if_operation_result, enable_color=True)
 def _format_noise_notice(builder):
     builder.append_line(
         """Note: The result may contain false positive predictions (noise).
-You can help us improve the accuracy of the result by opening an issue here: https://aka.ms/WhatIfIssues."""
+You can help us improve the accuracy of the result by opening an issue here: https://aka.ms/WhatIfIssues"""
     )
     builder.append_line()
 
@@ -315,7 +315,7 @@ def _format_property_modify(builder, before, after, children, indent_level):
         # Space before =>
         if _is_non_empty_object(before):
             builder.append_line()
-            _format_indent(indent_level)
+            _format_indent(builder, indent_level)
         else:
             builder.append(Symbol.WHITE_SPACE)
 

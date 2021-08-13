@@ -304,7 +304,7 @@ def load_command_table(self, _):
         g.custom_command('show-log', 'get_deployment_script_logs')
         g.custom_command('delete', 'delete_deployment_script', confirmation=True)
 
-    with self.command_group('ts', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, is_preview=True, min_api='2019-06-01-preview') as g:
+    with self.command_group('ts', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, min_api='2019-06-01-preview') as g:
         g.custom_command('create', 'create_template_spec', validator=process_ts_create_or_update_namespace)
         g.custom_command('update', 'update_template_spec', validator=process_ts_create_or_update_namespace, confirmation=True)
         g.custom_command('export', 'export_template_spec', validator=_validate_template_spec_out)
@@ -455,6 +455,7 @@ def load_command_table(self, _):
 
     with self.command_group('bicep') as g:
         g.custom_command('install', 'install_bicep_cli')
+        g.custom_command('uninstall', 'uninstall_bicep_cli')
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')

@@ -52,7 +52,9 @@ from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ValidationError,
-                                       UnauthorizedError)
+                                       UnauthorizedError,
+                                       AzureInternalError,
+                                       FileOperationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -122,6 +124,16 @@ def which(binary):
             return bin_path
 
     return None
+
+
+def get_cmd_test_hook_data(filename):
+    hook_data = None
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+    test_hook_file_path = os.path.join(curr_dir, 'tests/latest/data', filename)
+    if os.path.exists(test_hook_file_path):
+        with open(test_hook_file_path, "r") as f:
+            hook_data = json.load(f)
+    return hook_data
 
 
 def wait_then_open(url):
@@ -447,7 +459,10 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         # TODO: Support ARM CPU here
         sub_dir, binary_name = 'linux_amd64', 'kubelogin'
     elif system == 'Darwin':
-        sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
+        if platform.machine() == 'arm64':
+            sub_dir, binary_name = 'darwin_arm64', 'kubelogin'
+        else:
+            sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
     else:
         raise CLIError(
             'Proxy server ({}) does not exist on the cluster.'.format(system))
@@ -514,9 +529,9 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     return service_principal, aad_session_key
 
 
-def _add_role_assignment(cli_ctx, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
+def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
     # AAD can have delays in propagating data, so sleep and retry
-    hook = cli_ctx.get_progress_controller(True)
+    hook = cmd.cli_ctx.get_progress_controller(True)
     hook.add(message='Waiting for AAD role to propagate',
              value=0, total_val=1.0)
     logger.info('Waiting for AAD role to propagate')
@@ -526,7 +541,7 @@ def _add_role_assignment(cli_ctx, role, service_principal_msi_id, is_service_pri
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(
-                cli_ctx, role, service_principal_msi_id, is_service_principal, scope=scope)
+                cmd, role, service_principal_msi_id, is_service_principal, scope=scope)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
@@ -1223,7 +1238,7 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
     current_context = addition.get('current-context', 'UNKNOWN')
     msg = 'Merged "{}" as current context in {}'.format(
         current_context, existing_file)
-    print(msg)
+    logger.warning(msg)
 
 
 def _get_host_name(acs_info):
@@ -1430,16 +1445,16 @@ def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=
     return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
-def create_role_assignment(cli_ctx, role, assignee, is_service_principal, resource_group_name=None, scope=None):
-    return _create_role_assignment(cli_ctx,
+def create_role_assignment(cmd, role, assignee, is_service_principal, resource_group_name=None, scope=None):
+    return _create_role_assignment(cmd,
                                    role, assignee, resource_group_name,
                                    scope, resolve_assignee=is_service_principal)
 
 
-def _create_role_assignment(cli_ctx, role, assignee,
+def _create_role_assignment(cmd, role, assignee,
                             resource_group_name=None, scope=None, resolve_assignee=True):
     from azure.cli.core.profiles import get_sdk
-    factory = get_auth_management_client(cli_ctx, scope)
+    factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
@@ -1451,17 +1466,24 @@ def _create_role_assignment(cli_ctx, role, assignee,
     # If the cluster has service principal resolve the service principal client id to get the object id,
     # if not use MSI object id.
     object_id = _resolve_object_id(
-        cli_ctx, assignee) if resolve_assignee else assignee
+        cmd.cli_ctx, assignee) if resolve_assignee else assignee
 
-    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentCreateParameters', mod='models',
-                                             operation_group='role_assignments')
-    parameters = RoleAssignmentCreateParameters(
-        role_definition_id=role_id, principal_id=object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
-    # TODO: track2/remove custom headers, depends on 'azure.mgmt.authorization'
-    return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
+
+    RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
+    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):
+        parameters = RoleAssignmentCreateParameters(
+            role_definition_id=role_id, principal_id=object_id)
+        return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
+
+    RoleAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                       'RoleAssignmentProperties', mod='models',
+                                       operation_group='role_assignments')
+    properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
+    return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
@@ -1529,15 +1551,16 @@ def _update_dict(dict1, dict2):
     return cp
 
 
-def subnet_role_assignment_exists(cli_ctx, scope):
+def subnet_role_assignment_exists(cmd, scope):
     network_contributor_role_id = "4d97b98b-1d4f-4787-a291-c67834d212e7"
 
-    factory = get_auth_management_client(cli_ctx, scope)
+    factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
 
-    for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
-        if i.scope == scope and i.role_definition_id.endswith(network_contributor_role_id):
-            return True
+    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):
+        for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
+            if i.scope == scope and i.role_definition_id.endswith(network_contributor_role_id):
+                return True
     return False
 
 
@@ -1557,7 +1580,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         jsonS, _ = output.communicate()
         kubectl_version = json.loads(jsonS)
-        kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
+        # Remove any non-numeric characters like + from minor version
+        kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
         kubectl_server_minor_version = int(
             kubectl_version["serverVersion"]["minor"])
         kubectl_server_patch = int(
@@ -1627,20 +1651,28 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         output = subprocess.check_output(
             cmd,
             universal_newlines=True,
+            stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as err:
-        raise CLIError("Failed to check the ACR: {}".format(err))
+        raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
-        print(output)
-    else:
-        raise CLIError("Failed to check the ACR.")
+        return output
+    raise AzureInternalError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
-               listen_address='127.0.0.1', listen_port='8001'):
+def _aks_browse(
+    cmd,
+    client,
+    resource_group_name,
+    name,
+    disable_browser=False,
+    listen_address="127.0.0.1",
+    listen_port="8001",
+    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
-                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                resource_type=resource_type,
                                                 operation_group='managed_clusters')
     # verify the kube-dashboard addon was not disabled
     instance = client.get(resource_group_name, name)
@@ -1650,6 +1682,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                           if k.lower() == CONST_KUBE_DASHBOARD_ADDON_NAME.lower()),
                          ManagedClusterAddonProfile(enabled=False))
 
+    return_msg = None
     # open portal view if addon is not enabled or k8s version >= 1.19.0
     if StrictVersion(instance.kubernetes_version) >= StrictVersion('1.19.0') or (not addon_profile.enabled):
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1665,14 +1698,15 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                 'To view the Kubernetes resources view, please open %s in a new tab', dashboardURL)
         else:
             logger.warning('Kubernetes resources view on %s', dashboardURL)
+            return_msg = "Kubernetes resources view on {}".format(dashboardURL)
 
         if not disable_browser:
             webbrowser.open_new_tab(dashboardURL)
-        return
+        return return_msg
 
     # otherwise open the kube-dashboard addon
     if not which('kubectl'):
-        raise CLIError('Can not find kubectl executable in PATH')
+        raise FileOperationError('Can not find kubectl executable in PATH')
 
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(cmd, client, resource_group_name,
@@ -1683,26 +1717,30 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         dashboard_pod = subprocess.check_output(
             ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
              "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
-            universal_newlines=True)
+            universal_newlines=True,
+            stderr=subprocess.STDOUT,
+        )
     except subprocess.CalledProcessError as err:
-        raise CLIError('Could not find dashboard pod: {}'.format(err))
+        raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
     if dashboard_pod:
         # remove any "pods/" or "pod/" prefix from the name
         dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
     else:
-        raise CLIError("Couldn't find the Kubernetes dashboard pod.")
+        raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
 
     # find the port
     try:
         dashboard_port = subprocess.check_output(
             ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
              "--selector", "k8s-app=kubernetes-dashboard",
-             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"]
+             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"],
+            universal_newlines=True,
+            stderr=subprocess.STDOUT,
         )
-        # output format: b"'{port}'"
-        dashboard_port = int((dashboard_port.decode('utf-8').replace("'", "")))
+        # output format: "'{port}'"
+        dashboard_port = int((dashboard_port.replace("'", "")))
     except subprocess.CalledProcessError as err:
-        raise CLIError('Could not find dashboard port: {}'.format(err))
+        raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
 
     # use https if dashboard container is using https
     if dashboard_port == 8443:
@@ -1730,28 +1768,85 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     else:
         logger.warning('Proxy running on %s', proxy_url)
 
+    timeout = None
+    test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
+    if test_hook_data:
+        test_configs = test_hook_data.get("configs", None)
+        if test_configs and test_configs.get("enableTimeout", None):
+            timeout = test_configs.get("timeoutInterval", 10)
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(dashboardURL)
     try:
         try:
-            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
-                                     listen_address, "--port", listen_port], stderr=subprocess.STDOUT)
+            subprocess.check_output(
+                ["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
+                 listen_address, "--port", listen_port],
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+                timeout=timeout,
+            )
         except subprocess.CalledProcessError as err:
-            if err.output.find(b'unknown flag: --address'):
+            if err.output.find('unknown flag: --address'):
+                return_msg = "Test Invalid Address! "
                 if listen_address != '127.0.0.1':
                     logger.warning(
                         '"--address" is only supported in kubectl v1.13 and later.')
                     logger.warning(
                         'The "--listen-address" argument will be ignored.')
-                subprocess.call(["kubectl", "--kubeconfig",
-                                browse_path, "proxy", "--port", listen_port])
+                try:
+                    subprocess.call(["kubectl", "--kubeconfig",
+                                    browse_path, "proxy", "--port", listen_port], timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                    return_msg = return_msg if return_msg else ""
+                    return_msg += "Test Passed!"
+                except subprocess.CalledProcessError as new_err:
+                    raise AzureInternalError(
+                        "Could not open proxy: {} Command output: {}".format(
+                            new_err, new_err.output
+                        )
+                    )
+            else:
+                raise AzureInternalError(
+                    "Could not open proxy: {} Command output: {}".format(
+                        err, err.output
+                    )
+                )
+        except subprocess.TimeoutExpired:
+            logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+            return_msg = return_msg if return_msg else ""
+            return_msg += "Test Passed!"
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
     finally:
         if in_cloud_console():
             requests.post('http://localhost:8888/closeport/8001')
+    return return_msg
+
+
+# pylint: disable=too-many-statements,too-many-branches
+def aks_browse(
+    cmd,
+    client,
+    resource_group_name,
+    name,
+    disable_browser=False,
+    listen_address="127.0.0.1",
+    listen_port="8001",
+):
+
+    return _aks_browse(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        disable_browser=disable_browser,
+        listen_address=listen_address,
+        listen_port=listen_port,
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+    )
 
 
 def _trim_nodepoolname(nodepool_name):
@@ -1795,7 +1890,7 @@ def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         is_service_principal = False
 
     if service_principal_msi_id is not None:
-        if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
+        if not _add_role_assignment(cmd, 'Monitoring Metrics Publisher',
                                     service_principal_msi_id, is_service_principal, scope=cluster_resource_id):
             logger.warning('Could not create a role assignment for Monitoring addon. '
                            'Are you an Owner on this subscription?')
@@ -1834,14 +1929,14 @@ def _add_ingress_appgw_addon_role_assignment(result, cmd):
             parsed_appgw_id = parse_resource_id(appgw_id)
             appgw_group_id = resource_id(subscription=parsed_appgw_id["subscription"],
                                          resource_group=parsed_appgw_id["resource_group"])
-            if not _add_role_assignment(cmd.cli_ctx, 'Contributor',
+            if not _add_role_assignment(cmd, 'Contributor',
                                         service_principal_msi_id, is_service_principal, scope=appgw_group_id):
                 logger.warning('Could not create a role assignment for application gateway: %s '
                                'specified in %s addon. '
                                'Are you an Owner on this subscription?', appgw_id, CONST_INGRESS_APPGW_ADDON_NAME)
         if CONST_INGRESS_APPGW_SUBNET_ID in config:
             subnet_id = config[CONST_INGRESS_APPGW_SUBNET_ID]
-            if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
+            if not _add_role_assignment(cmd, 'Network Contributor',
                                         service_principal_msi_id, is_service_principal, scope=subnet_id):
                 logger.warning('Could not create a role assignment for subnet: %s '
                                'specified in %s addon. '
@@ -1855,7 +1950,7 @@ def _add_ingress_appgw_addon_role_assignment(result, cmd):
                                       namespace="Microsoft.Network",
                                       type="virtualNetworks",
                                       name=parsed_subnet_vnet_id["name"])
-                if not _add_role_assignment(cmd.cli_ctx, 'Contributor',
+                if not _add_role_assignment(cmd, 'Contributor',
                                             service_principal_msi_id, is_service_principal, scope=vnet_id):
                     logger.warning('Could not create a role assignment for virtual network: %s '
                                    'specified in %s addon. '
@@ -1892,7 +1987,7 @@ def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
         is_service_principal = False
 
     if service_principal_msi_id is not None:
-        if not _add_role_assignment(cmd.cli_ctx, 'Contributor',
+        if not _add_role_assignment(cmd, 'Contributor',
                                     service_principal_msi_id, is_service_principal, scope=vnet_id):
             logger.warning('Could not create a role assignment for virtual node addon. '
                            'Are you an Owner on this subscription?')
@@ -1975,6 +2070,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_encryption_at_host=False,
                assign_kubelet_identity=None,
                enable_ultra_ssd=False,
+               edge_zone=None,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
@@ -2008,9 +2104,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
-    ManagedClusterPropertiesIdentityProfileValue = cmd.get_models('ManagedClusterPropertiesIdentityProfileValue',
-                                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                                  operation_group='managed_clusters')
+    ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties = cmd.get_models(
+        'ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group='managed_clusters')
     ManagedCluster = cmd.get_models('ManagedCluster',
                                     resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                     operation_group='managed_clusters')
@@ -2125,7 +2222,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     need_post_creation_vnet_permission_granting = False
     if (vnet_subnet_id and not skip_subnet_role_assignment and
-            not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
+            not subnet_role_assignment_exists(cmd, vnet_subnet_id)):
         # if service_principal_profile is None, then this cluster is an MSI cluster,
         # and the service principal does not exist. Two cases:
         # 1. For system assigned identity, we just tell user to grant the
@@ -2153,7 +2250,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                     cmd.cli_ctx, assign_identity)
             else:
                 identity_client_id = service_principal_profile.client_id
-            if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
+            if not _add_role_assignment(cmd, 'Network Contributor',
                                         identity_client_id, scope=scope):
                 logger.warning('Could not create a role assignment for subnet. '
                                'Are you an Owner on this subscription?')
@@ -2173,7 +2270,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                '--no-wait is not allowed, please wait until the whole operation succeeds.')
             # Attach acr operation will be handled after the cluster is created
         else:
-            _ensure_aks_acr(cmd.cli_ctx,
+            _ensure_aks_acr(cmd,
                             client_id=service_principal_profile.client_id,
                             acr_name_or_id=attach_acr,
                             subscription_id=subscription_id)
@@ -2317,7 +2414,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
         kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
         identity_profile = {
-            'kubeletidentity': ManagedClusterPropertiesIdentityProfileValue(
+            # pylint: disable=line-too-long
+            'kubeletidentity': ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties(
                 resource_id=assign_kubelet_identity,
                 client_id=kubelet_identity.client_id,
                 object_id=kubelet_identity.principal_id
@@ -2326,8 +2424,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         cluster_identity_object_id = _get_user_assigned_identity_object_id(cmd.cli_ctx, assign_identity)
         # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
         _ensure_cluster_identity_permission_on_kubelet_identity(
-            cmd.cli_ctx,
-            cluster_identity_object_id)
+            cmd,
+            cluster_identity_object_id,
+            assign_kubelet_identity)
 
     mc = ManagedCluster(
         location=location,
@@ -2372,6 +2471,18 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         mc.sku = ManagedClusterSKU(
             name="Basic",
             tier="Paid"
+        )
+
+    if edge_zone:
+        ExtendedLocation = cmd.get_models('ExtendedLocation',
+                                          resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                          operation_group='managed_clusters')
+        ExtendedLocationTypes = cmd.get_models('ExtendedLocationTypes',
+                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                               operation_group='managed_clusters')
+        mc.extended_location = ExtendedLocation(
+            name=edge_zone,
+            type=ExtendedLocationTypes.EDGE_ZONE
         )
 
     # Add AAD session key to header.
@@ -2525,6 +2636,12 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     else:
         credentialResults = client.list_cluster_user_credentials(
             resource_group_name, name)
+
+    # Check if KUBECONFIG environmental variable is set
+    # If path is different than default then that means -f/--file is passed
+    # in which case we ignore the KUBECONFIG variable
+    if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
+        path = os.environ["KUBECONFIG"]
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
@@ -2770,13 +2887,13 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('Cannot get the AKS cluster\'s service principal.')
 
     if attach_acr:
-        _ensure_aks_acr(cmd.cli_ctx,
+        _ensure_aks_acr(cmd,
                         client_id=client_id,
                         acr_name_or_id=attach_acr,
                         subscription_id=subscription_id)
 
     if detach_acr:
-        _ensure_aks_acr(cmd.cli_ctx,
+        _ensure_aks_acr(cmd,
                         client_id=client_id,
                         acr_name_or_id=detach_acr,
                         subscription_id=subscription_id,
@@ -3773,7 +3890,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
                               validate=False, no_wait=False, subscription_id=subscription_id)
 
 
-def _ensure_aks_acr(cli_ctx,
+def _ensure_aks_acr(cmd,
                     client_id,
                     acr_name_or_id,
                     subscription_id,
@@ -3784,13 +3901,13 @@ def _ensure_aks_acr(cli_ctx,
         try:
             parsed_registry = parse_resource_id(acr_name_or_id)
             acr_client = cf_container_registry_service(
-                cli_ctx, subscription_id=parsed_registry['subscription'])
+                cmd.cli_ctx, subscription_id=parsed_registry['subscription'])
             registry = acr_client.registries.get(
                 parsed_registry['resource_group'], parsed_registry['name'])
         except CloudError as ex:
             raise CLIError(ex.message)
         _ensure_aks_acr_role_assignment(
-            cli_ctx, client_id, registry.id, detach)
+            cmd, client_id, registry.id, detach)
         return
 
     # Check if the ACR exists by name accross all resource groups.
@@ -3798,13 +3915,13 @@ def _ensure_aks_acr(cli_ctx,
     registry_resource = 'Microsoft.ContainerRegistry/registries'
     try:
         registry = get_resource_by_name(
-            cli_ctx, registry_name, registry_resource)
+            cmd.cli_ctx, registry_name, registry_resource)
     except CloudError as ex:
         if 'was not found' in ex.message:
             raise CLIError(
                 "ACR {} not found. Have you provided the right ACR name?".format(registry_name))
         raise CLIError(ex.message)
-    _ensure_aks_acr_role_assignment(cli_ctx, client_id, registry.id, detach)
+    _ensure_aks_acr_role_assignment(cmd, client_id, registry.id, detach)
     return
 
 
@@ -4087,12 +4204,12 @@ def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_
     return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
 
 
-def _ensure_aks_acr_role_assignment(cli_ctx,
+def _ensure_aks_acr_role_assignment(cmd,
                                     client_id,
                                     registry_id,
                                     detach=False):
     if detach:
-        if not _delete_role_assignments(cli_ctx,
+        if not _delete_role_assignments(cmd.cli_ctx,
                                         'acrpull',
                                         client_id,
                                         scope=registry_id):
@@ -4100,7 +4217,7 @@ def _ensure_aks_acr_role_assignment(cli_ctx,
                            'Are you an Owner on this subscription?')
         return
 
-    if not _add_role_assignment(cli_ctx,
+    if not _add_role_assignment(cmd,
                                 'acrpull',
                                 client_id,
                                 scope=registry_id):
@@ -4705,7 +4822,7 @@ def _put_managed_cluster_ensuring_permission(
         if virtual_node_addon_enabled:
             _add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
         if need_grant_vnet_permission_to_cluster_identity:
-            if not _create_role_assignment(cmd.cli_ctx, 'Network Contributor',
+            if not _create_role_assignment(cmd, 'Network Contributor',
                                            cluster.identity.principal_id, scope=vnet_subnet_id,
                                            resolve_assignee=False):
                 logger.warning('Could not create a role assignment for subnet. '
@@ -4721,7 +4838,7 @@ def _put_managed_cluster_ensuring_permission(
                                'it permission to pull from ACR.')
             else:
                 kubelet_identity_client_id = cluster.identity_profile["kubeletidentity"].client_id
-                _ensure_aks_acr(cmd.cli_ctx,
+                _ensure_aks_acr(cmd,
                                 client_id=kubelet_identity_client_id,
                                 acr_name_or_id=attach_acr,
                                 subscription_id=subscription_id)
@@ -4735,8 +4852,8 @@ def _put_managed_cluster_ensuring_permission(
     return cluster
 
 
-def _ensure_cluster_identity_permission_on_kubelet_identity(cli_ctx, cluster_identity_object_id, scope):
-    factory = get_auth_management_client(cli_ctx, scope)
+def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity_object_id, scope):
+    factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
 
     for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
@@ -4749,7 +4866,7 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cli_ctx, cluster_ide
         # already assigned
         return
 
-    if not _add_role_assignment(cli_ctx, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
+    if not _add_role_assignment(cmd, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
                                 is_service_principal=False, scope=scope):
         raise UnauthorizedError('Could not grant Managed Identity Operator '
                                 'permission to cluster identity at scope {}'.format(scope))
