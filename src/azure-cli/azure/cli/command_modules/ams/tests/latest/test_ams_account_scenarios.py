@@ -55,7 +55,7 @@ class AmsAccountTests(ScenarioTest):
             'storageId': account['storageAccounts'][0]['id']
         })
 
-        self.cmd('az ams account storage sync-storage-keys -g {rg} -a {amsname} --id "{storageId}"')
+        self.cmd('az ams account storage sync-storage-keys -g {rg} -a {amsname} --storage-account-id "{storageId}"')
 
         self.cmd('az ams account delete -n {amsname} -g {rg}')
 
