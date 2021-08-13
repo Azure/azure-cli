@@ -5814,15 +5814,24 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 
 # region CustomIpPrefix
 def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_name, location=None,
-                            cidr=None, tags=None, zone=None):
+                            cidr=None, tags=None, zone=None, signed_message=None, authorization_message=None,
+                            custom_ip_prefix_parent=None):
 
     CustomIpPrefix = cmd.get_models('CustomIpPrefix')
     prefix = CustomIpPrefix(
         location=location,
         cidr=cidr,
         zones=zone,
-        tags=tags
+        tags=tags,
+        signed_message=signed_message,
+        authorization_message=authorization_message
     )
+
+    if custom_ip_prefix_parent:
+        try:
+            prefix.custom_ip_prefix_parent = client.get(resource_group_name, custom_ip_prefix_name)
+        except ResourceNotFoundError:
+            raise ResourceNotFoundError("Custom ip prefix parent {} is'nt exist".format(custom_ip_prefix_name))
 
     return client.begin_create_or_update(resource_group_name, custom_ip_prefix_name, prefix)
 
@@ -5837,7 +5846,7 @@ def update_custom_ip_prefix(instance, tags=None):
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None):
+                     public_ip_prefix=None, edge_zone=None, ip_address=None):
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses
@@ -5850,6 +5859,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         'tags': tags,
         'public_ip_allocation_method': allocation_method,
         'idle_timeout_in_minutes': idle_timeout,
+        'ip_address': ip_address,
         'dns_settings': None
     }
     if cmd.supported_api_version(min_api='2016-09-01'):
@@ -5912,7 +5922,8 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            version=None, location=None, tags=None, zone=None, edge_zone=None):
+                            version=None, location=None, tags=None, zone=None, edge_zone=None,
+                            custom_ip_prefix_name=None):
     PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
     prefix = PublicIPPrefix(
         location=location,
@@ -5924,6 +5935,13 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
 
     if cmd.supported_api_version(min_api='2019-08-01'):
         prefix.public_ip_address_version = version if version is not None else 'ipv4'
+
+    if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
+        cip_client = network_client_factory(cmd.cli_ctx).custom_ip_prefixes
+        try:
+            prefix.custom_ip_prefix = cip_client.get(resource_group_name, custom_ip_prefix_name)
+        except ResourceNotFoundError:
+            raise ResourceNotFoundError('Custom ip prefix {} doesn\'t exist.'.format(custom_ip_prefix_name))
 
     if edge_zone:
         prefix.extended_location = _edge_zone_model(cmd, edge_zone)

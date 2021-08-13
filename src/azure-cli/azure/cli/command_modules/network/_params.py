@@ -1717,6 +1717,11 @@ def load_arguments(self, _):
     # region CustomIpPrefix
     with self.argument_context('network custom-ip prefix') as c:
         c.argument('custom_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/customIpPrefixes'), id_part='name', help='The name of the custom IP prefix.')
+        c.argument('signed_message', help='Signed message for WAN validation.')
+        c.argument('authorization_message', help='Authorization message for WAN validation.')
+        c.argument('custom_ip_prefix_parent', help='The Parent CustomIpPrefix for IPv6 /64 CustomIpPrefix.')
+        c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
+        c.argument('zone', zone_compatible_type, min_api='2020-08-01')
     # endregion
 
     # region PublicIPAddresses
@@ -1729,6 +1734,7 @@ def load_arguments(self, _):
         c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
         c.argument('ip_tags', nargs='+', min_api='2017-11-01', help="Space-separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
+        c.argument('ip_address', help='The IP address associated with the public IP address resource.')
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
@@ -1758,6 +1764,7 @@ def load_arguments(self, _):
     with self.argument_context('network public-ip prefix create') as c:
         c.argument('edge_zone', edge_zone)
         c.argument('version', min_api='2019-08-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
+        c.argument('custom_ip_prefix_name', min_api='2020-06-01', help='The customIpPrefix that this prefix is associated with.')
     # endregion
 
     # region RouteFilters

@@ -408,9 +408,10 @@ class NetworkCustomIpPrefix(ScenarioTest):
         self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
         self.cmd('network custom-ip prefix list -g {rg}',
                  checks=self.check('length(@)', 1))
-        self.cmd('network custom-ip prefix delete -g {rg} -n {prefix}')
-        self.cmd('network custom-ip prefix list -g {rg}',
-                 checks=self.is_empty())
+        # Delete operation isn't ready.
+        # self.cmd('network custom-ip prefix delete -g {rg} -n {prefix}')
+        # self.cmd('network custom-ip prefix list -g {rg}',
+        #          checks=self.is_empty())
 
 
 class NetworkPublicIpPrefix(ScenarioTest):
@@ -471,6 +472,23 @@ class NetworkPublicIpPrefix(ScenarioTest):
             self.check('prefixLength', 30),
             self.check('length(zones)', 3)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_with_ip_address', location='eastus2')
+    def test_network_public_ip_prefix_with_ip_address(self, resource_group):
+        self.kwargs.update({
+            'prefix_name_ipv4': 'public_ip_prefix_0',
+            'pip': 'pip1'
+        })
+
+        ip_prefix = self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 28', checks=[
+            self.check('publicIpAddressVersion', 'IPv4')
+        ]).get_output_in_json()
+
+        ip_address = '.'.join(ip_prefix['ipPrefix'].split('.')[:3]) + '10'
+
+        # Create public ip with ip address
+        self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
+                 checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
