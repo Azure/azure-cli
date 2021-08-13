@@ -2951,6 +2951,26 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss3}', checks=[self.check('length(@)', len(self.kwargs['instance_ids']) - 1)])
         self.cmd('vmss get-instance-view --resource-group {rg} --name {vmss3} --instance-id {id}', expect_failure=True)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_spot_restore')
+    def test_spot_restore_policy(self, resource_group):
+        self.kwargs.update({
+            'loc': 'NorthEurope',
+            'spot_vmss_name': 'vmss-spot1',
+            'enabled_1': 'True',
+            'enabled_2': 'False',
+            'restore_timeout1': 'PT1H',
+            'restore_timeout2': 'PT2H'
+
+        })
+        self.cmd('vmss create -g {rg} -n {spot_vmss_name} --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group True --spot-restore-enabled {enabled_1} --spot-restore-timeout {restore_timeout1}', checks=[
+            self.check('vmss.spotRestorePolicy.enabled', True),
+            self.check('vmss.spotRestorePolicy.restoreTimeout', '{restore_timeout1}')
+        ])
+        self.cmd('vmss update -g {rg} -n {spot_vmss_name} --spot-restore-enabled {enabled_2} --spot-restore-timeout {restore_timeout2}', checks=[
+            self.check('spotRestorePolicy.enabled', False),
+            self.check('spotRestorePolicy.restoreTimeout', '{restore_timeout2}')
+        ])
+
 
 class VMSSCustomDataScenarioTest(ScenarioTest):
 
