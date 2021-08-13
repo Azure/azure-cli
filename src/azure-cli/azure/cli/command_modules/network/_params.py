@@ -1719,9 +1719,11 @@ def load_arguments(self, _):
         c.argument('custom_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/customIpPrefixes'), id_part='name', help='The name of the custom IP prefix.')
         c.argument('signed_message', help='Signed message for WAN validation.')
         c.argument('authorization_message', help='Authorization message for WAN validation.')
-        c.argument('custom_ip_prefix_parent', help='The Parent CustomIpPrefix for IPv6 /64 CustomIpPrefix.')
+        c.argument('custom_ip_prefix_parent', help='The Parent CustomIpPrefix for IPv6 /64 CustomIpPrefix.', options_list=['--cip-prefix-parent', '-c'])
         c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
+        c.argument('cidr', help='The prefix range in CIDR notation. Should include the start address and the prefix length.')
+
     # endregion
 
     # region PublicIPAddresses
