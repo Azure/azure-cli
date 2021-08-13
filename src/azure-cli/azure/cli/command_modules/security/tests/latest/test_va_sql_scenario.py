@@ -6,7 +6,6 @@
 import time
 import json
 import tempfile
-from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer)
 from azure.cli.testsdk.base import execute
 from azure.cli.core.mock import DummyCli
@@ -15,7 +14,6 @@ from .preparers import (SqlVirtualMachinePreparer, LogAnalyticsWorkspacePreparer
 
 
 class VulnerabilityAssessmentForSqlTests(LiveScenarioTest):
-    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @SqlVirtualMachinePreparer()
     @LogAnalyticsWorkspacePreparer()
