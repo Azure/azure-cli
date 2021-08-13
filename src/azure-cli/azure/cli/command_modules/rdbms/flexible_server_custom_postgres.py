@@ -293,7 +293,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              maintenance_window=instance.maintenance_window,
                              tags=tags)
 
-    return params
+    # return params
 
 
 def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_over=None):
@@ -302,11 +302,11 @@ def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_
         raise ArgumentUsageError("Failing over can only be triggered for zone redundant servers.")
 
     if fail_over is not None:
-        if fail_over not in ['Planned', 'Forced']:
+        if fail_over not in ['Planned', 'Forced', 'planned', 'forced']:
             raise InvalidArgumentValueError("Allowed failover parameters are 'Planned' and 'Forced'.")
-        if fail_over == 'Planned':
+        if fail_over.lower() == 'planned':
             fail_over = 'plannedFailover'
-        elif fail_over == 'Forced':
+        elif fail_over.lower() == 'forced':
             fail_over = 'forcedFailover'
         parameters = postgresql_flexibleservers.models.RestartParameter(restart_with_failover=True,
                                                                         failover_mode=fail_over)

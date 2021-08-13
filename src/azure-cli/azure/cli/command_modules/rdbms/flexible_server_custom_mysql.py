@@ -300,7 +300,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
         
         params = ServerForUpdate(maintenance_window=instance.maintenance_window)
         logger.warning("You can update maintenance window only when updating maintenance window. Please update other properties separately if you are updating them as well.")
-        print(params.maintenance_window)
         return params
 
     if high_availability:
