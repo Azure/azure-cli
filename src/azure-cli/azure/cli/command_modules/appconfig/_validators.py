@@ -9,7 +9,7 @@ import json
 import re
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
@@ -69,27 +69,31 @@ def validate_separator(namespace):
 def validate_import(namespace):
     source = namespace.source
     if source == 'file':
-        if namespace.path is None or namespace.format_ is None:
-            raise CLIError("usage error: --path PATH --format FORMAT")
+        if namespace.path is None:
+            raise RequiredArgumentMissingError("Please provide the '--path' argument.")
+        if namespace.format_ is None:
+            raise RequiredArgumentMissingError("Please provide the '--format' argument.")
     elif source == 'appconfig':
-        if (namespace.src_name is None) and (namespace.src_connection_string is None):
-            raise CLIError("usage error: --config-name NAME | --connection-string STR")
+        if (namespace.src_name is None) and (namespace.src_connection_string is None) and (namespace.src_endpoint is None):
+            raise RequiredArgumentMissingError("Please provide '--src-name', '--src-connection-string' or '--src-endpoint' argument.")
     elif source == 'appservice':
         if namespace.appservice_account is None:
-            raise CLIError("usage error: --appservice-account NAME_OR_ID")
+            raise RequiredArgumentMissingError("Please provide '--appservice-account' argument")
 
 
 def validate_export(namespace):
     destination = namespace.destination
     if destination == 'file':
-        if namespace.path is None or namespace.format_ is None:
-            raise CLIError("usage error: --path PATH --format FORMAT")
+        if namespace.path is None:
+            raise RequiredArgumentMissingError("Please provide the '--path' argument.")
+        if namespace.format_ is None:
+            raise RequiredArgumentMissingError("Please provide the '--format' argument.")
     elif destination == 'appconfig':
-        if (namespace.dest_name is None) and (namespace.dest_connection_string is None):
-            raise CLIError("usage error: --config-name NAME | --connection-string STR")
+        if (namespace.dest_name is None) and (namespace.dest_connection_string is None) and (namespace.dest_endpoint is None):
+            raise RequiredArgumentMissingError("Please provide '--dest-name', '--dest-connection-string' or '--dest-endpoint' argument.")
     elif destination == 'appservice':
         if namespace.appservice_account is None:
-            raise CLIError("usage error: --appservice-account NAME_OR_ID")
+            raise RequiredArgumentMissingError("Please provide '--appservice-account' argument")
 
 
 def validate_appservice_name_or_id(cmd, namespace):
