@@ -447,7 +447,7 @@ def load_command_table(self, _):
     network_custom_ip_prefix_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
         client_factory=cf_custom_ip_prefixes,
-        min_api='2021-02-01'
+        min_api='2020-06-01'
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')

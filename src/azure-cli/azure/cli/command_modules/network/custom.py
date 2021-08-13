@@ -5812,6 +5812,7 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
     return client.begin_get_network_configuration_diagnostic(watcher_rg, watcher_name, params)
 # endregion
 
+
 # region CustomIpPrefix
 def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_name, location=None,
                             cidr=None, tags=None, zone=None, signed_message=None, authorization_message=None,
@@ -5835,12 +5836,13 @@ def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_n
 
     return client.begin_create_or_update(resource_group_name, custom_ip_prefix_name, prefix)
 
+
 def update_custom_ip_prefix(instance, tags=None):
     if tags is not None:
         instance.tags = tags
     return instance
-
 # endregion
+
 
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
