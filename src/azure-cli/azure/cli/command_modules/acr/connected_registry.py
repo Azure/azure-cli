@@ -404,16 +404,20 @@ def acr_connected_registry_install_info(cmd,
                                         client,
                                         connected_registry_name,
                                         registry_name,
+                                        parent_protocol,
                                         resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, parent_protocol,
+                             resource_group_name)
 
 
 def acr_connected_registry_install_renew_credentials(cmd,
                                                      client,
                                                      connected_registry_name,
                                                      registry_name,
+                                                     parent_protocol,
                                                      resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, parent_protocol,
+                             resource_group_name)
 
 
 def _get_install_info(cmd,
@@ -421,6 +425,7 @@ def _get_install_info(cmd,
                       connected_registry_name,
                       registry_name,
                       regenerate_credentials,
+                      parent_protocol,
                       resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
@@ -432,9 +437,11 @@ def _get_install_info(cmd,
     parent_id = connected_registry.parent.id
     # if parent_id is not none, parent is a connected registry
     if parent_id:
-        parent_endpoint_protocol = "<http or https>"
+        parent_endpoint_protocol = parent_protocol
     # if parent_id is none, parent is a cloud registry
     else:
+        if parent_protocol != "https":
+            logger.warning("Parent endpoint protocol must be 'https' when parent is a cloud registry.")
         parent_endpoint_protocol = "https"
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
 

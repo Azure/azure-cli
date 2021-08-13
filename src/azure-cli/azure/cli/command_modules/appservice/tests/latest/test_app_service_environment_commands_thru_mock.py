@@ -7,7 +7,7 @@
 # pylint: disable=too-few-public-methods
 
 import unittest
-import mock
+from unittest import mock
 from azure.cli.core.azclierror import ValidationError
 
 

@@ -4565,7 +4565,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 
 
 class NetworkWatcherScenarioTest(ScenarioTest):
-    import mock
+    from unittest import mock
 
     def _mock_thread_count():
         return 1
@@ -5184,7 +5184,7 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
 
         self.cmd('network lb create -g {rg} -n {lb} --sku Standard --public-ip-address {ip}')
         self.cmd('network lb create -g {rg} -n {lb1} --sku Gateway --vnet-name {vnet} --subnet {subnet} ')
-        self.cmd('network public-ip create -g {rg} -n {ip}1 --sku standard')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku standard')
         self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n {fip} --public-ip-address {ip1}',
                  checks=self.not_exists('gatewayLoadBalancer'))
         result = self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n {fip} '
@@ -5193,6 +5193,9 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
         self.kwargs['id'] = result['id']
         self.cmd('network lb frontend-ip update -g {rg} --lb-name {lb} -n {fip} --gateway-lb {id}',
                  checks=self.exists('gatewayLoadBalancer'))
+
+        self.cmd("network lb frontend-ip update -g {rg} --lb-name {lb} -n {fip} --gateway-lb ''",
+                 checks=self.check('gatewayLoadBalancer', None))
 
     @ResourceGroupPreparer(name_prefix='test_network_nic_front_ip', location='eastus2euap')
     def test_network_nic_front_ip(self, resource_group):

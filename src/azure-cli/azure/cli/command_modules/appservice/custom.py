@@ -685,7 +685,7 @@ def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, de
 
 def set_functionapp(cmd, resource_group_name, name, **kwargs):
     instance = kwargs['parameters']
-    if 'function' not in instance.kind:
+    if not instance or 'function' not in instance.kind:
         raise ValidationError('Not a function app to update')
     client = web_client_factory(cmd.cli_ctx)
     return client.web_apps.begin_create_or_update(resource_group_name, name, site_envelope=instance)
@@ -798,7 +798,10 @@ def assign_identity(cmd, resource_group_name, name, assign_identities=None, role
 
 
 def show_identity(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
+    web_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not web_app:
+        raise ResourceNotFoundError("Unable to find App {} in resource group {}".format(name, resource_group_name))
+    return web_app.identity
 
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
@@ -1701,6 +1704,17 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None):
         sku_def.capacity = number_of_workers
     instance.sku = sku_def
     return instance
+
+
+def show_plan(cmd, resource_group_name, name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
+    serverfarm_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + serverfarm_url
+    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    return response.json()
 
 
 def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_workers=None, max_burst=None):

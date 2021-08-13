@@ -214,6 +214,7 @@ def load_arguments(self, _):
             user = "User"
             group = "Group"
             service_principal = "ServicePrincipal"
+            foreign_group = "ForeignGroup"
 
         c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
                    help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')

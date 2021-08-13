@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.26.1"
+VERSION = "2.27.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -57,7 +57,7 @@ DEPENDENCIES = [
     'pkginfo>=1.5.0.1',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'requests~=2.25.1',
+    'requests[socks]~=2.25.1',
     'six~=1.12',
     'urllib3[secure]>=1.26.5',
 ]
@@ -66,9 +66,6 @@ DEPENDENCIES = [
 if not sys.platform.startswith('cygwin'):
     DEPENDENCIES.append('psutil~=5.8')
 
-TESTS_REQUIRE = [
-    'mock'
-]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
@@ -87,9 +84,5 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.6.0',
-    extras_require={
-        "test": TESTS_REQUIRE,
-    },
-    tests_require=TESTS_REQUIRE,
     package_data={'azure.cli.core': ['auth_landing_pages/*.html']}
 )

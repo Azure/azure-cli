@@ -9,10 +9,7 @@ from contextlib import contextmanager
 import os
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from azure.cli.testsdk import JMESPathCheck, JMESPathCheckExists, StringContainCheck
 from azure_devtools.scenario_tests import AllowLargeResponse
