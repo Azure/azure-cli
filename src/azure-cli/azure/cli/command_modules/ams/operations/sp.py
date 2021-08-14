@@ -14,7 +14,6 @@ from knack.util import CLIError, todict
 from knack.log import get_logger
 from msrest.serialization import TZ_UTC
 from azure.core.exceptions import HttpResponseError
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._profile import Profile
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ApplicationUpdateParameters,
@@ -78,7 +77,7 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
 
     aad_sp = _get_service_principal(graph_client, sp_name)
     if aad_sp:
-        return _update_sp(cmd, client, graph_client, aad_sp, ams, account_name, resource_group_name,
+        return _update_sp(cmd, graph_client, aad_sp, ams, account_name, resource_group_name,
                           app_display_name, new_sp_name, role, years, sp_password, xml)
 
     sp_password = _create_sp_password(sp_password)
@@ -105,7 +104,7 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
                             cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
 
 
-def _update_sp(cmd, client, graph_client, aad_sp, ams, account_name, resource_group_name, display_name,
+def _update_sp(cmd, graph_client, aad_sp, ams, account_name, resource_group_name, display_name,
                new_sp_name, role, years, sp_password, xml):
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
@@ -201,7 +200,7 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
-    role_id = _resolve_role_id(role, scope, definitions_client)
+    role_id = _resolve_role_id(cli_ctx, role, scope, definitions_client)
 
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
                                              'RoleAssignmentCreateParameters', mod='models',
@@ -213,14 +212,14 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
                                      parameters=parameters)
 
 
-def _resolve_role_id(role, scope, definitions_client):
+def _resolve_role_id(cli_ctx, role, scope, definitions_client):
     role_id = None
     if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',
                 role, re.I):
         role_id = role
     else:
         if _is_guid(role):
-            subscription_id = get_subscription_id(cmd.cli_ctx)
+            subscription_id = get_subscription_id(cli_ctx)
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
                 subscription_id, role)
         if not role_id:  # retrieve role id
