@@ -293,7 +293,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              maintenance_window=instance.maintenance_window,
                              tags=tags)
 
-    # return params
+    return params
 
 
 def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_over=None):

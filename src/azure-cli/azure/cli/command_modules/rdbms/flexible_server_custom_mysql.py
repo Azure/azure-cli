@@ -297,7 +297,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.maintenance_window.start_hour = start_hour
         instance.maintenance_window.start_minute = start_minute
         instance.maintenance_window.custom_window = custom_window
-        
+
         params = ServerForUpdate(maintenance_window=instance.maintenance_window)
         logger.warning("You can update maintenance window only when updating maintenance window. Please update other properties separately if you are updating them as well.")
         return params
@@ -330,11 +330,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              backup=instance.backup,
                              administrator_login_password=administrator_login_password,
                              high_availability=instance.high_availability,
-                             maintenance_window=instance.maintenance_window,
                              tags=tags)
 
     return params
-    # print(params.maintenance_window)
 
 
 def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
