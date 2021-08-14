@@ -97,12 +97,18 @@ class TunnelServer:
 
         web_address = 'https://{}/api/tokens'.format(self.bastion.dns_name)
         response = requests.post(web_address, data=content, headers=custom_header, verify=(not should_disable_connection_verify()))
+        response_json = None
+
+        if response.content is not None:
+            response_json =  json.loads(response.content.decode("utf-8"))
 
         if response.status_code not in [200]:
-            exp = CloudError(response)
+            if response_json is not None and response_json["message"] is not None:
+                exp = CloudError(response, error=response_json["message"])
+            else:
+                exp = CloudError(response)
             raise exp
 
-        response_json =  json.loads(response.content.decode("utf-8"))
         self.last_token = response_json["authToken"]
         self.node_id = response_json["nodeId"]
         return self.last_token

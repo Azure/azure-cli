@@ -23,6 +23,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
+from knack.prompting import prompt_pass, prompt, NoTTYException
 
 from .tunnel import TunnelServer
 
@@ -6969,7 +6970,7 @@ def _get_rdp_path(rdp_command="mstsc"):
         logger.debug("Attempting to run rdp from path %s", rdp_path)
 
         if not os.path.isfile(rdp_path):
-            raise util.CLIError("Could not find " + rdp_command + ".exe. Is the rdp client installed?")
+            raise CLIError("Could not find " + rdp_command + ".exe. Is the rdp client installed?")
 
     return rdp_path
 
@@ -6980,42 +6981,84 @@ def _get_host(username, ip):
 
 def _build_args(cert_file, private_key_file):
     private_key = []
+    certificate = []
     if private_key_file:
         private_key = ["-i", private_key_file]
-    certificate = ["-o", "CertificateFile=" + cert_file]
+    if cert_file:
+        certificate = ["-o", "CertificateFile=" + cert_file]
     return private_key + certificate
 
-def ssh_bastion_host(cmd, resource_group_name, name, resource_id, resource_port=None):
+def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, resource_id=None, name=None, resource_port=None):
 
     _test_extension(SSH_EXTENSION_NAME)
 
     if not resource_port:
         resource_port = 22
 
-    parsed_id = parse_resource_id(resource_id)
-    tunnel_server = get_tunnel(cmd, resource_group_name, name, resource_id, resource_port)
+    if not resource_id and not name:
+        raise CLIError("Please enter either resource id or name of the bastion.")
+
+    if(not is_valid_resource_id(vm_id)):
+        raise CLIError("Please enter a valid Virtual Machine resource Id.")
+
+    if(is_valid_resource_id(resource_id)):
+        parsed_id = parse_resource_id(resource_id)
+        bastion_name = parsed_id["name"]
+        resource_group_name =parsed_id['resource_group']
+    else:
+        bastion_name = name
+        if resource_group_name is None:
+            raise CLIError("Resource group name cannot be empty when not using resourceId")
+
+    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
 
     azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
-    public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)
-    cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file+'-cert.pub')
-    
-    command = [_get_ssh_path(), _get_host(username, 'localhost')]
-    command = command + _build_args(cert_file, private_key_file)
+
+    if auth_type.lower() == 'password':
+        username = prompt(msg = 'Enter username: ')
+        command = [_get_ssh_path(), _get_host(username, 'localhost')]
+    elif auth_type.lower() == 'aad':
+        public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)
+        cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file+'-cert.pub')
+        command = [_get_ssh_path(), _get_host(username, 'localhost')]
+        command = command + _build_args(cert_file, private_key_file)
+    elif auth_type.lower() == 'ssh-key-file':
+        username = prompt(msg = 'Enter username: ')
+        priv_key = prompt(msg = 'Enter ssh cert location: ')
+        command = [_get_ssh_path(), _get_host(username, 'localhost')]
+        command = command + _build_args(None, priv_key)
+    else:
+        raise CLIError("Unknown auth type. Use one of password, aad or akv.")
+
     command = command + ["-p", str(tunnel_server.local_port)]
     command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
     command = command + ['-o', "LogLevel=Error"]
     logger.debug("Running ssh command %s", ' '.join(command))
-    subprocess.call(command, shell=platform.system() == 'Windows')
+    try:
+        subprocess.call(command, shell=platform.system() == 'Windows')
+    except Exception as ex:
+        raise CLIError(ex)
 
-def rdp_bastion_host(cmd, resource_group_name, name, resource_id, resource_port=None):
+def rdp_bastion_host(cmd, vm_id, resource_group_name=None, name=None, resource_id=None, resource_port=None):
     if not resource_port:
         resource_port = 3389
+    
+    if not resource_id and not name:
+        raise CLIError("Please enter either resource id or name of the bastion.")
 
-    parsed_id = parse_resource_id(resource_id)
-    tunnel_server = get_tunnel(cmd, resource_group_name, name, resource_id, resource_port)
+    if(not is_valid_resource_id(vm_id)):
+        raise CLIError("Please enter a valid Virtual Machine resource Id.")
+
+    if(is_valid_resource_id(resource_id)):
+        parsed_id = parse_resource_id(resource_id)
+        bastion_name = parsed_id["name"]
+    else:
+        bastion_name = name
+
+    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
