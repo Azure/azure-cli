@@ -154,6 +154,7 @@ def flexible_server_create(cmd, client,
     logger.warning('Make a note of your password. If you forget, you would have to reset your password with'
                    '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
                    server_name, resource_group_name)
+    logger.warning('Try using az \'mysql flexible-server connect\' command to test out connection.')
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
