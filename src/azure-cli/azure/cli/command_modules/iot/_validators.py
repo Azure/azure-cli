@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from argparse import ArgumentError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from .custom import SimpleAccessRights
 
 
@@ -53,7 +54,13 @@ def validate_feedback_ttl(ns):
 def validate_feedback_lock_duration(ns):
     if (ns.feedback_lock_duration and
             ns.feedback_lock_duration not in range(5, 301, 1)):
-        raise ArgumentError(None, 'Please specify the duration from 5 to 300 seconds only.')
+        raise InvalidArgumentValueError('Please specify the feedback lock duration from 5 to 300 seconds only.')
+
+
+def validate_fileupload_notification_lock_duration(ns):
+    if (ns.fileupload_notification_lock_duration and
+            ns.fileupload_notification_lock_duration not in range(5, 301, 1)):
+        raise InvalidArgumentValueError('Please specify the notification lock duration from 5 to 300 seconds only.')
 
 
 def validate_feedback_max_delivery_count(ns):

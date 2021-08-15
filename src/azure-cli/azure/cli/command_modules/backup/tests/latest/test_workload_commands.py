@@ -48,18 +48,22 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # Each test will enable backup at the start and disable backup at the end of the test
     # Make sure that the backup is not already enabled since the start of the test
 
-    # Note: SQL RAF test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
+    # For the tests using PSTestVM664243 and hiagaSrcVault -
+    # Each test will register the container at the start and unregister at the end of the test
+    # Make sure that the container is not already registered since the start of the test
+
+    # Note: Archive test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
     @record_only()
     def test_backup_wl_sql_container(self):
 
         self.kwargs.update({
-            'vault': vault_sql,
-            'name': container_sql,
-            'fname': container_friendly_sql,
-            'rg': rg_sql,
+            'vault': "hiagaSrcVault",
+            'name': "VMAppContainer;Compute;hiagaSrcRG2;PSTestVM664243",
+            'fname': "PSTestVM664243",
+            'rg': "hiagaSrcRG",
             'wt': 'MSSQL',
             'sub': sub_sql,
-            'id': id_sql
+            'id': "/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/HIAGASRCRG2/providers/Microsoft.Compute/virtualMachines/PSTestVM664243"
         })
 
         self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id} ')
@@ -84,8 +88,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
-        self.assertIn(vault_sql.lower(), container_json['id'].lower())
-        self.assertIn(container_sql.lower(), container_json['name'].lower())
+        self.assertIn(self.kwargs['vault'].lower(), container_json['id'].lower())
+        self.assertIn(self.kwargs['name'].lower(), container_json['name'].lower())
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?properties.friendlyName == '{fname}'])", 1)])
@@ -527,15 +531,38 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @record_only()
     def test_backup_wl_sql_restore_as_files(self):
         self.kwargs.update({
-            'vault': "iaasvmsqlworkloadexistingvault1",
-            'name': "VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win",
+            'vault': "sarath-vault",
+            'name': "VMAppContainer;Compute;sarath-rg;sarathvm",
             'wt': 'MSSQL',
-            'sub': "38304e13-357e-405e-9e9a-220351dcce8c",
-            'rg': "iaasvmsqlworkload.existing.vaults",
-            'item': "SQLDataBase;mssqlserver;navigate-testdb2"
+            'sub': sub_sql,
+            'rg': "sarath-rg",
+            'item': "sqldatabase;mssqlserver;msdb",
+            'fname': "sarathvm",
+            'policy': 'HourlyLogBackup',
+            'pit': 'SQLDataBase',
+            'fitem': "msdb",
         })
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+            self.check("length([?name == '{name}'])", 1)])
+
+        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
+            self.check("properties.entityFriendlyName", '{fitem}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
+
+        self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
+            self.check("properties.operation", "Backup (Full)"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs['job'] = self.kwargs['backup_job']['name']
+
+        self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
 
         self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item} --backup-management-type AzureWorkload', checks=[
             self.check('properties.protectedItemHealthStatus', 'Healthy'),
@@ -607,25 +634,21 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                 self.check("properties.status", "Completed")
             ])
         
-        is_restorable = False
-        for i in rp_names:
-            if i['tierType']=="VaultArchive":
-                self.kwargs['rp_restore'] = i['name']
-                is_restorable = True
-                break
-        
-        if is_restorable:
-            # # Integrated Restore
-            self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container} --rp-name {rp_restore}').get_output_in_json(), separators=(',', ':'))
-            with open("recoveryconfig.json", "w") as f:
-                f.write(self.kwargs['rc'])
+        # Getting the recovery point ID in VaultArchive tier
+        self.kwargs['rp_restore'] = self.cmd('backup recoverypoint list --backup-management-type AzureWorkload --workload-type MSSQL -g {rg} -v {vault} -c {container} -i {item} --tier VaultArchive --query [0]').get_output_in_json()
+        self.kwargs['rp_restore'] = self.kwargs['rp_restore']['name']
 
-            # # Trigger Restore
-            self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig.json --rehydration-priority High', checks=[
-                self.check("properties.operation", "RestoreWithRehydrate"),
-                self.check("properties.status", "InProgress"),
-                self.check("resourceGroup", '{rg}')
-            ]).get_output_in_json()
+        # # Integrated Restore
+        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container} --rp-name {rp_restore}').get_output_in_json(), separators=(',', ':'))
+        with open("recoveryconfig.json", "w") as f:
+            f.write(self.kwargs['rc'])
+
+        # # Trigger Restore
+        self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig.json --rehydration-priority High', checks=[
+            self.check("properties.operation", "RestoreWithRehydrate"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
 
     # SAP HANA workload tests start here
     # Please make sure you have the following setup in place before running the tests -
@@ -633,6 +656,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # For the tests using akneema-hana-ccy and akneema-vault-ccy -
     # Each test will register the container at the start and unregister at the end of the test
     # Make sure that the container is not already registered since the start of the test
+
+    # Note: HANA Archive test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
 
     @record_only()
     def test_backup_wl_hana_archive (self):

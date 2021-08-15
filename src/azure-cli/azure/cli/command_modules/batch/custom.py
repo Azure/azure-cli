@@ -11,7 +11,7 @@ from knack.log import get_logger
 
 from msrest.exceptions import DeserializationError
 
-from azure.mgmt.batch import BatchManagement
+from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountUpdateParameters,
                                      AutoStorageBaseProperties, ActivateApplicationPackageParameters,
                                      Application, EncryptionProperties,
@@ -223,7 +223,7 @@ def create_application_package(cmd, client,
                                resource_group_name, account_name, application_name, version_name,
                                package_file):
     # create application if not exist
-    mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagement)
+    mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
     try:
         mgmt_client.application.get(resource_group_name, account_name, application_name)
     except Exception:  # pylint:disable=broad-except
