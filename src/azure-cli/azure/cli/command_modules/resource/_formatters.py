@@ -18,8 +18,6 @@ _change_type_to_color = {
     ChangeType.deploy: Color.BLUE,
     ChangeType.no_change: Color.RESET,
     ChangeType.ignore: Color.GRAY,
-    ChangeType.unsupported: Color.GRAY,
-    PropertyChangeType.no_effect: Color.GRAY,
 }
 
 _property_change_type_to_color = {
@@ -27,7 +25,6 @@ _property_change_type_to_color = {
     PropertyChangeType.delete: Color.ORANGE,
     PropertyChangeType.modify: Color.PURPLE,
     PropertyChangeType.array: Color.PURPLE,
-    PropertyChangeType.no_effect: Color.GRAY,
 }
 
 _change_type_to_symbol = {
@@ -37,8 +34,6 @@ _change_type_to_symbol = {
     ChangeType.deploy: Symbol.EXCLAMATION_POINT,
     ChangeType.no_change: Symbol.EQUAL,
     ChangeType.ignore: Symbol.ASTERISK,
-    ChangeType.unsupported: Symbol.CROSS,
-    PropertyChangeType.no_effect: Symbol.CROSS,
 }
 
 _property_change_type_to_symbol = {
@@ -46,7 +41,6 @@ _property_change_type_to_symbol = {
     PropertyChangeType.delete: Symbol.MINUS,
     PropertyChangeType.modify: Symbol.TILDE,
     PropertyChangeType.array: Symbol.TILDE,
-    PropertyChangeType.no_effect: Symbol.CROSS,
 }
 
 _change_type_to_weight = {
@@ -55,9 +49,7 @@ _change_type_to_weight = {
     ChangeType.deploy: 2,
     ChangeType.modify: 3,
     ChangeType.no_change: 4,
-    ChangeType.unsupported: 5,
-    ChangeType.ignore: 6,
-    PropertyChangeType.no_effect: 7,
+    ChangeType.ignore: 5,
 }
 
 _property_change_type_to_weight = {
@@ -65,7 +57,6 @@ _property_change_type_to_weight = {
     PropertyChangeType.create: 1,
     PropertyChangeType.modify: 2,
     PropertyChangeType.array: 2,
-    PropertyChangeType.no_effect: 3,
 }
 
 
@@ -136,7 +127,7 @@ def _format_resource_changes_stats(builder, resource_changes):
     builder.append(", ".join(change_type_stats)).append(".")
 
 
-def _format_change_type_count(change_type, count):  # pylint: disable=too-many-return-statements
+def _format_change_type_count(change_type, count):
     if change_type == ChangeType.create:
         return f"{count} to create"
     if change_type == ChangeType.delete:
@@ -149,8 +140,6 @@ def _format_change_type_count(change_type, count):  # pylint: disable=too-many-r
         return f"{count} to ignore"
     if change_type == ChangeType.no_change:
         return f"{count} no change"
-    if change_type == ChangeType.unsupported:
-        return f"{count} unsupported"
 
     raise ValueError(f"Invalid ChangeType: {change_type}")
 
@@ -201,7 +190,7 @@ def _format_resource_change(builder, resource_change, is_last):
     elif change_type == ChangeType.delete and resource_change.before:
         _format_json(builder, resource_change.before, indent_level=2)
 
-    elif resource_change.delta:
+    elif change_type == ChangeType.modify and resource_change.delta:
         with builder.new_color_scope(Color.RESET):
             builder.append_line()
             _format_property_changes(
@@ -267,9 +256,6 @@ def _format_property_change(builder, property_change, max_path_length, indent_le
     elif property_change_type == PropertyChangeType.array:
         _format_property_change_path(builder, property_change, "children", max_path_length, indent_level)
         _format_property_array_change(builder, children, indent_level + 1)
-    elif property_change_type == PropertyChangeType.no_effect:
-        _format_property_change_path(builder, property_change, "after", max_path_length, indent_level)
-        _format_property_no_effect(builder, after, indent_level + 1)
     else:
         raise ValueError(f"Unknown property change type: {property_change_type}.")
 
@@ -302,11 +288,6 @@ def _format_property_change_type(builder, property_change_type):
     property_change_symbol = _property_change_type_to_symbol[property_change_type]
     property_change_color = _property_change_type_to_color[property_change_type]
     builder.append(property_change_symbol, property_change_color).append(Symbol.WHITE_SPACE)
-
-
-def _format_property_no_effect(builder, value, indent_level):
-    with builder.new_color_scope(_property_change_type_to_color[PropertyChangeType.no_effect]):
-        _format_json(builder, value, indent_level=indent_level)
 
 
 def _format_property_create(builder, value, indent_level):
