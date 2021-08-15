@@ -185,8 +185,7 @@ helps['databoxedge bandwidth-schedule update'] = """
     short-summary: "Update a bandwidth schedule."
     examples:
       - name: Update a bandwidth schedule.
-        text: az databoxedge bandwidth-schedule update --name "bandwidth-1" --device-name "testedgedevice" \
-        --rate-in-mbps 150 --resource-group "GroupForEdgeAutomation" --start "0:0:0" --stop 12:00:00 --days Sunday
+        text: az databoxedge bandwidth-schedule update --name "bandwidth-1" --device-name "testedgedevice" --rate-in-mbps 150 --resource-group "GroupForEdgeAutomation"
 """
 
 helps['databoxedge bandwidth-schedule delete'] = """
@@ -271,7 +270,7 @@ helps['databoxedge order create'] = """
                az databoxedge order create --device-name "testedgedevice" --company-name "Microsoft" --contact-person \
 "John Mcclane" --email-list "john@microsoft.com" --phone "(800) 426-9400" --address-line1 "Microsoft Corporation" \
 --address-line2 "One Microsoft Way" --address-line3 "Redmond" --city "WA" --country "United States" --postal-code \
-"98052" --state "WA" --status Untracked --resource-group "GroupForEdgeAutomation"
+"98052" --state "WA" --resource-group "GroupForEdgeAutomation"
 """
 
 helps['databoxedge order update'] = """

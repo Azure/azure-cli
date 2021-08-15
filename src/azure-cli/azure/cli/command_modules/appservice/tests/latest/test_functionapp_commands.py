@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 import unittest
-from unittest import mock
+import mock
 import os
 import time
 import tempfile

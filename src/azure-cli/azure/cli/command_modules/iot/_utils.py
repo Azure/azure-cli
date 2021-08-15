@@ -45,7 +45,10 @@ def open_certificate(certificate_path):
     if certificate_path.endswith('.pem') or certificate_path.endswith('.cer'):
         with open(certificate_path, "rb") as cert_file:
             certificate = cert_file.read()
-        certificate = base64.b64encode(certificate).decode("utf-8")
+            try:
+                certificate = certificate.decode("utf-8")
+            except UnicodeError:
+                certificate = base64.b64encode(certificate).decode("utf-8")
     return certificate
 
 

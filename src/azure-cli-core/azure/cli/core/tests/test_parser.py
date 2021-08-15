@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from unittest import mock
+import mock
 import unittest
 import difflib
 from io import StringIO

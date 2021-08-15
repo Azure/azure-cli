@@ -46,5 +46,8 @@ setup(
     packages=[
         'azure.cli.telemetry',
         'azure.cli.telemetry.components'
+    ],
+    test_requires=[
+        'mock'
     ]
 )

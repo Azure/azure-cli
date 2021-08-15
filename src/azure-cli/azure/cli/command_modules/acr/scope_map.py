@@ -39,12 +39,10 @@ def acr_scope_map_create(cmd,
 
     actions = parse_scope_map_actions(repository_actions_list, gateway_actions_list)
 
-    ScopeMap = cmd.get_models('ScopeMap')
-
-    scope_map = ScopeMap(
-        actions=actions,
-        description=description
-    )
+    scope_map = {
+        'actions': actions,
+        'description': description
+    }
 
     return client.begin_create(
         resource_group_name,
@@ -70,7 +68,7 @@ def acr_scope_map_delete(cmd,
             return None
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    return client.begin_delete(resource_group_name, registry_name, scope_map_name)
+    return client.delete(resource_group_name, registry_name, scope_map_name)
 
 
 def acr_scope_map_update(cmd,
@@ -108,15 +106,13 @@ def acr_scope_map_update(cmd,
         final_actions_set = set(current_scope_map.actions).union(add_actions_set).difference(remove_actions_set)
         current_actions = list(final_actions_set)
 
-    ScopeMapUpdateParameters = cmd.get_models('ScopeMapUpdateParameters')
-    scope_map_update_parameters = ScopeMapUpdateParameters(
-        description=description,
-        actions=current_actions
+    return client.update(
+        resource_group_name,
+        registry_name,
+        scope_map_name,
+        description,
+        current_actions
     )
-    return client.begin_update(resource_group_name,
-                               registry_name,
-                               scope_map_name,
-                               scope_map_update_parameters)
 
 
 def acr_scope_map_show(cmd,

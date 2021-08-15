@@ -1188,18 +1188,6 @@ examples:
     text: az storage container-rm list --storage-account myaccount --include-deleted
 """
 
-helps['storage container-rm migrate-vlw'] = """
-type: command
-short-summary: Migrate a blob container from container level WORM to object level immutability enabled container.
-examples:
-  - name: Migrate a blob container from container level WORM to object level immutability enabled container.
-    text: az storage container-rm migrate-vlw -n mycontainer --storage-account myaccount -g myresourcegroup
-  - name: Migrate a blob container from container level WORM to object level immutability enabled container without waiting.
-    text: |
-        az storage container-rm migrate-vlw -n mycontainer --storage-account myaccount -g myresourcegroup --no-wait
-        az storage container-rm show -n mycontainer --storage-account myaccount -g myresourcegroup  --query immutableStorageWithVersioning.migrationState
-"""
-
 helps['storage container-rm show'] = """
 type: command
 short-summary: Show the properties for a specified container.
@@ -1930,16 +1918,6 @@ short-summary: Check for the existence of a file system in ADLS Gen2 account.
 examples:
     - name: Check for the existence of a file system in ADLS Gen2 account.
       text: az storage fs exists -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
-"""
-
-helps['storage fs generate-sas'] = """
-type: command
-short-summary: Generate a SAS token for file system in ADLS Gen2 account.
-examples:
-  - name: Generate a sas token for file system and use it to upload files.
-    text: |
-        end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
-        az storage fs generate-sas -n myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
 """
 
 helps['storage fs list'] = """

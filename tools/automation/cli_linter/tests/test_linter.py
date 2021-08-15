@@ -6,7 +6,7 @@
 import os
 import unittest
 import argparse
-from unittest import mock
+import mock
 from automation.cli_linter import main
 from automation.cli_linter.linter import LinterScope, RuleError
 from azure.cli.core.commands import AzCliCommand, ExtensionCommandSource

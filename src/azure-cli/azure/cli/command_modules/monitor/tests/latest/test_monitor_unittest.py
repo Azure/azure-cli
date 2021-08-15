@@ -5,7 +5,10 @@
 
 import unittest
 
-from unittest import mock
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 from knack.util import CLIError
 

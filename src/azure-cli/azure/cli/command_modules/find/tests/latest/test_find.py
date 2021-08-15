@@ -5,7 +5,7 @@
 
 import json
 import unittest
-from unittest import mock
+import mock
 import requests
 
 from azure.cli.command_modules.find.custom import (Example, call_aladdin_service,

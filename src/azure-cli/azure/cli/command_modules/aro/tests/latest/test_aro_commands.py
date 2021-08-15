@@ -6,7 +6,7 @@
 import os
 import unittest
 from random import randint
-from unittest import mock
+import mock
 
 
 from knack.log import get_logger
