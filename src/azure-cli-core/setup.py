@@ -66,6 +66,9 @@ DEPENDENCIES = [
 if not sys.platform.startswith('cygwin'):
     DEPENDENCIES.append('psutil~=5.8')
 
+TESTS_REQUIRE = [
+    'mock'
+]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
@@ -84,5 +87,9 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.6.0',
+    extras_require={
+        "test": TESTS_REQUIRE,
+    },
+    tests_require=TESTS_REQUIRE,
     package_data={'azure.cli.core': ['auth_landing_pages/*.html']}
 )

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from unittest import mock
+import mock
 from argparse import (Namespace, ArgumentError)
 from six import StringIO
 

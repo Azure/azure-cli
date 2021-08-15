@@ -7,7 +7,7 @@ import os
 import tempfile
 import unittest
 import uuid
-from unittest import mock
+import mock
 
 from azure.cli.core.mock import DummyCli
 

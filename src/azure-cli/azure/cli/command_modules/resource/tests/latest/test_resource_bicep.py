@@ -6,7 +6,7 @@
 import os
 import contextlib
 import unittest
-from unittest import mock
+import mock
 
 from knack.util import CLIError
 from azure.cli.command_modules.resource._bicep import (

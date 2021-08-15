@@ -1979,17 +1979,6 @@ def load_arguments(self, _):
 
         c.ignore('name')  # Hide sku name
 
-        c.extra('vnet_name',
-                options_list=['--vnet-name'],
-                help='The virtual network name',
-                validator=validate_subnet)
-
-        c.argument('virtual_network_subnet_id',
-                   options_list=['--subnet'],
-                   required=False,
-                   help='Name or ID of the subnet that allows access to an Azure Sql Managed Instance. '
-                   'If subnet name is provided, --vnet-name must be provided.')
-
     with self.argument_context('sql mi show') as c:
         c.argument('expand_ad_admin',
                    options_list=['--expand-ad-admin'],

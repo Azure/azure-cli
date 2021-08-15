@@ -7,7 +7,7 @@ import os
 import unittest
 import tempfile
 import shutil
-from unittest import mock
+import mock
 
 
 def get_test_data_file(filename):

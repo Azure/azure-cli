@@ -4565,7 +4565,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 
 
 class NetworkWatcherScenarioTest(ScenarioTest):
-    from unittest import mock
+    import mock
 
     def _mock_thread_count():
         return 1

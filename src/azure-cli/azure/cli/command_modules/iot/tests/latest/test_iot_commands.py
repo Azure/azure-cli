@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
 
-from unittest import mock
+import mock
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse

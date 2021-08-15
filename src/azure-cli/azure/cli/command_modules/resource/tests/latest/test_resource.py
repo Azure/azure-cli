@@ -8,7 +8,7 @@ import os
 import platform
 import shutil
 import time
-from unittest import mock
+import mock
 import unittest
 from pathlib import Path
 

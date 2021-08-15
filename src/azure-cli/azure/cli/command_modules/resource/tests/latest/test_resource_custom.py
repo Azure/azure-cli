@@ -11,7 +11,10 @@ from six.moves.urllib.request import pathname2url  # pylint: disable=import-erro
 from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 from six import assertRaisesRegex
 
-from unittest import mock
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.resource.custom import (
