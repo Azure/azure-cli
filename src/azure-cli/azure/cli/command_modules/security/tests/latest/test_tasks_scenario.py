@@ -10,7 +10,6 @@ import re
 
 
 class SecurityCenterTasksTests(ScenarioTest):
-
     @AllowLargeResponse()
     def test_security_tasks(self):
 

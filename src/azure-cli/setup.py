@@ -73,10 +73,10 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.3.0',
     'azure-mgmt-cdn==11.0.0',
     'azure-mgmt-cognitiveservices~=12.0.0',
-    'azure-mgmt-compute~=22.0.0',
+    'azure-mgmt-compute~=22.1.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry==8.0.0',
+    'azure-mgmt-containerregistry==8.1.0',
     'azure-mgmt-containerservice~=16.0.0',
     'azure-mgmt-cosmosdb~=6.4.0',
     'azure-mgmt-databoxedge~=1.0.0',
@@ -118,12 +118,12 @@ DEPENDENCIES = [
     'azure-mgmt-resource==18.0.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
-    'azure-mgmt-security~=0.6.0',
+    'azure-mgmt-security~=1.0.0',
     'azure-mgmt-servicebus~=6.0.0',
     'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-signalr~=1.0.0b2',
-    'azure-mgmt-sqlvirtualmachine~=0.5.0',
+    'azure-mgmt-sqlvirtualmachine~=1.0.0b1',
     'azure-mgmt-sql~=3.0.1',
     'azure-mgmt-storage~=18.0.0',
     'azure-mgmt-synapse~=2.0.0',
@@ -149,9 +149,6 @@ DEPENDENCIES = [
     'xmltodict~=0.12'
 ]
 
-TESTS_REQUIRE = [
-    'mock~=4.0'
-]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()

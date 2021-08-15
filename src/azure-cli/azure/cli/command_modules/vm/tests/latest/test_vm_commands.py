@@ -10,7 +10,7 @@ import platform
 import tempfile
 import time
 import unittest
-import mock
+from unittest import mock
 import uuid
 
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
@@ -4160,10 +4160,13 @@ class VMGalleryImage(ScenarioTest):
 
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2')
-    def test_sig_image_version_cross_tenant(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2',
+                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+    def test_sig_image_version_cross_tenant(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_image_version_', 40),
+            'rg': resource_group,
+            'another_rg': another_resource_group,
             'vm': self.create_random_name('cli_test_image_version_', 40),
             'image_name': self.create_random_name('cli_test_image_version_', 40),
             'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
@@ -4174,8 +4177,6 @@ class VMGalleryImage(ScenarioTest):
         })
 
         # Prepare image in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
         self.cmd(
@@ -4197,7 +4198,6 @@ class VMGalleryImage(ScenarioTest):
             'sig image-version create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --gallery-image-version {version} --managed-image {image_id} --replica-count 1',
             checks=self.check('name', self.kwargs['version']))
 
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
 
     @ResourceGroupPreparer(location='eastus')
     def test_create_vm_with_shared_gallery_image(self, resource_group, resource_group_location):
@@ -5401,11 +5401,14 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2')
-    def test_vm_cross_tenant_update(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2',
+                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+    def test_vm_cross_tenant_update(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_vm_cross_tenant_', 40),
+            'rg': resource_group,
+            'another_rg': another_resource_group,
             'another_vm': self.create_random_name('cli_test_vm_cross_tenant_', 40),
             'image_name': self.create_random_name('cli_test_vm_cross_tenant_', 40),
             'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
@@ -5414,8 +5417,6 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
         })
 
         # Prepare sig in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-keys --subscription {aux_sub}')
         self.cmd(
@@ -5435,16 +5436,17 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
             self.check('tags.tagName', 'tagValue')
         ])
 
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
-
 
 class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2')
-    def test_vmss_cross_tenant_update(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2',
+                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+    def test_vmss_cross_tenant_update(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_vmss_update_', 40),
+            'rg': resource_group,
+            'another_rg': another_resource_group,
             'vm': self.create_random_name('cli_test_vmss_update_', 40),
             'image_name': self.create_random_name('cli_test_vmss_update_', 40),
             'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
@@ -5457,8 +5459,6 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
         })
 
         # Prepare sig in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
         self.cmd(
@@ -5503,8 +5503,6 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
             self.check('name', self.kwargs['vmss']),
             self.check('virtualMachineProfile.storageProfile.imageReference.id', self.kwargs['image_2_id'])
         ])
-
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
 
         # Test vmss can be update even if the image reference is not available
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[

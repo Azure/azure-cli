@@ -9,7 +9,7 @@ import os
 import tempfile
 import time
 import datetime
-import mock
+from unittest import mock
 import unittest
 
 from knack.util import CLIError
