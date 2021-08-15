@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "WestUS2", "properties": {"tenantSettings": {}, "sku": {"name":
-      "Premium", "family": "p", "capacity": 1}}}'
+    body: '{"properties": {"tenantSettings": {}, "sku": {"name": "Premium", "family":
+      "p", "capacity": 1}}, "location": "WestUS2"}'
     headers:
       Accept:
       - application/json
@@ -14,30 +14,33 @@ interactions:
       Content-Length:
       - '119'
       Content-Type:
-      - application/json
+      - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -l --sku --vm-size
       User-Agent:
-      - AZURECLI/2.26.1 azsdk-python-mgmt-redis/13.0.0 Python/3.7.1 (Windows-10-10.0.19041-SP0)
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002?api-version=2019-07-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002","location":"West
-        US 2","name":"cliredis000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000,"isMaster":false,"isPrimary":false},{"sslPort":15001,"isMaster":false,"isPrimary":false}],"publicNetworkAccess":"Enabled","tenantSettings":{},"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":{"primaryKey":"*****","secondaryKey":"*****"},"hostName":"cliredis000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+        US 2","name":"cliredis000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000},{"sslPort":15001}],"tenantSettings":{},"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":{"primaryKey":"6YdoNqAzRFFR8f6hxiROjTf+bWAk6pfEOWH1hNZJxS4=","secondaryKey":"wg6JpEqpHTHg1IJHGTtn89mqWOMNCbIvb21bxNMl0p8="},"hostName":"cliredis000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1003'
+      - '901'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Jul 2021 00:55:28 GMT
+      - Fri, 06 Dec 2019 23:50:41 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002?api-version=2020-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002?api-version=2019-07-01
       pragma:
       - no-cache
       server:
@@ -49,7 +52,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
       x-rp-server-mvid:
-      - c3683564-281d-4923-9674-19b300a088a1
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
     status:
       code: 201
       message: Created
@@ -57,7 +60,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -67,22 +70,23 @@ interactions:
       ParameterSetName:
       - -n -g -l --sku --vm-size
       User-Agent:
-      - AZURECLI/2.26.1 azsdk-python-mgmt-redis/13.0.0 Python/3.7.1 (Windows-10-10.0.19041-SP0)
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002?api-version=2019-07-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002","location":"West
-        US 2","name":"cliredis000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000,"isMaster":false,"isPrimary":false},{"sslPort":15001,"isMaster":false,"isPrimary":false}],"publicNetworkAccess":"Enabled","tenantSettings":{},"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"cliredis000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+        US 2","name":"cliredis000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000},{"sslPort":15001}],"tenantSettings":{},"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"cliredis000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '884'
+      - '782'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Jul 2021 00:55:59 GMT
+      - Fri, 06 Dec 2019 23:51:11 GMT
       expires:
       - '-1'
       pragma:
@@ -98,7 +102,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - c3683564-281d-4923-9674-19b300a088a1
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
     status:
       code: 200
       message: OK
@@ -117,13 +121,16 @@ interactions:
       Content-Length:
       - '110'
       Content-Type:
-      - application/json
+      - application/json; charset=utf-8
       ParameterSetName:
       - -n -g --schedule-entries
       User-Agent:
-      - AZURECLI/2.26.1 azsdk-python-mgmt-redis/13.0.0 Python/3.7.1 (Windows-10-10.0.19041-SP0)
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002/patchSchedules/default?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002/patchSchedules/default?api-version=2019-07-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002/patchSchedules/default","location":"West
@@ -136,7 +143,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Jul 2021 00:55:59 GMT
+      - Fri, 06 Dec 2019 23:51:13 GMT
       expires:
       - '-1'
       pragma:
@@ -154,7 +161,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
       x-rp-server-mvid:
-      - c3683564-281d-4923-9674-19b300a088a1
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
     status:
       code: 200
       message: OK
@@ -173,13 +180,16 @@ interactions:
       Content-Length:
       - '112'
       Content-Type:
-      - application/json
+      - application/json; charset=utf-8
       ParameterSetName:
       - -n -g --schedule-entries
       User-Agent:
-      - AZURECLI/2.26.1 azsdk-python-mgmt-redis/13.0.0 Python/3.7.1 (Windows-10-10.0.19041-SP0)
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002/patchSchedules/default?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002/patchSchedules/default?api-version=2019-07-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002/patchSchedules/default","location":"West
@@ -192,7 +202,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Jul 2021 00:56:00 GMT
+      - Fri, 06 Dec 2019 23:51:14 GMT
       expires:
       - '-1'
       pragma:
@@ -210,7 +220,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
       x-rp-server-mvid:
-      - c3683564-281d-4923-9674-19b300a088a1
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
     status:
       code: 200
       message: OK
@@ -228,9 +238,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.26.1 azsdk-python-mgmt-redis/13.0.0 Python/3.7.1 (Windows-10-10.0.19041-SP0)
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002/patchSchedules/default?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002/patchSchedules/default?api-version=2019-07-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002/patchSchedules/default","location":"West
@@ -243,7 +256,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Jul 2021 00:56:00 GMT
+      - Fri, 06 Dec 2019 23:51:14 GMT
       expires:
       - '-1'
       pragma:
@@ -259,7 +272,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - c3683564-281d-4923-9674-19b300a088a1
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
     status:
       code: 200
       message: OK
@@ -279,9 +292,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.26.1 azsdk-python-mgmt-redis/13.0.0 Python/3.7.1 (Windows-10-10.0.19041-SP0)
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002/patchSchedules/default?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002/patchSchedules/default?api-version=2019-07-01
   response:
     body:
       string: ''
@@ -291,7 +307,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 27 Jul 2021 00:56:00 GMT
+      - Fri, 06 Dec 2019 23:51:14 GMT
       expires:
       - '-1'
       pragma:
@@ -305,7 +321,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
       x-rp-server-mvid:
-      - c3683564-281d-4923-9674-19b300a088a1
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
     status:
       code: 200
       message: OK

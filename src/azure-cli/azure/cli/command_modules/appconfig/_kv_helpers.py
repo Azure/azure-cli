@@ -7,6 +7,7 @@
 
 import io
 import json
+import re
 
 import chardet
 import javaproperties
@@ -106,8 +107,10 @@ def validate_import_key(key):
 
 def validate_import_feature(feature):
     if feature:
-        if '%' in feature:
-            logger.warning("Ignoring invalid feature '%s'. Feature name cannot contain the '%%' character.", feature)
+        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
+        invalid = re.search(invalid_pattern, feature)
+        if invalid:
+            logger.warning("Ignoring invalid feature '%s'. Only alphanumeric characters, '.', '-' and '_' are allowed in feature name.", feature)
             return False
     else:
         logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
@@ -549,8 +552,8 @@ def __serialize_feature_list_to_comparable_json_object(features):
         feature_json['description'] = feature.description
         # conditions
         feature_json['conditions'] = feature.conditions
-        # name
-        res[feature.name] = feature_json
+        # key
+        res[feature.key] = feature_json
     return res
 
 
@@ -874,7 +877,7 @@ def __export_features(retrieved_features, naming_convention):
                         feature_filter["Parameters"] = filter_.parameters
                     feature_state[feature_reserved_keywords.enabledfor].append(feature_filter)
 
-            feature_entry = {feature.name: feature_state}
+            feature_entry = {feature.key: feature_state}
 
             exported_dict[feature_reserved_keywords.featuremanagement].update(feature_entry)
 

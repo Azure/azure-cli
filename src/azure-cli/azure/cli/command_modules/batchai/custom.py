@@ -31,7 +31,6 @@ from azure.cli.core import keys
 from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.core.exceptions import ResourceNotFoundError
 import azure.mgmt.batchai.models as models
 
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
@@ -107,7 +106,7 @@ def _ensure_resource_not_exist(client, resource_group, workspace, name):
         client.get(resource_group, workspace, name)
         raise CLIError('"{0}" already exists in "{1}" resource group under {2} resource group.'.format(
             name, resource_group, workspace))
-    except ResourceNotFoundError as e:
+    except CloudError as e:
         if e.status_code != 404:
             raise
 
@@ -116,7 +115,7 @@ def _ensure_job_not_exist(client, resource_group, workspace, experiment, name):
     try:
         client.get(resource_group, workspace, experiment, name)
         raise CLIError('A job with given name, experiment, workspace and resource group already exists.')
-    except ResourceNotFoundError as e:
+    except CloudError as e:
         if e.status_code != 404:
             raise
 
@@ -616,12 +615,11 @@ def list_workspaces(client, resource_group=None):
 
 def create_workspace(cmd, client, resource_group, workspace_name, location=None):
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group)
-    parameters = models.WorkspaceCreateParameters(location=location)
-    return client.begin_create(resource_group, workspace_name, parameters)
+    return client.create(resource_group, workspace_name, location).result()
 
 
 def create_experiment(client, resource_group, workspace_name, experiment_name):
-    return client.begin_create(resource_group, workspace_name, experiment_name)
+    return client.create(resource_group, workspace_name, experiment_name).result()
 
 
 def _get_effective_resource_parameters(name_or_id, resource_group, workspace):
@@ -690,7 +688,7 @@ def create_cluster(cmd, client,  # pylint: disable=too-many-locals
         params.subnet = models.ResourceId(id=subnet)
     if setup_task:
         params = _add_setup_task(setup_task, setup_task_output, params)
-    return client.clusters.begin_create(resource_group, workspace_name, cluster_name, params)
+    return client.clusters.create(resource_group, workspace_name, cluster_name, params)
 
 
 def list_clusters(client, resource_group, workspace_name):
@@ -698,9 +696,8 @@ def list_clusters(client, resource_group, workspace_name):
 
 
 def resize_cluster(client, resource_group, workspace_name, cluster_name, target):
-    parameters = models.ClusterUpdateParameters(scale_settings=models.ScaleSettings(
+    return client.update(resource_group, workspace_name, cluster_name, scale_settings=models.ScaleSettings(
         manual=models.ManualScaleSettings(target_node_count=target)))
-    return client.update(resource_group, workspace_name, cluster_name, parameters=parameters)
 
 
 def set_cluster_auto_scale_parameters(client, resource_group, workspace_name, cluster_name, min_nodes, max_nodes):
@@ -867,7 +864,7 @@ def create_job(cmd,  # pylint: disable=too-many-locals
         mount_volumes = _add_azure_container_to_mount_volumes(cmd.cli_ctx, mount_volumes, container_name,
                                                               container_mount_path, account_name, account_key)
     params.mount_volumes = mount_volumes
-    return client.jobs.begin_create(resource_group, workspace_name, experiment_name, job_name, params)
+    return client.jobs.create(resource_group, workspace_name, experiment_name, job_name, params)
 
 
 def list_files(client, resource_group, workspace_name, experiment_name, job_name,
@@ -902,7 +899,7 @@ def tail_file(client, resource_group, workspace_name, experiment_name, job_name,
                 break
         if url is None:
             job = client.get(resource_group, workspace_name, experiment_name, job_name)
-            if job.execution_state in [models.ExecutionState.SUCCEEDED, models.ExecutionState.FAILED]:
+            if job.execution_state in [models.ExecutionState.succeeded, models.ExecutionState.failed]:
                 break
             if not reported_absence_of_file:
                 logger.warning('The file "%s" not found. Waiting for the job to generate it.', file_name)
@@ -919,7 +916,7 @@ def tail_file(client, resource_group, workspace_name, experiment_name, job_name,
             downloaded += len(r.content)
             print(r.content.decode(), end='')
         job = client.get(resource_group, workspace_name, experiment_name, job_name)
-        if job.execution_state in [models.ExecutionState.SUCCEEDED, models.ExecutionState.FAILED]:
+        if job.execution_state in [models.ExecutionState.succeeded, models.ExecutionState.failed]:
             break
         time.sleep(1)
 
@@ -937,11 +934,11 @@ def wait_for_job_completion(client, resource_group, workspace_name, experiment_n
         if job.execution_state != last_state:
             logger.warning('Job state: %s', job.execution_state)
             last_state = job.execution_state
-        if job.execution_state == models.ExecutionState.SUCCEEDED:
+        if job.execution_state == models.ExecutionState.succeeded:
             logger.warning('Job completed at %s; execution took %s', str(info.end_time),
                            str(info.end_time - info.start_time))
             return
-        if job.execution_state == models.ExecutionState.FAILED:
+        if job.execution_state == models.ExecutionState.failed:
             _log_failed_job(resource_group, job)
             sys.exit(-1)
         time.sleep(check_interval_sec)
@@ -1013,7 +1010,7 @@ def create_file_server(client, resource_group, workspace, file_server_name, json
             raise CLIError('Ill-formed subnet resource id')
         params.subnet = models.ResourceId(id=subnet)
 
-    return client.file_servers.begin_create(resource_group, workspace, file_server_name, params, raw=raw)
+    return client.file_servers.create(resource_group, workspace, file_server_name, params, raw=raw)
 
 
 def list_file_servers(client, resource_group, workspace_name):

@@ -245,10 +245,6 @@ def _parse_image_argument(cmd, namespace):
     if is_valid_resource_id(namespace.image):
         return 'image_id'
 
-    from ._vm_utils import is_shared_gallery_image_id
-    if is_shared_gallery_image_id(namespace.image):
-        return 'shared_gallery_image_id'
-
     # 2 - attempt to match an URN pattern
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
     if urn_match:
@@ -328,7 +324,7 @@ def _get_image_plan_info_if_exists(cmd, namespace):
                        "will be skipped", namespace.image, ex.message)
 
 
-# pylint: disable=inconsistent-return-statements, too-many-return-statements
+# pylint: disable=inconsistent-return-statements
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
         return 'create unmanaged OS disk created from generalized VHD'
@@ -342,8 +338,6 @@ def _get_storage_profile_description(profile):
         return 'create managed OS disk from Azure Marketplace image'
     if profile == StorageProfile.ManagedSpecializedOSDisk:
         return 'attach existing managed OS disk'
-    if profile == StorageProfile.SharedGalleryImage:
-        return 'create OS disk from shared gallery image'
 
 
 def _validate_location(cmd, namespace, zone_info, size_info):
@@ -385,8 +379,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         elif image_type == 'image_id':
             # STORAGE PROFILE #5
             namespace.storage_profile = StorageProfile.ManagedCustomImage
-        elif image_type == 'shared_gallery_image_id':
-            namespace.storage_profile = StorageProfile.SharedGalleryImage
         elif image_type == 'urn':
             if namespace.use_unmanaged_disk:
                 # STORAGE PROFILE #1
@@ -418,11 +410,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                      'storage_container_name', 'use_unmanaged_disk']
         if for_scale_set:
             forbidden.append('os_disk_name')
-
-    elif namespace.storage_profile == StorageProfile.SharedGalleryImage:
-        required = ['image']
-        forbidden = ['os_type', 'attach_os_disk', 'storage_account',
-                     'storage_container_name', 'use_unmanaged_disk']
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
@@ -518,7 +505,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             namespace.attach_data_disks = [_get_resource_id(cmd.cli_ctx, d, namespace.resource_group_name, 'disks',
                                                             'Microsoft.Compute') for d in namespace.attach_data_disks]
 
-    if not namespace.os_type and namespace.storage_profile != StorageProfile.SharedGalleryImage:
+    if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
     from ._vm_utils import normalize_disk_info

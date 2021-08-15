@@ -5,7 +5,7 @@
 
 # pylint: skip-file
 import unittest
-from unittest import mock
+import mock
 
 from azure.cli.command_modules.acs.acs_client import ACSClient
 

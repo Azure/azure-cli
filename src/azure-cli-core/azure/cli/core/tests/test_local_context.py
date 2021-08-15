@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from unittest import mock
+import mock
 import unittest
 
 from azure.cli.core.local_context import AzCLILocalContext, ALL

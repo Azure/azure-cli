@@ -104,10 +104,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             log_template=log_template,
             is_system_task=is_system_task)
         try:
-            return client.begin_create(resource_group_name=resource_group_name,
-                                       registry_name=registry_name,
-                                       task_name=task_name,
-                                       task_create_parameters=task_create_parameters)
+            return client.create(resource_group_name=resource_group_name,
+                                 registry_name=registry_name,
+                                 task_name=task_name,
+                                 task_create_parameters=task_create_parameters)
         except ValidationError as e:
             raise CLIError(e)
 
@@ -548,7 +548,7 @@ def acr_task_identity_assign(cmd,
         identity=identity
     )
 
-    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def acr_task_identity_remove(cmd,
@@ -583,7 +583,7 @@ def acr_task_identity_remove(cmd,
         identity=identity
     )
 
-    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def acr_task_identity_show(cmd,
@@ -632,7 +632,7 @@ def acr_task_credential_add(cmd,
     )
 
     resp = LongRunningOperation(cmd.cli_ctx)(
-        client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+        client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
     )
     resp = resp.credentials
     return {} if not resp else resp.custom_registries
@@ -671,7 +671,7 @@ def acr_task_credential_update(cmd,
     )
 
     resp = LongRunningOperation(cmd.cli_ctx)(
-        client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+        client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
     )
     resp = resp.credentials
     return {} if not resp else resp.custom_registries
@@ -696,7 +696,7 @@ def acr_task_credential_remove(cmd,
     )
 
     resp = LongRunningOperation(cmd.cli_ctx)(
-        client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+        client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
     )
     resp = resp.credentials
     return {} if not resp else resp.custom_registries
@@ -743,7 +743,7 @@ def acr_task_timer_add(cmd,
         )
     )
 
-    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def acr_task_timer_update(cmd,
@@ -779,7 +779,7 @@ def acr_task_timer_update(cmd,
         )
     )
 
-    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def acr_task_timer_remove(cmd,
@@ -801,10 +801,10 @@ def acr_task_timer_remove(cmd,
         existingTask.trigger.timer_triggers = trimmed_timer_triggers
 
         try:
-            return client.begin_create(resource_group_name=resource_group_name,
-                                       registry_name=registry_name,
-                                       task_name=task_name,
-                                       task_create_parameters=existingTask)
+            return client.create(resource_group_name=resource_group_name,
+                                 registry_name=registry_name,
+                                 task_name=task_name,
+                                 task_create_parameters=existingTask)
         except ValidationError as e:
             raise CLIError(e)
 

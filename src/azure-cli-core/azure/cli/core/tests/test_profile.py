@@ -8,7 +8,7 @@ import json
 import os
 import sys
 import unittest
-from unittest import mock
+import mock
 import re
 
 from copy import deepcopy

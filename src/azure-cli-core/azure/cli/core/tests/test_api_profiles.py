@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from unittest import mock
+import mock
 
 from azure.cli.core.profiles import (ResourceType, PROFILE_TYPE, CustomResourceType,
                                      get_api_version, supported_api_version, register_resource_type)

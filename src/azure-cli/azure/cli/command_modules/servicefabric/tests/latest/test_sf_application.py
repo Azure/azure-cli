@@ -5,7 +5,7 @@
 import unittest
 from azure.cli.command_modules.servicefabric.tests.latest.test_util import _create_cluster_with_separate_kv
 from azure.cli.core.util import CLIError
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
 
 
 class ServiceFabricApplicationTests(ScenarioTest):
@@ -88,10 +88,9 @@ class ServiceFabricApplicationTests(ScenarioTest):
             self.cmd('az sf application show -g {rg} -c {cluster_name} --application-name {app_name}')
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
-    def test_application(self, key_vault):
+    def test_application(self):
         self.kwargs.update({
-            'kv_name': key_vault,
+            'kv_name': self.create_random_name('sfrp-cli-kv-', 24),
             'loc': 'westus',
             'cert_name': self.create_random_name('sfrp-cli-', 24),
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
