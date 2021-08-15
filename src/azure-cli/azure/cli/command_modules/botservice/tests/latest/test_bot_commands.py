@@ -12,7 +12,10 @@ import unittest
 
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
-from unittest import mock
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 import requests
 from azure.cli.command_modules.botservice.custom import prepare_webapp_deploy
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, live_only

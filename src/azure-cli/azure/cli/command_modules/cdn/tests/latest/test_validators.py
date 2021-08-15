@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-from unittest import mock
+import mock
 from azure.cli.command_modules.cdn._validators import validate_origin
 from knack.util import CLIError
 

@@ -452,9 +452,6 @@ parameters:
   - name: --enable-azure-rbac
     type: bool
     short-summary: Enable Azure RBAC to control authorization checks on cluster.
-  - name: --edge-zone
-    type: string
-    short-summary: The name of the Edge Zone.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -500,8 +497,6 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
   - name: Create a kubernetes cluster with custom control plane identity and kubelet identity.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --assign-identity <control-plane-identity-resource-id> --assign-kubelet-identity <kubelet-identity-resource-id>
-  - name: Create a kubernetes cluster in the Edge Zone.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --location <location> --kubernetes-version 1.20.7 --edge-zone <edge-zone-name>
 """
 
 helps['aks update'] = """
@@ -786,7 +781,7 @@ parameters:
     short-summary: Size in GB of the OS disk for each node in the agent pool. Minimum 30 GB.
   - name: --node-osdisk-type
     type: string
-    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation. ('Ephemeral' or 'Managed')
+    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation.
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.

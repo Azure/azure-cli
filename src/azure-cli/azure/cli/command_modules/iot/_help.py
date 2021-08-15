@@ -797,7 +797,7 @@ helps['iot hub update'] = """
 type: command
 short-summary: Update metadata for an IoT hub.
 examples:
-  - name: Add storage container settings to file upload
+  - name: Add a storage container settings
     text: >
         az iot hub update --name MyIotHub --fileupload-storage-connectionstring "connection-string" \\
         --fileupload-storage-container-name "container_name"
@@ -826,10 +826,10 @@ examples:
   - name: Update the IoT Hub file upload settings, and assign a managed identity to user for file upload
     text: >
         az iot hub update -n MyIoTHub --fileupload-sas-ttl 5 --fileupload-storage-auth-type identityBased --fileupload-storage-identity [system]
-  - name: Update the IoT Hub file upload notification settings and queue lock duration
+  - name: Update the IoT Hub file upload notification settings
     text: >
         az iot hub update -n MyIoTHub --fileupload-notification-max-delivery-count 50
-        --fileupload-notification-ttl 48 --fileupload-notifications --fileupload-notification-lock-duration 10
+        --fileupload-notification-ttl 48 --fileupload-notifications
 """
 
 helps['iot central'] = """

@@ -119,7 +119,10 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
 class DataLakeStoreFileScenarioTest(ScenarioTest):
 
     def setUp(self):
-        from unittest import mock
+        try:
+            import unittest.mock as mock
+        except ImportError:
+            import mock
         import uuid
 
         def const_uuid():

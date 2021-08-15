@@ -6,7 +6,7 @@
 import json
 import os
 import time
-from unittest import mock
+import mock
 import unittest
 
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID

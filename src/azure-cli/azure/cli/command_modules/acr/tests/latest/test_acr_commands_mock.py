@@ -9,7 +9,7 @@ except ImportError:
     from urllib import urlencode
 import json
 import unittest
-from unittest import mock
+import mock
 import sys
 
 from azure.mgmt.containerregistry.v2019_05_01.models import Registry, Sku

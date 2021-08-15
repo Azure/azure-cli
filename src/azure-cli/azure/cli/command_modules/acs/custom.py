@@ -1223,7 +1223,7 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
     current_context = addition.get('current-context', 'UNKNOWN')
     msg = 'Merged "{}" as current context in {}'.format(
         current_context, existing_file)
-    logger.warning(msg)
+    print(msg)
 
 
 def _get_host_name(acs_info):
@@ -1557,8 +1557,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         jsonS, _ = output.communicate()
         kubectl_version = json.loads(jsonS)
-        # Remove any non-numeric characters like + from minor version
-        kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
+        kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
         kubectl_server_minor_version = int(
             kubectl_version["serverVersion"]["minor"])
         kubectl_server_patch = int(
@@ -1633,25 +1632,15 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         raise CLIError("Failed to check the ACR: {}".format(err))
     if output:
         print(output)
-        if os.getenv("PYTEST_CURRENT_TEST", None):
-            return output
     else:
         raise CLIError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
-def _aks_browse(
-    cmd,
-    client,
-    resource_group_name,
-    name,
-    disable_browser=False,
-    listen_address="127.0.0.1",
-    listen_port="8001",
-    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-):
+def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
+               listen_address='127.0.0.1', listen_port='8001'):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
-                                                resource_type=resource_type,
+                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')
     # verify the kube-dashboard addon was not disabled
     instance = client.get(resource_group_name, name)
@@ -1661,7 +1650,6 @@ def _aks_browse(
                           if k.lower() == CONST_KUBE_DASHBOARD_ADDON_NAME.lower()),
                          ManagedClusterAddonProfile(enabled=False))
 
-    return_msg = None
     # open portal view if addon is not enabled or k8s version >= 1.19.0
     if StrictVersion(instance.kubernetes_version) >= StrictVersion('1.19.0') or (not addon_profile.enabled):
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1677,11 +1665,10 @@ def _aks_browse(
                 'To view the Kubernetes resources view, please open %s in a new tab', dashboardURL)
         else:
             logger.warning('Kubernetes resources view on %s', dashboardURL)
-            return_msg = "Kubernetes resources view on {}".format(dashboardURL)
 
         if not disable_browser:
             webbrowser.open_new_tab(dashboardURL)
-        return return_msg
+        return
 
     # otherwise open the kube-dashboard addon
     if not which('kubectl'):
@@ -1743,65 +1730,28 @@ def _aks_browse(
     else:
         logger.warning('Proxy running on %s', proxy_url)
 
-    timeout = None
-    if os.getenv("PYTEST_CURRENT_TEST", None):
-        timeout = 10
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(dashboardURL)
     try:
         try:
             subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
-                                     listen_address, "--port", listen_port], stderr=subprocess.STDOUT, timeout=timeout)
+                                     listen_address, "--port", listen_port], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
             if err.output.find(b'unknown flag: --address'):
-                return_msg = "Test Invalid Address! "
                 if listen_address != '127.0.0.1':
                     logger.warning(
                         '"--address" is only supported in kubectl v1.13 and later.')
                     logger.warning(
                         'The "--listen-address" argument will be ignored.')
-                try:
-                    subprocess.call(["kubectl", "--kubeconfig",
-                                    browse_path, "proxy", "--port", listen_port], timeout=timeout)
-                except subprocess.TimeoutExpired:
-                    logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-                    return_msg = return_msg if return_msg else ""
-                    return_msg += "Test Passed!"
-        except subprocess.TimeoutExpired:
-            logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-            return_msg = return_msg if return_msg else ""
-            return_msg += "Test Passed!"
+                subprocess.call(["kubectl", "--kubeconfig",
+                                browse_path, "proxy", "--port", listen_port])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
     finally:
         if in_cloud_console():
             requests.post('http://localhost:8888/closeport/8001')
-    return return_msg
-
-
-# pylint: disable=too-many-statements,too-many-branches
-def aks_browse(
-    cmd,
-    client,
-    resource_group_name,
-    name,
-    disable_browser=False,
-    listen_address="127.0.0.1",
-    listen_port="8001",
-):
-
-    return _aks_browse(
-        cmd,
-        client,
-        resource_group_name,
-        name,
-        disable_browser=disable_browser,
-        listen_address=listen_address,
-        listen_port=listen_port,
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-    )
 
 
 def _trim_nodepoolname(nodepool_name):
@@ -2026,7 +1976,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_encryption_at_host=False,
                assign_kubelet_identity=None,
                enable_ultra_ssd=False,
-               edge_zone=None,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
@@ -2063,10 +2012,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
-    ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties = cmd.get_models(
-        'ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        operation_group='managed_clusters')
+    ManagedClusterPropertiesIdentityProfileValue = cmd.get_models('ManagedClusterPropertiesIdentityProfileValue',
+                                                                  resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                                  operation_group='managed_clusters')
     ManagedCluster = cmd.get_models('ManagedCluster',
                                     resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                     operation_group='managed_clusters')
@@ -2373,8 +2321,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             raise ArgumentUsageError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
         kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
         identity_profile = {
-            # pylint: disable=line-too-long
-            'kubeletidentity': ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties(
+            'kubeletidentity': ManagedClusterPropertiesIdentityProfileValue(
                 resource_id=assign_kubelet_identity,
                 client_id=kubelet_identity.client_id,
                 object_id=kubelet_identity.principal_id
@@ -2384,8 +2331,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
         _ensure_cluster_identity_permission_on_kubelet_identity(
             cmd.cli_ctx,
-            cluster_identity_object_id,
-            assign_kubelet_identity)
+            cluster_identity_object_id)
 
     auto_upgrade_profile = None
     if auto_upgrade_channel is not None:
@@ -2435,18 +2381,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         mc.sku = ManagedClusterSKU(
             name="Basic",
             tier="Paid"
-        )
-
-    if edge_zone:
-        ExtendedLocation = cmd.get_models('ExtendedLocation',
-                                          resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                          operation_group='managed_clusters')
-        ExtendedLocationTypes = cmd.get_models('ExtendedLocationTypes',
-                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                               operation_group='managed_clusters')
-        mc.extended_location = ExtendedLocation(
-            name=edge_zone,
-            type=ExtendedLocationTypes.EDGE_ZONE
         )
 
     # Add AAD session key to header.

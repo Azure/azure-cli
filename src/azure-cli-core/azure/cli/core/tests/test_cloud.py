@@ -5,7 +5,7 @@
 
 import tempfile
 import unittest
-from unittest import mock
+import mock
 import multiprocessing
 import configparser
 

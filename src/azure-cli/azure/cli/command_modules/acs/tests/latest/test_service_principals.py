@@ -6,7 +6,7 @@
 import os
 import tempfile
 import unittest
-from unittest import mock
+import mock
 
 from knack.util import CLIError
 from azure.cli.command_modules.acs.custom import (

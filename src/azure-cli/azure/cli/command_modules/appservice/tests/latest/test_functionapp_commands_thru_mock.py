@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-from unittest import mock
+import mock
 import os
 
 from azure.mgmt.web import WebSiteManagementClient
