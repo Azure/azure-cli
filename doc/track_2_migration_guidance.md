@@ -2,9 +2,9 @@
 
 Azure CLI is built on Azure Python SDKs. Recently, Azure Python SDK team announced the next generation product, named Track 2 SDK. The old version of SDK is called Track 1 SDK. It claims that it has some advantages than Track 1 SDK. It is not compatible with Track 1 SDK. A considerable number of work days are required for Azure CLI developers to migrate their modules from Track 1 SDK to Track 2 SDK. Let's see an example of Track 2 SDK. [azure-mgmt-compute 17.0.0b1](https://pypi.org/project/azure-mgmt-compute/17.0.0b1/) introduces important breaking changes and important new features like unified authentication and asynchronous programming.
 
-This document summarizes typical issues and solutions when adopting Track 2 SDK in Azure CLI.
+This document summarizes the steps to apply the changes for migration, typical changes when adopting Track 2 SDK in Azure CLI.
 
-Example PRs:
+## Example PRs
 1. [Compute PR #15750](https://github.com/Azure/azure-cli/pull/15750)
 2. [Network PR #16245](https://github.com/Azure/azure-cli/pull/16245)
 3. [Network PR #16350](https://github.com/Azure/azure-cli/pull/16350)
@@ -13,7 +13,16 @@ Example PRs:
 6. [AppConfig PR #16376](https://github.com/Azure/azure-cli/pull/16376)
 7. [AppService PR #17146](https://github.com/Azure/azure-cli/pull/17146)
 
-Below is a list of typical issues.
+## Steps to apply the changes for migration
+1. Upgrade the version of your SDK to track 2 SDK in [setup.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/setup.py), [requirements.py3.Darwin.txt](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/requirements.py3.Darwin.txt), [requirements.py3.Linux.txt](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/requirements.py3.Linux.txt) and [requirements.py3.windows.txt](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/requirements.py3.windows.txt).
+2. Run command `azdev setup` to apply track 2 SDK to your local virtual environment.
+3. Run style check with command `azdev style your_module_name` and fix the errors returned from the command.
+4. Run linter check with command `azdev linter your_module_name` and fix the errors returned from the command.
+5. Run tests with command `azdev test your_module_name --no-exitfirst` and fix the errors returned from the command.
+6. Run tests lively with command `azdev test your_module_name --live --no-exitfirst` and fix the errors returned from the command.
+7. Create the pull request for migration.
+
+## Typical changes.
 
 1. [Long running operation function name change](#long-running-operation-function-name-change)
 2. [Property name change](#property-name-change)

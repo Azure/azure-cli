@@ -273,6 +273,7 @@ class AcrCommandsTests(ScenarioTest):
         # import image using no-wait
         self.cmd('acr import -n {source_registry_name} -r {resource_id} --source {source_image} --no-wait')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @record_only()
     def test_acr_image_import(self, resource_group):
@@ -291,8 +292,10 @@ class AcrCommandsTests(ScenarioTest):
         source_registry_name = self.create_random_name("sourceregistrysamesub", 40)
         registry_name = self.create_random_name("targetregistry", 20)
         token = self.cmd('account get-access-token').get_output_in_json()['accessToken']
-        service_principal_username = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
-        service_principal_password = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
+
+        # service principal creds to support import from resource_imageV1
+        service_principal_username = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
+        service_principal_password = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
 
         self.kwargs.update({
             'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
@@ -365,6 +368,55 @@ class AcrCommandsTests(ScenarioTest):
 
         # Case 9: Import image from an Azure Container Registry with personal access token
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
+
+
+    @ResourceGroupPreparer()
+    def test_acr_export_policy(self, resource_group):
+        registry_1 = self.create_random_name('clireg', 20)
+        registry_2 = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_1': registry_1,
+            'registry_2': registry_2,
+            'sku': 'Premium',
+        })
+
+        self.cmd('acr create -n {registry_1} -g {rg} --sku {sku} --public-network-enabled false --allow-exports',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'Enabled')])  # case insensitive check
+
+        self.cmd('acr create -n {registry_1} -g {rg} --sku {sku} --public-network-enabled false --allow-exports true',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'enabled')])
+
+        # for export policy to be disabled, we need to disable public network access
+        self.cmd('acr create -n {registry_1} -g {rg} --sku {sku} --public-network-enabled false --allow-exports false',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'Disabled')])
+
+        # create/PUT should default to enabling export policy
+        self.cmd('acr create -n {registry_1} -g {rg} --sku {sku} --public-network-enabled false',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'Enabled')])
+
+        self.cmd('acr update -n {registry_1} -g {rg} --sku {sku} --allow-exports true',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'enabled')])
+
+        self.cmd('acr update -n {registry_1} -g {rg} --sku {sku} --allow-exports false',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'disabled')])
+
+        self.cmd('acr update -n {registry_1} -g {rg} --sku {sku}',
+                 checks=[self.check('name', '{registry_1}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check_pattern('policies.exportPolicy.status', 'Disabled')])
 
     @ResourceGroupPreparer()
     def test_acr_create_with_audits(self, resource_group):

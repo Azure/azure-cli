@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-locals
+
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
@@ -51,6 +53,7 @@ def acr_create(cmd,
                public_network_enabled=None,
                zone_redundancy=None,
                allow_trusted_services=None,
+               allow_exports=None,
                tags=None):
 
     if default_action and sku not in get_premium_sku(cmd):
@@ -72,6 +75,7 @@ def acr_create(cmd,
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
+    _handle_export_policy(cmd, registry, allow_exports)
 
     lro_poller = client.begin_create(resource_group_name, registry_name, registry)
 
@@ -112,6 +116,7 @@ def acr_update_custom(cmd,
                       public_network_enabled=None,
                       allow_trusted_services=None,
                       anonymous_pull_enabled=None,
+                      allow_exports=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -137,6 +142,7 @@ def acr_update_custom(cmd,
         instance.anonymous_pull_enabled = anonymous_pull_enabled
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
+    _handle_export_policy(cmd, instance, allow_exports)
 
     return instance
 
@@ -151,6 +157,20 @@ def _handle_network_bypass(cmd, registry, allow_trusted_services):
         NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions')
         registry.network_rule_bypass_options = (NetworkRuleBypassOptions.azure_services
                                                 if allow_trusted_services else NetworkRuleBypassOptions.none)
+
+
+def _handle_export_policy(cmd, registry, allow_exports):
+    if allow_exports is not None:
+        Policies, ExportPolicy, ExportPolicyStatus = cmd.get_models('Policies', 'ExportPolicy', 'ExportPolicyStatus')
+
+        if registry.policies is None:
+            registry.policies = Policies()
+
+        status = ExportPolicyStatus.DISABLED if not allow_exports else ExportPolicyStatus.ENABLED
+        try:
+            registry.policies.export_policy.status = status
+        except AttributeError:
+            registry.policies.export_policy = ExportPolicy(status=status)
 
 
 def acr_update_get(cmd):

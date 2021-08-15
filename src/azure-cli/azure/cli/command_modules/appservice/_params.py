@@ -323,6 +323,8 @@ def load_arguments(self, _):
                        help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
             c.argument('ftps_state', help="Set the Ftps state value for an app. Default value is 'AllAllowed'.",
                        arg_type=get_enum_type(FTPS_STATE_TYPES))
+            c.argument('vnet_route_all_enabled', help="Configure regional VNet integration to route all traffic to the VNet.",
+                       arg_type=get_three_state_flag(return_label=True))
             c.argument('generic_configurations', nargs='+',
                        help='provide site configuration list in a format of either `key=value` pair or `@<json_file>`')
 
@@ -636,6 +638,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
+        c.argument('skip_delegation_check', help="Skip check if you do not have permission or the VNet is in another subscription.",
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the webapp to deploy to.')
@@ -670,6 +674,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
+        c.argument('skip_delegation_check', help="Skip check if you do not have permission or the VNet is in another subscription.",
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance')
@@ -908,19 +914,21 @@ def load_arguments(self, _):
         c.argument('ignore_subnet_size_validation', arg_type=get_three_state_flag(),
                    help='Do not check if subnet is sized according to recommendations.')
         c.argument('ignore_route_table', arg_type=get_three_state_flag(),
-                   help='Configure route table manually.')
+                   help='Configure route table manually. Applies to ASEv2 only.')
         c.argument('ignore_network_security_group', arg_type=get_three_state_flag(),
-                   help='Configure network security group manually.')
+                   help='Configure network security group manually. Applies to ASEv2 only.')
         c.argument('force_route_table', arg_type=get_three_state_flag(),
-                   help='Override route table for subnet')
+                   help='Override route table for subnet. Applies to ASEv2 only.')
         c.argument('force_network_security_group', arg_type=get_three_state_flag(),
-                   help='Override network security group for subnet')
+                   help='Override network security group for subnet. Applies to ASEv2 only.')
         c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
-                   help='Scale of front ends to app service plan instance ratio.', default=15)
+                   help='Scale of front ends to app service plan instance ratio. Applies to ASEv2 only.', default=15)
         c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
-                   help='Size of front end servers.')
+                   help='Size of front end servers. Applies to ASEv2 only.')
         c.argument('os_preference', arg_type=get_enum_type(ASE_OS_PREFERENCE_TYPES),
                    help='Determine if app service environment should start with Linux workers. Applies to ASEv2 only.')
+        c.argument('zone_redundant', arg_type=get_three_state_flag(),
+                   help='Configure App Service Environment as Zone Redundant. Applies to ASEv3 only.')
     with self.argument_context('appservice ase delete') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:
