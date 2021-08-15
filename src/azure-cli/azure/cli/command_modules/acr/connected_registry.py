@@ -76,7 +76,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                        "Enabling the data endpoint might affect your firewall rules.\nTo enable data endpoint run:" +
                        "\n\taz acr update -n {} --data-endpoint-enabled true".format(registry_name))
 
-    ErrorResponseException = cmd.get_models('ErrorResponseException')
+    from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None
     mode = mode.capitalize()
     if parent_name:
@@ -129,11 +129,10 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
     )
 
     try:
-        return client.create(subscription_id=subscription_id,
-                             resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             connected_registry_name=connected_registry_name,
-                             connected_registry_create_parameters=connected_registry_create_parameters)
+        return client.begin_create(resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   connected_registry_name=connected_registry_name,
+                                   connected_registry_create_parameters=connected_registry_create_parameters)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -202,10 +201,10 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
     )
 
     try:
-        return client.update(resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             connected_registry_name=connected_registry_name,
-                             connected_registry_update_parameters=connected_registry_update_parameters)
+        return client.begin_update(resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   connected_registry_name=connected_registry_name,
+                                   connected_registry_update_parameters=connected_registry_update_parameters)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -224,7 +223,7 @@ def acr_connected_registry_delete(cmd,
     try:
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
-        result = client.delete(resource_group_name, registry_name, connected_registry_name)
+        result = client.begin_delete(resource_group_name, registry_name, connected_registry_name)
         sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
         sync_token_name = sync_token.name
         sync_scope_map_name = sync_token.scope_map_id.split('/scopeMaps/')[1]
@@ -264,14 +263,12 @@ def acr_connected_registry_deactivate(cmd,
                                       resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
-    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     user_confirmation("Are you sure you want to deactivate the connected registry '{}' in '{}'?".format(
         connected_registry_name, registry_name), yes)
-    return client.deactivate(subscription_id=subscription_id,
-                             resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             connected_registry_name=connected_registry_name)
+    return client.begin_deactivate(resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   connected_registry_name=connected_registry_name)
 
 
 def acr_connected_registry_list(cmd,
@@ -355,7 +352,7 @@ def _create_sync_token(cmd,
         sync_token_name = SYNC_TOKEN_NAME.format(connected_registry_name)
         logger.warning("If sync token '%s' already exists, it properties will be overwritten", sync_token_name)
         Token = cmd.get_models('Token')
-        poller = token_client.create(
+        poller = token_client.begin_create(
             resource_group_name,
             registry_name,
             sync_token_name,
@@ -407,16 +404,20 @@ def acr_connected_registry_install_info(cmd,
                                         client,
                                         connected_registry_name,
                                         registry_name,
+                                        parent_protocol,
                                         resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, parent_protocol,
+                             resource_group_name)
 
 
 def acr_connected_registry_install_renew_credentials(cmd,
                                                      client,
                                                      connected_registry_name,
                                                      registry_name,
+                                                     parent_protocol,
                                                      resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, parent_protocol,
+                             resource_group_name)
 
 
 def _get_install_info(cmd,
@@ -424,6 +425,7 @@ def _get_install_info(cmd,
                       connected_registry_name,
                       registry_name,
                       regenerate_credentials,
+                      parent_protocol,
                       resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
@@ -435,9 +437,11 @@ def _get_install_info(cmd,
     parent_id = connected_registry.parent.id
     # if parent_id is not none, parent is a connected registry
     if parent_id:
-        parent_endpoint_protocol = "<http or https>"
+        parent_endpoint_protocol = parent_protocol
     # if parent_id is none, parent is a cloud registry
     else:
+        if parent_protocol != "https":
+            logger.warning("Parent endpoint protocol must be 'https' when parent is a cloud registry.")
         parent_endpoint_protocol = "https"
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
 
@@ -520,12 +524,18 @@ def _update_repo_permissions(cmd,
         return None
     current_actions = list(final_actions_set)
     logger.warning(msg)
-    return scope_map_client.update(
+
+    ScopeMapUpdateParameters = cmd.get_models('ScopeMapUpdateParameters')
+    scope_map_update_parameters = ScopeMapUpdateParameters(
+        description=description,
+        actions=current_actions
+    )
+
+    return scope_map_client.begin_update(
         resource_group_name,
         registry_name,
         sync_scope_map_name,
-        description,
-        current_actions
+        scope_map_update_parameters
     )
 
 
