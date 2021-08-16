@@ -18,6 +18,7 @@ from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, UnrecognizedArgumentError
 from azure.cli.command_modules.network._client_factory import network_client_factory
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
@@ -6996,19 +6997,22 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, resource_i
         resource_port = 22
 
     if not resource_id and not name:
-        raise CLIError("Please enter either resource id or name of the bastion.")
+        raise RequiredArgumentMissingError("Please enter either resource id or name of the bastion. --resource-id or --name")
 
     if(not is_valid_resource_id(vm_id)):
-        raise CLIError("Please enter a valid Virtual Machine resource Id.")
+        raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
 
-    if(is_valid_resource_id(resource_id)):
-        parsed_id = parse_resource_id(resource_id)
-        bastion_name = parsed_id["name"]
-        resource_group_name =parsed_id['resource_group']
+    if resource_id is not None:
+        if(is_valid_resource_id(resource_id)):
+            parsed_id = parse_resource_id(resource_id)
+            bastion_name = parsed_id["name"]
+            resource_group_name =parsed_id['resource_group']
+        else:
+            raise InvalidArgumentValueError("Please enter a valid Bastion resource Id.")
     else:
         bastion_name = name
         if resource_group_name is None:
-            raise CLIError("Resource group name cannot be empty when not using resourceId")
+            raise RequiredArgumentMissingError("Resource group name cannot be empty when not using resourceId. Use --resource-group")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
@@ -7031,7 +7035,7 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, resource_i
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(None, priv_key)
     else:
-        raise CLIError("Unknown auth type. Use one of password, aad or akv.")
+        raise UnrecognizedArgumentError("Unknown auth type. Use one of password, aad or akv.")
 
     command = command + ["-p", str(tunnel_server.local_port)]
     command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
@@ -7043,20 +7047,27 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, resource_i
         raise CLIError(ex)
 
 def rdp_bastion_host(cmd, vm_id, resource_group_name=None, name=None, resource_id=None, resource_port=None):
+    
     if not resource_port:
         resource_port = 3389
     
     if not resource_id and not name:
-        raise CLIError("Please enter either resource id or name of the bastion.")
+        raise RequiredArgumentMissingError("Please enter either resource id or name of the bastion. --resource-id or --name")
 
     if(not is_valid_resource_id(vm_id)):
-        raise CLIError("Please enter a valid Virtual Machine resource Id.")
+        raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
 
-    if(is_valid_resource_id(resource_id)):
-        parsed_id = parse_resource_id(resource_id)
-        bastion_name = parsed_id["name"]
+    if resource_id is not None:
+        if(is_valid_resource_id(resource_id)):
+            parsed_id = parse_resource_id(resource_id)
+            bastion_name = parsed_id["name"]
+            resource_group_name =parsed_id['resource_group']
+        else:
+            raise InvalidArgumentValueError("Please enter a valid Bastion resource Id.")
     else:
         bastion_name = name
+        if resource_group_name is None:
+            raise RequiredArgumentMissingError("Resource group name cannot be empty when not using resourceId. Use --resource-group")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
