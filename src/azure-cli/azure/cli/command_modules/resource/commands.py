@@ -245,7 +245,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_feature_registrations', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('create', 'create_feature_registration')
-        g.custom_command('delete ', 'delete_feature_registration')
+        g.custom_command('delete ', 'delete_feature_registration', confirmation=True)
 
     # Tag commands
     with self.command_group('tag', resource_tag_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
