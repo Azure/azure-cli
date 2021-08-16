@@ -4321,7 +4321,7 @@ examples:
   - name: Create a "Deny" rule over TCP for a specific IP address range with the lowest priority.
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096 \\
-            --source-address-prefixes 208.130.28/24 --source-port-ranges 80 \\
+            --source-address-prefixes 208.130.28.0/24 --source-port-ranges 80 \\
             --destination-address-prefixes '*' --destination-port-ranges 80 8080 --access Deny \\
             --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
   - name: Create a security rule using service tags. For more details visit https://aka.ms/servicetags
