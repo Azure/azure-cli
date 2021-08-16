@@ -482,7 +482,7 @@ class IoTHubTest(ScenarioTest):
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsi [system]'.format(identity_hub, rg), expect_failure=True)
 
         # Back to identity-based file upload
-        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'.format(identity_hub, rg, identity_based_auth, user_identity_1)).get_output_in_json()
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'.format(identity_hub, rg, identity_based_auth)).get_output_in_json()
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
 
         # Create EH and link identity

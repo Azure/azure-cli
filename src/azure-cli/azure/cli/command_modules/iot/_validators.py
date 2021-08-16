@@ -63,12 +63,6 @@ def validate_fileupload_notification_lock_duration(ns):
         raise InvalidArgumentValueError('Please specify the notification lock duration from 5 to 300 seconds only.')
 
 
-def validate_fileupload_lock_duration(ns):
-    if (ns.fileupload_lock_duration and
-            ns.fileupload_lock_duration not in range(5, 301, 1)):
-        raise ArgumentError(None, 'Please specify the duration from 5 to 300 seconds only.')
-
-
 def validate_feedback_max_delivery_count(ns):
     if (ns.feedback_max_delivery_count and
             ns.feedback_max_delivery_count not in range(1, 101, 1)):

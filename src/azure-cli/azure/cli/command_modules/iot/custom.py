@@ -1366,9 +1366,6 @@ def _process_fileupload_args(
 
     return default_storage_endpoint
 
-def  _get_hub_identity_type(instance):
-    identity = getattr(instance, 'identity', {})
-    return getattr(identity, 'type', None)
 
 def _get_hub_identity_type(instance):
     identity = getattr(instance, 'identity', {})
