@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from azure.core.exceptions import HttpResponseError
 
-from azure.mgmt.media.models import (ApiError, MediaService, MediaServiceIdentity, StorageAccount,
+from azure.mgmt.media.models import (MediaService, MediaServiceIdentity, StorageAccount,
                                      CheckNameAvailabilityInput, SyncStorageKeysInput)
 
 
@@ -85,7 +86,7 @@ def mediaservice_update_getter(client, resource_group_name, account_name):
 
     try:
         return client.get(resource_group_name, account_name)
-    except ApiError as ex:
+    except HttpResponseError as ex:
         raise CLIError(ex.message)
 
 
