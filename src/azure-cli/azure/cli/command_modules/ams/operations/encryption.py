@@ -6,6 +6,7 @@
 # pylint: disable=redefined-builtin
 
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.azclierror import BadRequestError
 from azure.mgmt.media.models import (MediaService, AccountEncryption, KeyVaultProperties)
 
 
