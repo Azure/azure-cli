@@ -85,7 +85,3 @@ def get_account_filters_client(cli_ctx, *_):
 
 def get_asset_filters_client(cli_ctx, *_):
     return cf_media(cli_ctx).asset_filters
-
-
-def sync_storage_keys(cli_ctx, *_):
-    return cf_media(cli_ctx).mediaservices
