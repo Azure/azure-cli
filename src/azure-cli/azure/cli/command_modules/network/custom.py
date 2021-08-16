@@ -2501,9 +2501,9 @@ def _check_aaaa_record_exist(record, exist_list):
 
 def _check_caa_record_exist(record, exist_list):
     for r in exist_list:
-        if (r.flags == record.flags \
-            and r.tag == record.tag \
-            and r.value == record.value):
+        if (r.flags == record.flags and
+            r.tag == record.tag and
+            r.value == record.value):
             return True
     return False
 
@@ -2517,8 +2517,8 @@ def _check_cname_record_exist(record, exist_list):
 
 def _check_mx_record_exist(record, exist_list):
     for r in exist_list:
-        if (r.preference == record.preference \
-            and r.exchange == record.exchange):
+        if (r.preference == record.preference and
+            r.exchange == record.exchange):
             return True
     return False
 
@@ -2539,10 +2539,10 @@ def _check_ptr_record_exist(record, exist_list):
 
 def _check_srv_record_exist(record, exist_list):
     for r in exist_list:
-        if (r.priority == record.priority \
-            and r.weight == record.weight \
-            and r.port == record.port \
-            and r.target == record.target):
+        if (r.priority == record.priority and
+            r.weight == record.weight and
+            r.port == record.port and
+            r.target == record.target):
             return True
     return False
 
