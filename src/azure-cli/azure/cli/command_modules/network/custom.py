@@ -2380,7 +2380,7 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
 def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
                        port, target, if_none_match=None):
     SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
+    record = SrvRecord(priority=int(priority), weight=int(weight), port=int(port), target=target)
     record_type = 'srv'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             if_none_match=if_none_match)
@@ -2470,7 +2470,7 @@ def remove_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, 
 def remove_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
                           port, target, keep_empty_record_set=False):
     SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
+    record = SrvRecord(priority=int(priority), weight=int(weight), port=int(port), target=target)
     record_type = 'srv'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2580,8 +2580,6 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
 
-    if record_type == 'srv':
-        breakpoint()
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except HttpResponseError:
