@@ -11,9 +11,9 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-compute/22.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-compute/22.1.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftSQLServer/artifacttypes/vmimage/offers/SQL2017-WS2016/skus/Enterprise/versions?$top=1&$orderby=name%20desc&api-version=2021-04-01
   response:
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:38:22 GMT
+      - Thu, 12 Aug 2021 22:02:56 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +46,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43999
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43996
     status:
       code: 200
       message: OK
@@ -62,9 +62,9 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-compute/22.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-compute/22.1.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftSQLServer/artifacttypes/vmimage/offers/SQL2017-WS2016/skus/Enterprise/versions/14.1.210713?api-version=2021-04-01
   response:
@@ -85,7 +85,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:38:23 GMT
+      - Thu, 12 Aug 2021 22:02:57 GMT
       expires:
       - '-1'
       pragma:
@@ -102,7 +102,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73999
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73997
     status:
       code: 200
       message: OK
@@ -118,9 +118,9 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
@@ -134,7 +134,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:38:24 GMT
+      - Thu, 12 Aug 2021 22:02:57 GMT
       expires:
       - '-1'
       pragma:
@@ -160,9 +160,9 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-compute/22.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-compute/22.1.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/vmSizes?api-version=2021-04-01
   response:
@@ -1139,6 +1139,48 @@ interactions:
         \   },\r\n    {\r\n      \"name\": \"Standard_H16mr_Promo\",\r\n      \"numberOfCores\":
         16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
         2048000,\r\n      \"memoryInMB\": 229376,\r\n      \"maxDataDiskCount\": 64\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E2a_v3\",\r\n      \"numberOfCores\":
+        2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        51200,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 4\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E4a_v3\",\r\n      \"numberOfCores\":
+        4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        102400,\r\n      \"memoryInMB\": 32768,\r\n      \"maxDataDiskCount\": 8\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E8a_v3\",\r\n      \"numberOfCores\":
+        8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        204800,\r\n      \"memoryInMB\": 65536,\r\n      \"maxDataDiskCount\": 16\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E16a_v3\",\r\n      \"numberOfCores\":
+        16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        409600,\r\n      \"memoryInMB\": 131072,\r\n      \"maxDataDiskCount\": 32\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E32a_v3\",\r\n      \"numberOfCores\":
+        32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        819200,\r\n      \"memoryInMB\": 262144,\r\n      \"maxDataDiskCount\": 32\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E48a_v3\",\r\n      \"numberOfCores\":
+        48,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        1228800,\r\n      \"memoryInMB\": 393216,\r\n      \"maxDataDiskCount\": 32\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E64a_v3\",\r\n      \"numberOfCores\":
+        64,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        1638400,\r\n      \"memoryInMB\": 442368,\r\n      \"maxDataDiskCount\": 32\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E2as_v3\",\r\n      \"numberOfCores\":
+        2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        32768,\r\n      \"memoryInMB\": 16384,\r\n      \"maxDataDiskCount\": 4\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E4as_v3\",\r\n      \"numberOfCores\":
+        4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        65536,\r\n      \"memoryInMB\": 32768,\r\n      \"maxDataDiskCount\": 8\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E8as_v3\",\r\n      \"numberOfCores\":
+        8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        131072,\r\n      \"memoryInMB\": 65536,\r\n      \"maxDataDiskCount\": 16\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E16as_v3\",\r\n      \"numberOfCores\":
+        16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        262144,\r\n      \"memoryInMB\": 131072,\r\n      \"maxDataDiskCount\": 32\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E32as_v3\",\r\n      \"numberOfCores\":
+        32,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        524288,\r\n      \"memoryInMB\": 262144,\r\n      \"maxDataDiskCount\": 32\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E48as_v3\",\r\n      \"numberOfCores\":
+        48,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        786432,\r\n      \"memoryInMB\": 393216,\r\n      \"maxDataDiskCount\": 32\r\n
+        \   },\r\n    {\r\n      \"name\": \"Standard_E64as_v3\",\r\n      \"numberOfCores\":
+        64,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
+        884736,\r\n      \"memoryInMB\": 442368,\r\n      \"maxDataDiskCount\": 32\r\n
         \   },\r\n    {\r\n      \"name\": \"Standard_D2a_v4\",\r\n      \"numberOfCores\":
         2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n      \"resourceDiskSizeInMB\":
         51200,\r\n      \"memoryInMB\": 8192,\r\n      \"maxDataDiskCount\": 4\r\n
@@ -1297,11 +1339,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '77989'
+      - '80913'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:38:26 GMT
+      - Thu, 12 Aug 2021 22:02:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1331,11 +1373,8 @@ interactions:
       "properties": {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets":
       [{"name": "clisqlvm000002Subnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}},
       {"type": "Microsoft.Network/networkSecurityGroups", "name": "clisqlvm000002NSG",
-      "apiVersion": "2015-06-15", "location": "westus", "tags": {}, "dependsOn": [],
-      "properties": {"securityRules": [{"name": "default-allow-ssh", "properties":
-      {"protocol": "Tcp", "sourcePortRange": "*", "destinationPortRange": "22", "sourceAddressPrefix":
-      "*", "destinationAddressPrefix": "*", "access": "Allow", "priority": 1000, "direction":
-      "Inbound"}}]}}, {"apiVersion": "2018-01-01", "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2015-06-15", "location": "westus", "tags": {}, "dependsOn": []},
+      {"apiVersion": "2018-01-01", "type": "Microsoft.Network/publicIPAddresses",
       "name": "clisqlvm000002PublicIP", "location": "westus", "tags": {}, "dependsOn":
       [], "properties": {"publicIPAllocationMethod": null}}, {"apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces", "name": "clisqlvm000002VMNic",
@@ -1366,29 +1405,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3570'
+      - '3293'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/vm_deploy_nPakDtkePDbLvGFaaWzYoHUOlGrtM3Vp","name":"vm_deploy_nPakDtkePDbLvGFaaWzYoHUOlGrtM3Vp","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12845509035973073167","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-08-07T10:38:31.6058311Z","duration":"PT2.4704618S","correlationId":"71da22cd-5dfd-4da4-aff0-9b19321540d9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/virtualNetworks/clisqlvm000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clisqlvm000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkSecurityGroups/clisqlvm000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clisqlvm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/publicIPAddresses/clisqlvm000002PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clisqlvm000002PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clisqlvm000002VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clisqlvm000002VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clisqlvm000002"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/vm_deploy_Ko6mCij1XHoEc2KGgPd6LWs5MnzIACKw","name":"vm_deploy_Ko6mCij1XHoEc2KGgPd6LWs5MnzIACKw","type":"Microsoft.Resources/deployments","properties":{"templateHash":"2399275393660778421","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-08-12T22:03:00.1274656Z","duration":"PT0.5333042S","correlationId":"8bdf043b-adee-40a4-b199-038c52f33664","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/virtualNetworks/clisqlvm000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clisqlvm000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkSecurityGroups/clisqlvm000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clisqlvm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/publicIPAddresses/clisqlvm000002PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clisqlvm000002PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clisqlvm000002VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clisqlvm000002VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clisqlvm000002"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/vm_deploy_nPakDtkePDbLvGFaaWzYoHUOlGrtM3Vp/operationStatuses/08585732741763422755?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/vm_deploy_Ko6mCij1XHoEc2KGgPd6LWs5MnzIACKw/operationStatuses/08585728011058834727?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '2926'
+      - '2925'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:38:32 GMT
+      - Thu, 12 Aug 2021 22:02:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1414,11 +1453,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585732741763422755?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585728011058834727?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1430,7 +1469,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:39:03 GMT
+      - Thu, 12 Aug 2021 22:03:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1456,11 +1495,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585732741763422755?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585728011058834727?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1472,7 +1511,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:39:33 GMT
+      - Thu, 12 Aug 2021 22:04:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1498,11 +1537,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585732741763422755?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585728011058834727?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1514,7 +1553,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:40:04 GMT
+      - Thu, 12 Aug 2021 22:04:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1540,53 +1579,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585732741763422755?api-version=2021-04-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:40:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
-      User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585732741763422755?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585728011058834727?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1598,7 +1595,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:41:06 GMT
+      - Thu, 12 Aug 2021 22:05:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1624,23 +1621,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/vm_deploy_nPakDtkePDbLvGFaaWzYoHUOlGrtM3Vp","name":"vm_deploy_nPakDtkePDbLvGFaaWzYoHUOlGrtM3Vp","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12845509035973073167","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-08-07T10:40:51.7705879Z","duration":"PT2M22.6352186S","correlationId":"71da22cd-5dfd-4da4-aff0-9b19321540d9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/virtualNetworks/clisqlvm000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clisqlvm000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkSecurityGroups/clisqlvm000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clisqlvm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/publicIPAddresses/clisqlvm000002PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clisqlvm000002PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clisqlvm000002VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clisqlvm000002VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clisqlvm000002"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkSecurityGroups/clisqlvm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/publicIPAddresses/clisqlvm000002PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/virtualNetworks/clisqlvm000002VNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Resources/deployments/vm_deploy_Ko6mCij1XHoEc2KGgPd6LWs5MnzIACKw","name":"vm_deploy_Ko6mCij1XHoEc2KGgPd6LWs5MnzIACKw","type":"Microsoft.Resources/deployments","properties":{"templateHash":"2399275393660778421","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-08-12T22:04:39.324284Z","duration":"PT1M39.7301226S","correlationId":"8bdf043b-adee-40a4-b199-038c52f33664","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/virtualNetworks/clisqlvm000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clisqlvm000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkSecurityGroups/clisqlvm000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clisqlvm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/publicIPAddresses/clisqlvm000002PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clisqlvm000002PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clisqlvm000002VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clisqlvm000002VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clisqlvm000002"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkSecurityGroups/clisqlvm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/publicIPAddresses/clisqlvm000002PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/virtualNetworks/clisqlvm000002VNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4053'
+      - '4051'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:41:06 GMT
+      - Thu, 12 Aug 2021 22:05:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1666,49 +1663,49 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-compute/22.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-compute/22.1.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002?$expand=instanceView&api-version=2021-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"clisqlvm000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"9cc5dc65-0a20-4396-8782-0f4a736611b4\",\r\n
+        \ \"tags\": {\r\n    \"platformsettings.host_environment.service.platform_optedin_for_rootcerts\":
+        \"true\"\r\n  },\r\n  \"properties\": {\r\n    \"vmId\": \"d81c836c-647c-4f4c-9b02-f1dc2b39a409\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS2_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"MicrosoftSQLServer\",\r\n        \"offer\": \"SQL2017-WS2016\",\r\n        \"sku\":
         \"Enterprise\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
         \"14.1.210713\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Windows\",\r\n        \"name\": \"clisqlvm000002_OsDisk_1_83e696bb683e426cb58ff43ca603e4b8\",\r\n
+        \"Windows\",\r\n        \"name\": \"clisqlvm000002_OsDisk_1_644239c4ee9b46958dcbdd5968ea6a5a\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/disks/clisqlvm000002_OsDisk_1_83e696bb683e426cb58ff43ca603e4b8\"\r\n
-        \       },\r\n        \"diskSizeGB\": 127,\r\n        \"deleteOption\": \"Detach\"\r\n
-        \     },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\": {\r\n
-        \     \"computerName\": \"clisqlvm000002\",\r\n      \"adminUsername\": \"admin123\",\r\n
-        \     \"windowsConfiguration\": {\r\n        \"provisionVMAgent\": true,\r\n
-        \       \"enableAutomaticUpdates\": true,\r\n        \"patchSettings\": {\r\n
-        \         \"patchMode\": \"AutomaticByOS\",\r\n          \"assessmentMode\":
-        \"ImageDefault\"\r\n        }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
-        true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
-        {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic\"}]},\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/disks/clisqlvm000002_OsDisk_1_644239c4ee9b46958dcbdd5968ea6a5a\"\r\n
+        \       },\r\n        \"diskSizeGB\": 127\r\n      },\r\n      \"dataDisks\":
+        []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"clisqlvm000002\",\r\n
+        \     \"adminUsername\": \"admin123\",\r\n      \"windowsConfiguration\":
+        {\r\n        \"provisionVMAgent\": true,\r\n        \"enableAutomaticUpdates\":
+        true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"AutomaticByOS\",\r\n
+        \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
+        \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
+        true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"vmAgent\":
         {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n        \"statuses\": [\r\n
         \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
         \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
         Ready\",\r\n            \"message\": \"VM status blob is found but not yet
-        populated.\",\r\n            \"time\": \"2021-08-07T10:41:08+00:00\"\r\n          }\r\n
+        populated.\",\r\n            \"time\": \"2021-08-12T22:05:01+00:00\"\r\n          }\r\n
         \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
-        \"clisqlvm000002_OsDisk_1_83e696bb683e426cb58ff43ca603e4b8\",\r\n          \"statuses\":
+        \"clisqlvm000002_OsDisk_1_644239c4ee9b46958dcbdd5968ea6a5a\",\r\n          \"statuses\":
         [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-08-07T10:39:09.3212054+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2021-08-12T22:03:17.8334012+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2021-08-07T10:40:50.4618279+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2021-08-12T22:04:36.3049978+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -1716,11 +1713,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3343'
+      - '3400'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:41:08 GMT
+      - Thu, 12 Aug 2021 22:05:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1737,7 +1734,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3997,Microsoft.Compute/LowCostGet30Min;31995
+      - Microsoft.Compute/LowCostGet3Min;3996,Microsoft.Compute/LowCostGet30Min;31929
     status:
       code: 200
       message: OK
@@ -1753,20 +1750,20 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"clisqlvm000002VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic\",\r\n
-        \ \"etag\": \"W/\\\"4e56b256-cad4-44e9-9c8c-befcc4d6946e\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"620aa219-a3ce-4db5-a119-7c114ed1172c\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"0d5c60d6-4a85-4065-a375-c51198a1b995\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"2400c7f1-6116-4d23-bdb4-9949d20c1c58\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigclisqlvm000002\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic/ipConfigurations/ipconfigclisqlvm000002\",\r\n
-        \       \"etag\": \"W/\\\"4e56b256-cad4-44e9-9c8c-befcc4d6946e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"620aa219-a3ce-4db5-a119-7c114ed1172c\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -1775,8 +1772,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"hgh4onz13spezk0bdfqzflhj2a.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-22-48-0A-05-FE\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"r23g3pylujyuxbmrz0wnfd2xja.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-08-9E-A4\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkSecurityGroups/clisqlvm000002NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -1790,9 +1787,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:41:09 GMT
+      - Thu, 12 Aug 2021 22:05:00 GMT
       etag:
-      - W/"4e56b256-cad4-44e9-9c8c-befcc4d6946e"
+      - W/"620aa219-a3ce-4db5-a119-7c114ed1172c"
       expires:
       - '-1'
       pragma:
@@ -1809,7 +1806,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cbbe99a0-af99-4abb-af3b-a9e432c5ca56
+      - 871ec04a-3846-4a8d-af71-2103e8057fd5
     status:
       code: 200
       message: OK
@@ -1825,18 +1822,18 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -l -g -n --admin-username --admin-password --image --size
+      - -l -g -n --admin-username --admin-password --image --size --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.27.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/publicIPAddresses/clisqlvm000002PublicIP?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"clisqlvm000002PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/publicIPAddresses/clisqlvm000002PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"6e6e3ae6-4af5-4ab4-abae-d34c9c4bf698\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"c85b5aae-d13f-4641-a168-28a2434eef93\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"3f5c9539-d275-4fc5-a488-f9746ded0a0f\",\r\n
-        \   \"ipAddress\": \"104.42.99.194\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"512d86b9-94cb-4243-b590-4459a8c42325\",\r\n
+        \   \"ipAddress\": \"40.83.144.187\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000002VMNic/ipConfigurations/ipconfigclisqlvm000002\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -1849,9 +1846,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:41:09 GMT
+      - Thu, 12 Aug 2021 22:05:00 GMT
       etag:
-      - W/"6e6e3ae6-4af5-4ab4-abae-d34c9c4bf698"
+      - W/"c85b5aae-d13f-4641-a168-28a2434eef93"
       expires:
       - '-1'
       pragma:
@@ -1868,7 +1865,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a3fa3827-d8bd-4a4f-800f-9574338c0fb1
+      - 45504699-92a8-4611-8365-741969556399
     status:
       code: 200
       message: OK
@@ -1892,14 +1889,11 @@ interactions:
       Content-Length:
       - '629'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g -l --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -1907,7 +1901,7 @@ interactions:
       string: '{"properties":{"virtualMachineResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","provisioningState":"Provisioning","sqlServerLicenseType":"AHUB","sqlManagement":"LightWeight","sqlImageSku":"Unknown"},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002","name":"clisqlvm000002","type":"Microsoft.SqlVirtualMachine/sqlVirtualMachines"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/621b0e47-6f98-46ed-bc32-7ce1f3036653?api-version=2017-03-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1915,7 +1909,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:41:18 GMT
+      - Thu, 12 Aug 2021 22:05:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1927,7 +1921,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1935,7 +1929,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1945,436 +1939,12 @@ interactions:
       ParameterSetName:
       - -n -g -l --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/621b0e47-6f98-46ed-bc32-7ce1f3036653?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"InProgress","startTime":"2021-08-07T10:41:16.183Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:41:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"InProgress","startTime":"2021-08-07T10:41:16.183Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:41:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"InProgress","startTime":"2021-08-07T10:41:16.183Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:42:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"InProgress","startTime":"2021-08-07T10:41:16.183Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:42:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"InProgress","startTime":"2021-08-07T10:41:16.183Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:42:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"InProgress","startTime":"2021-08-07T10:41:16.183Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:42:50 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"InProgress","startTime":"2021-08-07T10:41:16.183Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:43:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"InProgress","startTime":"2021-08-07T10:41:16.183Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:43:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"InProgress","startTime":"2021-08-07T10:41:16.183Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:43:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/4d02b436-ccff-4278-a3ed-5449511251f2?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"4d02b436-ccff-4278-a3ed-5449511251f2","status":"Succeeded","startTime":"2021-08-07T10:41:16.183Z"}'
+      string: '{"name":"621b0e47-6f98-46ed-bc32-7ce1f3036653","status":"InProgress","startTime":"2021-08-12T22:05:04.74Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2383,7 +1953,329 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:43:53 GMT
+      - Thu, 12 Aug 2021 22:05:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/621b0e47-6f98-46ed-bc32-7ce1f3036653?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"621b0e47-6f98-46ed-bc32-7ce1f3036653","status":"InProgress","startTime":"2021-08-12T22:05:04.74Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:05:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/621b0e47-6f98-46ed-bc32-7ce1f3036653?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"621b0e47-6f98-46ed-bc32-7ce1f3036653","status":"InProgress","startTime":"2021-08-12T22:05:04.74Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:05:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/621b0e47-6f98-46ed-bc32-7ce1f3036653?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"621b0e47-6f98-46ed-bc32-7ce1f3036653","status":"InProgress","startTime":"2021-08-12T22:05:04.74Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:06:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/621b0e47-6f98-46ed-bc32-7ce1f3036653?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"621b0e47-6f98-46ed-bc32-7ce1f3036653","status":"InProgress","startTime":"2021-08-12T22:05:04.74Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:06:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/621b0e47-6f98-46ed-bc32-7ce1f3036653?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"621b0e47-6f98-46ed-bc32-7ce1f3036653","status":"InProgress","startTime":"2021-08-12T22:05:04.74Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:06:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/621b0e47-6f98-46ed-bc32-7ce1f3036653?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"621b0e47-6f98-46ed-bc32-7ce1f3036653","status":"Succeeded","startTime":"2021-08-12T22:05:04.74Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:06:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"properties":{"virtualMachineResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","provisioningState":"Succeeded","sqlImageOffer":"SQL2017-WS2016","sqlServerLicenseType":"AHUB","sqlManagement":"LightWeight","sqlImageSku":"Enterprise"},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002","name":"clisqlvm000002","type":"Microsoft.SqlVirtualMachine/sqlVirtualMachines"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '734'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:06:51 GMT
       expires:
       - '-1'
       pragma:
@@ -2415,8 +2307,7 @@ interactions:
       ParameterSetName:
       - -n -g -l --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -2430,56 +2321,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:43:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"properties":{"virtualMachineResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","provisioningState":"Succeeded","sqlImageOffer":"SQL2017-WS2016","sqlServerLicenseType":"AHUB","sqlManagement":"LightWeight","sqlImageSku":"Enterprise"},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002","name":"clisqlvm000002","type":"Microsoft.SqlVirtualMachine/sqlVirtualMachines"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '734'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:43:54 GMT
+      - Thu, 12 Aug 2021 22:06:51 GMT
       expires:
       - '-1'
       pragma:
@@ -2511,10 +2353,7 @@ interactions:
       ParameterSetName:
       - -n -g --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -2528,7 +2367,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:43:56 GMT
+      - Thu, 12 Aug 2021 22:06:52 GMT
       expires:
       - '-1'
       pragma:
@@ -2563,14 +2402,11 @@ interactions:
       Content-Length:
       - '412'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -2578,7 +2414,7 @@ interactions:
       string: '{"properties":{"virtualMachineResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","provisioningState":"Updating","sqlServerLicenseType":"PAYG","sqlManagement":"LightWeight","sqlImageSku":"Enterprise"},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002","name":"clisqlvm000002","type":"Microsoft.SqlVirtualMachine/sqlVirtualMachines"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/2c86b7b4-5a32-4b19-b300-3938999b793e?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/e011f39e-a867-415f-b045-f552c4fce9ed?api-version=2017-03-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2586,7 +2422,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:43:59 GMT
+      - Thu, 12 Aug 2021 22:06:54 GMT
       expires:
       - '-1'
       pragma:
@@ -2610,7 +2446,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2620,22 +2456,21 @@ interactions:
       ParameterSetName:
       - -n -g --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/2c86b7b4-5a32-4b19-b300-3938999b793e?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/e011f39e-a867-415f-b045-f552c4fce9ed?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"2c86b7b4-5a32-4b19-b300-3938999b793e","status":"Succeeded","startTime":"2021-08-07T10:43:58.967Z"}'
+      string: '{"name":"e011f39e-a867-415f-b045-f552c4fce9ed","status":"Succeeded","startTime":"2021-08-12T22:06:54.12Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:44:15 GMT
+      - Thu, 12 Aug 2021 22:07:09 GMT
       expires:
       - '-1'
       pragma:
@@ -2657,7 +2492,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2667,8 +2502,7 @@ interactions:
       ParameterSetName:
       - -n -g --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -2682,7 +2516,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:44:16 GMT
+      - Thu, 12 Aug 2021 22:07:09 GMT
       expires:
       - '-1'
       pragma:
@@ -2704,7 +2538,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2716,10 +2550,7 @@ interactions:
       ParameterSetName:
       - -n -g --yes
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -2727,17 +2558,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/742e6000-b067-4f27-9b2a-0a33eb5bed7c?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/db27347c-e4a9-4c29-b48f-4b40fcea9103?api-version=2017-03-01-preview
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Sat, 07 Aug 2021 10:44:19 GMT
+      - Thu, 12 Aug 2021 22:07:11 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/sqlVirtualMachineOperationResults/742e6000-b067-4f27-9b2a-0a33eb5bed7c?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/sqlVirtualMachineOperationResults/db27347c-e4a9-4c29-b48f-4b40fcea9103?api-version=2017-03-01-preview
       pragma:
       - no-cache
       server:
@@ -2755,7 +2586,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2765,107 +2596,12 @@ interactions:
       ParameterSetName:
       - -n -g --yes
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/742e6000-b067-4f27-9b2a-0a33eb5bed7c?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/db27347c-e4a9-4c29-b48f-4b40fcea9103?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"742e6000-b067-4f27-9b2a-0a33eb5bed7c","status":"InProgress","startTime":"2021-08-07T10:44:19.253Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:44:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --yes
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/742e6000-b067-4f27-9b2a-0a33eb5bed7c?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"742e6000-b067-4f27-9b2a-0a33eb5bed7c","status":"InProgress","startTime":"2021-08-07T10:44:19.253Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:44:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --yes
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/742e6000-b067-4f27-9b2a-0a33eb5bed7c?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"742e6000-b067-4f27-9b2a-0a33eb5bed7c","status":"Succeeded","startTime":"2021-08-07T10:44:19.253Z"}'
+      string: '{"name":"db27347c-e4a9-4c29-b48f-4b40fcea9103","status":"InProgress","startTime":"2021-08-12T22:07:10.93Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2874,7 +2610,191 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:45:07 GMT
+      - Thu, 12 Aug 2021 22:07:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --yes
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/db27347c-e4a9-4c29-b48f-4b40fcea9103?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"db27347c-e4a9-4c29-b48f-4b40fcea9103","status":"InProgress","startTime":"2021-08-12T22:07:10.93Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:07:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --yes
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/db27347c-e4a9-4c29-b48f-4b40fcea9103?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"db27347c-e4a9-4c29-b48f-4b40fcea9103","status":"InProgress","startTime":"2021-08-12T22:07:10.93Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:07:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --yes
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/db27347c-e4a9-4c29-b48f-4b40fcea9103?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"db27347c-e4a9-4c29-b48f-4b40fcea9103","status":"InProgress","startTime":"2021-08-12T22:07:10.93Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:08:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --yes
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/db27347c-e4a9-4c29-b48f-4b40fcea9103?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"db27347c-e4a9-4c29-b48f-4b40fcea9103","status":"Succeeded","startTime":"2021-08-12T22:07:10.93Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:08:26 GMT
       expires:
       - '-1'
       pragma:
@@ -2912,14 +2832,11 @@ interactions:
       Content-Length:
       - '629'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g -l --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -2927,7 +2844,7 @@ interactions:
       string: '{"properties":{"virtualMachineResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","provisioningState":"Provisioning","sqlServerLicenseType":"PAYG","sqlManagement":"LightWeight","sqlImageSku":"Unknown"},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002","name":"clisqlvm000002","type":"Microsoft.SqlVirtualMachine/sqlVirtualMachines"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/78c81b0e-184e-48ea-b52d-aa59188fe4fe?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/27522146-92f7-4206-a2d4-af7bb4138323?api-version=2017-03-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2935,7 +2852,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:45:17 GMT
+      - Thu, 12 Aug 2021 22:08:29 GMT
       expires:
       - '-1'
       pragma:
@@ -2955,7 +2872,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2965,13 +2882,196 @@ interactions:
       ParameterSetName:
       - -n -g -l --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/78c81b0e-184e-48ea-b52d-aa59188fe4fe?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/27522146-92f7-4206-a2d4-af7bb4138323?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"78c81b0e-184e-48ea-b52d-aa59188fe4fe","status":"InProgress","startTime":"2021-08-07T10:45:15.38Z"}'
+      string: '{"name":"27522146-92f7-4206-a2d4-af7bb4138323","status":"InProgress","startTime":"2021-08-12T22:08:29.337Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:08:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/27522146-92f7-4206-a2d4-af7bb4138323?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"27522146-92f7-4206-a2d4-af7bb4138323","status":"InProgress","startTime":"2021-08-12T22:08:29.337Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:08:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/27522146-92f7-4206-a2d4-af7bb4138323?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"27522146-92f7-4206-a2d4-af7bb4138323","status":"InProgress","startTime":"2021-08-12T22:08:29.337Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:09:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/27522146-92f7-4206-a2d4-af7bb4138323?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"27522146-92f7-4206-a2d4-af7bb4138323","status":"InProgress","startTime":"2021-08-12T22:08:29.337Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:09:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --image-sku --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/27522146-92f7-4206-a2d4-af7bb4138323?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"27522146-92f7-4206-a2d4-af7bb4138323","status":"Succeeded","startTime":"2021-08-12T22:08:29.337Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2980,7 +3080,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:45:34 GMT
+      - Thu, 12 Aug 2021 22:09:45 GMT
       expires:
       - '-1'
       pragma:
@@ -3002,7 +3102,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3012,55 +3112,7 @@ interactions:
       ParameterSetName:
       - -n -g -l --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/78c81b0e-184e-48ea-b52d-aa59188fe4fe?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"78c81b0e-184e-48ea-b52d-aa59188fe4fe","status":"Succeeded","startTime":"2021-08-07T10:45:15.38Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '106'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:45:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --image-sku --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3074,7 +3126,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:45:49 GMT
+      - Thu, 12 Aug 2021 22:09:45 GMT
       expires:
       - '-1'
       pragma:
@@ -3106,10 +3158,7 @@ interactions:
       ParameterSetName:
       - -n -g -l --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3123,7 +3172,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:45:50 GMT
+      - Thu, 12 Aug 2021 22:09:45 GMT
       expires:
       - '-1'
       pragma:
@@ -3155,10 +3204,7 @@ interactions:
       ParameterSetName:
       - -n -g --image-sku
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3172,7 +3218,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:45:51 GMT
+      - Thu, 12 Aug 2021 22:09:46 GMT
       expires:
       - '-1'
       pragma:
@@ -3207,14 +3253,11 @@ interactions:
       Content-Length:
       - '412'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --image-sku
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3222,7 +3265,7 @@ interactions:
       string: '{"properties":{"virtualMachineResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","provisioningState":"Updating","sqlServerLicenseType":"PAYG","sqlManagement":"LightWeight","sqlImageSku":"Enterprise"},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002","name":"clisqlvm000002","type":"Microsoft.SqlVirtualMachine/sqlVirtualMachines"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/4bb3756f-f4a5-4e08-9ef0-caf7e45fa0fa?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/de070f49-df43-4b1e-b1ad-e1555f0d0e20?api-version=2017-03-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -3230,7 +3273,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:45:54 GMT
+      - Thu, 12 Aug 2021 22:09:48 GMT
       expires:
       - '-1'
       pragma:
@@ -3254,7 +3297,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3264,22 +3307,21 @@ interactions:
       ParameterSetName:
       - -n -g --image-sku
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/4bb3756f-f4a5-4e08-9ef0-caf7e45fa0fa?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/de070f49-df43-4b1e-b1ad-e1555f0d0e20?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"4bb3756f-f4a5-4e08-9ef0-caf7e45fa0fa","status":"Succeeded","startTime":"2021-08-07T10:45:54.577Z"}'
+      string: '{"name":"de070f49-df43-4b1e-b1ad-e1555f0d0e20","status":"Succeeded","startTime":"2021-08-12T22:09:48.15Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:11 GMT
+      - Thu, 12 Aug 2021 22:10:03 GMT
       expires:
       - '-1'
       pragma:
@@ -3301,7 +3343,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3311,8 +3353,7 @@ interactions:
       ParameterSetName:
       - -n -g --image-sku
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3326,7 +3367,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:11 GMT
+      - Thu, 12 Aug 2021 22:10:03 GMT
       expires:
       - '-1'
       pragma:
@@ -3358,10 +3399,7 @@ interactions:
       ParameterSetName:
       - -n -g --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3375,7 +3413,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:13 GMT
+      - Thu, 12 Aug 2021 22:10:04 GMT
       expires:
       - '-1'
       pragma:
@@ -3410,14 +3448,11 @@ interactions:
       Content-Length:
       - '412'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3425,7 +3460,7 @@ interactions:
       string: '{"properties":{"virtualMachineResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","provisioningState":"Updating","sqlServerLicenseType":"AHUB","sqlManagement":"LightWeight","sqlImageSku":"Enterprise"},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002","name":"clisqlvm000002","type":"Microsoft.SqlVirtualMachine/sqlVirtualMachines"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/294bc676-9d29-4c23-9b98-fb5a61a929d3?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/f23347b7-27dc-48fa-b1b5-d8832b02a81d?api-version=2017-03-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -3433,7 +3468,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:16 GMT
+      - Thu, 12 Aug 2021 22:10:06 GMT
       expires:
       - '-1'
       pragma:
@@ -3457,7 +3492,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3467,13 +3502,12 @@ interactions:
       ParameterSetName:
       - -n -g --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/294bc676-9d29-4c23-9b98-fb5a61a929d3?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/f23347b7-27dc-48fa-b1b5-d8832b02a81d?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"294bc676-9d29-4c23-9b98-fb5a61a929d3","status":"Succeeded","startTime":"2021-08-07T10:46:16.23Z"}'
+      string: '{"name":"f23347b7-27dc-48fa-b1b5-d8832b02a81d","status":"Succeeded","startTime":"2021-08-12T22:10:05.84Z"}'
     headers:
       cache-control:
       - no-cache
@@ -3482,7 +3516,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:33 GMT
+      - Thu, 12 Aug 2021 22:10:21 GMT
       expires:
       - '-1'
       pragma:
@@ -3504,7 +3538,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3514,8 +3548,7 @@ interactions:
       ParameterSetName:
       - -n -g --image-sku --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3529,7 +3562,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:34 GMT
+      - Thu, 12 Aug 2021 22:10:21 GMT
       expires:
       - '-1'
       pragma:
@@ -3561,10 +3594,7 @@ interactions:
       ParameterSetName:
       - -n -g --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3578,7 +3608,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:35 GMT
+      - Thu, 12 Aug 2021 22:10:21 GMT
       expires:
       - '-1'
       pragma:
@@ -3613,14 +3643,11 @@ interactions:
       Content-Length:
       - '410'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3628,7 +3655,7 @@ interactions:
       string: '{"properties":{"virtualMachineResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","provisioningState":"Updating","sqlServerLicenseType":"DR","sqlManagement":"LightWeight","sqlImageSku":"Enterprise"},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002","name":"clisqlvm000002","type":"Microsoft.SqlVirtualMachine/sqlVirtualMachines"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/6b3c5783-669c-48b3-82c5-4c912f6f88ae?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/1e2946b7-fd7a-4b71-af36-15dbd32a19e5?api-version=2017-03-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -3636,7 +3663,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:38 GMT
+      - Thu, 12 Aug 2021 22:10:24 GMT
       expires:
       - '-1'
       pragma:
@@ -3660,7 +3687,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3670,22 +3697,21 @@ interactions:
       ParameterSetName:
       - -n -g --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/6b3c5783-669c-48b3-82c5-4c912f6f88ae?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/updatesqlvirtualmachine/operationResults/1e2946b7-fd7a-4b71-af36-15dbd32a19e5?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"6b3c5783-669c-48b3-82c5-4c912f6f88ae","status":"Succeeded","startTime":"2021-08-07T10:46:37.897Z"}'
+      string: '{"name":"1e2946b7-fd7a-4b71-af36-15dbd32a19e5","status":"Succeeded","startTime":"2021-08-12T22:10:24.06Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:55 GMT
+      - Thu, 12 Aug 2021 22:10:39 GMT
       expires:
       - '-1'
       pragma:
@@ -3707,7 +3733,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3717,8 +3743,7 @@ interactions:
       ParameterSetName:
       - -n -g --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3732,7 +3757,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:46:55 GMT
+      - Thu, 12 Aug 2021 22:10:39 GMT
       expires:
       - '-1'
       pragma:
@@ -3754,7 +3779,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3766,10 +3791,7 @@ interactions:
       ParameterSetName:
       - -n -g --yes
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3777,17 +3799,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/f0def1ba-76ba-4c49-be6c-ff03ca5a7899?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/0dae00e2-23f2-411c-903e-45f6477a5cbf?api-version=2017-03-01-preview
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Sat, 07 Aug 2021 10:46:58 GMT
+      - Thu, 12 Aug 2021 22:10:41 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/sqlVirtualMachineOperationResults/f0def1ba-76ba-4c49-be6c-ff03ca5a7899?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/sqlVirtualMachineOperationResults/0dae00e2-23f2-411c-903e-45f6477a5cbf?api-version=2017-03-01-preview
       pragma:
       - no-cache
       server:
@@ -3805,7 +3827,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3815,22 +3837,21 @@ interactions:
       ParameterSetName:
       - -n -g --yes
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/f0def1ba-76ba-4c49-be6c-ff03ca5a7899?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/0dae00e2-23f2-411c-903e-45f6477a5cbf?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"f0def1ba-76ba-4c49-be6c-ff03ca5a7899","status":"InProgress","startTime":"2021-08-07T10:46:58.293Z"}'
+      string: '{"name":"0dae00e2-23f2-411c-903e-45f6477a5cbf","status":"InProgress","startTime":"2021-08-12T22:10:40.78Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '108'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:47:15 GMT
+      - Thu, 12 Aug 2021 22:10:56 GMT
       expires:
       - '-1'
       pragma:
@@ -3852,7 +3873,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3862,13 +3883,12 @@ interactions:
       ParameterSetName:
       - -n -g --yes
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/f0def1ba-76ba-4c49-be6c-ff03ca5a7899?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/0dae00e2-23f2-411c-903e-45f6477a5cbf?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"f0def1ba-76ba-4c49-be6c-ff03ca5a7899","status":"Succeeded","startTime":"2021-08-07T10:46:58.293Z"}'
+      string: '{"name":"0dae00e2-23f2-411c-903e-45f6477a5cbf","status":"InProgress","startTime":"2021-08-12T22:10:40.78Z"}'
     headers:
       cache-control:
       - no-cache
@@ -3877,7 +3897,145 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:47:30 GMT
+      - Thu, 12 Aug 2021 22:11:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --yes
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/0dae00e2-23f2-411c-903e-45f6477a5cbf?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"0dae00e2-23f2-411c-903e-45f6477a5cbf","status":"InProgress","startTime":"2021-08-12T22:10:40.78Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:11:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --yes
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/0dae00e2-23f2-411c-903e-45f6477a5cbf?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"0dae00e2-23f2-411c-903e-45f6477a5cbf","status":"InProgress","startTime":"2021-08-12T22:10:40.78Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:11:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --yes
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/deletesqlvirtualmachine/operationResults/0dae00e2-23f2-411c-903e-45f6477a5cbf?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"0dae00e2-23f2-411c-903e-45f6477a5cbf","status":"Succeeded","startTime":"2021-08-12T22:10:40.78Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:11:56 GMT
       expires:
       - '-1'
       pragma:
@@ -3914,14 +4072,11 @@ interactions:
       Content-Length:
       - '598'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g -l --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -3929,7 +4084,7 @@ interactions:
       string: '{"properties":{"virtualMachineResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000002","provisioningState":"Provisioning","sqlServerLicenseType":"DR","sqlManagement":"LightWeight","sqlImageSku":"Unknown"},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002","name":"clisqlvm000002","type":"Microsoft.SqlVirtualMachine/sqlVirtualMachines"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/5fade796-6bc0-4685-afa3-0a40a2d89591?api-version=2017-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20?api-version=2017-03-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -3937,7 +4092,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:47:34 GMT
+      - Thu, 12 Aug 2021 22:12:00 GMT
       expires:
       - '-1'
       pragma:
@@ -3957,7 +4112,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3967,13 +4122,196 @@ interactions:
       ParameterSetName:
       - -n -g -l --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/5fade796-6bc0-4685-afa3-0a40a2d89591?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20?api-version=2017-03-01-preview
   response:
     body:
-      string: '{"name":"5fade796-6bc0-4685-afa3-0a40a2d89591","status":"InProgress","startTime":"2021-08-07T10:47:33.67Z"}'
+      string: '{"name":"b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20","status":"InProgress","startTime":"2021-08-12T22:11:59.373Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:12:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20","status":"InProgress","startTime":"2021-08-12T22:11:59.373Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:12:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20","status":"InProgress","startTime":"2021-08-12T22:11:59.373Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:12:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20","status":"InProgress","startTime":"2021-08-12T22:11:59.373Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Aug 2021 22:13:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --license-type
+      User-Agent:
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20?api-version=2017-03-01-preview
+  response:
+    body:
+      string: '{"name":"b6cb5d9d-5e6a-4fd6-aa18-a60d67c33d20","status":"Succeeded","startTime":"2021-08-12T22:11:59.373Z"}'
     headers:
       cache-control:
       - no-cache
@@ -3982,7 +4320,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:47:50 GMT
+      - Thu, 12 Aug 2021 22:13:15 GMT
       expires:
       - '-1'
       pragma:
@@ -4004,7 +4342,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -4014,102 +4352,7 @@ interactions:
       ParameterSetName:
       - -n -g -l --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/5fade796-6bc0-4685-afa3-0a40a2d89591?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"5fade796-6bc0-4685-afa3-0a40a2d89591","status":"InProgress","startTime":"2021-08-07T10:47:33.67Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:48:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.SqlVirtualMachine/locations/westus/operationTypes/createsqlvirtualmachine/operationResults/5fade796-6bc0-4685-afa3-0a40a2d89591?api-version=2017-03-01-preview
-  response:
-    body:
-      string: '{"name":"5fade796-6bc0-4685-afa3-0a40a2d89591","status":"Succeeded","startTime":"2021-08-07T10:47:33.67Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '106'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Aug 2021 10:48:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --license-type
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -4123,7 +4366,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:48:22 GMT
+      - Thu, 12 Aug 2021 22:13:15 GMT
       expires:
       - '-1'
       pragma:
@@ -4155,10 +4398,7 @@ interactions:
       ParameterSetName:
       - -n -g -l --license-type
       User-Agent:
-      - python/3.8.1 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-sqlvirtualmachine/0.5.0 Azure-SDK-For-Python AZURECLI/2.27.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.27.0 azsdk-python-mgmt-sqlvirtualmachine/1.0.0b1 Python/3.9.6 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlvm_cli_test_license000001/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/clisqlvm000002?api-version=2017-03-01-preview
   response:
@@ -4172,7 +4412,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Aug 2021 10:48:22 GMT
+      - Thu, 12 Aug 2021 22:13:16 GMT
       expires:
       - '-1'
       pragma:
