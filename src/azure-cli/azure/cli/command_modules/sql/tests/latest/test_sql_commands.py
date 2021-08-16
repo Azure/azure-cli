@@ -79,6 +79,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subscription_id = '4cac86b0-1e56-48c2-9df2-669a6d2d87c5'
     location = 'westeurope'
     subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance'
+    target_vnet_name = 'vnet-powershell-cli-testing'
+    target_subnet_name = 'ManagedInstance2'
+    target_subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(target_vnet_name, target_subnet_name)
     group = 'Committer-SwaggerAndGeneratedSDKs-MI-CLI'
     collation = "Serbian_Cyrillic_100_CS_AS"
 
@@ -4208,6 +4211,24 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('tags', {})])
+
+        # test cross-subnet update SLO. Since the feature isn't rolled out, we expect the operation to fail.
+        try:
+            self.cmd('sql mi update -g {} -n {} --subnet {}'
+                 .format(resource_group_1, managed_instance_name_1, ManagedInstancePreparer.target_subnet))
+        except Exception as e:
+            expectedmessage = "Subnet resource ID '{}' is invalid. Please provide a correct resource Id for the target subnet.".format(ManagedInstancePreparer.target_subnet)
+            if expectedmessage in str(e):
+                pass
+
+        # test cross-subnet update SLO. Since the feature isn't rolled out, we expect the operation to fail.
+        try:
+            self.cmd('sql mi update -g {} -n {} --subnet {} --vnet-name {}'
+                 .format(resource_group_1, managed_instance_name_1, ManagedInstancePreparer.target_subnet_name, ManagedInstancePreparer.target_vnet_name))
+        except Exception as e:
+            expectedmessage = "Subnet resource ID '{}' is invalid. Please provide a correct resource Id for the target subnet.".format(ManagedInstancePreparer.target_subnet)
+            if expectedmessage in str(e):
+                pass
 
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
