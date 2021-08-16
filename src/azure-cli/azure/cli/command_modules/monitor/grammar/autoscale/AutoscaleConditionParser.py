@@ -5,7 +5,6 @@
 # Generated from AutoscaleCondition.g4 by ANTLR 4.7.2
 # encoding: utf-8
 # pylint: disable=all
-from __future__ import print_function
 from antlr4 import *
 from io import StringIO
 import sys

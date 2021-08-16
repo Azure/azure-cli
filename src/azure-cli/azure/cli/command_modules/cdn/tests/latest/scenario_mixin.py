@@ -97,13 +97,15 @@ class CdnScenarioMixin:
                              ' '.join(content_paths))
         return self.cmd(command, checks)
 
-    def endpoint_add_rule_cmd(self, group, name, profile_name, checks=None):
-        msg = 'az cdn endpoint rule add -g {} -n {} --profile-name {} --order 1 --rule-name r1\
+    def endpoint_add_rule_cmd(self, group, name, profile_name, order, rule_name, checks=None):
+        msg = 'az cdn endpoint rule add -g {} -n {} --profile-name {} --order {} --rule-name {}\
                --match-variable RemoteAddress --operator GeoMatch --match-values "TH"\
                --action-name CacheExpiration --cache-behavior BypassCache'
         command = msg.format(group,
                              name,
-                             profile_name)
+                             profile_name,
+                             order,
+                             rule_name)
         return self.cmd(command, checks)
 
     def endpoint_add_condition_cmd(self, group, name, profile_name, checks=None, options=None):
@@ -390,7 +392,6 @@ class CdnScenarioMixin:
         test_dir = path.dirname(path.realpath(__file__))
         default_cert_policy = path.join(test_dir, "byoc_cert_policy.json")
 
-        self.cmd(f'keyvault create --location centralus --name {key_vault_name} -g {group_name}')
         return self.cmd(f'keyvault certificate create --vault-name {key_vault_name} '
                         f'-n {cert_name} --policy "@{default_cert_policy}"')
 

@@ -3,11 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long,too-many-nested-blocks
+# pylint: disable=line-too-long,too-many-nested-blocks,too-many-lines
 
 import io
 import json
-import re
 
 import chardet
 import javaproperties
@@ -17,9 +16,10 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.appconfiguration import ResourceReadOnlyError
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.util import user_confirmation
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants)
-from ._utils import user_confirmation, prep_label_filter_for_url_encoding
+from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from._featuremodels import (map_keyvalue_to_featureflag,
@@ -106,10 +106,8 @@ def validate_import_key(key):
 
 def validate_import_feature(feature):
     if feature:
-        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
-        invalid = re.search(invalid_pattern, feature)
-        if invalid:
-            logger.warning("Ignoring invalid feature '%s'. Only alphanumeric characters, '.', '-' and '_' are allowed in feature name.", feature)
+        if '%' in feature:
+            logger.warning("Ignoring invalid feature '%s'. Feature name cannot contain the '%%' character.", feature)
             return False
     else:
         logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
@@ -120,6 +118,42 @@ def validate_import_feature(feature):
 
 # File <-> List of KeyValue object
 
+def __read_with_appropriate_encoding(file_path, format_):
+    config_data = {}
+    default_encoding = 'utf-8'
+    detected_encoding = __check_file_encoding(file_path)
+
+    try:
+        with io.open(file_path, 'r', encoding=default_encoding) as config_file:
+            if format_ == 'json':
+                config_data = json.load(config_file)
+
+            elif format_ == 'yaml':
+                for yaml_data in list(yaml.safe_load_all(config_file)):
+                    config_data.update(yaml_data)
+
+            elif format_ == 'properties':
+                config_data = javaproperties.load(config_file)
+                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
+
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        if detected_encoding == default_encoding:
+            raise
+
+        with io.open(file_path, 'r', encoding=detected_encoding) as config_file:
+            if format_ == 'json':
+                config_data = json.load(config_file)
+
+            elif format_ == 'yaml':
+                for yaml_data in list(yaml.safe_load_all(config_file)):
+                    config_data.update(yaml_data)
+
+            elif format_ == 'properties':
+                config_data = javaproperties.load(config_file)
+                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
+
+    return config_data
+
 
 def __read_kv_from_file(file_path,
                         format_,
@@ -129,34 +163,21 @@ def __read_kv_from_file(file_path,
                         content_type=None):
     config_data = {}
     try:
-        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
-            if format_ == 'json':
-                config_data = json.load(config_file)
-                for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
-                    # delete all feature management sections in any name format.
-                    # If users have not skipped features, and there are multiple
-                    # feature sections, we will error out while reading features.
-                    if feature_management_keyword in config_data:
-                        del config_data[feature_management_keyword]
-
-            elif format_ == 'yaml':
-                for yaml_data in list(yaml.safe_load_all(config_file)):
-                    config_data.update(yaml_data)
-                for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
-                    # delete all feature management sections in any name format.
-                    # If users have not skipped features, and there are multiple
-                    # feature sections, we will error out while reading features.
-                    if feature_management_keyword in config_data:
-                        del config_data[feature_management_keyword]
-
-            elif format_ == 'properties':
-                config_data = javaproperties.load(config_file)
-                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
-
-    except ValueError:
-        raise CLIError('The input is not a well formatted %s file.' % (format_))
+        config_data = __read_with_appropriate_encoding(file_path, format_)
+        if format_ in ('json', 'yaml'):
+            for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
+                # delete all feature management sections in any name format.
+                # If users have not skipped features, and there are multiple
+                # feature sections, we will error out while reading features.
+                if feature_management_keyword in config_data:
+                    del config_data[feature_management_keyword]
+    except ValueError as ex:
+        raise CLIError('The input is not a well formatted %s file.\nException: %s' % (format_, ex))
+    except yaml.YAMLError as ex:
+        raise CLIError('The input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
         raise CLIError('File is not available.')
+
     flattened_data = {}
     if format_ == 'json' and content_type and __is_json_content_type(content_type):
         for key in config_data:
@@ -202,17 +223,10 @@ def __read_features_from_file(file_path, format_):
         return features_dict
 
     try:
-        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
-            if format_ == 'json':
-                config_data = json.load(config_file)
-
-            elif format_ == 'yaml':
-                for yaml_data in list(yaml.safe_load_all(config_file)):
-                    config_data.update(yaml_data)
-
+        config_data = __read_with_appropriate_encoding(file_path, format_)
         found_feature_section = False
         for index, feature_management_keyword in enumerate(FEATURE_MANAGEMENT_KEYWORDS):
-            # find the first occurence of feature management section in file.
+            # find the first occurrence of feature management section in file.
             # Enforce the same naming convention for 'EnabledFor' keyword
             # If there are multiple feature sections, we will error out here.
             if feature_management_keyword in config_data:
@@ -223,9 +237,11 @@ def __read_features_from_file(file_path, format_):
                 else:
                     raise CLIError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
 
-    except ValueError:
+    except ValueError as ex:
         raise CLIError(
-            'The feature management section of input is not a well formatted %s file.' % (format_))
+            'The feature management section of input is not a well formatted %s file.\nException: %s' % (format_, ex))
+    except yaml.YAMLError as ex:
+        raise CLIError('The feature management section of input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
         raise CLIError('File is not available.')
 
@@ -244,7 +260,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
             if format_ == 'json':
                 json.dump(exported_keyvalues, fp, indent=2, ensure_ascii=False)
             elif format_ == 'yaml':
-                yaml.safe_dump(exported_keyvalues, fp, sort_keys=False)
+                yaml.safe_dump(exported_keyvalues, fp, sort_keys=False, width=float('inf'))
             elif format_ == 'properties':
                 javaproperties.dump(exported_keyvalues, fp)
     except Exception as exception:
@@ -298,7 +314,7 @@ def __read_kv_from_config_store(azconfig_client,
 
     if cli_ctx:
         from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-        keyvault_client = keyvault_data_plane_factory(cli_ctx, None)
+        keyvault_client = keyvault_data_plane_factory(cli_ctx)
     else:
         keyvault_client = None
 
@@ -315,7 +331,7 @@ def __read_kv_from_config_store(azconfig_client,
 
             if kv.content_type and kv.value:
                 # resolve key vault reference
-                if keyvault_client and kv.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+                if keyvault_client and __is_key_vault_ref(kv):
                     __resolve_secret(keyvault_client, kv)
 
         # trim unwanted fields from kv object instead of leaving them as null.
@@ -350,8 +366,8 @@ def __write_kv_and_features_to_config_store(azconfig_client,
         if not preserve_labels:
             set_kv.label = label
 
-        # Don't overwrite the content type of feature flags
-        if content_type and not __is_feature_flag(set_kv):
+        # Don't overwrite the content type of feature flags or key vault references
+        if content_type and not __is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
         try:
@@ -368,6 +384,10 @@ def __is_feature_flag(kv):
     if kv and kv.key and kv.content_type:
         return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
     return False
+
+
+def __is_key_vault_ref(kv):
+    return kv and kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE
 
 
 def __discard_features_from_retrieved_kv(src_kvs):
@@ -448,7 +468,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
             name = kv.key
             value = kv.value
             # If its a KeyVault ref, convert the format to AppService KeyVault ref format
-            if kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+            if __is_key_vault_ref(kv):
                 try:
                     secret_uri = json.loads(value).get("uri")
                     if secret_uri:
@@ -529,8 +549,8 @@ def __serialize_feature_list_to_comparable_json_object(features):
         feature_json['description'] = feature.description
         # conditions
         feature_json['conditions'] = feature.conditions
-        # key
-        res[feature.key] = feature_json
+        # name
+        res[feature.name] = feature_json
     return res
 
 
@@ -541,7 +561,7 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues):
         kv_json = {'key': kv.key,
                    'value': kv.value,
                    'label': kv.label,
-                   'locked': kv.read_only,
+                   'locked': kv.locked,
                    'last modified': kv.last_modified,
                    'content type': kv.content_type}
         # tags
@@ -854,7 +874,7 @@ def __export_features(retrieved_features, naming_convention):
                         feature_filter["Parameters"] = filter_.parameters
                     feature_state[feature_reserved_keywords.enabledfor].append(feature_filter)
 
-            feature_entry = {feature.key: feature_state}
+            feature_entry = {feature.name: feature_state}
 
             exported_dict[feature_reserved_keywords.featuremanagement].update(feature_entry)
 

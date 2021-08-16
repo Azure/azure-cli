@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, too-many-statements, too-many-locals
+# pylint: disable=line-too-long, too-many-statements, too-many-locals, too-many-branches
 
 import json
 import time
@@ -12,10 +12,12 @@ import copy
 
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
 from azure.core import MatchConditions
+from azure.cli.core.util import user_confirmation
 from azure.core.exceptions import (HttpResponseError,
                                    ResourceNotFoundError,
                                    ResourceModifiedError)
@@ -24,7 +26,7 @@ from ._constants import (FeatureFlagConstants, SearchFilterOptions, StatusCodes)
 from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
-from ._utils import (get_appconfig_data_client, user_confirmation,
+from ._utils import (get_appconfig_data_client,
                      prep_label_filter_for_url_encoding)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
@@ -37,7 +39,8 @@ logger = get_logger(__name__)
 
 
 def set_feature(cmd,
-                feature,
+                feature=None,
+                key=None,
                 name=None,
                 label=None,
                 description=None,
@@ -45,7 +48,11 @@ def set_feature(cmd,
                 connection_string=None,
                 auth_mode="key",
                 endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):] if feature is None else feature
 
     # when creating a new Feature flag, these defaults will be used
     tags = {}
@@ -53,7 +60,7 @@ def set_feature(cmd,
 
     default_value = {
         "id": feature,
-        "description": description,
+        "description": "" if description is None else description,
         "enabled": False,
         "conditions": default_conditions
     }
@@ -95,7 +102,9 @@ def set_feature(cmd,
                 feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
 
                 # User can only update description if the key already exists
-                feature_flag_value.description = description
+                if description is not None:
+                    feature_flag_value.description = description
+
                 set_kv = KeyValue(key=key,
                                   label=label,
                                   value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
@@ -139,17 +148,28 @@ def set_feature(cmd,
 
 
 def delete_feature(cmd,
-                   feature,
+                   feature=None,
+                   key=None,
                    name=None,
                    label=None,
                    yes=False,
                    connection_string=None,
                    auth_mode="key",
                    endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    if key is not None:
+        key_filter = key
+    elif feature is not None:
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
-                                               feature=feature,
+                                               key_filter=key_filter,
                                                label=SearchFilterOptions.EMPTY_LABEL if label is None else label)
 
     confirmation_message = "Found '{}' feature flags matching the specified feature and label. Are you sure you want to delete these feature flags?".format(len(retrieved_keyvalues))
@@ -183,7 +203,7 @@ def delete_feature(cmd,
         else:
             raise CLIError('Delete operation failed. \n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
 
-    # Convert result list of KeyValue to ist of FeatureFlag
+    # Convert result list of KeyValue to list of FeatureFlag
     deleted_ff = []
     for success_kv in deleted_kvs:
         success_ff = map_keyvalue_to_featureflag(success_kv, show_conditions=False)
@@ -193,14 +213,23 @@ def delete_feature(cmd,
 
 
 def show_feature(cmd,
-                 feature,
+                 feature=None,
+                 key=None,
                  name=None,
                  label=None,
                  fields=None,
                  connection_string=None,
                  auth_mode="key",
                  endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
@@ -219,8 +248,7 @@ def show_feature(cmd,
                 # feature_flag is guaranteed to have all the fields because
                 # we validate this in map_keyvalue_to_featureflag()
                 # So this line will never throw AttributeError
-                partial_featureflag[field.name.lower()] = getattr(
-                    feature_flag, field.name.lower())
+                partial_featureflag[field.name.lower()] = getattr(feature_flag, field.name.lower())
             return partial_featureflag
         return feature_flag
     except ResourceNotFoundError:
@@ -228,11 +256,10 @@ def show_feature(cmd,
     except HttpResponseError as exception:
         raise CLIError(str(exception))
 
-    raise CLIError("Failed to get the feature '{}' with label '{}'.".format(feature, label))
-
 
 def list_feature(cmd,
                  feature=None,
+                 key=None,
                  name=None,
                  label=None,
                  fields=None,
@@ -241,10 +268,20 @@ def list_feature(cmd,
                  all_=False,
                  auth_mode="key",
                  endpoint=None):
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    if key is not None:
+        key_filter = key
+    elif feature is not None:
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    else:
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     try:
         retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
-                                                   feature=feature if feature else SearchFilterOptions.ANY_KEY,
+                                                   key_filter=key_filter,
                                                    label=label if label else SearchFilterOptions.ANY_LABEL)
         retrieved_featureflags = []
         for kv in retrieved_keyvalues:
@@ -281,14 +318,23 @@ def list_feature(cmd,
 
 
 def lock_feature(cmd,
-                 feature,
+                 feature=None,
+                 key=None,
                  name=None,
                  label=None,
                  connection_string=None,
                  yes=False,
                  auth_mode="key",
                  endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
@@ -323,14 +369,23 @@ def lock_feature(cmd,
 
 
 def unlock_feature(cmd,
-                   feature,
+                   feature=None,
+                   key=None,
                    name=None,
                    label=None,
                    connection_string=None,
                    yes=False,
                    auth_mode="key",
                    endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
@@ -365,14 +420,23 @@ def unlock_feature(cmd,
 
 
 def enable_feature(cmd,
-                   feature,
+                   feature=None,
+                   key=None,
                    name=None,
                    label=None,
                    connection_string=None,
                    yes=False,
                    auth_mode="key",
                    endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
@@ -418,14 +482,23 @@ def enable_feature(cmd,
 
 
 def disable_feature(cmd,
-                    feature,
+                    feature=None,
+                    key=None,
                     name=None,
                     label=None,
                     connection_string=None,
                     yes=False,
                     auth_mode="key",
                     endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
@@ -474,8 +547,9 @@ def disable_feature(cmd,
 
 
 def add_filter(cmd,
-               feature,
                filter_name,
+               feature=None,
+               key=None,
                name=None,
                label=None,
                filter_parameters=None,
@@ -484,7 +558,15 @@ def add_filter(cmd,
                connection_string=None,
                auth_mode="key",
                endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
@@ -552,7 +634,8 @@ def add_filter(cmd,
 
 
 def delete_filter(cmd,
-                  feature,
+                  feature=None,
+                  key=None,
                   filter_name=None,
                   name=None,
                   label=None,
@@ -562,7 +645,15 @@ def delete_filter(cmd,
                   all_=False,
                   auth_mode="key",
                   endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
@@ -663,15 +754,24 @@ def delete_filter(cmd,
 
 
 def show_filter(cmd,
-                feature,
                 filter_name,
+                feature=None,
+                key=None,
                 index=None,
                 name=None,
                 label=None,
                 connection_string=None,
                 auth_mode="key",
                 endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
@@ -720,7 +820,8 @@ def show_filter(cmd,
 
 
 def list_filter(cmd,
-                feature,
+                feature=None,
+                key=None,
                 name=None,
                 label=None,
                 connection_string=None,
@@ -728,7 +829,15 @@ def list_filter(cmd,
                 all_=False,
                 auth_mode="key",
                 endpoint=None):
-    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
@@ -856,14 +965,14 @@ def __update_existing_key_value(azconfig_client,
 
 
 def __list_all_keyvalues(azconfig_client,
-                         feature,
+                         key_filter,
                          label=None):
     '''
         To get all keys by name or pattern
 
         Args:
             azconfig_client - AppConfig client making calls to the service
-            feature - Feature name or pattern
+            key_filter - Filter for the key of the feature flag
             label - Feature label or pattern
 
         Return:
@@ -875,77 +984,22 @@ def __list_all_keyvalues(azconfig_client,
     # (?:\\\\)*  Matches any number of occurrences of two backslashes
     # ,          Matches a comma
     unescaped_comma_regex = re.compile(r'(?<!\\)(?:\\\\)*,')
-    if unescaped_comma_regex.search(feature):
+    if unescaped_comma_regex.search(key_filter):
         raise CLIError("Comma separated feature names are not supported. Please provide escaped string if your feature name contains comma. \nSee \"az appconfig feature list -h\" for correct usage.")
-
-    # Filtering keys on these patterns needs to happen on client side after getting all keys that match user specified pattern
-    # If user provides *abc or *abc* or * -> get all keys that match this
-    # pattern, then filter based on whether they are feature flags or not
-    all_keys_pattern = "*"
-    if feature.startswith("*") and feature != all_keys_pattern:
-        key = feature
-    else:
-        key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-
-    # If user has specified fields, we still get all the fields and then
-    # filter what we need from the response.
 
     label = prep_label_filter_for_url_encoding(label)
 
     try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key, label_filter=label)
+        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label)
     except HttpResponseError as exception:
         raise CLIError('Failed to read feature flag(s) that match the specified feature and label. ' + str(exception))
 
     try:
         retrieved_kv = [convert_configurationsetting_to_keyvalue(x) for x in configsetting_iterable]
-        if key != feature:
-            valid_features = []
-            for kv in retrieved_kv:
-                if kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
-                    valid_features.append(kv)
-            return valid_features
-
-        return __custom_key_filtering(retrieved_kv=retrieved_kv, user_key_filter=feature)
+        valid_features = []
+        for kv in retrieved_kv:
+            if kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+                valid_features.append(kv)
+        return valid_features
     except Exception as exception:
         raise CLIError(str(exception))
-
-
-def __custom_key_filtering(retrieved_kv, user_key_filter):
-    '''
-        To get all keys after Client side Filtering based on user specified pattern
-
-        Args:
-            retrieved_kv - List of KeyValue objects
-            user_key_filter - key pattern to be matched
-
-        Return:
-            List of KeyValue objects
-    '''
-
-    filtered_kv = []
-    try:
-        user_key_pattern_regex = re.compile(r"." + user_key_filter)
-        for kv in retrieved_kv:
-            internal_key = kv.key
-            internal_content_type = kv.content_type
-            # filter only feature flags
-            if internal_key.startswith(
-                    FeatureFlagConstants.FEATURE_FLAG_PREFIX) and internal_content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
-                feature_name = internal_key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
-                # search for user pattern in actual feature name
-                if user_key_pattern_regex.search(feature_name):
-                    filtered_kv.append(kv)
-        return filtered_kv
-
-    except re.error as exception:
-        error_msg = "Regular expression error in parsing '{0}'. ".format(user_key_filter) +\
-            "Please provide escaped string if your feature name contains special characters. \nSee \"az appconfig feature list -h\" for correct usage.\n"
-        raise re.error(error_msg + "Error: " + str(exception))
-
-    except AttributeError as exception:
-        raise AttributeError(
-            "Could not find 'content_type' attribute in the retrieved key-value data.\n" +
-            str(exception))
-
-    return filtered_kv

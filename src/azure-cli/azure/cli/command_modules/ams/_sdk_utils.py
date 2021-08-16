@@ -59,4 +59,21 @@ def get_media_type():
 
 
 def get_encoding_types():
-    return ['Basic', 'None', 'Standard']
+    return ['Premium1080p', 'None', 'Standard']
+
+
+def get_transcription_langauges():
+    return ['ca-ES', 'da-DK', 'de-DE', 'en-AU', 'en-CA', 'en-GB', 'en-IN', 'en-NZ', 'en-US', 'es-ES',
+            'es-MX', 'fi-FI', 'fr-CA', 'fr-FR', 'it-IT', 'nl-NL', 'pt-BR', 'pt-PT', 'sv-SE']
+
+
+def get_analysis_modes():
+    return ['Standard', 'Basic']
+
+
+def get_stretch_mode_types():
+    return ['None', 'AutoSize', 'AutoFit']
+
+
+def get_storage_authentication_allowed_values():
+    return ['System', 'ManagedIdentity']

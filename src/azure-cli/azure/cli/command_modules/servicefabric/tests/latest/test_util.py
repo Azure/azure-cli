@@ -25,13 +25,7 @@ def _add_selfsigned_cert_to_keyvault(test, kwargs):
     return cert
 
 
-def _create_keyvault(test, kwargs):
-    kv = test.cmd('keyvault create --resource-group {rg} -n {kv_name} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
-    return kv
-
-
 def _create_cluster_with_separate_kv(test, kwargs):
-    _create_keyvault(test, kwargs)
     cert = _add_selfsigned_cert_to_keyvault(test, kwargs)
     cert_secret_id = cert['sid']
     kwargs.update({'cert_secret_id': cert_secret_id})
@@ -44,7 +38,7 @@ def _create_cluster_with_separate_kv(test, kwargs):
             if cluster['provisioningState'] == 'Succeeded':
                 return
             if cluster['provisioningState'] == 'Failed':
-                raise CLIError("Cluster deployment was not succesful")
+                raise CLIError("Cluster deployment was not successful")
 
         if time.time() > timeout:
             raise CLIError("Cluster deployment timed out")
@@ -61,7 +55,7 @@ def _create_cluster(test, kwargs):
             if cluster['provisioningState'] == 'Succeeded':
                 return
             if cluster['provisioningState'] == 'Failed':
-                raise CLIError("Cluster deployment was not succesful")
+                raise CLIError("Cluster deployment was not successful")
 
         if time.time() > timeout:
             raise CLIError("Cluster deployment timed out")
@@ -83,5 +77,33 @@ def _wait_for_cluster_state_ready(test, kwargs):
             if cluster['clusterState']:
                 state = cluster['clusterState']
             raise CLIError("Cluster deployment timed out. cluster state is not 'Ready'. State: {}".format(state))
+        if test.in_recording or test.is_live:
+            time.sleep(60)
+
+
+# Manged Cluster helpers
+def _create_managed_cluster(test, kwargs):
+    test.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password}',
+             checks=[test.check('provisioningState', 'Succeeded'),
+                     test.check('clusterState', 'WaitingForNodes')])
+
+    test.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary',
+             checks=[test.check('provisioningState', 'Succeeded')])
+
+
+def _wait_for_managed_cluster_state_ready(test, kwargs):
+    timeout = time.time() + 900
+    while True:
+        cluster = test.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}').get_output_in_json()
+
+        if cluster['clusterState']:
+            if cluster['clusterState'] == 'Ready':
+                return
+
+        if time.time() > timeout:
+            state = "unknown"
+            if cluster['clusterState']:
+                state = cluster['clusterState']
+            raise CLIError("Managed cluster deployment timed out. cluster state is not 'Ready'. State: {}".format(state))
         if test.in_recording or test.is_live:
             time.sleep(60)

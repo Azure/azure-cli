@@ -35,6 +35,7 @@ short-summary: Show the contents of a specific object in the cache.
 helps['configure'] = """
 type: command
 short-summary: Manage Azure CLI configuration. This command is interactive.
+long-summary: For automation scenarios or to set all available options, use the new `az config`.
 parameters:
   - name: --defaults -d
     short-summary: >

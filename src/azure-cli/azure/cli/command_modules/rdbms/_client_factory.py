@@ -6,7 +6,7 @@
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 
-# CLIENT FACTORIES
+# pylint: disable=import-outside-toplevel
 
 RM_URI_OVERRIDE = 'AZURE_CLI_RDBMS_RM_URI'
 SUB_ID_OVERRIDE = 'AZURE_CLI_RDBMS_SUB_ID'
@@ -26,11 +26,11 @@ def get_mariadb_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -38,7 +38,7 @@ def get_mariadb_management_client(cli_ctx, **_):
         return MariaDBManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MariaDBManagementClient)
 
@@ -54,11 +54,11 @@ def get_mysql_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -66,7 +66,7 @@ def get_mysql_management_client(cli_ctx, **_):
         return MySQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
@@ -82,11 +82,11 @@ def get_mysql_flexible_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -94,7 +94,7 @@ def get_mysql_flexible_management_client(cli_ctx, **_):
         return MySQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
@@ -110,11 +110,11 @@ def get_postgresql_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -122,7 +122,7 @@ def get_postgresql_management_client(cli_ctx, **_):
         return PostgreSQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 
@@ -137,11 +137,11 @@ def get_postgresql_flexible_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -149,7 +149,7 @@ def get_postgresql_flexible_management_client(cli_ctx, **_):
         return PostgreSQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 
@@ -331,6 +331,10 @@ def cf_mysql_check_resource_availability(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).check_name_availability
 
 
+def cf_mysql_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
+
+
 def cf_postgres_flexible_servers(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).servers
 
@@ -351,9 +355,28 @@ def cf_postgres_check_resource_availability(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).check_name_availability
 
 
-def resource_client_factory(cli_ctx, **_):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+def cf_postgres_flexible_db(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).databases
 
 
-def network_client_factory(cli_ctx):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
+def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
+
+
+def resource_client_factory(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription_id)
+
+
+def network_client_factory(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, subscription_id=subscription_id)
+
+
+def private_dns_client_factory(cli_ctx, subscription_id=None):
+    from azure.mgmt.privatedns import PrivateDnsManagementClient
+    return get_mgmt_service_client(cli_ctx, PrivateDnsManagementClient, subscription_id=subscription_id).private_zones
+
+
+def private_dns_link_client_factory(cli_ctx, subscription_id=None):
+    from azure.mgmt.privatedns import PrivateDnsManagementClient
+    return get_mgmt_service_client(cli_ctx, PrivateDnsManagementClient,
+                                   subscription_id=subscription_id).virtual_network_links

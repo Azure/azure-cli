@@ -40,14 +40,14 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     from azure.cli.core import __version__ as local_version
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     from azure.cli.core.extension import get_extensions, WheelExtension
-    from distutils.version import LooseVersion
+    from packaging.version import parse
     from knack.util import CLIError
 
     update_cli = True
     from azure.cli.core.util import get_latest_from_github
     try:
         latest_version = get_latest_from_github()
-        if latest_version and LooseVersion(latest_version) <= LooseVersion(local_version):
+        if latest_version and parse(latest_version) <= parse(local_version):
             logger.warning("You already have the latest azure-cli version: %s", local_version)
             update_cli = False
             if not update_all:
@@ -88,7 +88,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 az_update_cmd.insert(0, 'sudo')
             exit_code = subprocess.call(apt_update_cmd)
             if exit_code == 0:
-                logger.debug("Update azure cli with '%s'", " ".join(apt_update_cmd))
+                logger.debug("Update azure cli with '%s'", " ".join(az_update_cmd))
                 exit_code = subprocess.call(az_update_cmd)
         elif installer == 'RPM':
             from azure.cli.core.util import get_linux_distro
@@ -141,20 +141,23 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         telemetry.set_failure(err_msg)
         sys.exit(exit_code)
 
-    import azure.cli.core
+    # Avoid using python modules directly as they may have been changed due to upgrade.
+    # If you do need to use them, you may need to reload them and their dependent modules.
+    # Otherwise you may have such issue https://github.com/Azure/azure-cli/issues/16952
     import importlib
-    importlib.reload(azure.cli.core)
-    new_version = azure.cli.core.__version__
+    import json
+    importlib.reload(subprocess)
+    importlib.reload(json)
+
+    version_result = subprocess.check_output(['az', 'version', '-o', 'json'], shell=platform.system() == 'Windows')
+    version_json = json.loads(version_result)
+    new_version = version_json['azure-cli-core']
 
     if update_cli and new_version == local_version:
         err_msg = "CLI upgrade failed or aborted."
         logger.warning(err_msg)
         telemetry.set_failure(err_msg)
         sys.exit(1)
-
-    # Python is reinstalled in another versioned directory with Homebrew, subprocess needs to be reloaded
-    if installer == 'HOMEBREW' and exts:
-        importlib.reload(subprocess)
 
     if exts:
         logger.warning("Upgrading extensions")
@@ -172,22 +175,38 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                    else auto_upgrade_msg)
 
 
-def demo_style(cmd):  # pylint: disable=unused-argument
-    from azure.cli.core.style import Style, print_styled_text
-    print("[available styles]\n")
+def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
+    from azure.cli.core.style import Style, print_styled_text, format_styled_text
+    if theme:
+        format_styled_text.theme = theme
+    print_styled_text("[How to call print_styled_text]")
+    # Print an empty line
+    print_styled_text()
+    # Various methods to print
+    print_styled_text("- Print using a str")
+    print_styled_text("- Print using multiple", "strs")
+    print_styled_text((Style.PRIMARY, "- Print using a tuple"))
+    print_styled_text((Style.PRIMARY, "- Print using multiple"), (Style.IMPORTANT, "tuples"))
+    print_styled_text([(Style.PRIMARY, "- Print using a "), (Style.IMPORTANT, "list")])
+    print_styled_text([(Style.PRIMARY, "- Print using multiple")], [(Style.IMPORTANT, "lists")])
+    print_styled_text()
+
+    print_styled_text("[Available styles]\n")
+    placeholder = '████ {:8s}: {}\n'
     styled_text = [
-        (Style.PRIMARY, "Bright White: Primary text color\n"),
-        (Style.SECONDARY, "White: Secondary text color\n"),
-        (Style.IMPORTANT, "Bright Magenta: Important text color\n"),
-        (Style.ACTION, "Bright Blue: Commands, parameters, and system inputs\n"),
-        (Style.HYPERLINK, "Bright Cyan: Hyperlink\n"),
-        (Style.ERROR, "Bright Red: Error message indicator\n"),
-        (Style.SUCCESS, "Bright Green: Success message indicator\n"),
-        (Style.WARNING, "Bright Yellow: Warning message indicator\n"),
+        (Style.PRIMARY, placeholder.format("White", "Primary text color")),
+        (Style.SECONDARY, placeholder.format("Grey", "Secondary text color")),
+        (Style.IMPORTANT, placeholder.format("Magenta", "Important text color")),
+        (Style.ACTION, placeholder.format(
+            "Blue", "Commands, parameters, and system inputs (White in legacy powershell terminal)")),
+        (Style.HYPERLINK, placeholder.format("Cyan", "Hyperlink")),
+        (Style.ERROR, placeholder.format("Red", "Error message indicator")),
+        (Style.SUCCESS, placeholder.format("Green", "Success message indicator")),
+        (Style.WARNING, placeholder.format("Yellow", "Warning message indicator")),
     ]
     print_styled_text(styled_text)
 
-    print("[interactive]\n")
+    print_styled_text("[interactive]\n")
     # NOTE! Unicode character ⦾ ⦿ will most likely not be displayed correctly
     styled_text = [
         (Style.ACTION, "?"),
@@ -203,7 +222,7 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[progress report]\n")
+    print_styled_text("[progress report]\n")
     # NOTE! Unicode character ✓ will most likely not be displayed correctly
     styled_text = [
         (Style.SUCCESS, '(✓) Done: '),
@@ -219,7 +238,7 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[error handing]\n")
+    print_styled_text("[error handing]\n")
     styled_text = [
         (Style.ERROR, "ERROR: Command not found: az storage create\n"),
         (Style.PRIMARY, "TRY\n"),
@@ -234,13 +253,22 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[post-output hint]\n")
+    print_styled_text("[post-output hint]\n")
     styled_text = [
         (Style.PRIMARY, "The default subscription is "),
         (Style.IMPORTANT, "AzureSDKTest (0b1f6471-1bf0-4dda-aec3-cb9272f09590)"),
         (Style.PRIMARY, ". To switch to another subscription, run "),
         (Style.ACTION, "az account set --subscription"),
         (Style.PRIMARY, " <subscription ID>\n"),
-        (Style.WARNING, "WARNING: The subscription has been disabled!")
+        (Style.WARNING, "WARNING: The subscription has been disabled!\n")
     ]
     print_styled_text(styled_text)
+
+    print_styled_text("[logs]\n")
+
+    # Print logs
+    logger.debug("This is a debug log entry.")
+    logger.info("This is a info log entry.")
+    logger.warning("This is a warning log entry.")
+    logger.error("This is a error log entry.")
+    logger.critical("This is a critical log entry.")

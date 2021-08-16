@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 
 STORAGE_RESOURCE_ENDPOINT = "https://storage.azure.com"
 SERVICES = {'blob', 'file'}
-AZCOPY_VERSION = '10.5.0'
+AZCOPY_VERSION = '10.8.0'
 
 
 class AzCopy:
@@ -39,7 +39,7 @@ class AzCopy:
         install_dir = os.path.dirname(install_location)
         if not os.path.exists(install_dir):
             os.makedirs(install_dir)
-        base_url = 'https://azcopyvnext.azureedge.net/release20200709/azcopy_{}_{}_{}.{}'
+        base_url = 'https://azcopyvnext.azureedge.net/release20201211/azcopy_{}_{}_{}.{}'
 
         if self.system == 'Windows':
             if platform.machine().endswith('64'):
@@ -53,11 +53,14 @@ class AzCopy:
         else:
             raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
         try:
+            os.chmod(install_dir,
+                     os.stat(install_dir).st_mode | stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
             _urlretrieve(file_url, install_location)
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         except IOError as err:
-            raise CLIError('Connection error while attempting to download azcopy ({})'.format(err))
+            raise CLIError('Connection error while attempting to download azcopy {}. You could also install the '
+                           'specified azcopy version to {} manually. ({})'.format(AZCOPY_VERSION, install_dir, err))
 
     def check_version(self):
         try:
@@ -109,30 +112,29 @@ def login_auth_for_azcopy(cmd):
 
 
 def client_auth_for_azcopy(cmd, client, service='blob'):
-    azcopy_creds = storage_client_auth_for_azcopy(cmd, client, service)
+    azcopy_creds = storage_client_auth_for_azcopy(client, service)
     if azcopy_creds is not None:
         return azcopy_creds
 
     # oauth mode
-    token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
-    try:
-        token_info = _unserialize_non_msi_token_payload(token_info)
-    except KeyError:  # unserialized MSI token payload
-        raise Exception('MSI auth not yet supported.')
-    return AzCopyCredentials(token_info=token_info)
+    if client.token_credential:
+        token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
+        try:
+            token_info = _unserialize_non_msi_token_payload(token_info)
+        except KeyError as ex:  # unserialized token payload
+            from azure.cli.core.azclierror import ValidationError
+            raise ValidationError('No {}. MSI auth and service principal are not yet supported.'.format(ex))
+        return AzCopyCredentials(token_info=token_info)
+
+    return None
 
 
-def storage_client_auth_for_azcopy(cmd, client, service):
+def storage_client_auth_for_azcopy(client, service):
     if service not in SERVICES:
         raise Exception('{} not one of: {}'.format(service, str(SERVICES)))
 
     if client.sas_token:
         return AzCopyCredentials(sas_token=client.sas_token)
-
-    # if account key provided, generate a sas token
-    if client.account_key:
-        sas_token = _generate_sas_token(cmd, client.account_name, client.account_key, service)
-        return AzCopyCredentials(sas_token=sas_token)
     return None
 
 
@@ -140,7 +142,7 @@ def _unserialize_non_msi_token_payload(token_info):
     import jwt  # pylint: disable=import-error
 
     parsed_authority = urlparse(token_info['_authority'])
-    decode = jwt.decode(token_info['accessToken'], verify=False, algorithms=['RS256'])
+    decode = jwt.decode(token_info['accessToken'], algorithms=['RS256'], options={"verify_signature": False})
     return {
         'access_token': token_info['accessToken'],
         'refresh_token': token_info['refreshToken'],
@@ -156,7 +158,7 @@ def _unserialize_non_msi_token_payload(token_info):
     }
 
 
-def _generate_sas_token(cmd, account_name, account_key, service):
+def _generate_sas_token(cmd, account_name, account_key, service, resource_types='sco', permissions='rwdlacup'):
     from .._client_factory import cloud_storage_account_service_factory
     from .._validators import resource_type_type, services_type
 
@@ -169,8 +171,8 @@ def _generate_sas_token(cmd, account_name, account_key, service):
 
     return cloud_storage_client.generate_shared_access_signature(
         services_type(cmd.loader)(service[0]),
-        resource_type_type(cmd.loader)('sco'),
-        t_account_permissions(_str='rwdlacup'),
+        resource_type_type(cmd.loader)(resource_types),
+        t_account_permissions(_str=permissions),
         datetime.datetime.utcnow() + datetime.timedelta(days=1)
     )
 

@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from __future__ import print_function
-
 import datetime
 import os
 import time
@@ -121,10 +119,7 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
 class DataLakeStoreFileScenarioTest(ScenarioTest):
 
     def setUp(self):
-        try:
-            import unittest.mock as mock
-        except ImportError:
-            import mock
+        from unittest import mock
         import uuid
 
         def const_uuid():

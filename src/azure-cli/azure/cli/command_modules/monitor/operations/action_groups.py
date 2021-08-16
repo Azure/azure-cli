@@ -61,3 +61,11 @@ def update_action_groups(instance, tags=None, short_name=None, add_receivers=Non
                 instance.azure_function_receivers.append(r)
 
     return instance
+
+
+def enable_receiver(client, resource_group_name, action_group_name, receiver_name):
+    from azure.mgmt.monitor.models import EnableRequest
+    enable_request = EnableRequest(receiver_name=receiver_name)
+    return client.enable_receiver(resource_group_name=resource_group_name,
+                                  action_group_name=action_group_name,
+                                  enable_request=enable_request)

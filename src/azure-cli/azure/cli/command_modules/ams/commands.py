@@ -51,6 +51,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.custom_command('remove', 'remove_mediaservice_secondary_storage',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
+        g.custom_command('set-authentication', 'set_mediaservice_trusted_storage',
+                         custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.command('sync-storage-keys', 'sync_storage_keys')
 
     with self.command_group('ams account sp', get_sdk('Mediaservices', get_mediaservices_client)) as g:
@@ -61,9 +63,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('ams account mru', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_show_command('show', 'get_mru',
-                              custom_command_type=get_custom_sdk('mru', None))
+                              custom_command_type=get_custom_sdk('mru', get_mediaservices_client))
         g.custom_command('set', 'set_mru',
-                         custom_command_type=get_custom_sdk('mru', None))
+                         custom_command_type=get_custom_sdk('mru', get_mediaservices_client))
+
+    with self.command_group('ams account encryption', get_sdk('Mediaservices', get_mediaservices_client)) as g:
+        g.custom_show_command('show', 'get_encryption',
+                              custom_command_type=get_custom_sdk('encryption', get_mediaservices_client))
+        g.custom_command('set', 'set_encryption',
+                         custom_command_type=get_custom_sdk('encryption', get_mediaservices_client))
 
     with self.command_group('ams transform', get_sdk('Transforms', get_transforms_client)) as g:
         g.custom_show_command('show', 'get_transform',
@@ -199,6 +207,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('live_event', get_live_events_client),
                          supports_no_wait=True)
         g.custom_command('start', 'start',
+                         custom_command_type=get_custom_sdk('live_event', get_live_events_client),
+                         supports_no_wait=True)
+        g.custom_command('standby', 'standby',
                          custom_command_type=get_custom_sdk('live_event', get_live_events_client),
                          supports_no_wait=True)
         g.custom_command('stop', 'stop',

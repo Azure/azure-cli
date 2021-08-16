@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from uuid import uuid4
+from datetime import datetime, timedelta, timezone
 
 # pylint: disable=import-error
 # pylint: disable=broad-except
@@ -17,15 +18,20 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
     ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, \
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
-    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem
+    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
+    RecoveryPointRehydrationInfo, AzureWorkloadSAPHanaRestoreWithRehydrateRequest, \
+    AzureWorkloadSQLRestoreWithRehydrateRequest
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
-    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
+    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
+    _backup_client_factory, recovery_points_cf
+
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
+    ResourceNotFoundError, ArgumentUsageError
 
 
 fabric_name = "Azure"
@@ -100,20 +106,18 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
             """)
 
     workload_type = _check_map(workload_type, workload_type_map)
-    container_name = resource_id.split('/')[-1]
+    container_name = _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id)
 
-    containers = list_protectable_containers(cmd, resource_group_name, vault_name)
+    if container_name is None or not cust_help.is_native_name(container_name):
+        # refresh containers and try to get the protectable container object again
+        client.refresh(vault_name, resource_group_name, fabric_name)
+        container_name = _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id)
 
-    for container in containers:
-        if cust_help.get_resource_id(container.properties.container_id) == cust_help.get_resource_id(resource_id):
-            container_name = container.name
-            break
-
-    if not cust_help.is_native_name(container_name):
-        raise CLIError(
-            """
-            Container unavailable or already registered.
-            """)
+        if container_name is None or not cust_help.is_native_name(container_name):
+            raise ResourceNotFoundError(
+                """
+                Container unavailable or already registered.
+                """)
 
     properties = AzureVMAppContainerProtectionContainer(backup_management_type=container_type,
                                                         source_resource_id=resource_id,
@@ -180,11 +184,16 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             The policy type should match with the workload being protected.
             Use the relevant get-default policy command and use it to update the policy for the workload.
             """)
-    item_properties = item.properties
-    item_properties.policy_id = policy.id
 
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
+
+    backup_item_type = item_uri.split(';')[0]
+    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
+        raise InvalidArgumentValueError("Item must be either of type SQLDataBase or SAPHanaDatabase.")
+
+    item_properties = _get_protected_item_instance(backup_item_type)
+    item_properties.policy_id = policy.id
 
     param = ProtectedItemResource(properties=item_properties)
 
@@ -273,35 +282,55 @@ def show_protectable_instance(items, server_name, protectable_item_type):
         raise az_error
 
     protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
-    # Server Name filter
-    filtered_items = [item for item in items if item.properties.server_name.lower() == server_name.lower()]
-
     # Protectable Item Type filter
-    filtered_items = [item for item in filtered_items if
+    filtered_items = [item for item in items if
+                      item.properties.protectable_item_type is not None and
                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
+    # Server Name filter
+    filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
 
     return cust_help.get_none_one_or_many(filtered_items)
 
 
-def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None):
+def list_protectable_items(client, resource_group_name, vault_name, workload_type,
+                           backup_management_type="AzureWorkload", container_uri=None, protectable_item_type=None,
+                           server_name=None):
+
     workload_type = _check_map(workload_type, workload_type_map)
+    if protectable_item_type is not None:
+        protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
 
     filter_string = cust_help.get_filter_string({
-        'backupManagementType': "AzureWorkload",
+        'backupManagementType': backup_management_type,
         'workloadType': workload_type})
 
     # Items list
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = cust_help.get_list_from_paged_response(items)
 
+    if protectable_item_type is not None:
+        # Protectable Item Type filter
+        paged_items = [item for item in paged_items if
+                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
+    if server_name is not None:
+        # Server Name filter
+        paged_items = [item for item in paged_items if
+                       item.properties.server_name.lower() == server_name.lower()]
     if container_uri:
         return [item for item in paged_items if
                 cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+
     return paged_items
 
 
 def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
-                            extended_info=None):
+                            extended_info=None, is_ready_for_move=None, target_tier=None, use_secondary_region=None,
+                            tier=None, recommended_for_archive=None):
+
+    if recommended_for_archive is not None:
+        raise ArgumentUsageError("""--recommended-for-archive is supported by AzureIaasVM backup management
+        type only.""")
+
     # Get container and item URIs
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -322,11 +351,42 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, 
             'endDate': query_end_date,
             'extendedInfo': extended_info})
 
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
+
     # Get recovery points
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
     paged_recovery_points = cust_help.get_list_from_paged_response(recovery_points)
 
-    return paged_recovery_points
+    common.fetch_tier(paged_recovery_points)
+
+    if use_secondary_region:
+        paged_recovery_points = [item for item in paged_recovery_points if item.properties.recovery_point_tier_details
+                                 is None or (item.properties.recovery_point_tier_details is not None and
+                                             item.tier_type != 'VaultArchive')]
+
+    recovery_point_list = common.check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move)
+    recovery_point_list = common.filter_rp_based_on_tier(recovery_point_list, tier)
+    return recovery_point_list
+
+
+def move_wl_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_name, source_tier,
+                            destination_tier):
+
+    container_uri = cust_help.get_protection_container_uri_from_id(item_name.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item_name.id)
+
+    if source_tier not in common.tier_type_map.keys():
+        raise InvalidArgumentValueError('This source tier-type is not accepted by move command at present.')
+
+    parameters = MoveRPAcrossTiersRequest(source_tier_type=common.tier_type_map[source_tier],
+                                          target_tier_type=common.tier_type_map[destination_tier])
+
+    result = _backup_client_factory(cmd.cli_ctx).move_recovery_point(vault_name, resource_group_name, fabric_name,
+                                                                     container_uri, item_uri, rp_name, parameters,
+                                                                     raw=True, polling=False).result()
+
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_object, protectable_item):
@@ -358,9 +418,19 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until, backup_type,
                enable_compression=False):
+    if backup_type is None:
+        raise RequiredArgumentMissingError("Backup type missing. Please provide a valid backup type using "
+                                           "--backup-type argument.")
+
     message = "For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy"
-    if retain_until is not None:
+
+    if (retain_until is not None and backup_type != 'CopyOnlyFull'):
         logger.warning(message)
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
+    if retain_until is None:
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
@@ -371,10 +441,10 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
             Enable compression is not applicable for SAPHanaDatabase item type.
             """)
 
-    if cust_help.is_hana(backup_item_type) and backup_type in ['Log', 'CopyOnlyFull']:
+    if cust_help.is_hana(backup_item_type) and backup_type in ['Log', 'CopyOnlyFull', 'Incremental']:
         raise CLIError(
             """
-            Backup type cannot be Log or CopyOnlyFull for SAPHanaDatabase item type.
+            Backup type cannot be Log, CopyOnlyFull, Incremental for SAPHanaDatabase Adhoc backup.
             """)
 
     properties = AzureWorkloadBackupRequest(backup_type=backup_type, enable_compression=enable_compression,
@@ -495,7 +565,9 @@ def list_workload_items(cmd, vault_name, resource_group_name, container_name,
     return cust_help.get_list_from_paged_response(items)
 
 
-def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config):
+def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, rehydration_duration=15,
+                     rehydration_priority=None):
+
     recovery_config_object = cust_help.get_or_read_json(recovery_config)
     restore_mode = recovery_config_object['restore_mode']
     container_uri = recovery_config_object['container_uri']
@@ -510,9 +582,42 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     recovery_mode = recovery_config_object['recovery_mode']
     filepath = recovery_config_object['filepath']
 
-    # Construct trigger restore request object
-    trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time)
+    trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, None)
+    if log_point_in_time is None:
+        recovery_point = common.show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name,
+                                                    vault_name, container_uri, item_uri, recovery_point_id, item_type,
+                                                    backup_management_type="AzureWorkload")
+
+        rp_list = [recovery_point]
+        common.fetch_tier(rp_list)
+
+        if (rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive' and
+                rehydration_priority is None):
+            raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
+            parameters of rehydration duration and rehydration priority.""")
+
+        if rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive':
+            # normal rehydrated restore
+            trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time,
+                                                                       rehydration_priority)
+
+            rehyd_duration = 'P' + str(rehydration_duration) + 'D'
+            rehydration_info = RecoveryPointRehydrationInfo(rehydration_retention_duration=rehyd_duration,
+                                                            rehydration_priority=rehydration_priority)
+
+            trigger_restore_properties.recovery_point_rehydration_info = rehydration_info
+
     trigger_restore_properties.recovery_type = restore_mode
+
+    # Get target vm id
+    if container_id is not None:
+        target_container_name = cust_help.get_protection_container_uri_from_id(container_id)
+        target_resource_group = cust_help.get_resource_group_from_id(container_id)
+        target_vault_name = cust_help.get_vault_from_arm_id(container_id)
+        target_container = common.show_container(cmd, backup_protection_containers_cf(cmd.cli_ctx),
+                                                 target_container_name, target_resource_group, target_vault_name,
+                                                 'AzureWorkload')
+        setattr(trigger_restore_properties, 'target_virtual_machine_id', target_container.properties.source_resource_id)
 
     if restore_mode == 'AlternateLocation':
         if recovery_mode != "FileRecovery":
@@ -538,10 +643,12 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     if 'sql' in item_type.lower():
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
+
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
+
     # Trigger restore and wait for completion
     result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
-                            item_uri, recovery_point_id, trigger_restore_request, raw=True)
+                            item_uri, recovery_point_id, trigger_restore_request, raw=True, polling=False).result()
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -552,11 +659,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         datetime_type(log_point_in_time)
 
     if restore_mode == 'AlternateWorkloadRestore':
-        if target_item is None:
-            raise CLIError(
-                """
-                Target Item must be provided.
-                """)
+        _check_none_and_many(target_item, "Target Item")
 
         protectable_item_type = target_item.properties.protectable_item_type
         if protectable_item_type.lower() not in ["sqlinstance", "saphanasystem"]:
@@ -654,16 +757,28 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'alternate_directory_paths': alternate_directory_paths}
 
 
-def _get_restore_request_instance(item_type, log_point_in_time):
+def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
+
+    if rehydration_priority is None:
+        if item_type.lower() == "saphana":
+            if log_point_in_time is not None:
+                return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
+            return AzureWorkloadSAPHanaRestoreRequest()
+
+        if item_type.lower() == "sql":
+            if log_point_in_time is not None:
+                return AzureWorkloadSQLPointInTimeRestoreRequest()
+            return AzureWorkloadSQLRestoreRequest()
+
     if item_type.lower() == "saphana":
         if log_point_in_time is not None:
-            return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
-        return AzureWorkloadSAPHanaRestoreRequest()
+            raise InvalidArgumentValueError('Integrated restore is not defined for log recovery point.')
+        return AzureWorkloadSAPHanaRestoreWithRehydrateRequest()
+
     if item_type.lower() == "sql":
         if log_point_in_time is not None:
-            return AzureWorkloadSQLPointInTimeRestoreRequest()
-        return AzureWorkloadSQLRestoreRequest()
-    return None
+            raise InvalidArgumentValueError('Integrated restore is not defined for log recovery point.')
+        return AzureWorkloadSQLRestoreWithRehydrateRequest()
 
 
 def _get_protected_item_instance(item_type):
@@ -696,3 +811,25 @@ def _check_map(item_type, item_type_map):
     az_error = InvalidArgumentValueError(error_text)
     az_error.set_recommendation(recommendation_text)
     raise az_error
+
+
+def _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id):
+    containers = list_protectable_containers(cmd, resource_group_name, vault_name)
+    container_name = None
+    for container in containers:
+        container_resource_id = cust_help.get_resource_id(container.properties.container_id)
+        if container_resource_id.lower() == cust_help.get_resource_id(resource_id).lower():
+            container_name = container.name
+            break
+    return container_name
+
+
+def _check_none_and_many(item, item_name):
+    if item is None:
+        error_text = "{} must be provided.".format(item_name)
+        az_error = ResourceNotFoundError(error_text)
+        raise az_error
+    if isinstance(item, list):
+        error_text = "Multiple {}s found. Please check if you have given correct target server type.".format(item_name)
+        az_error = InvalidArgumentValueError(error_text)
+        raise az_error

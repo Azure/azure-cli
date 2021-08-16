@@ -11,18 +11,18 @@ This represents the most common sequence of steps you would perform to create, t
 Development of extensions have been simplified by the public release of the azdev CLI. Please visit https://github.com/Azure/azure-cli-dev-tools for more information.
 
 1. In a new virtual environment, install azdev: `pip install azdev`
-2. Setup your CLI and install your extension:
+2. Setup your Azure CLI and install your extension:
   - If you prefer to be guided via an interactive experience, just run `azdev setup` with no additional arguments.
   - If you are creating a brand new extension, run `azdev setup -r <PATH>` to add the repo to your extension dev sources. From there you can run `azdev extension create` to generate and install starter code.
   - If you are only developing on an existing extension, run: `azdev setup -r <PATH> -e <NAME>` where PATH is the path to the local git folder your extension resides in and NAME is the name of your extension. If you don't know the name of the extension, you can omit `-e` to complete the setup. Then you can run `azdev extension list -o table` to see which extensions are installable for your repo and add that extension with `azdev extension add <NAME>`.
-  - If you would like to develop for a CLI module and your extension, run the above, but include `-c [<CLI_PATH>]` where CLI_PATH is the path to your local Azure CLI repo. If omitted, the command will attempt to find the repo by crawling your current working directory.
+  - If you would like to develop for an Azure CLI module and your extension, run the above, but include `-c [<CLI_PATH>]` where CLI_PATH is the path to your local Azure CLI repo. If omitted, the command will attempt to find the repo by crawling your current working directory.
 
 ### Create
 
 Run `azdev extension create <NAME>` to create skeleton code for a new extension. As an example (for a fictional widget API):
 
-```
-azdev extension create  widget --local-sdk <PATH TO SDK ZIP> --operation-name WidgetOperations --client-name WidgetManagementClient --sdk-property widget_name --github-alias myalias
+```azurecli
+azdev extension create widget --local-sdk <PATH TO SDK ZIP> --operation-name WidgetOperations --client-name WidgetManagementClient --sdk-property widget_name --github-alias myalias
 ```
 
 The fields `--operation-name`, `--client-name` and `--sdk-property` will come from a review of your Python SDK.
@@ -37,7 +37,7 @@ Periodically run the following to ensure your extension will pass CI:
 `azdev test <NAME>`
 `azdev linter <NAME>`
 
-Address comments as appropriate and consult the CLI team if something is unclear.
+Address comments as appropriate and consult the Azure CLI team if something is unclear.
 
 ### Publish
 
@@ -80,7 +80,8 @@ Normally, you will have you extension installed in dev mode and your code change
 `azdev extension remove myexampleextension`
 
 Verify it is removed:
-```
+
+```azurecli
 az extension list -ojson
 []
 ```
@@ -91,7 +92,7 @@ az extension list -ojson
 
 You can verify the extension was installed as follows:
 
-```
+```azurecli
 az extension list -ojson
 [
   {
@@ -120,7 +121,7 @@ See [Extension Metadata](metadata.md) for more information.
 ### Limit dependencies in setup.py
 
 - Before adding a dependency to your setup.py, check that it's not already available in [azure-cli-core setup.py](https://github.com/Azure/azure-cli/blob/master/src/azure-cli-core/setup.py).
-- Azure SDK or Azure Management SDK dependencies may be overridden by the versions installed as requirements of azure-cli-core. If you use any, test carefully, gracefully handle API changes, and be prepared to release updates. You might also consider rebasing the libraries under a different namespace (besides `azure`) to avoid conflicting with core CLI functionality. You can use [autorest](https://github.com/azure/autorest) to generate your SDK into a package that isn't under the `azure` directory.
+- Azure SDK or Azure Management SDK dependencies may be overridden by the versions installed as requirements of azure-cli-core. If you use any, test carefully, gracefully handle API changes, and be prepared to release updates. You might also consider rebasing the libraries under a different namespace (besides `azure`) to avoid conflicting with core Azure CLI functionality. You can use [autorest](https://github.com/azure/autorest) to generate your SDK into a package that isn't under the `azure` directory.
 
 ### How do I know I'm using my dev extension(s)?
 
@@ -128,7 +129,7 @@ See [Extension Metadata](metadata.md) for more information.
 
 ### Test your extension on Python 3
 
-- The CLI supports Python 3.6, 3.7, 3.8 so verify that your extension does the same.
+- The Azure CLI supports Python 3.6, 3.7, 3.8 so verify that your extension does the same.
 - You can create virtual environments for different versions and run your extension in them.
 - e.g. `python3.6 -m venv env36` and `python3.8 -m venv env38`.
 

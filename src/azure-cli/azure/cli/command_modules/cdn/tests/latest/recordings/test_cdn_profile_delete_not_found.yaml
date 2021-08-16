@@ -10,25 +10,26 @@ interactions:
       - cdn profile delete
       Connection:
       - keep-alive
-      Content-Length:
-      - '0'
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/foo12345?api-version=2020-04-15
+      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/foo12345?api-version=2020-09-01
   response:
     body:
-      string: ''
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Cdn/profiles/foo12345''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
       cache-control:
       - no-cache
+      content-length:
+      - '278'
+      content-type:
+      - application/json; charset=utf-8
       date:
-      - Wed, 18 Nov 2020 22:29:30 GMT
+      - Fri, 02 Apr 2021 10:31:25 GMT
       expires:
       - '-1'
       pragma:
@@ -37,9 +38,9 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 204
-      message: No Content
+      code: 404
+      message: Not Found
 version: 1

@@ -3,15 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import difflib
 
 import argparse
 import argcomplete
 
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands import AzCliCommandInvoker
@@ -35,8 +32,7 @@ EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "To learn more about extensions, please visit "
                        "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
-OVERVIEW_REFERENCE = ("Still stuck? Run '{command} --help' to view all commands or go to "
-                      "'https://aka.ms/cli_ref' to learn more")
+OVERVIEW_REFERENCE = ("https://aka.ms/cli_ref")
 
 
 class IncorrectUsageError(CLIError):
@@ -162,7 +158,7 @@ class AzCliCommandParser(CLICommandParser):
         cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
         recommender = CommandRecommender(*command_arguments, message, cli_ctx)
         recommender.set_help_examples(self.get_examples(self.prog))
-        recommendation = recommender.recommend_a_command()
+        recommendations = recommender.provide_recommendations()
 
         az_error = ArgumentUsageError(message)
         if 'unrecognized arguments' in message:
@@ -175,9 +171,8 @@ class AzCliCommandParser(CLICommandParser):
         if '--query' in message:
             from azure.cli.core.util import QUERY_REFERENCE
             az_error.set_recommendation(QUERY_REFERENCE)
-        elif recommendation:
-            az_error.set_recommendation("Try this: '{}'".format(recommendation))
-            az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
+        elif recommendations:
+            az_error.set_aladdin_recommendation(recommendations)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -289,83 +284,7 @@ class AzCliCommandParser(CLICommandParser):
         self._namespace, self._raw_arguments = super().parse_known_args(args=args, namespace=namespace)
         return self._namespace, self._raw_arguments
 
-    def _get_extension_command_tree(self):
-        from azure.cli.core._session import EXT_CMD_TREE
-        import os
-        VALID_SECOND = 3600 * 24 * 10
-        # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
-        # use cli_ctx from cli_help which is not lost.
-        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
-        if not cli_ctx:
-            return None
-        EXT_CMD_TREE.load(os.path.join(cli_ctx.config.config_dir, 'extensionCommandTree.json'), VALID_SECOND)
-        if not EXT_CMD_TREE.data:
-            import requests
-            from azure.cli.core.util import should_disable_connection_verify
-            try:
-                response = requests.get(
-                    'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json',
-                    verify=(not should_disable_connection_verify()),
-                    timeout=10)
-            except Exception as ex:  # pylint: disable=broad-except
-                logger.info("Request failed for extension command tree: %s", str(ex))
-                return None
-            if response.status_code == 200:
-                EXT_CMD_TREE.data = response.json()
-                EXT_CMD_TREE.save_with_retry()
-            else:
-                logger.info("Error when retrieving extension command tree. Response code: %s", response.status_code)
-                return None
-        return EXT_CMD_TREE
-
-    def _search_in_extension_commands(self, command_str):
-        """Search the command in an extension commands dict which mimics a prefix tree.
-        If the value of the dict item is a string, then the key represents the end of a complete command
-        and the value is the name of the extension that the command belongs to.
-        An example of the dict read from extensionCommandTree.json:
-        {
-            "aks": {
-                "create": "aks-preview",
-                "update": "aks-preview",
-                "app": {
-                    "up": "deploy-to-azure"
-                },
-                "use-dev-spaces": "dev-spaces"
-            },
-            ...
-        }
-        """
-
-        cmd_chain = self._get_extension_command_tree()
-        if not cmd_chain:
-            return None
-        for part in command_str.split():
-            try:
-                if isinstance(cmd_chain[part], str):
-                    return cmd_chain[part]
-                cmd_chain = cmd_chain[part]
-            except KeyError:
-                return None
-        return None
-
-    def _get_extension_use_dynamic_install_config(self):
-        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
-        default_value = 'yes_prompt'
-        use_dynamic_install = cli_ctx.config.get(
-            'extension', 'use_dynamic_install', default_value).lower() if cli_ctx else default_value
-        if use_dynamic_install not in ['no', 'yes_prompt', 'yes_without_prompt']:
-            use_dynamic_install = default_value
-        return use_dynamic_install
-
-    def _get_extension_run_after_dynamic_install_config(self):
-        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
-        default_value = True
-        run_after_extension_installed = cli_ctx.config.getboolean('extension',
-                                                                  'run_after_dynamic_install',
-                                                                  default_value) if cli_ctx else default_value
-        return run_after_extension_installed
-
-    def _check_value(self, action, value):  # pylint: disable=too-many-statements, too-many-locals
+    def _check_value(self, action, value):
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:  # pylint: disable=too-many-nested-blocks
@@ -373,84 +292,30 @@ class AzCliCommandParser(CLICommandParser):
             # use cli_ctx from cli_help which is not lost.
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
-            caused_by_extension_not_installed = False
             command_name_inferred = self.prog
-            error_msg = None
+            use_dynamic_install = 'no'
             if not self.command_source:
+                from azure.cli.core.extension.dynamic_install import try_install_extension
+                candidates = []
+                args = self.prog.split() + self._raw_arguments
+                # Check if the command is from an extension. If yes, try to fix by installing the extension, then exit.
+                # The command will be rerun in another process.
+                use_dynamic_install = try_install_extension(self, args)
+                # parser has no `command_source`, value is part of command itself
+                error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
+                az_error = CommandNotFoundError(error_msg)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
-                    args = self.prog.split() + self._raw_arguments
                     args_inferred = [item if item != value else candidates[0] for item in args]
                     command_name_inferred = ' '.join(args_inferred).split('-')[0]
-
-                use_dynamic_install = self._get_extension_use_dynamic_install_config()
-                if use_dynamic_install != 'no' and not candidates:
-                    # Check if the command is from an extension
-                    from azure.cli.core.util import roughly_parse_command
-                    cmd_list = self.prog.split() + self._raw_arguments
-                    command_str = roughly_parse_command(cmd_list[1:])
-                    ext_name = self._search_in_extension_commands(command_str)
-                    if ext_name:
-                        caused_by_extension_not_installed = True
-                        telemetry.set_command_details(command_str,
-                                                      parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
-                                                      extension_name=ext_name)
-                        run_after_extension_installed = self._get_extension_run_after_dynamic_install_config()
-                        if use_dynamic_install == 'yes_without_prompt':
-                            logger.warning('The command requires the extension %s. '
-                                           'It will be installed first.', ext_name)
-                            go_on = True
-                        else:
-                            from knack.prompting import prompt_y_n, NoTTYException
-                            prompt_msg = 'The command requires the extension {}. ' \
-                                'Do you want to install it now?'.format(ext_name)
-                            if run_after_extension_installed:
-                                prompt_msg = '{} The command will continue to run after the extension is installed.' \
-                                    .format(prompt_msg)
-                            NO_PROMPT_CONFIG_MSG = "Run 'az config set extension.use_dynamic_install=" \
-                                "yes_without_prompt' to allow installing extensions without prompt."
-                            try:
-                                go_on = prompt_y_n(prompt_msg, default='y')
-                                if go_on:
-                                    logger.warning(NO_PROMPT_CONFIG_MSG)
-                            except NoTTYException:
-                                logger.warning("The command requires the extension %s.\n "
-                                               "Unable to prompt for extension install confirmation as no tty "
-                                               "available. %s", ext_name, NO_PROMPT_CONFIG_MSG)
-                                go_on = False
-                        if go_on:
-                            from azure.cli.core.extension.operations import add_extension
-                            add_extension(cli_ctx=cli_ctx, extension_name=ext_name, upgrade=True)
-                            if run_after_extension_installed:
-                                import subprocess
-                                import platform
-                                exit_code = subprocess.call(cmd_list, shell=platform.system() == 'Windows')
-                                error_msg = ("Extension {} dynamically installed and commands will be "
-                                             "rerun automatically.").format(ext_name)
-                                telemetry.set_user_fault(error_msg)
-                                self.exit(exit_code)
-                            else:
-                                with CommandLoggerContext(logger):
-                                    error_msg = 'Extension {} installed. Please rerun your command.'.format(ext_name)
-                                    logger.error(error_msg)
-                                    telemetry.set_user_fault(error_msg)
-                                self.exit(2)
-                        else:
-                            error_msg = "The command requires the latest version of extension {ext_name}. " \
-                                "To install, run 'az extension add --upgrade -n {ext_name}'.".format(ext_name=ext_name)
-                if not error_msg:
-                    # parser has no `command_source`, value is part of command itself
-                    error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
-                az_error = CommandNotFoundError(error_msg)
-
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest
-                error_msg = "{prog}: '{value}' is not a valid value for '{param}'.".format(
-                    prog=self.prog, value=value, param=parameter)
-                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                error_msg = "{prog}: '{value}' is not a valid value for '{param}'. Allowed values: {choices}.".format(
+                    prog=self.prog, value=value, param=parameter, choices=', '.join([str(x) for x in action.choices]))
                 az_error = InvalidArgumentValueError(error_msg)
+                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
 
             command_arguments = self._get_failure_recovery_arguments(action)
             if candidates:
@@ -459,9 +324,9 @@ class AzCliCommandParser(CLICommandParser):
             # recommend a command for user
             recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
             recommender.set_help_examples(self.get_examples(command_name_inferred))
-            recommended_command = recommender.recommend_a_command()
-            if recommended_command:
-                az_error.set_recommendation("Try this: '{}'".format(recommended_command))
+            recommendations = recommender.provide_recommendations()
+            if recommendations:
+                az_error.set_aladdin_recommendation(recommendations)
 
             # remind user to check extensions if we can not find a command to recommend
             if isinstance(az_error, CommandNotFoundError) \
@@ -469,10 +334,7 @@ class AzCliCommandParser(CLICommandParser):
                     and use_dynamic_install == 'no':
                 az_error.set_recommendation(EXTENSION_REFERENCE)
 
-            az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
-
-            if not caused_by_extension_not_installed:
-                az_error.print_error()
-                az_error.send_telemetry()
+            az_error.print_error()
+            az_error.send_telemetry()
 
             self.exit(2)

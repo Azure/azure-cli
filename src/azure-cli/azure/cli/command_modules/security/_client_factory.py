@@ -67,6 +67,18 @@ def cf_security_advanced_threat_protection(cli_ctx, _):
     return _cf_security(cli_ctx).advanced_threat_protection
 
 
+def cf_sql_vulnerability_assessment_scans(cli_ctx, _):
+    return _cf_security(cli_ctx).sql_vulnerability_assessment_scans
+
+
+def cf_sql_vulnerability_assessment_results(cli_ctx, _):
+    return _cf_security(cli_ctx).sql_vulnerability_assessment_scan_results
+
+
+def cf_sql_vulnerability_assessment_baseline(cli_ctx, _):
+    return _cf_security(cli_ctx).sql_vulnerability_assessment_baseline_rules
+
+
 def cf_security_assessment(cli_ctx, _):
     return _cf_security(cli_ctx).assessments
 

@@ -5,7 +5,7 @@
 
 import os.path
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.core.cloud import CloudEndpointNotSetException
 from azure.cli.core.mock import DummyCli

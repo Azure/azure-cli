@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import mock
+from unittest import mock
 import unittest
 import difflib
-from six import StringIO
+from io import StringIO
 from collections import namedtuple
 from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import AzCliCommand
@@ -143,7 +143,7 @@ class TestParser(unittest.TestCase):
     def _mock_extension_modname(ext_name, ext_dir):
         return ext_name
 
-    def _mock_get_extensions():
+    def _mock_get_extensions(**kwargs):
         MockExtension = namedtuple('Extension', ['name', 'preview', 'experimental', 'path', 'get_metadata'])
         return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}),
                 MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {})]
@@ -209,8 +209,10 @@ class TestParser(unittest.TestCase):
         choice_lists = []
         original_get_close_matches = difflib.get_close_matches
 
-        def mock_log_error(_, msg):
-            logger_msgs.append(msg)
+        def mock_log_error(logger_self, msg):
+            # Only intercept 'cli.azure.cli.core.azclierror' logger and ignore 'az_command_data_logger'
+            if logger_self.name.startswith('cli'):
+                logger_msgs.append(msg)
 
         def mock_get_close_matches(*args, **kwargs):
             choice_lists.append(original_get_close_matches(*args, **kwargs))
@@ -239,7 +241,7 @@ class TestParser(unittest.TestCase):
         # assert the right type of error msg is logged for command vs argument parsing
         self.assertEqual(len(logger_msgs), 5)
         for msg in logger_msgs[:3]:
-            self.assertIn("CommandNotFoundError", msg)
+            self.assertIn("misspelled or not recognized by the system", msg)
         for msg in logger_msgs[3:]:
             self.assertIn("not a valid value for '--opt'.", msg)
 
@@ -256,9 +258,9 @@ class TestParser(unittest.TestCase):
         # test dynamic extension install
         with mock.patch('logging.Logger.error', mock_log_error), \
                 mock.patch('azure.cli.core.extension.operations.add_extension', mock_add_extension), \
-                mock.patch('azure.cli.core.parser.AzCliCommandParser._get_extension_command_tree', mock_ext_cmd_tree_load), \
-                mock.patch('azure.cli.core.parser.AzCliCommandParser._get_extension_use_dynamic_install_config', return_value='yes_without_prompt'), \
-                mock.patch('azure.cli.core.parser.AzCliCommandParser._get_extension_run_after_dynamic_install_config', return_value=False):
+                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_command_tree', mock_ext_cmd_tree_load), \
+                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_use_dynamic_install_config', return_value='yes_without_prompt'), \
+                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_run_after_dynamic_install_config', return_value=False):
             with self.assertRaises(SystemExit):
                 parser.parse_args('test new-ext create --opt enum_2'.split())
             self.assertIn("Extension new-ext-name installed. Please rerun your command.", logger_msgs[5])

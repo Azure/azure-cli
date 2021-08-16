@@ -16,14 +16,14 @@ helps['appconfig create'] = """
 type: command
 short-summary: Create an App Configuration.
 examples:
-  - name: Create an App Configuration with name, location, sku and resource group.
-    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard
+  - name: Create an App Configuration with name, location, sku, tags and resource group.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --tags key1=value1 key2=value2
   - name: Create an App Configuration with name, location, sku and resource group with system assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
   - name: Create an App Configuration with name, location, sku and resource group with user assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
-  - name: Create an App Configuration with name, location and resource group and enable public network access.
-    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network
+  - name: Create an App Configuration with name, location and resource group with public network access enabled and local auth disabled.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network --disable-local-auth
 """
 
 helps['appconfig identity'] = """
@@ -283,8 +283,8 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net
   - name: Remove customer encryption key
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
-  - name: Update an App Configuration to enable public network access.
-    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true
+  - name: Update an App Configuration to enable public network access and disable local auth.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true --disable-local-auth true
 """
 
 helps['appconfig feature'] = """
@@ -305,6 +305,9 @@ helps['appconfig feature set'] = """
         - name: Set a feature flag using your 'az login' credentials.
           text:
             az appconfig feature set --endpoint https://myappconfiguration.azconfig.io --feature color --label MyLabel --auth-mode login
+        - name: Set a feature flag with name "Beta" and custom key ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature set -n MyAppConfiguration --feature Beta --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature delete'] = """
@@ -320,6 +323,9 @@ helps['appconfig feature delete'] = """
         - name: Delete a feature using App Configuration endpoint and your 'az login' credentials.
           text:
             az appconfig feature delete --endpoint https://myappconfiguration.azconfig.io --feature color --auth-mode login
+        - name: Delete a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature delete -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta --yes
     """
 
 helps['appconfig feature show'] = """
@@ -335,6 +341,9 @@ helps['appconfig feature show'] = """
         - name: Show a feature flag using App Configuration endpoint and your 'az login' credentials.
           text:
             az appconfig feature show --endpoint https://myappconfiguration.azconfig.io --feature color --auth-mode login
+        - name: Show a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature show -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature list'] = """
@@ -347,7 +356,7 @@ helps['appconfig feature list'] = """
         - name: List all feature flags with null labels.
           text:
             az appconfig feature list -n MyAppConfiguration --label \\0
-        - name: List a specfic feature for any label start with v1. using connection string.
+        - name: List a specific feature for any label start with v1. using connection string.
           text:
             az appconfig feature list --feature color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
         - name: List all features with any labels and query only key, state and conditions.
@@ -359,6 +368,9 @@ helps['appconfig feature list'] = """
         - name: List feature flags with multiple labels.
           text:
             az appconfig feature list --label test,prod,\\0 -n MyAppConfiguration
+        - name: List all features starting with "MyApp1".
+          text:
+            az appconfig feature list -n MyAppConfiguration --key .appconfig.featureflag/MyApp1*
     """
 
 helps['appconfig feature lock'] = """
@@ -371,6 +383,9 @@ helps['appconfig feature lock'] = """
         - name: Force locking a feature using connection string.
           text:
             az appconfig feature lock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+        - name: Lock a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature lock -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature unlock'] = """
@@ -383,6 +398,9 @@ helps['appconfig feature unlock'] = """
         - name: Force unlocking a feature using connection string.
           text:
             az appconfig feature unlock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+        - name: Unlock a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature unlock -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature enable'] = """
@@ -395,6 +413,9 @@ helps['appconfig feature enable'] = """
         - name: Force enabling a feature using connection string.
           text:
             az appconfig feature enable --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+        - name: Enable a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature enable -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature disable'] = """
@@ -407,6 +428,9 @@ helps['appconfig feature disable'] = """
         - name: Force disabling a feature using connection string.
           text:
             az appconfig feature disable --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+        - name: Disable a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
+          text:
+            az appconfig feature disable -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
 helps['appconfig feature filter'] = """
@@ -420,7 +444,7 @@ helps['appconfig feature filter add'] = """
     examples:
         - name: Add a filter for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
           text:
-            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=Value Name2=Value2
+            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\"
         - name: Insert a filter at index 2 (zero-based index) for feature 'color' with label MyLabel and filter name 'MyFilter' with no parameters
           text:
             az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --index 2
@@ -430,6 +454,9 @@ helps['appconfig feature filter add'] = """
         - name: Add a filter with name 'MyFilter' using App Configuration endpoint and your 'az login' credentials.
           text:
             az appconfig feature filter add --endpoint=https://contoso.azconfig.io --feature color --filter-name MyFilter --auth-mode login
+        - name: Add a filter for feature 'color' with label MyLabel with name 'MyFilter' and array parameters.
+          text:
+            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
     """
 
 helps['appconfig feature filter delete'] = """

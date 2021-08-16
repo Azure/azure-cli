@@ -7,7 +7,7 @@ import os
 import shutil
 import tempfile
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
@@ -39,6 +39,7 @@ class TestActions(unittest.TestCase):
         os.remove(private_key_file)
 
         args = mock.MagicMock()
+        args.ssh_key_name = None
         args.ssh_key_value = [public_key_file]
         args.generate_ssh_keys = True
 
@@ -53,6 +54,7 @@ class TestActions(unittest.TestCase):
         # 2 verify we load existing key files
         # for convinience we will reuse the generated file in the previous step
         args2 = mock.MagicMock()
+        args2.ssh_key_name = None
         args2.ssh_key_value = [generated_public_key_string]
         args2.generate_ssh_keys = False
         validate_ssh_key(args2)
@@ -64,6 +66,7 @@ class TestActions(unittest.TestCase):
         os.close(fd)
         public_key_file2 = private_key_file2 + '.pub'
         args3 = mock.MagicMock()
+        args3.ssh_key_name = None
         args3.ssh_key_value = [public_key_file2]
         args3.generate_ssh_keys = False
         with self.assertRaises(CLIError):
@@ -74,6 +77,7 @@ class TestActions(unittest.TestCase):
         os.close(fd)
         public_key_file4 += '1'  # make it nonexisting
         args4 = mock.MagicMock()
+        args4.ssh_key_name = None
         args4.ssh_key_value = [public_key_file4]
         args4.generate_ssh_keys = True
         validate_ssh_key(args4)
@@ -422,7 +426,7 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.size = 'Standard_DS4_v2'
         np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'coreos', 'coreos', 'alpha'
+        np.os_publisher, np.os_offer, np.os_sku = 'kinvolk', 'flatcar-container-linux-free', 'alpha'
         size_mock.number_of_cores, size_mock.name = 8, 'Standard_DS4_v2'
         _validate_vm_vmss_accelerated_networking(mock.MagicMock(), np)
         self.assertTrue(np.accelerated_networking)
@@ -430,7 +434,7 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.size = 'Standard_D3_v2'  # known supported 4 core size
         np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'coreos', 'coreos', 'alpha'
+        np.os_publisher, np.os_offer, np.os_sku = 'kinvolk', 'flatcar-container-linux-free', 'alpha'
         _validate_vm_vmss_accelerated_networking(None, np)
         self.assertTrue(np.accelerated_networking)
 
