@@ -229,6 +229,14 @@ examples:
     text: az postgres flexible-server migration delete --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 """
 
+helps['postgres flexible-server migration check-name-availability'] = """
+type: command
+short-summary: Checks if the provided migration-name can be used.
+examples:
+  - name: Check if the migration-name provided is available for your migration workflow.
+    text: az postgres flexible-server migration check-name-availability --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+"""
+
 helps['postgres flexible-server parameter'] = """
 type: group
 short-summary: Commands for managing server parameter values for flexible server.
