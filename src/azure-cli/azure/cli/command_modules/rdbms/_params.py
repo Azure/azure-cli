@@ -609,6 +609,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Allow the migration workflow to overwrite the DB on the target.')
                     c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
                                help='Cut-over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
+                    c.argument('start_data_migration', options_list=['--start-data-migration'], action='store_true', required=False,
+                               help='Reschedule the data migration to start right now.')
                 elif scope == "delete":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
