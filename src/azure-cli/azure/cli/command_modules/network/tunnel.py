@@ -85,17 +85,17 @@ class TunnelServer:
             'token': self.last_token,
         }
         if self.node_id:
-            custom_header = {'X-Node-Id': self.node_id }
+            custom_header = {'X-Node-Id': self.node_id}
         else:
-            custom_header = { }
+            custom_header = {}
 
         web_address = 'https://{}/api/tokens'.format(self.bastion.dns_name)
-        response = requests.post(web_address, data=content, headers=custom_header, 
-                                    verify=(not should_disable_connection_verify()))
+        response = requests.post(web_address, data=content, headers=custom_header,
+                                 verify=(not should_disable_connection_verify()))
         response_json = None
 
         if response.content is not None:
-            response_json =  json.loads(response.content.decode("utf-8"))
+            response_json = json.loads(response.content.decode("utf-8"))
 
         if response.status_code not in [200]:
             if response_json is not None and response_json["message"] is not None:
@@ -187,13 +187,13 @@ class TunnelServer:
             logger.info('Cleaning up session')
 
             if self.node_id:
-                custom_header = {'X-Node-Id': self.node_id }
+                custom_header = {'X-Node-Id': self.node_id}
             else:
                 custom_header = {}
 
             web_address = 'https://{}/api/tokens/{}'.format(self.bastion.dns_name, self.last_token)
             response = requests.delete(web_address, headers=custom_header, 
-                                        verify=(not should_disable_connection_verify()))
+                                       verify=(not should_disable_connection_verify()))
 
             if response.status_code not in [200, 204]:
                 exp = CloudError(response)

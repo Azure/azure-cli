@@ -16,11 +16,12 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, UnrecognizedArgumentError, ResourceNotFoundError
-from azure.cli.command_modules.network._client_factory import network_client_factory
+from azure.cli.core.profiles import ResourceType, supported_api_version
 
+from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-from azure.cli.core.profiles import ResourceType, supported_api_version
+
 from knack.prompting import prompt
 
 from .tunnel import TunnelServer
@@ -7487,6 +7488,7 @@ def _test_extension(extension_name):
 
 
 def _get_ssh_path(ssh_command="ssh"):
+    import os
     ssh_path = ssh_command
 
     if platform.system() == 'Windows':
@@ -7507,6 +7509,7 @@ def _get_ssh_path(ssh_command="ssh"):
 
 
 def _get_rdp_path(rdp_command="mstsc"):
+    import os
     rdp_path = rdp_command
 
     if platform.system() == 'Windows':
@@ -7565,7 +7568,7 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, bastion_re
             raise RequiredArgumentMissingError("Resource group name cannot be empty when not using resourceId. Use --resource-group")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port)
-    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t = threading.Thread(target = _start_tunnel, args = (tunnel_server))
     t.daemon = True
     t.start()
 
@@ -7576,7 +7579,7 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, bastion_re
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
     elif auth_type.lower() == 'aad':
         public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)
-        cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file+'-cert.pub')
+        cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file + '-cert.pub')
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(cert_file, private_key_file)
     elif auth_type.lower() == 'ssh-key-file':
@@ -7608,7 +7611,7 @@ def rdp_bastion_host(cmd, vm_id, resource_group_name=None, name=None, bastion_re
         if is_valid_resource_id(bastion_resource_id):
             parsed_id = parse_resource_id(bastion_resource_id)
             bastion_name = parsed_id["name"]
-            resource_group_name =parsed_id['resource_group']
+            resource_group_name = parsed_id['resource_group']
         else:
             raise InvalidArgumentValueError("Please enter a valid Bastion resource Id.")
     else:
@@ -7628,14 +7631,14 @@ def rdp_bastion_host(cmd, vm_id, resource_group_name=None, name=None, bastion_re
     tunnel_server.cleanup()
 
 
-def get_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port=None):
+def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     bastion = client.get(resource_group_name, name)
 
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
 
-    tunnel_server = TunnelServer(cmd.cli_ctx, 'localhost', port, bastion, resource_id, resource_port)
+    tunnel_server = TunnelServer(cmd.cli_ctx, 'localhost', port, bastion, vm_id, resource_port)
     return tunnel_server
 
 
@@ -7648,7 +7651,7 @@ def create_bastion_tunnel(cmd, vm_id, resource_port, port, resource_group_name=N
         if is_valid_resource_id(bastion_resource_id):
             parsed_id = parse_resource_id(bastion_resource_id)
             bastion_name = parsed_id["name"]
-            resource_group_name =parsed_id['resource_group']
+            resource_group_name = parsed_id['resource_group']
         else:
             raise InvalidArgumentValueError("Please enter a valid Bastion resource Id.")
     else:
@@ -7671,6 +7674,7 @@ def create_bastion_tunnel(cmd, vm_id, resource_port, port, resource_group_name=N
     else:
         while t.is_alive():
             time.sleep(5)
+
 
 def _start_tunnel(tunnel_server):
     tunnel_server.start_server()
