@@ -11,10 +11,7 @@ from six.moves.urllib.request import pathname2url  # pylint: disable=import-erro
 from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 from six import assertRaisesRegex
 
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.resource.custom import (
@@ -31,6 +28,20 @@ from azure.cli.command_modules.resource.custom import (
     deploy_arm_template_at_tenant_scope,
 )
 
+from azure.cli.core.mock import DummyCli
+from azure.cli.core import AzCommandsLoader
+from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.profiles._shared import ResourceType
+
+cli_ctx = DummyCli()
+loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+cmd = AzCliCommand(loader, 'test', None)
+cmd.command_kwargs = {'resource_type': ResourceType.MGMT_RESOURCE_RESOURCES}
+cmd.cli_ctx = cli_ctx
+
+WhatIfOperationResult, WhatIfChange, ChangeType = cmd.get_models(
+    'WhatIfOperationResult', 'WhatIfChange', 'ChangeType'
+)
 
 def _simulate_no_tty():
     from knack.prompting import NoTTYException
@@ -344,7 +355,7 @@ class TestCustom(unittest.TestCase):
         self.assertTrue(str(list(results.keys())) in param_alpha_order)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_resource_group", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
     def test_confirm_with_what_if_prompt_at_resource_group(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         prompt_y_n_mock.return_value = False
@@ -355,7 +366,37 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_subscription_scope", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
+    def test_proceed_if_no_change_prompt_at_resource_group(self, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        what_if_command_mock.return_value = WhatIfOperationResult(changes=[
+            WhatIfChange(resource_id='resource1', change_type=ChangeType.modify),
+            WhatIfChange(resource_id='resource2', change_type=ChangeType.ignore),
+        ])
+        prompt_y_n_mock.return_value = False
+        # Act.
+        result = deploy_arm_template_at_resource_group(mock.MagicMock(), confirm_with_what_if=True, proceed_if_no_change=True)
+        # Assert.
+        prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
+        self.assertIsNone(result)
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._deploy_arm_template_at_resource_group", autospec=True)
+    def test_proceed_if_no_change_skip_prompt_at_resource_group(self, deploy_template_mock, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        what_if_command_mock.return_value = WhatIfOperationResult(changes=[
+            WhatIfChange(resource_id='resource1', change_type=ChangeType.no_change),
+            WhatIfChange(resource_id='resource2', change_type=ChangeType.ignore),
+        ])
+        # Act.
+        deploy_arm_template_at_resource_group(cmd, mock.MagicMock(), confirm_with_what_if=True, proceed_if_no_change=True)
+        # Assert.
+        prompt_y_n_mock.assert_not_called()
+        deploy_template_mock.assert_called_once()
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_subscription_scope_core", autospec=True)
     def test_confirm_with_what_if_prompt_at_subscription_scope(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         prompt_y_n_mock.return_value = False
@@ -366,7 +407,37 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_management_group", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_subscription_scope_core", autospec=True)
+    def test_proceed_if_no_change_prompt_at_subscription_scope(self, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        what_if_command_mock.return_value = WhatIfOperationResult(changes=[
+            WhatIfChange(resource_id='resource1', change_type=ChangeType.modify),
+            WhatIfChange(resource_id='resource2', change_type=ChangeType.ignore),
+        ])
+        prompt_y_n_mock.return_value = False
+        # Act.
+        result = deploy_arm_template_at_subscription_scope(mock.MagicMock(), confirm_with_what_if=True, proceed_if_no_change=True)
+        # Assert.
+        prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
+        self.assertIsNone(result)
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_subscription_scope_core", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._deploy_arm_template_at_subscription_scope", autospec=True)
+    def test_proceed_if_no_change_skip_prompt_at_subscription_scope(self, deploy_template_mock, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        what_if_command_mock.return_value = WhatIfOperationResult(changes=[
+            WhatIfChange(resource_id='resource1', change_type=ChangeType.no_change),
+            WhatIfChange(resource_id='resource2', change_type=ChangeType.ignore),
+        ])
+        # Act.
+        deploy_arm_template_at_subscription_scope(cmd, mock.MagicMock(), confirm_with_what_if=True, proceed_if_no_change=True)
+        # Assert.
+        prompt_y_n_mock.assert_not_called()
+        deploy_template_mock.assert_called_once()
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_management_group_core", autospec=True)
     def test_confirm_with_what_if_prompt_at_management_group(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         prompt_y_n_mock.return_value = False
@@ -377,7 +448,37 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
-    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_tenant_scope", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_management_group_core", autospec=True)
+    def test_proceed_if_no_change_prompt_at_management_group(self, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        what_if_command_mock.return_value = WhatIfOperationResult(changes=[
+            WhatIfChange(resource_id='resource1', change_type=ChangeType.modify),
+            WhatIfChange(resource_id='resource2', change_type=ChangeType.ignore),
+        ])
+        prompt_y_n_mock.return_value = False
+        # Act.
+        result = deploy_arm_template_at_management_group(mock.MagicMock(), confirm_with_what_if=True, proceed_if_no_change=True)
+        # Assert.
+        prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
+        self.assertIsNone(result)
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_management_group_core", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._deploy_arm_template_at_management_group", autospec=True)
+    def test_proceed_if_no_change_skip_prompt_at_management_group(self, deploy_template_mock, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        what_if_command_mock.return_value = WhatIfOperationResult(changes=[
+            WhatIfChange(resource_id='resource1', change_type=ChangeType.no_change),
+            WhatIfChange(resource_id='resource2', change_type=ChangeType.ignore),
+        ])
+        # Act.
+        deploy_arm_template_at_management_group(cmd, mock.MagicMock(), confirm_with_what_if=True, proceed_if_no_change=True)
+        # Assert.
+        prompt_y_n_mock.assert_not_called()
+        deploy_template_mock.assert_called_once()
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_tenant_scope_core", autospec=True)
     def test_confirm_with_what_if_prompt_at_tenant_scope(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         prompt_y_n_mock.return_value = False
@@ -387,24 +488,39 @@ class TestCustom(unittest.TestCase):
         prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
         self.assertIsNone(result)
 
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_tenant_scope_core", autospec=True)
+    def test_proceed_if_no_change_prompt_at_tenant_scope(self, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        what_if_command_mock.return_value = WhatIfOperationResult(changes=[
+            WhatIfChange(resource_id='resource1', change_type=ChangeType.modify),
+            WhatIfChange(resource_id='resource2', change_type=ChangeType.ignore),
+        ])
+        prompt_y_n_mock.return_value = False
+        # Act.
+        result = deploy_arm_template_at_tenant_scope(mock.MagicMock(), confirm_with_what_if=True, proceed_if_no_change=True)
+        # Assert.
+        prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
+        self.assertIsNone(result)
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_tenant_scope_core", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom._deploy_arm_template_at_tenant_scope", autospec=True)
+    def test_proceed_if_no_change_skip_prompt_at_tenant_scope(self, deploy_template_mock, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        what_if_command_mock.return_value = WhatIfOperationResult(changes=[
+            WhatIfChange(resource_id='resource1', change_type=ChangeType.no_change),
+            WhatIfChange(resource_id='resource2', change_type=ChangeType.ignore),
+        ])
+        # Act.
+        deploy_arm_template_at_tenant_scope(cmd, mock.MagicMock(), confirm_with_what_if=True, proceed_if_no_change=True)
+        # Assert.
+        prompt_y_n_mock.assert_not_called()
+        deploy_template_mock.assert_called_once()
+
     @mock.patch("azure.cli.command_modules.resource.custom.LongRunningOperation.__call__", autospec=True)
     def test_what_if_exclude_change_types(self, long_running_operation_stub):
         # Arrange.
-        from azure.cli.core.mock import DummyCli
-        from azure.cli.core import AzCommandsLoader
-        from azure.cli.core.commands import AzCliCommand
-        from azure.cli.core.profiles._shared import ResourceType
-
-        cli_ctx = DummyCli()
-        loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        cmd = AzCliCommand(loader, 'test', None)
-        cmd.command_kwargs = {'resource_type': ResourceType.MGMT_RESOURCE_RESOURCES}
-        cmd.cli_ctx = cli_ctx
-
-        WhatIfOperationResult, WhatIfChange, ChangeType = cmd.get_models(
-            'WhatIfOperationResult', 'WhatIfChange', 'ChangeType'
-        )
-
         long_running_operation_stub.return_value = WhatIfOperationResult(changes=[
             WhatIfChange(resource_id='resource0', change_type=ChangeType.create),
             WhatIfChange(resource_id='resource1', change_type=ChangeType.modify),
@@ -412,7 +528,7 @@ class TestCustom(unittest.TestCase):
         ])
 
         # Act.
-        result = _what_if_deploy_arm_template_core(cmd, mock.MagicMock(), True, ["create", "igNoRE"])
+        result = _what_if_deploy_arm_template_core(cmd.cli_ctx, mock.MagicMock(), True, ["create", "igNoRE"])
 
         # Assert.
         self.assertEqual(1, len(result.changes))

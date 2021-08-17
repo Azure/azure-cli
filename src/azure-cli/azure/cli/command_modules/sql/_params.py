@@ -28,7 +28,6 @@ from azure.mgmt.sql.models import (
     ElasticPoolLicenseType,
     SampleName,
     SecurityAlertPolicyState,
-    SecurityAlertPolicyEmailAccountAdmins,
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
@@ -57,6 +56,7 @@ from .custom import (
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
+    ResourceIdType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType
@@ -66,6 +66,7 @@ from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
     validate_backup_storage_redundancy,
+    validate_backup_storage_redundancy_mi,
     validate_subnet
 )
 
@@ -105,6 +106,14 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
 
 
 def get_internal_backup_storage_redundancy(self):
+    return {
+        'local': 'Local',
+        'zone': 'Zone',
+        'geo': 'Geo',
+    }.get(self.lower(), 'Invalid')
+
+
+def get_internal_backup_storage_redundancy_mi(self):
     return {
         'local': 'LRS',
         'zone': 'ZRS',
@@ -198,6 +207,17 @@ zone_redundant_param_type = CLIArgumentType(
     help='Specifies whether to enable zone redundancy',
     arg_type=get_three_state_flag())
 
+maintenance_configuration_id_param_type = CLIArgumentType(
+    options_list=['--maint-config-id', '-m'],
+    help='Specified maintenance configuration id or name for this resource.')
+
+ledger_on_param_type = CLIArgumentType(
+    options_list=['--ledger-on'],
+    help='Create a ledger database, in which the integrity of all data is protected by the ledger feature. '
+         'All tables in the ledger database must be ledger tables. '
+         'Note: the value of this property cannot be changed after the database has been created. ',
+    arg_type=get_three_state_flag("Enabled", "Disabled", False, False))
+
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL managed instance.')
@@ -228,6 +248,12 @@ backup_storage_redundancy_param_type = CLIArgumentType(
     help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
     validator=validate_backup_storage_redundancy)
 
+backup_storage_redundancy_param_type_mi = CLIArgumentType(
+    options_list=['--backup-storage-redundancy', '--bsr'],
+    type=get_internal_backup_storage_redundancy_mi,
+    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
+    validator=validate_backup_storage_redundancy_mi)
+
 grace_period_param_type = CLIArgumentType(
     help='Interval in hours before automatic failover is initiated '
     'if an outage occurs on the primary server. '
@@ -256,9 +282,9 @@ read_scale_param_type = CLIArgumentType(
     arg_type=get_enum_type(['Enabled', 'Disabled']))
 
 read_replicas_param_type = CLIArgumentType(
-    options_list=['--read-replicas'],
+    options_list=['--read-replicas', '--ha-replicas'],
     type=int,
-    help='The number of readonly replicas to provision for the database. '
+    help='The number of high availability replicas to provision for the database. '
     'Only settable for Hyperscale edition.')
 
 blob_storage_target_state_param_type = CLIArgumentType(
@@ -347,7 +373,7 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('read_scale',
                      arg_type=read_scale_param_type)
 
-    arg_ctx.argument('read_replica_count',
+    arg_ctx.argument('high_availability_replica_count',
                      arg_type=read_replicas_param_type)
 
     creation_arg_group = 'Creation'
@@ -370,9 +396,6 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
-
-    arg_ctx.argument('storage_account_type',
-                     arg_type=backup_storage_redundancy_param_type)
 
 
 def _configure_db_dw_create_params(
@@ -463,8 +486,10 @@ def _configure_db_dw_create_params(
             'min_capacity',
             'compute_model',
             'read_scale',
-            'read_replica_count',
-            'storage_account_type'
+            'high_availability_replica_count',
+            'requested_backup_storage_redundancy',
+            'maintenance_configuration_id',
+            'is_ledger_on',
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -488,12 +513,23 @@ def _configure_db_dw_create_params(
     arg_ctx.argument('elastic_pool_id',
                      help='The name or resource id of the elastic pool to create the database in.')
 
+    arg_ctx.argument('requested_backup_storage_redundancy',
+                     arg_type=backup_storage_redundancy_param_type)
+
+    arg_ctx.argument('maintenance_configuration_id',
+                     arg_type=maintenance_configuration_id_param_type)
+
+    arg_ctx.argument('is_ledger_on',
+                     arg_type=ledger_on_param_type)
+
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
         arg_ctx.ignore('sample_name')
         arg_ctx.ignore('catalog_collation')
+        arg_ctx.ignore('maintenance_configuration_id')
+        arg_ctx.ignore('is_ledger_on')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -534,6 +570,7 @@ def _configure_db_dw_create_params(
         # --read-replica-count was accidentally included in previous releases and
         # therefore is hidden using `deprecate_info` instead of `ignore`
         arg_ctx.ignore('read_scale')
+        arg_ctx.ignore('high_availability_replica_count')
         arg_ctx.argument('read_replica_count',
                          options_list=['--read-replica-count'],
                          deprecate_info=arg_ctx.deprecate(hide=True))
@@ -588,9 +625,6 @@ def load_arguments(self, _):
     with self.argument_context('sql db create') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
-
         c.argument('yes',
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
@@ -610,9 +644,6 @@ def load_arguments(self, _):
                    options_list=['--dest-server'],
                    help='Name of the server to create the copy in.'
                    ' If unspecified, defaults to the origin server.')
-
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
@@ -641,9 +672,6 @@ def load_arguments(self, _):
                    ' Must match the deleted time of a deleted database in the same server.'
                    ' Either --time or --deleted-time (or both) must be specified. ' +
                    time_format_help)
-
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -698,8 +726,10 @@ def load_arguments(self, _):
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
-        c.argument('storage_account_type',
+        c.argument('requested_backup_storage_redundancy',
                    arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('maintenance_configuration_id', arg_type=maintenance_configuration_id_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -824,8 +854,10 @@ def load_arguments(self, _):
                    help='Name of the new replica.'
                    ' If unspecified, defaults to the source database name.')
 
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
+        c.argument('secondary_type',
+                   options_list=['--secondary-type'],
+                   help='Type of secondary to create.'
+                   ' Allowed values include: Geo, Named.')
 
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
@@ -935,8 +967,7 @@ def load_arguments(self, _):
         c.argument('email_account_admins',
                    arg_group=notification_arg_group,
                    options_list=['--email-account-admins'],
-                   help='Whether the alert is sent to the account administrators.',
-                   arg_type=get_enum_type(SecurityAlertPolicyEmailAccountAdmins))
+                   help='Whether the alert is sent to the account administrators.')
 
         # TODO: use server default
 
@@ -955,6 +986,15 @@ def load_arguments(self, _):
                    required=True,
                    help='Status of the transparent data encryption.',
                    arg_type=get_enum_type(TransparentDataEncryptionStatus))
+
+    #####
+    #           sql db ledger-digest-uploads
+    ######
+    with self.argument_context('sql db ledger-digest-uploads enable') as c:
+        c.argument('endpoint',
+                   options_list=['--endpoint'],
+                   help='The endpoint of a digest storage, '
+                   'which can be either an Azure Blob storage or a ledger in Azure Confidential Ledger.')
 
     ###############################################
     #                sql db ltr                   #
@@ -1041,9 +1081,33 @@ def load_arguments(self, _):
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
 
-        c.argument('storage_account_type',
+        c.argument('requested_backup_storage_redundancy',
                    required=False,
                    arg_type=backup_storage_redundancy_param_type)
+
+    ###############################################
+    #                sql db str                   #
+    ###############################################
+    with self.argument_context('sql db str-policy set') as c:
+        create_args_for_complex_type(
+            c, 'parameters', Database, [
+                'retention_days',
+                'diffbackup_hours'
+            ])
+
+        c.argument(
+            'retention_days',
+            options_list=['--retention-days'],
+            required=True,
+            help='New backup short term retention policy retention in days.'
+            'Valid retention days for live database of (DTU) Basic can be 1-7 days; Rest models can be 1-35 days.')
+
+        c.argument(
+            'diffbackup_hours',
+            options_list=['--diffbackup-hours'],
+            required=True,
+            help='New backup short term retention policy differential backup interval in hours.'
+            'Valid differential backup interval for live database can be 12 or 24 hours.')
 
     ###############################################
     #                sql dw                       #
@@ -1135,6 +1199,9 @@ def load_arguments(self, _):
                    help='The compute generation component of the sku (for vcore skus only). '
                    'Allowed values include: Gen4, Gen5.')
 
+        c.argument('maintenance_configuration_id',
+                   arg_type=maintenance_configuration_id_param_type)
+
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
         create_args_for_complex_type(
@@ -1145,6 +1212,7 @@ def load_arguments(self, _):
                 'per_database_settings',
                 'tags',
                 'zone_redundant',
+                'maintenance_configuration_id',
             ])
 
         # Create args that will be used to build up the ElasticPoolPerDatabaseSettings object
@@ -1316,7 +1384,7 @@ def load_arguments(self, _):
 
         c.argument('assign_identity',
                    options_list=['--assign_identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
+                   help='Generate and assign an Azure Active Directory Identity for this server '
                    'for use with key management services like Azure KeyVault.')
 
         c.argument('minimal_tls_version',
@@ -1329,6 +1397,32 @@ def load_arguments(self, _):
                    help='Set whether public network access to server is allowed or not. When false,'
                    'only connections made through Private Links can reach this server.',
                    is_preview=True)
+
+        c.argument('restrict_outbound_network_access',
+                   options_list=['--restrict-outbound-network-access', '-r'],
+                   arg_type=get_three_state_flag(),
+                   help='Set whether outbound network access to server is restricted or not. When true,'
+                   'the outbound connections from the server will be restricted.',
+                   is_preview=True)
+
+        c.argument('primary_user_assigned_identity_id',
+                   options_list=['--primary-user-assigned-identity-id', '--pid'],
+                   help='The ID of the primary user managed identity.')
+
+        c.argument('key_id',
+                   options_list=['--key-id', '-k'],
+                   help='The key vault URI for encryption.')
+
+        c.argument('user_assigned_identity_id',
+                   options_list=['--user-assigned-identity-id', '-a'],
+                   nargs='+',
+                   help='Generate and assign an User Managed Identity(UMI) for this server.')
+
+        c.argument('identity_type',
+                   options_list=['--identity-type', '-t'],
+                   arg_type=get_enum_type(ResourceIdType),
+                   help='Type of Identity to be used. Possible values are SystemAsssigned,'
+                   'UserAssigned, SystemAssigned,UserAssigned and None.')
 
     with self.argument_context('sql server create') as c:
         c.argument('location',
@@ -1344,19 +1438,46 @@ def load_arguments(self, _):
             ])
 
         c.argument('administrator_login',
-                   required=True)
+                   required=False)
 
         c.argument('administrator_login_password',
-                   required=True)
+                   required=False)
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
+                   help='Generate and assign an Azure Active Directory Identity for this server '
                    'for use with key management services like Azure KeyVault.')
+
+        c.argument('enable_ad_only_auth',
+                   options_list=['--enable-ad-only-auth'],
+                   help='Enable Azure Active Directory Only Authentication for this server.')
+
+        c.argument('external_admin_name',
+                   options_list=['--external-admin-name'],
+                   help='Display name of the Azure AD administrator user, group or application.')
+
+        c.argument('external_admin_sid',
+                   options_list=['--external-admin-sid'],
+                   help='The unique ID of the Azure AD administrator. Object Id for User or Group, '
+                   'Client Id for Applications')
+
+        c.argument('external_admin_principal_type',
+                   options_list=['--external-admin-principal-type'],
+                   help='User, Group or Application')
 
     with self.argument_context('sql server update') as c:
         c.argument('administrator_login_password',
                    help='The administrator login password.')
+
+    with self.argument_context('sql server show') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
+
+    with self.argument_context('sql server list') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
 
     #####
     #           sql server ad-admin
@@ -1437,6 +1558,49 @@ def load_arguments(self, _):
         c.argument('event_hub', event_hub_param_type)
 
     #####
+    #           sql server ms-support audit-policy
+    ######
+    with self.argument_context('sql server ms-support audit-policy update') as c:
+        c.argument('storage_account',
+                   options_list=['--storage-account'],
+                   arg_group=storage_arg_group,
+                   help='Name of the storage account.')
+
+        c.argument('storage_account_access_key',
+                   options_list=['--storage-key'],
+                   arg_group=storage_arg_group,
+                   help='Access key for the storage account.')
+
+        c.argument('storage_endpoint',
+                   arg_group=storage_arg_group,
+                   help='The storage account endpoint.')
+        _configure_security_policy_storage_params(c)
+
+        policy_arg_group = 'Policy'
+
+        c.argument('state',
+                   arg_group=policy_arg_group,
+                   help='Auditing policy state',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('blob_storage_target_state',
+                   blob_storage_target_state_param_type)
+
+        c.argument('log_analytics_target_state',
+                   log_analytics_target_state_param_type)
+
+        c.argument('log_analytics_workspace_resource_id',
+                   log_analytics_workspace_resource_id_param_type)
+
+        c.argument('event_hub_target_state',
+                   event_hub_target_state_param_type)
+
+        c.argument('event_hub_authorization_rule_id',
+                   event_hub_authorization_rule_id_param_type)
+
+        c.argument('event_hub', event_hub_param_type)
+
+    #####
     #           sql server conn-policy
     #####
     with self.argument_context('sql server conn-policy') as c:
@@ -1445,7 +1609,8 @@ def load_arguments(self, _):
 
         c.argument('connection_type',
                    options_list=['--connection-type', '-t'],
-                   arg_type=get_enum_type(ServerConnectionType))
+                   arg_type=get_enum_type(ServerConnectionType),
+                   help='The required parameters for updating a secure connection policy. The value is default',)
 
     #####
     #           sql server dns-alias
@@ -1496,6 +1661,19 @@ def load_arguments(self, _):
                    ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
     #####
+    #           sql server outbound firewall-rule
+    #####
+    with self.argument_context('sql server outbound-firewall-rule') as c:
+        # Help text needs to be specified because 'sql server outbound-firewall-rule update' is a custom
+        # command.
+        c.argument('server_name',
+                   arg_type=server_param_type)
+
+        c.argument('outbound_rule_fqdn',
+                   options_list=['--outbound-rule-fqdn', '-n'],
+                   help='The allowed FQDN for the outbound firewall rule.')
+
+    #####
     #           sql server key
     #####
     with self.argument_context('sql server key') as c:
@@ -1523,6 +1701,11 @@ def load_arguments(self, _):
         c.argument('server_key_type',
                    arg_type=server_key_type_param_type)
 
+        c.argument('auto_rotation_enabled',
+                   options_list=['--auto-rotation-enabled'],
+                   help='The key auto rotation opt in status. Can be either true or false.',
+                   arg_type=get_three_state_flag())
+
     #####
     #           sql server vnet-rule
     #####
@@ -1533,7 +1716,8 @@ def load_arguments(self, _):
                    arg_type=server_param_type)
 
         c.argument('virtual_network_rule_name',
-                   options_list=['--name', '-n'])
+                   options_list=['--name', '-n'],
+                   help='The name of the virtual network rule.')
 
         c.argument('virtual_network_subnet_id',
                    options_list=['--subnet'],
@@ -1549,6 +1733,57 @@ def load_arguments(self, _):
         c.extra('vnet_name',
                 options_list=['--vnet-name'],
                 help='The virtual network name')
+
+    ###############################################
+    #           sql server trust groups           #
+    ###############################################
+
+    with self.argument_context('sql stg') as c:
+        c.argument('resource_group_name',
+                   help='The resource group name')
+
+    with self.argument_context('sql stg create') as c:
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+        c.argument('location',
+                   help='The location name of the Server Trust Group.')
+
+        c.argument('group_member',
+                   options_list=['--group-member', '-m'],
+                   help="""Managed Instance that is to be a member of the group.
+                   Specify resource group, subscription id and the name of the instance.""",
+                   nargs='+')
+
+        c.argument('trust_scope',
+                   help='The trust scope of the Server Trust Group.',
+                   nargs='+')
+
+    with self.argument_context('sql stg show') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.')
+
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+    with self.argument_context('sql stg delete') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.')
+
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+    with self.argument_context('sql stg list') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.',
+                   arg_group='List By Location')
+
+        c.argument('instance_name',
+                   help='Managed Instance name.',
+                   arg_group='List By Instance')
 
     ###############################################
     #                sql managed instance         #
@@ -1606,6 +1841,25 @@ def load_arguments(self, _):
 
         c.argument('tags', arg_type=tags_type)
 
+        c.argument('primary_user_assigned_identity_id',
+                   options_list=['--primary-user-assigned-identity-id', '--pid'],
+                   help='The ID of the primary user managed identity.')
+
+        c.argument('key_id',
+                   options_list=['--key-id', '-k'],
+                   help='The key vault URI for encryption.')
+
+        c.argument('user_assigned_identity_id',
+                   options_list=['--user-assigned-identity-id', '-a'],
+                   nargs='+',
+                   help='Generate and assign an User Managed Identity(UMI) for this server.')
+
+        c.argument('identity_type',
+                   options_list=['--identity-type', '-t'],
+                   arg_type=get_enum_type(ResourceIdType),
+                   help='Type of Identity to be used. Possible values are SystemAsssigned,'
+                   'UserAssigned, SystemAssignedUserAssigned and None.')
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1626,7 +1880,10 @@ def load_arguments(self, _):
                 'timezone_id',
                 'tags',
                 'storage_account_type',
-                'yes'
+                'yes',
+                'maintenance_configuration_id',
+                'primary_user_assigned_identity_id',
+                'key_id'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1641,11 +1898,11 @@ def load_arguments(self, _):
 
         c.argument('administrator_login',
                    options_list=['--admin-user', '-u'],
-                   required=True)
+                   required=False)
 
         c.argument('administrator_login_password',
                    options_list=['--admin-password', '-p'],
-                   required=True)
+                   required=False)
 
         c.extra('vnet_name',
                 options_list=['--vnet-name'],
@@ -1664,11 +1921,32 @@ def load_arguments(self, _):
                    'for use with key management services like Azure KeyVault.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
+                   arg_type=backup_storage_redundancy_param_type_mi)
 
         c.argument('yes',
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
+
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Assign maintenance configuration to this managed instance.')
+
+        c.argument('enable_ad_only_auth',
+                   options_list=['--enable-ad-only-auth'],
+                   help='Enable Azure Active Directory Only Authentication for this server.')
+
+        c.argument('external_admin_name',
+                   options_list=['--external-admin-name'],
+                   help='Display name of the Azure AD administrator user, group or application.')
+
+        c.argument('external_admin_sid',
+                   options_list=['--external-admin-sid'],
+                   help='The unique ID of the Azure AD administrator. Object Id for User or Group, '
+                   'Client Id for Applications')
+
+        c.argument('external_admin_principal_type',
+                   options_list=['--external-admin-principal-type'],
+                   help='User, Group or Application')
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
@@ -1687,6 +1965,10 @@ def load_arguments(self, _):
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
 
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Change maintenance configuration for this managed instance.')
+
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(
             c, 'sku', Sku, [
@@ -1696,6 +1978,27 @@ def load_arguments(self, _):
             ])
 
         c.ignore('name')  # Hide sku name
+
+        c.extra('vnet_name',
+                options_list=['--vnet-name'],
+                help='The virtual network name',
+                validator=validate_subnet)
+
+        c.argument('virtual_network_subnet_id',
+                   options_list=['--subnet'],
+                   required=False,
+                   help='Name or ID of the subnet that allows access to an Azure Sql Managed Instance. '
+                   'If subnet name is provided, --vnet-name must be provided.')
+
+    with self.argument_context('sql mi show') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
+
+    with self.argument_context('sql mi list') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
 
     #####
     #           sql managed instance key
@@ -1753,6 +2056,11 @@ def load_arguments(self, _):
 
         c.argument('server_key_type',
                    arg_type=server_key_type_param_type)
+
+        c.argument('auto_rotation_enabled',
+                   options_list=['--auto-rotation-enabled'],
+                   help='The key auto rotation opt in status. Can be either true or false.',
+                   arg_type=get_three_state_flag())
 
     ###############################################
     #                sql managed db               #
@@ -1947,7 +2255,7 @@ def load_arguments(self, _):
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
+                   arg_type=backup_storage_redundancy_param_type_mi)
 
     with self.argument_context('sql midb log-replay start') as c:
         create_args_for_complex_type(

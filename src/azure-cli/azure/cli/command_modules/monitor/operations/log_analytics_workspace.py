@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.command_modules.monitor._client_factory import _log_analytics_client_factory
 from azure.cli.core.commands.transform import _parse_id
-from azure.mgmt.loganalytics.models import WorkspaceSkuNameEnum, Workspace, WorkspaceSku, WorkspaceCapping
+from azure.mgmt.loganalytics.models import WorkspaceSkuNameEnum, Workspace, WorkspaceSku, WorkspaceCapping, Table
 from azure.cli.core.util import sdk_no_wait
 from knack.util import CLIError
 
@@ -29,7 +29,7 @@ def create_log_analytics_workspace(client, resource_group_name, workspace_name, 
                                    retention_in_days=retention_time,
                                    public_network_access_for_query=public_network_access_for_query,
                                    public_network_access_for_ingestion=public_network_access_for_ingestion)
-    return sdk_no_wait(no_wait, workspace_client.create_or_update, resource_group_name,
+    return sdk_no_wait(no_wait, workspace_client.begin_create_or_update, resource_group_name,
                        workspace_name, workspace_instance)
 
 
@@ -74,7 +74,7 @@ def recover_log_analytics_workspace(cmd, workspace_name, resource_group_name=Non
         if deleted_workspace.name.lower() == workspace_name.lower():
             workspace_instance = Workspace(location=deleted_workspace.location)
 
-            return sdk_no_wait(no_wait, workspace_client.create_or_update,
+            return sdk_no_wait(no_wait, workspace_client.begin_create_or_update,
                                _parse_id(deleted_workspace.id)['resource-group'],
                                workspace_name, workspace_instance)
 
@@ -120,13 +120,10 @@ def update_log_analytics_workspace_saved_search(cmd, instance, category=None, di
 
 
 def create_log_analytics_workspace_data_exports(client, workspace_name, resource_group_name, data_export_name,
-                                                destination, data_export_type, enable_all_tables=None, table_names=None,
+                                                destination, data_export_type, table_names,
                                                 event_hub_name=None, enable=None):
     from azure.mgmt.loganalytics.models import DataExport
-    if enable_all_tables:
-        table_names = None
-    data_export = DataExport(all_tables=enable_all_tables,
-                             resource_id=destination,
+    data_export = DataExport(resource_id=destination,
                              data_export_type=data_export_type,
                              table_names=table_names,
                              event_hub_name=event_hub_name,
@@ -134,16 +131,20 @@ def create_log_analytics_workspace_data_exports(client, workspace_name, resource
     return client.create_or_update(resource_group_name, workspace_name, data_export_name, data_export)
 
 
-def update_log_analytics_workspace_data_exports(cmd, instance, destination=None, data_export_type=None,
-                                                enable_all_tables=None, table_names=None,
+def update_log_analytics_workspace_data_exports(cmd, instance, table_names, destination=None, data_export_type=None,
                                                 event_hub_name=None, enable=None):
-    if enable_all_tables:
-        table_names = ''
     with cmd.update_context(instance) as c:
         c.set_param('resource_id', destination)
         c.set_param('data_export_type', data_export_type)
-        c.set_param('all_tables', enable_all_tables)
         c.set_param('table_names', table_names)
         c.set_param('event_hub_name', event_hub_name)
         c.set_param('enable', enable)
     return instance
+
+
+def update_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, retention_in_days):
+    table = Table(retention_in_days=retention_in_days)
+    return client.update(resource_group_name=resource_group_name,
+                         workspace_name=workspace_name,
+                         table_name=table_name,
+                         parameters=table)

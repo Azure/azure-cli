@@ -10,7 +10,7 @@ apt install -y apt-transport-https git gcc python3-dev
 
 # The distros that need libssl1.1
 case ${DISTRO} in
-    bionic|buster|eoan|focal|groovy) apt install -y libssl1.1;;
+    bionic|buster|focal|groovy) apt install -y libssl1.1;;
     *)                        :;;
 esac
 

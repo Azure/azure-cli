@@ -5,6 +5,11 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = "eastus2euap"
 
+# No tidy up of tests required. The resource group is automatically removed
+
+# As a refactoring consideration for the future, consider use of authoring patterns described here
+# https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md#sample-5-get-more-from-resourcegrouppreparer
+
 
 class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_')
@@ -76,7 +81,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
                            self.create_random_name(prefix='cli', length=16)]
         for backup_policy_name in backup_policies:
             self.cmd("az netappfiles account backup-policy create -g {rg} -a %s --backup-policy-name %s -l %s "
-                     "--daily-backups 1" % (account_name, backup_policy_name, LOCATION))
+                     "--daily-backups 1 --enabled true" % (account_name, backup_policy_name, LOCATION))
 
         # validate that both backup policies exist
         backup_policy_list = self.cmd("az netappfiles account backup-policy list -g {rg} -a '%s'" %
@@ -100,9 +105,9 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
 
         # create backup policy
-        backup_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
+        backup_policy_name = self.create_random_name(prefix='cli-ba-pol-', length=16)
         self.cmd("az netappfiles account backup-policy create -g {rg} -a %s --backup-policy-name %s -l %s "
-                 "--daily-backups 1" % (account_name, backup_policy_name, LOCATION)).get_output_in_json()
+                 "--daily-backups 1 --enabled true" % (account_name, backup_policy_name, LOCATION)).get_output_in_json()
 
         # get backup policy by name and validate
         backup_policy = self.cmd("az netappfiles account backup-policy show -g {rg} -a %s --backup-policy-name %s" %
@@ -123,7 +128,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
 
         # create backup policy
-        backup_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
+        backup_policy_name = self.create_random_name(prefix='cli-ba-pol-', length=16)
         daily_backups_to_keep = 1
         weekly_backups_to_keep = 2
         monthly_backups_to_keep = 3

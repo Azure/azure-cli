@@ -16,7 +16,7 @@ def create_log_analytics_cluster(client, resource_group_name, cluster_name, sku_
                                sku=sku,
                                identity=identity)
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, cluster_instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, cluster_instance)
 
 
 def update_log_analytics_cluster(client, resource_group_name, cluster_name,

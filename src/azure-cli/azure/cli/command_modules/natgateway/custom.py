@@ -31,7 +31,7 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                              public_ip_addresses=public_ip_addresses,
                              public_ip_prefixes=public_ip_prefixes)
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, nat_gateway_name, nat_gateway)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, nat_gateway_name, nat_gateway)
 
 
 def update_nat_gateway(instance, cmd, public_ip_addresses=None,

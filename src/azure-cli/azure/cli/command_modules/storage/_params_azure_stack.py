@@ -435,7 +435,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob') as c:
         c.argument('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
-        c.argument('destination_path', help='The destination path that will be appended to the blob name.')
+        c.argument('destination_path', help='The destination path that will be prepended to the blob name.')
 
     with self.argument_context('storage blob list') as c:
         c.argument('include', validator=validate_included_datasets)
@@ -634,6 +634,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('content_type', arg_group='Additional Flags', help="Specify content type of the file. ")
         c.argument('follow_symlinks', arg_group='Additional Flags', action='store_true',
                    help='Follow symbolic links when uploading from local file system.')
+        c.argument('cap_mbps', arg_group='Additional Flags', help="Cap the transfer rate, in megabits per second. "
+                   "Moment-by-moment throughput might vary slightly from the cap. "
+                   "If this option is set to zero, or it is omitted, the throughput isn't capped. ")
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
@@ -650,6 +653,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from azure.cli.command_modules.storage._validators import validate_source_uri
 
         c.register_source_uri_arguments(validator=validate_source_uri)
+        c.argument('requires_sync', arg_type=get_three_state_flag(),
+                   help='Enforce that the service will not return a response until the copy is complete.'
+                        'Not support for standard page blob.')
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client

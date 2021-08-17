@@ -14,7 +14,7 @@ from knack.config import _ConfigFile
 ALL = 'all'   # effective level of local context, ALL means all commands can share this parameter value
 LOCAL_CONTEXT_FILE = '.local_context_{}'  # each user has a separate file, an example is .local_context_username
 LOCAL_CONTEXT_ON_OFF_CONFIG_SECTION = 'local_context'
-LOCAL_CONTEXT_NOTICE = '; This file is used to store local context data.\n'\
+LOCAL_CONTEXT_NOTICE = '; This file is used to store persistent parameters.\n'\
                        '; DO NOT modify it manually unless you know it well.\n'
 logger = get_logger(__name__)
 

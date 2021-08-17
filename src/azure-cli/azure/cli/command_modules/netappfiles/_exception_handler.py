@@ -3,13 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
+
 from knack.util import CLIError
 from msrest.exceptions import ValidationError  # pylint: disable=import-error
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 
 
 def netappfiles_exception_handler(ex):
-    if isinstance(ex, (CloudError, ValidationError, ValueError)):
+    if isinstance(ex, (HttpResponseError, ValidationError, ValueError)):
         message = ex
         raise CLIError(message)
 

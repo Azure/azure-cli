@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import time
 import unittest
-import mock
+from unittest import mock
 from knack.testsdk import record_only
 from knack.util import CLIError
 
@@ -258,7 +258,7 @@ class ImageTemplateTest(ScenarioTest):
         self.assertTrue(parsed['name'], self.kwargs['gallery'])
         self.assertTrue(parsed['child_name_1'], self.kwargs['sig1'])
 
-    @record_only()
+    # @record_only()
     @ResourceGroupPreparer(name_prefix='img_tmpl_managed')
     def test_image_build_managed_image(self, resource_group, resource_group_location):
         self._identity_role(resource_group)

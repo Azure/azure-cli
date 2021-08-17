@@ -9,52 +9,24 @@ import os
 import time
 from azure.cli.command_modules.servicefabric.tests.latest.test_util import _create_cluster, _create_cluster_with_separate_kv, _wait_for_cluster_state_ready, _add_selfsigned_cert_to_keyvault
 from azure.cli.core.util import CLIError
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class ServiceFabricClusterTests(ScenarioTest):
-    @unittest.skip('Update api version')
     @ResourceGroupPreparer()
-    def test_cluster_certs(self):
+    @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    def test_create_cluster_with_separate_kv(self, key_vault, resource_group):
         self.kwargs.update({
-            'kv_name': self.create_random_name('sfrp-cli-kv-', 24),
+            'kv_name': key_vault,
             'loc': 'westus',
             'cert_name': self.create_random_name('sfrp-cli-', 24),
-            'cert_name2': self.create_random_name('sfrp-cli-cert2', 24),
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': "Pass123!@#",
             'policy_path': os.path.join(TEST_DIR, 'policy.json')
         })
         _create_cluster_with_separate_kv(self, self.kwargs)
-        _wait_for_cluster_state_ready(self, self.kwargs)
-
-        primary_cert = self.cmd('keyvault certificate show --vault-name {kv_name} -n {cert_name}').get_output_in_json()
-        primary_cert_tp = primary_cert['x509ThumbprintHex']
-        self.kwargs.update({'primary_cert_tp': primary_cert_tp})
-
-        # add secondary cert
-        self.cmd('keyvault certificate create --vault-name {kv_name} -n {cert_name2} -p @"{policy_path}"')
-
-        while True:
-            cert = self.cmd('keyvault certificate show --vault-name {kv_name} -n {cert_name}').get_output_in_json()
-            if cert:
-                break
-        assert cert['sid'] is not None
-        secondary_cert = cert
-        secondary_cert_secret_id = secondary_cert['sid']
-        secondary_cert_tp = secondary_cert['x509ThumbprintHex']
-        self.kwargs.update({'secondary_cert_secret_id': secondary_cert_secret_id})
-        self.cmd('sf cluster certificate add --resource-group {rg} --cluster-name {cluster_name} --secret-identifier {secondary_cert_secret_id}',
-                 checks=[self.check('certificate.thumbprintSecondary', secondary_cert_tp)])
-
-        _wait_for_cluster_state_ready(self, self.kwargs)
-
-        # remove primary cert
-        self.cmd('sf cluster certificate remove --resource-group {rg} --cluster-name {cluster_name} --thumbprint {primary_cert_tp}',
-                 checks=[self.check('certificate.thumbprint', secondary_cert_tp)])
-
         _wait_for_cluster_state_ready(self, self.kwargs)
 
     @unittest.skip('no quota, disable temporarily')

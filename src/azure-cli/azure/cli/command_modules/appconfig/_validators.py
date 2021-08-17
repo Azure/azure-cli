@@ -5,12 +5,15 @@
 
 # pylint: disable=line-too-long
 
+import json
 import re
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
+from ._constants import FeatureFlagConstants
 from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)
@@ -66,27 +69,31 @@ def validate_separator(namespace):
 def validate_import(namespace):
     source = namespace.source
     if source == 'file':
-        if namespace.path is None or namespace.format_ is None:
-            raise CLIError("usage error: --path PATH --format FORMAT")
+        if namespace.path is None:
+            raise RequiredArgumentMissingError("Please provide the '--path' argument.")
+        if namespace.format_ is None:
+            raise RequiredArgumentMissingError("Please provide the '--format' argument.")
     elif source == 'appconfig':
-        if (namespace.src_name is None) and (namespace.src_connection_string is None):
-            raise CLIError("usage error: --config-name NAME | --connection-string STR")
+        if (namespace.src_name is None) and (namespace.src_connection_string is None) and (namespace.src_endpoint is None):
+            raise RequiredArgumentMissingError("Please provide '--src-name', '--src-connection-string' or '--src-endpoint' argument.")
     elif source == 'appservice':
         if namespace.appservice_account is None:
-            raise CLIError("usage error: --appservice-account NAME_OR_ID")
+            raise RequiredArgumentMissingError("Please provide '--appservice-account' argument")
 
 
 def validate_export(namespace):
     destination = namespace.destination
     if destination == 'file':
-        if namespace.path is None or namespace.format_ is None:
-            raise CLIError("usage error: --path PATH --format FORMAT")
+        if namespace.path is None:
+            raise RequiredArgumentMissingError("Please provide the '--path' argument.")
+        if namespace.format_ is None:
+            raise RequiredArgumentMissingError("Please provide the '--format' argument.")
     elif destination == 'appconfig':
-        if (namespace.dest_name is None) and (namespace.dest_connection_string is None):
-            raise CLIError("usage error: --config-name NAME | --connection-string STR")
+        if (namespace.dest_name is None) and (namespace.dest_connection_string is None) and (namespace.dest_endpoint is None):
+            raise RequiredArgumentMissingError("Please provide '--dest-name', '--dest-connection-string' or '--dest-endpoint' argument.")
     elif destination == 'appservice':
         if namespace.appservice_account is None:
-            raise CLIError("usage error: --appservice-account NAME_OR_ID")
+            raise RequiredArgumentMissingError("Please provide '--appservice-account' argument")
 
 
 def validate_appservice_name_or_id(cmd, namespace):
@@ -141,15 +148,10 @@ def validate_filter_parameters(namespace):
             if param_tuple:
                 # pylint: disable=unbalanced-tuple-unpacking
                 param_name, param_value = param_tuple
-                # If param_name already exists, convert the values to a list
+                # If param_name already exists, error out
                 if param_name in filter_parameters_dict:
-                    old_param_value = filter_parameters_dict[param_name]
-                    if isinstance(old_param_value, list):
-                        old_param_value.append(param_value)
-                    else:
-                        filter_parameters_dict[param_name] = [old_param_value, param_value]
-                else:
-                    filter_parameters_dict.update({param_name: param_value})
+                    raise CLIError('Filter parameter name "{}" cannot be duplicated.'.format(param_name))
+                filter_parameters_dict.update({param_name: param_value})
         namespace.filter_parameters = filter_parameters_dict
 
 
@@ -158,11 +160,25 @@ def validate_filter_parameter(string):
     result = ()
     if string:
         comps = string.split('=', 1)
-        # Ignore invalid arguments like  '=value' or '='
+
         if comps[0]:
-            result = (comps[0], comps[1]) if len(comps) > 1 else (string, '')
+            if len(comps) > 1:
+                # In the portal, if value textbox is blank we store the value as empty string.
+                # In CLI, we should allow inputs like 'name=', which correspond to empty string value.
+                # But there is no way to differentiate between CLI inputs 'name=' and 'name=""'.
+                # So even though "" is invalid JSON escaped string, we will accept it and set the value as empty string.
+                filter_param_value = '\"\"' if comps[1] == "" else comps[1]
+                try:
+                    # Ensure that provided value of this filter parameter is valid JSON. Error out if value is invalid JSON.
+                    filter_param_value = json.loads(filter_param_value)
+                except ValueError:
+                    raise CLIError('Filter parameter value must be a JSON escaped string. "{}" is not a valid JSON object.'.format(filter_param_value))
+                result = (comps[0], filter_param_value)
+            else:
+                result = (string, '')
         else:
-            logger.warning("Ignoring filter parameter '%s' because parameter name is empty.", string)
+            # Error out on invalid arguments like '=value' or '='
+            raise CLIError('Invalid filter parameter "{}". Parameter name cannot be empty.'.format(string))
     return result
 
 
@@ -215,10 +231,19 @@ def validate_resolve_keyvault(namespace):
 
 
 def validate_feature(namespace):
-    if namespace.feature:
-        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
-        invalid = re.search(invalid_pattern, namespace.feature)
-        if invalid:
-            raise CLIError("Feature name is invalid. Only alphanumeric characters, '.', '-' and '_' are allowed.")
-    else:
-        raise CLIError("Feature name cannot be empty.")
+    if namespace.feature is not None:
+        if '%' in namespace.feature:
+            raise InvalidArgumentValueError("Feature name cannot contain the '%' character.")
+        if not namespace.feature:
+            raise InvalidArgumentValueError("Feature name cannot be empty.")
+
+
+def validate_feature_key(namespace):
+    if namespace.key is not None:
+        input_key = str(namespace.key).lower()
+        if '%' in input_key:
+            raise InvalidArgumentValueError("Feature flag key cannot contain the '%' character.")
+        if not input_key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+            raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+        if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+            raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))

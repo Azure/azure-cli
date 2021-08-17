@@ -15,8 +15,9 @@ from azure.cli.command_modules.aro._validators import validate_vnet
 from azure.cli.command_modules.aro._validators import validate_vnet_resource_group_name
 from azure.cli.command_modules.aro._validators import validate_worker_count
 from azure.cli.command_modules.aro._validators import validate_worker_vm_disk_size_gb
+from azure.cli.command_modules.aro._validators import validate_refresh_cluster_credentials
 from azure.cli.core.commands.parameters import name_type
-from azure.cli.core.commands.parameters import get_enum_type
+from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.commands.parameters import tags_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
@@ -47,13 +48,13 @@ def load_arguments(self, _):
                    validator=validate_client_id)
         c.argument('client_secret',
                    help='Client secret of cluster service principal.',
-                   validator=validate_client_secret)
+                   validator=validate_client_secret(isCreate=True))
 
         c.argument('pod_cidr',
-                   help='CIDR of pod network.',
+                   help='CIDR of pod network. Must be a minimum of /18 or larger.',
                    validator=validate_cidr('pod_cidr'))
         c.argument('service_cidr',
-                   help='CIDR of service network.',
+                   help='CIDR of service network. Must be a minimum of /18 or larger',
                    validator=validate_cidr('service_cidr'))
 
         c.argument('master_vm_size',
@@ -92,3 +93,12 @@ def load_arguments(self, _):
         c.argument('worker_subnet',
                    help='Name or ID of worker vnet subnet.  If name is supplied, `--vnet` must be supplied.',
                    validator=validate_subnet('worker_subnet'))
+    with self.argument_context('aro update') as c:
+        c.argument('client_secret',
+                   help='Client secret of cluster service principal.',
+                   validator=validate_client_secret(isCreate=False))
+        c.argument('refresh_cluster_credentials',
+                   arg_type=get_three_state_flag(),
+                   help='Refresh cluster application credentials.',
+                   options_list=['--refresh-credentials'],
+                   validator=validate_refresh_cluster_credentials)

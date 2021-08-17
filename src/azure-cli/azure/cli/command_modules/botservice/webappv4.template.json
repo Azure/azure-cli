@@ -64,6 +64,14 @@
         "botFileEncryptionKey": {
             "type": "string",
             "defaultValue": ""
+        },
+        "isCmekEnabled":{
+            "type": "bool",
+            "defaultValue": false
+        },
+        "cmekKeyVaultUrl":{
+            "type": "string",
+            "defaultValue": ""
         }
     },
     "variables": {
@@ -148,7 +156,7 @@
             ]
         },
         {
-            "apiVersion": "2017-12-01",
+            "apiVersion": "2020-06-02",
             "type": "Microsoft.BotService/botServices",
             "name": "[parameters('botId')]",
             "location": "global",
@@ -161,6 +169,8 @@
                 "displayName": "[parameters('botId')]",
                 "endpoint": "[variables('botEndpoint')]",
                 "msaAppId": "[parameters('appId')]",
+                "isCmekEnabled": "[parameters('isCmekEnabled')]",
+                "cmekKeyVaultUrl": "[parameters('cmekKeyVaultUrl')]",
                 "publishingCredentials": "[list(concat(resourceId('Microsoft.Web/Sites', parameters('siteName')), '/config/publishingcredentials'), '2018-02-01')]",
                 "allSettings": {
                     "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",

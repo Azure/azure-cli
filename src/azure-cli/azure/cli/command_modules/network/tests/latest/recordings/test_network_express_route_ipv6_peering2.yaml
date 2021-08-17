@@ -1,0 +1,444 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network express-route create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --bandwidth --provider --peering-location --sku-tier
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_express_route_ipv6_peering2000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_express_route_ipv6_peering2000001","name":"cli_test_express_route_ipv6_peering2000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-07-15T10:01:53Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 15 Jul 2021 10:02:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "sku": {"name": "Premium_MeteredData", "tier": "Premium",
+      "family": "MeteredData"}, "properties": {"serviceProviderProperties": {"serviceProviderName":
+      "Ibiza Test Provider", "peeringLocation": "Area51", "bandwidthInMbps": 50}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network express-route create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '251'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --bandwidth --provider --peering-location --sku-tier
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_express_route_ipv6_peering2000001/providers/Microsoft.Network/expressRouteCircuits/test_circuit?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"test_circuit\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_express_route_ipv6_peering2000001/providers/Microsoft.Network/expressRouteCircuits/test_circuit\",\r\n
+        \ \"etag\": \"W/\\\"73cb4f2e-5ecc-4bc9-9360-a1ee3c555022\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/expressRouteCircuits\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"0414b664-c817-4c7b-b6cf-4d40864f102d\",\r\n    \"peerings\": [],\r\n    \"authorizations\":
+        [],\r\n    \"serviceProviderProperties\": {\r\n      \"serviceProviderName\":
+        \"Ibiza Test Provider\",\r\n      \"peeringLocation\": \"Area51\",\r\n      \"bandwidthInMbps\":
+        50\r\n    },\r\n    \"circuitProvisioningState\": \"Disabled\",\r\n    \"allowClassicOperations\":
+        false,\r\n    \"serviceKey\": \"00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"serviceProviderProvisioningState\": \"NotProvisioned\",\r\n    \"allowGlobalReach\":
+        false,\r\n    \"globalReachEnabled\": false\r\n  },\r\n  \"sku\": {\r\n    \"name\":
+        \"Premium_MeteredData\",\r\n    \"tier\": \"Premium\",\r\n    \"family\":
+        \"MeteredData\"\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/bff0e6e3-2d97-475b-bb39-52b2c955f046?api-version=2021-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1089'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 15 Jul 2021 10:02:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bb2bfe03-d6ea-46dd-8d97-aa523635ff30
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network express-route create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --bandwidth --provider --peering-location --sku-tier
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/bff0e6e3-2d97-475b-bb39-52b2c955f046?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 15 Jul 2021 10:02:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5887fb57-b0fb-47e2-9fd6-1fe4d0b00f0b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network express-route create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --bandwidth --provider --peering-location --sku-tier
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/bff0e6e3-2d97-475b-bb39-52b2c955f046?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 15 Jul 2021 10:02:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9fe8b6c4-b752-4b88-a012-dc5ada2d0c42
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network express-route create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --bandwidth --provider --peering-location --sku-tier
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_express_route_ipv6_peering2000001/providers/Microsoft.Network/expressRouteCircuits/test_circuit?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"test_circuit\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_express_route_ipv6_peering2000001/providers/Microsoft.Network/expressRouteCircuits/test_circuit\",\r\n
+        \ \"etag\": \"W/\\\"88e600b3-7558-4ee5-bb80-47c9d9e6847d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/expressRouteCircuits\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"0414b664-c817-4c7b-b6cf-4d40864f102d\",\r\n    \"peerings\": [],\r\n    \"authorizations\":
+        [],\r\n    \"serviceProviderProperties\": {\r\n      \"serviceProviderName\":
+        \"Ibiza Test Provider\",\r\n      \"peeringLocation\": \"Area51\",\r\n      \"bandwidthInMbps\":
+        50\r\n    },\r\n    \"circuitProvisioningState\": \"Enabled\",\r\n    \"allowClassicOperations\":
+        false,\r\n    \"gatewayManagerEtag\": \"\",\r\n    \"serviceKey\": \"243c4dce-c8d2-4afd-829a-45fe351f9e2e\",\r\n
+        \   \"serviceProviderProvisioningState\": \"NotProvisioned\",\r\n    \"allowGlobalReach\":
+        false,\r\n    \"globalReachEnabled\": false,\r\n    \"stag\": 3\r\n  },\r\n
+        \ \"sku\": {\r\n    \"name\": \"Premium_MeteredData\",\r\n    \"tier\": \"Premium\",\r\n
+        \   \"family\": \"MeteredData\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1136'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 15 Jul 2021 10:02:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d2bb3a2c-1cca-440a-9f39-48a715ebb4cf
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"peeringType": "AzurePrivatePeering", "peerASN": 10002,
+      "vlanId": 103, "ipv6PeeringConfig": {"primaryPeerAddressPrefix": "2002:db00::/126",
+      "secondaryPeerAddressPrefix": "2003:db00::/126"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network express-route peering create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '206'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --circuit-name --peering-type --peer-asn --vlan-id --ip-version --primary-peer-subnet
+        --secondary-peer-subnet
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_express_route_ipv6_peering2000001/providers/Microsoft.Network/expressRouteCircuits/test_circuit/peerings/AzurePrivatePeering?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"AzurePrivatePeering\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_express_route_ipv6_peering2000001/providers/Microsoft.Network/expressRouteCircuits/test_circuit/peerings/AzurePrivatePeering\",\r\n
+        \ \"etag\": \"W/\\\"1ec85615-2dd0-4e19-be10-814d3baeb709\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"peeringType\": \"AzurePrivatePeering\",\r\n
+        \   \"azureASN\": 0,\r\n    \"peerASN\": 10002,\r\n    \"state\": \"Enabled\",\r\n
+        \   \"vlanId\": 103,\r\n    \"lastModifiedBy\": \"\",\r\n    \"ipv6PeeringConfig\":
+        {\r\n      \"primaryPeerAddressPrefix\": \"2002:db00::/126\",\r\n      \"secondaryPeerAddressPrefix\":
+        \"2003:db00::/126\",\r\n      \"state\": \"Enabled\"\r\n    },\r\n    \"connections\":
+        [],\r\n    \"peeredConnections\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/expressRouteCircuits/peerings\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/d37a9e4e-120a-47e1-8ba9-90f15417c776?api-version=2021-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '848'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 15 Jul 2021 10:02:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6ca3ad86-c876-4421-a6d6-a34edfb3c709
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network express-route peering create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --circuit-name --peering-type --peer-asn --vlan-id --ip-version --primary-peer-subnet
+        --secondary-peer-subnet
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/d37a9e4e-120a-47e1-8ba9-90f15417c776?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 15 Jul 2021 10:02:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c6eabc16-aac7-43b1-8a1a-138297ae41da
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network express-route peering create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --circuit-name --peering-type --peer-asn --vlan-id --ip-version --primary-peer-subnet
+        --secondary-peer-subnet
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_express_route_ipv6_peering2000001/providers/Microsoft.Network/expressRouteCircuits/test_circuit/peerings/AzurePrivatePeering?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"AzurePrivatePeering\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_express_route_ipv6_peering2000001/providers/Microsoft.Network/expressRouteCircuits/test_circuit/peerings/AzurePrivatePeering\",\r\n
+        \ \"etag\": \"W/\\\"fef4b659-e272-485b-a883-b6f36ee7bfb1\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"peeringType\": \"AzurePrivatePeering\",\r\n
+        \   \"azureASN\": 12076,\r\n    \"peerASN\": 10002,\r\n    \"primaryAzurePort\":
+        \"A51-IBIZA-06GMR-CIS-1-PRI-A\",\r\n    \"secondaryAzurePort\": \"A51-IBIZA-06GMR-CIS-2-SEC-A\",\r\n
+        \   \"state\": \"Disabled\",\r\n    \"vlanId\": 103,\r\n    \"gatewayManagerEtag\":
+        \"\",\r\n    \"lastModifiedBy\": \"Customer\",\r\n    \"ipv6PeeringConfig\":
+        {\r\n      \"primaryPeerAddressPrefix\": \"2002:db00::/126\",\r\n      \"secondaryPeerAddressPrefix\":
+        \"2003:db00::/126\",\r\n      \"state\": \"Enabled\"\r\n    },\r\n    \"connections\":
+        [],\r\n    \"peeredConnections\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/expressRouteCircuits/peerings\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1007'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 15 Jul 2021 10:02:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2490e069-c506-4dc3-82fb-827b466c98ff
+    status:
+      code: 200
+      message: OK
+version: 1

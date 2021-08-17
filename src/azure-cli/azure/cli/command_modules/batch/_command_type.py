@@ -250,7 +250,7 @@ class BatchArgumentTree:
         required_args = []
         children = self._get_children(path)
         if not required:
-            if not any([getattr(namespace, n) for n in children]):
+            if not any(getattr(namespace, n) for n in children):
                 return []
         siblings = self._get_siblings(path)
         if not siblings:
@@ -377,7 +377,7 @@ class BatchArgumentTree:
             child_args = self._get_children(arg_group)
             if child_args:
                 ex_group_names.append(group_title(arg_group))
-                if any([getattr(namespace, arg) for arg in child_args]):
+                if any(getattr(namespace, arg) for arg in child_args):
                     ex_groups.append(ex_group_names[-1])
 
         message = None
@@ -488,12 +488,11 @@ class AzureBatchDataPlaneCommand:
                             param_value = kwargs.pop(arg)
                             if param_value is None:
                                 continue
-                            else:
-                                self._build_parameters(
-                                    details['path'],
-                                    kwargs,
-                                    details['root'],
-                                    param_value)
+                            self._build_parameters(
+                                details['path'],
+                                kwargs,
+                                details['root'],
+                                param_value)
                         except KeyError:
                             continue
 
@@ -614,7 +613,7 @@ class AzureBatchDataPlaneCommand:
                 model._validation.get(attr, {}).get('readonly'))  # pylint: disable=protected-access
             conditions.append(
                 model._validation.get(attr, {}).get('constant'))  # pylint: disable=protected-access
-            conditions.append(any([i for i in pformat.IGNORE_PARAMETERS if i in full_path]))
+            conditions.append(any(i for i in pformat.IGNORE_PARAMETERS if i in full_path))
             conditions.append(details['type'][0] in ['{'])
             if not any(conditions):
                 yield attr, details

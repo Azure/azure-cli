@@ -52,6 +52,14 @@ parameters:
     short-summary: If enabled, AES encryption will be enabled for SMB communication
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
+  - name: --security-operators
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
+  - name: --ldap-over-tls
+    short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
+  - name: --allow-local-ldap-users
+    short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
+  - name: --administrators
+    short-summary: Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier.
 examples:
   - name: Add an active directory to the account
     text: >
@@ -92,6 +100,8 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --encryption
+    short-summary: Encryption settings
 examples:
   - name: Create an ANF account
     text: >
@@ -139,6 +149,8 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --encryption
+    short-summary: Encryption settings
 examples:
   - name: Update the tags of an ANF account
     text: >
@@ -160,6 +172,34 @@ examples:
   - name: Get a list of all ANF account backup
     text: >
         az netappfiles account backup list -g mygroup --account-name myaccountname
+"""
+
+helps['netappfiles account backup show'] = """
+type: command
+short-summary: Get Backup for a Netapp Files (ANF) Account.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --backup-name
+    short-summary: The name of the backup
+examples:
+  - name: Get a list of all ANF account backup
+    text: >
+        az netappfiles account backup show -g mygroup --account-name myaccountname --backup-name mybackupname
+"""
+
+helps['netappfiles account backup delete'] = """
+type: command
+short-summary: Delete Backup for a Netapp Files (ANF) Account.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --backup-name
+    short-summary: The name of the backup
+examples:
+  - name: Get a list of all ANF account backup
+    text: >
+        az netappfiles account backup delete -g mygroup --account-name myaccountname --backup-name mybackupname
 """
 
 
@@ -282,6 +322,8 @@ parameters:
     short-summary: The qos type of the ANF pool
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --cool-access
+    short-summary: If enabled (true) the pool can contain cool Access enabled volumes.
 examples:
   - name: Create an ANF pool
     text: >
@@ -496,6 +538,32 @@ parameters:
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
     short-summary: Has root access to volume
+  - name: --smb-encryption
+    short-summary: Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later. Default value is False
+  - name: --smb-continuously-avl
+    short-summary: Enables continuously available share property for smb volume. Only applicable for SMB volume. Default value is False
+  - name: --encryption-key-source
+    short-summary: Encryption Key Source
+  - name: --allowed-clients
+    short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names
+  - name: --cifs
+    short-summary: Allows NFSv3 protocol. Enable only for NFSv3 type volumes
+  - name: --rule-index
+    short-summary: Order index
+  - name: --unix-read-only
+    short-summary: Read only access
+  - name: --unix-read-write
+    short-summary: Read and write access
+  - name: --ldap-enabled
+    short-summary: Specifies whether LDAP is enabled or not for a given NFS volume
+  - name: --chown-mode
+    short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include- Restricted, Unrestricted. Default value- Restricted.
+  - name: --cool-access
+    short-summary: Specifies whether Cool Access(tiering) is enabled for the volume.
+  - name: --coolness-period
+    short-summary: Specifies the number of days after which data that is not accessed by clients will be tiered.
+  - name: --unix-permissions
+    short-summary: UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file- read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users.
 examples:
   - name: Create an ANF volume
     text: >
@@ -754,7 +822,7 @@ parameters:
   - name: --service-level
     short-summary: The service level
   - name: --usage-threshold
-    short-summary: The maximum storage quota allowed for a file system as integer number of GiB. Min 100 GiB, max 100TiB"
+    short-summary: The maximum storage quota allowed for a file system as integer number of GiB. Min 100 GiB, max 100TiB
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
   - name: --backup-enabled
@@ -765,6 +833,8 @@ parameters:
     short-summary: Backup Policy Enforced
   - name: --vault-id
     short-summary: Vault Resource ID
+  - name: --snapshot-policy-id
+    short-summary: Snapshot Policy ResourceId
 examples:
   - name: Update an ANF volume
     text: >
@@ -773,7 +843,7 @@ examples:
 
 helps['netappfiles volume pool-change'] = """
 type: command
-short-summary: Get the specified ANF volume.
+short-summary: Change pool for an Azure NetApp Files (ANF) volume.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
@@ -784,7 +854,7 @@ parameters:
   - name: --new-pool-resource-id -d
     short-summary: The resource id of the new ANF pool
 examples:
-  - name: Returns the properties of the given ANF volume
+  - name: This changes the pool for the volume myvolname from mypoolname to pool with the Id mynewresourceid
     text: >
         az netappfiles volume pool-change -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --new-pool-resource-id mynewresourceid
 """
@@ -806,6 +876,8 @@ parameters:
     short-summary: The name of the ANF volume
   - name: --backup-name -b
     short-summary: The name of the ANF backup
+  - name: --use-existing-snapshot
+    short-summary: Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups
 examples:
   - name: Returns the created ANF backup
     text: >
@@ -844,6 +916,38 @@ examples:
   - name: Returns the properties of the given ANF backup
     text: >
         az netappfiles volume backup show -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
+"""
+
+helps['netappfiles volume backup status'] = """
+type: command
+short-summary: Get backup status of the specified ANF Volume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF pool
+examples:
+  - name: Returns the backup status of the given ANF Volume
+    text: >
+        az netappfiles volume backup status -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""
+
+helps['netappfiles volume backup restore-status'] = """
+type: command
+short-summary: Get backup restore status of the specified ANF Volume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF pool
+examples:
+  - name: Returns the backup restore status of the given ANF Volume
+    text: >
+        az netappfiles volume backup restore-status -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
 helps['netappfiles volume backup update'] = """
