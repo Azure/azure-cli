@@ -2159,7 +2159,7 @@ def load_arguments(self, _):
         c.argument('resource_id', help='ResourceId of the Bastion host.', options_list=['--resource-id'])
         c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
         c.argument('vm_id', help='ResourceId of the target Virtual Machine.', options_list=['--vm-id'])
-        c.argument('auth-type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
+        c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
         c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
         c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
         c.ignore('subnet')
