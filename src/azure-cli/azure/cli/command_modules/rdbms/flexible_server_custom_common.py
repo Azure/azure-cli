@@ -80,24 +80,24 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
         parameters)
 
 
-def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_id=None):
+def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_name=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    if migration_id is None:
+    if migration_name is None:
         # Convert a UUID to a string of hex digits in standard form
-        migration_id = str(uuid.uuid4())
+        migration_name = str(uuid.uuid4())
 
-    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, properties)
+    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
 
     return r.json()
 
 
-def migration_show_func(cmd, client, resource_group_name, server_name, migration_id, level="Default"):
+def migration_show_func(cmd, client, resource_group_name, server_name, migration_name, level="Default"):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id, level))
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name, level))
 
     return r.json()
 
@@ -111,7 +111,7 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
     return r.json()
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_id, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -144,21 +144,21 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
     if operationSpecified is False:
         raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
 
-    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, properties)
+    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
 
     return r.json()
 
 
-def migration_delete_func(cmd, client, resource_group_name, server_name, migration_id, yes=None):
+def migration_delete_func(cmd, client, resource_group_name, server_name, migration_name, yes=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if not yes:
         user_confirmation(
             "Are you sure you want to delete the migration '{0}' on target server '{1}', resource group '{2}'".format(
-                migration_id, server_name, resource_group_name))
+                migration_name, server_name, resource_group_name))
 
-    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id))
+    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name))
 
     return r.json()
 
@@ -199,14 +199,14 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
 def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
     result = None
     if resource_group_name is None or server_name is None or database_name is None:
-        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
+        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name. "
                        "If your parameter persistence is turned ON, make sure these three parameters exist in "
                        "persistent parameters using \'az config param-persist show\'. "
                        "If your parameter persistence is turned OFF, consider passing them explicitly.")
     if not yes:
         user_confirmation(
-            "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
-                                                                                              resource_group_name), yes=yes)
+            "Are you sure you want to delete the database '{0}' of server '{1}'".format(database_name,
+                                                                                        server_name), yes=yes)
 
     try:
         result = client.begin_delete(resource_group_name, server_name, database_name)

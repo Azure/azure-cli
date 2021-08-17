@@ -951,7 +951,7 @@ examples:
   - name: Display the expiry date of SSL certificate. The certificate is returned in PKCS7 format from which the expiration date needs to be retrieved.
     text: |
         publiccert=`az network application-gateway ssl-cert show -g MyResourceGroup --gateway-name MyAppGateway --name mywebsite.com --query publicCertData -o tsv`
-        echo "-----BEGIN CERTIFICATE-----" >> public.cert; echo "${publiccert}" >> public.cert; echo "-----END CERTIFICATE-----" >> public.cert
+        echo "-----BEGIN PKCS7-----" >> public.cert; echo "${publiccert}" >> public.cert; echo "-----END PKCS7-----" >> public.cert
         cat public.cert | fold -w 64 | openssl pkcs7 -print_certs | openssl x509 -noout -enddate
 """
 
@@ -1333,6 +1333,13 @@ short-summary: Manage application gateway web application firewall (WAF) policie
 helps['network application-gateway waf-policy custom-rule match-condition add'] = """
 type: command
 short-summary: A match condition to an application gateway WAF policy custom rule.
+examples:
+  - name: Add application gateway WAF policy custom rule match condition with contains.
+    text: |
+        az network application-gateway waf-policy custom-rule match-condition add --resource-group MyResourceGroup --policy-name MyPolicy --name MyWAFPolicyRule --match-variables RequestHeaders.value --operator contains --values foo boo --transform lowercase
+  - name: Add application gateway WAF policy custom rule match condition with equal.
+    text: |
+        az network application-gateway waf-policy custom-rule match-condition add --resource-group MyResourceGroup --policy-name MyPolicy --name MyWAFPolicyRule --match-variables RequestHeaders.Content-Type --operator Equal --values application/csp-report
 """
 
 helps['network application-gateway waf-policy custom-rule match-condition list'] = """
@@ -2943,7 +2950,7 @@ examples:
         --name link1 \\
         --macsec-ckn-secret-identifier MacSecCKNSecretID \\
         --macsec-cak-secret-identifier MacSecCAKSecretID \\
-        --macsec-cipher gcm-aes-128
+        --macsec-cipher GcmAes128
   - name: Enable administrative state of an ExpressRoute Link.
     text: |-
         az network express-route port link update \\
@@ -4314,7 +4321,7 @@ examples:
   - name: Create a "Deny" rule over TCP for a specific IP address range with the lowest priority.
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096 \\
-            --source-address-prefixes 208.130.28/24 --source-port-ranges 80 \\
+            --source-address-prefixes 208.130.28.0/24 --source-port-ranges 80 \\
             --destination-address-prefixes '*' --destination-port-ranges 80 8080 --access Deny \\
             --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
   - name: Create a security rule using service tags. For more details visit https://aka.ms/servicetags
@@ -6163,7 +6170,7 @@ short-summary: Create a route server.
 examples:
   - name: Create a route server.
     text: |
-      az network routeserver create --resource-group myresourcegroup --name myrouteserver --hosted-subnet my_subnet_id
+      az network routeserver create --resource-group myresourcegroup --name myrouteserver --hosted-subnet my_subnet_id --public-ip-address my_public_ip
 """
 
 helps['network routeserver update'] = """

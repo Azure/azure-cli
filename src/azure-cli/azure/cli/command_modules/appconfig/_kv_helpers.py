@@ -7,7 +7,6 @@
 
 import io
 import json
-import re
 
 import chardet
 import javaproperties
@@ -107,10 +106,8 @@ def validate_import_key(key):
 
 def validate_import_feature(feature):
     if feature:
-        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
-        invalid = re.search(invalid_pattern, feature)
-        if invalid:
-            logger.warning("Ignoring invalid feature '%s'. Only alphanumeric characters, '.', '-' and '_' are allowed in feature name.", feature)
+        if '%' in feature:
+            logger.warning("Ignoring invalid feature '%s'. Feature name cannot contain the '%%' character.", feature)
             return False
     else:
         logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
@@ -334,7 +331,7 @@ def __read_kv_from_config_store(azconfig_client,
 
             if kv.content_type and kv.value:
                 # resolve key vault reference
-                if keyvault_client and kv.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+                if keyvault_client and __is_key_vault_ref(kv):
                     __resolve_secret(keyvault_client, kv)
 
         # trim unwanted fields from kv object instead of leaving them as null.
@@ -369,8 +366,8 @@ def __write_kv_and_features_to_config_store(azconfig_client,
         if not preserve_labels:
             set_kv.label = label
 
-        # Don't overwrite the content type of feature flags
-        if content_type and not __is_feature_flag(set_kv):
+        # Don't overwrite the content type of feature flags or key vault references
+        if content_type and not __is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
         try:
@@ -387,6 +384,10 @@ def __is_feature_flag(kv):
     if kv and kv.key and kv.content_type:
         return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
     return False
+
+
+def __is_key_vault_ref(kv):
+    return kv and kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE
 
 
 def __discard_features_from_retrieved_kv(src_kvs):
@@ -467,7 +468,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
             name = kv.key
             value = kv.value
             # If its a KeyVault ref, convert the format to AppService KeyVault ref format
-            if kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+            if __is_key_vault_ref(kv):
                 try:
                     secret_uri = json.loads(value).get("uri")
                     if secret_uri:
@@ -548,8 +549,8 @@ def __serialize_feature_list_to_comparable_json_object(features):
         feature_json['description'] = feature.description
         # conditions
         feature_json['conditions'] = feature.conditions
-        # key
-        res[feature.key] = feature_json
+        # name
+        res[feature.name] = feature_json
     return res
 
 
@@ -873,7 +874,7 @@ def __export_features(retrieved_features, naming_convention):
                         feature_filter["Parameters"] = filter_.parameters
                     feature_state[feature_reserved_keywords.enabledfor].append(feature_filter)
 
-            feature_entry = {feature.key: feature_state}
+            feature_entry = {feature.name: feature_state}
 
             exported_dict[feature_reserved_keywords.featuremanagement].update(feature_entry)
 

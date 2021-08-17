@@ -26,10 +26,9 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import CLIInternalError
+from azure.cli.core.azclierror import CLIInternalError, ValidationError, RequiredArgumentMissingError
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
-from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
@@ -738,7 +737,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None):
+              data_disk_delete_option=None, user_data=None):
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -751,6 +751,15 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_vm_windows_log_analytics_workspace_agent)
     from azure.cli.command_modules.vm._vm_utils import ArmTemplateBuilder20190401
     from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
+
+    # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
+    # In order to avoid breaking change which has a big impact to users,
+    # we use the hint to guide users to use Standard public IP to create VM in the first stage.
+    if public_ip_sku is None and cmd.cli_ctx.cloud.profile == 'latest':
+        logger.warning(
+            'It is recommended to use parameter "--public-ip-sku Standard" to create new VM with Standard public IP. '
+            'Please note that the default public IP used for VM creation will be changed from Basic to Standard '
+            'in the future.')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -794,7 +803,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             hash_string(vm_id, length=14, force_lower=True))
         vm_dependencies.append('Microsoft.Storage/storageAccounts/{}'.format(storage_account))
         master_template.add_resource(build_storage_account_resource(cmd, storage_account, location,
-                                                                    tags, storage_sku))
+                                                                    tags, storage_sku, edge_zone))
 
     nic_name = None
     if nic_type == 'new':
@@ -836,8 +845,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             if not vnet_exists:
                 vnet_name = vnet_name or '{}VNET'.format(vm_name)
                 nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-                master_template.add_resource(build_vnet_resource(
-                    cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
+                master_template.add_resource(build_vnet_resource(cmd, vnet_name, location, tags, vnet_address_prefix,
+                                                                 subnet, subnet_address_prefix, edge_zone=edge_zone))
 
         if nsg_type == 'new':
             if nsg_rule is None:
@@ -856,7 +865,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location, tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name,
-                                                                  public_ip_sku, zone, count))
+                                                                  public_ip_sku, zone, count, edge_zone))
 
         subnet_id = subnet if is_valid_resource_id(subnet) else \
             '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
@@ -895,7 +904,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         nic_resource = build_nic_resource(
             cmd, nic_name, location, tags, vm_name, subnet_id, private_ip_address, nsg_id,
             public_ip_address_id, application_security_groups, accelerated_networking=accelerated_networking,
-            count=count)
+            count=count, edge_zone=edge_zone)
         nic_resource['dependsOn'] = nic_dependencies
         master_template.add_resource(nic_resource)
     else:
@@ -923,6 +932,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if custom_data:
         custom_data = read_content_if_is_file(custom_data)
 
+    if user_data:
+        user_data = read_content_if_is_file(user_data)
+
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
@@ -942,7 +954,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
-        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option)
+        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
+        user_data=user_data)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1052,15 +1065,16 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         raise CLIError('usage error: --time is a required parameter')
     daily_recurrence = {'time': time}
     notification_settings = None
-    if email and not webhook:
-        raise CLIError('usage error: --webhook is a required parameter when --email exists')
-    if webhook:
+    if email or webhook:
         notification_settings = {
-            'emailRecipient': email,
-            'webhookUrl': webhook,
             'timeInMinutes': 30,
             'status': 'Enabled'
         }
+        if email:
+            notification_settings['emailRecipient'] = email
+        if webhook:
+            notification_settings['webhookUrl'] = webhook
+
     schedule = Schedule(status='Enabled',
                         target_resource_id=vm_id,
                         daily_recurrence=daily_recurrence,
@@ -1071,8 +1085,11 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
     return client.global_schedules.create_or_update(resource_group_name, name, schedule)
 
 
-def get_instance_view(cmd, resource_group_name, vm_name):
-    return get_vm(cmd, resource_group_name, vm_name, 'instanceView')
+def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False):
+    expand = 'instanceView'
+    if include_user_data:
+        expand = expand + ',userData'
+    return get_vm(cmd, resource_group_name, vm_name, expand)
 
 
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
@@ -1088,10 +1105,10 @@ def get_vm_to_update(cmd, resource_group_name, vm_name):
     return vm
 
 
-def get_vm_details(cmd, resource_group_name, vm_name):
+def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
     from msrestazure.tools import parse_resource_id
     from azure.cli.command_modules.vm._vm_utils import get_target_network_api
-    result = get_instance_view(cmd, resource_group_name, vm_name)
+    result = get_instance_view(cmd, resource_group_name, vm_name, include_user_data)
     network_client = get_mgmt_service_client(
         cmd.cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cmd.cli_ctx))
     public_ips = []
@@ -1129,9 +1146,26 @@ def get_vm_details(cmd, resource_group_name, vm_name):
 def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_type=None):
     from ._vm_utils import list_sku_info
     result = list_sku_info(cmd.cli_ctx, location)
+    # pylint: disable=too-many-nested-blocks
     if not show_all:
-        result = [x for x in result if not [y for y in (x.restrictions or [])
-                                            if y.reason_code == 'NotAvailableForSubscription']]
+        available_skus = []
+        for sku_info in result:
+            is_available = True
+            if sku_info.restrictions:
+                for restriction in sku_info.restrictions:
+                    if restriction.reason_code == 'NotAvailableForSubscription':
+                        # The attribute location_info is not supported in versions 2017-03-30 and earlier
+                        if cmd.supported_api_version(max_api='2017-03-30'):
+                            is_available = False
+                            break
+                        # This SKU is not available only if all zones are restricted
+                        if not (set(sku_info.location_info[0].zones or []) -
+                                set(restriction.restriction_info.zones or [])):
+                            is_available = False
+                            break
+            if is_available:
+                available_skus.append(sku_info)
+        result = available_skus
     if resource_type:
         result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
     if size:
@@ -1327,15 +1361,20 @@ def patch_vm(cmd, resource_group_name, vm_name, vm):
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
-def show_vm(cmd, resource_group_name, vm_name, show_details=False):
-    return get_vm_details(cmd, resource_group_name, vm_name) if show_details \
-        else get_vm(cmd, resource_group_name, vm_name)
+def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_data=False):
+    if show_details:
+        return get_vm_details(cmd, resource_group_name, vm_name, include_user_data)
+
+    expand = None
+    if include_user_data:
+        expand = "userData"
+    return get_vm(cmd, resource_group_name, vm_name, expand)
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
-              enable_vtpm=None, **kwargs):
+              enable_vtpm=None, user_data=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1358,6 +1397,10 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if license_type is not None:
         vm.license_type = license_type
+
+    if user_data is not None:
+        from azure.cli.core.util import b64encode
+        vm.user_data = b64encode(user_data)
 
     if ultra_ssd_enabled is not None:
         if vm.additional_capabilities is None:
@@ -1562,9 +1605,8 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Managed storage
     if blob_uri is None:
         try:
-            poller = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
-            uris = LongRunningOperation(cmd.cli_ctx)(poller)
-            blob_uri = uris.serial_console_log_blob_uri
+            boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
+            blob_uri = boot_diagnostics_data.serial_console_log_blob_uri
         except CloudError:
             pass
         if blob_uri is None:
@@ -1817,8 +1859,7 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
 def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
-                                           InvalidArgumentValueError,
-                                           RequiredArgumentMissingError)
+                                           InvalidArgumentValueError)
 
     location = location or get_one_of_subscription_locations(cmd.cli_ctx)
     error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
@@ -1842,8 +1883,7 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
     from azure.mgmt.marketplaceordering.models import OfferType
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
-                                           InvalidArgumentValueError,
-                                           RequiredArgumentMissingError)
+                                           InvalidArgumentValueError)
 
     error_msg = 'Please specify all of (--plan, --offer, --publish), or --urn'
     if urn:
@@ -2402,7 +2442,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
 
 # pylint: disable=too-many-locals, too-many-statements
 def create_vmss(cmd, vmss_name, resource_group_name, image=None,
-                disable_overprovision=False, instance_count=2,
+                disable_overprovision=None, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
                 admin_username=None, admin_password=None, authentication_type=None,
                 vm_sku=None, no_wait=False,
@@ -2434,7 +2474,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
-                enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None):
+                enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
+                user_data=None, network_api_version=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2448,11 +2489,11 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     master_template = ArmTemplateBuilder()
 
     uniform_str = 'Uniform'
-    flexible_str = 'Flexible'
-    if orchestration_mode.lower() == uniform_str.lower():
+    if orchestration_mode:
         from msrestazure.tools import resource_id, is_valid_resource_id
 
-        storage_sku = disk_info['os'].get('storageAccountType')
+        if disk_info:
+            storage_sku = disk_info['os'].get('storageAccountType')
 
         subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -2499,7 +2540,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             subnet = subnet or '{}Subnet'.format(vmss_name)
             vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
             vnet = build_vnet_resource(
-                cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+                cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix, edge_zone=edge_zone)
             if app_gateway_type:
                 vnet['properties']['subnets'].append({
                     'name': 'appGwSubnet',
@@ -2508,13 +2549,19 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                     }
                 })
             master_template.add_resource(vnet)
+        if subnet:
+            subnet_id = subnet if is_valid_resource_id(subnet) else \
+                '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+        else:
+            subnet_id = None
 
-        subnet_id = subnet if is_valid_resource_id(subnet) else \
-            '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
-        gateway_subnet_id = ('{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name)
-                             if app_gateway_type == 'new' else None)
+        if vnet_name:
+            gateway_subnet_id = ('{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name)
+                                 if app_gateway_type == 'new' else None)
+        else:
+            gateway_subnet_id = None
 
-        # public IP is used by either load balancer/application gateway
+            # public IP is used by either load balancer/application gateway
         public_ip_address_id = None
         if public_ip_address:
             public_ip_address_id = (public_ip_address if is_valid_resource_id(public_ip_address)
@@ -2542,7 +2589,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 master_template.add_resource(build_public_ip_resource(
                     cmd, public_ip_address, location, tags,
                     _get_public_ip_address_allocation(public_ip_address_allocation, load_balancer_sku),
-                    public_ip_address_dns_name, load_balancer_sku, zones))
+                    public_ip_address_dns_name, load_balancer_sku, zones, edge_zone=edge_zone))
                 public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                         public_ip_address)
 
@@ -2555,12 +2602,12 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 cmd, load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
                 'loadBalancerFrontEnd', public_ip_address_id, subnet_id, private_ip_address='',
                 private_ip_allocation='Dynamic', sku=load_balancer_sku, instance_count=instance_count,
-                disable_overprovision=disable_overprovision)
+                disable_overprovision=disable_overprovision, edge_zone=edge_zone)
             lb_resource['dependsOn'] = lb_dependencies
             master_template.add_resource(lb_resource)
 
             # Per https://docs.microsoft.com/azure/load-balancer/load-balancer-standard-overview#nsg
-            if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
+            if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None and os_type:
                 nsg_name = '{}NSG'.format(vmss_name)
                 master_template.add_resource(build_nsg_resource(
                     None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
@@ -2601,7 +2648,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         # create storage accounts if needed for unmanaged disk storage
         if storage_profile == StorageProfile.SAPirImage:
             master_template.add_resource(build_vmss_storage_account_pool_resource(
-                cmd, 'storageLoop', location, tags, storage_sku))
+                cmd, 'storageLoop', location, tags, storage_sku, edge_zone))
             master_template.add_variable('storageAccountNames', [
                 '{}{}'.format(naming_prefix, x) for x in range(5)
             ])
@@ -2639,19 +2686,26 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         if custom_data:
             custom_data = read_content_if_is_file(custom_data)
 
+        if user_data:
+            user_data = read_content_if_is_file(user_data)
+
         if secrets:
             secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
         if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
             naming_prefix = computer_name_prefix
 
+        if orchestration_mode.lower() == uniform_str.lower():
+            computer_name_prefix = naming_prefix
+
         if os_version and os_version != 'latest':
             logger.warning('You are deploying VMSS pinned to a specific image version from Azure Marketplace. '
                            'Consider using "latest" as the image version.')
 
         vmss_resource = build_vmss_resource(
-            cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
-            overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
+            cmd=cmd, name=vmss_name, computer_name_prefix=computer_name_prefix, location=location, tags=tags,
+            overprovision=not disable_overprovision if orchestration_mode.lower() == uniform_str.lower() else None,
+            upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
             instance_count=instance_count, ip_config_name=ip_config_name, nic_name=nic_name, subnet_id=subnet_id,
             public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
             accelerated_networking=accelerated_networking, admin_username=admin_username,
@@ -2673,7 +2727,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_instance_percent=max_unhealthy_instance_percent,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
-            prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone)
+            prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
+            orchestration_mode=orchestration_mode, network_api_version=network_api_version)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2693,28 +2748,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 role_assignment_guid = str(_gen_guid())
                 master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                        role_assignment_guid, identity_scope, False))
-
-    elif orchestration_mode.lower() == flexible_str.lower():
-        if platform_fault_domain_count is None:
-            raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
-        vmss_resource = {
-            'type': 'Microsoft.Compute/virtualMachineScaleSets',
-            'name': vmss_name,
-            'location': location,
-            'tags': tags,
-            'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
-            'properties': {
-                'singlePlacementGroup': single_placement_group,
-                'provisioningState': 0,
-                'platformFaultDomainCount': platform_fault_domain_count
-            }
-        }
-        if zones is not None:
-            vmss_resource['zones'] = zones
-        if proximity_placement_group is not None:
-            vmss_resource['properties']['proximityPlacementGroup'] = {
-                'id': proximity_placement_group
-            }
     else:
         raise CLIError('usage error: --orchestration-mode (Uniform | Flexible)')
 
@@ -2722,7 +2755,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
 
-    if orchestration_mode.lower() == uniform_str.lower() and admin_password:
+    if admin_password:
         master_template.add_secure_parameter('adminPassword', admin_password)
 
     template = master_template.build()
@@ -2800,10 +2833,20 @@ def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
                        resource_group_name, vm_scale_set_name, instance_ids)
 
 
-def get_vmss(cmd, resource_group_name, name, instance_id=None):
+def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
     client = _compute_client_factory(cmd.cli_ctx)
+
+    expand = None
+    if include_user_data:
+        expand = 'userData'
+
     if instance_id is not None:
+        if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+            return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id, expand)
         return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+
+    if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
+        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand)
     return client.virtual_machine_scale_sets.get(resource_group_name, name)
 
 
@@ -2960,7 +3003,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, max_batch_instance_percent=None,
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
-                **kwargs):
+                user_data=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -2974,9 +3017,14 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
 
     # handle vmss instance update
+    from azure.cli.core.util import b64encode
+
     if instance_id is not None:
         if license_type is not None:
             vmss.license_type = license_type
+
+        if user_data is not None:
+            vmss.user_data = b64encode(user_data)
 
         if not vmss.protection_policy:
             vmss.protection_policy = VMProtectionPolicy()
@@ -2993,6 +3041,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     # else handle vmss update
     if license_type is not None:
         vmss.virtual_machine_profile.license_type = license_type
+
+    if user_data is not None:
+        vmss.virtual_machine_profile.user_data = b64encode(user_data)
 
     if enable_terminate_notification is not None or terminate_notification_time is not None:
         if vmss.virtual_machine_profile.scheduled_events_profile is None:
@@ -3327,14 +3378,32 @@ def list_image_galleries(cmd, resource_group_name=None):
     return client.galleries.list()
 
 
+# from azure.mgmt.compute.models import Gallery, SharingProfile
+def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None, **kwargs):
+    if permissions:
+        if gallery.sharing_profile is None:
+            SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
+            gallery.sharing_profile = SharingProfile(permissions=permissions)
+        else:
+            gallery.sharing_profile.permissions = permissions
+
+    client = _compute_client_factory(cmd.cli_ctx)
+
+    return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
+
+
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                         location=None, no_wait=False, tags=None):
+                         location=None, no_wait=False, tags=None, permissions=None):
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     gallery = Gallery(description=description, location=location, tags=(tags or {}))
 
     client = _compute_client_factory(cmd.cli_ctx)
+    if permissions:
+        SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
+        gallery.sharing_profile = SharingProfile(permissions=permissions)
+
     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
 
 
@@ -3493,7 +3562,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                         data_vhds_storage_accounts[i] = resource_id(
                             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                             namespace='Microsoft.Storage', type='storageAccounts', name=storage_account)
-                data_disk_images = []
+                if data_disk_images is None:
+                    data_disk_images = []
                 for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
                     data_disk_images.append(GalleryDataDiskImage(
                         source=GalleryArtifactVersionSource(id=account, uri=uri), lun=lun))
@@ -3817,3 +3887,61 @@ def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_durati
     return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input)
 
 # endregion
+
+
+def sig_shared_gallery_list(client, location, shared_to=None):
+    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       shared_to=shared_to)
+
+
+def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
+                     op_type=None):
+    SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
+        'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes', operation_group='shared_galleries')
+    if subscription_ids is None and tenant_ids is None:
+        raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
+    groups = []
+    if subscription_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))
+    if tenant_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.AAD_TENANTS, ids=tenant_ids))
+    sharing_update = SharingUpdate(operation_type=op_type, groups=groups)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def sig_share_reset(cmd, client, resource_group_name, gallery_name):
+    SharingUpdate, SharingUpdateOperationTypes = cmd.get_models('SharingUpdate', 'SharingUpdateOperationTypes',
+                                                                operation_group='shared_galleries')
+    sharing_update = SharingUpdate(operation_type=SharingUpdateOperationTypes.RESET)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
+    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       gallery_unique_name=gallery_unique_name,
+                       shared_to=shared_to)
+
+
+def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
+    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location, gallery_unique_name=gallery_unique_name,
+                       gallery_image_name=gallery_image_name, shared_to=shared_to)
+
+
+def get_gallery_instance(cmd, resource_group_name, gallery_name):
+    from ._client_factory import cf_vm_cl
+    client = cf_vm_cl(cmd.cli_ctx)
+    SelectPermissions = cmd.get_models('SelectPermissions', operation_group='shared_galleries')
+    return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
