@@ -45,7 +45,7 @@ class AmsSpTests(ScenarioTest):
                     self.check('AccountName', '{amsname}')
                 ])
 
-                # Wait 2 minutes for role assignment be created.
+                # Wait 2 minutes for role assignment to be created.
                 time.sleep(120)
                 
                 self.cmd('az ams account sp reset-credentials -a {amsname} -n {spName} -g {rg} -p {spNewPassword} --role {role}', checks=[
