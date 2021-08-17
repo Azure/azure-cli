@@ -25,9 +25,7 @@ class ConditionalAccessScenarioTest(LiveScenarioTest):
           - doesn't require MFA for ARM
           - requires MFA for data-plane resource
 
-        The result ATs are checked per
-          Microsoft identity platform access tokens
-          https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens
+        The result ATs are checked per https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens
 
         Following claims are checked:
           - aud (Audience): https://tools.ietf.org/html/rfc7519#section-4.1.3
