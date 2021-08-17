@@ -7569,7 +7569,7 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, bastion_re
             raise RequiredArgumentMissingError("Resource group name cannot be empty when not using resourceId. Use --resource-group")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port)
-    t = threading.Thread(target = _start_tunnel, args=(tunnel_server))
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server))
     t.daemon = True
     t.start()
 
@@ -7579,8 +7579,8 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, bastion_re
         username = prompt(msg='Enter username: ')
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
     elif auth_type.lower() == 'aad':
-        public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None) # pylint: disable=protected-access
-        cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file + '-cert.pub') # pylint: disable=protected-access
+        public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)  # pylint: disable=protected-access
+        cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file + '-cert.pub')  # pylint: disable=protected-access
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(cert_file, private_key_file)
     elif auth_type.lower() == 'ssh-key-file':
