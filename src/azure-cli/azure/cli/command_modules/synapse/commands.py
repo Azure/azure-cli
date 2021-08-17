@@ -180,7 +180,7 @@ def load_command_table(self, _):
         client_factory=None)
 
     synapse_managed_private_endpoints_sdk = CliCommandType(
-        operation_tmpl='azure.synapse.managedprivateendpoints.operations#ManagedPrivateEndpoints.{}',
+        operations_tmpl='azure.synapse.managedprivateendpoints.operations#ManagedPrivateEndpoints.{}',
         client_factory=None)
 
     # Management Plane Commands --Workspace
@@ -486,9 +486,9 @@ def load_command_table(self, _):
     with self.command_group('synapse managed-private-endpoints', synapse_managed_private_endpoints_sdk,
                             custom_command_type=get_custom_sdk('managedprivateendpoints', None)) as g:
         g.custom_show_command('show', 'get_Managed_private_endpoints')
-        g.custom_command('create', 'create_Managed_private_endpoints', supports_no_wait=True)
+        g.custom_command('create', 'create_Managed_private_endpoints')
         g.custom_command('list', 'list_Managed_private_endpoints')
-        g.custom_command('delete', 'delete_Managed_private_endpoints', confirmation=True, supports_no_wait=True)
+        g.custom_command('delete', 'delete_Managed_private_endpoints', confirmation=True)
 
     with self.command_group('synapse', is_preview=True):
         pass

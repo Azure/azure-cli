@@ -1363,7 +1363,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_managed_private_endpoints(self):
         self.kwargs.update({
@@ -1371,8 +1371,6 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'AzureDataLakeStoragePE',
             'privateLinkResourceId': '/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Storage/storageAccounts/hozhao0917gen2',
             'groupId': 'dfs'})
-        
-        #self._create_workspace("--enable-managed-virtual-network")
 
         # create managed private endpoint
         self.cmd(
