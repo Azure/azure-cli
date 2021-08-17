@@ -2170,7 +2170,7 @@ class FeatureScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     def test_feature_registration_delete(self):
-        self.cmd('feature registration delete --namespace Microsoft.Network --name AllowLBPreview')
+        self.cmd('feature registration delete --namespace Microsoft.Network --name AllowLBPreview --yes')
 
 class PolicyScenarioTest(ScenarioTest):
 

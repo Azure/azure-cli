@@ -1139,7 +1139,7 @@ examples:
 
 helps['feature registration create'] = """
 type: command
-short-summary: create a feature registration.
+short-summary: Create a feature registration.
 examples:
   - name: create the "Shared Image Gallery" feature
     text: az feature registration create --namespace Microsoft.Compute --name GalleryPreview
@@ -1147,7 +1147,7 @@ examples:
 
 helps['feature registration delete'] = """
 type: command
-short-summary: delete a feature registration.
+short-summary: Delete a feature registration.
 examples:
   - name: delete the "Shared Image Gallery" feature
     text: az feature registration delete --namespace Microsoft.Compute --name GalleryPreview
