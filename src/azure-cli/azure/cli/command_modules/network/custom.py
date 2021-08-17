@@ -26,11 +26,6 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 
 from .tunnel import TunnelServer
 
-import threading
-import time
-import platform
-import subprocess
-
 logger = get_logger(__name__)
 
 
