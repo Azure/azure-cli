@@ -1642,6 +1642,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
             json.dumps(overrides),
             "-it",
             podName,
+            "--namespace=default",
         ]
 
         # Support kubectl versons < 1.18
@@ -2104,15 +2105,15 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
-    ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties = cmd.get_models(
-        'ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties',
+    UserAssignedIdentity = cmd.get_models(
+        'UserAssignedIdentity',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         operation_group='managed_clusters')
     ManagedCluster = cmd.get_models('ManagedCluster',
                                     resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                     operation_group='managed_clusters')
-    Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = cmd.get_models(
-        'Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties',
+    ManagedServiceIdentityUserAssignedIdentitiesValue = cmd.get_models(
+        'ManagedServiceIdentityUserAssignedIdentitiesValue',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         operation_group='managed_clusters')
 
@@ -2400,7 +2401,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     elif enable_managed_identity and assign_identity:
         user_assigned_identity = {
             # pylint: disable=line-too-long
-            assign_identity: Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties()
+            assign_identity: ManagedServiceIdentityUserAssignedIdentitiesValue()
         }
         identity = ManagedClusterIdentity(
             type="UserAssigned",
@@ -2415,7 +2416,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
         identity_profile = {
             # pylint: disable=line-too-long
-            'kubeletidentity': ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties(
+            'kubeletidentity': UserAssignedIdentity(
                 resource_id=assign_kubelet_identity,
                 client_id=kubelet_identity.client_id,
                 object_id=kubelet_identity.principal_id
@@ -2768,8 +2769,8 @@ def aks_update(cmd, client, resource_group_name, name,
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
-    Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = cmd.get_models(
-        'Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties',
+    ManagedServiceIdentityUserAssignedIdentitiesValue = cmd.get_models(
+        'ManagedServiceIdentityUserAssignedIdentitiesValue',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         operation_group='managed_clusters')
     update_autoscaler = enable_cluster_autoscaler + \
@@ -3003,7 +3004,7 @@ def aks_update(cmd, client, resource_group_name, name,
         elif goal_identity_type == "userassigned":
             # pylint: disable=line-too-long
             user_assigned_identity = {
-                assign_identity: Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties()
+                assign_identity: ManagedServiceIdentityUserAssignedIdentitiesValue()
             }
             instance.identity = ManagedClusterIdentity(
                 type="UserAssigned",
