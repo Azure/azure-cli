@@ -52,7 +52,9 @@ from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ValidationError,
-                                       UnauthorizedError)
+                                       UnauthorizedError,
+                                       AzureInternalError,
+                                       FileOperationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -122,6 +124,16 @@ def which(binary):
             return bin_path
 
     return None
+
+
+def get_cmd_test_hook_data(filename):
+    hook_data = None
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+    test_hook_file_path = os.path.join(curr_dir, 'tests/latest/data', filename)
+    if os.path.exists(test_hook_file_path):
+        with open(test_hook_file_path, "r") as f:
+            hook_data = json.load(f)
+    return hook_data
 
 
 def wait_then_open(url):
@@ -447,7 +459,10 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         # TODO: Support ARM CPU here
         sub_dir, binary_name = 'linux_amd64', 'kubelogin'
     elif system == 'Darwin':
-        sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
+        if platform.machine() == 'arm64':
+            sub_dir, binary_name = 'darwin_arm64', 'kubelogin'
+        else:
+            sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
     else:
         raise CLIError(
             'Proxy server ({}) does not exist on the cluster.'.format(system))
@@ -1636,15 +1651,13 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         output = subprocess.check_output(
             cmd,
             universal_newlines=True,
+            stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as err:
-        raise CLIError("Failed to check the ACR: {}".format(err))
+        raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
-        print(output)
-        if os.getenv("PYTEST_CURRENT_TEST", None):
-            return output
-    else:
-        raise CLIError("Failed to check the ACR.")
+        return output
+    raise AzureInternalError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -1693,7 +1706,7 @@ def _aks_browse(
 
     # otherwise open the kube-dashboard addon
     if not which('kubectl'):
-        raise CLIError('Can not find kubectl executable in PATH')
+        raise FileOperationError('Can not find kubectl executable in PATH')
 
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(cmd, client, resource_group_name,
@@ -1704,26 +1717,30 @@ def _aks_browse(
         dashboard_pod = subprocess.check_output(
             ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
              "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
-            universal_newlines=True)
+            universal_newlines=True,
+            stderr=subprocess.STDOUT,
+        )
     except subprocess.CalledProcessError as err:
-        raise CLIError('Could not find dashboard pod: {}'.format(err))
+        raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
     if dashboard_pod:
         # remove any "pods/" or "pod/" prefix from the name
         dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
     else:
-        raise CLIError("Couldn't find the Kubernetes dashboard pod.")
+        raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
 
     # find the port
     try:
         dashboard_port = subprocess.check_output(
             ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
              "--selector", "k8s-app=kubernetes-dashboard",
-             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"]
+             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"],
+            universal_newlines=True,
+            stderr=subprocess.STDOUT,
         )
-        # output format: b"'{port}'"
-        dashboard_port = int((dashboard_port.decode('utf-8').replace("'", "")))
+        # output format: "'{port}'"
+        dashboard_port = int((dashboard_port.replace("'", "")))
     except subprocess.CalledProcessError as err:
-        raise CLIError('Could not find dashboard port: {}'.format(err))
+        raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
 
     # use https if dashboard container is using https
     if dashboard_port == 8443:
@@ -1752,17 +1769,25 @@ def _aks_browse(
         logger.warning('Proxy running on %s', proxy_url)
 
     timeout = None
-    if os.getenv("PYTEST_CURRENT_TEST", None):
-        timeout = 10
+    test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
+    if test_hook_data:
+        test_configs = test_hook_data.get("configs", None)
+        if test_configs and test_configs.get("enableTimeout", None):
+            timeout = test_configs.get("timeoutInterval", 10)
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(dashboardURL)
     try:
         try:
-            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
-                                     listen_address, "--port", listen_port], stderr=subprocess.STDOUT, timeout=timeout)
+            subprocess.check_output(
+                ["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
+                 listen_address, "--port", listen_port],
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+                timeout=timeout,
+            )
         except subprocess.CalledProcessError as err:
-            if err.output.find(b'unknown flag: --address'):
+            if err.output.find('unknown flag: --address'):
                 return_msg = "Test Invalid Address! "
                 if listen_address != '127.0.0.1':
                     logger.warning(
@@ -1776,6 +1801,18 @@ def _aks_browse(
                     logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
                     return_msg = return_msg if return_msg else ""
                     return_msg += "Test Passed!"
+                except subprocess.CalledProcessError as new_err:
+                    raise AzureInternalError(
+                        "Could not open proxy: {} Command output: {}".format(
+                            new_err, new_err.output
+                        )
+                    )
+            else:
+                raise AzureInternalError(
+                    "Could not open proxy: {} Command output: {}".format(
+                        err, err.output
+                    )
+                )
         except subprocess.TimeoutExpired:
             logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
             return_msg = return_msg if return_msg else ""
@@ -2387,7 +2424,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         cluster_identity_object_id = _get_user_assigned_identity_object_id(cmd.cli_ctx, assign_identity)
         # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
         _ensure_cluster_identity_permission_on_kubelet_identity(
-            cmd.cli_ctx,
+            cmd,
             cluster_identity_object_id,
             assign_kubelet_identity)
 
@@ -4815,8 +4852,8 @@ def _put_managed_cluster_ensuring_permission(
     return cluster
 
 
-def _ensure_cluster_identity_permission_on_kubelet_identity(cli_ctx, cluster_identity_object_id, scope):
-    factory = get_auth_management_client(cli_ctx, scope)
+def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity_object_id, scope):
+    factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
 
     for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
@@ -4829,7 +4866,7 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cli_ctx, cluster_ide
         # already assigned
         return
 
-    if not _add_role_assignment(cli_ctx, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
+    if not _add_role_assignment(cmd, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id,
                                 is_service_principal=False, scope=scope):
         raise UnauthorizedError('Could not grant Managed Identity Operator '
                                 'permission to cluster identity at scope {}'.format(scope))
