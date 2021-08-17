@@ -152,12 +152,15 @@ def format_styled_text(styled_text, theme=None):
     if isinstance(theme, str):
         theme = get_theme_dict(theme)
 
-    # Cache the value of is_legacy_powershell
-    if not hasattr(format_styled_text, "_is_legacy_powershell"):
-        from azure.cli.core.util import get_parent_proc_name
-        is_legacy_powershell = not is_modern_terminal() and get_parent_proc_name() == "powershell.exe"
-        setattr(format_styled_text, "_is_legacy_powershell", is_legacy_powershell)
-    is_legacy_powershell = getattr(format_styled_text, "_is_legacy_powershell")
+    # If style is enabled, cache the value of is_legacy_powershell.
+    # Otherwise if theme is None, is_legacy_powershell is meaningless.
+    is_legacy_powershell = None
+    if theme:
+        if not hasattr(format_styled_text, "_is_legacy_powershell"):
+            from azure.cli.core.util import get_parent_proc_name
+            is_legacy_powershell = not is_modern_terminal() and get_parent_proc_name() == "powershell.exe"
+            setattr(format_styled_text, "_is_legacy_powershell", is_legacy_powershell)
+        is_legacy_powershell = getattr(format_styled_text, "_is_legacy_powershell")
 
     # https://python-prompt-toolkit.readthedocs.io/en/stable/pages/printing_text.html#style-text-tuples
     formatted_parts = []
