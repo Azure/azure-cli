@@ -192,7 +192,7 @@ class TunnelServer:
                 custom_header = {}
 
             web_address = 'https://{}/api/tokens/{}'.format(self.bastion.dns_name, self.last_token)
-            response = requests.delete(web_address, headers=custom_header, 
+            response = requests.delete(web_address, headers=custom_header,
                                        verify=(not should_disable_connection_verify()))
 
             if response.status_code not in [200, 204]:

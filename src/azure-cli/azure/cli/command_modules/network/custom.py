@@ -7461,6 +7461,7 @@ def list_bastion_host(cmd, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list()
 
+
 SSH_EXTENSION_NAME = 'ssh'
 SSH_EXTENSION_MODULE = 'azext_ssh.custom'
 SSH_EXTENSION_VERSION = '0.1.3'
@@ -7484,7 +7485,7 @@ def _test_extension(extension_name):
     from pkg_resources import parse_version
     ext = get_extension(extension_name)
     if parse_version(ext.version) < parse_version(SSH_EXTENSION_VERSION):
-        raise CLIError('SSH Extension (version >= %s) must be installed'.format(SSH_EXTENSION_VERSION))
+        raise CLIError("SSH Extension (version >= %s) must be installed".format(SSH_EXTENSION_VERSION))
 
 
 def _get_ssh_path(ssh_command="ssh"):
@@ -7559,7 +7560,7 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, bastion_re
         if is_valid_resource_id(bastion_resource_id):
             parsed_id = parse_resource_id(bastion_resource_id)
             bastion_name = parsed_id["name"]
-            resource_group_name =parsed_id['resource_group']
+            resource_group_name = parsed_id['resource_group']
         else:
             raise InvalidArgumentValueError("Please enter a valid Bastion resource Id.")
     else:
@@ -7568,14 +7569,14 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, bastion_re
             raise RequiredArgumentMissingError("Resource group name cannot be empty when not using resourceId. Use --resource-group")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port)
-    t = threading.Thread(target = _start_tunnel, args = (tunnel_server))
+    t = threading.Thread(target = _start_tunnel, args=(tunnel_server))
     t.daemon = True
     t.start()
 
     azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
 
     if auth_type.lower() == 'password':
-        username = prompt(msg = 'Enter username: ')
+        username = prompt(msg='Enter username: ')
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
     elif auth_type.lower() == 'aad':
         public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)
@@ -7583,8 +7584,8 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, bastion_re
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(cert_file, private_key_file)
     elif auth_type.lower() == 'ssh-key-file':
-        username = prompt(msg = 'Enter username: ')
-        priv_key = prompt(msg = 'Enter ssh cert location: ')
+        username = prompt(msg='Enter username: ')
+        priv_key = prompt(msg='Enter ssh cert location: ')
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(None, priv_key)
     else:
