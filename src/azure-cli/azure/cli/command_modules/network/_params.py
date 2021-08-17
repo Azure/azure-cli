@@ -2155,6 +2155,13 @@ def load_arguments(self, _):
         c.argument('bastion_host_name', help='Name of the Bastion Host.', options_list=['--name', '-n'])
         c.argument('public_ip_address', help='Name or ID of the Azure public IP. The SKU of the public IP must be Standard.', validator=get_public_ip_validator())
         c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
+        c.argument('name', help='Name of the Bastion host.', options_list=['--name'])
+        c.argument('resource_id', help='ResourceId of the Bastion host.', options_list=['--resource-id'])
+        c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
+        c.argument('vm_id', help='ResourceId of the target Virtual Machine.', options_list=['--vm-id'])
+        c.argument('auth-type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
+        c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
+        c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
         c.ignore('subnet')
     # endregion
 
