@@ -735,6 +735,19 @@ class Profile:
         tenant = account[_TENANT_ID]
         identity = Identity(authority=self._authority, tenant_id=tenant)
 
+        # Raise error for managed identity and Cloud Shell
+        not_support_message = "VM SSH currently doesn't support {}."
+
+        # managed identity
+        managed_identity_type, _ = Profile._try_parse_msi_account_name(account)
+        if managed_identity_type:
+            raise CLIError(not_support_message.format("managed identity"))
+
+        # Cloud Shell
+        if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            raise CLIError(not_support_message.format("Cloud Shell"))
+
+        # user
         if identity_type == _USER:
             username = username_or_sp_id
             app = identity.get_user_credential(username)
@@ -748,12 +761,13 @@ class Profile:
                 # Retry login with VM SSH as resource
                 result = app.acquire_token_interactive(scopes, login_hint=username, data=data)
 
+        # service principal
         elif identity_type == _SERVICE_PRINCIPAL:
             app = identity.get_service_principal_credential(username_or_sp_id)
             result = app.acquire_token_for_client(scopes, data=data)
 
         else:
-            raise CLIError("Identity type {} is currently unsupported".format(identity_type))
+            raise CLIError("Unknown identity type {}".format(identity_type))
 
         if 'error' in result:
             from azure.cli.core.auth import aad_error_handler
