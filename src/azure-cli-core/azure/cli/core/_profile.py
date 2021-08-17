@@ -16,7 +16,7 @@ from knack.util import CLIError
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import in_cloud_console
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.auth import (Identity, AdalCredentialCache, MsalSecretStore, AZURE_CLI_CLIENT_ID,
+from azure.cli.core.auth import (Identity, MsalSecretStore, AZURE_CLI_CLIENT_ID,
                                  resource_to_scopes, can_launch_browser)
 
 logger = get_logger(__name__)
@@ -497,11 +497,6 @@ class Profile:
             # Remove the account from the profile
             subscriptions = [x for x in subscriptions if x not in result]
             self._storage[_SUBSCRIPTIONS] = subscriptions
-
-            # Always remove credential from the legacy cred cache, regardless of MSAL cache, to be deprecated
-            adal_cache = AdalCredentialCache()
-            adal_cache.remove_cached_creds(user_or_sp)
-
             logger.warning("Account '%s' has been logged out from Azure CLI.", user_or_sp)
         else:
             # https://english.stackexchange.com/questions/5302/log-in-to-or-log-into-or-login-to
@@ -528,10 +523,6 @@ class Profile:
 
     def logout_all(self, clear_credential):
         self._storage[_SUBSCRIPTIONS] = []
-
-        # Always remove credentials from the legacy cred cache, regardless of MSAL cache
-        adal_cache = AdalCredentialCache()
-        adal_cache.remove_all_cached_creds()
         logger.warning('All accounts were logged out.')
 
         # Deal with MSAL cache
@@ -890,7 +881,6 @@ class SubscriptionFinder:
         self.secret = None
         self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
         self.authority = self.cli_ctx.cloud.endpoints.active_directory
-        self.adal_cache = kwargs.pop("adal_cache", None)
 
         def create_arm_client_factory(credential):
             if arm_client_factory:
@@ -951,11 +941,6 @@ class SubscriptionFinder:
                                 .getboolean('core', 'allow_fallback_to_plaintext', fallback=True))
             try:
                 specific_tenant_credential = identity.get_user_credential(username)
-                # todo: remove after ADAL deprecation
-                if self.adal_cache:
-                    self.adal_cache.add_credential(specific_tenant_credential,
-                                                   self.cli_ctx.cloud.endpoints.active_directory_resource_id,
-                                                   self.authority)
             # TODO: handle MSAL exceptions
             except adal.AdalError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
