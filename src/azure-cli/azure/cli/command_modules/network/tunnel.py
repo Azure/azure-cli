@@ -43,7 +43,6 @@ class TunnelServer:
         self.local_port = int(local_port)
         if self.local_port != 0 and not self.is_port_open():
             raise CLIError('Defined port is currently unavailable')
-        
         self.bastion = bastion
         self.remote_host = remote_host
         self.remote_port = remote_port
@@ -52,7 +51,6 @@ class TunnelServer:
         self.last_token = None
         self.node_id = None
         self.cli_ctx = cli_ctx
-        
         logger.info('Creating a socket on port: %s', self.local_port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         logger.info('Setting socket options')
@@ -62,7 +60,6 @@ class TunnelServer:
         if self.local_port == 0:
             self.local_port = self.sock.getsockname()[1]
             logger.info('Auto-selecting port: %s', self.local_port)
-            
         logger.info('Finished initialization')
 
     def is_port_open(self):
@@ -78,10 +75,8 @@ class TunnelServer:
     def _get_auth_token(self):
         profile = Profile(cli_ctx=self.cli_ctx)
         user = profile.get_current_account_user()
-    
         # Generate an Azure token with the VSTS resource app id
         auth_token = profile.get_access_token_for_resource(user, None, None)
-        
         content = {
             'resourceId': self.remote_host,
             'protocol': 'tcptunnel',
@@ -89,14 +84,14 @@ class TunnelServer:
             'aztoken': auth_token,
             'token': self.last_token,
         }
-        
         if self.node_id:
             custom_header = {'X-Node-Id': self.node_id }
         else:
-            custom_header = {}
+            custom_header = { }
 
         web_address = 'https://{}/api/tokens'.format(self.bastion.dns_name)
-        response = requests.post(web_address, data=content, headers=custom_header, verify=(not should_disable_connection_verify()))
+        response = requests.post(web_address, data=content, headers=custom_header, 
+                                    verify=(not should_disable_connection_verify()))
         response_json = None
 
         if response.content is not None:
@@ -173,7 +168,6 @@ class TunnelServer:
                     responseData = buf[0:nbytes]
                     logger.info('Sending to websocket, index: %s', index)
                     ws_socket.send_binary(responseData)
-                    
                     logger.info('Done sending to websocket, index: %s', index)
                 else:
                     logger.info('Client close, index: %s', index)
@@ -198,7 +192,8 @@ class TunnelServer:
                 custom_header = {}
 
             web_address = 'https://{}/api/tokens/{}'.format(self.bastion.dns_name, self.last_token)
-            response = requests.delete(web_address, headers=custom_header, verify=(not should_disable_connection_verify()))
+            response = requests.delete(web_address, headers=custom_header, 
+                                        verify=(not should_disable_connection_verify()))
 
             if response.status_code not in [200, 204]:
                 exp = CloudError(response)
