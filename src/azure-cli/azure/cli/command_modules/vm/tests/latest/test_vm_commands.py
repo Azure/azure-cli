@@ -2962,11 +2962,11 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
             'restore_timeout2': 'PT2H'
 
         })
-        self.cmd('vmss create -g {rg} -n {spot_vmss_name} --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group True --spot-restore-enabled {enabled_1} --spot-restore-timeout {restore_timeout1}', checks=[
+        self.cmd('vmss create -g {rg} -n {spot_vmss_name} --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group True --enable-spot-restore {enabled_1} --spot-restore-timeout {restore_timeout1}', checks=[
             self.check('vmss.spotRestorePolicy.enabled', True),
             self.check('vmss.spotRestorePolicy.restoreTimeout', '{restore_timeout1}')
         ])
-        self.cmd('vmss update -g {rg} -n {spot_vmss_name} --spot-restore-enabled {enabled_2} --spot-restore-timeout {restore_timeout2}', checks=[
+        self.cmd('vmss update -g {rg} -n {spot_vmss_name} --enable-spot-restore {enabled_2} --spot-restore-timeout {restore_timeout2}', checks=[
             self.check('spotRestorePolicy.enabled', False),
             self.check('spotRestorePolicy.restoreTimeout', '{restore_timeout2}')
         ])

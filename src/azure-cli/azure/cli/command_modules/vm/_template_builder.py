@@ -825,7 +825,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
-                        spot_restore_enabled=None, spot_restore_timeout=None):
+                        enable_spot_restore=None, spot_restore_timeout=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1043,11 +1043,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if not rolling_upgrade_policy:
             del rolling_upgrade_policy
 
-    if spot_restore_enabled and cmd.supported_api_version(min_api='2021-04-01',
-                                                          operation_group='virtual_machine_scale_sets'):
+    if enable_spot_restore and cmd.supported_api_version(min_api='2021-04-01',
+                                                         operation_group='virtual_machine_scale_sets'):
         vmss_properties['spotRestorePolicy'] = {}
-        if spot_restore_enabled:
-            vmss_properties['spotRestorePolicy']['enabled'] = spot_restore_enabled
+        if enable_spot_restore:
+            vmss_properties['spotRestorePolicy']['enabled'] = enable_spot_restore
 
         if spot_restore_timeout:
             vmss_properties['spotRestorePolicy']['restoreTimeout'] = spot_restore_timeout
