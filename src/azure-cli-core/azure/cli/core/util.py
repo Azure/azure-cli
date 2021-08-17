@@ -1252,9 +1252,8 @@ def _get_parent_proc_name():
             # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
             return parent.name()
     except psutil.AccessDenied as ex:
-        logger.debug(ex)
         # Ignore due to https://github.com/giampaolo/psutil/issues/1980
-        pass
+        logger.debug(ex)
     return None
 
 
