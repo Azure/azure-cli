@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.27.0"
+VERSION = "2.27.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,7 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-appconfiguration~=1.1.1',
-    'azure-batch~=10.0.0',
+    'azure-batch~=11.0.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.49',
@@ -68,7 +68,7 @@ DEPENDENCIES = [
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batchai~=7.0.0b1',
-    'azure-mgmt-batch~=15.0.0',
+    'azure-mgmt-batch~=16.0.0',
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=0.3.0',
     'azure-mgmt-cdn==11.0.0',
