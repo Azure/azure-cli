@@ -84,7 +84,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=validate_storage_account_id)
 
     with self.argument_context('ams account storage sync-storage-keys') as c:
-        c.argument('id', required=True)
+        c.argument('storage_account_id', required=True, help="The storage account Id.")
 
     with self.argument_context('ams account storage set-authentication') as c:
         c.argument('storage_auth', arg_type=get_enum_type(get_storage_authentication_allowed_values_list()), help='The type of authentication for the storage account associated with the media services account.')
