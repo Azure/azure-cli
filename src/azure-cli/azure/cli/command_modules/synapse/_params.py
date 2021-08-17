@@ -15,6 +15,7 @@ from ._completers import get_role_definition_name_completion_list
 from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnectionClientType, PrincipalType, \
     SqlPoolConnectionClientAuthenticationType, ItemType
 from .action import AddFilters, AddOrderBy
+from shlex import split
 
 workspace_name_arg_type = CLIArgumentType(help='The workspace name.',
                                           completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
@@ -380,7 +381,7 @@ def load_arguments(self, _):
         c.argument('main_definition_file', help='The main file used for the job.')
         c.argument('main_class_name',
                    help='The fully-qualified identifier or the main class that is in the main definition file.')
-        c.argument('command_line_arguments', options_list=['--arguments'], nargs='+',
+        c.argument('command_line_arguments', options_list=['--arguments'], type=split, nargs='+',
                    help='Optional arguments to the job (Note: please use storage URIs for file arguments).')
         c.argument('archives', nargs='+', help='The array of archives.')
         c.argument('job_name', arg_type=name_type, help='The Spark job name.')
