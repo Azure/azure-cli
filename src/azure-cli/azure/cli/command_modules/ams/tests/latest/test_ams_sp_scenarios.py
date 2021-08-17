@@ -28,8 +28,8 @@ class AmsSpTests(ScenarioTest):
                 self.check('location', 'West US 2')
             ])
 
-            spPassword = self.create_random_name(prefix='spp!', length=16)
-            spNewPassword = self.create_random_name(prefix='spp!', length=16)
+            spPassword = self.create_random_name(prefix='spp1!', length=16)
+            spNewPassword = self.create_random_name(prefix='spp1!', length=16)
 
             self.kwargs.update({
                 'spName': 'http://{}'.format(resource_group),
