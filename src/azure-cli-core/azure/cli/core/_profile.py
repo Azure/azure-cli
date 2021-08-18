@@ -600,7 +600,7 @@ class Profile:
             return user_name, account[_USER_ENTITY].get(_CLIENT_ID)
         return None, None
 
-    def _create_identity_credential(self, account, aux_tenant_id=None, client_id=None):
+    def _create_credential(self, account, aux_tenant_id=None, client_id=None):
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
@@ -622,8 +622,6 @@ class Profile:
 
             # User
             if user_type == _USER:
-                # if not home_account_id:
-                #     raise CLIError("CLI authentication is migrated to AADv2.0, please run 'az login' to re-login")
                 return identity.get_user_credential(username_or_sp_id)
 
             # Service Principal
@@ -659,24 +657,25 @@ class Profile:
         account = self.get_subscription(subscription_id)
 
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        external_tenants_info = []
+        external_tenants = []
         if aux_tenants:
-            external_tenants_info = [tenant for tenant in aux_tenants if tenant != account[_TENANT_ID]]
+            external_tenants = [tenant for tenant in aux_tenants if tenant != account[_TENANT_ID]]
         if aux_subscriptions:
             ext_subs = [aux_sub for aux_sub in aux_subscriptions if aux_sub != subscription_id]
             for ext_sub in ext_subs:
                 sub = self.get_subscription(ext_sub)
                 if sub[_TENANT_ID] != account[_TENANT_ID]:
-                    external_tenants_info.append(sub[_TENANT_ID])
-        identity_credential = self._create_identity_credential(account, client_id=client_id)
+                    external_tenants.append(sub[_TENANT_ID])
+
+        credential = self._create_credential(account, client_id=client_id)
         external_credentials = []
-        for sub_tenant_id in external_tenants_info:
-            external_credentials.append(self._create_identity_credential(account, sub_tenant_id, client_id=client_id))
+        for external_tenant in external_tenants:
+            external_credentials.append(self._create_credential(account, external_tenant, client_id=client_id))
         from azure.cli.core.auth import CredentialAdaptor
-        auth_object = CredentialAdaptor(identity_credential,
-                                        external_credentials=external_credentials if external_credentials else None,
-                                        resource=resource)
-        return (auth_object,
+        cred_adaptor = CredentialAdaptor(credential,
+                                         external_credentials=external_credentials,
+                                         resource=resource)
+        return (cred_adaptor,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
@@ -693,7 +692,7 @@ class Profile:
             raise CLIError("Please specify only one of subscription and tenant, not both")
 
         account = self.get_subscription(subscription)
-        cred = self._create_identity_credential(account, tenant)
+        cred = self._create_credential(account, tenant)
 
         token = cred.get_token(*scopes)
 
@@ -782,7 +781,7 @@ class Profile:
             tenant = s[_TENANT_ID]
             subscriptions = []
             try:
-                identity_credential = self._create_identity_credential(s, tenant)
+                identity_credential = self._create_credential(s, tenant)
                 if is_service_principal:
                     subscriptions = subscription_finder.find_using_specific_tenant(tenant, identity_credential)
                 else:

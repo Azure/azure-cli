@@ -72,10 +72,10 @@ class CredentialAdaptor:
         token, _ = self._get_token(scopes, **kwargs)
         return token
 
-    def get_all_tokens(self, *scopes):
-        # type: (*str) -> Tuple[AccessToken, List[AccessToken]]
-        # TODO: Track 2 SDK should support external credentials.
-        return self._get_token(scopes)
+    def get_auxiliary_tokens(self, *scopes, **kwargs):
+        if self._external_credentials:
+            return [cred.get_token(*scopes, **kwargs) for cred in self._external_credentials]
+        return None
 
     @staticmethod
     def _log_hostname():

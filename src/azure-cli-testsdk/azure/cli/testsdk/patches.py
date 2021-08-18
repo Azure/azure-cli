@@ -7,6 +7,7 @@ from azure_devtools.scenario_tests import mock_in_unit_test
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 from .exceptions import CliExecutionError
+from .constants import AUX_SUBSCRIPTION, AUX_TENANT
 
 MOCKED_USER_NAME = 'example@example.com'
 
@@ -40,18 +41,30 @@ def patch_main_exception_handler(unit_test):
 def patch_load_cached_subscriptions(unit_test):
     def _handle_load_cached_subscription(*args, **kwargs):  # pylint: disable=unused-argument
 
-        return [{
-            "id": MOCKED_SUBSCRIPTION_ID,
-            "user": {
-                # TODO: Azure Identity may remove homeAccountId in the future, since it is internal to MSAL and
-                #   may not be absolutely necessary
-                "name": MOCKED_USER_NAME,
-                "type": "user"
+        return [
+            {
+                "id": MOCKED_SUBSCRIPTION_ID,
+                "state": "Enabled",
+                "name": "Example",
+                "tenantId": MOCKED_TENANT_ID,
+                "isDefault": True,
+                "user": {
+                    "name": MOCKED_USER_NAME,
+                    "type": "user"
+                }
             },
-            "state": "Enabled",
-            "name": "Example",
-            "tenantId": MOCKED_TENANT_ID,
-            "isDefault": True}]
+            {
+                "id": AUX_SUBSCRIPTION,
+                "state": "Enabled",
+                "name": "Azure CLI Tests with TTL = 2 Days",
+                "tenantId": AUX_TENANT,
+                "isDefault": False,
+                "user": {
+                    "name": MOCKED_USER_NAME,
+                    "type": "user"
+                }
+            }
+        ]
 
     mock_in_unit_test(unit_test,
                       'azure.cli.core._profile.Profile.load_cached_subscriptions',

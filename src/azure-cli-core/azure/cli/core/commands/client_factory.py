@@ -177,6 +177,16 @@ def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
     client_kwargs['credential_scopes'] = scopes
     client_kwargs['authentication_policy'] = policy
 
+    # Track 2 currently lacks the ability to take external credentials.
+    #   https://github.com/Azure/azure-sdk-for-python/issues/8313
+    # As a temporary workaround, manually add external tokens to 'x-ms-authorization-auxiliary' header.
+    #   https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
+    aux_tokens = cred.get_auxiliary_tokens(*scopes)
+    if aux_tokens:
+        # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
+        client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
+            ', '.join("Bearer {}".format(token.token) for token in aux_tokens)
+
     return client_kwargs
 
 
