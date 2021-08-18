@@ -239,6 +239,10 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
         self.cmd('keyvault private-endpoint-connection show --hsm-name {hsm} --name {hsm_pec_name}',
                  checks=self.check('name', '{hsm_pec_name}'))
 
+        # List private endpoint connections
+        self.cmd('keyvault private-endpoint-connection list --hsm-name {hsm}',
+                 checks=[self.check('length(@)', 1), self.check('[0].id', '{hsm_pec_id}')])
+
         # Test approval/rejection
         self.kwargs.update({
             'approval_desc': 'You are approved!',

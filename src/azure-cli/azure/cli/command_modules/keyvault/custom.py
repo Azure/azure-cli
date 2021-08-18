@@ -1853,6 +1853,11 @@ def delete_private_endpoint_connection(cmd, client, resource_group_name, private
                                    private_endpoint_connection_name)
 
 
+def list_private_endpoint_connection(cmd, client, resource_group_name, hsm_name):
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, None, hsm_name)
+    return pec_client.list_by_resource(resource_group_name, hsm_name)
+
+
 def show_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
                                      vault_name=None, hsm_name=None):
     pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
