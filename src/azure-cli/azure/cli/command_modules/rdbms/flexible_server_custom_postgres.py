@@ -303,7 +303,7 @@ def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_
         raise ArgumentUsageError("Failing over can only be triggered for zone redundant servers.")
 
     if fail_over is not None:
-        if fail_over not in ['Planned', 'Forced', 'planned', 'forced']:
+        if fail_over.lower() not in ['planned', 'forced']:
             raise InvalidArgumentValueError("Allowed failover parameters are 'Planned' and 'Forced'.")
         if fail_over.lower() == 'planned':
             fail_over = 'plannedFailover'
