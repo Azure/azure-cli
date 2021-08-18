@@ -115,6 +115,7 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection',
                          validator=validate_private_endpoint_connection_id, supports_no_wait=True)
+        g.custom_command('list', 'list_private_endpoint_connection')
         g.custom_show_command('show', 'show_private_endpoint_connection',
                               validator=validate_private_endpoint_connection_id)
         g.custom_wait_command('wait', 'show_private_endpoint_connection',
