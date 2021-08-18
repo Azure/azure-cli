@@ -1219,7 +1219,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_custom_ip_prefixes')
         g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix', supports_no_wait=True)
     # endRegion
 
     # region PublicIPAddresses
