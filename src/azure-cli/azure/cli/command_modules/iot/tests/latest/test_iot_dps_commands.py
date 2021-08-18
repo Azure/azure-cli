@@ -121,10 +121,10 @@ class IoTDpsTest(ScenarioTest):
         self.cmd('az iot dps certificate list --dps-name {} -g {}'.format(dps_name, group_name),
                  checks=[
                      self.check('length(value)', 2),
-                     self.check('value[0].name', cert_name),
-                     self.check('value[0].properties.isVerified', False),
-                     self.check('value[1].name', cert_name_verified),
-                     self.check('value[1].properties.isVerified', True)])
+                     self.check('value[0].name', cert_name_verified),
+                     self.check('value[0].properties.isVerified', True),
+                     self.check('value[1].name', cert_name),
+                     self.check('value[1].properties.isVerified', False)])
 
         # Get certificate
         etag = self.cmd('az iot dps certificate show --dps-name {} -g {} --name {}'.format(dps_name, group_name, cert_name), checks=[
