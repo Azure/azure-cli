@@ -110,7 +110,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', location='eastasia', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
-    def test_cert_and_ext(self, key_vault):
+    def test_cert_and_ext(self, key_vault, resource_group):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'cert_tp2': '123BDACDCDFB2C7B250192C6078E47D1E1DB7777',

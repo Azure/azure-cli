@@ -34,7 +34,7 @@ logger = get_logger(__name__)
 class MigrationScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    def test_postgres_server_migration(self):
+    def test_postgres_flexible_server_migration(self):
         self._test_server_migration('postgres')
 
     def _test_server_migration(self, database_engine):
@@ -45,20 +45,20 @@ class MigrationScenarioTest(ScenarioTest):
         if livemode:
             # Live mode values
             target_subscription_id = "6a37df99-a9de-48c4-91e5-7e6ab00b2362"
-            migration_id = str(uuid.uuid4())
+            migration_name = str(uuid.uuid4())
         else:
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
-            migration_id = "00000000-0000-0000-0000-000000000000"
+            migration_name = "00000000-0000-0000-0000-000000000000"
 
         target_resource_group_name = "raganesa-t-m-pg-1"
         target_server_name = "raganesa-t-m-pg-1-vnet"
 
         # test create migration - success
-        result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-id {} --properties @migrationVNet.json'
-                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_id)).get_output_in_json()
+        result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-name {} --properties @migrationVNet.json'
+                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
 
-        migration_id = result['name']
+        migration_name = result['name']
 
         # test list migrations - success, with filter
         result = self.cmd('{} flexible-server migration list --subscription {} --resource-group {} --name {} --filter Active'
@@ -69,13 +69,13 @@ class MigrationScenarioTest(ScenarioTest):
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name)).get_output_in_json()
 
         # test show migration - success
-        result = self.cmd('{} flexible-server migration show --subscription {} --resource-group {} --name {} --migration-id {}'
-                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_id)).get_output_in_json()
+        result = self.cmd('{} flexible-server migration show --subscription {} --resource-group {} --name {} --migration-name {}'
+                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
 
         # test update migration - error - no param
-        result = self.cmd('{} flexible-server migration update --subscription {} --resource-group {} --name {} --migration-id {}'
-                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_id), expect_failure=True)
+        result = self.cmd('{} flexible-server migration update --subscription {} --resource-group {} --name {} --migration-name {}'
+                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name), expect_failure=True)
 
         # test delete migration - success
-        result = self.cmd('{} flexible-server migration delete --subscription {} --resource-group {} --name {} --migration-id {} --yes'
-                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_id)).get_output_in_json()
+        result = self.cmd('{} flexible-server migration delete --subscription {} --resource-group {} --name {} --migration-name {} --yes'
+                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()

@@ -9,7 +9,7 @@ import adal
 from msrest.authentication import Authentication
 from msrestazure.azure_active_directory import MSIAuthentication
 from azure.core.credentials import AccessToken
-from azure.cli.core.util import in_cloud_console, scopes_to_resource
+from azure.cli.core.util import in_cloud_console, scopes_to_resource, resource_to_scopes
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 
 class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, token_retriever, external_tenant_token_retriever=None):
+    def __init__(self, token_retriever, external_tenant_token_retriever=None, resource=None):
         # DO NOT call _token_retriever from outside azure-cli-core. It is only available for user or
         # Service Principal credential (AdalAuthentication), but not for Managed Identity credential
         # (MSIAuthenticationWrapper).
@@ -28,16 +28,23 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         #   - AdalAuthentication.get_token, which is designed for Track 2 SDKs
         self._token_retriever = token_retriever
         self._external_tenant_token_retriever = external_tenant_token_retriever
+        self._resource = resource
 
     def _get_token(self, sdk_resource=None):
         """
         :param sdk_resource: `resource` converted from Track 2 SDK's `scopes`
         """
+
+        # When called by
+        #   - Track 1 SDK, use `resource` specified by CLI
+        #   - Track 2 SDK, use `sdk_resource` specified by SDK and ignore `resource` specified by CLI
+        token_resource = sdk_resource or self._resource
+
         external_tenant_tokens = None
         try:
-            scheme, token, token_entry = self._token_retriever(sdk_resource)
+            scheme, token, token_entry = self._token_retriever(token_resource)
             if self._external_tenant_token_retriever:
-                external_tenant_tokens = self._external_tenant_token_retriever(sdk_resource)
+                external_tenant_tokens = self._external_tenant_token_retriever(token_resource)
         except CLIError as err:
             if in_cloud_console():
                 AdalAuthentication._log_hostname()
@@ -45,7 +52,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         except adal.AdalError as err:
             if in_cloud_console():
                 AdalAuthentication._log_hostname()
-            adal_error_handler(err)
+            adal_error_handler(err, scopes=resource_to_scopes(token_resource))
         except requests.exceptions.SSLError as err:
             from .util import SSLERROR_TEMPLATE
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
@@ -236,24 +243,11 @@ def _timestamp(dt):
     return dt.timestamp()
 
 
-def aad_error_handler(error: dict):
-    """ Handle the error from AAD server returned by ADAL or MSAL. """
-    login_message = ("To re-authenticate, please {}. If the problem persists, "
-                     "please contact your tenant administrator."
-                     .format("refresh Azure Portal" if in_cloud_console() else "run `az login`"))
-
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
-    # Search for an error code at https://login.microsoftonline.com/error
-    msg = error.get('error_description')
-
-    from azure.cli.core.azclierror import AuthenticationError
-    raise AuthenticationError(msg, login_message)
-
-
-def adal_error_handler(err: adal.AdalError):
+def adal_error_handler(err: adal.AdalError, **kwargs):
     """ Handle AdalError. """
     try:
-        aad_error_handler(err.error_response)
+        from azure.cli.core.auth.util import aad_error_handler
+        aad_error_handler(err.error_response, **kwargs)
     except AttributeError:
         # In case of AdalError created as
         #   AdalError('More than one token matches the criteria. The result is ambiguous.')
