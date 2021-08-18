@@ -64,6 +64,14 @@ regions_in_prod = [
     "westus",
 ]
 
+auto_upgrade_channels = [
+    "rapid",
+    "stable",
+    "patch",
+    "node-image",
+    "none"
+]
+
 storage_profile_types = ["StorageAccount", "ManagedDisks"]
 nodepool_mode_type = ["System", "User"]
 
@@ -203,6 +211,7 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type([CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                                                             CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
+        c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('enable_cluster_autoscaler', action='store_true')
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile,
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
@@ -296,6 +305,7 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int,
                    validator=validate_load_balancer_idle_timeout)
+        c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
         c.argument('enable_ahub', options_list=['--enable-ahub'])
