@@ -374,6 +374,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 
 # pylint: disable=unsupported-assignment-operation
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
+    from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
     resource_client = cf_resource(cli_ctx)
     cg_defintion = None
 
@@ -401,7 +402,7 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
         location = cg_defintion.get('location')
     cg_defintion['location'] = location
 
-    api_version = cg_defintion.get('apiVersion', None) or "2021-03-01"
+    api_version = cg_defintion.get('apiVersion', None) or AZURE_API_PROFILES['latest'][ResourceType.MGMT_CONTAINERINSTANCE]
 
     return sdk_no_wait(no_wait,
                        resource_client.resources.begin_create_or_update,
@@ -560,7 +561,8 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 
 
 def container_export(cmd, resource_group_name, name, file):
-    api_version = "2021-03-01"
+    from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
+    api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_CONTAINERINSTANCE]
     resource_client = cf_resource(cmd.cli_ctx)
     resource = resource_client.resources.get(resource_group_name,
                                              "Microsoft.ContainerInstance",

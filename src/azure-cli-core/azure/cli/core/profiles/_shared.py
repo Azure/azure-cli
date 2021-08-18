@@ -110,6 +110,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
     DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
 
+
     def __init__(self, import_prefix, client_name):
         """Constructor.
 
@@ -228,7 +229,8 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-05-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
-        })
+        }),
+        ResourceType.MGMT_CONTAINERINSTANCE: '2021-03-01'
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
