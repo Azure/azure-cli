@@ -4,35 +4,25 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-import os
-import unittest
-from unittest.mock import Mock, patch
-import tempfile
 from knack import CLI
 from knack.util import CLIError
-from azure.cli.core.azclierror import (
-    CLIInternalError,
-    ResourceNotFoundError,
-    ClientRequestError,
-    ArgumentUsageError,
-    InvalidArgumentValueError,
-    MutuallyExclusiveArgumentError,
-    ValidationError,
-    UnauthorizedError,
-)
+import tempfile
+import unittest
+from unittest.mock import patch
 
-
-from azure.cli.core._config import ENV_VAR_PREFIX
-from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core._config import ENV_VAR_PREFIX
+
 from azure.cli.command_modules.acs.decorator import (
     AKSCreateModels,
     AKSCreateParameters,
     AKSCreateContext,
     AKSCreateDecorator,
 )
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 
 
 MOCK_CLI_CONFIG_DIR = tempfile.mkdtemp()
@@ -164,6 +154,14 @@ class AKSCreateModelsTestCase(unittest.TestCase):
         )
 
 
+class AKSCreateParametersTestCase(unittest.TestCase):
+    def test_parameters(self):
+        data = {"key1": "value1", "key2": 200}
+        param = AKSCreateParameters(data)
+        self.assertEqual(param.key1, "value1")
+        self.assertEqual(getattr(param, "key2"), 200)
+
+
 class AKSCreateContextTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -177,13 +175,45 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.mc.location, "test_location")
 
     def test_get_intermediate(self):
-        pass
+        ctx_1 = AKSCreateContext(self.cmd, {})
+        self.assertEqual(
+            ctx_1.get_intermediate("fake-intermediate", "not found"),
+            "not found",
+        )
 
     def test_set_intermediate(self):
-        pass
+        ctx_1 = AKSCreateContext(self.cmd, {})
+        ctx_1.set_intermediate("test-intermediate", "test-intermediate-value")
+        self.assertEqual(
+            ctx_1.get_intermediate("test-intermediate"),
+            "test-intermediate-value",
+        )
+        ctx_1.set_intermediate(
+            "test-intermediate", "new-test-intermediate-value"
+        )
+        self.assertEqual(
+            ctx_1.get_intermediate("test-intermediate"),
+            "test-intermediate-value",
+        )
+        ctx_1.set_intermediate(
+            "test-intermediate",
+            "new-test-intermediate-value",
+            overwrite_exists=True,
+        )
+        self.assertEqual(
+            ctx_1.get_intermediate("test-intermediate"),
+            "new-test-intermediate-value",
+        )
 
     def test_remove_intermediate(self):
-        pass
+        ctx_1 = AKSCreateContext(self.cmd, {})
+        ctx_1.set_intermediate("test-intermediate", "test-intermediate-value")
+        self.assertEqual(
+            ctx_1.get_intermediate("test-intermediate"),
+            "test-intermediate-value",
+        )
+        ctx_1.remove_intermediate("test-intermediate")
+        self.assertEqual(ctx_1.get_intermediate("test-intermediate"), None)
 
     def test_get_resource_group_name(self):
         # default
@@ -299,8 +329,12 @@ class AKSCreateContextTestCase(unittest.TestCase):
 
     def test_get_kubernetes_version(self):
         # default
-        ctx_1 = AKSCreateContext(self.cmd, {"kubernetes_version": "test_kubernetes_version"})
-        self.assertEqual(ctx_1.get_kubernetes_version(), "test_kubernetes_version")
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"kubernetes_version": "test_kubernetes_version"}
+        )
+        self.assertEqual(
+            ctx_1.get_kubernetes_version(), "test_kubernetes_version"
+        )
 
         # empty string
         ctx_2 = AKSCreateContext(self.cmd, {"kubernetes_version": ""})
@@ -312,7 +346,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_no_ssh_key(), True)
 
         # invalid parameter with validation
-        ctx_2 = AKSCreateContext(self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": False})
+        ctx_2 = AKSCreateContext(
+            self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": False}
+        )
         with self.assertRaises(CLIError):
             ctx_2.get_no_ssh_key(enable_validation=True)
 
@@ -324,19 +360,16 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # dynamic completion
         ctx_2 = AKSCreateContext(
             self.cmd,
-            {
-                "vm_set_type": None,
-                "kubernetes_version": None
-            },
+            {"vm_set_type": None, "kubernetes_version": None},
         )
-        self.assertEqual(
-            ctx_2.get_vm_set_type(), "VirtualMachineScaleSets"
-        )
+        self.assertEqual(ctx_2.get_vm_set_type(), "VirtualMachineScaleSets")
         self.assertEqual(
             ctx_2.get_intermediate("vm_set_type"),
             "VirtualMachineScaleSets",
         )
-        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(name="test_ap_name", type="test_vm_set_type")
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_ap_name", type="test_vm_set_type"
+        )
         mc = self.models.ManagedCluster(
             location="test_location", agent_pool_profiles=[agent_pool_profile]
         )
@@ -346,30 +379,33 @@ class AKSCreateContextTestCase(unittest.TestCase):
 
     def test_get_load_balancer_sku(self):
         # default
-        ctx_1 = AKSCreateContext(self.cmd, {"load_balancer_sku": "test_load_balancer_sku"})
-        self.assertEqual(ctx_1.get_load_balancer_sku(), "test_load_balancer_sku")
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"load_balancer_sku": "test_load_balancer_sku"}
+        )
+        self.assertEqual(
+            ctx_1.get_load_balancer_sku(), "test_load_balancer_sku"
+        )
 
         # dynamic completion
         ctx_2 = AKSCreateContext(
             self.cmd,
-            {
-                "load_balancer_sku": None,
-                "kubernetes_version": None
-            },
+            {"load_balancer_sku": None, "kubernetes_version": None},
         )
-        self.assertEqual(
-            ctx_2.get_load_balancer_sku(), "standard"
-        )
+        self.assertEqual(ctx_2.get_load_balancer_sku(), "standard")
         self.assertEqual(
             ctx_2.get_intermediate("load_balancer_sku"),
             "standard",
         )
-        network_profile = self.models.ContainerServiceNetworkProfile(load_balancer_sku="test_load_balancer_sku")
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            load_balancer_sku="test_load_balancer_sku"
+        )
         mc = self.models.ManagedCluster(
             location="test_location", network_profile=network_profile
         )
         ctx_2.attach_mc(mc)
-        self.assertEqual(ctx_2.get_load_balancer_sku(), "test_load_balancer_sku")
+        self.assertEqual(
+            ctx_2.get_load_balancer_sku(), "test_load_balancer_sku"
+        )
         self.assertEqual(ctx_2.get_intermediate("load_balancer_sku"), None)
 
         # invalid parameter with validation
@@ -382,3 +418,81 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_3.get_load_balancer_sku(enable_validation=True)
+
+    def test_get_api_server_authorized_ip_ranges(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges"
+            },
+        )
+        self.assertEqual(
+            ctx_1.get_api_server_authorized_ip_ranges(),
+            "test_api_server_authorized_ip_ranges",
+        )
+
+        # valid parameter with validation
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_sku": "standard",
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+            },
+        )
+        self.assertEqual(
+            ctx_2.get_api_server_authorized_ip_ranges(enable_validation=True),
+            "test_api_server_authorized_ip_ranges",
+        )
+
+    def test_get_fqdn_subdomain(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"fqdn_subdomain": "test_fqdn_subdomain"}
+        )
+        self.assertEqual(ctx_1.get_fqdn_subdomain(), "test_fqdn_subdomain")
+
+        # valid parameter with validation
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "dns_name_prefix": None,
+                "fqdn_subdomain": "test_fqdn_subdomain",
+            },
+        )
+        self.assertEqual(
+            ctx_2.get_fqdn_subdomain(enable_validation=True),
+            "test_fqdn_subdomain",
+        )
+
+
+class AKSCreateDecoratorTestCase(unittest.TestCase):
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.models = AKSCreateModels(self.cmd)
+        self.client = MockClient()
+
+    def test_init_mc(self):
+        dec_1 = AKSCreateDecorator(
+            self.cmd, self.client, self.models, {"location": "test_location"}
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.get_subscription_id",
+            return_value="test_sub_id",
+        ):
+            dec_mc = dec_1.init_mc()
+        mc = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc, mc)
+
+    def test_construct_default_mc(self):
+        dec_1 = AKSCreateDecorator(
+            self.cmd, self.client, self.models, {"location": "test_location"}
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.get_subscription_id",
+            return_value="test_sub_id",
+        ):
+            dec_mc = dec_1.construct_default_mc()
+        mc = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc, mc)
