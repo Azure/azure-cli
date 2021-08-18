@@ -577,7 +577,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
     def handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type):
-        for scope in ['create', 'show', 'list', 'update', 'delete','check-name-availability']:
+        for scope in ['create', 'show', 'list', 'update', 'delete', 'check-name-availability']:
             argument_context_string = '{} flexible-server migration {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type,
@@ -615,10 +615,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
                     c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
-                elif scope== "check-name-availability":
+                elif scope == "check-name-availability":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
-
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')

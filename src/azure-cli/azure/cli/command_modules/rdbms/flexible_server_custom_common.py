@@ -6,6 +6,7 @@
 # pylint: disable=unused-argument, line-too-long
 
 import os
+import json
 import uuid
 from datetime import datetime
 from knack.log import get_logger
@@ -174,10 +175,8 @@ def migration_delete_func(cmd, client, resource_group_name, server_name, migrati
 def migration_check_name_availability(cmd, client, resource_group_name, server_name, migration_name):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    properties = "{\"name\":migration_name,\"type\":\"Microsoft.DBforPostgreSQL/flexibleServers/migrations\"}"
-    print("Props---------------->",properties)
+    properties = json.dumps({"name": "%s" % migration_name, "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"})
     r = send_raw_request(cmd.cli_ctx, "post", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/checkMigrationNameAvailability?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name), None, None, properties)
-
     return r.json()
 
 

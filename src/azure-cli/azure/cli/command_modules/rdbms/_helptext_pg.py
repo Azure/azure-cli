@@ -219,7 +219,7 @@ examples:
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --overwrite-dbs
   - name: Cutover the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --cutover
-  - name: Start the data migration right now. You can schedule data migration to start right now rather than a time in subsequent 2 weeks.
+  - name: Start the data migration right now. You can reschedule data migration to start right now rather than a time in subsequent 2 weeks.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --start-data-migration
 """
 
