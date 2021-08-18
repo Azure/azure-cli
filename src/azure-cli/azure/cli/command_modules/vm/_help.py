@@ -64,7 +64,7 @@ examples:
   - name: Create a disk from image.
     text: >
         az disk create -g MyResourceGroup -n MyDisk --image-reference Canonical:UbuntuServer:18.04-LTS:18.04.202002180
-    - name: Create a disk from the OS Disk of a gallery image version
+  - name: Create a disk from the OS Disk of a gallery image version
     text: >
         az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0
   - name: Create a disk from the OS Disk of the latest version in a gallery image
