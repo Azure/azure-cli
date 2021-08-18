@@ -1168,9 +1168,15 @@ examples:
   - name: Create a VM from a custom managed image.
     text: >
         az vm create -g MyResourceGroup -n MyVm --image MyImage
-  - name: Create a VM from a specialized image version.
+  - name: Create a VM from a generalized gallery image version.
     text: >
-        az vm create -g MyResourceGroup -n MyVm --image $id --specialized
+        az vm create -g MyResourceGroup -n MyVm --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0
+  - name: Create a VM from a specialized gallery image version.
+    text: >
+        az vm create -g MyResourceGroup -n MyVm --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0 --specialized
+  - name: Create a VM from the latest version of a gallery image
+    text: >
+        az vm create -g MyResourceGroup -n MyVm --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
@@ -2429,9 +2435,15 @@ examples:
   - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init'
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image debian --custom-data MyCloudInitScript.yml
-  - name: Create a Linux VM scale set from a specialized image version.
+  - name: Create a VMSS from a generalized gallery image version.
     text: >
-        az vmss create -n MyVmss -g MyResourceGroup --image $id --specialized
+        az vmss create -g MyResourceGroup -n MyVmss --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0
+  - name: Create a VMSS from a specialized gallery image version.
+    text: >
+        az vmss create -g MyResourceGroup -n MyVmss --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0 --specialized
+  - name: Create a VMSS from the latest version of a gallery image
+    text: >
+        az vmss create -g MyResourceGroup -n MyVmss --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage
   - name: Create a Debian VM scaleset using Key Vault secrets.
     text: >
         az keyvault certificate create --vault-name vaultname -n cert1 \\
