@@ -9,6 +9,7 @@ from .._client_factory import cf_synapse_spark_batch, cf_synapse_spark_session
 from ..util import categorized_files, check_udfs_folder
 from ..constant import DOTNET_CLASS, DOTNET_FILE, SPARK_DOTNET_UDFS_FOLDER_NAME, EXECUTOR_SIZE, \
     SPARK_DOTNET_ASSEMBLY_SEARCH_PATHS_KEY, SparkBatchLanguage
+from shlex import split
 
 
 # Spark batch job
@@ -32,10 +33,17 @@ def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_
                            command_line_arguments=None,
                            reference_files=None, archives=None, configuration=None,
                            tags=None):
+    # pylint: disable-msg=too-many-locals
     client = cf_synapse_spark_batch(cmd.cli_ctx, workspace_name, spark_pool_name)
     file = main_definition_file
     class_name = main_class_name
-    arguments = command_line_arguments
+    final_command_line_arguments = []
+    for item in command_line_arguments:
+        final_command_line_arguments.append(' '.join(item))
+    # e.g --arguments a b; command_line_arguments =[['a', 'b']]
+    if len(command_line_arguments) == 1 and len(command_line_arguments[0]) != 1:
+        final_command_line_arguments = split(final_command_line_arguments[0])
+    arguments = final_command_line_arguments
     # dotnet spark
     if language.upper() == SparkBatchLanguage.SparkDotNet.upper() or language.upper() == SparkBatchLanguage.CSharp.upper():
         file = DOTNET_FILE
