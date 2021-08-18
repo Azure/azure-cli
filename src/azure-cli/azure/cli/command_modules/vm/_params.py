@@ -473,13 +473,24 @@ def load_arguments(self, _):
         c.argument('plan', help='image billing plan')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('version', help="image sku's version")
-        c.argument('urn', help="URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted")
+        c.argument('urn', help="URN, in format of 'publisher:offer:sku:version' or 'publisher:offer:sku:edge_zone:version'. If specified, other argument values can be omitted")
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
+        c.argument('edge_zone', options_list=['--edge-zone'], help='The name of the edge zone')
+
+    with self.argument_context('vm image list-offers') as c:
+        c.argument('edge_zone', options_list=['--edge-zone'], help='The name of the edge zone')
+
+    with self.argument_context('vm image list-skus') as c:
+        c.argument('edge_zone', options_list=['--edge-zone'], help='The name of the edge zone')
+
+    with self.argument_context('vm image list-publishers') as c:
+        c.argument('edge_zone', options_list=['--edge-zone'], help='The name of the edge zone')
 
     with self.argument_context('vm image show') as c:
         c.argument('skus', options_list=['--sku', '-s'])
+        c.argument('edge_zone', options_list=['--edge-zone'], help='The name of the edge zone')
 
     with self.argument_context('vm image terms') as c:
         c.argument('urn', help='URN, in the format of \'publisher:offer:sku:version\'. If specified, other argument values can be omitted')
