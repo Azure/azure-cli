@@ -418,6 +418,15 @@ examples:
         az keyvault private-endpoint-connection delete -g myrg --hsm-name myhsm --name myconnection
 """
 
+helps['keyvault private-endpoint-connection list'] = """
+type: command
+short-summary: List all private endpoint connections associated with a HSM.
+examples:
+  - name: List all private endpoint connections associated with a HSM using hsm name.
+    text: |
+        az keyvault private-endpoint-connection list -g myrg --hsm-name myhsm
+"""
+
 helps['keyvault private-endpoint-connection show'] = """
 type: command
 short-summary: Show details of a private endpoint connection associated with a Key Vault/HSM.

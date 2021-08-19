@@ -2020,5 +2020,110 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
         _test_private_endpoint(self, approve=False, rejected=False)
 
 
+class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
+    def _test_private_endpoint_connection_scenario_powerbi(self, resource_group, powerBIResourceName, resource_type, reject):
+        from azure.mgmt.core.tools import resource_id
+
+        tenant_id = self.cmd('account list --query "[?isDefault].tenantId" -o tsv').output.strip()
+
+        self.kwargs.update({
+            'powerbi_resource_name': powerBIResourceName,
+            'powerbi_resource_id': resource_id(subscription=self.get_subscription_id(),
+                                              resource_group=resource_group,
+                                              namespace=resource_type.split('/')[0],
+                                              type=resource_type.split('/')[1],
+                                              name=powerBIResourceName),
+            'rg': resource_group,
+            'resource_type': resource_type,
+            'tenant_id': tenant_id,
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'loc': 'eastus2',
+            'group_ids': 'tenant'
+        })
+
+        # Create powerbi resource from template : private_endpoint_arm_templates/powerbi_privatelinkservicesforpowerbi_parameters.json, powerbi_privatelinkservicesforpowerbi_parameters.json
+        param_file_name = "{}_{}_parameters.json".format(resource_type.split('/')[0].split('.')[1].lower(), resource_type.split('/')[1].lower())
+        template_file_name = "{}_{}_template.json".format(resource_type.split('/')[0].split('.')[1].lower(), resource_type.split('/')[1].lower())
+        self.kwargs.update({
+            'param_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', param_file_name),
+            'template_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', template_file_name)
+        })
+        self.cmd('deployment group create -g {rg} -p "@{param_path}" powerbi_resource_name={powerbi_resource_name} tenant_object_id={tenant_id} -f "{template_path}"')
+
+        # Create vnet and subnet
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --address-prefixes 10.5.0.0/16 '
+                 '--subnet-name {subnet} --subnet-prefixes 10.5.0.0/24')
+
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # List all private link resources for PowerBI resource
+        target_private_link_resource = self.cmd('network private-link-resource list --name {powerbi_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'network private-endpoint create -g {rg} -n {pe} -l {loc} --vnet-name {vnet} --subnet {subnet} '
+            '--connection-name {pe_connection} --private-connection-resource-id {powerbi_resource_id} '
+            '--group-ids {group_ids}').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+        
+        # List powerbi private link connection
+        list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --name {powerbi_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+
+        self.kwargs.update({
+            "pec_id": list_private_endpoint_conn[0]['id']
+        })
+        self.kwargs.update({
+            "pec_name": self.kwargs['pec_id'].split('/')[-1]
+        })
+
+        # Show the private endpoint connection
+        self.cmd('network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('network private-endpoint-connection show --resource-name {powerbi_resource_name} --name {pec_name} --resource-group {rg} --type {resource_type}')
+
+        # Approve the private endpoint connection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        
+        self.cmd(
+            'network private-endpoint-connection approve --resource-name {powerbi_resource_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
+            '--description "{approval_desc}"', 
+                checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        
+        # Reject the private endpoint connection
+        if reject: self.cmd(
+            'network private-endpoint-connection reject --resource-name {powerbi_resource_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
+            '--description "{rejection_desc}"',
+                checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+            ])
+        
+        self.cmd(
+            'network private-endpoint-connection list --name {powerbi_resource_name} --resource-group {rg} --type {resource_type}',
+            checks=[
+                self.check('length(@)', 1)
+            ])
+
+        # Delete the private endpoint connection
+        self.cmd('network private-endpoint-connection delete --id {pec_id} -y')
+        
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_powerbi", location="eastus2")
+    @unittest.skip('Test account subscription not registered')
+    def test_private_endpoint_connection_powerbi(self, resource_group):
+        self._test_private_endpoint_connection_scenario_powerbi(resource_group, 'myPowerBIResource', 'Microsoft.PowerBI/privateLinkServicesForPowerBI', True)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_powerbi", location="eastus2")
+    def test_private_endpoint_connection_powerbi_ignoreReject(self, resource_group):
+        self._test_private_endpoint_connection_scenario_powerbi(resource_group, 'myPowerBIResource', 'Microsoft.PowerBI/privateLinkServicesForPowerBI', False)
+
+
 if __name__ == '__main__':
     unittest.main()

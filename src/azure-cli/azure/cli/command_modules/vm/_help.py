@@ -2452,6 +2452,9 @@ examples:
     supported-profiles: latest
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
+  - name: Create a VMSS that supports SpotRestore.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup  --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group --enable-spot-restore True --spot-restore-timeout PT1H
 """
 
 helps['vmss deallocate'] = """
