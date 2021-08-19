@@ -10,7 +10,7 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-lines
+# pylint: disable=no-self-use,too-many-lines,no-else-return
 import json
 import os
 
@@ -1838,7 +1838,6 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 # region VirtualMachines Images
 def list_vm_images(cmd, edge_zone=None, image_location=None, publisher_name=None, offer=None, sku=None,
                    all=False):  # pylint: disable=redefined-builtin
-    edge_zone_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
     load_thru_services = all
 
     if load_thru_services:
@@ -1868,31 +1867,32 @@ def list_vm_images(cmd, edge_zone=None, image_location=None, publisher_name=None
     return all_images
 
 
-def list_offers(cmd, publisher_name, loaction, edge_zone=None):
+def list_offers(cmd, publisher_name, location, edge_zone=None):
     if edge_zone is not None:
         edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
                                                    ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        return edge_zone_client.list_offers(location=loaction, edge_zone=edge_zone, publisher_name=publisher_name)
+        return edge_zone_client.list_offers(location=location, edge_zone=edge_zone, publisher_name=publisher_name)
     else:
         client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
-        return client.list_offers(location=loaction, publisher_name=publisher_name)
+        return client.list_offers(location=location, publisher_name=publisher_name)
 
 
 def list_publishers(cmd, location, edge_zone=None):
     if edge_zone is not None:
         edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
                                                    ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        return edge_zone_client.list_publishers(location=loaction, edge_zone=edge_zone)
+        return edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
     else:
         client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
-        return client.list_publishers(location=loaction)
+        return client.list_publishers(location=location)
 
-def list_skus(cmd, location, publisher_name, offer, edge_zone=None,):
+
+def list_skus_edge_zone(cmd, location, publisher_name, offer, edge_zone=None,):
     if edge_zone is not None:
         edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
                                                    ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        return edge_zone_client.list_skus(location=location, edge_zone=edge_zone, publisher_name=publisher_name,
-                                            offer=offer)
+        return edge_zone_client.list_skus(location=location, edge_zone=edge_zone,
+                                          publisher_name=publisher_name, offer=offer)
     else:
         client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
         return client.list_skus(location=location, publisher_name=publisher_name, offer=offer)
@@ -1907,7 +1907,8 @@ def show_vm_image(cmd, edge_zone=None, urn=None, publisher=None, offer=None, sku
     error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
     if urn:
         if any([publisher, offer, sku, edge_zone, version]):
-            recommendation = 'Try to use --urn publisher:offer:sku:version or --urn publisher:offer:sku:edge_zone:version'
+            recommendation = 'Try to use --urn publisher:offer:sku:version or' \
+                             ' --urn publisher:offer:sku:edge_zone:version'
             raise MutuallyExclusiveArgumentError(error_msg, recommendation)
         items = urn.split(":")
         if len(items) != 4 and len(items) != 5:

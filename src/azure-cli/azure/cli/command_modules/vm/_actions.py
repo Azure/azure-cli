@@ -10,6 +10,7 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
+# pylint: disable=too-many-statements
 import json
 
 from knack.util import CLIError
