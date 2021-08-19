@@ -48,9 +48,7 @@ def _get_thread_count():
 
 def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zone):
     from concurrent.futures import ThreadPoolExecutor, as_completed
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles import ResourceType
-    edge_zone_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+
     all_images = []
     client = _compute_client_factory(cli_ctx)
     if location is None:
@@ -104,6 +102,10 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                             'version': i.name})
 
     if edge_zone is not None:
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        from azure.cli.core.profiles import ResourceType
+        edge_zone_client = get_mgmt_service_client(cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
         publishers = edge_zone_client.list_publishers(location, edge_zone)
     else:
         publishers = client.virtual_machine_images.list_publishers(location)
