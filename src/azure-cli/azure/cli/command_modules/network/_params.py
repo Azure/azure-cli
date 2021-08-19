@@ -715,9 +715,9 @@ def load_arguments(self, _):
         c.argument('serial_number', options_list=['--serial-number', '-s'], help='Serial number.')
 
     with self.argument_context('network dns record-set srv') as c:
-        c.argument('priority', options_list=['--priority', '-p'], help='Priority metric.')
-        c.argument('weight', options_list=['--weight', '-w'], help='Weight metric.')
-        c.argument('port', options_list=['--port', '-r'], help='Service port.')
+        c.argument('priority', type=int, options_list=['--priority', '-p'], help='Priority metric.')
+        c.argument('weight', type=int, options_list=['--weight', '-w'], help='Weight metric.')
+        c.argument('port', type=int, options_list=['--port', '-r'], help='Service port.')
         c.argument('target', options_list=['--target', '-t'], help='Target domain name.')
 
     with self.argument_context('network dns record-set txt') as c:
