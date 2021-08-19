@@ -92,10 +92,10 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                             'offer': o.name,
                             'sku': s.name,
                             'version': i.name
-                     }
-                     if edge_zone is not None:
+                    }
+                    if edge_zone is not None:
                             image_info['edge_zone'] = edge_zone
-                     all_images.append(image_info)
+                    all_images.append(image_info)
                       
 
     if edge_zone is not None:
