@@ -4701,6 +4701,57 @@ examples:
     crafted: true
 """
 
+helps['network custom-ip'] = """
+type: group
+short-summary: Manage custom IP
+"""
+
+helps['network custom-ip prefix'] = """
+type: group
+short-summary: Manage custom IP prefix resources.
+"""
+
+helps['network custom-ip prefix create'] = """
+type: command
+short-summary: Create a custom IP prefix resource.
+examples:
+  - name: Create a custom IP prefix resource.
+    text: |
+        az network custom-ip prefix create --location westus2 --name MyCustomIpPrefix --resource-group MyResourceGroup
+"""
+
+helps['network custom-ip prefix delete'] = """
+type: command
+short-summary: Delete a custom IP prefix resource.
+examples:
+  - name: Delete a custom IP prefix resource.
+    text: |
+        az network custom-ip prefix delete --name MyCustomIpPrefix --resource-group MyResourceGroup
+"""
+
+helps['network custom-ip prefix list'] = """
+type: command
+short-summary: List custom IP prefix resources.
+"""
+
+helps['network custom-ip prefix show'] = """
+type: command
+short-summary: Get the details of a custom IP prefix resource.
+examples:
+  - name: Get the details of a custom IP prefix resource.
+    text: |
+        az network custom-ip prefix show --name MyCustomIpPrefix --resource-group MyResourceGroup --subscription MySubscription
+"""
+
+helps['network custom-ip prefix update'] = """
+type: command
+short-summary: Update a custom IP prefix resource.
+examples:
+  - name: Update a custom IP prefix resource.
+    text: |
+        az network custom-ip prefix update --name MyCustomIpPrefix --resource-group MyResourceGroup --set useRemoteGateways=true
+"""
+
 helps['network public-ip'] = """
 type: group
 short-summary: Manage public IP addresses.
