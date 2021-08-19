@@ -50,81 +50,84 @@ class AKSCreateModels:
         cmd: AzCommandsLoader,
         resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
     ):
-        self.cmd = cmd
+        self.__cmd = cmd
         self.resource_type = resource_type
-        self.ManagedClusterWindowsProfile = self.cmd.get_models(
+        self.ManagedClusterWindowsProfile = self.__cmd.get_models(
             "ManagedClusterWindowsProfile",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ManagedClusterSKU = self.cmd.get_models(
+        self.ManagedClusterSKU = self.__cmd.get_models(
             "ManagedClusterSKU",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ContainerServiceNetworkProfile = self.cmd.get_models(
+        self.ContainerServiceNetworkProfile = self.__cmd.get_models(
             "ContainerServiceNetworkProfile",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ContainerServiceLinuxProfile = self.cmd.get_models(
+        self.ContainerServiceLinuxProfile = self.__cmd.get_models(
             "ContainerServiceLinuxProfile",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ManagedClusterServicePrincipalProfile = self.cmd.get_models(
+        self.ManagedClusterServicePrincipalProfile = self.__cmd.get_models(
             "ManagedClusterServicePrincipalProfile",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ContainerServiceSshConfiguration = self.cmd.get_models(
+        self.ContainerServiceSshConfiguration = self.__cmd.get_models(
             "ContainerServiceSshConfiguration",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ContainerServiceSshPublicKey = self.cmd.get_models(
+        self.ContainerServiceSshPublicKey = self.__cmd.get_models(
             "ContainerServiceSshPublicKey",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ManagedClusterAADProfile = self.cmd.get_models(
+        self.ManagedClusterAADProfile = self.__cmd.get_models(
             "ManagedClusterAADProfile",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ManagedClusterAgentPoolProfile = self.cmd.get_models(
+        self.ManagedClusterAutoUpgradeProfile = self.__cmd.get_models(
+            "ManagedClusterAutoUpgradeProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterAgentPoolProfile = self.__cmd.get_models(
             "ManagedClusterAgentPoolProfile",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ManagedClusterIdentity = self.cmd.get_models(
+        self.ManagedClusterIdentity = self.__cmd.get_models(
             "ManagedClusterIdentity",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        # pylint: disable=line-too-long
-        self.ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties = self.cmd.get_models(
-            "ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties",
+        self.UserAssignedIdentity = self.__cmd.get_models(
+            "UserAssignedIdentity",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ManagedCluster = self.cmd.get_models(
+        self.ManagedCluster = self.__cmd.get_models(
             "ManagedCluster",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        # pylint: disable=line-too-long
-        self.Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = self.cmd.get_models(
-            "Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties",
+        self.ManagedServiceIdentityUserAssignedIdentitiesValue = self.__cmd.get_models(
+            "ManagedServiceIdentityUserAssignedIdentitiesValue",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ExtendedLocation = self.cmd.get_models(
+        self.ExtendedLocation = self.__cmd.get_models(
             "ExtendedLocation",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ExtendedLocationTypes = self.cmd.get_models(
+        self.ExtendedLocationTypes = self.__cmd.get_models(
             "ExtendedLocationTypes",
             resource_type=self.resource_type,
             operation_group="managed_clusters",

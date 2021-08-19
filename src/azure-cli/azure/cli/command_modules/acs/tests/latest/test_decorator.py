@@ -121,6 +121,10 @@ class AKSCreateModelsTestCase(unittest.TestCase):
             getattr(module, "ManagedClusterAADProfile"),
         )
         self.assertEqual(
+            models.ManagedClusterAutoUpgradeProfile,
+            getattr(module, "ManagedClusterAutoUpgradeProfile"),
+        )
+        self.assertEqual(
             models.ManagedClusterAgentPoolProfile,
             getattr(module, "ManagedClusterAgentPoolProfile"),
         )
@@ -129,20 +133,20 @@ class AKSCreateModelsTestCase(unittest.TestCase):
             getattr(module, "ManagedClusterIdentity"),
         )
         self.assertEqual(
-            models.ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties,
+            models.UserAssignedIdentity,
             getattr(
                 module,
-                "ComponentsQit0EtSchemasManagedclusterpropertiesPropertiesIdentityprofileAdditionalproperties",
+                "UserAssignedIdentity",
             ),
         )
         self.assertEqual(
             models.ManagedCluster, getattr(module, "ManagedCluster")
         )
         self.assertEqual(
-            models.Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties,
+            models.ManagedServiceIdentityUserAssignedIdentitiesValue,
             getattr(
                 module,
-                "Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties",
+                "ManagedServiceIdentityUserAssignedIdentitiesValue",
             ),
         )
         self.assertEqual(
