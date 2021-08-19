@@ -467,7 +467,7 @@ def load_arguments(self, _):
         c.argument('vm_name', arg_type=existing_vm_name, id_part=None)
 
     with self.argument_context('vm image') as c:
-        c.argument('publisher_name', options_list=['--publisher', '-p'])
+        c.argument('publisher_name', options_list=['--publisher', '-p'], help='image publisher')
         c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
         c.argument('plan', help='image billing plan')

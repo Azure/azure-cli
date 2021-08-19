@@ -1836,8 +1836,7 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
 
 # region VirtualMachines Images
-def list_vm_images(cmd, edge_zone=None, image_location=None, publisher_name=None, offer=None, sku=None,
-                   all=False):  # pylint: disable=redefined-builtin
+def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False, edge_zone=None):  # pylint: disable=redefined-builtin
     load_thru_services = all
 
     if load_thru_services:
@@ -1898,7 +1897,7 @@ def list_skus_edge_zone(cmd, location, publisher_name, offer, edge_zone=None,):
         return client.list_skus(location=location, publisher_name=publisher_name, offer=offer)
 
 
-def show_vm_image(cmd, edge_zone=None, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
+def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None, edge_zone=None):
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
                                            InvalidArgumentValueError)
