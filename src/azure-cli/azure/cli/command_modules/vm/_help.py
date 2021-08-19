@@ -642,7 +642,7 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized --plan-name PlanName \\
         --plan-product PlanProduct --plan-publisher PlanPublisher
-  - name: Create an image definition for images that support hibernate feature 
+  - name: Create an image definition for images that support hibernate feature
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
@@ -704,7 +704,7 @@ examples:
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
-        --end-of-life-date YYYY-MM-DDTHH:MM:SS+00:00 
+        --end-of-life-date YYYY-MM-DDTHH:MM:SS+00:00
   - name: Create an image definition and recommend minimum and maximum CPU and memory (GB)
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -843,7 +843,7 @@ examples:
         --os-vhd-storage-account /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Storage/storageAccounts/mystorageaccount \\
         --os-vhd-uri https://mystorageaccount.blob.core.windows.net/container/path_to_vhd_file \\
         --data-vhds-sa /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Storage/storageAccounts/myotherstorageaccount \\
-        --data-vhd-uris https://myotherstorageaccount.blob.core.windows.net/container/path_to_vhd_file \\
+        --data-vhds-uris https://myotherstorageaccount.blob.core.windows.net/container/path_to_vhd_file \\
         --data-vhds-luns 0
   - name: You can combine snapshots, managed disks, and VHDs to create a new image version. Add a new image version using a VHD as the OS disk and a managed disk and a snapshot as data disks.
     text: |
@@ -885,13 +885,13 @@ examples:
         --gallery-image-version 1.0.0 \\
         --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
         --exclude-from-latest true
-  - name: Add a new image version and set its end-of-life date. The image version can still be used to create a virtual machine after its end-of-life date. 
+  - name: Add a new image version and set its end-of-life date. The image version can still be used to create a virtual machine after its end-of-life date.
     text: |
         az sig image-version create --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
-        --end-of-life-date 2024-08-02T00:00:00+00:00 
+        --end-of-life-date 2024-08-02T00:00:00+00:00
 """
 
 helps['sig image-version list-shared'] = """
@@ -914,7 +914,7 @@ short-summary: Get an image version in a gallery shared directly to your subscri
 examples:
   - name: Get an image version in a gallery shared directly to your subscription or tenant in the given location.
     text: |
-        az sig image-version show-shared--gallery-unique-name galleryUniqueName \\
+        az sig image-version show-shared --gallery-unique-name galleryUniqueName \\
         --gallery-image-definition MyImage --gallery-image-version 1.0.0 --location myLocation
 """
 
@@ -930,7 +930,7 @@ examples:
         --target-regions westcentralus=2 eastus2
   - name: Replicate to an additional region. Optional, you can set the replica count for the region.
     text: |
-        az sig image-version create --resource-group MyResourceGroup \\
+        az sig image-version update --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --add publishingProfile.targetRegions name=westcentralus \\
@@ -996,7 +996,7 @@ short-summary: Share gallery with subscriptions and tenants
 examples:
   - name: Share entire gallery with all members of a subscription and/or tenant.
     text: |
-        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery 
+        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery
         --gallery-image-definition MyImage \\
         --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
 """
@@ -1008,7 +1008,6 @@ examples:
   - name: Stop sharing with a subscription or tenant ID
     text: |
         az sig share remove --resource-group MyResourceGroup --gallery-name MyGallery \\
-        --gallery-image-definition MyImage \\
         --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
 """
 
@@ -1046,8 +1045,7 @@ examples:
   - name: Enable gallery to be shared to subscription or tenant
     text: |
         az sig update --resource-group myresourcegroup --gallery-name mygallery \\
-        --permissions "groups" 
-    crafted: true
+        --permissions groups
 """
 
 helps['snapshot'] = """
