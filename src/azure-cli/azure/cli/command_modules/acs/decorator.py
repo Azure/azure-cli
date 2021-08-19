@@ -119,10 +119,12 @@ class AKSCreateModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ManagedServiceIdentityUserAssignedIdentitiesValue = self.__cmd.get_models(
-            "ManagedServiceIdentityUserAssignedIdentitiesValue",
-            resource_type=self.resource_type,
-            operation_group="managed_clusters",
+        self.ManagedServiceIdentityUserAssignedIdentitiesValue = (
+            self.__cmd.get_models(
+                "ManagedServiceIdentityUserAssignedIdentitiesValue",
+                resource_type=self.resource_type,
+                operation_group="managed_clusters",
+            )
         )
         self.ExtendedLocation = self.__cmd.get_models(
             "ExtendedLocation",
@@ -157,11 +159,19 @@ class AKSCreateContext:
         self.mc = None
 
     def attach_mc(self, mc):
-        self.mc = mc
+        if self.mc is None:
+            self.mc = mc
+        else:
+            msg = "the same" if self.mc == mc else "different"
+            raise CLIInternalError(
+                "Attempting to attach the `mc` object again, the two objects are {}.".format(
+                    msg
+                )
+            )
 
     def get_intermediate(self, variable_name: str, default_value: Any = None):
         if variable_name not in self.intermediates:
-            msg = "The intermediate '{}' does not exist! Return default value '{}'!".format(
+            msg = "The intermediate '{}' does not exist, return default value '{}'.".format(
                 variable_name, default_value
             )
             logger.debug(msg)
@@ -172,13 +182,13 @@ class AKSCreateContext:
     ):
         if variable_name in self.intermediates:
             if overwrite_exists:
-                msg = "The intermediate '{}' is overwritten! Original value: '{}', new value: '{}'!".format(
+                msg = "The intermediate '{}' is overwritten. Original value: '{}', new value: '{}'.".format(
                     variable_name, self.intermediates.get(variable_name), value
                 )
                 logger.debug(msg)
                 self.intermediates[variable_name] = value
             elif self.intermediates.get(variable_name) != value:
-                msg = "The intermediate '{}' already exists, but overwrite is not enabled! " "Original value: '{}', candidate value: '{}'!".format(
+                msg = "The intermediate '{}' already exists, but overwrite is not enabled. Original value: '{}', candidate value: '{}'.".format(
                     variable_name,
                     self.intermediates.get(variable_name),
                     value,
