@@ -9,13 +9,7 @@ from typing import Any, List, Dict
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
     CLIInternalError,
-    ResourceNotFoundError,
-    ClientRequestError,
-    ArgumentUsageError,
-    InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
-    ValidationError,
-    UnauthorizedError,
 )
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
@@ -188,11 +182,12 @@ class AKSCreateContext:
                 logger.debug(msg)
                 self.intermediates[variable_name] = value
             elif self.intermediates.get(variable_name) != value:
-                msg = "The intermediate '{}' already exists, but overwrite is not enabled. Original value: '{}', candidate value: '{}'.".format(
-                    variable_name,
-                    self.intermediates.get(variable_name),
-                    value,
-                )
+                msg = "The intermediate '{}' already exists, but overwrite is not enabled." \
+                    "Original value: '{}', candidate value: '{}'.".format(
+                        variable_name,
+                        self.intermediates.get(variable_name),
+                        value,
+                    )
                 # warning level log will be output to the console, which may cause confusion to users
                 logger.warning(msg)
         else:
@@ -201,6 +196,7 @@ class AKSCreateContext:
     def remove_intermediate(self, variable_name: str):
         self.intermediates.pop(variable_name, None)
 
+    # pylint: disable=unused-argument
     def get_resource_group_name(
         self, enable_validation: bool = False, **kwargs
     ):
@@ -212,6 +208,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return resource_group_name
 
+    # pylint: disable=unused-argument
     def get_name(self, enable_validation: bool = False, **kwargs):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
@@ -221,6 +218,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return name
 
+    # pylint: disable=unused-argument
     def get_ssh_key_value(self, enable_validation: bool = False, **kwargs):
         # read the original value passed by the command
         ssh_key_value = self.raw_param.get("ssh_key_value")
@@ -234,6 +232,7 @@ class AKSCreateContext:
             )
         return ssh_key_value
 
+    # pylint: disable=unused-argument
     def get_dns_name_prefix(self, enable_validation: bool = False, **kwargs):
         parameter_name = "dns_name_prefix"
 
@@ -284,6 +283,7 @@ class AKSCreateContext:
                 )
         return dns_name_prefix
 
+    # pylint: disable=unused-argument
     def get_location(self, enable_validation: bool = False, **kwargs):
         parameter_name = "location"
 
@@ -324,6 +324,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return location
 
+    # pylint: disable=unused-argument
     def get_kubernetes_version(self, enable_validation: bool = False, **kwargs):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
@@ -333,6 +334,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return kubernetes_version
 
+    # pylint: disable=unused-argument
     def get_no_ssh_key(self, enable_validation: bool = False, **kwargs):
         # read the original value passed by the command
         no_ssh_key = self.raw_param.get("no_ssh_key")
@@ -346,6 +348,7 @@ class AKSCreateContext:
             )
         return no_ssh_key
 
+    # pylint: disable=unused-argument
     def get_vm_set_type(self, enable_validation: bool = False, **kwargs):
         parameter_name = "vm_set_type"
 
@@ -389,6 +392,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return vm_set_type
 
+    # pylint: disable=unused-argument
     def get_load_balancer_sku(self, enable_validation: bool = False, **kwargs):
         parameter_name = "load_balancer_sku"
 
@@ -436,6 +440,7 @@ class AKSCreateContext:
                 )
         return load_balancer_sku
 
+    # pylint: disable=unused-argument
     def get_api_server_authorized_ip_ranges(
         self, enable_validation: bool = False, **kwargs
     ):
@@ -467,6 +472,7 @@ class AKSCreateContext:
                 )
         return api_server_authorized_ip_ranges
 
+    # pylint: disable=unused-argument
     def get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs):
         # read the original value passed by the command
         fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
