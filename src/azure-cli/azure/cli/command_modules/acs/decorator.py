@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
-from typing import Any
+from typing import Any, List, Dict
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
@@ -32,7 +32,9 @@ from .custom import (
 logger = get_logger(__name__)
 
 
-def safe_list_get(li: list, idx: int, default: Any = None):
+def safe_list_get(li: List, idx: int, default: Any = None):
+    # Attempt to get the element with index `idx` from an object `li` (which should be a list),
+    # if the index is invalid (like out of range), return `default` (whose default value is None)
     if isinstance(li, list):
         try:
             return li[idx]
@@ -139,7 +141,7 @@ class AKSCreateParameters:
     # Used to store original function parameters, in the form of attributes of this class, which can be
     # obtained through a.xxx (a is an instance of this class, xxx is the original parameter name).
     # Note: The attributes of this class should not be modified once they are initialized.
-    def __init__(self, data: dict):
+    def __init__(self, data: Dict):
         for name, value in data.items():
             setattr(self, name, value)
 
@@ -153,7 +155,7 @@ class AKSCreateContext:
     # function to obtain the values of other parameters to be checked to avoid circular calls.
     # Note: The update of parameters and intermediate variables in the command implementation should be achieved
     # by operating the instance of this class.
-    def __init__(self, cmd: AzCliCommand, raw_parameters: dict):
+    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict):
         self.cmd = cmd
         self.raw_param = AKSCreateParameters(raw_parameters)
         self.intermediates = dict()
@@ -536,7 +538,7 @@ class AKSCreateDecorator:
         cmd: AzCliCommand,
         client,
         models: AKSCreateModels,
-        raw_parameters: dict,
+        raw_parameters: Dict,
         resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
     ):
         self.cmd = cmd
