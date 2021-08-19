@@ -882,7 +882,6 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
     task_details = get_task_details_by_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
     if task_details:
         timeout = task_details.timeout
-    print(timeout)
 
     override_task_step_properties = OverrideTaskStepProperties(
         context_path=context_path,

@@ -25,10 +25,7 @@ from ._constants import (
     get_valid_variant,
     ACR_NULL_CONTEXT
 )
-from ._client_factory import (
-    cf_acr_registries,
-    cf_acr_tasks
-)
+from ._client_factory import cf_acr_registries
 
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -572,5 +569,6 @@ def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_n
     :param str registry_name: The name of container registry
     :param str task_name: The name of task
     """
+    from ._client_factory import cf_acr_tasks
     client = cf_acr_tasks(cli_ctx)
     return client.get_details(resource_group_name, registry_name, task_name)
