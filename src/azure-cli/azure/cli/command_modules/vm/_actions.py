@@ -87,19 +87,16 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                     logger.warning(str(e))
                     continue
                 for i in images:
-                    if edge_zone is not None:
-                        all_images.append({
+                    image_info = {
                             'publisher': publisher,
                             'offer': o.name,
                             'sku': s.name,
-                            'edge_zone': edge_zone,
-                            'version': i.name})
-                    else:
-                        all_images.append({
-                            'publisher': publisher,
-                            'offer': o.name,
-                            'sku': s.name,
-                            'version': i.name})
+                            'version': i.name
+                     }
+                     if edge_zone is not None:
+                            image_info['edge_zone'] = edge_zone
+                     all_images.append(image_info)
+                      
 
     if edge_zone is not None:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
