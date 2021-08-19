@@ -374,8 +374,8 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 
 # pylint: disable=unsupported-assignment-operation
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
-    from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
     resource_client = cf_resource(cli_ctx)
+    container_group_client = cf_container_groups(cli_ctx)
     cg_defintion = None
 
     try:
@@ -402,7 +402,7 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
         location = cg_defintion.get('location')
     cg_defintion['location'] = location
 
-    api_version = cg_defintion.get('apiVersion', None) or AZURE_API_PROFILES['latest'][ResourceType.MGMT_CONTAINERINSTANCE]
+    api_version = cg_defintion.get('apiVersion', None) or container_group_client._config.api_version
 
     return sdk_no_wait(no_wait,
                        resource_client.resources.begin_create_or_update,
@@ -561,15 +561,14 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 
 
 def container_export(cmd, resource_group_name, name, file):
-    from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
-    api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_CONTAINERINSTANCE]
     resource_client = cf_resource(cmd.cli_ctx)
+    container_group_client = cf_container_groups(cmd.cli_ctx)
     resource = resource_client.resources.get(resource_group_name,
                                              "Microsoft.ContainerInstance",
                                              '',
                                              "containerGroups",
                                              name,
-                                             api_version).__dict__
+                                             container_group_client._config.api_version).__dict__
 
     # Remove unwanted properites
     resource['properties'].pop('instanceView', None)
@@ -597,7 +596,7 @@ def container_export(cmd, resource_group_name, name, file):
         resource['properties']['containers'][i]['properties'].pop('instanceView', None)
 
     # Add the api version
-    resource['apiVersion'] = api_version
+    resource['apiVersion'] = container_group_client._config.api_version
 
     with open(file, 'w+') as f:
         yaml.safe_dump(resource, f, default_flow_style=False)
