@@ -661,18 +661,10 @@ def load_arguments(self, _):
                             'Creates a new record set if one does not exist.')
             c.argument('if_none_match', help='Create the record set only if it does not already exist.',
                        action='store_true')
-            if item == 'srv':
-                c.argument('priority', type=int)
-                c.argument('weight', type=int)
-                c.argument('port', type=int)
 
         with self.argument_context('network dns record-set {} remove-record'.format(item)) as c:
             c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone.')
             c.argument('keep_empty_record_set', action='store_true', help='Keep the empty record set if the last record is removed.')
-            if item == 'srv':
-                c.argument('priority', type=int)
-                c.argument('weight', type=int)
-                c.argument('port', type=int)
 
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
@@ -723,9 +715,9 @@ def load_arguments(self, _):
         c.argument('serial_number', options_list=['--serial-number', '-s'], help='Serial number.')
 
     with self.argument_context('network dns record-set srv') as c:
-        c.argument('priority', options_list=['--priority', '-p'], help='Priority metric.')
-        c.argument('weight', options_list=['--weight', '-w'], help='Weight metric.')
-        c.argument('port', options_list=['--port', '-r'], help='Service port.')
+        c.argument('priority', type=int, options_list=['--priority', '-p'], help='Priority metric.')
+        c.argument('weight', type=int, options_list=['--weight', '-w'], help='Weight metric.')
+        c.argument('port', type=int, options_list=['--port', '-r'], help='Service port.')
         c.argument('target', options_list=['--target', '-t'], help='Target domain name.')
 
     with self.argument_context('network dns record-set txt') as c:
