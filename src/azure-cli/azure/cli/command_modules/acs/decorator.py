@@ -202,10 +202,7 @@ class AKSCreateContext:
         self.intermediates.pop(variable_name, None)
 
     def get_resource_group_name(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
+        self, enable_validation: bool = False, **kwargs
     ):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
@@ -215,12 +212,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return resource_group_name
 
-    def get_name(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
-    ):
+    def get_name(self, enable_validation: bool = False, **kwargs):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         name = self.raw_param.get("name")
@@ -229,12 +221,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return name
 
-    def get_ssh_key_value(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
-    ):
+    def get_ssh_key_value(self, enable_validation: bool = False, **kwargs):
         # read the original value passed by the command
         ssh_key_value = self.raw_param.get("ssh_key_value")
 
@@ -247,12 +234,7 @@ class AKSCreateContext:
             )
         return ssh_key_value
 
-    def get_dns_name_prefix(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
-    ):
+    def get_dns_name_prefix(self, enable_validation: bool = False, **kwargs):
         parameter_name = "dns_name_prefix"
 
         # read the original value passed by the command
@@ -277,8 +259,7 @@ class AKSCreateContext:
         else:
             dns_name_prefix = raw_value
 
-        # enable dynamic completion if the `force_update` parameter is specified when calling this getter
-        dynamic_completion = force_update
+        dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
         if not dns_name_prefix and not self.get_fqdn_subdomain():
             dynamic_completion = True
@@ -303,12 +284,7 @@ class AKSCreateContext:
                 )
         return dns_name_prefix
 
-    def get_location(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
-    ):
+    def get_location(self, enable_validation: bool = False, **kwargs):
         parameter_name = "location"
 
         # read the original value passed by the command
@@ -330,8 +306,7 @@ class AKSCreateContext:
         else:
             location = raw_value
 
-        # enable dynamic completion if the `force_update` parameter is specified when calling this getter
-        dynamic_completion = force_update
+        dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
         if location is None:
             dynamic_completion = True
@@ -349,12 +324,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return location
 
-    def get_kubernetes_version(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
-    ):
+    def get_kubernetes_version(self, enable_validation: bool = False, **kwargs):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         kubernetes_version = self.raw_param.get("kubernetes_version")
@@ -363,12 +333,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return kubernetes_version
 
-    def get_no_ssh_key(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
-    ):
+    def get_no_ssh_key(self, enable_validation: bool = False, **kwargs):
         # read the original value passed by the command
         no_ssh_key = self.raw_param.get("no_ssh_key")
 
@@ -381,12 +346,7 @@ class AKSCreateContext:
             )
         return no_ssh_key
 
-    def get_vm_set_type(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
-    ):
+    def get_vm_set_type(self, enable_validation: bool = False, **kwargs):
         parameter_name = "vm_set_type"
 
         # read the original value passed by the command
@@ -412,8 +372,7 @@ class AKSCreateContext:
         else:
             vm_set_type = raw_value
 
-        # enable dynamic completion if the `force_update` parameter is specified when calling this getter
-        dynamic_completion = force_update
+        dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
         if not vm_set_type:
             dynamic_completion = True
@@ -430,12 +389,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return vm_set_type
 
-    def get_load_balancer_sku(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
-    ):
+    def get_load_balancer_sku(self, enable_validation: bool = False, **kwargs):
         parameter_name = "load_balancer_sku"
 
         # read the original value passed by the command
@@ -457,8 +411,7 @@ class AKSCreateContext:
         else:
             load_balancer_sku = raw_value
 
-        # enable dynamic completion if the `force_update` parameter is specified when calling this getter
-        dynamic_completion = force_update
+        dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
         if not load_balancer_sku:
             dynamic_completion = True
@@ -475,8 +428,8 @@ class AKSCreateContext:
         # validation
         if enable_validation:
             if (
-                load_balancer_sku == "basic"
-                and self.get_api_server_authorized_ip_ranges()
+                load_balancer_sku == "basic" and
+                self.get_api_server_authorized_ip_ranges()
             ):
                 raise MutuallyExclusiveArgumentError(
                     "--api-server-authorized-ip-ranges can only be used with standard load balancer"
@@ -484,10 +437,7 @@ class AKSCreateContext:
         return load_balancer_sku
 
     def get_api_server_authorized_ip_ranges(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
+        self, enable_validation: bool = False, **kwargs
     ):
         parameter_name = "api_server_authorized_ip_ranges"
 
@@ -509,20 +459,15 @@ class AKSCreateContext:
         # validation
         if enable_validation:
             if (
-                api_server_authorized_ip_ranges
-                and self.get_load_balancer_sku() == "basic"
+                api_server_authorized_ip_ranges and
+                self.get_load_balancer_sku() == "basic"
             ):
                 raise MutuallyExclusiveArgumentError(
                     "--api-server-authorized-ip-ranges can only be used with standard load balancer"
                 )
         return api_server_authorized_ip_ranges
 
-    def get_fqdn_subdomain(
-        self,
-        enable_validation: bool = False,
-        force_update: bool = False,
-        **kwargs
-    ):
+    def get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs):
         # read the original value passed by the command
         fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
 
