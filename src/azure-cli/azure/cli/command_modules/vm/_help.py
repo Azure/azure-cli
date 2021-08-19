@@ -1177,6 +1177,9 @@ examples:
   - name: Create a VM from the latest version of a gallery image
     text: >
         az vm create -g MyResourceGroup -n MyVm --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage
+  - name: Create a VM from a gallery image shared directly to your subscription or tenant.
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --image /sharedgalleries/theGalleryUniqueName/images/theImage/versions/1.0.0
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
@@ -2444,6 +2447,9 @@ examples:
   - name: Create a VMSS from the latest version of a gallery image
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage
+  - name: Create a VMSS from a gallery image shared directly to your subscription or tenant.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image /sharedgalleries/theGalleryUniqueName/images/theImage/versions/1.0.0
   - name: Create a Debian VM scaleset using Key Vault secrets.
     text: >
         az keyvault certificate create --vault-name vaultname -n cert1 \\
