@@ -33,8 +33,8 @@ logger = get_logger(__name__)
 
 
 def safe_list_get(li: List, idx: int, default: Any = None):
-    # Attempt to get the element with index `idx` from an object `li` (which should be a list),
-    # if the index is invalid (like out of range), return `default` (whose default value is None)
+    # Attempt to get the element with index `idx` from an object `li` (which should be a `list`),
+    # if the index is invalid (like out of range), return `default` (whose default value is `None`)
     if isinstance(li, list):
         try:
             return li[idx]
@@ -136,28 +136,23 @@ class AKSCreateModels:
         )
 
 
-# pylint: disable=too-few-public-methods
-class AKSCreateParameters:
-    # Used to store original function parameters, in the form of attributes of this class, which can be
-    # obtained through a.xxx (a is an instance of this class, xxx is the original parameter name).
-    # Note: The attributes of this class should not be modified once they are initialized.
-    def __init__(self, data: Dict):
-        for name, value in data.items():
-            setattr(self, name, value)
-
-
 class AKSCreateContext:
-    # Used to store dynamically inferred/completed parameters (i.e. not specified by the user), intermediate
-    # variables and a copy of the original function parameters.
-    # To dynamically infer/complete a parameter or check the validity of a parameter, please provide a function
-    # named `get_xxx`, where `xxx` is the parameter name.
-    # Attention: When checking the validity of parameters in the `get_xxx` function, please use the `get_param`
-    # function to obtain the values of other parameters to be checked to avoid circular calls.
-    # Note: The update of parameters and intermediate variables in the command implementation should be achieved
-    # by operating the instance of this class.
+    # Used to store intermediate variables (usually this stores the dynamically completed value of the parameter,
+    # which has not been decorated into the `mc` object, and some pure intermediate variables (such as the
+    # subscription ID)) and a copy of the original function parameters, and provide "getter" methods for all
+    # parameters.
+    # To dynamically complete a parameter or check the validity of a parameter, please provide a "getter" function
+    # named `get_xxx`, where `xxx` is the parameter name. In this function, the process of obtaining parameter
+    # values, dynamic completion (optional), and validation (optional) should be followed. The obtaining of
+    # parameter values should further follow the order of obtaining from the `mc` object, from the intermediates,
+    # or from the original value.
+    # Attention: In case of checking the validity of parameters, be sure not to set the `enable_validation` to
+    # `True` to avoid loop calls, when using the getter function to obtain the value of other parameters.
+    # Attension: After the parameter is dynamically completed, it must be added to the intermediates; and after
+    # the parameter is decorated into the `mc` object, the corresponding intermediate should be deleted.
     def __init__(self, cmd: AzCliCommand, raw_parameters: Dict):
         self.cmd = cmd
-        self.raw_param = AKSCreateParameters(raw_parameters)
+        self.raw_param = raw_parameters
         self.intermediates = dict()
         self.mc = None
 
@@ -204,7 +199,7 @@ class AKSCreateContext:
     ):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
-        resource_group_name = getattr(self.raw_param, "resource_group_name")
+        resource_group_name = self.raw_param.get("resource_group_name")
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -218,7 +213,7 @@ class AKSCreateContext:
     ):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
-        name = getattr(self.raw_param, "name")
+        name = self.raw_param.get("name")
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -231,7 +226,7 @@ class AKSCreateContext:
         **kwargs
     ):
         # read the original value passed by the command
-        ssh_key_value = getattr(self.raw_param, "ssh_key_value")
+        ssh_key_value = self.raw_param.get("ssh_key_value")
 
         # this parameter does not need dynamic completion
 
@@ -251,7 +246,7 @@ class AKSCreateContext:
         parameter_name = "dns_name_prefix"
 
         # read the original value passed by the command
-        raw_value = getattr(self.raw_param, parameter_name)
+        raw_value = self.raw_param.get(parameter_name)
         # Try to read from intermediates, the intermediate only exists when the parameter value has been
         # dynamically completed but has not been decorated into the `mc` object.
         # Note: The intermediate value should be cleared immediately after it is decorated into the
@@ -307,7 +302,7 @@ class AKSCreateContext:
         parameter_name = "location"
 
         # read the original value passed by the command
-        raw_value = getattr(self.raw_param, parameter_name)
+        raw_value = self.raw_param.get(parameter_name)
         # try to read from intermediates
         intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -352,7 +347,7 @@ class AKSCreateContext:
     ):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
-        kubernetes_version = getattr(self.raw_param, "kubernetes_version")
+        kubernetes_version = self.raw_param.get("kubernetes_version")
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -365,7 +360,7 @@ class AKSCreateContext:
         **kwargs
     ):
         # read the original value passed by the command
-        no_ssh_key = getattr(self.raw_param, "no_ssh_key")
+        no_ssh_key = self.raw_param.get("no_ssh_key")
 
         # this parameter does not need dynamic completion
 
@@ -385,7 +380,7 @@ class AKSCreateContext:
         parameter_name = "vm_set_type"
 
         # read the original value passed by the command
-        raw_value = getattr(self.raw_param, parameter_name)
+        raw_value = self.raw_param.get(parameter_name)
         # try to read from intermediates
         intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -434,7 +429,7 @@ class AKSCreateContext:
         parameter_name = "load_balancer_sku"
 
         # read the original value passed by the command
-        raw_value = getattr(self.raw_param, parameter_name)
+        raw_value = self.raw_param.get(parameter_name)
         # try to read from intermediates
         intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -487,7 +482,7 @@ class AKSCreateContext:
         parameter_name = "api_server_authorized_ip_ranges"
 
         # read the original value passed by the command
-        raw_value = getattr(self.raw_param, parameter_name)
+        raw_value = self.raw_param.get(parameter_name)
         # try to read the property value corresponding to the parameter from the `mc` object
         mc_property = None
         if self.mc and self.mc.api_server_access_profile:
@@ -519,7 +514,7 @@ class AKSCreateContext:
         **kwargs
     ):
         # read the original value passed by the command
-        fqdn_subdomain = getattr(self.raw_param, "fqdn_subdomain")
+        fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
 
         # this parameter does not need dynamic completion
 

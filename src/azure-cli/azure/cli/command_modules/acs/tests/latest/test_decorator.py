@@ -19,7 +19,6 @@ from azure.cli.core._config import ENV_VAR_PREFIX
 
 from azure.cli.command_modules.acs.decorator import (
     AKSCreateModels,
-    AKSCreateParameters,
     AKSCreateContext,
     AKSCreateDecorator,
 )
@@ -156,14 +155,6 @@ class AKSCreateModelsTestCase(unittest.TestCase):
             models.ExtendedLocationTypes,
             getattr(module, "ExtendedLocationTypes"),
         )
-
-
-class AKSCreateParametersTestCase(unittest.TestCase):
-    def test_parameters(self):
-        data = {"key1": "value1", "key2": 200}
-        param = AKSCreateParameters(data)
-        self.assertEqual(param.key1, "value1")
-        self.assertEqual(getattr(param, "key2"), 200)
 
 
 class AKSCreateContextTestCase(unittest.TestCase):
