@@ -7548,7 +7548,6 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
 
     if not resource_port:
         resource_port = 22
-
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
 
@@ -7557,10 +7556,9 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     t.daemon = True
     t.start()
     azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
-
     if auth_type.lower() == 'password':
         if username is None:
-            raise InvalidArgumentValueError("Please enter username with --username.")
+            raise RequiredArgumentMissingError("Please enter username with --username.")
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
     elif auth_type.lower() == 'aad':
         public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)  # pylint: disable=protected-access
@@ -7569,12 +7567,11 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         command = command + _build_args(cert_file, private_key_file)
     elif auth_type.lower() == 'ssh-key':
         if username is None or ssh_key is None:
-            raise InvalidArgumentValueError("Please enter username --username and ssh cert location --ssh-key.")
+            raise RequiredArgumentMissingError("Please enter username --username and ssh cert location --ssh-key.")
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(None, ssh_key)
     else:
         raise UnrecognizedArgumentError("Unknown auth type. Use one of password, aad or akv.")
-
     command = command + ["-p", str(tunnel_server.local_port)]
     command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
     command = command + ['-o', "LogLevel=Error"]
@@ -7588,7 +7585,6 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
 def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None):
     if not resource_port:
         resource_port = 3389
-        
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
 
@@ -7596,27 +7592,22 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
-
     command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
     logger.debug("Running rdp command %s", ' '.join(command))
     subprocess.call(command, shell=platform.system() == 'Windows')
-
     tunnel_server.cleanup()
 
 
 def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     bastion = client.get(resource_group_name, name)
-
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
-
     tunnel_server = TunnelServer(cmd.cli_ctx, 'localhost', port, bastion, vm_id, resource_port)
     return tunnel_server
 
 
 def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port, port, timeout=None):
-
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
     
@@ -7624,7 +7615,6 @@ def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
-
     logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
     logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
     logger.warning('Ctrl + C to close')
