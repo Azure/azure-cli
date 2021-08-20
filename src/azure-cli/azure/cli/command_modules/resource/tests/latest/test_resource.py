@@ -2157,6 +2157,21 @@ class FeatureScenarioTest(ScenarioTest):
             self.check_pattern('properties.state', 'Unregistering|Unregistered')
         ])
 
+    @AllowLargeResponse(8192)
+    def test_feature_registration_list(self):
+        self.cmd('feature registration list', checks=self.check("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1))
+
+        self.cmd('feature registration show --provider-namespace Microsoft.Network -n AllowLBPreview')
+    
+    @AllowLargeResponse(8192)
+    def test_feature_registration_create(self):
+        self.cmd('feature registration create --namespace Microsoft.Network --name AllowLBPreview', checks=[
+            self.check_pattern('properties.state', 'Registering|Registered')
+        ])
+
+    @AllowLargeResponse(8192)
+    def test_feature_registration_delete(self):
+        self.cmd('feature registration delete --namespace Microsoft.Network --name AllowLBPreview --yes')
 
 class PolicyScenarioTest(ScenarioTest):
 
