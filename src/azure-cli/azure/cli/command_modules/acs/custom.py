@@ -4079,7 +4079,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
             'node version please use the "--node-image-only" option only.'
         )
 
-    # Note: we exclude this option becuase node image upgrade can't accept agentpool put fields like max surge
+    # Note: we exclude this option because node image upgrade can't accept nodepools put fields like max surge
     if max_surge and node_image_only:
         raise CLIError(
             'Conflicting flags. Unable to specify max-surge with node-image-only.'
