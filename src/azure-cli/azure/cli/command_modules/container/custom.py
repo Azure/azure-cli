@@ -372,7 +372,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     return None, {}
 
 
-# pylint: disable=unsupported-assignment-operation
+# pylint: disable=unsupported-assignment-operation,protected-access
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
@@ -560,6 +560,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             stream_args=(container_client, resource_group_name, name, container_name, container_group.restart_policy))
 
 
+# pylint: disable=protected-access
 def container_export(cmd, resource_group_name, name, file):
     resource_client = cf_resource(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
