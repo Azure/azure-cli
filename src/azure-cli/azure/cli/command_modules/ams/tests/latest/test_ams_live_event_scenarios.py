@@ -378,7 +378,7 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['crossDomainPolicy'])
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['clientAccessPolicy'])
-
+    
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_show(self, storage_account_for_create):

@@ -142,6 +142,7 @@ def flexible_server_create(cmd, client,
     logger.warning('Make a note of your password. If you forget, you would have to '
                    'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
                    server_name, resource_group_name)
+    logger.warning('Try using \'az postgres flexible-server connect\' command to test out connection.')
 
     _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user)
 
@@ -271,18 +272,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
             custom_window = "Enabled"
 
         # set values - if maintenance_window when is None when created then create a new object
-        if instance.maintenance_window is None:
-            instance.maintenance_window = postgresql_flexibleservers.models.MaintenanceWindow(
-                day_of_week=day_of_week,
-                start_hour=start_hour,
-                start_minute=start_minute,
-                custom_window=custom_window
-            )
-        else:
-            instance.maintenance_window.day_of_week = day_of_week
-            instance.maintenance_window.start_hour = start_hour
-            instance.maintenance_window.start_minute = start_minute
-            instance.maintenance_window.custom_window = custom_window
+        instance.maintenance_window.day_of_week = day_of_week
+        instance.maintenance_window.start_hour = start_hour
+        instance.maintenance_window.start_minute = start_minute
+        instance.maintenance_window.custom_window = custom_window
 
     if high_availability:
         if high_availability.lower() == "enabled":
@@ -310,11 +303,11 @@ def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_
         raise ArgumentUsageError("Failing over can only be triggered for zone redundant servers.")
 
     if fail_over is not None:
-        if fail_over not in ['Planned', 'Forced']:
+        if fail_over.lower() not in ['planned', 'forced']:
             raise InvalidArgumentValueError("Allowed failover parameters are 'Planned' and 'Forced'.")
-        if fail_over == 'Planned':
+        if fail_over.lower() == 'planned':
             fail_over = 'plannedFailover'
-        elif fail_over == 'Forced':
+        elif fail_over.lower() == 'forced':
             fail_over = 'forcedFailover'
         parameters = postgresql_flexibleservers.models.RestartParameter(restart_with_failover=True,
                                                                         failover_mode=fail_over)

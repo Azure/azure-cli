@@ -146,6 +146,7 @@ class TestProfile(unittest.TestCase):
                                      'e-lOym1sH5iOcxfIjXF0Tp2y0f3zM7qCq8Cp1ZxEwz6xYIgByoxjErNXrOME5Ld1WizcsaWxTXpwxJn_'
                                      'Q8U2g9kXHrbYFeY2gJxF_hnfLvNKxUKUBnftmyYxZwKi0GDS0BvdJnJnsqSRSpxUx__Ra9QJkG1IaDzj'
                                      'ZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw')
+        cls.arm_resource = 'https://management.core.windows.net/'
 
     def test_normalize(self):
         cli = DummyCli()
@@ -551,7 +552,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, test_subscription_id)
 
         # verify the cred._tokenRetriever is a working lambda
-        token_type, token = cred._token_retriever()
+        token_type, token = cred._token_retriever(self.arm_resource)
         self.assertEqual(token, self.raw_token1)
         self.assertEqual(some_token_type, token_type)
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, test_tenant_id,
@@ -595,11 +596,11 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, test_subscription_id)
 
         # verify the cred._tokenRetriever is a working lambda
-        token_type, token = cred._token_retriever()
+        token_type, token = cred._token_retriever(self.arm_resource)
         self.assertEqual(token, self.raw_token1)
         self.assertEqual(some_token_type, token_type)
 
-        token2 = cred._external_tenant_token_retriever()
+        token2 = cred._external_tenant_token_retriever(self.arm_resource)
         self.assertEqual(len(token2), 1)
         self.assertEqual(token2[0][1], raw_token2)
 
@@ -642,11 +643,11 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, test_subscription_id)
 
         # verify the cred._tokenRetriever is a working lambda
-        token_type, token = cred._token_retriever()
+        token_type, token = cred._token_retriever(self.arm_resource)
         self.assertEqual(token, self.raw_token1)
         self.assertEqual(some_token_type, token_type)
 
-        token2 = cred._external_tenant_token_retriever()
+        token2 = cred._external_tenant_token_retriever(self.arm_resource)
         self.assertEqual(len(token2), 1)
         self.assertEqual(token2[0][1], raw_token2)
 
@@ -949,7 +950,7 @@ class TestProfile(unittest.TestCase):
         # action
         cred, _, tenant_id = profile.get_login_credentials(
             resource=cli.cloud.endpoints.active_directory_graph_resource_id)
-        _, _ = cred._token_retriever()
+        _, _ = cred._token_retriever('https://graph.windows.net/')
         # verify
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
                                                'https://graph.windows.net/')
@@ -971,7 +972,7 @@ class TestProfile(unittest.TestCase):
         # action
         cred, _, tenant_id = profile.get_login_credentials(
             resource=cli.cloud.endpoints.active_directory_data_lake_resource_id)
-        _, _ = cred._token_retriever()
+        _, _ = cred._token_retriever('https://datalake.azure.net/')
         # verify
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
                                                'https://datalake.azure.net/')

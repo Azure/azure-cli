@@ -103,6 +103,10 @@ def list_nsg_rules(cmd, resource_group_name, network_security_group_name, includ
     return rules
 
 
+def list_custom_ip_prefixes(cmd, resource_group_name=None):
+    return _generic_list(cmd.cli_ctx, 'custom_ip_prefixes', resource_group_name)
+
+
 def list_public_ips(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
 
@@ -2485,6 +2489,79 @@ def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, 
                           keep_empty_record_set=keep_empty_record_set)
 
 
+def _check_a_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.ipv4_address == record.ipv4_address:
+            return True
+    return False
+
+
+def _check_aaaa_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.ipv6_address == record.ipv6_address:
+            return True
+    return False
+
+
+def _check_caa_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r.flags == record.flags and
+                r.tag == record.tag and
+                r.value == record.value):
+            return True
+    return False
+
+
+def _check_cname_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.cname == record.cname:
+            return True
+    return False
+
+
+def _check_mx_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r.preference == record.preference and
+                r.exchange == record.exchange):
+            return True
+    return False
+
+
+def _check_ns_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.nsdname == record.nsdname:
+            return True
+    return False
+
+
+def _check_ptr_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.ptrdname == record.ptrdname:
+            return True
+    return False
+
+
+def _check_srv_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r.priority == record.priority and
+                r.weight == record.weight and
+                r.port == record.port and
+                r.target == record.target):
+            return True
+    return False
+
+
+def _check_txt_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.value == record.value:
+            return True
+    return False
+
+
+def _record_exist_func(record_type):
+    return globals()["_check_{}_record_exist".format(record_type)]
+
+
 def _add_record(record_set, record, record_type, is_list=False):
     record_property = _type_to_property_name(record_type)
 
@@ -2493,7 +2570,10 @@ def _add_record(record_set, record, record_type, is_list=False):
         if record_list is None:
             setattr(record_set, record_property, [])
             record_list = getattr(record_set, record_property)
-        record_list.append(record)
+
+        _record_exist = _record_exist_func(record_type)
+        if not _record_exist(record, record_list):
+            record_list.append(record)
     else:
         setattr(record_set, record_property, record)
 
@@ -2503,6 +2583,7 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     from azure.core.exceptions import HttpResponseError
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
+
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except HttpResponseError:
@@ -5809,11 +5890,46 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 # endregion
 
 
+# region CustomIpPrefix
+def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_name, location=None,
+                            cidr=None, tags=None, zone=None, signed_message=None, authorization_message=None,
+                            custom_ip_prefix_parent=None, no_wait=False):
+
+    CustomIpPrefix = cmd.get_models('CustomIpPrefix')
+    prefix = CustomIpPrefix(
+        location=location,
+        cidr=cidr,
+        zones=zone,
+        tags=tags,
+        signed_message=signed_message,
+        authorization_message=authorization_message
+    )
+
+    if custom_ip_prefix_parent:
+        try:
+            prefix.custom_ip_prefix_parent = client.get(resource_group_name, custom_ip_prefix_name)
+        except ResourceNotFoundError:
+            raise ResourceNotFoundError("Custom ip prefix parent {} doesn't exist".format(custom_ip_prefix_name))
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, custom_ip_prefix_name, prefix)
+
+
+def update_custom_ip_prefix(instance, signed_message=None, authorization_message=None, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    if signed_message is not None:
+        instance.signed_message = signed_message
+    if authorization_message is not None:
+        instance.authorization_message = authorization_message
+    return instance
+# endregion
+
+
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None):
+                     public_ip_prefix=None, edge_zone=None, ip_address=None):
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses
@@ -5826,6 +5942,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         'tags': tags,
         'public_ip_allocation_method': allocation_method,
         'idle_timeout_in_minutes': idle_timeout,
+        'ip_address': ip_address,
         'dns_settings': None
     }
     if cmd.supported_api_version(min_api='2016-09-01'):
@@ -5888,7 +6005,8 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            version=None, location=None, tags=None, zone=None, edge_zone=None):
+                            version=None, location=None, tags=None, zone=None, edge_zone=None,
+                            custom_ip_prefix_name=None):
     PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
     prefix = PublicIPPrefix(
         location=location,
@@ -5900,6 +6018,13 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
 
     if cmd.supported_api_version(min_api='2019-08-01'):
         prefix.public_ip_address_version = version if version is not None else 'ipv4'
+
+    if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
+        cip_client = network_client_factory(cmd.cli_ctx).custom_ip_prefixes
+        try:
+            prefix.custom_ip_prefix = cip_client.get(resource_group_name, custom_ip_prefix_name)
+        except ResourceNotFoundError:
+            raise ResourceNotFoundError('Custom ip prefix {} doesn\'t exist.'.format(custom_ip_prefix_name))
 
     if edge_zone:
         prefix.extended_location = _edge_zone_model(cmd, edge_zone)
