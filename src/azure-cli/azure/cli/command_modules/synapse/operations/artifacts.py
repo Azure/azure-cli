@@ -344,3 +344,5 @@ def write_to_file(notebook, path):
 def delete_notebook(cmd, workspace_name, notebook_name, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
     return sdk_no_wait(no_wait, client.begin_delete_notebook, notebook_name, polling=True)
+
+
