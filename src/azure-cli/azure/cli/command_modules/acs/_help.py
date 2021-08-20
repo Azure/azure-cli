@@ -312,9 +312,6 @@ parameters:
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
     long-summary: Select between loadBalancer and userDefinedRouting. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
-  - name: --auto-upgrade-channel
-    type: string
-    short-summary: Specify the upgrade channel for autoupgrade.
   - name: --enable-cluster-autoscaler
     type: bool
     short-summary: Enable cluster autoscaler, default value is false.
@@ -549,9 +546,6 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
-  - name: --auto-upgrade-channel
-    type: string
-    short-summary: Specify the upgrade channel for autoupgrade.
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.

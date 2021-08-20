@@ -2036,7 +2036,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
                outbound_type=None,
-               auto_upgrade_channel=None,
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
@@ -2100,9 +2099,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     ManagedClusterAADProfile = cmd.get_models('ManagedClusterAADProfile',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='managed_clusters')
-    ManagedClusterAutoUpgradeProfile = cmd.get_models('ManagedClusterAutoUpgradeProfile',
-                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                      operation_group='managed_clusters')
     ManagedClusterAgentPoolProfile = cmd.get_models('ManagedClusterAgentPoolProfile',
                                                     resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                     operation_group='managed_clusters')
@@ -2433,10 +2429,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             cluster_identity_object_id,
             assign_kubelet_identity)
 
-    auto_upgrade_profile = None
-    if auto_upgrade_channel is not None:
-        auto_upgrade_profile = ManagedClusterAutoUpgradeProfile(upgrade_channel=auto_upgrade_channel)
-
     mc = ManagedCluster(
         location=location,
         tags=tags,
@@ -2454,8 +2446,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         api_server_access_profile=api_server_access_profile,
         identity=identity,
         disk_encryption_set_id=node_osdisk_diskencryptionset_id,
-        identity_profile=identity_profile,
-        auto_upgrade_profile=auto_upgrade_profile
+        identity_profile=identity_profile
     )
 
     use_custom_private_dns_zone = False
@@ -2763,7 +2754,6 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_ahub=False,
                disable_ahub=False,
                windows_admin_password=None,
-               auto_upgrade_channel=None,
                enable_managed_identity=False,
                assign_identity=None,
                yes=False,
@@ -2776,9 +2766,6 @@ def aks_update(cmd, client, resource_group_name, name,
     ManagedClusterAADProfile = cmd.get_models('ManagedClusterAADProfile',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='managed_clusters')
-    ManagedClusterAutoUpgradeProfile = cmd.get_models('ManagedClusterAutoUpgradeProfile',
-                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                      operation_group='managed_clusters')
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
@@ -2808,7 +2795,6 @@ def aks_update(cmd, client, resource_group_name, name,
             not update_aad_profile and
             not enable_ahub and
             not disable_ahub and
-            not auto_upgrade_channel and
             not windows_admin_password and
             not enable_managed_identity and
             not assign_identity):
@@ -2821,7 +2807,6 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--load-balancer-outbound-ip-prefixes" or'
                        '"--load-balancer-outbound-ports" or'
                        '"--load-balancer-idle-timeout" or'
-                       '"--auto-upgrade-channel" or '
                        '"--attach-acr" or "--detach-acr" or'
                        '"--uptime-sla" or'
                        '"--no-uptime-sla" or '
@@ -2982,12 +2967,6 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.windows_profile.license_type = 'Windows_Server'
     if disable_ahub:
         instance.windows_profile.license_type = 'None'
-
-    if instance.auto_upgrade_profile is None:
-        instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
-
-    if auto_upgrade_channel is not None:
-        instance.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
 
     if windows_admin_password:
         instance.windows_profile.admin_password = windows_admin_password
