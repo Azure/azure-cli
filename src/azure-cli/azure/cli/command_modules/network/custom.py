@@ -7735,8 +7735,7 @@ def create_network_virtual_appliance_site(cmd, client, resource_group_name, netw
                                                           allow=allow,
                                                           optimize=optimize,
                                                           default=default
-                                                      )
-                                                  ))
+                                                      )))
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, network_virtual_appliance_name, site_name, virtual_appliance_site)
 
