@@ -2983,10 +2983,9 @@ def aks_update(cmd, client, resource_group_name, name,
     if disable_ahub:
         instance.windows_profile.license_type = 'None'
 
-    if instance.auto_upgrade_profile is None:
-        instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
-
     if auto_upgrade_channel is not None:
+        if instance.auto_upgrade_profile is None:
+            instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
         instance.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
 
     if windows_admin_password:
