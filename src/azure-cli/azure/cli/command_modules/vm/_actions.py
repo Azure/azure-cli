@@ -88,15 +88,14 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                     continue
                 for i in images:
                     image_info = {
-                            'publisher': publisher,
-                            'offer': o.name,
-                            'sku': s.name,
-                            'version': i.name
+                        'publisher': publisher,
+                        'offer': o.name,
+                        'sku': s.name,
+                        'version': i.name
                     }
                     if edge_zone is not None:
-                            image_info['edge_zone'] = edge_zone
+                        image_info['edge_zone'] = edge_zone
                     all_images.append(image_info)
-                      
 
     if edge_zone is not None:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -258,7 +257,8 @@ def _get_latest_image_version(cli_ctx, location, publisher, offer, sku, edge_zon
         edge_zone_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
         top_one = edge_zone_client.list(location, edge_zone, publisher, offer, sku, top=1, orderby='name desc')
         if not top_one:
-            raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}'".format(publisher, offer, sku))
+            raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}:{}'"
+                                            .format(publisher, offer, sku, edge_zone))
     else:
         top_one = _compute_client_factory(cli_ctx).virtual_machine_images.list(location,
                                                                                publisher,

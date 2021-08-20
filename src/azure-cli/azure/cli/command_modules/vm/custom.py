@@ -1837,7 +1837,7 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
 # region VirtualMachines Images
 def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False, edge_zone=None):  # pylint: disable=redefined-builtin
-    load_thru_services = all
+    load_thru_services = all or edge_zone is not None
 
     if load_thru_services:
         if not publisher_name and not offer and not sku and not edge_zone:
@@ -1846,16 +1846,8 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
                            " Partial name search is supported.")
         all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone)
     else:
-        if edge_zone is not None:
-            if not publisher_name and not offer and not sku:
-                logger.warning("You are retrieving all the images from server which could take more than a minute. "
-                               "To shorten the wait, provide '--publisher', '--offer' or '--sku'."
-                               "Partial name search is supported.")
-            all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone)
-        else:
-            all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku)
-            logger.warning(
-                'You are viewing an offline list of images, use --all to retrieve an up-to-date list')
+        all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku)
+        logger.warning('You are viewing an offline list of images, use --all to retrieve an up-to-date list')
 
     if edge_zone is not None:
         for i in all_images:
@@ -1886,7 +1878,7 @@ def list_publishers(cmd, location, edge_zone=None):
         return client.list_publishers(location=location)
 
 
-def list_skus_edge_zone(cmd, location, publisher_name, offer, edge_zone=None,):
+def list_sku(cmd, location, publisher_name, offer, edge_zone=None,):
     if edge_zone is not None:
         edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
                                                    ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone

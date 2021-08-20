@@ -477,20 +477,20 @@ def load_arguments(self, _):
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
-        c.argument('edge_zone', options_list=['--edge-zone'], min_api='2020-12-01', help='The name of the edge zone')
+        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image list-offers') as c:
-        c.argument('edge_zone', options_list=['--edge-zone'], min_api='2020-12-01', help='The name of the edge zone')
+        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image list-skus') as c:
-        c.argument('edge_zone', options_list=['--edge-zone'], min_api='2020-12-01', help='The name of the edge zone')
+        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image list-publishers') as c:
-        c.argument('edge_zone', options_list=['--edge-zone'], min_api='2020-12-01', help='The name of the edge zone')
+        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image show') as c:
         c.argument('skus', options_list=['--sku', '-s'])
-        c.argument('edge_zone', options_list=['--edge-zone'], min_api='2020-12-01', help='The name of the edge zone')
+        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image terms') as c:
         c.argument('urn', help='URN, in the format of \'publisher:offer:sku:version\'. If specified, other argument values can be omitted')
