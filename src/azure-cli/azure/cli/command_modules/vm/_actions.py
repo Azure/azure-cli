@@ -250,10 +250,10 @@ def _create_image_instance(publisher, offer, sku, version):
 
 
 def _get_latest_image_version(cli_ctx, location, publisher, offer, sku, edge_zone=None):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     if edge_zone is not None:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         from azure.cli.core.profiles import ResourceType
-        from azure.cli.core.azclierror import InvalidArgumentValueError
         edge_zone_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
         top_one = edge_zone_client.list(location, edge_zone, publisher, offer, sku, top=1, orderby='name desc')
         if not top_one:
