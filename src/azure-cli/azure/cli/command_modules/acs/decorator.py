@@ -21,6 +21,7 @@ from .custom import (
     _set_vm_set_type,
     set_load_balancer_sku,
     get_subscription_id,
+    _trim_nodepoolname,
 )
 
 logger = get_logger(__name__)
@@ -221,7 +222,24 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_ssh_key_value(self, enable_validation: bool = False, **kwargs):
         # read the original value passed by the command
-        ssh_key_value = self.raw_param.get("ssh_key_value")
+        raw_value = self.raw_param.get("ssh_key_value")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        mc_property = None
+        if (
+            self.mc and
+            self.mc.linux_profile and
+            self.mc.linux_profile.ssh and
+            self.mc.linux_profile.ssh.public_keys
+        ):
+            public_key_obj = safe_list_get(self.mc.linux_profile.ssh.public_keys, 0, None)
+            if public_key_obj:
+                mc_property = public_key_obj.key_data
+
+        # set defautl value
+        if mc_property is not None:
+            ssh_key_value = mc_property
+        else:
+            ssh_key_value = raw_value
 
         # this parameter does not need dynamic completion
 
@@ -326,9 +344,18 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_kubernetes_version(self, enable_validation: bool = False, **kwargs):
-        # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
-        kubernetes_version = self.raw_param.get("kubernetes_version")
+        raw_value = self.raw_param.get("kubernetes_version")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        mc_property = None
+        if self.mc:
+            mc_property = self.mc.kubernetes_version
+
+        # set defautl value
+        if mc_property is not None:
+            kubernetes_version = mc_property
+        else:
+            kubernetes_version = raw_value
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -336,6 +363,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_no_ssh_key(self, enable_validation: bool = False, **kwargs):
+        # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         no_ssh_key = self.raw_param.get("no_ssh_key")
 
@@ -475,7 +503,17 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs):
         # read the original value passed by the command
-        fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
+        raw_value = self.raw_param.get("fqdn_subdomain")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        mc_property = None
+        if self.mc:
+            mc_property = self.mc.fqdn_subdomain
+
+        # set defautl value
+        if mc_property is not None:
+            fqdn_subdomain = mc_property
+        else:
+            fqdn_subdomain = raw_value
 
         # this parameter does not need dynamic completion
 
@@ -487,6 +525,148 @@ class AKSCreateContext:
                 )
         return fqdn_subdomain
 
+    # pylint: disable=unused-argument
+    def get_nodepool_name(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("nodepool_name")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        mc_property = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                mc_property = agent_pool_profile.name
+
+        # set defautl value
+        if mc_property is not None:
+            nodepool_name = mc_property
+        else:
+            nodepool_name = raw_value
+
+        # dynamic completion
+        # Only when additional parameter "enable_trim" is given, trim or set default value for the parameter.
+        if kwargs.get("enable_trim", False):
+            if not nodepool_name:
+                nodepool_name = "nodepool1"
+            else:
+                nodepool_name = nodepool_name[:12]
+
+        # this parameter does not need validation
+        return nodepool_name
+
+    # pylint: disable=unused-argument
+    def get_nodepool_tags(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        nodepool_tags = self.raw_param.get("nodepool_tags")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nodepool_tags
+
+    # pylint: disable=unused-argument
+    def get_nodepool_labels(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        nodepool_labels = self.raw_param.get("nodepool_labels")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nodepool_labels
+
+    # pylint: disable=unused-argument
+    def get_node_count(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        node_count = self.raw_param.get("node_count")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return int(node_count)
+
+    # pylint: disable=unused-argument
+    def get_node_vm_size(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        node_vm_size = self.raw_param.get("node_vm_size")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_vm_size
+
+    # pylint: disable=unused-argument
+    def get_vnet_subnet_id(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        vnet_subnet_id = self.raw_param.get("vnet_subnet_id")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return vnet_subnet_id
+
+    # pylint: disable=unused-argument
+    def get_ppg(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        ppg = self.raw_param.get("ppg")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return ppg
+
+    # pylint: disable=unused-argument
+    def get_zones(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        zones = self.raw_param.get("zones")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return zones
+
+    # pylint: disable=unused-argument
+    def get_enable_node_public_ip(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        enable_node_public_ip = self.raw_param.get("enable_node_public_ip")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_node_public_ip
+
+    # pylint: disable=unused-argument
+    def get_node_public_ip_prefix_id(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        node_public_ip_prefix_id = self.raw_param.get("node_public_ip_prefix_id")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_public_ip_prefix_id
+
+    # pylint: disable=unused-argument
+    def get_enable_encryption_at_host(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        enable_encryption_at_host = self.raw_param.get("enable_encryption_at_host")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_encryption_at_host
+
+    # pylint: disable=unused-argument
+    def get_enable_ultra_ssd(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        enable_ultra_ssd = self.raw_param.get("enable_ultra_ssd")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_ultra_ssd
+
+    # pylint: disable=unused-argument
+    def get_max_pods(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        max_pods = self.raw_param.get("max_pods")
+
+        if max_pods and max_pods != "0":
+            max_pods = int(max_pods)
+        else:
+            max_pods = None
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return max_pods
 
 class AKSCreateDecorator:
     def __init__(
@@ -520,6 +700,32 @@ class AKSCreateDecorator:
         # initialize the `ManagedCluster` object with mandatory parameters (i.e. location)
         mc = self.models.ManagedCluster(location=self.context.get_location())
         return mc
+
+    def set_up_agent_pool_profiles(self):
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            # Must be 12 chars or less before ACS RP adds to it
+            name=_trim_nodepoolname(nodepool_name),
+            tags=nodepool_tags,
+            node_labels=nodepool_labels,
+            count=int(node_count),
+            vm_size=node_vm_size,
+            os_type="Linux",
+            vnet_subnet_id=vnet_subnet_id,
+            proximity_placement_group_id=ppg,
+            availability_zones=zones,
+            enable_node_public_ip=enable_node_public_ip,
+            node_public_ip_prefix_id=node_public_ip_prefix_id,
+            enable_encryption_at_host=enable_encryption_at_host,
+            enable_ultra_ssd=enable_ultra_ssd,
+            max_pods=int(max_pods) if max_pods else None,
+            type=vm_set_type,
+            mode="System"
+        )
+        if node_osdisk_size:
+            agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
+
+        if node_osdisk_type:
+            agent_pool_profile.os_disk_type = node_osdisk_type
 
     def construct_default_mc(self):
         # An all-in-one function used to create the complete `ManagedCluster` object, which will later be
