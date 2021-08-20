@@ -2156,11 +2156,11 @@ def load_arguments(self, _):
         c.argument('bastion_host_name', bastion_host_name_type, options_list=['--name', '-n'])
         c.argument('public_ip_address', help='Name or ID of the Azure public IP. The SKU of the public IP must be Standard.', validator=get_public_ip_validator())
         c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
+        c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
+        c.argument('target_resource_id', help='ResourceId of the target Virtual Machine.', options_list=['--target-resource-id'])
         c.ignore('subnet')
     for item in ['ssh', 'rdp']:
         with self.argument_context('network bastion {}'.format(item)) as c:
-            c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
-            c.argument('target_resource_id', help='ResourceId of the target Virtual Machine.', options_list=['--target-resource-id'])
             c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
             c.argument('username', help='User name for SSH connections.', options_list=['--username'])
             c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])

@@ -7,7 +7,6 @@ from collections import Counter, OrderedDict
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from knack.log import get_logger
-from knack.prompting import prompt
 
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 
