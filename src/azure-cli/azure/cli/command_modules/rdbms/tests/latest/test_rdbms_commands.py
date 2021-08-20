@@ -801,7 +801,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # add identity to server
         server_resp = self.cmd('{} server update -g {} --name {} --assign-identity'
                                .format(database_engine, resource_group, server)).get_output_in_json()
-        print(server_resp)
+
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
