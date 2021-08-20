@@ -7610,7 +7610,6 @@ def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
 def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port, port, timeout=None):
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
-    
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port, port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
@@ -7738,7 +7737,6 @@ def create_network_virtual_appliance_site(cmd, client, resource_group_name, netw
                                                           default=default
                                                       )
                                                   ))
-
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, network_virtual_appliance_name, site_name, virtual_appliance_site)
 
