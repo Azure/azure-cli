@@ -57,7 +57,7 @@ sku_type = CLIArgumentType(
 
 identity_type = CLIArgumentType(
     help="The managed identity type for the resource.",
-    arg_type=get_enum_type(['noidentity', 'systemassigned']),
+    arg_type=get_enum_type(['noidentity', 'systemassigned', 'userAssigned']),
     options_list=['--identity'],
     is_preview=True
 )
