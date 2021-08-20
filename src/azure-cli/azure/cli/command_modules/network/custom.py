@@ -7543,51 +7543,36 @@ def _build_args(cert_file, private_key_file):
     return private_key + certificate
 
 
-def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, bastion_resource_id=None, name=None, resource_port=None):
+def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, username=None, ssh_key=None):
 
     _test_extension(SSH_EXTENSION_NAME)
 
     if not resource_port:
         resource_port = 22
 
-    if not bastion_resource_id and not name:
-        raise RequiredArgumentMissingError("Please enter either resource id or name of the bastion. --resource-id or --name")
-
-    if not bastion_resource_id(vm_id):
+    if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
 
-    if bastion_resource_id is not None:
-        if is_valid_resource_id(bastion_resource_id):
-            parsed_id = parse_resource_id(bastion_resource_id)
-            bastion_name = parsed_id["name"]
-            resource_group_name = parsed_id['resource_group']
-        else:
-            raise InvalidArgumentValueError("Please enter a valid Bastion resource Id.")
-    else:
-        bastion_name = name
-        if resource_group_name is None:
-            raise RequiredArgumentMissingError("Resource group name cannot be empty when not using resourceId. Use --resource-group")
-
-    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port)
-    t = threading.Thread(target=_start_tunnel, args=(tunnel_server))
+    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
-
     azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
 
     if auth_type.lower() == 'password':
-        username = prompt(msg='Enter username: ')
+        if username is None:
+            raise InvalidArgumentValueError("Please enter username with --username.")
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
     elif auth_type.lower() == 'aad':
         public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)  # pylint: disable=protected-access
         cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file + '-cert.pub')  # pylint: disable=protected-access
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(cert_file, private_key_file)
-    elif auth_type.lower() == 'ssh-key-file':
-        username = prompt(msg='Enter username: ')
-        priv_key = prompt(msg='Enter ssh cert location: ')
+    elif auth_type.lower() == 'ssh-key':
+        if username is None or ssh_key is None:
+            raise InvalidArgumentValueError("Please enter username --username and ssh cert location --ssh-key.")
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
-        command = command + _build_args(None, priv_key)
+        command = command + _build_args(None, ssh_key)
     else:
         raise UnrecognizedArgumentError("Unknown auth type. Use one of password, aad or akv.")
 
@@ -7601,26 +7586,14 @@ def ssh_bastion_host(cmd, auth_type, vm_id, resource_group_name=None, bastion_re
         raise CLIError(ex)
 
 
-def rdp_bastion_host(cmd, vm_id, resource_group_name=None, name=None, bastion_resource_id=None, resource_port=None):
+def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None):
     if not resource_port:
         resource_port = 3389
-    if not bastion_resource_id and not name:
-        raise RequiredArgumentMissingError("Please enter either resource id or name of the bastion. --resource-id or --name")
-    if not is_valid_resource_id(vm_id):
+        
+    if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
-    if bastion_resource_id is not None:
-        if is_valid_resource_id(bastion_resource_id):
-            parsed_id = parse_resource_id(bastion_resource_id)
-            bastion_name = parsed_id["name"]
-            resource_group_name = parsed_id['resource_group']
-        else:
-            raise InvalidArgumentValueError("Please enter a valid Bastion resource Id.")
-    else:
-        bastion_name = name
-        if resource_group_name is None:
-            raise RequiredArgumentMissingError("Resource group name cannot be empty when not using resourceId. Use --resource-group")
 
-    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port)
+    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
@@ -7643,25 +7616,12 @@ def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
     return tunnel_server
 
 
-def create_bastion_tunnel(cmd, vm_id, resource_port, port, resource_group_name=None, name=None, bastion_resource_id=None, timeout=None):
-    if not bastion_resource_id and not name:
-        raise RequiredArgumentMissingError("Please enter either resource id or name of the bastion. --resource-id or --name")
-    if not is_valid_resource_id(vm_id):
+def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port, port, timeout=None):
+
+    if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
-    if bastion_resource_id is not None:
-        if is_valid_resource_id(bastion_resource_id):
-            parsed_id = parse_resource_id(bastion_resource_id)
-            bastion_name = parsed_id["name"]
-            resource_group_name = parsed_id['resource_group']
-        else:
-            raise InvalidArgumentValueError("Please enter a valid Bastion resource Id.")
-    else:
-        bastion_name = name
-        if resource_group_name is None:
-            raise RequiredArgumentMissingError("Resource group name cannot be empty when not using resourceId. Use --resource-group")
-
-    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_name, vm_id, resource_port, port)
-
+    
+    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port, port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
