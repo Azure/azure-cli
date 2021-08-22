@@ -536,6 +536,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('replica_name', options_list=['--replica-name'],
                        help='The name of the server to restore to.')
+            c.argument('zone', arg_type=zone_arg_type)
             c.ignore('location')
             c.ignore('sku_name')
             c.ignore('tier')

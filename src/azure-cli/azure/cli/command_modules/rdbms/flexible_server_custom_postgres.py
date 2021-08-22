@@ -276,23 +276,25 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.maintenance_window.start_hour = start_hour
         instance.maintenance_window.start_minute = start_minute
         instance.maintenance_window.custom_window = custom_window
-
-    if high_availability:
-        if high_availability.lower() == "enabled":
-            high_availability = "ZoneRedundant"
-            instance.high_availability.mode = high_availability
-            if standby_availability_zone:
-                instance.high_availability.standby_availability_zone = standby_availability_zone
-        else:
-            instance.high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability)
-
+    
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
                              administrator_login_password=administrator_login_password,
-                             high_availability=instance.high_availability,
                              maintenance_window=instance.maintenance_window,
                              tags=tags)
+
+    # High availability can't be updated with existing properties
+    high_availability_param = postgresql_flexibleservers.models.HighAvailability()
+    if high_availability:
+        if high_availability.lower() == "enabled":
+            high_availability_param.mode = "ZoneRedundant"
+            if standby_availability_zone:
+                high_availability_param.standby_availability_zone = standby_availability_zone
+        else:
+            high_availability_param.mode = high_availability
+
+        params.high_availability = high_availability_param
 
     return params
 

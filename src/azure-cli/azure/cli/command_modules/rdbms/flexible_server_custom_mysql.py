@@ -397,7 +397,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -423,12 +423,16 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     location = source_server_object.location
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
+    if not zone:
+        zone = source_server_object.availability_zone
 
     parameters = mysql_flexibleservers.models.Server(
         sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         source_server_resource_id=source_server_id,
         location=location,
+        availability_zone=zone,
         create_mode="Replica")
+
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
 
