@@ -2283,6 +2283,7 @@ long-summary: >
     The az tag create command with an id creates or updates the entire set of tags on a resource, resource group or subscription.
     This operation allows adding or replacing the entire set of tags on the specified resource, resource group or subscription.
     The specified entity can have a maximum of 50 tags.
+    Please note: 'tag create' acts like a 'tag init' hence tags created with this command are the only ones being present after execution.
 parameters:
   - name: --name -n
     short-summary: The name of the tag to create.
