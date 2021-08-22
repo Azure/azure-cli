@@ -276,7 +276,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.maintenance_window.start_hour = start_hour
         instance.maintenance_window.start_minute = start_minute
         instance.maintenance_window.custom_window = custom_window
-    
+
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,

@@ -432,6 +432,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
+            if command_group == 'mysql':
+                c.argument('public_access', arg_type=public_access_arg_type)
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
