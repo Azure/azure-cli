@@ -178,8 +178,9 @@ def flexible_server_restore(cmd, client,
         if not zone:
             zone = source_server_object.availability_zone
 
+        location = ''.join(source_server_object.location.lower().split())
         parameters = mysql_flexibleservers.models.Server(
-            location=source_server_object.location,
+            location=location,
             restore_point_in_time=restore_point_in_time,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
@@ -190,12 +191,12 @@ def flexible_server_restore(cmd, client,
             db_context = DbContext(
                 cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
                 cf_availability=cf_mysql_check_resource_availability, cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations, logging_name='MySQL', command_group='mysql', server_client=client,
-                location=source_server_object.location)
+                location=location)
 
             parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
                                                                                   resource_group_name=resource_group_name,
                                                                                   server_name=server_name,
-                                                                                  location=source_server_object.location,
+                                                                                  location=location,
                                                                                   db_context=db_context,
                                                                                   private_dns_zone_arguments=private_dns_zone_arguments,
                                                                                   public_access=public_access,
