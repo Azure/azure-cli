@@ -108,11 +108,15 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
             # an artifact elsewhere, we'll do so here...
 
             as_relative_path = _absolute_to_relative_path(getattr(context, 'RootTemplateDirectory'), abs_local_path)
+            duplicateFile = False
             for prev_added_artifact in getattr(context, 'Artifact'):
                 prev_added_artifact = os.path.join(getattr(context, 'RootTemplateDirectory'),
                                                    getattr(prev_added_artifact, 'path'))
                 if os.path.samefile(prev_added_artifact, abs_local_path):
+                    duplicateFile = True
                     continue
+            if duplicateFile:
+                continue
             _pack_artifacts(cmd, abs_local_path, context)
             LinkedTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
                                              'LinkedTemplateArtifact', mod='models')
