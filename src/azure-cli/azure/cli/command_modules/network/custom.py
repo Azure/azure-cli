@@ -16,14 +16,12 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
-    UnrecognizedArgumentError, ResourceNotFoundError
+    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
 from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-
-from .tunnel import TunnelServer
 
 import threading
 import time
@@ -7579,7 +7577,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     try:
         subprocess.call(command, shell=platform.system() == 'Windows')
     except Exception as ex:
-        raise CLIError(ex)
+        raise CLIInternalError(ex)
 
 
 def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None):
@@ -7599,6 +7597,7 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
 
 
 def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
+    from .tunnel import TunnelServer
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     bastion = client.get(resource_group_name, name)
     if port is None:
