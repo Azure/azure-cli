@@ -1640,7 +1640,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
             CONST_CANIPULL_IMAGE,
             "--overrides",
             json.dumps(overrides),
-            "-it",
+            "-i",
             podName,
             "--namespace=default",
         ]
