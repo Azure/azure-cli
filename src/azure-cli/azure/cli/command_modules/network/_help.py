@@ -1455,7 +1455,7 @@ short-summary: Add an OWASP CRS exclusion rule to the WAF policy managed rules.
 
 helps['network application-gateway waf-policy managed-rule exclusion remove'] = """
 type: command
-short-summary: List all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
+short-summary: Remove all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
 """
 
 helps['network application-gateway waf-policy managed-rule exclusion list'] = """
