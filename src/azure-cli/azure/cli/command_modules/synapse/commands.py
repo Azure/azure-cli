@@ -195,6 +195,7 @@ def load_command_table(self, _):
                          command_type=synapse_operations_sdk,
                          client_factory=cf_synapse_client_operations_factory)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('activate', 'activate_workspace', command_type=synapse_cmk_sdk, client_factory=cf_synapse_client_cmk_factory, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --SparkPool
@@ -338,7 +339,6 @@ def load_command_table(self, _):
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_workspace_key', supports_no_wait=True)
-        g.custom_command('activate', 'activate_workspace_key', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 

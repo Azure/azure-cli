@@ -56,7 +56,7 @@ def _configure_security_or_audit_policy_storage_params(arg_ctx):
 
 def load_arguments(self, _):
     # synapse workspace
-    for scope in ['show', 'create', 'update', 'delete', 'activate']:
+    for scope in ['show', 'create', 'update', 'delete']:
         with self.argument_context('synapse workspace ' + scope) as c:
             c.argument('workspace_name', arg_type=name_type, id_part='name', help='The workspace name.')
 
@@ -86,6 +86,10 @@ def load_arguments(self, _):
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
 
+    with self.argument_context('synapse workspace activate') as c:
+        c.argument('workspace_name', id_part='name', help='The workspace name.')
+        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+        c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace customer-managed key display name. All existing keys can be found using /"az synapse workspace key list/" cmdlet.')
     # synapse spark pool
     with self.argument_context('synapse spark pool') as c:
         c.argument('workspace_name', id_part='name', help='The workspace name.')
@@ -346,14 +350,11 @@ def load_arguments(self, _):
     with self.argument_context('synapse workspace key list') as c:
         c.argument('workspace_name', id_part=None, help='The workspace name.')
 
-    for scope in ['show', 'create', 'delete', 'activate']:
+    for scope in ['show', 'create', 'delete']:
         with self.argument_context('synapse workspace key ' + scope) as c:
             c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace customer-managed key display name. All existing keys can be found using /"az synapse workspace key list/" cmdlet.')
 
     with self.argument_context('synapse workspace key create') as c:
-        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
-
-    with self.argument_context('synapse workspace key activate') as c:
         c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
 
     # synapse workspace managed-identity

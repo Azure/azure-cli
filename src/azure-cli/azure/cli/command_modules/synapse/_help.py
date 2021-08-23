@@ -575,14 +575,14 @@ examples:
         --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
-helps['synapse workspace key activate'] = """
+helps['synapse workspace activate'] = """
 type: command
-short-summary: active a workspace's key.
-long-summary: Activate a workspace and change it's state from pending to success state when the workspace is first being provisioned through activating a workspace's key.
+short-summary: Activates a workspace and change it's state from pending to success state when the workspace is first being provisioned and double encryption is enabled.
+long-summary: When creating an Azure Synapse Analytics workspace, you can choose to encrypt all data at rest in the workspace with a customer-managed key which will provide double encryption to the workspace.You may need to set up the encryption environment firstly, such as to create a key vault with purge protection enable and specify Access Polices to the key vault. Then use this cmdlet to activate the new Azure Synapse Analytics workspace which double encryption is enabled using a customer-managed key.
 examples:
-  - name: Update a workspace's key.
+  - name: activate a workspace.
     text: |-
-        az synapse workspace key activate --name newkey --workspace-name testsynapseworkspace \\
+        az synapse workspace activate --name newkey --workspace-name testsynapseworkspace \\
         --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
