@@ -2278,7 +2278,6 @@ examples:
 helps['tag create'] = """
 type: command
 short-summary: Create tags on a specific resource.
-note: az tag wipes existing tags. To solve this, one can get and buffer existing tags and add new ones to buffer. Then set buffered tags on resource.
 long-summary: >
     The az tag create command with an id creates or updates the entire set of tags on a resource, resource group or subscription.
     This operation allows adding or replacing the entire set of tags on the specified resource, resource group or subscription.
