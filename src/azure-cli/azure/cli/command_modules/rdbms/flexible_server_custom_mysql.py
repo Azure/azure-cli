@@ -41,7 +41,7 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           iops=None, auto_grow=None, geo_redundant_backup=None, yes=False):
+                           iops=None, auto_grow=None, yes=False):
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'mysql')

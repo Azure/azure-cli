@@ -433,7 +433,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
             if command_group == 'mysql':
-                c.argument('public_access', arg_type=public_access_arg_type)
+                c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
+                            help='Determines the public access. Allowed Values: Enabled, Disabled',)
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
