@@ -420,9 +420,10 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
             logger.warning(message)
             return _get_operation()
         return cache_obj
-    except Exception:  # pylint: disable=broad-except
+    except Exception as exception:  # pylint: disable=broad-except
         message = "{model} '{name}' not found in cache. Retrieving from Azure...".format(**cache_obj.prop_dict())
         logger.debug(message)
+        logger.error(exception)
         return _get_operation()
 
 
