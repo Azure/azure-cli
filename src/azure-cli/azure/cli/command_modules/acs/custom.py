@@ -4081,7 +4081,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
 
     # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
     if max_surge and node_image_only:
-        raise CLIError(
+        raise MutuallyExclusiveArgumentError(
             'Conflicting flags. Unable to specify max-surge with node-image-only.'
             'If you want to use max-surge with a node image upgrade, please first '
             'update max-surge using "az aks nodepool update --max-surge".'
