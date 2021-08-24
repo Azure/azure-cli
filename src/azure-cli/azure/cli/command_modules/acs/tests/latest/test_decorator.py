@@ -236,32 +236,49 @@ class AKSCreateContextTestCase(unittest.TestCase):
         key = paramiko.RSAKey.generate(2048)
         public_key = "{} {}".format(key.get_name(), key.get_base64())
 
-        # valid key
+        # default
         ctx_1 = AKSCreateContext(
+            self.cmd, {"ssh_key_value": "test_ssh_key_value"}
+        )
+        self.assertEqual(ctx_1.get_ssh_key_value(), "test_ssh_key_value")
+        ssh_config = self.models.ContainerServiceSshConfiguration(
+            public_keys=[
+                self.models.ContainerServiceSshPublicKey(
+                    key_data="test_mc_ssh_key_value"
+                )
+            ]
+        )
+        linux_profile = self.models.ContainerServiceLinuxProfile(
+            admin_username="test_user", ssh=ssh_config
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", linux_profile=linux_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_ssh_key_value(), "test_mc_ssh_key_value")
+
+        # valid key
+        ctx_2 = AKSCreateContext(
             self.cmd, {"ssh_key_value": public_key, "no_ssh_key": False}
         )
         self.assertEqual(
-            ctx_1.get_ssh_key_value(enable_validation=True), public_key
+            ctx_2.get_ssh_key_value(enable_validation=True), public_key
         )
 
         # invalid key with validation
-        ctx_2 = AKSCreateContext(
+        ctx_3 = AKSCreateContext(
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": False}
         )
         with self.assertRaises(CLIError):
-            ctx_2.get_ssh_key_value(enable_validation=True)
+            ctx_3.get_ssh_key_value(enable_validation=True)
 
         # invalid key & valid parameter with validation
-        ctx_3 = AKSCreateContext(
+        ctx_4 = AKSCreateContext(
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": True}
         )
         self.assertEqual(
-            ctx_3.get_ssh_key_value(enable_validation=True), "fake-key"
+            ctx_4.get_ssh_key_value(enable_validation=True), "fake-key"
         )
-
-        # invalid key without validation
-        ctx_4 = AKSCreateContext(self.cmd, {"ssh_key_value": "fake-key"})
-        self.assertEqual(ctx_4.get_ssh_key_value(), "fake-key")
 
     def test_get_dns_name_prefix(self):
         # default
@@ -269,6 +286,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
             self.cmd, {"dns_name_prefix": "test_dns_name_prefix"}
         )
         self.assertEqual(ctx_1.get_dns_name_prefix(), "test_dns_name_prefix")
+        mc = self.models.ManagedCluster(
+            location="test_location", dns_prefix="test_mc_dns_name_prefix"
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_dns_name_prefix(), "test_mc_dns_name_prefix")
 
         # dynamic completion
         ctx_2 = AKSCreateContext(
@@ -289,10 +311,10 @@ class AKSCreateContextTestCase(unittest.TestCase):
             "testname-testrgname-1234-5",
         )
         mc = self.models.ManagedCluster(
-            location="test_location", dns_prefix="test_dns_name_prefix"
+            location="test_location", dns_prefix="test_mc_dns_name_prefix"
         )
         ctx_2.attach_mc(mc)
-        self.assertEqual(ctx_2.get_dns_name_prefix(), "test_dns_name_prefix")
+        self.assertEqual(ctx_2.get_dns_name_prefix(), "test_mc_dns_name_prefix")
         self.assertEqual(ctx_2.get_intermediate("dns_name_prefix"), None)
 
         # invalid parameter with validation
@@ -310,6 +332,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"location": "test_location"})
         self.assertEqual(ctx_1.get_location(), "test_location")
+        mc = self.models.ManagedCluster(location="test_mc_location")
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_location(), "test_mc_location")
 
         # dynamic completion
         with patch(
@@ -330,10 +355,14 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(
             ctx_1.get_kubernetes_version(), "test_kubernetes_version"
         )
-
-        # empty string
-        ctx_2 = AKSCreateContext(self.cmd, {"kubernetes_version": ""})
-        self.assertEqual(ctx_2.get_kubernetes_version(), "")
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            kubernetes_version="test_mc_kubernetes_version",
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_kubernetes_version(), "test_mc_kubernetes_version"
+        )
 
     def test_get_no_ssh_key(self):
         # default
@@ -351,6 +380,16 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"vm_set_type": "test_vm_set_type"})
         self.assertEqual(ctx_1.get_vm_set_type(), "test_vm_set_type")
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_ap_name", type="test_mc_vm_set_type"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_vm_set_type(), "test_mc_vm_set_type"
+        )
 
         # dynamic completion
         ctx_2 = AKSCreateContext(
@@ -363,13 +402,13 @@ class AKSCreateContextTestCase(unittest.TestCase):
             "VirtualMachineScaleSets",
         )
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_ap_name", type="test_vm_set_type"
+            name="test_ap_name", type="test_mc_vm_set_type"
         )
         mc = self.models.ManagedCluster(
             location="test_location", agent_pool_profiles=[agent_pool_profile]
         )
         ctx_2.attach_mc(mc)
-        self.assertEqual(ctx_2.get_vm_set_type(), "test_vm_set_type")
+        self.assertEqual(ctx_2.get_vm_set_type(), "test_mc_vm_set_type")
         self.assertEqual(ctx_2.get_intermediate("vm_set_type"), None)
 
     def test_get_load_balancer_sku(self):
@@ -379,6 +418,16 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         self.assertEqual(
             ctx_1.get_load_balancer_sku(), "test_load_balancer_sku"
+        )
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            load_balancer_sku="test_mc_load_balancer_sku"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_load_balancer_sku(), "test_mc_load_balancer_sku"
         )
 
         # dynamic completion
@@ -392,14 +441,14 @@ class AKSCreateContextTestCase(unittest.TestCase):
             "standard",
         )
         network_profile = self.models.ContainerServiceNetworkProfile(
-            load_balancer_sku="test_load_balancer_sku"
+            load_balancer_sku="test_mc_load_balancer_sku"
         )
         mc = self.models.ManagedCluster(
             location="test_location", network_profile=network_profile
         )
         ctx_2.attach_mc(mc)
         self.assertEqual(
-            ctx_2.get_load_balancer_sku(), "test_load_balancer_sku"
+            ctx_2.get_load_balancer_sku(), "test_mc_load_balancer_sku"
         )
         self.assertEqual(ctx_2.get_intermediate("load_balancer_sku"), None)
 
@@ -426,6 +475,16 @@ class AKSCreateContextTestCase(unittest.TestCase):
             ctx_1.get_api_server_authorized_ip_ranges(),
             "test_api_server_authorized_ip_ranges",
         )
+        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile(
+            authorized_ip_ranges="test_mc_api_server_authorized_ip_ranges"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", api_server_access_profile=api_server_access_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_api_server_authorized_ip_ranges(), "test_mc_api_server_authorized_ip_ranges"
+        )
 
         # valid parameter with validation
         ctx_2 = AKSCreateContext(
@@ -446,6 +505,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
             self.cmd, {"fqdn_subdomain": "test_fqdn_subdomain"}
         )
         self.assertEqual(ctx_1.get_fqdn_subdomain(), "test_fqdn_subdomain")
+        mc = self.models.ManagedCluster(
+            location="test_location", fqdn_subdomain="test_mc_fqdn_subdomain"
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_fqdn_subdomain(), "test_mc_fqdn_subdomain")
 
         # valid parameter with validation
         ctx_2 = AKSCreateContext(
@@ -459,6 +523,128 @@ class AKSCreateContextTestCase(unittest.TestCase):
             ctx_2.get_fqdn_subdomain(enable_validation=True),
             "test_fqdn_subdomain",
         )
+
+    def test_get_nodepool_name(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"nodepool_name": "test_nodepool_name"}
+        )
+        self.assertEqual(ctx_1.get_nodepool_name(), "test_nodepool_name")
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_mc_nodepool_name"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_nodepool_name(), "test_mc_nodepool_name")
+
+        # dynamic completion
+        ctx_2 = AKSCreateContext(
+            self.cmd, {"nodepool_name": "test_nodepool_name"}
+        )
+        self.assertEqual(
+            ctx_2.get_nodepool_name(enable_trim=True), "test_nodepoo"
+        )
+        self.assertEqual(
+            ctx_2.get_intermediate("nodepool_name"),
+            "test_nodepoo",
+        )
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(
+            ctx_2.get_nodepool_name(enable_trim=True), "test_nodepool_name"
+        )
+        self.assertEqual(ctx_2.get_intermediate("nodepool_name"), None)
+
+        # dynamic completion
+        ctx_3 = AKSCreateContext(self.cmd, {"nodepool_name": None})
+        self.assertEqual(ctx_3.get_nodepool_name(enable_trim=True), "nodepool1")
+        self.assertEqual(
+            ctx_3.get_intermediate("nodepool_name"),
+            "nodepool1",
+        )
+
+    def test_get_nodepool_tags(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"nodepool_tags": {"key1": "value1"}}
+        )
+        self.assertEqual(ctx_1.get_nodepool_tags(), {"key1": "value1"})
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", tags={"key1": "value1", "key2": "value2"}
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_nodepool_tags(), {"key1": "value1", "key2": "value2"}
+        )
+
+    def test_get_nodepool_labels(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"nodepool_labels": {"key1": "value1"}}
+        )
+        self.assertEqual(ctx_1.get_nodepool_labels(), {"key1": "value1"})
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name",
+            node_labels={"key1": "value1", "key2": "value2"},
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_nodepool_labels(), {"key1": "value1", "key2": "value2"}
+        )
+
+    def test_get_node_count(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"node_count": 10})
+        self.assertEqual(ctx_1.get_node_count(), 10)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", count=20
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_node_count(), 20)
+
+    def test_get_node_vm_size(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"node_vm_size": "Standard_ABCD"})
+        self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD")
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", vm_size="Standard_ABCD_v2"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD_v2")
+
+    def test_get_vnet_subnet_id(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"vnet_subnet_id": "test_vnet_subnet_id"}
+        )
+        self.assertEqual(ctx_1.get_vnet_subnet_id(), "test_vnet_subnet_id")
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", vnet_subnet_id="test_mc_vnet_subnet_id"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_vnet_subnet_id(), "test_mc_vnet_subnet_id")
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):

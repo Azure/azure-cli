@@ -131,6 +131,12 @@ class AKSCreateModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
+        # not directly used
+        self.ManagedClusterAPIServerAccessProfile = self.__cmd.get_models(
+            "ManagedClusterAPIServerAccessProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
 
 
 class AKSCreateContext:
@@ -231,7 +237,9 @@ class AKSCreateContext:
             self.mc.linux_profile.ssh and
             self.mc.linux_profile.ssh.public_keys
         ):
-            public_key_obj = safe_list_get(self.mc.linux_profile.ssh.public_keys, 0, None)
+            public_key_obj = safe_list_get(
+                self.mc.linux_profile.ssh.public_keys, 0, None
+            )
             if public_key_obj:
                 mc_property = public_key_obj.key_data
 
@@ -267,10 +275,12 @@ class AKSCreateContext:
             mc_property = self.mc.dns_prefix
 
         # set defautl value
+        read_from_mc = False
         if mc_property is not None:
             dns_name_prefix = mc_property
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate(parameter_name)
+            read_from_mc = True
         elif intermediate is not None:
             dns_name_prefix = intermediate
         else:
@@ -280,6 +290,8 @@ class AKSCreateContext:
         # check whether the parameter meet the conditions of dynamic completion
         if not dns_name_prefix and not self.get_fqdn_subdomain():
             dynamic_completion = True
+        # disable dynamic completion if the value is read from `mc`
+        dynamic_completion = dynamic_completion and not read_from_mc
         # In case the user does not specify the parameter and it meets the conditions of automatic completion,
         # necessary information is dynamically completed.
         if dynamic_completion:
@@ -315,10 +327,12 @@ class AKSCreateContext:
             mc_property = self.mc.location
 
         # set defautl value
+        read_from_mc = False
         if mc_property is not None:
             location = mc_property
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate(parameter_name)
+            read_from_mc = True
         elif intermediate is not None:
             location = intermediate
         else:
@@ -328,8 +342,8 @@ class AKSCreateContext:
         # check whether the parameter meet the conditions of dynamic completion
         if location is None:
             dynamic_completion = True
-        # In case the user does not specify the parameter and it meets the conditions of automatic completion,
-        # necessary information is dynamically completed.
+        # disable dynamic completion if the value is read from `mc`
+        dynamic_completion = dynamic_completion and not read_from_mc
         if dynamic_completion:
             location = _get_rg_location(
                 self.cmd.cli_ctx, self.get_resource_group_name()
@@ -394,10 +408,12 @@ class AKSCreateContext:
                 mc_property = agent_pool_profile.type
 
         # set defautl value
+        read_from_mc = False
         if mc_property is not None:
             vm_set_type = mc_property
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate(parameter_name)
+            read_from_mc = True
         elif intermediate is not None:
             vm_set_type = intermediate
         else:
@@ -407,6 +423,8 @@ class AKSCreateContext:
         # check whether the parameter meet the conditions of dynamic completion
         if not vm_set_type:
             dynamic_completion = True
+        # disable dynamic completion if the value is read from `mc`
+        dynamic_completion = dynamic_completion and not read_from_mc
         if dynamic_completion:
             vm_set_type = _set_vm_set_type(
                 vm_set_type=vm_set_type,
@@ -434,10 +452,12 @@ class AKSCreateContext:
             mc_property = self.mc.network_profile.load_balancer_sku
 
         # set defautl value
+        read_from_mc = False
         if mc_property is not None:
             load_balancer_sku = mc_property
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate(parameter_name)
+            read_from_mc = True
         elif intermediate is not None:
             load_balancer_sku = intermediate
         else:
@@ -447,6 +467,8 @@ class AKSCreateContext:
         # check whether the parameter meet the conditions of dynamic completion
         if not load_balancer_sku:
             dynamic_completion = True
+        # disable dynamic completion if the value is read from `mc`
+        dynamic_completion = dynamic_completion and not read_from_mc
         if dynamic_completion:
             load_balancer_sku = set_load_balancer_sku(
                 sku=load_balancer_sku,
@@ -527,8 +549,12 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_nodepool_name(self, enable_validation: bool = False, **kwargs):
+        parameter_name = "nodepool_name"
+
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_name")
+        # try to read from intermediates
+        intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         mc_property = None
         if self.mc and self.mc.agent_pool_profiles:
@@ -539,18 +565,32 @@ class AKSCreateContext:
                 mc_property = agent_pool_profile.name
 
         # set defautl value
+        read_from_mc = False
         if mc_property is not None:
             nodepool_name = mc_property
+            # clean up intermediate if `mc` has been decorated
+            self.remove_intermediate(parameter_name)
+            read_from_mc = True
+        elif intermediate is not None:
+            nodepool_name = intermediate
         else:
             nodepool_name = raw_value
 
-        # dynamic completion
-        # Only when additional parameter "enable_trim" is given, trim or set default value for the parameter.
+        dynamic_completion = False
+        # check whether the parameter meet the conditions of dynamic completion
         if kwargs.get("enable_trim", False):
+            dynamic_completion = True
+        # disable dynamic completion if the value is read from `mc`
+        dynamic_completion = dynamic_completion and not read_from_mc
+        if dynamic_completion:
             if not nodepool_name:
                 nodepool_name = "nodepool1"
             else:
                 nodepool_name = nodepool_name[:12]
+            # add to intermediate
+            self.set_intermediate(
+                parameter_name, nodepool_name, overwrite_exists=True
+            )
 
         # this parameter does not need validation
         return nodepool_name
@@ -602,7 +642,7 @@ class AKSCreateContext:
         return nodepool_labels
 
     # pylint: disable=unused-argument
-    def get_node_count(self, enable_validation: bool = False, **kwargs):
+    def get_node_count(self, enable_validation: bool = False, **kwargs) -> int:
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_count")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -717,7 +757,9 @@ class AKSCreateContext:
         return zones
 
     # pylint: disable=unused-argument
-    def get_enable_node_public_ip(self, enable_validation: bool = False, **kwargs):
+    def get_enable_node_public_ip(
+        self, enable_validation: bool = False, **kwargs
+    ):
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_node_public_ip")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -740,7 +782,9 @@ class AKSCreateContext:
         return enable_node_public_ip
 
     # pylint: disable=unused-argument
-    def get_node_public_ip_prefix_id(self, enable_validation: bool = False, **kwargs):
+    def get_node_public_ip_prefix_id(
+        self, enable_validation: bool = False, **kwargs
+    ):
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_public_ip_prefix_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -763,7 +807,9 @@ class AKSCreateContext:
         return node_public_ip_prefix_id
 
     # pylint: disable=unused-argument
-    def get_enable_encryption_at_host(self, enable_validation: bool = False, **kwargs):
+    def get_enable_encryption_at_host(
+        self, enable_validation: bool = False, **kwargs
+    ):
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_encryption_at_host")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -826,12 +872,11 @@ class AKSCreateContext:
             max_pods = mc_property
         else:
             max_pods = raw_value
-
-        # dynamic completion
-        if max_pods and max_pods != "0":
-            max_pods = int(max_pods)
-        else:
-            max_pods = None
+            # Note: 0 is converted to None
+            if max_pods:
+                max_pods = int(max_pods)
+            else:
+                max_pods = None
 
         # this parameter does not need validation
         return max_pods
@@ -854,10 +899,15 @@ class AKSCreateContext:
             node_osdisk_size = mc_property
         else:
             node_osdisk_size = raw_value
+            # Note: 0 is converted to None
+            if node_osdisk_size:
+                node_osdisk_size = int(node_osdisk_size)
+            else:
+                node_osdisk_size = None
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
-        return int(node_osdisk_size)
+        return node_osdisk_size
 
     # pylint: disable=unused-argument
     def get_node_osdisk_type(self, enable_validation: bool = False, **kwargs):
@@ -916,7 +966,12 @@ class AKSCreateDecorator:
         mc = self.models.ManagedCluster(location=self.context.get_location())
         return mc
 
-    def set_up_agent_pool_profiles(self):
+    def set_up_agent_pool_profiles(self, mc):
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             # Must be 12 chars or less before ACS RP adds to it
             name=self.context.get_nodepool_name(enable_trim=True),
@@ -936,13 +991,10 @@ class AKSCreateDecorator:
             type=self.context.get_vm_set_type(),
             mode="System",
             os_disk_size_gb=self.context.get_node_osdisk_size(),
-            os_disk_type=self.context.get_node_osdisk_type()
+            os_disk_type=self.context.get_node_osdisk_type(),
         )
-        if node_osdisk_size:
-            agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
-
-        if node_osdisk_type:
-            agent_pool_profile.os_disk_type = node_osdisk_type
+        mc.agent_pool_profiles = [agent_pool_profile]
+        return mc
 
     def construct_default_mc(self):
         # An all-in-one function used to create the complete `ManagedCluster` object, which will later be
