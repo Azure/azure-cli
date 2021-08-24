@@ -646,6 +646,96 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_vnet_subnet_id(), "test_mc_vnet_subnet_id")
 
+    def test_get_ppg(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"ppg": "test_ppg"}
+        )
+        self.assertEqual(ctx_1.get_ppg(), "test_ppg")
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", proximity_placement_group_id="test_mc_ppg"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_ppg(), "test_mc_ppg")
+
+    def test_get_zones(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"zones": ["test_zones1", "test_zones2"]}
+        )
+        self.assertEqual(ctx_1.get_zones(), ["test_zones1", "test_zones2"])
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", availability_zones=["test_mc_zones1", "test_mc_zones2"]
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_zones(), ["test_mc_zones1", "test_mc_zones2"])
+
+    def test_get_enable_node_public_ip(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"enable_node_public_ip": True}
+        )
+        self.assertEqual(ctx_1.get_enable_node_public_ip(), True)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", enable_node_public_ip=False
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_node_public_ip(), False)
+
+    def test_get_node_public_ip_prefix_id(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"node_public_ip_prefix_id": "test_node_public_ip_prefix_id"}
+        )
+        self.assertEqual(ctx_1.get_node_public_ip_prefix_id(), "test_node_public_ip_prefix_id")
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", node_public_ip_prefix_id="test_mc_node_public_ip_prefix_id"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_node_public_ip_prefix_id(), "test_mc_node_public_ip_prefix_id")
+
+    def test_get_enable_encryption_at_host(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"enable_encryption_at_host": True}
+        )
+        self.assertEqual(ctx_1.get_enable_encryption_at_host(), True)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", enable_encryption_at_host=False
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_encryption_at_host(), False)
+
+    def test_enable_ultra_ssd(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"enable_ultra_ssd": True}
+        )
+        self.assertEqual(ctx_1.get_enable_ultra_ssd(), True)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", enable_ultra_ssd=False
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_ultra_ssd(), False)
+
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
