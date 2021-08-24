@@ -416,3 +416,9 @@ def validate_mysql_ha_enabled(server):
 def validate_vnet_location(vnet, location):
     if vnet.location != location:
         raise ValidationError("The location of Vnet should be same as the location of the server")
+
+
+def validate_replica_burstable_server(server):
+    if server.sku.tier == 'Burstable':
+        raise ValidationError("Replication for Burstable servers are not supported. "
+                              "Try using GeneralPurpose or MemoryOptimized tiers.")

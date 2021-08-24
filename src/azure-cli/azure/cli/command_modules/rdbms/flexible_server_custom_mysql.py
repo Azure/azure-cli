@@ -20,7 +20,7 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import mysql_arguments_validator
+from .validators import mysql_arguments_validator, validate_replica_burstable_server
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -94,8 +94,7 @@ def flexible_server_create(cmd, client,
                                                    iops=iops,
                                                    auto_grow=auto_grow)
 
-    backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
-                                                 geo_redundant_backup=geo_redundant_backup)
+    backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention)
 
     sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
@@ -428,6 +427,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     source_server_id_parts = parse_resource_id(source_server_id)
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+        validate_replica_burstable_server(source_server_object)
     except Exception as e:
         raise ResourceNotFoundError(e)
 
