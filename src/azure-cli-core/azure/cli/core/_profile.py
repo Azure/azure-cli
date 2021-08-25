@@ -279,29 +279,24 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_in_cloud_shell(self, allow_no_subscriptions=None, find_subscriptions=True, scopes=None):
-        if not scopes:
-            scopes = self._arm_scope
+    def login_in_cloud_shell(self):
+        import jwt
+        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
 
-        identity = Identity()
-        credential, identity_info = identity.login_in_cloud_shell(scopes)
+        msi_creds = MSIAuthenticationWrapper(resource=self.cli_ctx.cloud.endpoints.active_directory_resource_id)
+        token_entry = msi_creds.token
+        token = token_entry['access_token']
+        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
+        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
+        tenant = decode['tid']
 
-        tenant = identity_info[Identity.MANAGED_IDENTITY_TENANT_ID]
-        if find_subscriptions:
-            logger.info('Finding subscriptions...')
-            subscription_finder = SubscriptionFinder(self.cli_ctx)
-            subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
-            if not subscriptions:
-                if allow_no_subscriptions:
-                    subscriptions = self._build_tenant_level_accounts([tenant])
-                else:
-                    raise CLIError('No access was configured for the VM, hence no subscriptions were found. '
-                                   "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
-        else:
-            subscriptions = self._build_tenant_level_accounts([tenant])
+        subscription_finder = SubscriptionFinder(self.cli_ctx)
+        subscriptions = subscription_finder.find_using_specific_tenant(tenant, msi_creds)
+        if not subscriptions:
+            raise CLIError('No subscriptions were found in the cloud shell')
+        user = decode.get('unique_name', 'N/A')
 
-        consolidated = self._normalize_properties(identity_info[Identity.CLOUD_SHELL_IDENTITY_UNIQUE_NAME],
-                                                  subscriptions, is_service_principal=False)
+        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=False)
         for s in consolidated:
             s[_USER_ENTITY][_CLOUD_SHELL_ID] = True
         self._set_subscriptions(consolidated)
@@ -946,14 +941,6 @@ class SubscriptionFinder:
 
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []
-
-    #  only occur inside cloud console or VM with identity
-    def find_from_raw_token(self, tenant, token):
-        # decode the token, so we know the tenant
-        # msal : todo
-        result = self.find_using_specific_tenant(tenant, token)
-        self.tenants = [tenant]
-        return result
 
     def find_using_common_tenant(self, username, credential=None):
         # pylint: disable=too-many-statements

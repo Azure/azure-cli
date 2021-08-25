@@ -162,101 +162,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._cred_cache.save_service_principal_cred(entry)
 
     def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
-        from msrestazure.tools import is_valid_resource_id
-        from requests import HTTPError
-        from azure.core.exceptions import ClientAuthenticationError
-
-        credential = None
-        id_type = None
-        token = None
-
-        # https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
-        if identity_id:
-            # Try resource ID
-            if is_valid_resource_id(identity_id):
-                credential = ManagedIdentityCredential(identity_config={"mi_res_id": identity_id},
-                                                       **self._credential_kwargs)
-                token = credential.get_token(*scopes)
-                id_type = self.MANAGED_IDENTITY_RESOURCE_ID
-            else:
-                authenticated = False
-                try:
-                    # Try client ID
-                    credential = ManagedIdentityCredential(client_id=identity_id,
-                                                           **self._credential_kwargs)
-                    token = credential.get_token(*scopes)
-                    id_type = self.MANAGED_IDENTITY_CLIENT_ID
-                    authenticated = True
-                except ClientAuthenticationError as e:
-                    logger.debug('Managed Identity authentication error: %s', e.message)
-                    logger.info('Username is not an MSI client id')
-                except HTTPError as ex:
-                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                        logger.info('Username is not an MSI client id')
-                    else:
-                        raise
-
-                if not authenticated:
-                    try:
-                        # Try object ID
-                        credential = ManagedIdentityCredential(identity_config={"object_id": identity_id},
-                                                               **self._credential_kwargs)
-                        token = credential.get_token(*scopes)
-                        id_type = self.MANAGED_IDENTITY_OBJECT_ID
-                        authenticated = True
-                    except ClientAuthenticationError as e:
-                        logger.debug('Managed Identity authentication error: %s', e.message)
-                        logger.info('Username is not an MSI object id')
-                    except HTTPError as ex:
-                        if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                            logger.info('Username is not an MSI object id')
-                        else:
-                            raise
-
-                if not authenticated:
-                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
-
-        else:
-            # Use the default managed identity. It can be either system assigned or user assigned.
-            credential = ManagedIdentityCredential(**self._credential_kwargs)
-            token = credential.get_token(*scopes)
-
-        decoded = decode_access_token(token)
-        resource_id = decoded.get('xms_mirid')
-        # User-assigned identity has resourceID as
-        # /subscriptions/xxx/resourcegroups/xxx/providers/Microsoft.ManagedIdentity/userAssignedIdentities/xxx
-        if resource_id and 'Microsoft.ManagedIdentity' in resource_id:
-            mi_type = self.MANAGED_IDENTITY_USER_ASSIGNED
-        else:
-            mi_type = self.MANAGED_IDENTITY_SYSTEM_ASSIGNED
-
-        managed_identity_info = {
-            self.MANAGED_IDENTITY_TYPE: mi_type,
-            # The type of the ID provided with --username, only valid for a user-assigned managed identity
-            self.MANAGED_IDENTITY_ID_TYPE: id_type,
-            self.MANAGED_IDENTITY_TENANT_ID: decoded['tid'],
-            self.MANAGED_IDENTITY_CLIENT_ID: decoded['appid'],
-            self.MANAGED_IDENTITY_OBJECT_ID: decoded['oid'],
-            self.MANAGED_IDENTITY_RESOURCE_ID: resource_id,
-        }
-        logger.debug('Using Managed Identity: %s', json.dumps(managed_identity_info))
-
-        return credential, managed_identity_info
+        raise NotImplemented
 
     def login_in_cloud_shell(self, scopes):
-        credential = ManagedIdentityCredential(**self._credential_kwargs)
-        # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
-        # The scopes is only used for acquiring the initial access token
-        token = credential.get_token(*scopes)
-        decoded = decode_access_token(token)
-
-        cloud_shell_identity_info = {
-            self.MANAGED_IDENTITY_TENANT_ID: decoded['tid'],
-            # For getting the user email in Cloud Shell, maybe 'email' can also be used
-            self.CLOUD_SHELL_IDENTITY_UNIQUE_NAME: decoded.get('unique_name', 'N/A')
-        }
-        logger.warning('Using Cloud Shell Managed Identity: %s', json.dumps(cloud_shell_identity_info))
-        return credential, cloud_shell_identity_info
+        raise NotImplemented
 
     def logout_user(self, user):
         accounts = self.msal_app.get_accounts(user)
