@@ -277,7 +277,7 @@ class AKSCreateContext:
         intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
-        if self.mc and self.mc.dns_prefix:
+        if self.mc:
             value_obtained_from_mc = self.mc.dns_prefix
 
         # set default value
@@ -1117,6 +1117,25 @@ class AKSCreateContext:
                     )
         return max_count
 
+    # pylint: disable=unused-argument
+    def get_admin_username(self, enable_validation: bool = False, **kwargs):
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("admin_username")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.linux_profile:
+            value_obtained_from_mc = self.mc.linux_profile.admin_username
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            admin_username = value_obtained_from_mc
+        else:
+            admin_username = raw_value
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return admin_username
+
 
 class AKSCreateDecorator:
     def __init__(
@@ -1184,6 +1203,29 @@ class AKSCreateDecorator:
             ),
         )
         mc.agent_pool_profiles = [agent_pool_profile]
+        return mc
+
+    def set_up_linux_profile(self, mc):
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        # LinuxProfile is just used for SSH access to VMs, so omit it if --no-ssh-key was specified.
+        if not self.context.get_no_ssh_key(enable_validation=True):
+            ssh_config = self.models.ContainerServiceSshConfiguration(
+                public_keys=[
+                    self.models.ContainerServiceSshPublicKey(
+                        key_data=self.context.get_ssh_key_value(
+                            enable_validation=True
+                        )
+                    )
+                ]
+            )
+            linux_profile = self.models.ContainerServiceLinuxProfile(
+                admin_username=self.context.get_admin_username(), ssh=ssh_config
+            )
+            mc.linux_profile = linux_profile
         return mc
 
     def construct_default_mc(self):
