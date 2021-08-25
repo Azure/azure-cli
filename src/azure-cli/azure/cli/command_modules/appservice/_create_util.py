@@ -342,8 +342,7 @@ def get_app_details(cmd, name):
 
 def get_rg_to_use(cmd, user, loc, os_name, rg_name=None):
     default_rg = "{}_rg_{}_{}".format(user, os_name, loc.replace(" ", "").lower())
-    # check if RG exists & can be used
-    if rg_name is not None and _check_resource_group_exists(cmd, rg_name):
+    if rg_name is not None:
         return rg_name
     else:
         return default_rg
