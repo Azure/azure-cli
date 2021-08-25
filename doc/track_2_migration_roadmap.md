@@ -143,7 +143,7 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | BluePrint (CLI own)  | | **Completed** | N/A|N/A | Vendored_Preview (2018-11-01-preview) | N/A | Extension |
 | K8S-Configuration  | | **Completed**| N/A|N/A | Vendored_SDK) | N/A | Extension |
 | K8S-Extension  | | **Completed** | N/A|N/A | Vendored_SDK) | N/A | Extension |
-| DMS-Preview   | | **In Completed** | N/A |N/A | Vendored_GA (4.0.0) | N/A | Extension |
+| DMS-Preview   | | **Completed** | N/A |N/A | Vendored_GA (4.0.0) | N/A | Extension |
 | Connection-Monitor-Preview (CLI own)  | | **Completed (already moved to CLI module)** | N/A |N/A | Vendored_SDK | N/A | Extension |
 | Dev-Spaces   | | **Completed (No SDK)** | N/A |N/A | N/A | N/A | Extension |
 | Cli-Translator   | | **Completed (No SDK)** | N/A |N/A | N/A | N/A |
