@@ -457,3 +457,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_staticsite_users')
         g.custom_command('invite', 'invite_staticsite_users')
         g.custom_command('update', 'update_staticsite_users')
+
+    with self.command_group('staticwebapp secrets', custom_command_type=staticsite_sdk, is_preview=True) as g:
+        g.custom_command('list', 'list_staticsite_secrets')
+        g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
