@@ -2077,6 +2077,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
+    auto_upgrade_profile = None
     ManagedClusterWindowsProfile = cmd.get_models('ManagedClusterWindowsProfile',
                                                   resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                   operation_group='managed_clusters')
@@ -2434,7 +2435,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             cluster_identity_object_id,
             assign_kubelet_identity)
 
-    auto_upgrade_profile = None
     if auto_upgrade_channel is not None:
         auto_upgrade_profile = ManagedClusterAutoUpgradeProfile(upgrade_channel=auto_upgrade_channel)
 
