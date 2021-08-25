@@ -602,10 +602,14 @@ class Profile:
 
     @staticmethod
     def _try_parse_msi_account_name(account):
-        user_name = account[_USER_ENTITY].get(_USER_NAME)
+        msi_info, user = account[_USER_ENTITY].get(_ASSIGNED_IDENTITY_INFO), account[_USER_ENTITY].get(_USER_NAME)
 
-        if user_name in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
-            return user_name, account[_USER_ENTITY].get(_CLIENT_ID)
+        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
+            if not msi_info:
+                msi_info = account[_SUBSCRIPTION_NAME]  # fall back to old persisting way
+            parts = msi_info.split('-', 1)
+            if parts[0] in MsiAccountTypes.valid_msi_account_types():
+                return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
     def _create_credential(self, account, tenant_id=None, client_id=None):
