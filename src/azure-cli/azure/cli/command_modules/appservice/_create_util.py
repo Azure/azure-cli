@@ -312,12 +312,9 @@ def set_location(cmd, sku, location):
     return loc.replace(" ", "").lower()
 
 
-# check if the RG value to use already exists and follows the OS requirements or new RG to be created
-def should_create_new_rg(cmd, rg_name, is_linux):
-    if (_check_resource_group_exists(cmd, rg_name) and
-            _check_resource_group_supports_os(cmd, rg_name, is_linux)):
-        return False
-    return True
+# check if the RG value to use already exists or new RG to be created
+def should_create_new_rg(cmd, rg_name):
+    return not _check_resource_group_exists(cmd, rg_name)
 
 
 def get_site_availability(cmd, name):
@@ -347,13 +344,9 @@ def get_rg_to_use(cmd, user, loc, os_name, rg_name=None):
     default_rg = "{}_rg_{}_{}".format(user, os_name, loc.replace(" ", "").lower())
     # check if RG exists & can be used
     if rg_name is not None and _check_resource_group_exists(cmd, rg_name):
-        if _check_resource_group_supports_os(cmd, rg_name, os_name.lower() == 'linux'):
-            return rg_name
-        raise CLIError("The ResourceGroup '{}' cannot be used with the os '{}'. Use a different RG".format(rg_name,
-                                                                                                           os_name))
-    if rg_name is None:
-        rg_name = default_rg
-    return rg_name
+        return rg_name
+    else:
+        return default_rg
 
 
 def get_profile_username():

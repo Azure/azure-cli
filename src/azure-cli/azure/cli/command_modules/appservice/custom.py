@@ -3789,7 +3789,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         sku = get_sku_to_use(src_dir, html, sku, runtime)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
-        _create_new_rg = should_create_new_rg(cmd, rg_name, _is_linux)
+        _create_new_rg = should_create_new_rg(cmd, rg_name)
         plan = get_plan_to_use(cmd=cmd,
                                user=user,
                                os_name=os_name,
