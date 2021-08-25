@@ -48,7 +48,6 @@ DEPENDENCIES = [
     'azure-cli-telemetry==1.0.6.*',
     'azure-common~=1.1',
     'azure-core==1.17.0',
-    'azure-identity==1.6.0b3',
     'azure-mgmt-core==1.3.0b3',
     'cryptography>=3.2,<3.4',
     'humanfriendly>=4.7,<10.0',

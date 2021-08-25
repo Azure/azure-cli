@@ -314,7 +314,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return EnvironmentCredential(**self._credential_kwargs)
 
     def get_managed_identity_credential(self, client_id=None):
-        return ManagedIdentityCredential(client_id=client_id, **self._credential_kwargs)
+        raise NotImplemented
 
     def migrate_tokens(self):
         """Migrate ADAL token cache to MSAL."""

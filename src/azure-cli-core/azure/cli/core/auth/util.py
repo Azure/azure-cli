@@ -3,6 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.log import get_logger
+
+logger = get_logger(__name__)
+
+
 def aad_error_handler(error, **kwargs):
     """ Handle the error from AAD server returned by ADAL or MSAL. """
 
@@ -76,6 +81,28 @@ def scopes_to_resource(scopes):
             return scope[:-len(s)]
 
     return scope
+
+
+def try_scopes_to_resource(scopes):
+    """Wrap scopes_to_resource to workaround some SDK issues."""
+
+    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/239 don't maintain
+    # credential_scopes and call `get_token` with empty scopes.
+    # As a workaround, return None so that the CLI-managed resource is used.
+    if not scopes:
+        logger.debug("No scope is provided by the SDK, use the CLI-managed resource.")
+        return None
+
+    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/745 extend default
+    # credential_scopes with custom credential_scopes. Instead, credential_scopes should be replaced by
+    # custom credential_scopes. https://github.com/Azure/azure-sdk-for-python/issues/12947
+    # As a workaround, remove the first one if there are multiple scopes provided.
+    if len(scopes) > 1:
+        logger.debug("Multiple scopes are provided by the SDK, discarding the first one: %s", scopes[0])
+        return scopes_to_resource(scopes[1:])
+
+    # Exactly only one scope is provided
+    return scopes_to_resource(scopes)
 
 
 def check_result(result, **kwargs):
