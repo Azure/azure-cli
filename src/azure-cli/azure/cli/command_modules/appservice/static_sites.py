@@ -347,6 +347,7 @@ def _find_user_id_and_authentication_provider(client, resource_group_name, name,
 
     return user_id, authentication_provider
 
+
 def list_staticsite_secrets(cmd, name, resource_group_name=None, no_wait=False):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
