@@ -37,6 +37,7 @@ CONST_ACC_SGX_QUOTE_HELPER_ENABLED = "ACCSGXQuoteHelperEnabled"
 
 # private dns zone mode
 CONST_PRIVATE_DNS_ZONE_SYSTEM = "system"
+CONST_PRIVATE_DNS_ZONE_NONE = "none"
 
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,

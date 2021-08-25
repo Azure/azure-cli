@@ -74,6 +74,11 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
         result = self.cmd('vm image list -p Canonical -f UbuntuServer -o tsv --all').output
         assert result.index('16.04') >= 0
 
+    @AllowLargeResponse()
+    def test_vm_images_list_thru_services_edge_zone(self):
+        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
+        assert result.index('7.7') >= 0
+
 
 class VMOpenPortTest(ScenarioTest):
 
@@ -176,6 +181,18 @@ class VMImageListOffersScenarioTest(ScenarioTest):
         self.assertFalse([i for i in result if i['location'].lower() != self.kwargs['loc']])
 
 
+    def test_vm_image_list_offers_edge_zone(self):
+        self.kwargs.update({
+            'loc': 'westus',
+            'pub': 'OpenLogic',
+            'edge_zone': 'microsoftlosangeles1'
+        })
+
+        result = self.cmd('vm image list-offers --location {loc} --publisher {pub} --edge-zone {edge_zone}').get_output_in_json()
+        self.assertTrue(len(result) > 0)
+        self.assertTrue([i for i in result if i['extendedLocation']['name'] == self.kwargs['edge_zone']])
+        self.assertFalse([i for i in result if i['location'].lower() != self.kwargs['loc']])
+
 class VMImageListPublishersScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
@@ -187,6 +204,19 @@ class VMImageListPublishersScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?location == '{loc}']) == length(@)", True),
         ])
+
+    @AllowLargeResponse()
+    def test_vm_image_list_publishers_edge_zone(self):
+        self.kwargs.update({
+            'loc': 'westus',
+            'edge_zone': 'microsoftlosangeles1'
+        })
+
+        result = self.cmd('vm image list-publishers --location {loc} --edge-zone {edge_zone}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?location == '{loc}']) == length(@)", True),
+        ]).get_output_in_json()
+        self.assertTrue([i for i in result if i['extendedLocation']['name'] == self.kwargs['edge_zone']])
 
 
 class VMImageListSkusScenarioTest(ScenarioTest):
@@ -201,6 +231,23 @@ class VMImageListSkusScenarioTest(ScenarioTest):
 
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
+
+
+    def test_vm_image_list_skus_edge_zone(self):
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'pub': 'OpenLogic',
+            'offer': 'CentOs',
+            'edge_zone': 'microsoftlosangeles1'
+        })
+
+        result = self.cmd('vm image list-skus --location {loc} --edge-zone {edge_zone} --offer {offer} --publisher {pub} --edge-zone {edge_zone}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?location == '{loc}']) == length(@)", True),
+        ]).get_output_in_json()
+        self.assertTrue(len(result) > 0)
+        self.assertTrue([i for i in result if i['extendedLocation']['name'] == self.kwargs['edge_zone']])
 
 
 class VMImageShowScenarioTest(ScenarioTest):
@@ -222,6 +269,26 @@ class VMImageShowScenarioTest(ScenarioTest):
             self.check("contains(id, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/{sku}/Versions/{ver}')", True)
         ])
 
+
+    def test_vm_image_show_edge_zone(self):
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'pub': 'OpenLogic',
+            'offer': 'CentOs',
+            'sku': '7.7',
+            'edge_zone': 'microsoftlosangeles1',
+            'ver': '7.7.2021020400'
+        })
+
+        self.cmd('vm image show --offer {offer} --publisher {pub} --sku {sku} --version {ver} -l {loc} --edge-zone {edge_zone}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('location', '{loc}'),
+            self.check('name', '{ver}'),
+            self.check("contains(id, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/{sku}/Versions/{ver}')", True),
+            self.check('extendedLocation.name', '{edge_zone}'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
 
 class VMGeneralizeScenarioTest(ScenarioTest):
 
@@ -2951,6 +3018,26 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
         time.sleep(180)
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss3}', checks=[self.check('length(@)', len(self.kwargs['instance_ids']) - 1)])
         self.cmd('vmss get-instance-view --resource-group {rg} --name {vmss3} --instance-id {id}', expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_spot_restore')
+    def test_spot_restore_policy(self, resource_group):
+        self.kwargs.update({
+            'loc': 'NorthEurope',
+            'spot_vmss_name': 'vmss-spot1',
+            'enabled_1': 'True',
+            'enabled_2': 'False',
+            'restore_timeout1': 'PT1H',
+            'restore_timeout2': 'PT2H'
+
+        })
+        self.cmd('vmss create -g {rg} -n {spot_vmss_name} --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group True --enable-spot-restore {enabled_1} --spot-restore-timeout {restore_timeout1}', checks=[
+            self.check('vmss.spotRestorePolicy.enabled', True),
+            self.check('vmss.spotRestorePolicy.restoreTimeout', '{restore_timeout1}')
+        ])
+        self.cmd('vmss update -g {rg} -n {spot_vmss_name} --enable-spot-restore {enabled_2} --spot-restore-timeout {restore_timeout2}', checks=[
+            self.check('spotRestorePolicy.enabled', False),
+            self.check('spotRestorePolicy.restoreTimeout', '{restore_timeout2}')
+        ])
 
 
 class VMSSCustomDataScenarioTest(ScenarioTest):

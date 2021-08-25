@@ -286,7 +286,7 @@ def get_custom_registry_credentials(cmd,
     :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
     """
-    Credentials, SourceRegistryCredentials, CustomRegistryCredentials, SecretObject, \
+    Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, \
         SecretObjectType = cmd.get_models(
             'Credentials', 'CustomRegistryCredentials', 'SourceRegistryCredentials', 'SecretObject',
             'SecretObjectType',
@@ -561,3 +561,14 @@ def resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
     res = parse_resource_id(managed_identity_resource_id)
     client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
     return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
+
+
+def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_name):
+    """Returns the task details.
+    :param str resource_group_name: The name of resource group
+    :param str registry_name: The name of container registry
+    :param str task_name: The name of task
+    """
+    from ._client_factory import cf_acr_tasks
+    client = cf_acr_tasks(cli_ctx)
+    return client.get_details(resource_group_name, registry_name, task_name)

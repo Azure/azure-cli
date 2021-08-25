@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.27.2
+++++++
+
+**Cosmos DB**
+
+* Hotfix: `az cosmosdb restore`: Fix the restore command for deleted accounts (#19273)
+
 2.27.1
 ++++++
 

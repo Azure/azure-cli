@@ -302,7 +302,7 @@ def _network_arg_validator(subnet, public_access):
 
 
 def maintenance_window_validator(ns):
-    options = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Disabled"]
+    options = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Disabled", "disabled"]
     if ns.maintenance_window:
         parsed_input = ns.maintenance_window.split(':')
         if not parsed_input or len(parsed_input) > 3:

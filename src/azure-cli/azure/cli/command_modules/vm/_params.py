@@ -467,19 +467,30 @@ def load_arguments(self, _):
         c.argument('vm_name', arg_type=existing_vm_name, id_part=None)
 
     with self.argument_context('vm image') as c:
-        c.argument('publisher_name', options_list=['--publisher', '-p'])
+        c.argument('publisher_name', options_list=['--publisher', '-p'], help='image publisher')
         c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
         c.argument('plan', help='image billing plan')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('version', help="image sku's version")
-        c.argument('urn', help="URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted")
+        c.argument('urn', help="URN, in format of 'publisher:offer:sku:version' or 'publisher:offer:sku:edge_zone:version'. If specified, other argument values can be omitted")
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
+        c.argument('edge_zone', edge_zone_type)
+
+    with self.argument_context('vm image list-offers') as c:
+        c.argument('edge_zone', edge_zone_type)
+
+    with self.argument_context('vm image list-skus') as c:
+        c.argument('edge_zone', edge_zone_type)
+
+    with self.argument_context('vm image list-publishers') as c:
+        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image show') as c:
         c.argument('skus', options_list=['--sku', '-s'])
+        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image terms') as c:
         c.argument('urn', help='URN, in the format of \'publisher:offer:sku:version\'. If specified, other argument values can be omitted')
@@ -615,6 +626,8 @@ def load_arguments(self, _):
                    help="Specify the Microsoft.Network API version used when creating networking resources in the Network "
                         "Interface Configurations for Virtual Machine Scale Set with orchestration mode 'Flexible'. Possible "
                         "value is 2020-11-01.")
+        c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01', help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
+        c.argument('spot_restore_timeout', min_api='2021-04-01', help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -645,6 +658,10 @@ def load_arguments(self, _):
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
+        c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01',
+                   help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
+        c.argument('spot_restore_timeout', min_api='2021-04-01',
+                   help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
