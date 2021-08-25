@@ -16,7 +16,7 @@ from azure.mgmt.iothub.models import (IotHubSku,
                                       AccessRights,
                                       ArmIdentity,
                                       CertificateDescription,
-                                      CertificateBodyDescription,
+                                      CertificateProperties,
                                       CertificateVerificationDescription,
                                       CloudToDeviceProperties,
                                       IotHubDescription,
@@ -355,7 +355,7 @@ def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_p
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-    cert_properties = CertificateBodyDescription(certificate=certificate, is_verified=is_verified)
+    cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
     cert_description = CertificateDescription(properties=cert_properties)
     return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
 
@@ -368,7 +368,7 @@ def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_p
             certificate = open_certificate(certificate_path)
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-            cert_properties = CertificateBodyDescription(certificate=certificate, is_verified=is_verified)
+            cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
             cert_description = CertificateDescription(properties=cert_properties)
             return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate."
