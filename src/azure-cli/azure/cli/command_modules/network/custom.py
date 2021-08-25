@@ -16,7 +16,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
-    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, UnrecognizedArgumentError
+    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
 from azure.cli.command_modules.network._client_factory import network_client_factory
