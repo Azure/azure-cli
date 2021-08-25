@@ -243,6 +243,7 @@ def load_arguments(self, _):
         c.argument('enable_private_cluster', action='store_true')
         c.argument('private_dns_zone')
         c.argument('fqdn_subdomain')
+        c.argument('disable_public_fqdn', action='store_true')
         c.argument('nodepool_tags', nargs='*', validator=validate_nodepool_tags,
                    help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
         c.argument('enable_managed_identity', action='store_true')
@@ -310,6 +311,8 @@ def load_arguments(self, _):
                    type=str, validator=validate_ip_ranges)
         c.argument('enable_ahub', options_list=['--enable-ahub'])
         c.argument('disable_ahub', options_list=['--disable-ahub'])
+        c.argument('enable_public_fqdn', action='store_true')
+        c.argument('disable_public_fqdn', action='store_true')
         c.argument('windows_admin_password', options_list=[
                    '--windows-admin-password'])
         c.argument('enable_managed_identity', action='store_true')
@@ -343,6 +346,7 @@ def load_arguments(self, _):
                    help='If specified, overwrite the default context name.')
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
+        c.argument('public_fqdn', default=False, action='store_true')
 
     for scope in ['aks', 'acs kubernetes', 'acs dcos']:
         with self.argument_context('{} install-cli'.format(scope)) as c:
