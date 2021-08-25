@@ -21,7 +21,6 @@ from .custom import (
     _set_vm_set_type,
     set_load_balancer_sku,
     get_subscription_id,
-    _trim_nodepoolname,
 )
 
 logger = get_logger(__name__)
@@ -139,6 +138,7 @@ class AKSCreateModels:
         )
 
 
+# pylint: disable=too-many-public-methods
 class AKSCreateContext:
     # Used to store intermediate variables (usually this stores the dynamically completed value of the parameter,
     # which has not been decorated into the `mc` object, and some pure intermediate variables (such as the
