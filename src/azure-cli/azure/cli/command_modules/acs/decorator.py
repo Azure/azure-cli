@@ -249,7 +249,7 @@ class AKSCreateContext:
             if public_key_obj:
                 mc_property = public_key_obj.key_data
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             ssh_key_value = mc_property
         else:
@@ -280,7 +280,7 @@ class AKSCreateContext:
         if self.mc and self.mc.dns_prefix:
             mc_property = self.mc.dns_prefix
 
-        # set defautl value
+        # set default value
         read_from_mc = False
         if mc_property is not None:
             dns_name_prefix = mc_property
@@ -332,7 +332,7 @@ class AKSCreateContext:
         if self.mc:
             mc_property = self.mc.location
 
-        # set defautl value
+        # set default value
         read_from_mc = False
         if mc_property is not None:
             location = mc_property
@@ -371,7 +371,7 @@ class AKSCreateContext:
         if self.mc:
             mc_property = self.mc.kubernetes_version
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             kubernetes_version = mc_property
         else:
@@ -413,7 +413,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.type
 
-        # set defautl value
+        # set default value
         read_from_mc = False
         if mc_property is not None:
             vm_set_type = mc_property
@@ -457,7 +457,7 @@ class AKSCreateContext:
         if self.mc and self.mc.network_profile:
             mc_property = self.mc.network_profile.load_balancer_sku
 
-        # set defautl value
+        # set default value
         read_from_mc = False
         if mc_property is not None:
             load_balancer_sku = mc_property
@@ -509,7 +509,7 @@ class AKSCreateContext:
         if self.mc and self.mc.api_server_access_profile:
             mc_property = self.mc.api_server_access_profile.authorized_ip_ranges
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             api_server_authorized_ip_ranges = mc_property
         else:
@@ -537,7 +537,7 @@ class AKSCreateContext:
         if self.mc:
             mc_property = self.mc.fqdn_subdomain
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             fqdn_subdomain = mc_property
         else:
@@ -570,7 +570,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.name
 
-        # set defautl value
+        # set default value
         read_from_mc = False
         if mc_property is not None:
             nodepool_name = mc_property
@@ -614,7 +614,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.tags
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             nodepool_tags = mc_property
         else:
@@ -637,7 +637,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.node_labels
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             nodepool_labels = mc_property
         else:
@@ -660,7 +660,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.count
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             node_count = mc_property
         else:
@@ -698,7 +698,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.vm_size
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             node_vm_size = mc_property
         else:
@@ -721,7 +721,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.vnet_subnet_id
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             vnet_subnet_id = mc_property
         else:
@@ -744,7 +744,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.proximity_placement_group_id
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             ppg = mc_property
         else:
@@ -767,7 +767,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.availability_zones
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             zones = mc_property
         else:
@@ -792,7 +792,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.enable_node_public_ip
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             enable_node_public_ip = mc_property
         else:
@@ -817,7 +817,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.node_public_ip_prefix_id
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             node_public_ip_prefix_id = mc_property
         else:
@@ -842,7 +842,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.enable_encryption_at_host
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             enable_encryption_at_host = mc_property
         else:
@@ -865,7 +865,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.enable_ultra_ssd
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             enable_ultra_ssd = mc_property
         else:
@@ -891,7 +891,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.max_pods
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             max_pods = mc_property
         else:
@@ -921,7 +921,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.os_disk_size_gb
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             node_osdisk_size = mc_property
         else:
@@ -949,7 +949,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.os_disk_type
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             node_osdisk_type = mc_property
         else:
@@ -974,7 +974,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.enable_auto_scaling
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             enable_cluster_autoscaler = mc_property
         else:
@@ -1021,7 +1021,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.min_count
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             min_count = mc_property
         else:
@@ -1068,7 +1068,7 @@ class AKSCreateContext:
             if agent_pool_profile:
                 mc_property = agent_pool_profile.max_count
 
-        # set defautl value
+        # set default value
         if mc_property is not None:
             max_count = mc_property
         else:
