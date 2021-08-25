@@ -387,9 +387,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             location="test_location", agent_pool_profiles=[agent_pool_profile]
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_vm_set_type(), "test_mc_vm_set_type"
-        )
+        self.assertEqual(ctx_1.get_vm_set_type(), "test_mc_vm_set_type")
 
         # dynamic completion
         ctx_2 = AKSCreateContext(
@@ -475,15 +473,19 @@ class AKSCreateContextTestCase(unittest.TestCase):
             ctx_1.get_api_server_authorized_ip_ranges(),
             "test_api_server_authorized_ip_ranges",
         )
-        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile(
-            authorized_ip_ranges="test_mc_api_server_authorized_ip_ranges"
+        api_server_access_profile = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                authorized_ip_ranges="test_mc_api_server_authorized_ip_ranges"
+            )
         )
         mc = self.models.ManagedCluster(
-            location="test_location", api_server_access_profile=api_server_access_profile
+            location="test_location",
+            api_server_access_profile=api_server_access_profile,
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(
-            ctx_1.get_api_server_authorized_ip_ranges(), "test_mc_api_server_authorized_ip_ranges"
+            ctx_1.get_api_server_authorized_ip_ranges(),
+            "test_mc_api_server_authorized_ip_ranges",
         )
 
         # valid parameter with validation
@@ -648,12 +650,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
 
     def test_get_ppg(self):
         # default
-        ctx_1 = AKSCreateContext(
-            self.cmd, {"ppg": "test_ppg"}
-        )
+        ctx_1 = AKSCreateContext(self.cmd, {"ppg": "test_ppg"})
         self.assertEqual(ctx_1.get_ppg(), "test_ppg")
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", proximity_placement_group_id="test_mc_ppg"
+            name="test_nodepool_name",
+            proximity_placement_group_id="test_mc_ppg",
         )
         mc = self.models.ManagedCluster(
             location="test_location", agent_pool_profiles=[agent_pool_profile]
@@ -668,19 +669,20 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_zones(), ["test_zones1", "test_zones2"])
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", availability_zones=["test_mc_zones1", "test_mc_zones2"]
+            name="test_nodepool_name",
+            availability_zones=["test_mc_zones1", "test_mc_zones2"],
         )
         mc = self.models.ManagedCluster(
             location="test_location", agent_pool_profiles=[agent_pool_profile]
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_zones(), ["test_mc_zones1", "test_mc_zones2"])
+        self.assertEqual(
+            ctx_1.get_zones(), ["test_mc_zones1", "test_mc_zones2"]
+        )
 
     def test_get_enable_node_public_ip(self):
         # default
-        ctx_1 = AKSCreateContext(
-            self.cmd, {"enable_node_public_ip": True}
-        )
+        ctx_1 = AKSCreateContext(self.cmd, {"enable_node_public_ip": True})
         self.assertEqual(ctx_1.get_enable_node_public_ip(), True)
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             name="test_nodepool_name", enable_node_public_ip=False
@@ -694,23 +696,29 @@ class AKSCreateContextTestCase(unittest.TestCase):
     def test_get_node_public_ip_prefix_id(self):
         # default
         ctx_1 = AKSCreateContext(
-            self.cmd, {"node_public_ip_prefix_id": "test_node_public_ip_prefix_id"}
+            self.cmd,
+            {"node_public_ip_prefix_id": "test_node_public_ip_prefix_id"},
         )
-        self.assertEqual(ctx_1.get_node_public_ip_prefix_id(), "test_node_public_ip_prefix_id")
+        self.assertEqual(
+            ctx_1.get_node_public_ip_prefix_id(),
+            "test_node_public_ip_prefix_id",
+        )
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", node_public_ip_prefix_id="test_mc_node_public_ip_prefix_id"
+            name="test_nodepool_name",
+            node_public_ip_prefix_id="test_mc_node_public_ip_prefix_id",
         )
         mc = self.models.ManagedCluster(
             location="test_location", agent_pool_profiles=[agent_pool_profile]
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_node_public_ip_prefix_id(), "test_mc_node_public_ip_prefix_id")
+        self.assertEqual(
+            ctx_1.get_node_public_ip_prefix_id(),
+            "test_mc_node_public_ip_prefix_id",
+        )
 
     def test_get_enable_encryption_at_host(self):
         # default
-        ctx_1 = AKSCreateContext(
-            self.cmd, {"enable_encryption_at_host": True}
-        )
+        ctx_1 = AKSCreateContext(self.cmd, {"enable_encryption_at_host": True})
         self.assertEqual(ctx_1.get_enable_encryption_at_host(), True)
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             name="test_nodepool_name", enable_encryption_at_host=False
@@ -723,9 +731,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
 
     def test_enable_ultra_ssd(self):
         # default
-        ctx_1 = AKSCreateContext(
-            self.cmd, {"enable_ultra_ssd": True}
-        )
+        ctx_1 = AKSCreateContext(self.cmd, {"enable_ultra_ssd": True})
         self.assertEqual(ctx_1.get_enable_ultra_ssd(), True)
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             name="test_nodepool_name", enable_ultra_ssd=False
@@ -735,6 +741,49 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_enable_ultra_ssd(), False)
+
+    def test_get_max_pods(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"max_pods": 0})
+        self.assertEqual(ctx_1.get_max_pods(), None)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", max_pods=10
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_max_pods(), 10)
+
+    def test_get_node_osdisk_size(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"node_osdisk_size": 0})
+        self.assertEqual(ctx_1.get_node_osdisk_size(), None)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", os_disk_size_gb=10
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_node_osdisk_size(), 10)
+
+    def test_get_node_osdisk_type(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"node_osdisk_type": "test_node_osdisk_type"}
+        )
+        self.assertEqual(ctx_1.get_node_osdisk_type(), "test_node_osdisk_type")
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", os_disk_type="test_mc_node_osdisk_type"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_node_osdisk_type(), "test_mc_node_osdisk_type"
+        )
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
@@ -753,17 +802,56 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             return_value="test_sub_id",
         ):
             dec_mc = dec_1.init_mc()
-        mc = self.models.ManagedCluster(location="test_location")
-        self.assertEqual(dec_mc, mc)
+        ground_truth_mc = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc, ground_truth_mc)
 
-    def test_construct_default_mc(self):
+    def test_set_up_agent_pool_profiles(self):
         dec_1 = AKSCreateDecorator(
-            self.cmd, self.client, self.models, {"location": "test_location"}
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "location": "test_location",
+                "nodepool_name": "test_np_name1234",
+                "nodepool_tags": {"k1": "v1"},
+                "nodepool_labels": {"k1": "v1", "k2": "v2"},
+                "node_count": 10,
+                "node_vm_size": "Standard_DSx_vy",
+                "vnet_subnet_id": "test_vnet_subnet_id",
+                "ppg": "test_ppg_id",
+                "zones": ["tz1", "tz2"],
+                "enable_node_public_ip": True,
+                "node_public_ip_prefix_id": "test_node_public_ip_prefix_id",
+                "enable_encryption_at_host": True,
+                "enable_ultra_ssd": True,
+                "max_pods": 0,
+                "node_osdisk_size": 100,
+                "node_osdisk_type": "test_os_disk_type",
+            },
         )
-        with patch(
-            "azure.cli.command_modules.acs.decorator.get_subscription_id",
-            return_value="test_sub_id",
-        ):
-            dec_mc = dec_1.construct_default_mc()
         mc = self.models.ManagedCluster(location="test_location")
-        self.assertEqual(dec_mc, mc)
+        dec_mc = dec_1.set_up_agent_pool_profiles(mc)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            # Must be 12 chars or less before ACS RP adds to it
+            name="test_np_name",
+            tags={"k1": "v1"},
+            node_labels={"k1": "v1", "k2": "v2"},
+            count=10,
+            vm_size="Standard_DSx_vy",
+            os_type="Linux",
+            vnet_subnet_id="test_vnet_subnet_id",
+            proximity_placement_group_id="test_ppg_id",
+            availability_zones=["tz1", "tz2"],
+            enable_node_public_ip=True,
+            node_public_ip_prefix_id="test_node_public_ip_prefix_id",
+            enable_encryption_at_host=True,
+            enable_ultra_ssd=True,
+            max_pods=None,
+            type="VirtualMachineScaleSets",
+            mode="System",
+            os_disk_size_gb=100,
+            os_disk_type="test_os_disk_type",
+        )
+        ground_truth_mc = self.models.ManagedCluster(location="test_location")
+        ground_truth_mc.agent_pool_profiles = [agent_pool_profile]
+        self.assertEqual(dec_mc.agent_pool_profiles[0], ground_truth_mc.agent_pool_profiles[0])

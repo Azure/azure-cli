@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Union
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
@@ -149,10 +149,14 @@ class AKSCreateContext:
     # values, dynamic completion (optional), and validation (optional) should be followed. The obtaining of
     # parameter values should further follow the order of obtaining from the `mc` object, from the intermediates,
     # or from the original value.
+    # Note: Dynamic completion will also perform some operations that regulate parameter values, such as
+    # converting int 0 to None.
     # Attention: In case of checking the validity of parameters, be sure not to set the `enable_validation` to
     # `True` to avoid loop calls, when using the getter function to obtain the value of other parameters.
-    # Attension: After the parameter is dynamically completed, it must be added to the intermediates; and after
+    # Attention: After the parameter is dynamically completed, it must be added to the intermediates; and after
     # the parameter is decorated into the `mc` object, the corresponding intermediate should be deleted.
+    # Attention: One of the most basic principles is that when the parameter/profile is decorated into the `mc`
+    # object, it should never be modified, only read-only operations (e.g. validation) can be performed.
     def __init__(self, cmd: AzCliCommand, raw_parameters: Dict):
         self.cmd = cmd
         self.raw_param = raw_parameters
@@ -854,9 +858,8 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_ultra_ssd
 
-    # TODO: add unit test
     # pylint: disable=unused-argument
-    def get_max_pods(self, enable_validation: bool = False, **kwargs):
+    def get_max_pods(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("max_pods")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -883,7 +886,7 @@ class AKSCreateContext:
         return max_pods
 
     # pylint: disable=unused-argument
-    def get_node_osdisk_size(self, enable_validation: bool = False, **kwargs):
+    def get_node_osdisk_size(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_osdisk_size")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1004,4 +1007,6 @@ class AKSCreateDecorator:
         # and is being implemented gradually.
         # initialize the `ManagedCluster` object
         mc = self.init_mc()
+        # set up agent pool profile(s)
+        mc = self.set_up_agent_pool_profiles(mc)
         return mc
