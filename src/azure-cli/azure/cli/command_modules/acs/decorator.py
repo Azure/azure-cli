@@ -507,7 +507,9 @@ class AKSCreateContext:
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc and self.mc.api_server_access_profile:
-            value_obtained_from_mc = self.mc.api_server_access_profile.authorized_ip_ranges
+            value_obtained_from_mc = (
+                self.mc.api_server_access_profile.authorized_ip_ranges
+            )
 
         # set default value
         if value_obtained_from_mc is not None:
@@ -742,7 +744,9 @@ class AKSCreateContext:
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.proximity_placement_group_id
+                value_obtained_from_mc = (
+                    agent_pool_profile.proximity_placement_group_id
+                )
 
         # set default value
         if value_obtained_from_mc is not None:
@@ -780,7 +784,7 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_enable_node_public_ip(
         self, enable_validation: bool = False, **kwargs
-    ):
+    ) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_node_public_ip")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -790,7 +794,9 @@ class AKSCreateContext:
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.enable_node_public_ip
+                value_obtained_from_mc = (
+                    agent_pool_profile.enable_node_public_ip
+                )
 
         # set default value
         if value_obtained_from_mc is not None:
@@ -815,7 +821,9 @@ class AKSCreateContext:
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.node_public_ip_prefix_id
+                value_obtained_from_mc = (
+                    agent_pool_profile.node_public_ip_prefix_id
+                )
 
         # set default value
         if value_obtained_from_mc is not None:
@@ -830,7 +838,7 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_enable_encryption_at_host(
         self, enable_validation: bool = False, **kwargs
-    ):
+    ) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_encryption_at_host")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -840,7 +848,9 @@ class AKSCreateContext:
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.enable_encryption_at_host
+                value_obtained_from_mc = (
+                    agent_pool_profile.enable_encryption_at_host
+                )
 
         # set default value
         if value_obtained_from_mc is not None:
@@ -853,7 +863,9 @@ class AKSCreateContext:
         return enable_encryption_at_host
 
     # pylint: disable=unused-argument
-    def get_enable_ultra_ssd(self, enable_validation: bool = False, **kwargs):
+    def get_enable_ultra_ssd(
+        self, enable_validation: bool = False, **kwargs
+    ) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_ultra_ssd")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -962,7 +974,7 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_enable_cluster_autoscaler(
         self, enable_validation: bool = False, **kwargs
-    ):
+    ) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_cluster_autoscaler")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1008,7 +1020,9 @@ class AKSCreateContext:
         return enable_cluster_autoscaler
 
     # pylint: disable=unused-argument
-    def get_min_count(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
+    def get_min_count(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[int, None]:
         # Note: the default value of the parameter is None
         # read the original value passed by the command
         raw_value = self.raw_param.get("min_count")
@@ -1055,7 +1069,9 @@ class AKSCreateContext:
         return min_count
 
     # pylint: disable=unused-argument
-    def get_max_count(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
+    def get_max_count(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[int, None]:
         # Note: the default value of the parameter is None
         # read the original value passed by the command
         raw_value = self.raw_param.get("max_count")
@@ -1146,7 +1162,7 @@ class AKSCreateDecorator:
             name=self.context.get_nodepool_name(enable_trim=True),
             tags=self.context.get_nodepool_tags(),
             node_labels=self.context.get_nodepool_labels(),
-            count=self.context.get_node_count(),
+            count=self.context.get_node_count(enable_validation=True),
             vm_size=self.context.get_node_vm_size(),
             os_type="Linux",
             vnet_subnet_id=self.context.get_vnet_subnet_id(),
@@ -1161,6 +1177,11 @@ class AKSCreateDecorator:
             mode="System",
             os_disk_size_gb=self.context.get_node_osdisk_size(),
             os_disk_type=self.context.get_node_osdisk_type(),
+            min_count=self.context.get_min_count(enable_validation=True),
+            max_count=self.context.get_max_count(enable_validation=True),
+            enable_auto_scaling=self.context.get_enable_cluster_autoscaler(
+                enable_validation=True
+            ),
         )
         mc.agent_pool_profiles = [agent_pool_profile]
         return mc

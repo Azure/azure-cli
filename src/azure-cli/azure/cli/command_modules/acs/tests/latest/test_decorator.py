@@ -926,7 +926,68 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc, ground_truth_mc)
 
     def test_set_up_agent_pool_profiles(self):
+        # default value in `aks_create`
         dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "location": "test_location",
+                "nodepool_name": "nodepool1",
+                "nodepool_tags": None,
+                "nodepool_labels": None,
+                "node_count": 3,
+                "node_vm_size": "Standard_DS2_v2",
+                "vnet_subnet_id": None,
+                "ppg": None,
+                "zones": None,
+                "enable_node_public_ip": False,
+                "node_public_ip_prefix_id": None,
+                "enable_encryption_at_host": False,
+                "enable_ultra_ssd": False,
+                "max_pods": 0,
+                "node_osdisk_size": 0,
+                "node_osdisk_type": None,
+                "enable_cluster_autoscaler": False,
+                "min_count": None,
+                "max_count": None,
+            },
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        dec_mc = dec_1.set_up_agent_pool_profiles(mc)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            # Must be 12 chars or less before ACS RP adds to it
+            name="nodepool1",
+            tags=None,
+            node_labels=None,
+            count=3,
+            vm_size="Standard_DS2_v2",
+            os_type="Linux",
+            vnet_subnet_id=None,
+            proximity_placement_group_id=None,
+            availability_zones=None,
+            enable_node_public_ip=False,
+            node_public_ip_prefix_id=None,
+            enable_encryption_at_host=False,
+            enable_ultra_ssd=False,
+            max_pods=None,
+            type="VirtualMachineScaleSets",
+            mode="System",
+            os_disk_size_gb=None,
+            os_disk_type=None,
+            enable_auto_scaling=False,
+            min_count=None,
+            max_count=None,
+        )
+        ground_truth_mc = self.models.ManagedCluster(location="test_location")
+        ground_truth_mc.agent_pool_profiles = [agent_pool_profile]
+        self.assertEqual(
+            dec_mc.agent_pool_profiles[0],
+            ground_truth_mc.agent_pool_profiles[0],
+        )
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
             self.models,
@@ -944,13 +1005,16 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "node_public_ip_prefix_id": "test_node_public_ip_prefix_id",
                 "enable_encryption_at_host": True,
                 "enable_ultra_ssd": True,
-                "max_pods": 0,
+                "max_pods": 50,
                 "node_osdisk_size": 100,
                 "node_osdisk_type": "test_os_disk_type",
+                "enable_cluster_autoscaler": True,
+                "min_count": 5,
+                "max_count": 20,
             },
         )
         mc = self.models.ManagedCluster(location="test_location")
-        dec_mc = dec_1.set_up_agent_pool_profiles(mc)
+        dec_mc = dec_2.set_up_agent_pool_profiles(mc)
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             # Must be 12 chars or less before ACS RP adds to it
             name="test_np_name",
@@ -966,11 +1030,14 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             node_public_ip_prefix_id="test_node_public_ip_prefix_id",
             enable_encryption_at_host=True,
             enable_ultra_ssd=True,
-            max_pods=None,
+            max_pods=50,
             type="VirtualMachineScaleSets",
             mode="System",
             os_disk_size_gb=100,
             os_disk_type="test_os_disk_type",
+            enable_auto_scaling=True,
+            min_count=5,
+            max_count=20,
         )
         ground_truth_mc = self.models.ManagedCluster(location="test_location")
         ground_truth_mc.agent_pool_profiles = [agent_pool_profile]
