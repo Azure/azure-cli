@@ -1883,7 +1883,8 @@ def load_arguments(self, _):
                 'yes',
                 'maintenance_configuration_id',
                 'primary_user_assigned_identity_id',
-                'key_id'
+                'key_id',
+                'zone_redundant'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1947,6 +1948,10 @@ def load_arguments(self, _):
         c.argument('external_admin_principal_type',
                    options_list=['--external-admin-principal-type'],
                    help='User, Group or Application')
+    
+        c.argument('zone_redundant',
+                   options_list=['--zone-redundant, -z'],
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
@@ -1968,6 +1973,10 @@ def load_arguments(self, _):
         c.argument('maintenance_configuration_id',
                    options_list=['--maint-config-id', '-m'],
                    help='Change maintenance configuration for this managed instance.')
+
+        c.argument('zone_redundant',
+                   options_list=['--zone-redundant, -z'],
+                   arg_type=get_three_state_flag())
 
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(

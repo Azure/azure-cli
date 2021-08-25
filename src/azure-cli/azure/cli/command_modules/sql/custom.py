@@ -4205,6 +4205,7 @@ def managed_instance_create(
         external_admin_principal_type=None,
         external_admin_sid=None,
         external_admin_name=None,
+        zone_redundant=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4255,6 +4256,8 @@ def managed_instance_create(
         sid=external_admin_sid,
         azure_ad_only_authentication=ad_only,
         tenant_id=tenant_id)
+
+    kwargs['zone_redundant'] = zone_redundant
 
     # Create
     return client.begin_create_or_update(
@@ -4319,7 +4322,8 @@ def managed_instance_update(
         key_id=None,
         identity_type=None,
         user_assigned_identity_id=None,
-        virtual_network_subnet_id=None):
+        virtual_network_subnet_id=None,
+        zone_redundant=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -4370,6 +4374,9 @@ def managed_instance_update(
 
     if virtual_network_subnet_id is not None:
         instance.subnet_id = virtual_network_subnet_id
+    
+    if zone_redundant is not None:
+        instance.zone_redundant = zone_redundant
 
     return instance
 
