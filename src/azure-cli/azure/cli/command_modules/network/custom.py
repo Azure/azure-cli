@@ -16,7 +16,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
-    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError
+    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, UnrecognizedArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
 from azure.cli.command_modules.network._client_factory import network_client_factory
@@ -7502,6 +7502,8 @@ def _get_ssh_path(ssh_command="ssh"):
 
         if not os.path.isfile(ssh_path):
             raise CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
+    else:
+        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
 
     return ssh_path
 
@@ -7522,6 +7524,8 @@ def _get_rdp_path(rdp_command="mstsc"):
 
         if not os.path.isfile(rdp_path):
             raise CLIError("Could not find " + rdp_command + ".exe. Is the rdp client installed?")
+    else:
+        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
 
     return rdp_path
 
@@ -7553,12 +7557,12 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
-    azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
     if auth_type.lower() == 'password':
         if username is None:
             raise RequiredArgumentMissingError("Please enter username with --username.")
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
     elif auth_type.lower() == 'aad':
+        azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
         public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)  # pylint: disable=protected-access
         cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file + '-cert.pub')  # pylint: disable=protected-access
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
