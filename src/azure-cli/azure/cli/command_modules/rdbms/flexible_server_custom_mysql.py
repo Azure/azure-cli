@@ -98,8 +98,6 @@ def flexible_server_create(cmd, client,
 
     sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
-    if high_availability.lower() == "enabled":
-        high_availability = "ZoneRedundant"
     high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                       standby_availability_zone=standby_availability_zone)
 
@@ -278,8 +276,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         return params
 
     if high_availability:
-        if high_availability.lower() == "enabled":
-            high_availability = "ZoneRedundant"
+        if high_availability.lower() != "disabled":
             instance.high_availability.mode = high_availability
             if standby_availability_zone:
                 instance.high_availability.standby_availability_zone = standby_availability_zone

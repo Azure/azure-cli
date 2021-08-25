@@ -109,11 +109,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_retention = 7
         database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        ha_value = 'Enabled' if database_engine == 'postgres' else 'ZoneRedundant'
 
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability Enabled \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
                   --zone 1 --public-access None'.format(database_engine,
-                  resource_group, server_name, backup_retention, sku_name, tier, storage_size, 'dbadmin', version, database_name))
+                  resource_group, server_name, backup_retention, sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value))
 
         list_checks = [JMESPathCheck('name', server_name),
                         JMESPathCheck('location', location_result),  # location should be same as rg location
@@ -411,6 +412,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_tier = self.create_random_name('tier', RANDOM_VARIABLE_MAX_LENGTH)
         valid_tier = 'GeneralPurpose'
         invalid_backup_retention = 1
+        ha_value = 'Enabled' if database_engine == 'postgres' else 'ZoneRedundant'
 
         # Create
         if database_engine == 'postgres':
@@ -434,26 +436,26 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, location, invalid_backup_retention),
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --high-availability Enabled '.format(
-                 database_engine, resource_group, server_name),
+        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --high-availability {} '.format(
+                 database_engine, resource_group, server_name, ha_value),
                  expect_failure=True)
 
         # high availability validator
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier Burstable --sku-name Standard_B1ms --high-availability Enabled'.format(
-                 database_engine, resource_group, server_name, location),
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier Burstable --sku-name Standard_B1ms --high-availability {}'.format(
+                 database_engine, resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability Enabled'.format(
-                 database_engine, resource_group, server_name), # single availability zone location
+        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability {}'.format(
+                 database_engine, resource_group, server_name, ha_value), # single availability zone location
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability Enabled --zone 1 --standby-zone 1'.format(
-                 database_engine, resource_group, server_name, location), # single availability zone location
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability {} --zone 1 --standby-zone 1'.format(
+                 database_engine, resource_group, server_name, location, ha_value), # single availability zone location
                  expect_failure=True)
 
         if database_engine == 'mysql':
-            self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability Enabled --storage-auto-grow Disabled'.format(
-                    database_engine, resource_group, server_name, location), # auto grow must be enabled for high availability server
+            self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability {} --storage-auto-grow Disabled'.format(
+                    database_engine, resource_group, server_name, location, ha_value), # auto grow must be enabled for high availability server
                     expect_failure=True)
 
         # Network
@@ -530,8 +532,9 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, invalid_backup_retention),
                  expect_failure=True)
         
-        self.cmd('{} flexible-server update -g {} -n {} --high-availability Enabled'.format(
-                 database_engine, resource_group, server_name),
+        ha_value = 'Enabled' if database_engine == 'postgres' else 'ZoneRedundant'
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability {}'.format(
+                 database_engine, resource_group, server_name, ha_value),
                  expect_failure=True)
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
