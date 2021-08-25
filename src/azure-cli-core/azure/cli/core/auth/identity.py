@@ -7,12 +7,6 @@ import json
 import os
 
 from azure.cli.core._environment import get_config_dir
-from azure.cli.core.util import get_file_json
-from azure.identity import (
-    ManagedIdentityCredential,
-    EnvironmentCredential,
-    TokenCachePersistenceOptions
-)
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -59,11 +53,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.msal_authority = "{}/{}".format(self.authority, self.tenant_id)
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
         self._cred_cache = None
-        self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
+
+        self._cache_file = os.path.join(get_config_dir(), "tokenCache.bin")
+        self._secret_file = os.path.join(get_config_dir(), "secrets.bin")
+        self._fallback_to_plaintext = kwargs.pop('fallback_to_plaintext', True)
+
         self._msal_app_instance = None
         # Store for Service principal credential persistence
-        self._msal_secret_store = MsalSecretStore(fallback_to_plaintext=self.allow_unencrypted)
-        self._cache_persistence_options = TokenCachePersistenceOptions(name="azcli", allow_unencrypted_storage=True)
+        self._msal_secret_store = MsalSecretStore(self._secret_file, fallback_to_plaintext=self._fallback_to_plaintext)
         self._msal_app_kwargs = {
             "authority": self.msal_authority,
             "token_cache": self._load_msal_cache(),
@@ -98,10 +95,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # patch_token_cache_add(self.msal_app.remove_account)
 
     def _load_msal_cache(self):
-        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
-        from azure.identity._persistent_cache import _load_persistent_cache
+        from .token_cache import load_persisted_token_cache
         # Store for user token persistence
-        cache = _load_persistent_cache(self._cache_persistence_options)
+        cache = load_persisted_token_cache(self._cache_file, self._fallback_to_plaintext)
         cache._reload_if_necessary()  # pylint: disable=protected-access
         return cache
 
@@ -331,9 +327,9 @@ class MsalSecretStore:
     """Caches secrets in MSAL custom secret store for Service Principal authentication.
     """
 
-    def __init__(self, fallback_to_plaintext=True):
-        self._token_file = os.path.join(get_config_dir(), 'msalSecrets.cache')
-        self._lock_file = self._token_file + '.lock'
+    def __init__(self, secret_file, fallback_to_plaintext=True):
+        self._secret_file = secret_file
+        self._lock_file = self._secret_file + '.lock'
         self._service_principal_creds = []
         self._fallback_to_plaintext = fallback_to_plaintext
 
@@ -393,7 +389,7 @@ class MsalSecretStore:
 
     def remove_all_cached_creds(self):
         try:
-            os.remove(self._token_file)
+            os.remove(self._secret_file)
         except FileNotFoundError:
             pass
 
@@ -426,14 +422,14 @@ class MsalSecretStore:
 
         import sys
         if sys.platform.startswith('win'):
-            return FilePersistenceWithDataProtection(self._token_file)
+            return FilePersistenceWithDataProtection(self._secret_file)
         if sys.platform.startswith('darwin'):
             # todo: support darwin
-            return KeychainPersistence(self._token_file, "Microsoft.Developer.IdentityService", "MSALCustomCache")
+            return KeychainPersistence(self._secret_file, "Microsoft.Developer.IdentityService", "MSALCustomCache")
         if sys.platform.startswith('linux'):
             try:
                 return LibsecretPersistence(
-                    self._token_file,
+                    self._secret_file,
                     schema_name="MSALCustomToken",
                     attributes={"MsalClientID": "Microsoft.Developer.IdentityService"}
                 )
@@ -442,12 +438,12 @@ class MsalSecretStore:
                     raise
                 # todo: add missing lib in message
                 logger.warning("Encryption unavailable. Opting in to plain text.")
-        return FilePersistence(self._token_file)
+        return FilePersistence(self._secret_file)
 
     def _serialize_secrets(self):
         # ONLY FOR DEBUGGING PURPOSE. DO NOT USE IN PRODUCTION CODE.
         logger.warning("Secrets are serialized as plain text and saved to `msalSecrets.cache.json`.")
-        with open(self._token_file + ".json", "w") as fd:
+        with open(self._secret_file + ".json", "w") as fd:
             fd.write(json.dumps(self._service_principal_creds))
 
 
