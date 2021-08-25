@@ -340,12 +340,11 @@ def get_app_details(cmd, name):
     return None
 
 
-def get_rg_to_use(cmd, user, loc, os_name, rg_name=None):
+def get_rg_to_use(user, loc, os_name, rg_name=None):
     default_rg = "{}_rg_{}_{}".format(user, os_name, loc.replace(" ", "").lower())
     if rg_name is not None:
         return rg_name
-    else:
-        return default_rg
+    return default_rg
 
 
 def get_profile_username():
