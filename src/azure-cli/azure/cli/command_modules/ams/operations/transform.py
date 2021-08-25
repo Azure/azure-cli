@@ -13,7 +13,7 @@ from azure.cli.command_modules.ams._utils import show_resource_not_found_message
 
 from azure.mgmt.media.models import (BuiltInStandardEncoderPreset, EncoderNamedPreset,
                                      OnErrorType, Priority,
-                                     StandardEncoderPreset, TransformOutput)
+                                     StandardEncoderPreset, TransformOutput, Transform)
 
 
 def create_transform(client, account_name, resource_group_name, transform_name, preset,
@@ -23,9 +23,9 @@ def create_transform(client, account_name, resource_group_name, transform_name, 
 
     outputs = [build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language,
                                       audio_analysis_mode, on_error, relative_priority, resolution)]
-
+    parameters = Transform(description=description, outputs=outputs)
     return client.create_or_update(resource_group_name, account_name, transform_name,
-                                   outputs, description)
+                                   parameters)
 
 
 def add_transform_output(client, account_name, resource_group_name, transform_name, preset,
@@ -41,7 +41,9 @@ def add_transform_output(client, account_name, resource_group_name, transform_na
                                                     audio_language, audio_analysis_mode, on_error,
                                                     relative_priority, resolution))
 
-    return client.create_or_update(resource_group_name, account_name, transform_name, transform.outputs)
+    parameters = Transform(outputs=transform.outputs)
+
+    return client.create_or_update(resource_group_name, account_name, transform_name, parameters)
 
 
 def build_transform_output(preset, insights_to_extract, video_analysis_mode,
@@ -89,13 +91,15 @@ def remove_transform_output(client, account_name, resource_group_name, transform
     except IndexError:
         raise CLIError("index {} doesn't exist on outputs".format(output_index))
 
-    return client.create_or_update(resource_group_name, account_name, transform_name, transform.outputs)
+    parameters = Transform(outputs=transform.outputs)
+    return client.create_or_update(resource_group_name, account_name, transform_name, parameters)
 
 
 def transform_update_setter(client, resource_group_name,
                             account_name, transform_name, parameters):
+    parameters = Transform(outputs=parameters.outputs, description=parameters.description)
     return client.create_or_update(resource_group_name, account_name, transform_name,
-                                   parameters.outputs, parameters.description)
+                                   parameters)
 
 
 def update_transform(instance, description=None):

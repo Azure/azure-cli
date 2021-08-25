@@ -257,6 +257,9 @@ def load_arguments(self, _):
                        help='Name of the HSM. Required if --id is not specified.'
                             '(--hsm-name and --vault-name are mutually exclusive, please specify just one of them)')
 
+    with self.argument_context('keyvault private-endpoint-connection list') as c:
+        c.argument("hsm_name", hsm_name_type)
+
     with self.argument_context('keyvault private-link-resource', min_api='2018-02-14', max_api='2020-04-01-preview') as c:
         c.argument('vault_name', vault_name_type, required=True)
     with self.argument_context('keyvault private-link-resource', min_api='2021-04-01-preview') as c:

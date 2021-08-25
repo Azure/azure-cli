@@ -154,6 +154,7 @@ def flexible_server_create(cmd, client,
     logger.warning('Make a note of your password. If you forget, you would have to reset your password with'
                    '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
                    server_name, resource_group_name)
+    logger.warning('Try using az \'mysql flexible-server connect\' command to test out connection.')
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
@@ -293,18 +294,14 @@ def flexible_server_update_custom_func(cmd, client, instance,
             custom_window = "Enabled"
 
         # set values - if maintenance_window when is None when created then create a new object
-        if instance.maintenance_window is None:
-            instance.maintenance_window = mysql_flexibleservers.models.MaintenanceWindow(
-                day_of_week=day_of_week,
-                start_hour=start_hour,
-                start_minute=start_minute,
-                custom_window=custom_window
-            )
-        else:
-            instance.maintenance_window.day_of_week = day_of_week
-            instance.maintenance_window.start_hour = start_hour
-            instance.maintenance_window.start_minute = start_minute
-            instance.maintenance_window.custom_window = custom_window
+        instance.maintenance_window.day_of_week = day_of_week
+        instance.maintenance_window.start_hour = start_hour
+        instance.maintenance_window.start_minute = start_minute
+        instance.maintenance_window.custom_window = custom_window
+
+        params = ServerForUpdate(maintenance_window=instance.maintenance_window)
+        logger.warning("You can update maintenance window only when updating maintenance window. Please update other properties separately if you are updating them as well.")
+        return params
 
     if high_availability:
         if high_availability.lower() == "enabled":
@@ -334,7 +331,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              backup=instance.backup,
                              administrator_login_password=administrator_login_password,
                              high_availability=instance.high_availability,
-                             maintenance_window=instance.maintenance_window,
                              tags=tags)
 
     return params
