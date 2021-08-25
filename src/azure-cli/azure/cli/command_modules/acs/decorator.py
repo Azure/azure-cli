@@ -10,6 +10,8 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
     CLIInternalError,
     MutuallyExclusiveArgumentError,
+    RequiredArgumentMissingError,
+    InvalidArgumentValueError,
 )
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
@@ -665,7 +667,22 @@ class AKSCreateContext:
             node_count = raw_value
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+
+        # validation
+        if enable_validation:
+            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
+            min_count = self.get_min_count()
+            max_count = self.get_max_count()
+            if enable_cluster_autoscaler:
+                if min_count is None or max_count is None:
+                    raise RequiredArgumentMissingError(
+                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                    )
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+
         return int(node_count)
 
     # pylint: disable=unused-argument
@@ -859,7 +876,10 @@ class AKSCreateContext:
         return enable_ultra_ssd
 
     # pylint: disable=unused-argument
-    def get_max_pods(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
+    def get_max_pods(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[int, None]:
+        # Note: int 0 is converted to None
         # read the original value passed by the command
         raw_value = self.raw_param.get("max_pods")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -876,7 +896,7 @@ class AKSCreateContext:
             max_pods = mc_property
         else:
             max_pods = raw_value
-            # Note: 0 is converted to None
+            # Note: int 0 is converted to None
             if max_pods:
                 max_pods = int(max_pods)
             else:
@@ -886,7 +906,10 @@ class AKSCreateContext:
         return max_pods
 
     # pylint: disable=unused-argument
-    def get_node_osdisk_size(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
+    def get_node_osdisk_size(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[int, None]:
+        # Note: int 0 is converted to None
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_osdisk_size")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -935,6 +958,148 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_osdisk_type
+
+    # pylint: disable=unused-argument
+    def get_enable_cluster_autoscaler(
+        self, enable_validation: bool = False, **kwargs
+    ):
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("enable_cluster_autoscaler")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        mc_property = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                mc_property = agent_pool_profile.enable_auto_scaling
+
+        # set defautl value
+        if mc_property is not None:
+            enable_cluster_autoscaler = mc_property
+        else:
+            enable_cluster_autoscaler = raw_value
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            min_count = self.get_min_count()
+            max_count = self.get_max_count()
+            node_count = self.get_node_count()
+            if enable_cluster_autoscaler:
+                if min_count is None or max_count is None:
+                    raise RequiredArgumentMissingError(
+                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                    )
+                if min_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "Value of min-count should be less than or equal to value of max-count"
+                    )
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+            else:
+                if min_count is not None or max_count is not None:
+                    raise RequiredArgumentMissingError(
+                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
+                    )
+        return enable_cluster_autoscaler
+
+    # pylint: disable=unused-argument
+    def get_min_count(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
+        # Note: the default value of the parameter is None
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("min_count")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        mc_property = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                mc_property = agent_pool_profile.min_count
+
+        # set defautl value
+        if mc_property is not None:
+            min_count = mc_property
+        else:
+            min_count = raw_value
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
+            max_count = self.get_max_count()
+            node_count = self.get_node_count()
+            if enable_cluster_autoscaler:
+                if min_count is None or max_count is None:
+                    raise RequiredArgumentMissingError(
+                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                    )
+                if min_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "Value of min-count should be less than or equal to value of max-count"
+                    )
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+            else:
+                if min_count is not None or max_count is not None:
+                    raise RequiredArgumentMissingError(
+                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
+                    )
+        return min_count
+
+    # pylint: disable=unused-argument
+    def get_max_count(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
+        # Note: the default value of the parameter is None
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("max_count")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        mc_property = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                mc_property = agent_pool_profile.max_count
+
+        # set defautl value
+        if mc_property is not None:
+            max_count = mc_property
+        else:
+            max_count = raw_value
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
+            min_count = self.get_min_count()
+            node_count = self.get_node_count()
+            if enable_cluster_autoscaler:
+                if min_count is None or max_count is None:
+                    raise RequiredArgumentMissingError(
+                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                    )
+                if min_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "Value of min-count should be less than or equal to value of max-count"
+                    )
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+            else:
+                if min_count is not None or max_count is not None:
+                    raise RequiredArgumentMissingError(
+                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
+                    )
+        return max_count
 
 
 class AKSCreateDecorator:
