@@ -10,6 +10,8 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
     CLIInternalError,
     MutuallyExclusiveArgumentError,
+    RequiredArgumentMissingError,
+    InvalidArgumentValueError,
 )
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
@@ -234,7 +236,7 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("ssh_key_value")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if (
             self.mc and
             self.mc.linux_profile and
@@ -245,11 +247,11 @@ class AKSCreateContext:
                 self.mc.linux_profile.ssh.public_keys, 0, None
             )
             if public_key_obj:
-                mc_property = public_key_obj.key_data
+                value_obtained_from_mc = public_key_obj.key_data
 
-        # set defautl value
-        if mc_property is not None:
-            ssh_key_value = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            ssh_key_value = value_obtained_from_mc
         else:
             ssh_key_value = raw_value
 
@@ -274,14 +276,14 @@ class AKSCreateContext:
         # `mc` object.
         intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.dns_prefix:
-            mc_property = self.mc.dns_prefix
+            value_obtained_from_mc = self.mc.dns_prefix
 
-        # set defautl value
+        # set default value
         read_from_mc = False
-        if mc_property is not None:
-            dns_name_prefix = mc_property
+        if value_obtained_from_mc is not None:
+            dns_name_prefix = value_obtained_from_mc
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate(parameter_name)
             read_from_mc = True
@@ -326,14 +328,14 @@ class AKSCreateContext:
         # try to read from intermediates
         intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc:
-            mc_property = self.mc.location
+            value_obtained_from_mc = self.mc.location
 
-        # set defautl value
+        # set default value
         read_from_mc = False
-        if mc_property is not None:
-            location = mc_property
+        if value_obtained_from_mc is not None:
+            location = value_obtained_from_mc
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate(parameter_name)
             read_from_mc = True
@@ -365,13 +367,13 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("kubernetes_version")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc:
-            mc_property = self.mc.kubernetes_version
+            value_obtained_from_mc = self.mc.kubernetes_version
 
-        # set defautl value
-        if mc_property is not None:
-            kubernetes_version = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            kubernetes_version = value_obtained_from_mc
         else:
             kubernetes_version = raw_value
 
@@ -403,18 +405,18 @@ class AKSCreateContext:
         # try to read from intermediates
         intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.type
+                value_obtained_from_mc = agent_pool_profile.type
 
-        # set defautl value
+        # set default value
         read_from_mc = False
-        if mc_property is not None:
-            vm_set_type = mc_property
+        if value_obtained_from_mc is not None:
+            vm_set_type = value_obtained_from_mc
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate(parameter_name)
             read_from_mc = True
@@ -451,14 +453,14 @@ class AKSCreateContext:
         # try to read from intermediates
         intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.network_profile:
-            mc_property = self.mc.network_profile.load_balancer_sku
+            value_obtained_from_mc = self.mc.network_profile.load_balancer_sku
 
-        # set defautl value
+        # set default value
         read_from_mc = False
-        if mc_property is not None:
-            load_balancer_sku = mc_property
+        if value_obtained_from_mc is not None:
+            load_balancer_sku = value_obtained_from_mc
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate(parameter_name)
             read_from_mc = True
@@ -503,13 +505,15 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.api_server_access_profile:
-            mc_property = self.mc.api_server_access_profile.authorized_ip_ranges
+            value_obtained_from_mc = (
+                self.mc.api_server_access_profile.authorized_ip_ranges
+            )
 
-        # set defautl value
-        if mc_property is not None:
-            api_server_authorized_ip_ranges = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            api_server_authorized_ip_ranges = value_obtained_from_mc
         else:
             api_server_authorized_ip_ranges = raw_value
 
@@ -531,13 +535,13 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("fqdn_subdomain")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc:
-            mc_property = self.mc.fqdn_subdomain
+            value_obtained_from_mc = self.mc.fqdn_subdomain
 
-        # set defautl value
-        if mc_property is not None:
-            fqdn_subdomain = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            fqdn_subdomain = value_obtained_from_mc
         else:
             fqdn_subdomain = raw_value
 
@@ -560,18 +564,18 @@ class AKSCreateContext:
         # try to read from intermediates
         intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.name
+                value_obtained_from_mc = agent_pool_profile.name
 
-        # set defautl value
+        # set default value
         read_from_mc = False
-        if mc_property is not None:
-            nodepool_name = mc_property
+        if value_obtained_from_mc is not None:
+            nodepool_name = value_obtained_from_mc
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate(parameter_name)
             read_from_mc = True
@@ -604,17 +608,17 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_tags")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.tags
+                value_obtained_from_mc = agent_pool_profile.tags
 
-        # set defautl value
-        if mc_property is not None:
-            nodepool_tags = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            nodepool_tags = value_obtained_from_mc
         else:
             nodepool_tags = raw_value
 
@@ -627,17 +631,17 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_labels")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.node_labels
+                value_obtained_from_mc = agent_pool_profile.node_labels
 
-        # set defautl value
-        if mc_property is not None:
-            nodepool_labels = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            nodepool_labels = value_obtained_from_mc
         else:
             nodepool_labels = raw_value
 
@@ -650,22 +654,37 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_count")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.count
+                value_obtained_from_mc = agent_pool_profile.count
 
-        # set defautl value
-        if mc_property is not None:
-            node_count = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            node_count = value_obtained_from_mc
         else:
             node_count = raw_value
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+
+        # validation
+        if enable_validation:
+            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
+            min_count = self.get_min_count()
+            max_count = self.get_max_count()
+            if enable_cluster_autoscaler:
+                if min_count is None or max_count is None:
+                    raise RequiredArgumentMissingError(
+                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                    )
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+
         return int(node_count)
 
     # pylint: disable=unused-argument
@@ -673,17 +692,17 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_vm_size")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.vm_size
+                value_obtained_from_mc = agent_pool_profile.vm_size
 
-        # set defautl value
-        if mc_property is not None:
-            node_vm_size = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            node_vm_size = value_obtained_from_mc
         else:
             node_vm_size = raw_value
 
@@ -696,17 +715,17 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("vnet_subnet_id")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.vnet_subnet_id
+                value_obtained_from_mc = agent_pool_profile.vnet_subnet_id
 
-        # set defautl value
-        if mc_property is not None:
-            vnet_subnet_id = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            vnet_subnet_id = value_obtained_from_mc
         else:
             vnet_subnet_id = raw_value
 
@@ -719,17 +738,19 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("ppg")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.proximity_placement_group_id
+                value_obtained_from_mc = (
+                    agent_pool_profile.proximity_placement_group_id
+                )
 
-        # set defautl value
-        if mc_property is not None:
-            ppg = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            ppg = value_obtained_from_mc
         else:
             ppg = raw_value
 
@@ -742,17 +763,17 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("zones")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.availability_zones
+                value_obtained_from_mc = agent_pool_profile.availability_zones
 
-        # set defautl value
-        if mc_property is not None:
-            zones = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            zones = value_obtained_from_mc
         else:
             zones = raw_value
 
@@ -763,21 +784,23 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_enable_node_public_ip(
         self, enable_validation: bool = False, **kwargs
-    ):
+    ) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_node_public_ip")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.enable_node_public_ip
+                value_obtained_from_mc = (
+                    agent_pool_profile.enable_node_public_ip
+                )
 
-        # set defautl value
-        if mc_property is not None:
-            enable_node_public_ip = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            enable_node_public_ip = value_obtained_from_mc
         else:
             enable_node_public_ip = raw_value
 
@@ -792,17 +815,19 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_public_ip_prefix_id")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.node_public_ip_prefix_id
+                value_obtained_from_mc = (
+                    agent_pool_profile.node_public_ip_prefix_id
+                )
 
-        # set defautl value
-        if mc_property is not None:
-            node_public_ip_prefix_id = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            node_public_ip_prefix_id = value_obtained_from_mc
         else:
             node_public_ip_prefix_id = raw_value
 
@@ -813,21 +838,23 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_enable_encryption_at_host(
         self, enable_validation: bool = False, **kwargs
-    ):
+    ) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_encryption_at_host")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.enable_encryption_at_host
+                value_obtained_from_mc = (
+                    agent_pool_profile.enable_encryption_at_host
+                )
 
-        # set defautl value
-        if mc_property is not None:
-            enable_encryption_at_host = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            enable_encryption_at_host = value_obtained_from_mc
         else:
             enable_encryption_at_host = raw_value
 
@@ -836,21 +863,23 @@ class AKSCreateContext:
         return enable_encryption_at_host
 
     # pylint: disable=unused-argument
-    def get_enable_ultra_ssd(self, enable_validation: bool = False, **kwargs):
+    def get_enable_ultra_ssd(
+        self, enable_validation: bool = False, **kwargs
+    ) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_ultra_ssd")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.enable_ultra_ssd
+                value_obtained_from_mc = agent_pool_profile.enable_ultra_ssd
 
-        # set defautl value
-        if mc_property is not None:
-            enable_ultra_ssd = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            enable_ultra_ssd = value_obtained_from_mc
         else:
             enable_ultra_ssd = raw_value
 
@@ -859,24 +888,27 @@ class AKSCreateContext:
         return enable_ultra_ssd
 
     # pylint: disable=unused-argument
-    def get_max_pods(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
+    def get_max_pods(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[int, None]:
+        # Note: int 0 is converted to None
         # read the original value passed by the command
         raw_value = self.raw_param.get("max_pods")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.max_pods
+                value_obtained_from_mc = agent_pool_profile.max_pods
 
-        # set defautl value
-        if mc_property is not None:
-            max_pods = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            max_pods = value_obtained_from_mc
         else:
             max_pods = raw_value
-            # Note: 0 is converted to None
+            # Note: int 0 is converted to None
             if max_pods:
                 max_pods = int(max_pods)
             else:
@@ -886,21 +918,24 @@ class AKSCreateContext:
         return max_pods
 
     # pylint: disable=unused-argument
-    def get_node_osdisk_size(self, enable_validation: bool = False, **kwargs) -> Union[int, None]:
+    def get_node_osdisk_size(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[int, None]:
+        # Note: int 0 is converted to None
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_osdisk_size")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.os_disk_size_gb
+                value_obtained_from_mc = agent_pool_profile.os_disk_size_gb
 
-        # set defautl value
-        if mc_property is not None:
-            node_osdisk_size = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            node_osdisk_size = value_obtained_from_mc
         else:
             node_osdisk_size = raw_value
             # Note: 0 is converted to None
@@ -918,23 +953,169 @@ class AKSCreateContext:
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_osdisk_type")
         # try to read the property value corresponding to the parameter from the `mc` object
-        mc_property = None
+        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
             if agent_pool_profile:
-                mc_property = agent_pool_profile.os_disk_type
+                value_obtained_from_mc = agent_pool_profile.os_disk_type
 
-        # set defautl value
-        if mc_property is not None:
-            node_osdisk_type = mc_property
+        # set default value
+        if value_obtained_from_mc is not None:
+            node_osdisk_type = value_obtained_from_mc
         else:
             node_osdisk_type = raw_value
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_osdisk_type
+
+    # pylint: disable=unused-argument
+    def get_enable_cluster_autoscaler(
+        self, enable_validation: bool = False, **kwargs
+    ) -> bool:
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("enable_cluster_autoscaler")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                value_obtained_from_mc = agent_pool_profile.enable_auto_scaling
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            enable_cluster_autoscaler = value_obtained_from_mc
+        else:
+            enable_cluster_autoscaler = raw_value
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            min_count = self.get_min_count()
+            max_count = self.get_max_count()
+            node_count = self.get_node_count()
+            if enable_cluster_autoscaler:
+                if min_count is None or max_count is None:
+                    raise RequiredArgumentMissingError(
+                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                    )
+                if min_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "Value of min-count should be less than or equal to value of max-count"
+                    )
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+            else:
+                if min_count is not None or max_count is not None:
+                    raise RequiredArgumentMissingError(
+                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
+                    )
+        return enable_cluster_autoscaler
+
+    # pylint: disable=unused-argument
+    def get_min_count(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[int, None]:
+        # Note: the default value of the parameter is None
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("min_count")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                value_obtained_from_mc = agent_pool_profile.min_count
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            min_count = value_obtained_from_mc
+        else:
+            min_count = raw_value
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
+            max_count = self.get_max_count()
+            node_count = self.get_node_count()
+            if enable_cluster_autoscaler:
+                if min_count is None or max_count is None:
+                    raise RequiredArgumentMissingError(
+                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                    )
+                if min_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "Value of min-count should be less than or equal to value of max-count"
+                    )
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+            else:
+                if min_count is not None or max_count is not None:
+                    raise RequiredArgumentMissingError(
+                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
+                    )
+        return min_count
+
+    # pylint: disable=unused-argument
+    def get_max_count(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[int, None]:
+        # Note: the default value of the parameter is None
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("max_count")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                value_obtained_from_mc = agent_pool_profile.max_count
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            max_count = value_obtained_from_mc
+        else:
+            max_count = raw_value
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
+            min_count = self.get_min_count()
+            node_count = self.get_node_count()
+            if enable_cluster_autoscaler:
+                if min_count is None or max_count is None:
+                    raise RequiredArgumentMissingError(
+                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                    )
+                if min_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "Value of min-count should be less than or equal to value of max-count"
+                    )
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+            else:
+                if min_count is not None or max_count is not None:
+                    raise RequiredArgumentMissingError(
+                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
+                    )
+        return max_count
 
 
 class AKSCreateDecorator:
@@ -981,7 +1162,7 @@ class AKSCreateDecorator:
             name=self.context.get_nodepool_name(enable_trim=True),
             tags=self.context.get_nodepool_tags(),
             node_labels=self.context.get_nodepool_labels(),
-            count=self.context.get_node_count(),
+            count=self.context.get_node_count(enable_validation=True),
             vm_size=self.context.get_node_vm_size(),
             os_type="Linux",
             vnet_subnet_id=self.context.get_vnet_subnet_id(),
@@ -996,6 +1177,11 @@ class AKSCreateDecorator:
             mode="System",
             os_disk_size_gb=self.context.get_node_osdisk_size(),
             os_disk_type=self.context.get_node_osdisk_type(),
+            min_count=self.context.get_min_count(enable_validation=True),
+            max_count=self.context.get_max_count(enable_validation=True),
+            enable_auto_scaling=self.context.get_enable_cluster_autoscaler(
+                enable_validation=True
+            ),
         )
         mc.agent_pool_profiles = [agent_pool_profile]
         return mc
