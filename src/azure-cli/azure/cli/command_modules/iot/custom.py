@@ -580,22 +580,7 @@ def update_iot_hub_custom(instance,
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
     # if setting a fileupload storage identity or changing fileupload to identity-based
     if fileupload_storage_identity or fileupload_storage_authentication_type == AuthenticationType.IdentityBased.value:
-        instance_identity = _get_hub_identity_type(instance)
-
-        # if hub has no identity
-        if not instance_identity or instance_identity == IdentityType.none.value:
-            raise ArgumentUsageError('Hub has no identity assigned, please assign a system or user-assigned managed identity to use for file-upload with `az iot hub identity assign`')
-
-        has_system_identity = instance_identity in [IdentityType.system_assigned.value, IdentityType.system_assigned_user_assigned.value]
-        has_user_identity = instance_identity in [IdentityType.user_assigned.value, IdentityType.system_assigned_user_assigned.value]
-
-        # if changing storage identity to '[system]'
-        if fileupload_storage_identity in [None, SYSTEM_ASSIGNED_IDENTITY]:
-            if not has_system_identity:
-                raise ArgumentUsageError('System managed identity must be enabled in order to use managed identity for file upload')
-        # if changing to user identity and hub has no user identities
-        elif fileupload_storage_identity and not has_user_identity:
-            raise ArgumentUsageError('User identity {} must be added to hub in order to use it for file upload'.format(fileupload_storage_identity))
+        _validate_fileupload_identity(instance, fileupload_storage_identity)
 
     default_storage_endpoint = _process_fileupload_args(
         instance.properties.storage_endpoints['$default'],
@@ -1365,6 +1350,25 @@ def _process_fileupload_args(
             raise ArgumentUsageError('In order to set a file upload storage identity, you must set the file upload storage authentication type (--fsa) to IdentityBased')
 
     return default_storage_endpoint
+
+
+def _validate_fileupload_identity(instance, fileupload_storage_identity):
+    instance_identity = _get_hub_identity_type(instance)
+
+    # if hub has no identity
+    if not instance_identity or instance_identity == IdentityType.none.value:
+        raise ArgumentUsageError('Hub has no identity assigned, please assign a system or user-assigned managed identity to use for file-upload with `az iot hub identity assign`')
+
+    has_system_identity = instance_identity in [IdentityType.system_assigned.value, IdentityType.system_assigned_user_assigned.value]
+    has_user_identity = instance_identity in [IdentityType.user_assigned.value, IdentityType.system_assigned_user_assigned.value]
+
+    # if changing storage identity to '[system]'
+    if fileupload_storage_identity in [None, SYSTEM_ASSIGNED_IDENTITY]:
+        if not has_system_identity:
+            raise ArgumentUsageError('System managed identity must be enabled in order to use managed identity for file upload')
+    # if changing to user identity and hub has no user identities
+    elif fileupload_storage_identity and not has_user_identity:
+        raise ArgumentUsageError('User identity {} must be added to hub in order to use it for file upload'.format(fileupload_storage_identity))
 
 
 def _get_hub_identity_type(instance):
