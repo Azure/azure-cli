@@ -526,7 +526,7 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.reset_static_site_api_key.assert_called_once()
 
         from ast import literal_eval
-        reset_envelope = literal_eval(self.staticapp_client.reset_static_site_api_key.call_args.kwargs["reset_properties_envelope"].__str__())
+        reset_envelope = literal_eval(self.staticapp_client.reset_static_site_api_key.call_args[1]["reset_properties_envelope"].__str__())
         self.assertEqual(reset_envelope["repository_token"], self.token1)     
 
 
