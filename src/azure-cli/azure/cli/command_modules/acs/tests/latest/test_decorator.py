@@ -221,18 +221,10 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_resource_group_name(), "test_rg_name")
 
-        # empty string
-        ctx_2 = AKSCreateContext(self.cmd, {"resource_group_name": ""})
-        self.assertEqual(ctx_2.get_resource_group_name(), "")
-
     def test_get_name(self):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"name": "test_name"})
         self.assertEqual(ctx_1.get_name(), "test_name")
-
-        # empty string
-        ctx_2 = AKSCreateContext(self.cmd, {"name": ""})
-        self.assertEqual(ctx_2.get_name(), "")
 
     def test_get_ssh_key_value(self):
         import paramiko
@@ -921,6 +913,105 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_admin_username(), "test_mc_user")
 
+    def test_get_windows_admin_username(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"windows_admin_username": None})
+        self.assertEqual(ctx_1.get_windows_admin_username(), None)
+        windows_profile = self.models.ManagedClusterWindowsProfile(
+            admin_username="test_win_admin",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", windows_profile=windows_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_windows_admin_username(), "test_win_admin")
+
+        # dynamic completion
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "windows_admin_username": None,
+                "windows_admin_password": "test_win_admin_pd",
+            },
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.prompt",
+            return_value="test_win_admin_name",
+        ):
+            self.assertEqual(
+                ctx_2.get_windows_admin_username(), "test_win_admin_name"
+            )
+        self.assertEqual(
+            ctx_2.get_intermediate("windows_admin_username"),
+            "test_win_admin_name",
+        )
+        windows_profile = self.models.ManagedClusterWindowsProfile(
+            admin_username="test_win_admin_name",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", windows_profile=windows_profile
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(
+            ctx_2.get_windows_admin_username(), "test_win_admin_name"
+        )
+        self.assertEqual(ctx_2.get_intermediate("windows_admin_username"), None)
+
+    def test_get_windows_admin_password(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"windows_admin_password": None})
+        self.assertEqual(ctx_1.get_windows_admin_password(), None)
+        windows_profile = self.models.ManagedClusterWindowsProfile(
+            admin_username="test_win_admin_name",
+            admin_password="test_win_admin",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", windows_profile=windows_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_windows_admin_password(), "test_win_admin")
+
+        # dynamic completion
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "windows_admin_username": "test_win_admin_name",
+                "windows_admin_password": None,
+            },
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.prompt_pass",
+            return_value="test_win_admin_pd",
+        ):
+            self.assertEqual(
+                ctx_2.get_windows_admin_password(), "test_win_admin_pd"
+            )
+        self.assertEqual(
+            ctx_2.get_intermediate("windows_admin_password"),
+            "test_win_admin_pd",
+        )
+        windows_profile = self.models.ManagedClusterWindowsProfile(
+            admin_username="test_win_admin_name",
+            admin_password="test_win_admin_pd",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", windows_profile=windows_profile
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(
+            ctx_2.get_windows_admin_password(), "test_win_admin_pd"
+        )
+        self.assertEqual(ctx_2.get_intermediate("windows_admin_password"), None)
+
+    def test_get_enable_ahub(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"enable_ahub": False})
+        self.assertEqual(ctx_1.get_enable_ahub(), False)
+
+        # custom value
+        ctx_1 = AKSCreateContext(self.cmd, {"enable_ahub": True})
+        self.assertEqual(ctx_1.get_enable_ahub(), True)
+
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -1065,6 +1156,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
     def test_set_up_linux_profile(self):
         # default value in `aks_create`
         import paramiko
+
         key = paramiko.RSAKey.generate(2048)
         public_key = "{} {}".format(key.get_name(), key.get_base64())
         dec_1 = AKSCreateDecorator(
@@ -1109,7 +1201,54 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_linux_profile(mc_2)
 
+        ground_truth_mc_2 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+    def test_set_up_windows_profile(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "location": "test_location",
+                "windows_admin_username": None,
+                "windows_admin_password": None,
+                "enable_ahub": False,
+            },
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_windows_profile(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "location": "test_location",
+                "windows_admin_username": "test_win_admin_name",
+                "windows_admin_password": None,
+                "enable_ahub": True,
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        with patch(
+            "azure.cli.command_modules.acs.decorator.prompt_pass",
+            return_value="test_win_admin_pd",
+        ):
+            dec_mc_2 = dec_2.set_up_windows_profile(mc_2)
+
+        windows_profile_2 = self.models.ManagedClusterWindowsProfile(
+            admin_username="test_win_admin_name",
+            admin_password="test_win_admin_pd",
+            license_type="Windows_Server",
+        )
+
         ground_truth_mc_2 = self.models.ManagedCluster(
-            location="test_location"
+            location="test_location", windows_profile=windows_profile_2
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
