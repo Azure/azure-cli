@@ -984,14 +984,14 @@ def acr_task_logs(cmd,
 
     if not run_id:
         # show logs for the last run
-        paged_runs = acr_task_list_runs(cmd,
-                                        client,
-                                        registry_name,
-                                        top=1,
-                                        task_name=task_name,
-                                        image=image)
+        paged_runs = list(acr_task_list_runs(cmd,
+                                             client,
+                                             registry_name,
+                                             top=1,
+                                             task_name=task_name,
+                                             image=image))
         try:
-            run_id = paged_runs.get(0)[0].run_id
+            run_id = paged_runs[0].run_id
             logger.warning(_get_list_runs_message(base_message="Showing logs of the last created run",
                                                   task_name=task_name,
                                                   image=image))
