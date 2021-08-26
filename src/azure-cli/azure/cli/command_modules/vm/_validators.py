@@ -518,8 +518,24 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             namespace.attach_data_disks = [_get_resource_id(cmd.cli_ctx, d, namespace.resource_group_name, 'disks',
                                                             'Microsoft.Compute') for d in namespace.attach_data_disks]
 
-    if not namespace.os_type and namespace.storage_profile != StorageProfile.SharedGalleryImage:
-        namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+    if not namespace.os_type:
+        if namespace.storage_profile == StorageProfile.SharedGalleryImage:
+
+            if namespace.location is None:
+                from azure.cli.core.azclierror import RequiredArgumentMissingError
+                raise RequiredArgumentMissingError(
+                    'Please input the location of the shared gallery image through the parameter --location.')
+
+            from ._vm_utils import parse_shared_gallery_image_id
+            image_info = parse_shared_gallery_image_id(namespace.image)
+
+            from ._client_factory import cf_shared_gallery_image
+            shared_gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+            namespace.os_type = shared_gallery_image_info.os_type
+
+        else:
+            namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
