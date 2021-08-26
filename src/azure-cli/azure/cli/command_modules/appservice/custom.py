@@ -1436,10 +1436,13 @@ def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
         raise CLIError("'{}' app doesn't exist".format(webapp_name))
     binding = HostNameBinding(site_name=webapp.name)
     if slot is None:
-        return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
+        return client.web_apps.create_or_update_host_name_binding(resource_group_name=resource_group_name,
+                                                                  name=webapp.name, host_name=hostname,
+                                                                  host_name_binding=binding)
 
-    return client.web_apps.create_or_update_host_name_binding_slot(resource_group_name, webapp.name, hostname, binding,
-                                                                   slot)
+    return client.web_apps.create_or_update_host_name_binding_slot(resource_group_name=resource_group_name,
+                                                                   name=webapp.name, host_name=hostname,
+                                                                   slot=slot, host_name_binding=binding)
 
 
 def delete_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
