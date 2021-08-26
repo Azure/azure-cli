@@ -793,6 +793,10 @@ examples:
               --user-assigned-identity-id /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
               --identity-type UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
               --subnet /subscriptions/78975f9f-2222-1111-1111-29c42ac70000/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet-test/subnets/ManagedInstance
+  - name: Create managed instance with enabled zone redundancy
+    text: text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -z
+    - name: Create managed instance with zone redundancy explicitly disabled
+    text: text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -z false
 """
 
 helps['sql mi delete'] = """
@@ -899,6 +903,10 @@ examples:
   - name: Move managed instance to another subnet
     text: az sql mi update -g myResourceGroup -n myServer -i \\
               --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
+  - name: Update managed instance with enabled zone redundancy
+    text: az sql mi update -g myResourceGroup -n myServer -z
+  - name: Update managed instance with zone redundancy explicitly disabled
+    text: az sql mi update -g myResourceGroup -n myServer -z false
 """
 
 helps['sql midb'] = """

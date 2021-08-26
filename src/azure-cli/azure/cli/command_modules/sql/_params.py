@@ -1951,6 +1951,7 @@ def load_arguments(self, _):
 
         c.argument('zone_redundant',
                    options_list=['--zone-redundant, -z'],
+                   help='Specifies whether to enable zone redundancy',
                    arg_type=get_three_state_flag())
 
     with self.argument_context('sql mi update') as c:
@@ -1976,6 +1977,7 @@ def load_arguments(self, _):
 
         c.argument('zone_redundant',
                    options_list=['--zone-redundant, -z'],
+                   help='Specifies whether to enable zone redundancy',
                    arg_type=get_three_state_flag())
 
         # Create args that will be used to build up the Managed Instance's Sku object

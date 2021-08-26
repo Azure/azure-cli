@@ -4374,7 +4374,7 @@ def managed_instance_update(
 
     if virtual_network_subnet_id is not None:
         instance.subnet_id = virtual_network_subnet_id
-    
+
     if zone_redundant is not None:
         instance.zone_redundant = zone_redundant
 
