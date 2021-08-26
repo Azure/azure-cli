@@ -962,6 +962,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1 = AKSCreateContext(self.cmd, {"windows_admin_password": None})
         self.assertEqual(ctx_1.get_windows_admin_password(), None)
         windows_profile = self.models.ManagedClusterWindowsProfile(
+            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
             admin_username="test_win_admin_name",
             admin_password="test_win_admin",
         )
@@ -991,6 +992,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             "test_win_admin_pd",
         )
         windows_profile = self.models.ManagedClusterWindowsProfile(
+            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
             admin_username="test_win_admin_name",
             admin_password="test_win_admin_pd",
         )
@@ -1009,8 +1011,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_enable_ahub(), False)
 
         # custom value
-        ctx_1 = AKSCreateContext(self.cmd, {"enable_ahub": True})
-        self.assertEqual(ctx_1.get_enable_ahub(), True)
+        ctx_2 = AKSCreateContext(self.cmd, {"enable_ahub": True})
+        self.assertEqual(ctx_2.get_enable_ahub(), True)
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
@@ -1243,6 +1245,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             dec_mc_2 = dec_2.set_up_windows_profile(mc_2)
 
         windows_profile_2 = self.models.ManagedClusterWindowsProfile(
+            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
             admin_username="test_win_admin_name",
             admin_password="test_win_admin_pd",
             license_type="Windows_Server",
