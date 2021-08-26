@@ -19,7 +19,7 @@ def sqlpool_blob_auditing_policy_update(
         instance,
         workspace_name,
         resource_group_name,
-        sqlpool_name,
+        sql_pool_name,
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -45,7 +45,7 @@ def sqlpool_blob_auditing_policy_update(
         instance=instance,
         workspace_name=workspace_name,
         resource_group_name=resource_group_name,
-        sqlpool_name=sqlpool_name,
+        sql_pool_name=sql_pool_name,
         state=state,
         blob_storage_target_state=blob_storage_target_state,
         storage_account=storage_account,
@@ -120,7 +120,7 @@ def _audit_policy_update(
         instance,
         workspace_name,
         resource_group_name,
-        sqlpool_name=None,
+        sql_pool_name=None,
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -158,14 +158,14 @@ def _audit_policy_update(
             cmd=cmd,
             resource_group_name=resource_group_name,
             workspace_name=workspace_name,
-            sqlpool_name=sqlpool_name)
+            sql_pool_name=sql_pool_name)
 
         # Update diagnostic settings
         rollback_data = _audit_policy_update_diagnostic_settings(
             cmd=cmd,
             workspace_name=workspace_name,
             resource_group_name=resource_group_name,
-            sqlpool_name=sqlpool_name,
+            sql_pool_name=sql_pool_name,
             diagnostic_settings=diagnostic_settings,
             category_name=category_name,
             log_analytics_target_state=log_analytics_target_state,
@@ -224,7 +224,7 @@ def _audit_policy_update(
                 cmd=cmd,
                 workspace_name=workspace_name,
                 resource_group_name=resource_group_name,
-                sqlpool_name=sqlpool_name,
+                sql_pool_name=sql_pool_name,
                 rollback_data=rollback_data)
 
         # Reraise the original exception
@@ -290,6 +290,9 @@ def _audit_policy_update_apply_blob_storage_details(
 
         if retention_days is not None:
             instance.retention_days = retention_days
+    else:
+        instance.storage_endpoint = None
+        instance.storage_account_access_key = None
 
 def _find_storage_account_resource_id(cli_ctx, name):
     '''
@@ -442,14 +445,14 @@ def _get_diagnostic_settings(
         cmd,
         resource_group_name,
         workspace_name,
-        sqlpool_name=None):
+        sql_pool_name=None):
     '''
     Common code to get workspace or sqlpool diagnostic settings
     '''
 
     diagnostic_settings_url = _get_diagnostic_settings_url(
         cmd=cmd, resource_group_name=resource_group_name,
-        workspace_name=workspace_name, sqlpool_name=sqlpool_name)
+        workspace_name=workspace_name, sql_pool_name=sql_pool_name)
     azure_monitor_client = cf_monitor(cmd.cli_ctx)
     return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
 
@@ -458,15 +461,15 @@ def _get_diagnostic_settings_url(
         cmd,
         resource_group_name,
         workspace_name,
-        sqlpool_name=None):
+        sql_pool_name=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     diagnostic_settings_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Synapse/workspaces/{}'.format(
             get_subscription_id(cmd.cli_ctx),
             resource_group_name, workspace_name)
-    if sqlpool_name is not None:
-        return diagnostic_settings_url +'/sqlpools/{}'.format(sqlpool_name)
+    if sql_pool_name is not None:
+        return diagnostic_settings_url +'/sqlpools/{}'.format(sql_pool_name)
     return diagnostic_settings_url
 
 
@@ -474,7 +477,7 @@ def _audit_policy_update_rollback(
         cmd,
         workspace_name,
         resource_group_name,
-        sqlpool_name,
+        sql_pool_name,
         rollback_data):
     '''
     Rollback diagnostic settings change
@@ -484,7 +487,7 @@ def _audit_policy_update_rollback(
         cmd=cmd,
         resource_group_name=resource_group_name,
         workspace_name=workspace_name,
-        sqlpool_name=sqlpool_name)
+        sql_pool_name=sql_pool_name)
 
     azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
@@ -555,7 +558,7 @@ def _audit_policy_update_diagnostic_settings(
         cmd,
         workspace_name,
         resource_group_name,
-        sqlpool_name=None,
+        sql_pool_name=None,
         diagnostic_settings=None,
         category_name=None,
         log_analytics_target_state=None,
@@ -579,7 +582,7 @@ def _audit_policy_update_diagnostic_settings(
         cmd=cmd,
         resource_group_name=resource_group_name,
         workspace_name=workspace_name,
-        sqlpool_name=sqlpool_name)
+        sql_pool_name=sql_pool_name)
 
     azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
@@ -591,7 +594,7 @@ def _audit_policy_update_diagnostic_settings(
                 cmd=cmd,
                 resource_group_name=resource_group_name,
                 workspace_name=workspace_name,
-                sqlpool_name=sqlpool_name,
+                sql_pool_name=sql_pool_name,
                 category_name=category_name,
                 log_analytics_target_state=log_analytics_target_state,
                 log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
@@ -699,7 +702,7 @@ def _audit_policy_update_diagnostic_settings(
             cmd=cmd,
             resource_group_name=resource_group_name,
             workspace_name=workspace_name,
-            sqlpool_name=sqlpool_name,
+            sql_pool_name=sql_pool_name,
             category_name=category_name,
             log_analytics_target_state=log_analytics_target_state,
             log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
@@ -717,7 +720,7 @@ def _audit_policy_create_diagnostic_setting(
         cmd,
         resource_group_name,
         workspace_name,
-        sqlpool_name=None,
+        sql_pool_name=None,
         category_name=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
@@ -747,7 +750,7 @@ def _audit_policy_create_diagnostic_setting(
         cmd=cmd,
         resource_group_name=resource_group_name,
         workspace_name=workspace_name,
-        sqlpool_name=sqlpool_name)
+        sql_pool_name=sql_pool_name)
 
     azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
@@ -854,3 +857,143 @@ def _audit_policy_validate_arguments(
 
     if _is_audit_policy_state_enabled(event_hub_target_state) and event_hub_authorization_rule_id is None:
         raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
+
+
+def _get_diagnostic_settings_url(
+        cmd,
+        resource_group_name,
+        workspace_name,
+        sql_pool_name=None):
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    diag_settings = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Synapse/workspaces/{}'.format(
+        get_subscription_id(cmd.cli_ctx),
+        resource_group_name, workspace_name)
+
+    if sql_pool_name is None:
+        return diag_settings
+    else:
+        return diag_settings+'/sqlpools/{}'.format(
+            sql_pool_name)
+
+
+def _get_diagnostic_settings(
+        cmd,
+        resource_group_name,
+        workspace_name,
+        sql_pool_name=None):
+    '''
+    Common code to get server or database diagnostic settings
+    '''
+
+    diagnostic_settings_url = _get_diagnostic_settings_url(
+        cmd=cmd, resource_group_name=resource_group_name,
+        workspace_name=workspace_name, sql_pool_name=sql_pool_name)
+    azure_monitor_client = cf_monitor(cmd.cli_ctx)
+
+    return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
+
+
+def server_audit_policy_show(
+        cmd,
+        client,
+        workspace_name,
+        resource_group_name,
+        blob_auditing_policy_name=None):
+    '''
+    Show server audit policy
+    '''
+
+    return _audit_policy_show(
+        cmd=cmd,
+        client=client,
+        resource_group_name=resource_group_name,
+        workspace_name=workspace_name,
+        blob_auditing_policy_name=blob_auditing_policy_name,
+        category_name='SQLSecurityAuditEvents')
+
+
+def db_audit_policy_show(
+        cmd,
+        client,
+        workspace_name,
+        resource_group_name,
+        sql_pool_name,
+        blob_auditing_policy_name=None):
+    '''
+    Show database audit policy
+    '''
+
+    return _audit_policy_show(
+        cmd=cmd,
+        client=client,
+        resource_group_name=resource_group_name,
+        workspace_name=workspace_name,
+        sql_pool_name=sql_pool_name,
+        blob_auditing_policy_name=blob_auditing_policy_name,
+        category_name='SQLSecurityAuditEvents')
+
+
+def _audit_policy_show(
+        cmd,
+        client,
+        resource_group_name,
+        workspace_name,
+        sql_pool_name=None,
+        category_name=None,
+        blob_auditing_policy_name=None):
+    '''
+    Common code to get server (DevOps) or database audit policy including diagnostic settings
+    '''
+
+    # Request audit policy
+    if sql_pool_name is None:
+        audit_policy = client.get(
+            resource_group_name=resource_group_name,
+            workspace_name=workspace_name,
+            blob_auditing_policy_name=blob_auditing_policy_name)
+    else:
+        audit_policy = client.get(
+            resource_group_name=resource_group_name,
+            workspace_name=workspace_name,
+            sql_pool_name=sql_pool_name)
+
+    audit_policy.blob_storage_target_state = BlobAuditingPolicyState.disabled
+    audit_policy.event_hub_target_state = BlobAuditingPolicyState.disabled
+    audit_policy.log_analytics_target_state = BlobAuditingPolicyState.disabled
+
+    # If audit policy's state is disabled there is nothing to do
+    if _is_audit_policy_state_disabled(audit_policy.state):
+        return audit_policy
+
+    if not audit_policy.storage_endpoint:
+        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.disabled
+    else:
+        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.enabled
+
+    # If 'is_azure_monitor_target_enabled' is false there is no reason to request diagnostic settings
+    if not audit_policy.is_azure_monitor_target_enabled:
+        return audit_policy
+
+    # Request diagnostic settings
+    diagnostic_settings = _get_diagnostic_settings(
+        cmd=cmd, resource_group_name=resource_group_name,
+        workspace_name=workspace_name, sql_pool_name=sql_pool_name)
+
+    # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
+    diagnostic_settings.value.sort(key=lambda d: d.name)
+    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value, category_name)
+
+    # Initialize azure monitor properties
+    if audit_diagnostic_setting is not None:
+        if audit_diagnostic_setting.workspace_id is not None:
+            audit_policy.log_analytics_target_state = BlobAuditingPolicyState.enabled
+            audit_policy.log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
+
+        if audit_diagnostic_setting.event_hub_authorization_rule_id is not None:
+            audit_policy.event_hub_target_state = BlobAuditingPolicyState.enabled
+            audit_policy.event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
+            audit_policy.event_hub_name = audit_diagnostic_setting.event_hub_name
+
+    return audit_policy
