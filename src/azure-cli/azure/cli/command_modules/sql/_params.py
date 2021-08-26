@@ -1948,7 +1948,7 @@ def load_arguments(self, _):
         c.argument('external_admin_principal_type',
                    options_list=['--external-admin-principal-type'],
                    help='User, Group or Application')
-    
+
         c.argument('zone_redundant',
                    options_list=['--zone-redundant, -z'],
                    arg_type=get_three_state_flag())

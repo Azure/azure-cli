@@ -4126,7 +4126,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}"),
                                           JMESPathCheck('backupStorageRedundancy', self.backup_storage_redundancy),
                                           JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(
-                                              self.DEFAULT_MC))]).get_output_in_json()
+                                              self.DEFAULT_MC)),
+                                          JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         # test show sql managed instance 1 using id
         self.cmd('sql mi show --ids {}'
@@ -4220,7 +4221,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
             expectedmessage = "Subnet resource ID '{}' is invalid. Please provide a correct resource Id for the target subnet.".format(ManagedInstancePreparer.target_subnet)
             if expectedmessage in str(e):
                 pass
-
+        
         # test cross-subnet update SLO. Since the feature isn't rolled out, we expect the operation to fail.
         try:
             self.cmd('sql mi update -g {} -n {} --subnet {} --vnet-name {}'
@@ -4230,9 +4231,62 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
             if expectedmessage in str(e):
                 pass
 
+        # test update managed instance to be zone redundant. Since currently there are no regions that support this, it is expected for operation to fail.
+        try:
+            self.cmd('sql mi update -g {} -n {} --zone-redundant'
+                 .format(resource_group_1, managed_instance_name_1))
+        except Exception as e:
+            expectedmessage = "Enabling zoneRedundant feature is not possible once managed instance is created"
+            if expectedmessage in str(e):
+                pass
+
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
+class SqlManagedInstanceCreateScenarioTest(ScenarioTest):
+    DEFAULT_MC = "SQL_Default"
+    MMI1 = "SQL_WestEurope_MI_1"
+    tag1 = "tagName1=tagValue1"
+    tag2 = "tagName2=tagValue2"
+    backup_storage_redundancy = "Local"
+
+    def _get_full_maintenance_id(self, name):
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
+            self.get_subscription_id(), name)
+
+    def test_sql_managed_instance_create_zoneRedundant(self):
+        location = 'westeurope'
+        subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance'
+        group = 'Committer-SwaggerAndGeneratedSDKs-MI-CLI'
+
+        self.kwargs.update({
+            'loc': location,
+            'rg': group,
+            'subnet': subnet,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'timezone_id': 'Central European Standard Time',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '128',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': ManagedInstancePreparer.collation,
+            'proxy_override': "Proxy",
+        })
+
+        # test create zone - redundant managed instance. Since currently there are no regions that support this, it is expected for operation to fail.
+        try:
+            self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
+                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --z')
+        except Exception as e:
+            expectedmessage = "ZoneRedundant feature is not supported for the selected service tier."
+            if expectedmessage in str(e):
+                pass                            
 
 class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
     test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
