@@ -905,6 +905,22 @@ class AKSCreateContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             ctx_3.get_max_count(enable_validation=True)
 
+    def test_get_admin_username(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"admin_username": "azureuser"})
+        self.assertEqual(ctx_1.get_admin_username(), "azureuser")
+        ssh_config = self.models.ContainerServiceSshConfiguration(
+            public_keys=[]
+        )
+        linux_profile = self.models.ContainerServiceLinuxProfile(
+            admin_username="test_mc_user", ssh=ssh_config
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", linux_profile=linux_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_admin_username(), "test_mc_user")
+
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -953,9 +969,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "max_count": None,
             },
         )
-        mc = self.models.ManagedCluster(location="test_location")
-        dec_mc = dec_1.set_up_agent_pool_profiles(mc)
-        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_agent_pool_profiles(mc_1)
+        agent_pool_profile_1 = self.models.ManagedClusterAgentPoolProfile(
             # Must be 12 chars or less before ACS RP adds to it
             name="nodepool1",
             tags=None,
@@ -979,11 +995,11 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             min_count=None,
             max_count=None,
         )
-        ground_truth_mc = self.models.ManagedCluster(location="test_location")
-        ground_truth_mc.agent_pool_profiles = [agent_pool_profile]
+        ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
+        ground_truth_mc_1.agent_pool_profiles = [agent_pool_profile_1]
         self.assertEqual(
-            dec_mc.agent_pool_profiles[0],
-            ground_truth_mc.agent_pool_profiles[0],
+            dec_mc_1.agent_pool_profiles[0],
+            ground_truth_mc_1.agent_pool_profiles[0],
         )
 
         # custom value
@@ -1013,9 +1029,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "max_count": 20,
             },
         )
-        mc = self.models.ManagedCluster(location="test_location")
-        dec_mc = dec_2.set_up_agent_pool_profiles(mc)
-        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_agent_pool_profiles(mc_2)
+        agent_pool_profile_2 = self.models.ManagedClusterAgentPoolProfile(
             # Must be 12 chars or less before ACS RP adds to it
             name="test_np_name",
             tags={"k1": "v1"},
@@ -1039,9 +1055,61 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             min_count=5,
             max_count=20,
         )
-        ground_truth_mc = self.models.ManagedCluster(location="test_location")
-        ground_truth_mc.agent_pool_profiles = [agent_pool_profile]
+        ground_truth_mc_2 = self.models.ManagedCluster(location="test_location")
+        ground_truth_mc_2.agent_pool_profiles = [agent_pool_profile_2]
         self.assertEqual(
-            dec_mc.agent_pool_profiles[0],
-            ground_truth_mc.agent_pool_profiles[0],
+            dec_mc_2.agent_pool_profiles[0],
+            ground_truth_mc_2.agent_pool_profiles[0],
         )
+
+    def test_set_up_linux_profile(self):
+        # default value in `aks_create`
+        import paramiko
+        key = paramiko.RSAKey.generate(2048)
+        public_key = "{} {}".format(key.get_name(), key.get_base64())
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "location": "test_location",
+                "admin_username": "azureuser",
+                "no_ssh_key": False,
+                "ssh_key_value": public_key,
+            },
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_linux_profile(mc_1)
+
+        ssh_config_1 = self.models.ContainerServiceSshConfiguration(
+            public_keys=[
+                self.models.ContainerServiceSshPublicKey(key_data=public_key)
+            ]
+        )
+        linux_profile_1 = self.models.ContainerServiceLinuxProfile(
+            admin_username="azureuser", ssh=ssh_config_1
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location", linux_profile=linux_profile_1
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "location": "test_location",
+                "admin_username": "test_user",
+                "no_ssh_key": True,
+                "ssh_key_value": "test_key",
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_linux_profile(mc_2)
+
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location"
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
