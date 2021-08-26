@@ -842,4 +842,3 @@ def load_arguments(self, _):
                    help='Enable or disable the self-hosted integration runtime auto-update.')
         c.argument('update_delay_offset',
                    help='The time of the day for the self-hosted integration runtime auto-update.')
-

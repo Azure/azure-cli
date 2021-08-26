@@ -13,6 +13,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.monitor._client_factory import cf_monitor
 from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
 
+
 logger = get_logger(__name__)
 def sqlpool_blob_auditing_policy_update(
         cmd,
@@ -112,6 +113,7 @@ def sqlserver_blob_auditing_policy_update(
     # this property is only for ServerBlobAuditingPolicy
     if queue_delay_milliseconds is not None:
         instance.queue_delay_ms = queue_delay_milliseconds
+
     return instance
 
 
@@ -202,6 +204,7 @@ def _audit_policy_update(
 
             if audit_actions_and_groups is not None:
                 instance.audit_actions_and_groups = audit_actions_and_groups
+
             if not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []:
                 instance.audit_actions_and_groups = [
                     "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
@@ -267,6 +270,7 @@ def _audit_policy_update_apply_blob_storage_details(
             storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
             storage_endpoint = _get_storage_endpoint(cmd.cli_ctx, storage_account, storage_resource_group)
             storage_account_subscription_id = _find_storage_account_subscription_id(cmd.cli_ctx, storage_account)
+
         if storage_endpoint is not None:
             instance.storage_endpoint = storage_endpoint
 
@@ -290,6 +294,7 @@ def _audit_policy_update_apply_blob_storage_details(
 
         if retention_days is not None:
             instance.retention_days = retention_days
+
     else:
         instance.storage_endpoint = None
         instance.storage_account_access_key = None
