@@ -288,7 +288,7 @@ def iot_dps_certificate_get(client, dps_name, resource_group_name, certificate_n
     return client.dps_certificate.get(certificate_name, resource_group_name, dps_name)
 
 
-def iot_dps_certificate_create(client, dps_name, resource_group_name, certificate_name, certificate_path, is_verified=False):
+def iot_dps_certificate_create(client, dps_name, resource_group_name, certificate_name, certificate_path, is_verified=None):
     cert_list = client.dps_certificate.list(resource_group_name, dps_name)
     for cert in cert_list.value:
         if cert.name == certificate_name:
@@ -300,7 +300,7 @@ def iot_dps_certificate_create(client, dps_name, resource_group_name, certificat
     return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, None, certificate, is_verified)
 
 
-def iot_dps_certificate_update(client, dps_name, resource_group_name, certificate_name, certificate_path, etag, is_verified=False):
+def iot_dps_certificate_update(client, dps_name, resource_group_name, certificate_name, certificate_path, etag, is_verified=None):
     cert_list = client.dps_certificate.list(resource_group_name, dps_name)
     for cert in cert_list.value:
         if cert.name == certificate_name:
