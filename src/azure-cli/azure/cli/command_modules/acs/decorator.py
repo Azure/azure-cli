@@ -1344,7 +1344,7 @@ class AKSCreateContext:
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc and self.mc.service_principal_profile:
-            value_obtained_from_mc = self.mc.service_principal_profile.client_secret
+            value_obtained_from_mc = self.mc.service_principal_profile.secret
 
         # set default value
         read_from_mc = False
@@ -1573,8 +1573,7 @@ class AKSCreateDecorator:
         if not(enable_managed_identity and not service_principal and not client_secret):
             service_principal_profile = self.models.ManagedClusterServicePrincipalProfile(
                 client_id=service_principal,
-                secret=client_secret,
-                key_vault_secret_ref=None)
+                secret=client_secret)
             mc.service_principal_profile = service_principal_profile
         return mc
 
