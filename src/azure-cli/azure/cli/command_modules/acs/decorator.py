@@ -25,6 +25,7 @@ from .custom import (
     _set_vm_set_type,
     set_load_balancer_sku,
     get_subscription_id,
+    _ensure_aks_service_principal,
 )
 
 logger = get_logger(__name__)
@@ -1253,6 +1254,199 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_ahub
 
+    # pylint: disable=unused-argument
+    def get_service_principal(self, enable_validation: bool = False, **kwargs):
+        parameter_name = "service_principal"
+
+        # read the original value passed by the command
+        raw_value = self.raw_param.get(parameter_name)
+        # try to read from intermediates
+        intermediate = self.get_intermediate(parameter_name, None)
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.service_principal_profile:
+            value_obtained_from_mc = self.mc.service_principal_profile.client_id
+
+        # set default value
+        read_from_mc = False
+        if value_obtained_from_mc is not None:
+            service_principal = value_obtained_from_mc
+            # clean up intermediate if `mc` has been decorated
+            self.remove_intermediate(parameter_name)
+            read_from_mc = True
+        elif intermediate is not None:
+            service_principal = intermediate
+        else:
+            service_principal = raw_value
+
+        # use the additional optional parameter "disable_dynamic_completion" to avoid loop calls
+        if not kwargs.get("disable_dynamic_completion", False):
+            dynamic_completion = False
+            # check whether the parameter meet the conditions of dynamic completion
+            if not (
+                self.get_enable_managed_identity(
+                    disable_dynamic_completion=True
+                ) and
+                not service_principal and
+                not self.get_client_secret(disable_dynamic_completion=True)
+            ):
+                dynamic_completion = True
+            # disable dynamic completion if the value is read from `mc`
+            dynamic_completion = dynamic_completion and not read_from_mc
+            if dynamic_completion:
+                # try to get "service_principal" from intermediate "principal_obj", if the
+                # intermediate "principal_obj" does not exist, create it
+                principal_obj = self.get_intermediate("principal_obj", None)
+                if principal_obj is None:
+                    principal_obj = _ensure_aks_service_principal(
+                        cli_ctx=self.cmd.cli_ctx,
+                        service_principal=service_principal,
+                        client_secret=self.get_client_secret(
+                            disable_dynamic_completion=True
+                        ),
+                        subscription_id=self.get_intermediate(
+                            "subscription_id", None
+                        ),
+                        dns_name_prefix=self.get_dns_name_prefix(
+                            disable_dynamic_completion=True
+                        ),
+                        fqdn_subdomain=self.get_fqdn_subdomain(
+                            disable_dynamic_completion=True
+                        ),
+                        location=self.get_location(
+                            disable_dynamic_completion=True
+                        ),
+                        name=self.get_name(disable_dynamic_completion=True),
+                    )
+                    # add to intermediate
+                    self.set_intermediate(
+                        "principal_obj", principal_obj, overwrite_exists=True
+                    )
+                service_principal = principal_obj.get("service_principal")
+                # add to intermediate
+                self.set_intermediate(
+                    "service_principal",
+                    service_principal,
+                    overwrite_exists=True,
+                )
+
+        # this parameter does not need validation
+        return service_principal
+
+    # pylint: disable=unused-argument
+    def get_client_secret(self, enable_validation: bool = False, **kwargs):
+        parameter_name = "client_secret"
+
+        # read the original value passed by the command
+        raw_value = self.raw_param.get(parameter_name)
+        # try to read from intermediates
+        intermediate = self.get_intermediate(parameter_name, None)
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.service_principal_profile:
+            value_obtained_from_mc = self.mc.service_principal_profile.client_secret
+
+        # set default value
+        read_from_mc = False
+        if value_obtained_from_mc is not None:
+            client_secret = value_obtained_from_mc
+            # clean up intermediate if `mc` has been decorated
+            self.remove_intermediate(parameter_name)
+            read_from_mc = True
+        elif intermediate is not None:
+            client_secret = intermediate
+        else:
+            client_secret = raw_value
+
+        # use the additional optional parameter "disable_dynamic_completion" to avoid loop calls
+        if not kwargs.get("disable_dynamic_completion", False):
+            dynamic_completion = False
+            # check whether the parameter meet the conditions of dynamic completion
+            if not (
+                self.get_enable_managed_identity(
+                    disable_dynamic_completion=True
+                ) and
+                not self.get_service_principal(disable_dynamic_completion=True) and
+                not client_secret
+            ):
+                dynamic_completion = True
+            # disable dynamic completion if the value is read from `mc`
+            dynamic_completion = dynamic_completion and not read_from_mc
+            if dynamic_completion:
+                # try to get "client_secret" from intermediate "principal_obj", if the
+                # intermediate "principal_obj" does not exist, create it
+                principal_obj = self.get_intermediate("principal_obj", None)
+                if principal_obj is None:
+                    principal_obj = _ensure_aks_service_principal(
+                        cli_ctx=self.cmd.cli_ctx,
+                        service_principal=self.get_service_principal(
+                            disable_dynamic_completion=True
+                        ),
+                        client_secret=client_secret,
+                        subscription_id=self.get_intermediate(
+                            "subscription_id", None
+                        ),
+                        dns_name_prefix=self.get_dns_name_prefix(
+                            disable_dynamic_completion=True
+                        ),
+                        fqdn_subdomain=self.get_fqdn_subdomain(
+                            disable_dynamic_completion=True
+                        ),
+                        location=self.get_location(
+                            disable_dynamic_completion=True
+                        ),
+                        name=self.get_name(disable_dynamic_completion=True),
+                    )
+                    # add to intermediate
+                    self.set_intermediate(
+                        "principal_obj", principal_obj, overwrite_exists=True
+                    )
+                client_secret = principal_obj.get("client_secret")
+                # add to intermediate
+                self.set_intermediate(
+                    "client_secret",
+                    client_secret,
+                    overwrite_exists=True,
+                )
+
+        # this parameter does not need validation
+        return client_secret
+
+    # pylint: disable=unused-argument
+    def get_enable_managed_identity(self, enable_validation: bool = False, **kwargs):
+        # Note: This parameter will not be decorated into the `mc` object.
+        parameter_name = "enable_managed_identity"
+
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("enable_managed_identity")
+        # try to read from intermediates
+        intermediate = self.get_intermediate(parameter_name, None)
+
+        # set default value
+        if intermediate is not None:
+            enable_managed_identity = intermediate
+        else:
+            enable_managed_identity = raw_value
+
+        # use the additional optional parameter "disable_dynamic_completion" to avoid loop calls
+        if not kwargs.get("disable_dynamic_completion", False):
+            dynamic_completion = False
+            # check whether the parameter meet the conditions of dynamic completion
+            if (
+                self.get_service_principal(disable_dynamic_completion=True) and
+                self.get_client_secret(disable_dynamic_completion=True)
+            ):
+                dynamic_completion = True
+            if dynamic_completion:
+                enable_managed_identity = False
+                # add to intermediate
+                self.set_intermediate(
+                    parameter_name, enable_managed_identity, overwrite_exists=True
+                )
+
+        # this parameter does not need validation
+        return enable_managed_identity
+
 
 class AKSCreateDecorator:
     def __init__(
@@ -1369,6 +1563,21 @@ class AKSCreateDecorator:
             self.context.remove_intermediate("windows_admin_password")
         return mc
 
+    def set_up_service_principal_profile(self, mc):
+        # If customer explicitly provide a service principal, disable managed identity.
+        enable_managed_identity = self.context.get_enable_managed_identity()
+        service_principal = self.context.get_service_principal()
+        client_secret = self.context.get_client_secret()
+        # Skip create service principal profile for the cluster if the cluster
+        # enables managed identity and customer doesn't explicitly provide a service principal.
+        if not(enable_managed_identity and not service_principal and not client_secret):
+            service_principal_profile = self.models.ManagedClusterServicePrincipalProfile(
+                client_id=service_principal,
+                secret=client_secret,
+                key_vault_secret_ref=None)
+            mc.service_principal_profile = service_principal_profile
+        return mc
+
     def construct_default_mc(self):
         # An all-in-one function used to create the complete `ManagedCluster` object, which will later be
         # passed as a parameter to the underlying SDK (mgmt-containerservice) to send the actual request.
@@ -1383,4 +1592,6 @@ class AKSCreateDecorator:
         mc = self.set_up_linux_profile(mc)
         # set up windows profile
         mc = self.set_up_windows_profile(mc)
+        # set up service principal profile
+        mc = self.set_up_service_principal_profile(mc)
         return mc
