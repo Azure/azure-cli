@@ -672,7 +672,6 @@ class SynapseScenarioTests(ScenarioTest):
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
             'performance-level': 'DW400c',
             'retention-days': '30',
-            'sql-pool': 'testsqlsynapse',
             'audit-actions-expected': ['SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP'],
             'audit-actions-input': 'SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP',
             'eventhub_name': self.create_random_name("ehsrv", 20),#'testehsrv02',

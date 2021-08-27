@@ -325,7 +325,6 @@ def load_arguments(self, _):
 
     # synapse sql pool audit-policy
     with self.argument_context('synapse sql pool audit-policy') as c:
-        c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
         c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
                    help='Name of the blob auditing policy name.')
 

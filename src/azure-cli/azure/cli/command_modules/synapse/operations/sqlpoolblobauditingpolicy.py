@@ -900,14 +900,14 @@ def _get_diagnostic_settings(
     return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
 
 
-def server_audit_policy_show(
+def workspace_audit_policy_show(
         cmd,
         client,
         workspace_name,
         resource_group_name,
         blob_auditing_policy_name=None):
     '''
-    Show server audit policy
+    Show workspace audit policy
     '''
 
     return _audit_policy_show(
@@ -919,7 +919,7 @@ def server_audit_policy_show(
         category_name='SQLSecurityAuditEvents')
 
 
-def db_audit_policy_show(
+def sqlpool_audit_policy_show(
         cmd,
         client,
         workspace_name,
@@ -927,7 +927,7 @@ def db_audit_policy_show(
         sql_pool_name,
         blob_auditing_policy_name=None):
     '''
-    Show database audit policy
+    Show sql pool audit policy
     '''
 
     return _audit_policy_show(
@@ -949,7 +949,7 @@ def _audit_policy_show(
         category_name=None,
         blob_auditing_policy_name=None):
     '''
-    Common code to get server (DevOps) or database audit policy including diagnostic settings
+    Common code to get workspace or sqlpool audit policy including diagnostic settings
     '''
 
     # Request audit policy
