@@ -1950,9 +1950,7 @@ def load_arguments(self, _):
                    help='User, Group or Application')
 
         c.argument('zone_redundant',
-                   options_list=['--zone-redundant, -z'],
-                   help='Specifies whether to enable zone redundancy',
-                   arg_type=get_three_state_flag())
+                   arg_type=zone_redundant_param_type)
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
@@ -1976,9 +1974,7 @@ def load_arguments(self, _):
                    help='Change maintenance configuration for this managed instance.')
 
         c.argument('zone_redundant',
-                   options_list=['--zone-redundant, -z'],
-                   help='Specifies whether to enable zone redundancy',
-                   arg_type=get_three_state_flag())
+                   arg_type=zone_redundant_param_type)
 
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(

@@ -4282,7 +4282,7 @@ class SqlManagedInstanceCreateScenarioTest(ScenarioTest):
             self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
-                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --z')
+                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" -z')
         except Exception as e:
             expectedmessage = "ZoneRedundant feature is not supported for the selected service tier."
             if expectedmessage in str(e):
