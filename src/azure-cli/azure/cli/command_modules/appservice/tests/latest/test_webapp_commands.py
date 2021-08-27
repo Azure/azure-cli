@@ -9,6 +9,7 @@ from unittest import mock
 import os
 import time
 import tempfile
+from azure_devtools.scenario_tests.utilities import create_random_name
 import requests
 import datetime
 
@@ -247,9 +248,11 @@ class WebappQuickCreateTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name="resource_group_one", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     @ResourceGroupPreparer(parameter_name="resource_group_two", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_create_names_are_substrings(self, resource_group_one, resource_group_two):
-        webapp_name_one = "test-webapp-name-on"
-        webapp_name_two = "test-webapp-name-one"
-        webapp_name_three = "test-webapp-nam"
+
+        random_prefix = create_random_name("", 10)
+        webapp_name_one = random_prefix + "test-webapp-name-on"
+        webapp_name_two = random_prefix + "test-webapp-name-one"
+        webapp_name_three = random_prefix + "test-webapp-nam"
         plan_name_one = "webapp-plan-one"
         plan_name_two = "webapp-plan-two"
         plan_id_one = self.cmd('appservice plan create -g {} -n {}'.format(
