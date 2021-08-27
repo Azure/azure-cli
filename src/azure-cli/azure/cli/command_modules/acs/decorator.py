@@ -164,6 +164,12 @@ class AKSCreateContext:
     # object, it should never be modified, only read-only operations (e.g. validation) can be performed.
     def __init__(self, cmd: AzCliCommand, raw_parameters: Dict):
         self.cmd = cmd
+        if not isinstance(raw_parameters, dict):
+            raise CLIInternalError(
+                "Unexpected raw_parameters object with type '{}'.".format(
+                    type(raw_parameters)
+                )
+            )
         self.raw_param = raw_parameters
         self.intermediates = dict()
         self.mc = None
@@ -1481,6 +1487,10 @@ class AKSCreateDecorator:
         return mc
 
     def set_up_windows_profile(self, mc):
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
         (
             windows_admin_username,
             windows_admin_password,
@@ -1505,14 +1515,31 @@ class AKSCreateDecorator:
         return mc
 
     def set_up_service_principal_profile(self, mc):
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
         # If customer explicitly provide a service principal, disable managed identity.
-        enable_managed_identity, service_principal, client_secret = self.context.get_enable_managed_identity_service_principal_and_client_secret()
+        (
+            enable_managed_identity,
+            service_principal,
+            client_secret,
+        ) = (
+            self.context.get_enable_managed_identity_service_principal_and_client_secret()
+        )
         # Skip create service principal profile for the cluster if the cluster enables managed identity
         # and customer doesn't explicitly provide a service principal.
-        if not(enable_managed_identity and not service_principal and not client_secret):
-            service_principal_profile = self.models.ManagedClusterServicePrincipalProfile(
-                client_id=service_principal,
-                secret=client_secret)
+        if not (
+            enable_managed_identity and
+            not service_principal and
+            not client_secret
+        ):
+            service_principal_profile = (
+                self.models.ManagedClusterServicePrincipalProfile(
+                    client_id=service_principal, secret=client_secret
+                )
+            )
             mc.service_principal_profile = service_principal_profile
         return mc
 
