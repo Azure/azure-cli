@@ -913,18 +913,27 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_admin_username(), "test_mc_user")
 
-    def test_get_windows_admin_username(self):
+    def test_get_windows_admin_username_and_password(self):
         # default
-        ctx_1 = AKSCreateContext(self.cmd, {"windows_admin_username": None})
-        self.assertEqual(ctx_1.get_windows_admin_username(), None)
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {"windows_admin_username": None, "windows_admin_password": None},
+        )
+        self.assertEqual(
+            ctx_1.get_windows_admin_username_and_password(), (None, None)
+        )
         windows_profile = self.models.ManagedClusterWindowsProfile(
             admin_username="test_win_admin",
+            admin_password="test_win_admin_password",
         )
         mc = self.models.ManagedCluster(
             location="test_location", windows_profile=windows_profile
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_windows_admin_username(), "test_win_admin")
+        self.assertEqual(
+            ctx_1.get_windows_admin_username_and_password(),
+            ("test_win_admin", "test_win_admin_password"),
+        )
 
         # dynamic completion
         ctx_2 = AKSCreateContext(
@@ -939,7 +948,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
             return_value="test_win_admin_name",
         ):
             self.assertEqual(
-                ctx_2.get_windows_admin_username(), "test_win_admin_name"
+                ctx_2.get_windows_admin_username_and_password(),
+                ("test_win_admin_name", "test_win_admin_pd"),
             )
         self.assertEqual(
             ctx_2.get_intermediate("windows_admin_username"),
@@ -953,27 +963,13 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_2.attach_mc(mc)
         self.assertEqual(
-            ctx_2.get_windows_admin_username(), "test_win_admin_name"
+            ctx_2.get_windows_admin_username_and_password(),
+            ("test_win_admin_name", "test_win_admin_pd"),
         )
         self.assertEqual(ctx_2.get_intermediate("windows_admin_username"), None)
 
-    def test_get_windows_admin_password(self):
-        # default
-        ctx_1 = AKSCreateContext(self.cmd, {"windows_admin_password": None})
-        self.assertEqual(ctx_1.get_windows_admin_password(), None)
-        windows_profile = self.models.ManagedClusterWindowsProfile(
-            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
-            admin_username="test_win_admin_name",
-            admin_password="test_win_admin",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", windows_profile=windows_profile
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_windows_admin_password(), "test_win_admin")
-
         # dynamic completion
-        ctx_2 = AKSCreateContext(
+        ctx_3 = AKSCreateContext(
             self.cmd,
             {
                 "windows_admin_username": "test_win_admin_name",
@@ -985,10 +981,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
             return_value="test_win_admin_pd",
         ):
             self.assertEqual(
-                ctx_2.get_windows_admin_password(), "test_win_admin_pd"
+                ctx_3.get_windows_admin_username_and_password(),
+                ("test_win_admin_name", "test_win_admin_pd"),
             )
         self.assertEqual(
-            ctx_2.get_intermediate("windows_admin_password"),
+            ctx_3.get_intermediate("windows_admin_password"),
             "test_win_admin_pd",
         )
         windows_profile = self.models.ManagedClusterWindowsProfile(
@@ -999,11 +996,12 @@ class AKSCreateContextTestCase(unittest.TestCase):
         mc = self.models.ManagedCluster(
             location="test_location", windows_profile=windows_profile
         )
-        ctx_2.attach_mc(mc)
+        ctx_3.attach_mc(mc)
         self.assertEqual(
-            ctx_2.get_windows_admin_password(), "test_win_admin_pd"
+            ctx_3.get_windows_admin_username_and_password(),
+            ("test_win_admin_name", "test_win_admin_pd"),
         )
-        self.assertEqual(ctx_2.get_intermediate("windows_admin_password"), None)
+        self.assertEqual(ctx_3.get_intermediate("windows_admin_password"), None)
 
     def test_get_enable_ahub(self):
         # default

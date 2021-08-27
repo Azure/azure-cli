@@ -1151,124 +1151,113 @@ class AKSCreateContext:
         return admin_username
 
     # pylint: disable=unused-argument
-    def get_windows_admin_username(
+    def get_windows_admin_username_and_password(
         self, enable_validation: bool = False, **kwargs
     ):
-        parameter_name = "windows_admin_username"
-
+        # windows_admin_username
         # read the original value passed by the command
-        raw_value = self.raw_param.get(parameter_name)
+        username_raw_value = self.raw_param.get("windows_admin_username")
         # try to read from intermediates
-        intermediate = self.get_intermediate(parameter_name, None)
+        username_intermediate = self.get_intermediate(
+            "windows_admin_username", None
+        )
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
+        username_value_obtained_from_mc = None
         if self.mc and self.mc.windows_profile:
-            value_obtained_from_mc = self.mc.windows_profile.admin_username
+            username_value_obtained_from_mc = (
+                self.mc.windows_profile.admin_username
+            )
 
         # set default value
         read_from_mc = False
-        if value_obtained_from_mc is not None:
-            windows_admin_username = value_obtained_from_mc
+        if username_value_obtained_from_mc is not None:
+            windows_admin_username = username_value_obtained_from_mc
             # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate(parameter_name)
+            self.remove_intermediate("windows_admin_username")
             read_from_mc = True
-        elif intermediate is not None:
-            windows_admin_username = intermediate
+        elif username_intermediate is not None:
+            windows_admin_username = username_intermediate
         else:
-            windows_admin_username = raw_value
+            windows_admin_username = username_raw_value
 
-        # use the additional optional parameter "disable_dynamic_completion" to avoid loop calls
-        if not kwargs.get("disable_dynamic_completion", False):
-            dynamic_completion = False
-            # check whether the parameter meet the conditions of dynamic completion
-            # to avoid that windows_admin_password is set but windows_admin_username is not
-            if (
-                windows_admin_username is None and
-                self.get_windows_admin_password(
-                    disable_dynamic_completion=True
-                )
-            ):
-                dynamic_completion = True
-            # disable dynamic completion if the value is read from `mc`
-            dynamic_completion = dynamic_completion and not read_from_mc
-            if dynamic_completion:
-                try:
-                    windows_admin_username = prompt("windows_admin_username: ")
-                    # The validation for admin_username in ManagedClusterWindowsProfile will fail even if
-                    # users still set windows_admin_username to empty here
-                except NoTTYException:
-                    raise NoTTYError(
-                        "Please specify username for Windows in non-interactive mode."
-                    )
-                # add to intermediate
-                self.set_intermediate(
-                    parameter_name,
-                    windows_admin_username,
-                    overwrite_exists=True,
-                )
-
-        # this parameter does not need validation
-        return windows_admin_username
-
-    # pylint: disable=unused-argument
-    def get_windows_admin_password(
-        self, enable_validation: bool = False, **kwargs
-    ):
-        parameter_name = "windows_admin_password"
-
+        # windows_admin_password
         # read the original value passed by the command
-        raw_value = self.raw_param.get(parameter_name)
+        password_raw_value = self.raw_param.get("windows_admin_password")
         # try to read from intermediates
-        intermediate = self.get_intermediate(parameter_name, None)
+        password_intermediate = self.get_intermediate(
+            "windows_admin_password", None
+        )
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
+        password_value_obtained_from_mc = None
         if self.mc and self.mc.windows_profile:
-            value_obtained_from_mc = self.mc.windows_profile.admin_password
+            password_value_obtained_from_mc = (
+                self.mc.windows_profile.admin_password
+            )
 
         # set default value
         read_from_mc = False
-        if value_obtained_from_mc is not None:
-            windows_admin_password = value_obtained_from_mc
+        if password_value_obtained_from_mc is not None:
+            windows_admin_password = password_value_obtained_from_mc
             # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate(parameter_name)
+            self.remove_intermediate("windows_admin_password")
             read_from_mc = True
-        elif intermediate is not None:
-            windows_admin_password = intermediate
+        elif password_intermediate is not None:
+            windows_admin_password = password_intermediate
         else:
-            windows_admin_password = raw_value
+            windows_admin_password = password_raw_value
 
-        # use the additional optional parameter "disable_dynamic_completion" to avoid loop calls
-        if not kwargs.get("disable_dynamic_completion", False):
-            dynamic_completion = False
-            # check whether the parameter meet the conditions of dynamic completion
-            # to avoid that windows_admin_username is set but windows_admin_password is not
-            if (
-                windows_admin_password is None and
-                self.get_windows_admin_username(
-                    disable_dynamic_completion=True
+        username_dynamic_completion = False
+        # check whether the parameter meet the conditions of dynamic completion
+        # to avoid that windows_admin_password is set but windows_admin_username is not
+        if windows_admin_username is None and windows_admin_password:
+            username_dynamic_completion = True
+        # disable dynamic completion if the value is read from `mc`
+        username_dynamic_completion = (
+            username_dynamic_completion and not read_from_mc
+        )
+        if username_dynamic_completion:
+            try:
+                windows_admin_username = prompt("windows_admin_username: ")
+                # The validation for admin_username in ManagedClusterWindowsProfile will fail even if
+                # users still set windows_admin_username to empty here
+            except NoTTYException:
+                raise NoTTYError(
+                    "Please specify username for Windows in non-interactive mode."
                 )
-            ):
-                dynamic_completion = True
-            # disable dynamic completion if the value is read from `mc`
-            dynamic_completion = dynamic_completion and not read_from_mc
-            if dynamic_completion:
-                try:
-                    windows_admin_password = prompt_pass(
-                        msg="windows-admin-password: ", confirm=True
-                    )
-                except NoTTYException:
-                    raise NoTTYError(
-                        "Please specify both username and password in non-interactive mode."
-                    )
-                # add to intermediate
-                self.set_intermediate(
-                    parameter_name,
-                    windows_admin_password,
-                    overwrite_exists=True,
-                )
+            # add to intermediate
+            self.set_intermediate(
+                "windows_admin_username",
+                windows_admin_username,
+                overwrite_exists=True,
+            )
 
-        # this parameter does not need validation
-        return windows_admin_password
+        password_dynamic_completion = False
+        # check whether the parameter meet the conditions of dynamic completion
+        # to avoid that windows_admin_username is set but windows_admin_password is not
+        if windows_admin_password is None and windows_admin_username:
+            password_dynamic_completion = True
+        # disable dynamic completion if the value is read from `mc`
+        password_dynamic_completion = (
+            password_dynamic_completion and not read_from_mc
+        )
+        if password_dynamic_completion:
+            try:
+                windows_admin_password = prompt_pass(
+                    msg="windows-admin-password: ", confirm=True
+                )
+            except NoTTYException:
+                raise NoTTYError(
+                    "Please specify both username and password in non-interactive mode."
+                )
+            # add to intermediate
+            self.set_intermediate(
+                "windows_admin_password",
+                windows_admin_password,
+                overwrite_exists=True,
+            )
+
+        # these parameters does not need validation
+        return windows_admin_username, windows_admin_password
 
     # pylint: disable=unused-argument
     def get_enable_ahub(self, enable_validation: bool = False, **kwargs):
@@ -1373,8 +1362,10 @@ class AKSCreateDecorator:
         return mc
 
     def set_up_windows_profile(self, mc):
-        windows_admin_username = self.context.get_windows_admin_username()
-        windows_admin_password = self.context.get_windows_admin_password()
+        (
+            windows_admin_username,
+            windows_admin_password,
+        ) = self.context.get_windows_admin_username_and_password()
         if windows_admin_username or windows_admin_password:
             windows_license_type = None
             if self.context.get_enable_ahub():
