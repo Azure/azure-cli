@@ -171,7 +171,7 @@ class WebappQuickCreateTest(ScenarioTest):
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
-        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
+        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), params={"echo": "Hello world"})
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
 
