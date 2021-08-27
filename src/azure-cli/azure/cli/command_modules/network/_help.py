@@ -7051,7 +7051,23 @@ examples:
   - name: SSH to virtual machine using Azure Bastion.
     text: |
         az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type AAD/password/ssh-key-file --username xyz
+"""
+
+helps['network bastion ssh'] = """
+type: command
+short-summary: SSH to a virtual machine using Tunneling from Azure Bastion.
+examples:
+  - name: SSH to virtual machine using Azure Bastion.
+    text: |
         az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type ssh-key-file --username xyz --ssh-key C:/filepath/sshkey.pem
+"""
+
+helps['network bastion ssh'] = """
+type: command
+short-summary: SSH to a virtual machine using Tunneling from Azure Bastion.
+examples:
+  - name: SSH to virtual machine using Azure Bastion.
+    text: |
         az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type AAD
 """
 
