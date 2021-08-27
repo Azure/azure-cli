@@ -1157,12 +1157,12 @@ class AKSCreateContext:
             )
 
         # set default value
-        read_from_mc = False
+        username_read_from_mc = False
         if username_value_obtained_from_mc is not None:
             windows_admin_username = username_value_obtained_from_mc
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate("windows_admin_username")
-            read_from_mc = True
+            username_read_from_mc = True
         elif username_intermediate is not None:
             windows_admin_username = username_intermediate
         else:
@@ -1183,12 +1183,12 @@ class AKSCreateContext:
             )
 
         # set default value
-        read_from_mc = False
+        password_read_from_mc = False
         if password_value_obtained_from_mc is not None:
             windows_admin_password = password_value_obtained_from_mc
             # clean up intermediate if `mc` has been decorated
             self.remove_intermediate("windows_admin_password")
-            read_from_mc = True
+            password_read_from_mc = True
         elif password_intermediate is not None:
             windows_admin_password = password_intermediate
         else:
@@ -1201,7 +1201,7 @@ class AKSCreateContext:
             username_dynamic_completion = True
         # disable dynamic completion if the value is read from `mc`
         username_dynamic_completion = (
-            username_dynamic_completion and not read_from_mc
+            username_dynamic_completion and not username_read_from_mc
         )
         if username_dynamic_completion:
             try:
@@ -1226,7 +1226,7 @@ class AKSCreateContext:
             password_dynamic_completion = True
         # disable dynamic completion if the value is read from `mc`
         password_dynamic_completion = (
-            password_dynamic_completion and not read_from_mc
+            password_dynamic_completion and not password_read_from_mc
         )
         if password_dynamic_completion:
             try:
