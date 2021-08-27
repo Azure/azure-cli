@@ -8,7 +8,7 @@ import json
 import os
 import sys
 import unittest
-import mock
+from unittest import mock
 import re
 
 from copy import deepcopy
@@ -30,6 +30,7 @@ from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
 
 
+@unittest.skip("Out of maintenance")
 class TestProfile(unittest.TestCase):
 
     @classmethod

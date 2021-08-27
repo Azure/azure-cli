@@ -1124,6 +1124,35 @@ examples:
     text: az feature unregister --namespace Microsoft.Compute --name GalleryPreview
 """
 
+helps['feature registration'] = """
+type: group
+short-summary: Manage resource provider feature registrations.
+"""
+
+helps['feature registration list'] = """
+type: command
+short-summary: List feature registrations.
+examples:
+  - name: List feature registrations
+    text: az feature registration list
+"""
+
+helps['feature registration create'] = """
+type: command
+short-summary: Create a feature registration.
+examples:
+  - name: create the "Shared Image Gallery" feature
+    text: az feature registration create --namespace Microsoft.Compute --name GalleryPreview
+"""
+
+helps['feature registration delete'] = """
+type: command
+short-summary: Delete a feature registration.
+examples:
+  - name: delete the "Shared Image Gallery" feature
+    text: az feature registration delete --namespace Microsoft.Compute --name GalleryPreview
+"""
+
 helps['group'] = """
 type: group
 short-summary: Manage resource groups and template deployments.
@@ -1988,6 +2017,13 @@ examples:
   - name: Create a resource by using the latest api-version whether this version is a preview version.
     text: >
         az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile --latest-include-preview
+  - name: Create a site extension to a web app
+    text: |
+        az resource create -g myRG --api-version "2018-02-01" \\
+            --name "{sitename+slot}/siteextensions/Contrast.NetCore.Azure.SiteExtension"  \\
+                --resource-type Microsoft.Web/sites/siteextensions --is-full-object \\
+                    --properties "{ \\"id\\": \\"Contrast.NetCore.Azure.SiteExtension\\", \\
+                        \\"location\\": \\"West US\\", \\"version\\": \\"1.9.0\\" }"
 """
 
 helps['resource delete'] = """
@@ -2275,6 +2311,7 @@ long-summary: >
     The az tag create command with an id creates or updates the entire set of tags on a resource, resource group or subscription.
     This operation allows adding or replacing the entire set of tags on the specified resource, resource group or subscription.
     The specified entity can have a maximum of 50 tags.
+    Please note: 'tag create' acts like a 'tag init' hence tags created with this command are the only ones being present after execution.
 parameters:
   - name: --name -n
     short-summary: The name of the tag to create.

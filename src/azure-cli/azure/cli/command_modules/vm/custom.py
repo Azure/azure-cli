@@ -10,7 +10,7 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-lines
+# pylint: disable=no-self-use,too-many-lines,no-else-return
 import json
 import os
 
@@ -1065,15 +1065,16 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         raise CLIError('usage error: --time is a required parameter')
     daily_recurrence = {'time': time}
     notification_settings = None
-    if email and not webhook:
-        raise CLIError('usage error: --webhook is a required parameter when --email exists')
-    if webhook:
+    if email or webhook:
         notification_settings = {
-            'emailRecipient': email,
-            'webhookUrl': webhook,
             'timeInMinutes': 30,
             'status': 'Enabled'
         }
+        if email:
+            notification_settings['emailRecipient'] = email
+        if webhook:
+            notification_settings['webhookUrl'] = webhook
+
     schedule = Schedule(status='Enabled',
                         target_resource_id=vm_id,
                         daily_recurrence=daily_recurrence,
@@ -1145,9 +1146,26 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
 def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_type=None):
     from ._vm_utils import list_sku_info
     result = list_sku_info(cmd.cli_ctx, location)
+    # pylint: disable=too-many-nested-blocks
     if not show_all:
-        result = [x for x in result if not [y for y in (x.restrictions or [])
-                                            if y.reason_code == 'NotAvailableForSubscription']]
+        available_skus = []
+        for sku_info in result:
+            is_available = True
+            if sku_info.restrictions:
+                for restriction in sku_info.restrictions:
+                    if restriction.reason_code == 'NotAvailableForSubscription':
+                        # The attribute location_info is not supported in versions 2017-03-30 and earlier
+                        if cmd.supported_api_version(max_api='2017-03-30'):
+                            is_available = False
+                            break
+                        # This SKU is not available only if all zones are restricted
+                        if not (set(sku_info.location_info[0].zones or []) -
+                                set(restriction.restriction_info.zones or [])):
+                            is_available = False
+                            break
+            if is_available:
+                available_skus.append(sku_info)
+        result = available_skus
     if resource_type:
         result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
     if size:
@@ -1818,27 +1836,60 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
 
 # region VirtualMachines Images
-def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None,
-                   all=False):  # pylint: disable=redefined-builtin
-    load_thru_services = all
+def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False, edge_zone=None):  # pylint: disable=redefined-builtin
+    load_thru_services = all or edge_zone is not None
 
     if load_thru_services:
-        if not publisher_name and not offer and not sku:
+        if not publisher_name and not offer and not sku and not edge_zone:
             logger.warning("You are retrieving all the images from server which could take more than a minute. "
-                           "To shorten the wait, provide '--publisher', '--offer' or '--sku'. Partial name search "
-                           "is supported.")
-        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location)
+                           "To shorten the wait, provide '--publisher', '--offer' , '--sku' or '--edge-zone'."
+                           " Partial name search is supported.")
+        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone)
     else:
         all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku)
-        logger.warning(
-            'You are viewing an offline list of images, use --all to retrieve an up-to-date list')
+        logger.warning('You are viewing an offline list of images, use --all to retrieve an up-to-date list')
 
-    for i in all_images:
-        i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
+    if edge_zone is not None:
+        for i in all_images:
+            i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['edge_zone'], i['version']])
+    else:
+        for i in all_images:
+            i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
     return all_images
 
 
-def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
+def list_offers(cmd, publisher_name, location, edge_zone=None):
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.list_offers(location=location, edge_zone=edge_zone, publisher_name=publisher_name)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+        return client.list_offers(location=location, publisher_name=publisher_name)
+
+
+def list_publishers(cmd, location, edge_zone=None):
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+        return client.list_publishers(location=location)
+
+
+def list_sku(cmd, location, publisher_name, offer, edge_zone=None,):
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.list_skus(location=location, edge_zone=edge_zone,
+                                          publisher_name=publisher_name, offer=offer)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+        return client.list_skus(location=location, publisher_name=publisher_name, offer=offer)
+
+
+def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None, edge_zone=None):
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
                                            InvalidArgumentValueError)
@@ -1846,19 +1897,30 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
     location = location or get_one_of_subscription_locations(cmd.cli_ctx)
     error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
     if urn:
-        if any([publisher, offer, sku, version]):
-            recommendation = 'Try to use --urn publisher:offer:sku:version only'
+        if any([publisher, offer, sku, edge_zone, version]):
+            recommendation = 'Try to use --urn publisher:offer:sku:version or' \
+                             ' --urn publisher:offer:sku:edge_zone:version'
             raise MutuallyExclusiveArgumentError(error_msg, recommendation)
         items = urn.split(":")
-        if len(items) != 4:
-            raise InvalidArgumentValueError('--urn should be in the format of publisher:offer:sku:version')
-        publisher, offer, sku, version = urn.split(":")
+        if len(items) != 4 and len(items) != 5:
+            raise InvalidArgumentValueError(
+                '--urn should be in the format of publisher:offer:sku:version or publisher:offer:sku:edge_zone:version')
+        if len(items) == 5:
+            publisher, offer, sku, edge_zone, version = urn.split(":")
+        elif len(items) == 4:
+            publisher, offer, sku, version = urn.split(":")
         if version.lower() == 'latest':
             version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
     elif not publisher or not offer or not sku or not version:
         raise RequiredArgumentMissingError(error_msg)
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machine_images.get(location, publisher, offer, sku, version)
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.get(location=location, edge_zone=edge_zone, publisher_name=publisher, offer=offer,
+                                    skus=sku, version=version)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx)
+        return client.virtual_machine_images.get(location, publisher, offer, sku, version)
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
@@ -2457,7 +2519,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                user_data=None, network_api_version=None):
+                user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2710,7 +2772,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
-            orchestration_mode=orchestration_mode, network_api_version=network_api_version)
+            orchestration_mode=orchestration_mode, network_api_version=network_api_version,
+            enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2985,7 +3048,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, max_batch_instance_percent=None,
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
-                user_data=None, **kwargs):
+                user_data=None, enable_spot_restore=None, spot_restore_timeout=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3059,6 +3122,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if scale_in_policy is not None:
         ScaleInPolicy = cmd.get_models('ScaleInPolicy')
         vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy)
+
+    if enable_spot_restore is not None:
+        vmss.spot_restore_policy.enabled = enable_spot_restore
+
+    if spot_restore_timeout is not None:
+        vmss.spot_restore_policy.restore_timeout = spot_restore_timeout
 
     if priority is not None:
         vmss.virtual_machine_profile.priority = priority

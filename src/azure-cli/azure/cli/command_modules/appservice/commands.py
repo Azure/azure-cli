@@ -156,10 +156,10 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_connection_strings')
 
     with self.command_group('webapp config storage-account') as g:
-        g.custom_command('list', 'get_azure_storage_accounts', exception_handler=empty_on_404, is_preview=True)
-        g.custom_command('add', 'add_azure_storage_account', is_preview=True)
-        g.custom_command('update', 'update_azure_storage_account', is_preview=True)
-        g.custom_command('delete', 'delete_azure_storage_accounts', is_preview=True)
+        g.custom_command('list', 'get_azure_storage_accounts', exception_handler=empty_on_404)
+        g.custom_command('add', 'add_azure_storage_account')
+        g.custom_command('update', 'update_azure_storage_account')
+        g.custom_command('delete', 'delete_azure_storage_accounts')
 
     with self.command_group('webapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
@@ -287,7 +287,7 @@ def load_command_table(self, _):
                          exception_handler=ex_handler_factory(creating_plan=True))
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'show_plan')
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_app_service_plan',
                                  setter_arg_name='app_service_plan', supports_no_wait=True,
                                  exception_handler=ex_handler_factory())
@@ -311,8 +311,8 @@ def load_command_table(self, _):
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
-        g.generic_update_command('update', setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
-                                 custom_func_name='update_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
+        g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
+                                 custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk)
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs')

@@ -24,6 +24,7 @@ class StorageProfile(Enum):
     ManagedPirImage = 4  # this would be the main scenarios
     ManagedCustomImage = 5
     ManagedSpecializedOSDisk = 6
+    SharedGalleryImage = 7
 
 
 def build_deployment_resource(name, template, dependencies=None):
@@ -448,6 +449,19 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                         'id': attach_os_disk
                     }
                 }
+            },
+            'SharedGalleryImage': {
+                "osDisk": {
+                    "caching": os_caching,
+                    "managedDisk": {
+                        "storageAccountType": disk_info['os'].get('storageAccountType'),
+                    },
+                    "name": os_disk_name,
+                    "createOption": "fromImage"
+                },
+                "imageReference": {
+                    'sharedGalleryImageId': image_reference
+                }
             }
         }
         if os_disk_encryption_set is not None:
@@ -457,6 +471,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             storage_profiles['ManagedCustomImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set,
             }
+            storage_profiles['SharedGalleryImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set,
+            }
+
         profile = storage_profiles[storage_profile.name]
         if os_disk_size_gb:
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
@@ -806,7 +824,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                        orchestration_mode=None, user_data=None, network_api_version=None):
+                        orchestration_mode=None, user_data=None, network_api_version=None,
+                        enable_spot_restore=None, spot_restore_timeout=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1023,6 +1042,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
         if not rolling_upgrade_policy:
             del rolling_upgrade_policy
+
+    if enable_spot_restore and cmd.supported_api_version(min_api='2021-04-01',
+                                                         operation_group='virtual_machine_scale_sets'):
+        vmss_properties['spotRestorePolicy'] = {}
+        if enable_spot_restore:
+            vmss_properties['spotRestorePolicy']['enabled'] = enable_spot_restore
+
+        if spot_restore_timeout:
+            vmss_properties['spotRestorePolicy']['restoreTimeout'] = spot_restore_timeout
 
     if license_type:
         virtual_machine_profile['licenseType'] = license_type

@@ -15,6 +15,8 @@ from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results)
 
+from azure.cli.command_modules.keyvault._format import transform_secret_list
+
 from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
     validate_private_endpoint_connection_id, validate_role_assignment_args)
@@ -113,6 +115,7 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection',
                          validator=validate_private_endpoint_connection_id, supports_no_wait=True)
+        g.custom_command('list', 'list_private_endpoint_connection')
         g.custom_show_command('show', 'show_private_endpoint_connection',
                               validator=validate_private_endpoint_connection_id)
         g.custom_wait_command('wait', 'show_private_endpoint_connection',
@@ -178,7 +181,8 @@ def load_command_table(self, _):
                            transform=multi_transformers(
                                filter_out_managed_resources,
                                keep_max_results,
-                               extract_subresource_name()))
+                               extract_subresource_name()),
+                           table_transformer=transform_secret_list)
         g.keyvault_command('list-versions', 'get_secret_versions',
                            transform=multi_transformers(
                                keep_max_results,

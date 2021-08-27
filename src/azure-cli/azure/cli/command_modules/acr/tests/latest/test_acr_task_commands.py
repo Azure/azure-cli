@@ -23,6 +23,8 @@ class AcrTaskCommandsTests(ScenarioTest):
             'image': 'testtask:v1',
             'existing_image': 'bash',
             'trigger_enabled': 'False',
+            'identity': '[system]',
+            'loginServer': 'test.acr.com',
         })
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
@@ -33,7 +35,7 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded')])
 
         # Create a docker build task.
-        self.cmd('acr task create -n {task_name} -r {registry_name} --context {context} --image {image} -f {file} --commit-trigger-enabled {trigger_enabled} --pull-request-trigger-enabled {trigger_enabled}',
+        self.cmd('acr task create -n {task_name} -r {registry_name} --context {context} --image {image} -f {file} --commit-trigger-enabled {trigger_enabled} --pull-request-trigger-enabled {trigger_enabled} --assign-identity {identity}',
                  checks=[self.check('name', '{task_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('platform.os', 'linux'),
@@ -46,7 +48,8 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('step.arguments', []),
                          self.check('step.isPushEnabled', True),
                          self.check('step.noCache', False),
-                         self.check('step.type', 'Docker')])
+                         self.check('step.type', 'Docker'),
+                         self.check('identity.type', 'SystemAssigned')]),
 
         # Create a contextless task.
         self.cmd('acr task create -n {task_no_context} -r {registry_name} --cmd {existing_image} -c {no_context}',
@@ -98,6 +101,14 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('runId', '{run_id}'),
                          self.check('isArchiveEnabled', True),
                          self.check('provisioningState', 'Succeeded')])
+
+        # Add credential for the task
+        self.cmd('acr task credential add -n {task_name} -r {registry_name} --login-server {loginServer} -u testuser -p random --use-identity {identity}',
+                 checks=[self.check('{loginServer}', None)])
+
+        # Update credential for the task
+        self.cmd('acr task credential update -n {task_name} -r {registry_name} --login-server {loginServer} -u testuser -p random',
+                 checks=[self.check('{loginServer}', None)])
 
         # test task delete
         self.cmd('acr task delete -n {task_name} -r {registry_name} -y')

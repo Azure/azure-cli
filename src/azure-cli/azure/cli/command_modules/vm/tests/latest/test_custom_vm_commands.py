@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
+from unittest import mock
 
 from knack.util import CLIError
 

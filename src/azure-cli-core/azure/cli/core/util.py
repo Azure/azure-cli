@@ -271,7 +271,7 @@ def get_installed_cli_distributions():
 def get_latest_from_github(package_path='azure-cli'):
     try:
         import requests
-        git_url = "https://raw.githubusercontent.com/Azure/azure-cli/master/src/{}/setup.py".format(package_path)
+        git_url = "https://raw.githubusercontent.com/Azure/azure-cli/main/src/{}/setup.py".format(package_path)
         response = requests.get(git_url, timeout=10)
         if response.status_code != 200:
             logger.info("Failed to fetch the latest version from '%s' with status code '%s' and reason '%s'",
@@ -657,7 +657,7 @@ def open_page_in_browser(url):
         try:
             # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
-            return subprocess.Popen(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
+            return subprocess.Popen(['powershell.exe', '-NoProfile', '-Command', 'Start-Process "{}"'.format(url)])
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':

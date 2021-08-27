@@ -103,6 +103,10 @@ def list_nsg_rules(cmd, resource_group_name, network_security_group_name, includ
     return rules
 
 
+def list_custom_ip_prefixes(cmd, resource_group_name=None):
+    return _generic_list(cmd.cli_ctx, 'custom_ip_prefixes', resource_group_name)
+
+
 def list_public_ips(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
 
@@ -2485,6 +2489,79 @@ def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, 
                           keep_empty_record_set=keep_empty_record_set)
 
 
+def _check_a_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.ipv4_address == record.ipv4_address:
+            return True
+    return False
+
+
+def _check_aaaa_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.ipv6_address == record.ipv6_address:
+            return True
+    return False
+
+
+def _check_caa_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r.flags == record.flags and
+                r.tag == record.tag and
+                r.value == record.value):
+            return True
+    return False
+
+
+def _check_cname_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.cname == record.cname:
+            return True
+    return False
+
+
+def _check_mx_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r.preference == record.preference and
+                r.exchange == record.exchange):
+            return True
+    return False
+
+
+def _check_ns_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.nsdname == record.nsdname:
+            return True
+    return False
+
+
+def _check_ptr_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.ptrdname == record.ptrdname:
+            return True
+    return False
+
+
+def _check_srv_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r.priority == record.priority and
+                r.weight == record.weight and
+                r.port == record.port and
+                r.target == record.target):
+            return True
+    return False
+
+
+def _check_txt_record_exist(record, exist_list):
+    for r in exist_list:
+        if r.value == record.value:
+            return True
+    return False
+
+
+def _record_exist_func(record_type):
+    return globals()["_check_{}_record_exist".format(record_type)]
+
+
 def _add_record(record_set, record, record_type, is_list=False):
     record_property = _type_to_property_name(record_type)
 
@@ -2493,7 +2570,10 @@ def _add_record(record_set, record, record_type, is_list=False):
         if record_list is None:
             setattr(record_set, record_property, [])
             record_list = getattr(record_set, record_property)
-        record_list.append(record)
+
+        _record_exist = _record_exist_func(record_type)
+        if not _record_exist(record, record_list):
+            record_list.append(record)
     else:
         setattr(record_set, record_property, record)
 
@@ -2503,6 +2583,7 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     from azure.core.exceptions import HttpResponseError
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
+
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except HttpResponseError:
@@ -2657,7 +2738,7 @@ def _validate_ipv6_address_prefixes(prefixes):
             if version is None:
                 version = type(network)
             else:
-                if not isinstance(network, version):
+                if not isinstance(network, version):  # pylint: disable=isinstance-second-argument-not-valid-type
                     raise CLIError("usage error: '{}' incompatible mix of IPv4 and IPv6 address prefixes."
                                    .format(prefixes))
         except ValueError:
@@ -2998,9 +3079,9 @@ def show_express_route_port_identity(cmd, resource_group_name, express_route_por
     return ports.identity
 
 
-def update_express_route_port_link(cmd, instance, express_route_port_name, link_name,
+def update_express_route_port_link(cmd, instance, parent, express_route_port_name, link_name,
                                    macsec_cak_secret_identifier=None, macsec_ckn_secret_identifier=None,
-                                   macsec_cipher=None, admin_state=None):
+                                   macsec_sci_state=None, macsec_cipher=None, admin_state=None):
     """
     :param cmd:
     :param instance: an instance of ExpressRoutePort
@@ -3012,30 +3093,22 @@ def update_express_route_port_link(cmd, instance, express_route_port_name, link_
     :param admin_state:
     :return:
     """
-    if len(instance.links) != 2:
-        raise CLIError("The number of ExpressRoute Links should be 2. "
-                       "Code may not perform as expected. Please contact us to update CLI.")
-
-    try:
-        link_index = [index for index, link in enumerate(instance.links) if link.name == link_name][0]
-    except Exception:
-        raise CLIError('ExpressRoute Link "{}" not found'.format(link_name))
-
-    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher]):
-        instance.links[link_index].mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
-        instance.links[link_index].mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
+    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher, macsec_sci_state]):
+        instance.mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
+        instance.mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
 
         # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
         # need to remove this conversion when the issue is fixed.
         if macsec_cipher is not None:
             macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
-            macsec_cipher = macsec_ciphers_tmp[macsec_cipher]
-        instance.links[link_index].mac_sec_config.cipher = macsec_cipher
+            macsec_cipher = macsec_ciphers_tmp.get(macsec_cipher, macsec_cipher)
+        instance.mac_sec_config.cipher = macsec_cipher
+        instance.mac_sec_config.sci_state = macsec_sci_state
 
     if admin_state is not None:
-        instance.links[link_index].admin_state = admin_state
+        instance.admin_state = admin_state
 
-    return instance
+    return parent
 # endregion
 
 
@@ -3486,6 +3559,14 @@ def create_lb_frontend_ip_configuration(
     upsert_to_collection(lb, 'frontend_ip_configurations', new_config, 'name')
     poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
     return get_property(poller.result().frontend_ip_configurations, item_name)
+
+
+def update_lb_frontend_ip_configuration_setter(cmd, resource_group_name, load_balancer_name, parameters, gateway_lb):
+    aux_subscriptions = []
+    if is_valid_resource_id(gateway_lb):
+        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
+    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).load_balancers
+    return client.begin_create_or_update(resource_group_name, load_balancer_name, parameters)
 
 
 def set_lb_frontend_ip_configuration(
@@ -4311,6 +4392,14 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
     poller = ncf.network_interfaces.begin_create_or_update(
         resource_group_name, network_interface_name, nic)
     return get_property(poller.result().ip_configurations, ip_config_name)
+
+
+def update_nic_ip_config_setter(cmd, resource_group_name, network_interface_name, parameters, gateway_lb):
+    aux_subscriptions = []
+    if is_valid_resource_id(gateway_lb):
+        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
+    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).network_interfaces
+    return client.begin_create_or_update(resource_group_name, network_interface_name, parameters)
 
 
 def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
@@ -5801,11 +5890,46 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 # endregion
 
 
+# region CustomIpPrefix
+def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_name, location=None,
+                            cidr=None, tags=None, zone=None, signed_message=None, authorization_message=None,
+                            custom_ip_prefix_parent=None, no_wait=False):
+
+    CustomIpPrefix = cmd.get_models('CustomIpPrefix')
+    prefix = CustomIpPrefix(
+        location=location,
+        cidr=cidr,
+        zones=zone,
+        tags=tags,
+        signed_message=signed_message,
+        authorization_message=authorization_message
+    )
+
+    if custom_ip_prefix_parent:
+        try:
+            prefix.custom_ip_prefix_parent = client.get(resource_group_name, custom_ip_prefix_name)
+        except ResourceNotFoundError:
+            raise ResourceNotFoundError("Custom ip prefix parent {} doesn't exist".format(custom_ip_prefix_name))
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, custom_ip_prefix_name, prefix)
+
+
+def update_custom_ip_prefix(instance, signed_message=None, authorization_message=None, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    if signed_message is not None:
+        instance.signed_message = signed_message
+    if authorization_message is not None:
+        instance.authorization_message = authorization_message
+    return instance
+# endregion
+
+
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None):
+                     public_ip_prefix=None, edge_zone=None, ip_address=None):
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses
@@ -5818,6 +5942,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         'tags': tags,
         'public_ip_allocation_method': allocation_method,
         'idle_timeout_in_minutes': idle_timeout,
+        'ip_address': ip_address,
         'dns_settings': None
     }
     if cmd.supported_api_version(min_api='2016-09-01'):
@@ -5880,7 +6005,8 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            version=None, location=None, tags=None, zone=None, edge_zone=None):
+                            version=None, location=None, tags=None, zone=None, edge_zone=None,
+                            custom_ip_prefix_name=None):
     PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
     prefix = PublicIPPrefix(
         location=location,
@@ -5892,6 +6018,13 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
 
     if cmd.supported_api_version(min_api='2019-08-01'):
         prefix.public_ip_address_version = version if version is not None else 'ipv4'
+
+    if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
+        cip_client = network_client_factory(cmd.cli_ctx).custom_ip_prefixes
+        try:
+            prefix.custom_ip_prefix = cip_client.get(resource_group_name, custom_ip_prefix_name)
+        except ResourceNotFoundError:
+            raise ResourceNotFoundError('Custom ip prefix {} doesn\'t exist.'.format(custom_ip_prefix_name))
 
     if edge_zone:
         prefix.extended_location = _edge_zone_model(cmd, edge_zone)

@@ -907,8 +907,8 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
 
     try:
         if cli_ctx.enable_color:
-            # Diabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
-            # is using. Unfortuanately, the colors that colorama supports are very limited, which doesn't meet our needs.
+            # Disabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
+            # is using. Unfortunately, the colors that colorama supports are very limited, which doesn't meet our needs.
             from colorama import deinit
             deinit()
 
@@ -1940,9 +1940,15 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
         if template_file:
             from azure.cli.command_modules.resource._packing_engine import (pack)
-            packed_template = pack(cmd, template_file)
-            input_template = getattr(packed_template, 'RootTemplate')
-            artifacts = getattr(packed_template, 'Artifacts')
+            if is_bicep_file(template_file):
+                template_content = run_bicep_command(["build", "--stdout", template_file])
+                input_content = _remove_comments_from_json(template_content, file_path=template_file)
+                input_template = json.loads(json.dumps(input_content))
+                artifacts = []
+            else:
+                packed_template = pack(cmd, template_file)
+                input_template = getattr(packed_template, 'RootTemplate')
+                artifacts = getattr(packed_template, 'Artifacts')
 
         if ui_form_definition_file:
             ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
@@ -1984,9 +1990,15 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     existing_template, artifacts, input_ui_form_definition = None, None, None
     if template_file:
         from azure.cli.command_modules.resource._packing_engine import (pack)
-        packed_template = pack(cmd, template_file)
-        input_template = getattr(packed_template, 'RootTemplate')
-        artifacts = getattr(packed_template, 'Artifacts')
+        if is_bicep_file(template_file):
+            template_content = run_bicep_command(["build", "--stdout", template_file])
+            input_content = _remove_comments_from_json(template_content, file_path=template_file)
+            input_template = json.loads(json.dumps(input_content))
+            artifacts = []
+        else:
+            packed_template = pack(cmd, template_file)
+            input_template = getattr(packed_template, 'RootTemplate')
+            artifacts = getattr(packed_template, 'Artifacts')
 
     if ui_form_definition_file:
         ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
@@ -2200,6 +2212,20 @@ def unregister_feature(client, resource_provider_namespace, feature_name):
     logger.warning("Once the feature '%s' is unregistered, invoking 'az provider register -n %s' is required "
                    "to get the change propagated", feature_name, resource_provider_namespace)
     return client.unregister(resource_provider_namespace, feature_name)
+
+
+def list_feature_registrations(client, resource_provider_namespace=None):
+    if resource_provider_namespace:
+        return client.list_by_subscription(provider_namespace=resource_provider_namespace)
+    return client.list_all_by_subscription()
+
+
+def create_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.create_or_update(resource_provider_namespace, feature_name, {})
+
+
+def delete_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.delete(resource_provider_namespace, feature_name)
 
 
 # pylint: disable=inconsistent-return-statements,too-many-locals

@@ -10,6 +10,7 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
+# pylint: disable=too-many-statements
 import json
 
 from knack.util import CLIError
@@ -45,8 +46,9 @@ def _get_thread_count():
     return 5  # don't increase too much till https://github.com/Azure/msrestazure-for-python/issues/6 is fixed
 
 
-def load_images_thru_services(cli_ctx, publisher, offer, sku, location):
+def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zone):
     from concurrent.futures import ThreadPoolExecutor, as_completed
+
     all_images = []
     client = _compute_client_factory(cli_ctx)
     if location is None:
@@ -55,7 +57,10 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location):
     def _load_images_from_publisher(publisher):
         from azure.core.exceptions import ResourceNotFoundError
         try:
-            offers = client.virtual_machine_images.list_offers(location, publisher)
+            if edge_zone is not None:
+                offers = edge_zone_client.list_offers(location, edge_zone, publisher)
+            else:
+                offers = client.virtual_machine_images.list_offers(location, publisher)
         except ResourceNotFoundError as e:
             logger.warning(str(e))
             return
@@ -63,7 +68,10 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location):
             offers = [o for o in offers if _matched(offer, o.name)]
         for o in offers:
             try:
-                skus = client.virtual_machine_images.list_skus(location, publisher, o.name)
+                if edge_zone is not None:
+                    skus = edge_zone_client.list_skus(location, edge_zone, publisher, o.name)
+                else:
+                    skus = client.virtual_machine_images.list_skus(location, publisher, o.name)
             except ResourceNotFoundError as e:
                 logger.warning(str(e))
                 continue
@@ -71,18 +79,32 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location):
                 skus = [s for s in skus if _matched(sku, s.name)]
             for s in skus:
                 try:
-                    images = client.virtual_machine_images.list(location, publisher, o.name, s.name)
+                    if edge_zone is not None:
+                        images = edge_zone_client.list(location, edge_zone, publisher, o.name, s.name)
+                    else:
+                        images = client.virtual_machine_images.list(location, publisher, o.name, s.name)
                 except ResourceNotFoundError as e:
                     logger.warning(str(e))
                     continue
                 for i in images:
-                    all_images.append({
+                    image_info = {
                         'publisher': publisher,
                         'offer': o.name,
                         'sku': s.name,
-                        'version': i.name})
+                        'version': i.name
+                    }
+                    if edge_zone is not None:
+                        image_info['edge_zone'] = edge_zone
+                    all_images.append(image_info)
 
-    publishers = client.virtual_machine_images.list_publishers(location)
+    if edge_zone is not None:
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        from azure.cli.core.profiles import ResourceType
+        edge_zone_client = get_mgmt_service_client(cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        publishers = edge_zone_client.list_publishers(location, edge_zone)
+    else:
+        publishers = client.virtual_machine_images.list_publishers(location)
     if publisher:
         publishers = [p for p in publishers if _matched(publisher, p.name)]
 
@@ -227,13 +249,23 @@ def _create_image_instance(publisher, offer, sku, version):
     }
 
 
-def _get_latest_image_version(cli_ctx, location, publisher, offer, sku):
-    top_one = _compute_client_factory(cli_ctx).virtual_machine_images.list(location,
-                                                                           publisher,
-                                                                           offer,
-                                                                           sku,
-                                                                           top=1,
-                                                                           orderby='name desc')
-    if not top_one:
-        raise CLIError("Can't resolve the version of '{}:{}:{}'".format(publisher, offer, sku))
+def _get_latest_image_version(cli_ctx, location, publisher, offer, sku, edge_zone=None):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if edge_zone is not None:
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        from azure.cli.core.profiles import ResourceType
+        edge_zone_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        top_one = edge_zone_client.list(location, edge_zone, publisher, offer, sku, top=1, orderby='name desc')
+        if not top_one:
+            raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}:{}'"
+                                            .format(publisher, offer, sku, edge_zone))
+    else:
+        top_one = _compute_client_factory(cli_ctx).virtual_machine_images.list(location,
+                                                                               publisher,
+                                                                               offer,
+                                                                               sku,
+                                                                               top=1,
+                                                                               orderby='name desc')
+        if not top_one:
+            raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}'".format(publisher, offer, sku))
     return top_one[0].name
