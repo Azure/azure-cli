@@ -996,13 +996,13 @@ def acr_task_logs(cmd,
                                              top=1,
                                              task_name=task_name,
                                              image=image))
-        try:
+        if len(paged_runs) > 0:
             run_id = paged_runs[0].run_id
             logger.warning(_get_list_runs_message(base_message="Showing logs of the last created run",
                                                   task_name=task_name,
                                                   image=image))
             logger.warning("Run ID: %s", run_id)
-        except (AttributeError, KeyError, TypeError, IndexError):
+        else:
             raise CLIError(_get_list_runs_message(base_message="Could not find the last created run",
                                                   task_name=task_name,
                                                   image=image))
