@@ -219,9 +219,7 @@ class AKSCreateContext:
         self.intermediates.pop(variable_name, None)
 
     # pylint: disable=unused-argument
-    def get_resource_group_name(
-        self, enable_validation: bool = False, **kwargs
-    ):
+    def get_resource_group_name(self, **kwargs):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         resource_group_name = self.raw_param.get("resource_group_name")
@@ -231,7 +229,7 @@ class AKSCreateContext:
         return resource_group_name
 
     # pylint: disable=unused-argument
-    def get_name(self, enable_validation: bool = False, **kwargs):
+    def get_name(self, **kwargs):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         name = self.raw_param.get("name")
@@ -329,7 +327,7 @@ class AKSCreateContext:
         return dns_name_prefix
 
     # pylint: disable=unused-argument
-    def get_location(self, enable_validation: bool = False, **kwargs):
+    def get_location(self, **kwargs):
         parameter_name = "location"
 
         # read the original value passed by the command
@@ -372,7 +370,7 @@ class AKSCreateContext:
         return location
 
     # pylint: disable=unused-argument
-    def get_kubernetes_version(self, enable_validation: bool = False, **kwargs):
+    def get_kubernetes_version(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("kubernetes_version")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -406,7 +404,7 @@ class AKSCreateContext:
         return no_ssh_key
 
     # pylint: disable=unused-argument
-    def get_vm_set_type(self, enable_validation: bool = False, **kwargs):
+    def get_vm_set_type(self, **kwargs):
         parameter_name = "vm_set_type"
 
         # read the original value passed by the command
@@ -565,7 +563,7 @@ class AKSCreateContext:
         return fqdn_subdomain
 
     # pylint: disable=unused-argument
-    def get_nodepool_name(self, enable_validation: bool = False, **kwargs):
+    def get_nodepool_name(self, **kwargs):
         parameter_name = "nodepool_name"
 
         # read the original value passed by the command
@@ -613,7 +611,7 @@ class AKSCreateContext:
         return nodepool_name
 
     # pylint: disable=unused-argument
-    def get_nodepool_tags(self, enable_validation: bool = False, **kwargs):
+    def get_nodepool_tags(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_tags")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -636,7 +634,7 @@ class AKSCreateContext:
         return nodepool_tags
 
     # pylint: disable=unused-argument
-    def get_nodepool_labels(self, enable_validation: bool = False, **kwargs):
+    def get_nodepool_labels(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_labels")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -697,7 +695,7 @@ class AKSCreateContext:
         return int(node_count)
 
     # pylint: disable=unused-argument
-    def get_node_vm_size(self, enable_validation: bool = False, **kwargs):
+    def get_node_vm_size(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_vm_size")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -720,7 +718,7 @@ class AKSCreateContext:
         return node_vm_size
 
     # pylint: disable=unused-argument
-    def get_vnet_subnet_id(self, enable_validation: bool = False, **kwargs):
+    def get_vnet_subnet_id(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("vnet_subnet_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -743,7 +741,7 @@ class AKSCreateContext:
         return vnet_subnet_id
 
     # pylint: disable=unused-argument
-    def get_ppg(self, enable_validation: bool = False, **kwargs):
+    def get_ppg(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("ppg")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -768,7 +766,7 @@ class AKSCreateContext:
         return ppg
 
     # pylint: disable=unused-argument
-    def get_zones(self, enable_validation: bool = False, **kwargs):
+    def get_zones(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("zones")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -791,9 +789,7 @@ class AKSCreateContext:
         return zones
 
     # pylint: disable=unused-argument
-    def get_enable_node_public_ip(
-        self, enable_validation: bool = False, **kwargs
-    ) -> bool:
+    def get_enable_node_public_ip(self, **kwargs) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_node_public_ip")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -818,9 +814,7 @@ class AKSCreateContext:
         return enable_node_public_ip
 
     # pylint: disable=unused-argument
-    def get_node_public_ip_prefix_id(
-        self, enable_validation: bool = False, **kwargs
-    ):
+    def get_node_public_ip_prefix_id(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_public_ip_prefix_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -845,9 +839,7 @@ class AKSCreateContext:
         return node_public_ip_prefix_id
 
     # pylint: disable=unused-argument
-    def get_enable_encryption_at_host(
-        self, enable_validation: bool = False, **kwargs
-    ) -> bool:
+    def get_enable_encryption_at_host(self, **kwargs) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_encryption_at_host")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -872,9 +864,7 @@ class AKSCreateContext:
         return enable_encryption_at_host
 
     # pylint: disable=unused-argument
-    def get_enable_ultra_ssd(
-        self, enable_validation: bool = False, **kwargs
-    ) -> bool:
+    def get_enable_ultra_ssd(self, **kwargs) -> bool:
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_ultra_ssd")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -897,9 +887,7 @@ class AKSCreateContext:
         return enable_ultra_ssd
 
     # pylint: disable=unused-argument
-    def get_max_pods(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[int, None]:
+    def get_max_pods(self, **kwargs) -> Union[int, None]:
         # Note: int 0 is converted to None
         # read the original value passed by the command
         raw_value = self.raw_param.get("max_pods")
@@ -927,9 +915,7 @@ class AKSCreateContext:
         return max_pods
 
     # pylint: disable=unused-argument
-    def get_node_osdisk_size(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[int, None]:
+    def get_node_osdisk_size(self, **kwargs) -> Union[int, None]:
         # Note: int 0 is converted to None
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_osdisk_size")
@@ -958,7 +944,7 @@ class AKSCreateContext:
         return node_osdisk_size
 
     # pylint: disable=unused-argument
-    def get_node_osdisk_type(self, enable_validation: bool = False, **kwargs):
+    def get_node_osdisk_type(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_osdisk_type")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1127,7 +1113,7 @@ class AKSCreateContext:
         return max_count
 
     # pylint: disable=unused-argument
-    def get_admin_username(self, enable_validation: bool = False, **kwargs):
+    def get_admin_username(self, **kwargs):
         # read the original value passed by the command
         raw_value = self.raw_param.get("admin_username")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1146,9 +1132,7 @@ class AKSCreateContext:
         return admin_username
 
     # pylint: disable=unused-argument
-    def get_windows_admin_username_and_password(
-        self, enable_validation: bool = False, **kwargs
-    ):
+    def get_windows_admin_username_and_password(self, **kwargs):
         # windows_admin_username
         # read the original value passed by the command
         username_raw_value = self.raw_param.get("windows_admin_username")
@@ -1251,7 +1235,7 @@ class AKSCreateContext:
         return windows_admin_username, windows_admin_password
 
     # pylint: disable=unused-argument
-    def get_enable_ahub(self, enable_validation: bool = False, **kwargs):
+    def get_enable_ahub(self, **kwargs):
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         enable_ahub = self.raw_param.get("enable_ahub")
@@ -1260,9 +1244,9 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_ahub
 
-    # pylint: disable=unused-argument
+    # pylint: disable=unused-argument,too-many-statements
     def get_enable_managed_identity_service_principal_and_client_secret(
-        self, enable_validation: bool = False, **kwargs
+        self, **kwargs
     ):
         """Dynamically obtain the values of enable_managed_identity, service_principal and client_secret according to
         the context.
