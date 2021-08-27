@@ -5,7 +5,7 @@
 
 from knack.prompting import NoTTYException, prompt, prompt_pass
 from knack.log import get_logger
-from typing import Any, List, Dict, Union
+from typing import Any, List, Dict, Tuple, Union
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
@@ -219,7 +219,7 @@ class AKSCreateContext:
         self.intermediates.pop(variable_name, None)
 
     # pylint: disable=unused-argument
-    def get_resource_group_name(self, **kwargs):
+    def get_resource_group_name(self, **kwargs) -> str:
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         resource_group_name = self.raw_param.get("resource_group_name")
@@ -229,7 +229,7 @@ class AKSCreateContext:
         return resource_group_name
 
     # pylint: disable=unused-argument
-    def get_name(self, **kwargs):
+    def get_name(self, **kwargs) -> str:
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         name = self.raw_param.get("name")
@@ -239,7 +239,9 @@ class AKSCreateContext:
         return name
 
     # pylint: disable=unused-argument
-    def get_ssh_key_value(self, enable_validation: bool = False, **kwargs):
+    def get_ssh_key_value(
+        self, enable_validation: bool = False, **kwargs
+    ) -> str:
         # read the original value passed by the command
         raw_value = self.raw_param.get("ssh_key_value")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -272,7 +274,9 @@ class AKSCreateContext:
         return ssh_key_value
 
     # pylint: disable=unused-argument
-    def get_dns_name_prefix(self, enable_validation: bool = False, **kwargs):
+    def get_dns_name_prefix(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[str, None]:
         parameter_name = "dns_name_prefix"
 
         # read the original value passed by the command
@@ -327,7 +331,7 @@ class AKSCreateContext:
         return dns_name_prefix
 
     # pylint: disable=unused-argument
-    def get_location(self, **kwargs):
+    def get_location(self, **kwargs) -> str:
         parameter_name = "location"
 
         # read the original value passed by the command
@@ -370,7 +374,7 @@ class AKSCreateContext:
         return location
 
     # pylint: disable=unused-argument
-    def get_kubernetes_version(self, **kwargs):
+    def get_kubernetes_version(self, **kwargs) -> str:
         # read the original value passed by the command
         raw_value = self.raw_param.get("kubernetes_version")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -389,7 +393,7 @@ class AKSCreateContext:
         return kubernetes_version
 
     # pylint: disable=unused-argument
-    def get_no_ssh_key(self, enable_validation: bool = False, **kwargs):
+    def get_no_ssh_key(self, enable_validation: bool = False, **kwargs) -> bool:
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         no_ssh_key = self.raw_param.get("no_ssh_key")
@@ -404,7 +408,7 @@ class AKSCreateContext:
         return no_ssh_key
 
     # pylint: disable=unused-argument
-    def get_vm_set_type(self, **kwargs):
+    def get_vm_set_type(self, **kwargs) -> str:
         parameter_name = "vm_set_type"
 
         # read the original value passed by the command
@@ -432,10 +436,9 @@ class AKSCreateContext:
         else:
             vm_set_type = raw_value
 
-        dynamic_completion = False
-        # check whether the parameter meet the conditions of dynamic completion
-        if not vm_set_type:
-            dynamic_completion = True
+        # the value verified by the validator may have case problems, and the
+        # "_set_vm_set_type" function will adjust it
+        dynamic_completion = True
         # disable dynamic completion if the value is read from `mc`
         dynamic_completion = dynamic_completion and not read_from_mc
         if dynamic_completion:
@@ -452,7 +455,9 @@ class AKSCreateContext:
         return vm_set_type
 
     # pylint: disable=unused-argument
-    def get_load_balancer_sku(self, enable_validation: bool = False, **kwargs):
+    def get_load_balancer_sku(
+        self, enable_validation: bool = False, **kwargs
+    ) -> str:
         parameter_name = "load_balancer_sku"
 
         # read the original value passed by the command
@@ -507,6 +512,7 @@ class AKSCreateContext:
     def get_api_server_authorized_ip_ranges(
         self, enable_validation: bool = False, **kwargs
     ):
+        # TODO: need update, raw input should be str, output should be List[str]
         parameter_name = "api_server_authorized_ip_ranges"
 
         # read the original value passed by the command
@@ -538,7 +544,9 @@ class AKSCreateContext:
         return api_server_authorized_ip_ranges
 
     # pylint: disable=unused-argument
-    def get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs):
+    def get_fqdn_subdomain(
+        self, enable_validation: bool = False, **kwargs
+    ) -> Union[str, None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("fqdn_subdomain")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -563,7 +571,7 @@ class AKSCreateContext:
         return fqdn_subdomain
 
     # pylint: disable=unused-argument
-    def get_nodepool_name(self, **kwargs):
+    def get_nodepool_name(self, **kwargs) -> str:
         parameter_name = "nodepool_name"
 
         # read the original value passed by the command
@@ -611,7 +619,7 @@ class AKSCreateContext:
         return nodepool_name
 
     # pylint: disable=unused-argument
-    def get_nodepool_tags(self, **kwargs):
+    def get_nodepool_tags(self, **kwargs) -> Union[Dict, None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_tags")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -634,7 +642,7 @@ class AKSCreateContext:
         return nodepool_tags
 
     # pylint: disable=unused-argument
-    def get_nodepool_labels(self, **kwargs):
+    def get_nodepool_labels(self, **kwargs) -> Union[Dict, None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_labels")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -695,7 +703,7 @@ class AKSCreateContext:
         return int(node_count)
 
     # pylint: disable=unused-argument
-    def get_node_vm_size(self, **kwargs):
+    def get_node_vm_size(self, **kwargs) -> str:
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_vm_size")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -718,7 +726,7 @@ class AKSCreateContext:
         return node_vm_size
 
     # pylint: disable=unused-argument
-    def get_vnet_subnet_id(self, **kwargs):
+    def get_vnet_subnet_id(self, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("vnet_subnet_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -741,7 +749,7 @@ class AKSCreateContext:
         return vnet_subnet_id
 
     # pylint: disable=unused-argument
-    def get_ppg(self, **kwargs):
+    def get_ppg(self, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("ppg")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -766,7 +774,7 @@ class AKSCreateContext:
         return ppg
 
     # pylint: disable=unused-argument
-    def get_zones(self, **kwargs):
+    def get_zones(self, **kwargs) -> Union[List[str], None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("zones")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -814,7 +822,7 @@ class AKSCreateContext:
         return enable_node_public_ip
 
     # pylint: disable=unused-argument
-    def get_node_public_ip_prefix_id(self, **kwargs):
+    def get_node_public_ip_prefix_id(self, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_public_ip_prefix_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -944,7 +952,7 @@ class AKSCreateContext:
         return node_osdisk_size
 
     # pylint: disable=unused-argument
-    def get_node_osdisk_type(self, **kwargs):
+    def get_node_osdisk_type(self, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_osdisk_type")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1113,7 +1121,7 @@ class AKSCreateContext:
         return max_count
 
     # pylint: disable=unused-argument
-    def get_admin_username(self, **kwargs):
+    def get_admin_username(self, **kwargs) -> str:
         # read the original value passed by the command
         raw_value = self.raw_param.get("admin_username")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1132,7 +1140,9 @@ class AKSCreateContext:
         return admin_username
 
     # pylint: disable=unused-argument
-    def get_windows_admin_username_and_password(self, **kwargs):
+    def get_windows_admin_username_and_password(
+        self, **kwargs
+    ) -> Tuple[Union[str, None], Union[str, None]]:
         # windows_admin_username
         # read the original value passed by the command
         username_raw_value = self.raw_param.get("windows_admin_username")
@@ -1235,7 +1245,7 @@ class AKSCreateContext:
         return windows_admin_username, windows_admin_password
 
     # pylint: disable=unused-argument
-    def get_enable_ahub(self, **kwargs):
+    def get_enable_ahub(self, **kwargs) -> bool:
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         enable_ahub = self.raw_param.get("enable_ahub")
