@@ -923,8 +923,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
             ctx_1.get_windows_admin_username_and_password(), (None, None)
         )
         windows_profile = self.models.ManagedClusterWindowsProfile(
-            admin_username="test_win_admin",
-            admin_password="test_win_admin_password",
+            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
+            admin_username="test_mc_win_admin",
+            admin_password="test_mc_win_admin_password",
         )
         mc = self.models.ManagedCluster(
             location="test_location", windows_profile=windows_profile
@@ -932,7 +933,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(
             ctx_1.get_windows_admin_username_and_password(),
-            ("test_win_admin", "test_win_admin_password"),
+            ("test_mc_win_admin", "test_mc_win_admin_password"),
         )
 
         # dynamic completion
@@ -956,7 +957,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
             "test_win_admin_name",
         )
         windows_profile = self.models.ManagedClusterWindowsProfile(
-            admin_username="test_win_admin_name",
+            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
+            admin_username="test_mc_win_admin_name",
+            admin_password="test_mc_win_admin_pd",
         )
         mc = self.models.ManagedCluster(
             location="test_location", windows_profile=windows_profile
@@ -964,7 +967,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_2.attach_mc(mc)
         self.assertEqual(
             ctx_2.get_windows_admin_username_and_password(),
-            ("test_win_admin_name", "test_win_admin_pd"),
+            ("test_mc_win_admin_name", "test_mc_win_admin_pd"),
         )
         self.assertEqual(ctx_2.get_intermediate("windows_admin_username"), None)
 
@@ -990,8 +993,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         windows_profile = self.models.ManagedClusterWindowsProfile(
             # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
-            admin_username="test_win_admin_name",
-            admin_password="test_win_admin_pd",
+            admin_username="test_mc_win_admin_name",
+            admin_password="test_mc_win_admin_pd",
         )
         mc = self.models.ManagedCluster(
             location="test_location", windows_profile=windows_profile
@@ -999,7 +1002,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_3.attach_mc(mc)
         self.assertEqual(
             ctx_3.get_windows_admin_username_and_password(),
-            ("test_win_admin_name", "test_win_admin_pd"),
+            ("test_mc_win_admin_name", "test_mc_win_admin_pd"),
         )
         self.assertEqual(ctx_3.get_intermediate("windows_admin_password"), None)
 
