@@ -7050,23 +7050,11 @@ short-summary: SSH to a virtual machine using Tunneling from Azure Bastion.
 examples:
   - name: SSH to virtual machine using Azure Bastion using password.
     text: |
-        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type AAD/password/ssh-key-file --username xyz
-"""
-
-helps['network bastion ssh'] = """
-type: command
-short-summary: SSH to a virtual machine using Tunneling from Azure Bastion using a SSH key file from local machine.
-examples:
-  - name: SSH to virtual machine using Azure Bastion.
+        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type password --username xyz
+  - name: SSH to virtual machine using Azure Bastion using ssh key file.
     text: |
         az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type ssh-key-file --username xyz --ssh-key C:/filepath/sshkey.pem
-"""
-
-helps['network bastion ssh'] = """
-type: command
-short-summary: SSH to a virtual machine using Tunneling from Azure Bastion using AAD.
-examples:
-  - name: SSH to virtual machine using Azure Bastion.
+  - name: SSH to virtual machine using Azure Bastion using AAD.
     text: |
         az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type AAD
 """
