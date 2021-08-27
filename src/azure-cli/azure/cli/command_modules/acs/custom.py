@@ -3010,7 +3010,7 @@ def aks_update(cmd, client, resource_group_name, name,
         if instance.auto_upgrade_profile is None:
             instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
         instance.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
-    
+
     if enable_public_fqdn and disable_public_fqdn:
         raise MutuallyExclusiveArgumentError(
             'Cannot specify "--enable-public-fqdn" and "--disable-public-fqdn" at the same time')
