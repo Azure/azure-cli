@@ -1013,7 +1013,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_2 = AKSCreateContext(self.cmd, {"enable_ahub": True})
         self.assertEqual(ctx_2.get_enable_ahub(), True)
 
-    def test_get_service_principal(self):
+    def test_get_enable_managed_identity_service_principal_and_client_secret(
+        self,
+    ):
         # default
         ctx_1 = AKSCreateContext(
             self.cmd,
@@ -1023,122 +1025,124 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "client_secret": None,
             },
         )
-        self.assertEqual(ctx_1.get_service_principal(), None)
+        self.assertEqual(
+            ctx_1.get_enable_managed_identity_service_principal_and_client_secret(),
+            (True, None, None),
+        )
 
         # dynamic completion
         ctx_2 = AKSCreateContext(
             self.cmd,
             {
-                "enable_managed_identity": True,
-                "service_principal": None,
-                "client_secret": "test_client_secret",
-            },
-        )
-        with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_aks_service_principal",
-            return_value={
-                "client_secret": "test_client_secret",
-                "service_principal": "test_service_principal",
-                "aad_session_key": None,
-            },
-        ):
-            self.assertEqual(
-                ctx_2.get_service_principal(), "test_service_principal"
-            )
-        self.assertEqual(
-            ctx_2.get_intermediate("service_principal"),
-            "test_service_principal",
-        )
-        service_principal_profile = (
-            self.models.ManagedClusterServicePrincipalProfile(
-                client_id="test_service_principal", secret="test_client_secret"
-            )
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            service_principal_profile=service_principal_profile,
-        )
-        ctx_2.attach_mc(mc)
-        self.assertEqual(
-            ctx_2.get_service_principal(), "test_service_principal"
-        )
-        self.assertEqual(ctx_2.get_intermediate("service_principal"), None)
-
-    def test_get_client_secret(self):
-        # default
-        ctx_1 = AKSCreateContext(
-            self.cmd,
-            {
-                "enable_managed_identity": True,
-                "service_principal": None,
-                "client_secret": None,
-            },
-        )
-        self.assertEqual(ctx_1.get_client_secret(), None)
-
-        # dynamic completion
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {
-                "enable_managed_identity": True,
-                "service_principal": "test_service_principal",
-                "client_secret": None,
-            },
-        )
-        with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_aks_service_principal",
-            return_value={
-                "client_secret": "test_client_secret",
-                "service_principal": "test_service_principal",
-                "aad_session_key": None,
-            },
-        ):
-            self.assertEqual(ctx_2.get_client_secret(), "test_client_secret")
-        self.assertEqual(
-            ctx_2.get_intermediate("client_secret"),
-            "test_client_secret",
-        )
-        service_principal_profile = (
-            self.models.ManagedClusterServicePrincipalProfile(
-                client_id="test_service_principal", secret="test_client_secret"
-            )
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            service_principal_profile=service_principal_profile,
-        )
-        ctx_2.attach_mc(mc)
-        self.assertEqual(ctx_2.get_client_secret(), "test_client_secret")
-        self.assertEqual(ctx_2.get_intermediate("client_secret"), None)
-
-    def test_get_enable_managed_identity(self):
-        # default
-        ctx_1 = AKSCreateContext(
-            self.cmd,
-            {
-                "enable_managed_identity": True,
-                "service_principal": None,
-                "client_secret": None,
-            },
-        )
-        self.assertEqual(ctx_1.get_enable_managed_identity(), True)
-
-        # dynamic completion
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {
+                "name": "test_name",
+                "resource_group_name": "test_rg_name",
                 "enable_managed_identity": True,
                 "service_principal": "test_service_principal",
                 "client_secret": "test_client_secret",
             },
+        )
+        ctx_2.set_intermediate(
+            "subscription_id", "1234-5678", overwrite_exists=True
         )
         self.assertEqual(
             ctx_2.get_intermediate("enable_managed_identity"), None
         )
-        self.assertEqual(ctx_2.get_enable_managed_identity(), False)
+        self.assertEqual(ctx_2.get_intermediate("principal_obj"), None)
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            return_value="test_location",
+        ), patch(
+            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            return_value=None,
+        ):
+            self.assertEqual(
+                ctx_2.get_enable_managed_identity_service_principal_and_client_secret(),
+                (False, "test_service_principal", "test_client_secret"),
+            )
         self.assertEqual(
             ctx_2.get_intermediate("enable_managed_identity"), False
         )
+        self.assertEqual(
+            ctx_2.get_intermediate("principal_obj"),
+            {
+                "service_principal": "test_service_principal",
+                "client_secret": "test_client_secret",
+                "aad_session_key": None,
+            },
+        )
+
+        # dynamic completion
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "name": "test_name",
+                "resource_group_name": "test_rg_name",
+                "enable_managed_identity": True,
+                "service_principal": None,
+                "client_secret": "test_client_secret",
+            },
+        )
+        ctx_3.set_intermediate(
+            "subscription_id", "1234-5678", overwrite_exists=True
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            return_value="test_location",
+        ), patch(
+            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            return_value=None,
+        ), patch(
+            "azure.cli.command_modules.acs.custom._build_service_principal",
+            return_value=("test_service_principal", "test_aad_session_key"),
+        ):
+            self.assertEqual(
+                ctx_3.get_enable_managed_identity_service_principal_and_client_secret(),
+                (True, "test_service_principal", "test_client_secret"),
+            )
+        self.assertEqual(
+            ctx_3.get_intermediate("service_principal"),
+            "test_service_principal",
+        )
+        service_principal_profile = (
+            self.models.ManagedClusterServicePrincipalProfile(
+                client_id="test_mc_service_principal",
+                secret="test_mc_client_secret",
+            )
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=service_principal_profile,
+        )
+        ctx_3.attach_mc(mc)
+        self.assertEqual(
+            ctx_3.get_enable_managed_identity_service_principal_and_client_secret(),
+            (False, "test_mc_service_principal", "test_mc_client_secret"),
+        )
+        self.assertEqual(ctx_3.get_intermediate("service_principal"), None)
+
+        # dynamic completion
+        ctx_4 = AKSCreateContext(
+            self.cmd,
+            {
+                "name": "test_name",
+                "resource_group_name": "test_rg_name",
+                "enable_managed_identity": True,
+                "service_principal": "test_service_principal",
+                "client_secret": None,
+            },
+        )
+        ctx_4.set_intermediate(
+            "subscription_id", "1234-5678", overwrite_exists=True
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            return_value="test_location",
+        ), patch(
+            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            return_value=None,
+        ):
+            with self.assertRaises(CLIError):
+                ctx_4.get_enable_managed_identity_service_principal_and_client_secret()
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
@@ -1167,7 +1171,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             self.models,
             {
-                "location": "test_location",
                 "nodepool_name": "nodepool1",
                 "nodepool_tags": None,
                 "nodepool_labels": None,
@@ -1227,7 +1230,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             self.models,
             {
-                "location": "test_location",
                 "nodepool_name": "test_np_name1234",
                 "nodepool_tags": {"k1": "v1"},
                 "nodepool_labels": {"k1": "v1", "k2": "v2"},
@@ -1292,7 +1294,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             self.models,
             {
-                "location": "test_location",
                 "admin_username": "azureuser",
                 "no_ssh_key": False,
                 "ssh_key_value": public_key,
@@ -1320,7 +1321,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             self.models,
             {
-                "location": "test_location",
                 "admin_username": "test_user",
                 "no_ssh_key": True,
                 "ssh_key_value": "test_key",
@@ -1339,7 +1339,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             self.models,
             {
-                "location": "test_location",
                 "windows_admin_username": None,
                 "windows_admin_password": None,
                 "enable_ahub": False,
@@ -1357,7 +1356,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             self.models,
             {
-                "location": "test_location",
                 "windows_admin_username": "test_win_admin_name",
                 "windows_admin_password": None,
                 "enable_ahub": True,
@@ -1408,13 +1406,21 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             self.models,
             {
+                "name": "test_name",
+                "resource_group_name": "test_rg_name",
                 "enable_managed_identity": True,
                 "service_principal": "test_service_principal",
                 "client_secret": "test_client_secret",
             },
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.set_intermediate(
+            "subscription_id", "1234-5678", overwrite_exists=True
+        )
         with patch(
+            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            return_value="test_location",
+        ), patch(
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
             return_value=None,
         ):
