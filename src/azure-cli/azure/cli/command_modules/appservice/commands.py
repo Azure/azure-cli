@@ -429,7 +429,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_domain')
         g.custom_command('show-terms', 'show_domain_purchase_terms')
 
-    with self.command_group('staticwebapp', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsites')
         g.custom_show_command('show', 'show_staticsite')
         g.custom_command('create', 'create_staticsites', supports_no_wait=True)
@@ -438,26 +438,26 @@ def load_command_table(self, _):
         g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
         g.custom_command('update', 'update_staticsite', supports_no_wait=True)
 
-    with self.command_group('staticwebapp environment', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp environment', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_environments')
         g.custom_show_command('show', 'show_staticsite_environment')
         g.custom_command('functions', 'list_staticsite_functions')
 
-    with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_domains')
         g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_function_app_settings')
         g.custom_command('set', 'set_staticsite_function_app_settings')
         g.custom_command('delete', 'delete_staticsite_function_app_settings')
 
-    with self.command_group('staticwebapp users', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp users', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_users')
         g.custom_command('invite', 'invite_staticsite_users')
         g.custom_command('update', 'update_staticsite_users')
 
-    with self.command_group('staticwebapp secrets', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp secrets', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_secrets')
         g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
