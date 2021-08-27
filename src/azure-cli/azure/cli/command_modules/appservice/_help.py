@@ -2055,7 +2055,7 @@ examples:
 
 helps['webapp update'] = """
 type: command
-short-summary: Update a web app.
+short-summary: Update a webapp's properties and settings such as enforcing HTTPS, adding a propery object to a list of objects, or specifying time to live in seconds.
 examples:
   - name: Update the tags of a web app.
     text: >
