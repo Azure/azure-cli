@@ -106,6 +106,7 @@ def load_arguments(self, _):
     http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
     ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
     app_gateway_name_type = CLIArgumentType(help='Name of the application gateway.', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
+    bastion_host_name_type = CLIArgumentType(help='Name of the bastion host.', options_list='--bastion-host-name', completer=get_resource_name_completion_list('Microsoft.Network/bastionHosts'), id_part='name')
     express_route_link_macsec_cipher_type = CLIArgumentType(get_enum_type(ExpressRouteLinkMacSecCipher))
     zone_compatible_type = CLIArgumentType(
         options_list=['--zone', '-z'],
@@ -2166,10 +2167,20 @@ def load_arguments(self, _):
 
     # region Bastion
     with self.argument_context('network bastion') as c:
-        c.argument('bastion_host_name', help='Name of the Bastion Host.', options_list=['--name', '-n'])
+        c.argument('bastion_host_name', bastion_host_name_type, options_list=['--name', '-n'])
         c.argument('public_ip_address', help='Name or ID of the Azure public IP. The SKU of the public IP must be Standard.', validator=get_public_ip_validator())
         c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
+        c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
+        c.argument('target_resource_id', help='ResourceId of the target Virtual Machine.', options_list=['--target-resource-id'])
         c.ignore('subnet')
+    for item in ['ssh', 'rdp']:
+        with self.argument_context('network bastion {}'.format(item)) as c:
+            c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
+            c.argument('username', help='User name for SSH connections.', options_list=['--username'])
+            c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
+    with self.argument_context('network bastion tunnel') as c:
+        c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
+        c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
     # endregion
 
     # region security partner provider
