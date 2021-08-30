@@ -231,24 +231,31 @@ class TestProfile(unittest.TestCase):
         cls.service_principal_secret = "test_secret"
         cls.service_principal_tenant_id = "00000001-0000-0000-0000-000000000000"
 
-    @mock.patch('azure.identity.InteractiveBrowserCredential.authenticate', autospec=True)
-    @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
     @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
-    def test_login_with_interactive_browser(self, can_launch_browser_mock, app_mock, authenticate_mock):
-        authenticate_mock.return_value = self.authentication_record
+    def test_login_with_auth_code(self, can_launch_browser_mock, login_with_auth_code_mock, get_user_credential_mock,
+                                  create_subscription_client_mock):
+        user_identity_mock = {
+            'username': self.user1,
+            'tenantId': self.tenant_id
+        }
+        login_with_auth_code_mock.return_value = user_identity_mock
 
         cli = DummyCli()
-        mock_arm_client = mock.MagicMock()
-        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        create_subscription_client_mock.return_value = mock_subscription_client
 
         storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        subs = profile.login(True, None, None, False, None, use_device_code=False,
-                             allow_no_subscriptions=False, subscription_finder=finder)
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False)
 
         # assert
+        login_with_auth_code_mock.assert_called_once()
+        get_user_credential_mock.assert_called()
         self.assertEqual(self.subscription1_output, subs)
 
     @mock.patch('azure.identity.UsernamePasswordCredential.authenticate', autospec=True)
@@ -456,31 +463,28 @@ class TestProfile(unittest.TestCase):
     def test_normalize(self):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
         consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
         expected = self.subscription1_normalized
         self.assertEqual(expected, consolidated[0])
         # verify serialization works
         self.assertIsNotNone(json.dumps(consolidated[0]))
 
-        # Test is_environment is mapped to user.isEnvironmentCredential
-        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False, is_environment=True)
-        self.assertEqual(consolidated[0]['user']['isEnvironmentCredential'], True)
-
     def test_normalize_v2016_06_01(self):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        from azure.cli.core.vendored_sdks.subscriptions.v2016_06_01.models import Subscription \
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        from azure.mgmt.resource.subscriptions.v2016_06_01.models import Subscription \
             as Subscription_v2016_06_01
         subscription = Subscription_v2016_06_01()
         subscription.id = self.id1
         subscription.display_name = self.display_name1
         subscription.state = self.state1
         subscription.tenant_id = self.tenant_id
-        # The subscription shouldn't have managed_by_tenants and home_tenant_id
 
         consolidated = profile._normalize_properties(self.user1, [subscription], False)
+
+        # The subscription shouldn't have managed_by_tenants and home_tenant_id
         expected = {
             'id': '1',
             'name': self.display_name1,
@@ -497,40 +501,10 @@ class TestProfile(unittest.TestCase):
         # verify serialization works
         self.assertIsNotNone(json.dumps(consolidated[0]))
 
-    def test_normalize_with_unicode_in_subscription_name(self):
-        cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        test_display_name = 'sub' + chr(255)
-        polished_display_name = 'sub?'
-        test_subscription = SubscriptionStub('subscriptions/sub1',
-                                             test_display_name,
-                                             'Enabled',
-                                             'tenant1')
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        consolidated = profile._normalize_properties(self.user1,
-                                                     [test_subscription],
-                                                     False)
-        self.assertTrue(consolidated[0]['name'] in [polished_display_name, test_display_name])
-
-    def test_normalize_with_none_subscription_name(self):
-        cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        test_display_name = None
-        polished_display_name = ''
-        test_subscription = SubscriptionStub('subscriptions/sub1',
-                                             test_display_name,
-                                             'Enabled',
-                                             'tenant1')
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        consolidated = profile._normalize_properties(self.user1,
-                                                     [test_subscription],
-                                                     False)
-        self.assertTrue(consolidated[0]['name'] == polished_display_name)
-
     def test_update_add_two_different_subscriptions(self):
         cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
 
         # add the first and verify
         consolidated = profile._normalize_properties(self.user1,
@@ -563,8 +537,8 @@ class TestProfile(unittest.TestCase):
 
     def test_update_with_same_subscription_added_twice(self):
         cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
 
         # add one twice and verify we will have one but with new token
         consolidated = profile._normalize_properties(self.user1,
@@ -586,8 +560,8 @@ class TestProfile(unittest.TestCase):
 
     def test_set_active_subscription(self):
         cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
 
         consolidated = profile._normalize_properties(self.user1,
                                                      [self.subscription1],
@@ -607,8 +581,8 @@ class TestProfile(unittest.TestCase):
 
     def test_default_active_subscription_to_non_disabled_one(self):
         cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
 
         subscriptions = profile._normalize_properties(
             self.user2, [self.subscription2, self.subscription1], False)
@@ -621,8 +595,8 @@ class TestProfile(unittest.TestCase):
 
     def test_get_subscription(self):
         cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
 
         consolidated = profile._normalize_properties(self.user1,
                                                      [self.subscription1],
@@ -641,7 +615,7 @@ class TestProfile(unittest.TestCase):
     def test_get_auth_info_fail_on_user_account(self):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
 
         consolidated = profile._normalize_properties(self.user1,
                                                      [self.subscription1],

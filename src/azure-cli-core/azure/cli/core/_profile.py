@@ -207,7 +207,7 @@ class Profile:
                     return []
         else:
             # Build a tenant account
-            bare_tenant = tenant or user_identity['tid']
+            bare_tenant = tenant or user_identity['tenantId']
             subscriptions = self._build_tenant_level_accounts([bare_tenant])
 
         consolidated = self._normalize_properties(username, subscriptions,
@@ -340,21 +340,13 @@ class Profile:
         return deepcopy(consolidated)
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
-                              user_assigned_identity_id=None, managed_identity_info=None, is_environment=False):
+                              user_assigned_identity_id=None, managed_identity_info=None):
         import sys
         consolidated = []
         for s in subscriptions:
-            display_name = s.display_name
-            if display_name is None:
-                display_name = ''
-            try:
-                display_name.encode(sys.getdefaultencoding())
-            except (UnicodeEncodeError, UnicodeDecodeError):  # mainly for Python 2.7 with ascii as the default encoding
-                display_name = re.sub(r'[^\x00-\x7f]', lambda x: '?', display_name)
-
             subscription_dict = {
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
-                _SUBSCRIPTION_NAME: display_name,
+                _SUBSCRIPTION_NAME: s.display_name,
                 _STATE: s.state,
                 _USER_ENTITY: {
                     _USER_NAME: user,
@@ -365,28 +357,17 @@ class Profile:
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
             }
 
-            # Add _IS_ENVIRONMENT_CREDENTIAL for environment credential accounts, but not for normal accounts.
-            if is_environment:
-                subscription_dict[_USER_ENTITY][_IS_ENVIRONMENT_CREDENTIAL] = True
-
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
                 _transform_subscription_for_multiapi(s, subscription_dict)
 
             if cert_sn_issuer_auth:
                 subscription_dict[_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
-            if managed_identity_info:
-                subscription_dict[_USER_ENTITY]['clientId'] = \
-                    managed_identity_info[Identity.MANAGED_IDENTITY_CLIENT_ID]
-                subscription_dict[_USER_ENTITY]['objectId'] = \
-                    managed_identity_info[Identity.MANAGED_IDENTITY_OBJECT_ID]
-                subscription_dict[_USER_ENTITY]['resourceId'] = \
-                    managed_identity_info[Identity.MANAGED_IDENTITY_RESOURCE_ID]
 
             # This will be deprecated and client_id will be the only persisted ID
+            if cert_sn_issuer_auth:
+                consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
             if user_assigned_identity_id:
-                logger.warning("assignedIdentityInfo will be deprecated in the future. All IDs of the identity "
-                               "are now preserved.")
-                subscription_dict[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
+                consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
 
             consolidated.append(subscription_dict)
         return consolidated
@@ -436,9 +417,9 @@ class Profile:
 
         # merge with existing ones
         if merge:
-            dic = collections.OrderedDict((_get_key_name(x, secondary_key_name), x) for x in existing_ones)
+            dic = {_get_key_name(x, secondary_key_name): x for x in existing_ones}
         else:
-            dic = collections.OrderedDict()
+            dic = {}
 
         dic.update((_get_key_name(x, secondary_key_name), x) for x in new_subscriptions)
         subscriptions = list(dic.values())
@@ -913,44 +894,22 @@ class MsiAccountTypes:
 class SubscriptionFinder:
     # An ARM client. It finds subscriptions for a user or service principal. It shouldn't do any
     # authentication work, but only find subscriptions
-    def __init__(self, cli_ctx, arm_client_factory=None, **kwargs):
+    def __init__(self, cli_ctx):
 
         self.user_id = None  # will figure out after log user in
         self.cli_ctx = cli_ctx
         self.secret = None
         self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
         self.authority = self.cli_ctx.cloud.endpoints.active_directory
-
-        def create_arm_client_factory(credential):
-            if arm_client_factory:
-                return arm_client_factory(credential)
-            from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core.commands.client_factory import _prepare_mgmt_client_kwargs_track2
-
-            client_type = self._get_subscription_client_class()
-            if client_type is None:
-                from azure.cli.core.azclierror import CLIInternalError
-                raise CLIInternalError("Unable to get '{}' in profile '{}'"
-                                       .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, cli_ctx.cloud.profile))
-            api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-            client_kwargs = _prepare_mgmt_client_kwargs_track2(cli_ctx, credential)
-            # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
-            client = client_type(credential, api_version=api_version,
-                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager,
-                                 **client_kwargs)
-            return client
-
-        self._arm_client_factory = create_arm_client_factory
         self.tenants = []
 
     def find_using_common_tenant(self, username, credential=None):
         # pylint: disable=too-many-statements
-        import adal
         all_subscriptions = []
         empty_tenants = []
         mfa_tenants = []
 
-        client = self._arm_client_factory(credential)
+        client = self._create_subscription_client(credential)
         tenants = client.tenants.list()
 
         for t in tenants:
@@ -1024,8 +983,7 @@ class SubscriptionFinder:
 
     def find_using_specific_tenant(self, tenant, credential):
         from azure.cli.core.auth import CredentialAdaptor
-        track1_credential = CredentialAdaptor(credential)
-        client = self._arm_client_factory(track1_credential)
+        client = self._create_subscription_client(credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
@@ -1034,21 +992,23 @@ class SubscriptionFinder:
         self.tenants.append(tenant)
         return all_subscriptions
 
-    def _get_subscription_client_class(self):  # pylint: disable=no-self-use
-        """Get the subscription client class. It can come from either the vendored SDK or public SDK, depending
-        on the design of architecture.
-        """
-        if _USE_VENDORED_SUBSCRIPTION_SDK:
-            # Use vendered subscription SDK to decouple from `resource` command module
-            # pylint: disable=no-name-in-module, import-error
-            from azure.cli.core.vendored_sdks.subscriptions import SubscriptionClient
-            client_type = SubscriptionClient
-        else:
-            # Use the public SDK
-            from azure.cli.core.profiles import ResourceType
-            from azure.cli.core.profiles._shared import get_client_class
-            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-        return client_type
+    def _create_subscription_client(self, credential):
+        from azure.cli.core.profiles import ResourceType, get_api_version
+        from azure.cli.core.profiles._shared import get_client_class
+        from azure.cli.core.commands.client_factory import _prepare_mgmt_client_kwargs_track2
+
+        client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+        if client_type is None:
+            from azure.cli.core.azclierror import CLIInternalError
+            raise CLIInternalError("Unable to get '{}' in profile '{}'"
+                                   .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, self.cli_ctx.cloud.profile))
+        api_version = get_api_version(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+        client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, credential)
+        # TODO: Support CAE
+        client = client_type(credential, api_version=api_version,
+                             base_url=self.cli_ctx.cloud.endpoints.resource_manager,
+                             **client_kwargs)
+        return client
 
 
 def _transform_subscription_for_multiapi(s, s_dict):
