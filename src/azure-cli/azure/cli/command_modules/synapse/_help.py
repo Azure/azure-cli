@@ -236,11 +236,11 @@ examples:
   - name: Enable by storage account name.
     text: |
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg --state Enabled \\
-            --bsts Enabled --storage-account mystorage --blob-auditing-policy-name bapname
+            --blob-storage-target-state Enabled --storage-account mystorage --blob-auditing-policy-name bapname
   - name: Enable by storage endpoint and key.
     text: |
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg --state Enabled \\
-            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --blob-storage-target-state Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
             --storage-key MYKEY== --blob-auditing-policy-name bapname
   - name: Set the list of audit actions.
     text: |
@@ -254,23 +254,23 @@ examples:
   - name: Enable a log analytics auditing policy.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws --state Enabled \\
-            --lats Enabled --lawri myworkspaceresourceid \\
+            --log-analytics-target-state Enabled --log-analytics-workspace-resource-id myworkspaceresourceid \\
             --blob-auditing-policy-name bapname
   - name: Disable a log analytics auditing policy.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws --state Enabled
-            --lats Disabled --blob-auditing-policy-name bapname
+            --log-analytics-target-state Disabled --blob-auditing-policy-name bapname
   - name: Enable an event hub auditing policy.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws --state Enabled \\
             --event-hub-target-state Enabled \\
-            --ehari eventhubauthorizationruleid \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
             --event-hub eventhubname --blob-auditing-policy-name bapname
   - name: Enable an event hub auditing policy for default event hub.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws --state Enabled \\
             --event-hub-target-state Enabled \\
-            --ehari eventhubauthorizationruleid --blob-auditing-policy-name bapname
+            --event-hub-authorization-rule-id eventhubauthorizationruleid --blob-auditing-policy-name bapname
   - name: Disable an event hub auditing policy.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws
@@ -567,12 +567,12 @@ examples:
   - name: Enable by storage account name.
     text: |
         az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --state Enabled --bsts Enabled --storage-account mystorage \\
+        --resource-group rg --state Enabled --blob-storage-target-state Enabled --storage-account mystorage \\
         --blob-auditing-policy-name bapname
   - name: Enable by storage endpoint and key.
     text: |
         az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --state Enabled --bsts Enabled \\
+        --resource-group rg --state Enabled --blob-storage-target-state Enabled \\
         --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY== \\
         --blob-auditing-policy-name bapname
   - name: Set the list of audit actions.
@@ -587,23 +587,23 @@ examples:
   - name: Enable a log analytics auditing policy.
     text: |
         az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --state Enabled --lats Enabled \\
-        --lawri myworkspaceresourceid --blob-auditing-policy-name bapname
+        --resource-group rg --state Enabled --log-analytics-target-state Enabled \\
+        --log-analytics-workspace-resource-id myworkspaceresourceid --blob-auditing-policy-name bapname
   - name: Disable a log analytics auditing policy.
     text: |
         az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --lats Disabled --blob-auditing-policy-name bapname
+        --resource-group rg --log-analytics-target-state Disabled --blob-auditing-policy-name bapname
   - name: Enable an event hub auditing policy.
     text: |
         az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --event-hub-target-state Enabled \\
-        --ehari eventhubauthorizationruleid --event-hub eventhubname \\
+        --event-hub-authorization-rule-id eventhubauthorizationruleid --event-hub eventhubname \\
         --blob-auditing-policy-name bapname
   - name: Enable an event hub auditing policy for default event hub.
     text: |
         az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --event-hub-target-state Enabled \\
-        --ehari eventhubauthorizationruleid --blob-auditing-policy-name bapname
+        --event-hub-authorization-rule-id eventhubauthorizationruleid --blob-auditing-policy-name bapname
   - name: Disable an event hub auditing policy.
     text: |
         az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
