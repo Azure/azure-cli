@@ -969,7 +969,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
             ctx_2.get_windows_admin_username_and_password(),
             ("test_mc_win_admin_name", "test_mc_win_admin_pd"),
         )
-        self.assertEqual(ctx_2.get_intermediate("windows_admin_username"), None)
 
         # dynamic completion
         ctx_3 = AKSCreateContext(
@@ -1004,7 +1003,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
             ctx_3.get_windows_admin_username_and_password(),
             ("test_mc_win_admin_name", "test_mc_win_admin_pd"),
         )
-        self.assertEqual(ctx_3.get_intermediate("windows_admin_password"), None)
 
     def test_get_enable_ahub(self):
         # default

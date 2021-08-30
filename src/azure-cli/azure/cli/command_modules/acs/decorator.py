@@ -1160,8 +1160,6 @@ class AKSCreateContext:
         username_read_from_mc = False
         if username_value_obtained_from_mc is not None:
             windows_admin_username = username_value_obtained_from_mc
-            # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate("windows_admin_username")
             username_read_from_mc = True
         elif username_intermediate is not None:
             windows_admin_username = username_intermediate
@@ -1186,8 +1184,6 @@ class AKSCreateContext:
         password_read_from_mc = False
         if password_value_obtained_from_mc is not None:
             windows_admin_password = password_value_obtained_from_mc
-            # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate("windows_admin_password")
             password_read_from_mc = True
         elif password_intermediate is not None:
             windows_admin_password = password_intermediate
@@ -1368,6 +1364,9 @@ class AKSCreateDecorator:
             )
 
             mc.windows_profile = windows_profile
+            # clean up intermediate after `mc` is decorated
+            self.context.remove_intermediate("windows_admin_username")
+            self.context.remove_intermediate("windows_admin_password")
         return mc
 
     def construct_default_mc(self):
