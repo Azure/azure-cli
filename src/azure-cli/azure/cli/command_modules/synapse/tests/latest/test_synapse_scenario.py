@@ -14,7 +14,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class SynapseScenarioTests(ScenarioTest):
-    location = "eastus"
+    location = "eastus2euap"
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
@@ -227,8 +227,8 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
             ])
 
-    #@record_only()
-    @ResourceGroupPreparer(name_prefix='synapseing', random_name_length=16)
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool(self):
         self.kwargs.update({
             'location': 'eastus2euap',
