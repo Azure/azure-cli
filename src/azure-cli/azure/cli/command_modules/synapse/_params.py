@@ -292,6 +292,7 @@ def load_arguments(self, _):
     with self.argument_context('synapse sql pool audit-policy') as c:
         c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
                    help='Name of the blob auditing policy name.')
+        c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
 
     with self.argument_context('synapse sql pool audit-policy show') as c:
         c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
@@ -446,6 +447,7 @@ def load_arguments(self, _):
     with self.argument_context('synapse sql audit-policy') as c:
         c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
                    help='Name of the blob auditing policy name.')
+        c.argument('workspace_name', help='The workspace name.')
 
     with self.argument_context('synapse sql ad-admin') as c:
         c.argument('workspace_name', help='The workspace name.')
