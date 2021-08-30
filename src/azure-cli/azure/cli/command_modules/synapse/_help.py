@@ -556,7 +556,7 @@ short-summary: Get a SQL pool's auditing policy.
 examples:
   - name: Get a SQL pool's auditing policy.
     text: |-
-        az synapse sql pool audit-policy show --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
+        az synapse sql pool audit-policy show --sql-pool-name sqlpool --workspace-name testsynapseworkspace --resource-group rg
 """
 
 helps['synapse sql pool audit-policy update'] = """
