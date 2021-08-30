@@ -227,8 +227,8 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
             ])
 
-    @record_only()
-    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    #@record_only()
+    @ResourceGroupPreparer(name_prefix='synapseing', random_name_length=16)
     def test_sql_pool(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -514,7 +514,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace()
+        self._create_workspace_eastus()
 
         self.kwargs['storage-endpoint'] = self._get_storage_endpoint(self.kwargs['storage-account'], self.kwargs['rg'])
         self.kwargs['storage-key'] = self._get_storage_key(self.kwargs['storage-account'], self.kwargs['rg'])
@@ -680,7 +680,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace()
+        self._create_workspace_eastus()
 
         # create sql pool
         sql_pool = self.cmd(
@@ -1243,6 +1243,54 @@ class SynapseScenarioTests(ScenarioTest):
     def _create_storage_account(self):
         self.kwargs.update({
             'location': self.location,
+            'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
+        })
+
+        # Wait some time to improve robustness
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(60)
+
+        # create storage account
+        self.cmd(
+            'az storage account create --name {storage-account} --resource-group {rg} --enable-hierarchical-namespace true --location {location}',
+            checks=[
+                self.check('name', self.kwargs['storage-account']),
+                self.check('type', 'Microsoft.Storage/storageAccounts'),
+                self.check('provisioningState', 'Succeeded')
+            ])
+
+    def _create_workspace_eastus(self, *additional_create_params):
+        self.kwargs.update({
+            'workspace': self.create_random_name(prefix='clitest', length=16),
+            'location': 'eastus',
+            'file-system': 'testfilesystem',
+            'login-user': 'cliuser1',
+            'login-password': self.create_random_name(prefix='Pswd1', length=16)
+        })
+
+        # Create adlsgen2
+        self._create_storage_account_eastus()
+
+        # Wait some time to improve robustness
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(60)
+
+        # create synapse workspace
+        self.cmd(
+            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+            '--file-system {file-system} --sql-admin-login-user {login-user} '
+            '--sql-admin-login-password {login-password}'
+            ' --location {location} ' + ' '.join(additional_create_params), checks=[
+                self.check('name', self.kwargs['workspace']),
+                self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded')
+            ])
+
+    def _create_storage_account_eastus(self):
+        self.kwargs.update({
+            'location': 'eastus',
             'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
         })
 
