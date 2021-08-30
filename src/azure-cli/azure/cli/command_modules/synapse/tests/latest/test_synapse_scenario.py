@@ -160,7 +160,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # active workspace
         self.cmd(
-            'az synapse workspace key update --name default --key-identifier {key-identifier} --is-active True  --resource-group {rg} --workspace-name {workspace}', checks=[
+            'az synapse workspace activate --name default --key-identifier {key-identifier} --resource-group {rg} --workspace-name {workspace}', checks=[
                 self.check('name', 'default'),
                 self.check('type', 'Microsoft.Synapse/workspaces/keys')
             ])
@@ -1753,7 +1753,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
 
-
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('az storage account show -g {} -n {}'
                         ' --query primaryEndpoints.blob'
@@ -1763,3 +1762,47 @@ class SynapseScenarioTests(ScenarioTest):
     def _get_storage_key(self, storage_account, resource_group):
         return self.cmd('az storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
+
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    def test_managed_private_endpoints(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspacepe',
+            'name': 'AzureDataLakeStoragePE',
+            'privateLinkResourceId': '/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Storage/storageAccounts/hozhao0917gen2',
+            'groupId': 'dfs'})
+
+        # create managed private endpoint
+        self.cmd(
+            'az synapse  managed-private-endpoints create --workspace-name {workspace} --pe-name {name} --resource-id {privateLinkResourceId} --group-Id {groupId}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # wait some time to improve robustness
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(90)
+        # get managed private endpoint
+        self.cmd(
+            'az synapse  managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list managed private endpoint
+        self.cmd(
+            'az synapse  managed-private-endpoints list --workspace-name {workspace}',
+           checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints')
+            ])
+        
+        # delete managed private endpoint
+        self.cmd(
+            'az synapse  managed-private-endpoints delete --workspace-name {workspace} --pe-name {name} -y')
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(60)    
+        self.cmd(
+            'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
+            expect_failure=True)

@@ -357,11 +357,19 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help="The availability zone information of the standby server when high availability is enabled."
         )
 
-        high_availability_arg_type = CLIArgumentType(
+        pg_high_availability_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--high-availability'],
             help='Enable or disable high availability feature. '
                  'Default value is Disabled. High availability can only be set during flexible server create time'
+        )
+
+        mysql_high_availability_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled']),
+            options_list=['--high-availability'],
+            help='Enable (ZoneRedundant or SameZone) or disable high availability feature. '
+                 'Default value is Disabled. High availability can only be set during flexible server create time. '
+                 'Allowed values: ZoneRedundant, SameZone, Disabled'
         )
 
         private_dns_zone_arguments_arg_type = CLIArgumentType(
@@ -395,6 +403,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('sku_name', default='Standard_D2s_v3', arg_type=sku_name_arg_type)
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
                 c.argument('version', default='12', arg_type=version_arg_type)
+                c.argument('high_availability', arg_type=pg_high_availability_arg_type, default="Disabled")
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -402,6 +411,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('version', default='5.7', arg_type=version_arg_type)
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
+                c.argument('high_availability', arg_type=mysql_high_availability_arg_type, default="Disabled")
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
@@ -415,7 +425,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('zone', zone_arg_type)
             c.argument('tags', tags_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
-            c.argument('high_availability', arg_type=high_availability_arg_type, default="Disabled")
             c.argument('database_name', arg_type=database_name_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
@@ -432,10 +441,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
+            if command_group == 'mysql':
+                c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           help='Determines the public access. Allowed Values: Enabled, Disabled',)
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
-            c.argument('high_availability', arg_type=high_availability_arg_type)
             c.argument('maintenance_window', options_list=['--maintenance-window'], validator=maintenance_window_validator,
                        help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
             c.argument('tags', tags_type)
@@ -449,6 +460,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('replication_role', options_list=['--replication-role'],
                            help='The replication role of the server.')
                 c.argument('iops', arg_type=iops_arg_type)
+                c.argument('high_availability', arg_type=mysql_high_availability_arg_type)
+            elif command_group == 'postgres':
+                c.argument('high_availability', arg_type=pg_high_availability_arg_type)
 
         with self.argument_context('{} flexible-server restart'.format(command_group)) as c:
             if command_group == 'postgres':
@@ -536,6 +550,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('replica_name', options_list=['--replica-name'],
                        help='The name of the server to restore to.')
+            c.argument('zone', arg_type=zone_arg_type)
             c.ignore('location')
             c.ignore('sku_name')
             c.ignore('tier')
@@ -573,19 +588,19 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('properties', options_list=['--properties', '-b'],
                                help='Request properties. Use @{file} to load from a file. For quoting issues in different terminals, '
                                'see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
-                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
-                               help='Name or ID of the migration.')
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
                 elif scope == "show":
-                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
-                               help='Name or ID of the migration.')
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
                     c.argument('level', options_list=['--level'], required=False,
                                help='Specify the level of migration details requested. Valid values are Active and All. Active is the default.')
                 elif scope == "list":
                     c.argument('migration_filter', options_list=['--filter'], required=False,
                                help='Indicate whether all the migrations or just the Active migrations are returned. Active is the default. Valid values are: Active, All.')
                 elif scope == "update":
-                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
-                               help='Name or ID of the migration.')
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
                     c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
                                help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
                     c.argument('db_names', nargs='+', options_list=['--db-names', '--dbs'], required=False,
@@ -595,8 +610,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
                                help='Cut-over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
                 elif scope == "delete":
-                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
-                               help='Name or ID of the migration.')
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
                     c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
 
     _flexible_server_params('postgres')

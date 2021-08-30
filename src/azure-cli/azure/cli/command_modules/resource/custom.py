@@ -2214,6 +2214,20 @@ def unregister_feature(client, resource_provider_namespace, feature_name):
     return client.unregister(resource_provider_namespace, feature_name)
 
 
+def list_feature_registrations(client, resource_provider_namespace=None):
+    if resource_provider_namespace:
+        return client.list_by_subscription(provider_namespace=resource_provider_namespace)
+    return client.list_all_by_subscription()
+
+
+def create_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.create_or_update(resource_provider_namespace, feature_name, {})
+
+
+def delete_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.delete(resource_provider_namespace, feature_name)
+
+
 # pylint: disable=inconsistent-return-statements,too-many-locals
 def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,

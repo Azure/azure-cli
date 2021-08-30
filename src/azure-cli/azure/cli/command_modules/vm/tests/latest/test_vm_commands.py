@@ -10,7 +10,7 @@ import platform
 import tempfile
 import time
 import unittest
-import mock
+from unittest import mock
 import uuid
 
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
@@ -20,6 +20,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
     StorageAccountPreparer, JMESPathCheck, StringContainCheck, VirtualNetworkPreparer, KeyVaultPreparer)
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -72,6 +73,11 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
         result = self.cmd('vm image list -p Canonical -f UbuntuServer -o tsv --all').output
         assert result.index('16.04') >= 0
+
+    @AllowLargeResponse()
+    def test_vm_images_list_thru_services_edge_zone(self):
+        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
+        assert result.index('7.7') >= 0
 
 
 class VMOpenPortTest(ScenarioTest):
@@ -175,6 +181,18 @@ class VMImageListOffersScenarioTest(ScenarioTest):
         self.assertFalse([i for i in result if i['location'].lower() != self.kwargs['loc']])
 
 
+    def test_vm_image_list_offers_edge_zone(self):
+        self.kwargs.update({
+            'loc': 'westus',
+            'pub': 'OpenLogic',
+            'edge_zone': 'microsoftlosangeles1'
+        })
+
+        result = self.cmd('vm image list-offers --location {loc} --publisher {pub} --edge-zone {edge_zone}').get_output_in_json()
+        self.assertTrue(len(result) > 0)
+        self.assertTrue([i for i in result if i['extendedLocation']['name'] == self.kwargs['edge_zone']])
+        self.assertFalse([i for i in result if i['location'].lower() != self.kwargs['loc']])
+
 class VMImageListPublishersScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
@@ -186,6 +204,19 @@ class VMImageListPublishersScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?location == '{loc}']) == length(@)", True),
         ])
+
+    @AllowLargeResponse()
+    def test_vm_image_list_publishers_edge_zone(self):
+        self.kwargs.update({
+            'loc': 'westus',
+            'edge_zone': 'microsoftlosangeles1'
+        })
+
+        result = self.cmd('vm image list-publishers --location {loc} --edge-zone {edge_zone}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?location == '{loc}']) == length(@)", True),
+        ]).get_output_in_json()
+        self.assertTrue([i for i in result if i['extendedLocation']['name'] == self.kwargs['edge_zone']])
 
 
 class VMImageListSkusScenarioTest(ScenarioTest):
@@ -200,6 +231,23 @@ class VMImageListSkusScenarioTest(ScenarioTest):
 
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
+
+
+    def test_vm_image_list_skus_edge_zone(self):
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'pub': 'OpenLogic',
+            'offer': 'CentOs',
+            'edge_zone': 'microsoftlosangeles1'
+        })
+
+        result = self.cmd('vm image list-skus --location {loc} --edge-zone {edge_zone} --offer {offer} --publisher {pub} --edge-zone {edge_zone}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?location == '{loc}']) == length(@)", True),
+        ]).get_output_in_json()
+        self.assertTrue(len(result) > 0)
+        self.assertTrue([i for i in result if i['extendedLocation']['name'] == self.kwargs['edge_zone']])
 
 
 class VMImageShowScenarioTest(ScenarioTest):
@@ -221,6 +269,26 @@ class VMImageShowScenarioTest(ScenarioTest):
             self.check("contains(id, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/{sku}/Versions/{ver}')", True)
         ])
 
+
+    def test_vm_image_show_edge_zone(self):
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'pub': 'OpenLogic',
+            'offer': 'CentOs',
+            'sku': '7.7',
+            'edge_zone': 'microsoftlosangeles1',
+            'ver': '7.7.2021020400'
+        })
+
+        self.cmd('vm image show --offer {offer} --publisher {pub} --sku {sku} --version {ver} -l {loc} --edge-zone {edge_zone}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('location', '{loc}'),
+            self.check('name', '{ver}'),
+            self.check("contains(id, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/{sku}/Versions/{ver}')", True),
+            self.check('extendedLocation.name', '{edge_zone}'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
 
 class VMGeneralizeScenarioTest(ScenarioTest):
 
@@ -2951,6 +3019,26 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss3}', checks=[self.check('length(@)', len(self.kwargs['instance_ids']) - 1)])
         self.cmd('vmss get-instance-view --resource-group {rg} --name {vmss3} --instance-id {id}', expect_failure=True)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_spot_restore')
+    def test_spot_restore_policy(self, resource_group):
+        self.kwargs.update({
+            'loc': 'NorthEurope',
+            'spot_vmss_name': 'vmss-spot1',
+            'enabled_1': 'True',
+            'enabled_2': 'False',
+            'restore_timeout1': 'PT1H',
+            'restore_timeout2': 'PT2H'
+
+        })
+        self.cmd('vmss create -g {rg} -n {spot_vmss_name} --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group True --enable-spot-restore {enabled_1} --spot-restore-timeout {restore_timeout1}', checks=[
+            self.check('vmss.spotRestorePolicy.enabled', True),
+            self.check('vmss.spotRestorePolicy.restoreTimeout', '{restore_timeout1}')
+        ])
+        self.cmd('vmss update -g {rg} -n {spot_vmss_name} --enable-spot-restore {enabled_2} --spot-restore-timeout {restore_timeout2}', checks=[
+            self.check('spotRestorePolicy.enabled', False),
+            self.check('spotRestorePolicy.restoreTimeout', '{restore_timeout2}')
+        ])
+
 
 class VMSSCustomDataScenarioTest(ScenarioTest):
 
@@ -4160,22 +4248,23 @@ class VMGalleryImage(ScenarioTest):
 
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2')
-    def test_sig_image_version_cross_tenant(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_sig_image_version_cross_tenant(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_image_version_', 40),
+            'rg': resource_group,
+            'another_rg': another_resource_group,
             'vm': self.create_random_name('cli_test_image_version_', 40),
             'image_name': self.create_random_name('cli_test_image_version_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
             'sig_name': self.create_random_name('cli_test_image_version_', 40),
             'image_definition_name': self.create_random_name('cli_test_image_version_', 40),
             'version': '0.1.0'
         })
 
         # Prepare image in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
         self.cmd(
@@ -4197,7 +4286,6 @@ class VMGalleryImage(ScenarioTest):
             'sig image-version create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --gallery-image-version {version} --managed-image {image_id} --replica-count 1',
             checks=self.check('name', self.kwargs['version']))
 
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
 
     @ResourceGroupPreparer(location='eastus')
     def test_create_vm_with_shared_gallery_image(self, resource_group, resource_group_location):
@@ -4216,7 +4304,7 @@ class VMGalleryImage(ScenarioTest):
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --nsg-rule None')
         if self.is_live:
             time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm}')
@@ -4230,7 +4318,7 @@ class VMGalleryImage(ScenarioTest):
 
         self.kwargs['shared_gallery_image_version'] = self.cmd('sig image-version show-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location} --gallery-image-version {version}').get_output_in_json()['uniqueId']
 
-        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None')
 
         self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -5401,21 +5489,22 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2')
-    def test_vm_cross_tenant_update(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_vm_cross_tenant_update(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_vm_cross_tenant_', 40),
+            'rg': resource_group,
+            'another_rg': another_resource_group,
             'another_vm': self.create_random_name('cli_test_vm_cross_tenant_', 40),
             'image_name': self.create_random_name('cli_test_vm_cross_tenant_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
             'vm': self.create_random_name('cli_test_vm_cross_tenant_', 40)
         })
 
         # Prepare sig in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-keys --subscription {aux_sub}')
         self.cmd(
@@ -5435,20 +5524,21 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
             self.check('tags.tagName', 'tagValue')
         ])
 
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
-
 
 class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2')
-    def test_vmss_cross_tenant_update(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_vmss_cross_tenant_update(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_vmss_update_', 40),
+            'rg': resource_group,
+            'another_rg': another_resource_group,
             'vm': self.create_random_name('cli_test_vmss_update_', 40),
             'image_name': self.create_random_name('cli_test_vmss_update_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
             'sig_name': self.create_random_name('cli_test_vmss_update_', 40),
             'image_definition_name_1': self.create_random_name('cli_test_vmss_update_', 40),
             'image_definition_name_2': self.create_random_name('cli_test_vmss_update_', 40),
@@ -5457,8 +5547,6 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
         })
 
         # Prepare sig in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
         self.cmd(
@@ -5503,8 +5591,6 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
             self.check('name', self.kwargs['vmss']),
             self.check('virtualMachineProfile.storageProfile.imageReference.id', self.kwargs['image_2_id'])
         ])
-
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
 
         # Test vmss can be update even if the image reference is not available
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[

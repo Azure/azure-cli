@@ -393,6 +393,27 @@ class NetworkPublicIpWithSku(ScenarioTest):
             self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
 
 
+class NetworkCustomIpPrefix(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_custom_ip_prefix', location='eastus2')
+    def test_network_custom_ip_prefix(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'prefix': 'prefix1'
+        })
+
+        # Test custom prefix CRUD
+        self.cmd('network custom-ip prefix create -g {rg} -n {prefix} --cidr 40.40.40.0/24')
+        self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+        self.cmd('network custom-ip prefix list -g {rg}',
+                 checks=self.check('length(@)', 1))
+        # Delete operation isn't ready.
+        # self.cmd('network custom-ip prefix delete -g {rg} -n {prefix}')
+        # self.cmd('network custom-ip prefix list -g {rg}',
+        #          checks=self.is_empty())
+
+
 class NetworkPublicIpPrefix(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix', location='eastus2')
@@ -451,6 +472,23 @@ class NetworkPublicIpPrefix(ScenarioTest):
             self.check('prefixLength', 30),
             self.check('length(zones)', 3)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_with_ip_address', location='eastus2')
+    def test_network_public_ip_prefix_with_ip_address(self, resource_group):
+        self.kwargs.update({
+            'prefix_name_ipv4': 'public_ip_prefix_0',
+            'pip': 'pip1'
+        })
+
+        ip_prefix = self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 28', checks=[
+            self.check('publicIpAddressVersion', 'IPv4')
+        ]).get_output_in_json()
+
+        ip_address = '.'.join(ip_prefix['ipPrefix'].split('.')[:3]) + '10'
+
+        # Create public ip with ip address
+        self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
+                 checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
@@ -4565,7 +4603,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 
 
 class NetworkWatcherScenarioTest(ScenarioTest):
-    import mock
+    from unittest import mock
 
     def _mock_thread_count():
         return 1
@@ -5184,7 +5222,7 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
 
         self.cmd('network lb create -g {rg} -n {lb} --sku Standard --public-ip-address {ip}')
         self.cmd('network lb create -g {rg} -n {lb1} --sku Gateway --vnet-name {vnet} --subnet {subnet} ')
-        self.cmd('network public-ip create -g {rg} -n {ip}1 --sku standard')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku standard')
         self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n {fip} --public-ip-address {ip1}',
                  checks=self.not_exists('gatewayLoadBalancer'))
         result = self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n {fip} '
@@ -5193,6 +5231,9 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
         self.kwargs['id'] = result['id']
         self.cmd('network lb frontend-ip update -g {rg} --lb-name {lb} -n {fip} --gateway-lb {id}',
                  checks=self.exists('gatewayLoadBalancer'))
+
+        self.cmd("network lb frontend-ip update -g {rg} --lb-name {lb} -n {fip} --gateway-lb ''",
+                 checks=self.check('gatewayLoadBalancer', None))
 
     @ResourceGroupPreparer(name_prefix='test_network_nic_front_ip', location='eastus2euap')
     def test_network_nic_front_ip(self, resource_group):
