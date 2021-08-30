@@ -325,6 +325,42 @@ def load_arguments(self, _):
                        type=int,
                        arg_group=policy_arg_group,
                        help='The number of days to retain audit logs.')
+            c.argument('blob_storage_target_state',
+                       arg_group=storage_arg_group,
+                       options_list=['--blob-storage-target-state', '--bsts'],
+                       configured_default='sql-server',
+                       help='Indicate whether blob storage is a destination for audit records.',
+                       arg_type=get_enum_type(BlobAuditingPolicyState))
+            c.argument('log_analytics_target_state',
+                       arg_group=log_analytics_arg_group,
+                       options_list=['--log-analytics-target-state', '--lats'],
+                       configured_default='sql-server',
+                       help='Indicate whether log analytics is a destination for audit records.',
+                       arg_type=get_enum_type(BlobAuditingPolicyState))
+            c.argument('log_analytics_workspace_resource_id',
+                       arg_group=log_analytics_arg_group,
+                       options_list=['--log-analytics-workspace-resource-id', '--lawri'],
+                       configured_default='sql-server',
+                       help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace '
+                            'to which you would like to send Audit Logs.')
+            c.argument('event_hub_target_state',
+                       arg_group=event_hub_arg_group,
+                       options_list=['--event-hub-target-state', '--ehts'],
+                       configured_default='sql-server',
+                       help='Indicate whether event hub is a destination for audit records.',
+                       arg_type=get_enum_type(BlobAuditingPolicyState))
+            c.argument('event_hub_authorization_rule_id',
+                       arg_group=event_hub_arg_group,
+                       options_list=['--event-hub-authorization-rule-id', '--ehari'],
+                       configured_default='sql-server',
+                       help='The resource Id for the event hub authorization rule.')
+            c.argument('event_hub',
+                       arg_group=event_hub_arg_group,
+                       options_list=['--event-hub', '--eh'],
+                       configured_default='sql-server',
+                       help='The name of the event hub. If none is specified '
+                            'when providing event_hub_authorization_rule_id, the default event hub will be selected.'
+                       )
 
     with self.argument_context('synapse sql audit-policy update') as c:
         c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
