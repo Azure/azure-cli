@@ -1047,7 +1047,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(
             ctx_2.get_intermediate("enable_managed_identity"), None
         )
-        self.assertEqual(ctx_2.get_intermediate("principal_obj"), None)
         with patch(
             "azure.cli.command_modules.acs.decorator._get_rg_location",
             return_value="test_location",
@@ -1061,14 +1060,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
             )
         self.assertEqual(
             ctx_2.get_intermediate("enable_managed_identity"), False
-        )
-        self.assertEqual(
-            ctx_2.get_intermediate("principal_obj"),
-            {
-                "service_principal": "test_service_principal",
-                "client_secret": "test_client_secret",
-                "aad_session_key": None,
-            },
         )
 
         # dynamic completion
@@ -1099,10 +1090,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 ctx_3.get_enable_managed_identity_service_principal_and_client_secret(),
                 (True, "test_service_principal", "test_client_secret"),
             )
-        self.assertEqual(
-            ctx_3.get_intermediate("service_principal"),
-            "test_service_principal",
-        )
         service_principal_profile = (
             self.models.ManagedClusterServicePrincipalProfile(
                 client_id="test_mc_service_principal",
@@ -1378,8 +1365,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             location="test_location", windows_profile=windows_profile_2
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
-        self.assertEqual(dec_2.context.get_intermediate("windows_admin_username"), None)
-        self.assertEqual(dec_2.context.get_intermediate("windows_admin_password"), None)
+        self.assertEqual(
+            dec_2.context.get_intermediate("windows_admin_username"), None
+        )
+        self.assertEqual(
+            dec_2.context.get_intermediate("windows_admin_password"), None
+        )
 
     def test_set_up_service_principal_profile(self):
         # default value in `aks_create`
@@ -1435,5 +1426,3 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             service_principal_profile=service_principal_profile_2,
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
-        self.assertEqual(dec_2.context.get_intermediate("service_principal"), None)
-        self.assertEqual(dec_2.context.get_intermediate("client_secret"), None)

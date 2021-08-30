@@ -1264,27 +1264,34 @@ class AKSCreateContext:
     def get_enable_managed_identity_service_principal_and_client_secret(
         self, enable_validation: bool = False, **kwargs
     ):
+        """Dynamically obtain the values of enable_managed_identity, service_principal and client_secret according to the context.
+
+        Note: enable_managed_identity will not be decorated into the `mc` object, and changes to the original value will be stored in the intermediates dictionary.
+
+        When service_principal and client_secret are not given and enable_managed_identity is True, dynamic completion will not be triggered. For other cases, dynamic completion will be triggered.
+        When service_principal and client_secret are given, the value of enable_managed_identity will be changed to False.
+        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to create a service principal. The parameters subscription_id, location and name (cluster) are also required when calling function "_ensure_aks_service_principal".
+        When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise CLIError.
+
+        :return: A tuple of enable_managed_identity, service_principal and client_secret
+        """
+
         # service_principal
         sp_parameter_name = "service_principal"
         sp_property_name_in_mc = "client_id"
         # read the original value passed by the command
         sp_raw_value = self.raw_param.get(sp_parameter_name)
-        # try to read from intermediates
-        sp_intermediate = self.get_intermediate(sp_parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         sp_value_obtained_from_mc = None
         if self.mc and self.mc.service_principal_profile:
             sp_value_obtained_from_mc = getattr(
                 self.mc.service_principal_profile, sp_property_name_in_mc
             )
-
         # set default value
         sp_read_from_mc = False
         if sp_value_obtained_from_mc is not None:
             service_principal = sp_value_obtained_from_mc
             sp_read_from_mc = True
-        elif sp_intermediate is not None:
-            service_principal = sp_intermediate
         else:
             service_principal = sp_raw_value
 
@@ -1293,24 +1300,25 @@ class AKSCreateContext:
         secret_property_name_in_mc = "secret"
         # read the original value passed by the command
         secret_raw_value = self.raw_param.get(secret_parameter_name)
-        # try to read from intermediates
-        secret_intermediate = self.get_intermediate(secret_parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         secret_value_obtained_from_mc = None
         if self.mc and self.mc.service_principal_profile:
             secret_value_obtained_from_mc = getattr(
                 self.mc.service_principal_profile, secret_property_name_in_mc
             )
-
         # set default value
         secret_read_from_mc = False
         if secret_value_obtained_from_mc is not None:
             client_secret = secret_value_obtained_from_mc
             secret_read_from_mc = True
-        elif secret_intermediate is not None:
-            client_secret = secret_intermediate
         else:
             client_secret = secret_raw_value
+
+        # consistent check
+        if sp_read_from_mc != secret_read_from_mc:
+            raise CLIInternalError(
+                "Inconsistent state detected, one of sp and secret is read from the `mc` object."
+            )
 
         # enable_managed_identity
         managed_identity_parameter_name = "enable_managed_identity"
@@ -1340,8 +1348,7 @@ class AKSCreateContext:
                 overwrite_exists=True,
             )
 
-        # dynamic completion for service_principal and client_secret, will also set an intermediate
-        # "principal_obj" when service_principal is provided
+        # dynamic completion for service_principal and client_secret
         dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
         if not (
@@ -1357,40 +1364,20 @@ class AKSCreateContext:
             not secret_read_from_mc
         )
         if dynamic_completion:
-            # try to get "service_principal" and "client_secret" from intermediate "principal_obj",
-            # if the intermediate "principal_obj" does not exist, create one
-            principal_obj = self.get_intermediate("principal_obj", None)
-            if principal_obj is None:
-                principal_obj = _ensure_aks_service_principal(
-                    cli_ctx=self.cmd.cli_ctx,
-                    service_principal=service_principal,
-                    client_secret=client_secret,
-                    subscription_id=self.get_intermediate(
-                        "subscription_id", None
-                    ),
-                    dns_name_prefix=self.get_dns_name_prefix(),
-                    fqdn_subdomain=self.get_fqdn_subdomain(),
-                    location=self.get_location(),
-                    name=self.get_name(),
-                )
-                # add to intermediate
-                self.set_intermediate(
-                    "principal_obj", principal_obj, overwrite_exists=True
-                )
+            principal_obj = _ensure_aks_service_principal(
+                cli_ctx=self.cmd.cli_ctx,
+                service_principal=service_principal,
+                client_secret=client_secret,
+                subscription_id=self.get_intermediate(
+                    "subscription_id", None
+                ),
+                dns_name_prefix=self.get_dns_name_prefix(),
+                fqdn_subdomain=self.get_fqdn_subdomain(),
+                location=self.get_location(),
+                name=self.get_name(),
+            )
             service_principal = principal_obj.get("service_principal")
-            # add to intermediate
-            self.set_intermediate(
-                "service_principal",
-                service_principal,
-                overwrite_exists=True,
-            )
             client_secret = principal_obj.get("client_secret")
-            # add to intermediate
-            self.set_intermediate(
-                "client_secret",
-                client_secret,
-                overwrite_exists=True,
-            )
 
         # these parameters do not need validation
         return enable_managed_identity, service_principal, client_secret
