@@ -1265,15 +1265,17 @@ class AKSCreateContext:
         self, enable_validation: bool = False, **kwargs
     ):
         # service_principal
+        sp_parameter_name = "service_principal"
+        sp_property_name_in_mc = "client_id"
         # read the original value passed by the command
-        sp_raw_value = self.raw_param.get("service_principal")
+        sp_raw_value = self.raw_param.get(sp_parameter_name)
         # try to read from intermediates
-        sp_intermediate = self.get_intermediate("service_principal", None)
+        sp_intermediate = self.get_intermediate(sp_parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         sp_value_obtained_from_mc = None
         if self.mc and self.mc.service_principal_profile:
-            sp_value_obtained_from_mc = (
-                self.mc.service_principal_profile.client_id
+            sp_value_obtained_from_mc = getattr(
+                self.mc.service_principal_profile, sp_property_name_in_mc
             )
 
         # set default value
@@ -1287,15 +1289,17 @@ class AKSCreateContext:
             service_principal = sp_raw_value
 
         # client_secret
+        secret_parameter_name = "client_secret"
+        secret_property_name_in_mc = "secret"
         # read the original value passed by the command
-        secret_raw_value = self.raw_param.get("client_secret")
+        secret_raw_value = self.raw_param.get(secret_parameter_name)
         # try to read from intermediates
-        secret_intermediate = self.get_intermediate("client_secret", None)
+        secret_intermediate = self.get_intermediate(secret_parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         secret_value_obtained_from_mc = None
         if self.mc and self.mc.service_principal_profile:
-            secret_value_obtained_from_mc = (
-                self.mc.service_principal_profile.secret
+            secret_value_obtained_from_mc = getattr(
+                self.mc.service_principal_profile, secret_property_name_in_mc
             )
 
         # set default value
@@ -1309,14 +1313,15 @@ class AKSCreateContext:
             client_secret = secret_raw_value
 
         # enable_managed_identity
+        managed_identity_parameter_name = "enable_managed_identity"
         # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         managed_identity_raw_value = self.raw_param.get(
-            "enable_managed_identity"
+            managed_identity_parameter_name
         )
         # try to read from intermediates
         managed_identity_intermediate = self.get_intermediate(
-            "enable_managed_identity", None
+            managed_identity_parameter_name, None
         )
 
         # set default value
@@ -1330,7 +1335,7 @@ class AKSCreateContext:
             enable_managed_identity = False
             # add to intermediate
             self.set_intermediate(
-                "enable_managed_identity",
+                managed_identity_parameter_name,
                 enable_managed_identity,
                 overwrite_exists=True,
             )
