@@ -74,7 +74,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', True),
+            JMESPathCheck('properties.reserved', True),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'PremiumV2'),
             JMESPathCheck('sku.name', 'P1v2')
@@ -142,7 +142,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # verify SKU and kind of ASP created
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', True),
+            JMESPathCheck('properties.reserved', True),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Standard'),
             JMESPathCheck('sku.name', 'S1')
@@ -212,7 +212,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # verify SKU and kind of ASP created
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', False),
+            JMESPathCheck('properties.reserved', False),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Free'),
             JMESPathCheck('sku.name', 'F1')
@@ -281,7 +281,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # verify SKU and kind of ASP created
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', False),
+            JMESPathCheck('properties.reserved', False),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Free'),
             JMESPathCheck('sku.name', 'F1')
@@ -531,7 +531,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', True),
+            JMESPathCheck('properties.reserved', True),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Standard'),
             JMESPathCheck('sku.name', 'S1')
@@ -891,7 +891,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', True),
+            JMESPathCheck('properties.reserved', True),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'PremiumV2'),
             JMESPathCheck('sku.name', 'P1v2')
