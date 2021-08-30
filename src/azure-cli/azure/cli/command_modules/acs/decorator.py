@@ -220,7 +220,14 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_resource_group_name(self, **kwargs) -> str:
-        # Note: This parameter will not be decorated into the `mc` object.
+        """Obtain the value of resource_group_name.
+
+        Note: resource_group_name will not be decorated into the `mc` object.
+
+        The value of this parameter should be provided by user explicitly.
+
+        :return: string
+        """
         # read the original value passed by the command
         resource_group_name = self.raw_param.get("resource_group_name")
 
@@ -230,7 +237,14 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_name(self, **kwargs) -> str:
-        # Note: This parameter will not be decorated into the `mc` object.
+        """Obtain the value of name.
+
+        Note: name will not be decorated into the `mc` object.
+
+        The value of this parameter should be provided by user explicitly.
+
+        :return: string
+        """
         # read the original value passed by the command
         name = self.raw_param.get("name")
 
@@ -242,6 +256,21 @@ class AKSCreateContext:
     def get_ssh_key_value(
         self, enable_validation: bool = False, **kwargs
     ) -> str:
+        """Obtain the value of ssh_key_value.
+
+        If the user does not specify this parameter, the validator function "validate_ssh_key" checks the default file
+        location "~/.ssh/id_rsa.pub", if the file exists, read its content and return; otherise, create a key pair at
+        "~/.ssh/id_rsa.pub" and return the public key.
+        If the user provides a string-like input, the validator function "validate_ssh_key" checks whether it is a file
+        path, if so, read its content and return; if it is a valid public key, return it; otherwise, create a key pair
+        there and return the public key.
+
+        This function supports the option of enable_validation. When enabled, it will call "_validate_ssh_key" to
+        verify the validity of ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped;
+        otherwise, a CLIError will be raised when the value of ssh_key_value is invalid.
+
+        :return: string
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("ssh_key_value")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -277,15 +306,22 @@ class AKSCreateContext:
     def get_dns_name_prefix(
         self, enable_validation: bool = False, **kwargs
     ) -> Union[str, None]:
+        """Dynamically obtain the value of ssh_key_value according to the context.
+
+        When both dns_name_prefix and fqdn_subdomain are not assigned, dynamic completion will be triggerd. Function
+        "_get_default_dns_prefix" will be called to create a default dns_name_prefix composed of name(cluster),
+        resource_group_name, and subscription_id.
+
+        This function supports the option of enable_validation. When enabled, it will check if both dns_name_prefix and
+        fqdn_subdomain are assigend, if so, throw the MutuallyExclusiveArgumentError.
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
+        :return: string
+        """
         parameter_name = "dns_name_prefix"
 
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
-        # Try to read from intermediates, the intermediate only exists when the parameter value has been
-        # dynamically completed but has not been decorated into the `mc` object.
-        # Note: The intermediate value should be cleared immediately after it is decorated into the
-        # `mc` object.
-        intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc:
@@ -295,13 +331,13 @@ class AKSCreateContext:
         read_from_mc = False
         if value_obtained_from_mc is not None:
             dns_name_prefix = value_obtained_from_mc
-            # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate(parameter_name)
             read_from_mc = True
-        elif intermediate is not None:
-            dns_name_prefix = intermediate
         else:
             dns_name_prefix = raw_value
+
+        # skip dynamic completion & validation if option read_only is specified
+        if kwargs.get("read_only"):
+            return dns_name_prefix
 
         dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
@@ -332,12 +368,18 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_location(self, **kwargs) -> str:
+        """Dynamically obtain the value of location according to the context.
+
+        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        to get the location of the provided resource group, which internally used ResourceManagementClient to send
+        the request.
+
+        :return: string
+        """
         parameter_name = "location"
 
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
-        # try to read from intermediates
-        intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc:
@@ -347,11 +389,7 @@ class AKSCreateContext:
         read_from_mc = False
         if value_obtained_from_mc is not None:
             location = value_obtained_from_mc
-            # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate(parameter_name)
             read_from_mc = True
-        elif intermediate is not None:
-            location = intermediate
         else:
             location = raw_value
 
@@ -365,16 +403,16 @@ class AKSCreateContext:
             location = _get_rg_location(
                 self.cmd.cli_ctx, self.get_resource_group_name()
             )
-            # add to intermediate
-            self.set_intermediate(
-                parameter_name, location, overwrite_exists=True
-            )
 
         # this parameter does not need validation
         return location
 
     # pylint: disable=unused-argument
     def get_kubernetes_version(self, **kwargs) -> str:
+        """Obtain the value of kubernetes_version.
+
+        :return: string
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("kubernetes_version")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -394,7 +432,18 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_no_ssh_key(self, enable_validation: bool = False, **kwargs) -> bool:
-        # Note: This parameter will not be decorated into the `mc` object.
+        """Obtain the value of name.
+
+        Note: no_ssh_key will not be decorated into the `mc` object.
+
+        This function supports the option of enable_validation. When enabled, it will check if both dns_name_prefix and
+        fqdn_subdomain are assigend, if so, throw the MutuallyExclusiveArgumentError.
+        This function supports the option of enable_validation. When enabled, it will call "_validate_ssh_key" to
+        verify the validity of ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped;
+        otherwise, a CLIError will be raised when the value of ssh_key_value is invalid.
+
+        :return: bool
+        """
         # read the original value passed by the command
         no_ssh_key = self.raw_param.get("no_ssh_key")
 
@@ -409,12 +458,20 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_vm_set_type(self, **kwargs) -> str:
+        """Dynamically obtain the value of vm_set_type according to the context.
+
+        Dynamic completion will be triggerd by default. Function "_set_vm_set_type" will be called and the
+        corresponding vm set type will be returned according to the value of kubernetes_version. It will also
+        normalize the value as server validation is case-sensitive.
+
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
+        :return: string
+        """
         parameter_name = "vm_set_type"
 
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
-        # try to read from intermediates
-        intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
@@ -428,13 +485,13 @@ class AKSCreateContext:
         read_from_mc = False
         if value_obtained_from_mc is not None:
             vm_set_type = value_obtained_from_mc
-            # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate(parameter_name)
             read_from_mc = True
-        elif intermediate is not None:
-            vm_set_type = intermediate
         else:
             vm_set_type = raw_value
+
+        # skip dynamic completion & validation if option read_only is specified
+        if kwargs.get("read_only"):
+            return vm_set_type
 
         # the value verified by the validator may have case problems, and the
         # "_set_vm_set_type" function will adjust it
@@ -446,10 +503,6 @@ class AKSCreateContext:
                 vm_set_type=vm_set_type,
                 kubernetes_version=self.get_kubernetes_version(),
             )
-            # add to intermediate
-            self.set_intermediate(
-                parameter_name, vm_set_type, overwrite_exists=True
-            )
 
         # this parameter does not need validation
         return vm_set_type
@@ -458,12 +511,22 @@ class AKSCreateContext:
     def get_load_balancer_sku(
         self, enable_validation: bool = False, **kwargs
     ) -> str:
+        """Dynamically obtain the value of load_balancer_sku according to the context.
+
+        When load_balancer_sku is not assigned, dynamic completion will be triggerd. Function "set_load_balancer_sku"
+        will be called and the corresponding load balancer sku will be returned according to the value of
+        kubernetes_version.
+
+        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
+        to "basic" when api_server_authorized_ip_ranges is assigned, if so, throw the MutuallyExclusiveArgumentError.
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
+        :return: string
+        """
         parameter_name = "load_balancer_sku"
 
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
-        # try to read from intermediates
-        intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc and self.mc.network_profile:
@@ -473,13 +536,13 @@ class AKSCreateContext:
         read_from_mc = False
         if value_obtained_from_mc is not None:
             load_balancer_sku = value_obtained_from_mc
-            # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate(parameter_name)
             read_from_mc = True
-        elif intermediate is not None:
-            load_balancer_sku = intermediate
         else:
             load_balancer_sku = raw_value
+
+        # skip dynamic completion & validation if option read_only is specified
+        if kwargs.get("read_only"):
+            return load_balancer_sku
 
         dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
@@ -491,10 +554,6 @@ class AKSCreateContext:
             load_balancer_sku = set_load_balancer_sku(
                 sku=load_balancer_sku,
                 kubernetes_version=self.get_kubernetes_version(),
-            )
-            # add to intermediate
-            self.set_intermediate(
-                parameter_name, load_balancer_sku, overwrite_exists=True
             )
 
         # validation
