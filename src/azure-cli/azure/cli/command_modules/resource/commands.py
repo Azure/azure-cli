@@ -331,6 +331,10 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_template_spec', validator=_validate_template_spec)
         g.custom_command('list', 'list_template_specs')
         g.custom_command('delete', 'delete_template_spec', validator=_validate_template_spec, confirmation=True)
+    
+    with self.command_group('stacks', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
+        g.custom_command('sub-show', 'list_deployment_stacks')
+
 
     # az deployment group
     with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:

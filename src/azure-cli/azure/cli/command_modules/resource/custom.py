@@ -34,7 +34,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZUR
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
-    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory)
+    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _resource_deploymentstacks_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
 from azure.core.pipeline.policies import SansIOHTTPPolicy
@@ -2077,6 +2077,10 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
             return rcf.template_spec_versions.list(resource_group_name=resource_group_name, template_spec_name=name)
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
+
+def list_deployment_stacks(cmd, name):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    return rcf.deployment_stacks.get_at_subscription(name)
 
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
