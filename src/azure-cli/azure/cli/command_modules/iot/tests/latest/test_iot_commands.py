@@ -103,6 +103,22 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub update -n {0} -g {1} --fsi [system]'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub update -n {0} -g {1} --fsi test/user/'.format(hub, rg), expect_failure=True)
 
+        # Test auth config settings
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --disable-local-auth --disable-module-sas'.format(hub, rg)).get_output_in_json()
+        assert updated_hub['properties']['disableLocalAuth']
+        assert not updated_hub['properties']['disableDeviceSas']
+        assert updated_hub['properties']['disableModuleSas']
+
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --disable-module-sas false  --disable-device-sas'.format(hub, rg)).get_output_in_json()
+        assert updated_hub['properties']['disableLocalAuth']
+        assert updated_hub['properties']['disableDeviceSas']
+        assert not updated_hub['properties']['disableModuleSas']
+
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --disable-local-auth false --disable-device-sas false'.format(hub, rg)).get_output_in_json()
+        assert not updated_hub['properties']['disableLocalAuth']
+        assert not updated_hub['properties']['disableDeviceSas']
+        assert not updated_hub['properties']['disableModuleSas']
+
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
             self.check('resourcegroup', rg),
