@@ -1280,8 +1280,6 @@ class AKSCreateContext:
         sp_read_from_mc = False
         if sp_value_obtained_from_mc is not None:
             service_principal = sp_value_obtained_from_mc
-            # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate("service_principal")
             sp_read_from_mc = True
         elif sp_intermediate is not None:
             service_principal = sp_intermediate
@@ -1304,8 +1302,6 @@ class AKSCreateContext:
         secret_read_from_mc = False
         if secret_value_obtained_from_mc is not None:
             client_secret = secret_value_obtained_from_mc
-            # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate("client_secret")
             secret_read_from_mc = True
         elif secret_intermediate is not None:
             client_secret = secret_intermediate
@@ -1541,6 +1537,9 @@ class AKSCreateDecorator:
                 )
             )
             mc.service_principal_profile = service_principal_profile
+            # clean up intermediates after `mc` is decorated
+            self.context.remove_intermediate("service_principal")
+            self.context.remove_intermediate("client_secret")
         return mc
 
     def construct_default_mc(self):

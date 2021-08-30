@@ -1118,7 +1118,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
             ctx_3.get_enable_managed_identity_service_principal_and_client_secret(),
             (False, "test_mc_service_principal", "test_mc_client_secret"),
         )
-        self.assertEqual(ctx_3.get_intermediate("service_principal"), None)
 
         # dynamic completion
         ctx_4 = AKSCreateContext(
@@ -1436,3 +1435,5 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             service_principal_profile=service_principal_profile_2,
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
+        self.assertEqual(dec_2.context.get_intermediate("service_principal"), None)
+        self.assertEqual(dec_2.context.get_intermediate("client_secret"), None)
