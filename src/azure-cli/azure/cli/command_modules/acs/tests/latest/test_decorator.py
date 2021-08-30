@@ -1254,3 +1254,5 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             location="test_location", windows_profile=windows_profile_2
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
+        self.assertEqual(dec_2.context.get_intermediate("windows_admin_username"), None)
+        self.assertEqual(dec_2.context.get_intermediate("windows_admin_password"), None)
