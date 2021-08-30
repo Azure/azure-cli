@@ -527,7 +527,7 @@ class SynapseScenarioTests(ScenarioTest):
                  ])
 
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --state Enabled --blob-storage-target-state Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
+                 ' --state Enabled --bsts Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
                  ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapname',
                  checks=[
                      self.check('state', 'Enabled'),
@@ -547,7 +547,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('isAzureMonitorTargetEnabled', False)])
 
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --state Enabled --blob-storage-target-state Enabled --storage-account {storage-account}'
+                 ' --state Enabled --bsts Enabled --storage-account {storage-account}'
                  ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapn',
                  checks=[
                      self.check('state', 'Enabled'),
@@ -573,7 +573,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable log analytics target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled'
-                 ' --log-analytics-target-state Enabled --log-analytics-workspace-resource-id {log_analytics_workspace_id} '
+                 ' --lats Enabled --lawri {log_analytics_workspace_id} '
                  ' --blob-auditing-policy-name bapn',
                  checks=[
                      self.check('state', 'Enabled'),
@@ -592,7 +592,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable log analytics target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --state Enabled --log-analytics-target-state Disabled'
+                 ' --state Enabled --lats Disabled'
                  ' --blob-auditing-policy-name bapn',
                  checks=[
                      self.check('state', 'Enabled'),
@@ -627,7 +627,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable event hub target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled --event-hub-target-state Enabled'
-                 ' --event-hub-authorization-rule-id {eventhub_auth_rule_id} --event-hub {eventhub_name}'
+                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}'
                  ' --blob-auditing-policy-name bapn',
                  checks=[
                      self.check('state', 'Enabled'),
@@ -704,7 +704,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - enable
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace} --sql-pool-name {sql-pool} '
-             ' --state Enabled --blob-storage-target-state Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
+             ' --state Enabled --bsts Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
              ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapname',
              checks=[
                  self.check('state', 'Enabled'),
@@ -723,7 +723,7 @@ class SynapseScenarioTests(ScenarioTest):
                  self.check('isAzureMonitorTargetEnabled', False)])
 
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-             ' --sql-pool-name {sql-pool} --state Enabled --blob-storage-target-state Enabled --storage-account {storage-account}'
+             ' --sql-pool-name {sql-pool} --state Enabled --bsts Enabled --storage-account {storage-account}'
              ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapn',
              checks=[
                  self.check('state', 'Enabled'),
@@ -750,7 +750,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable log analytics target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --sql-pool-name {sql-pool} --state Enabled'
-                 ' --log-analytics-target-state Enabled --log-analytics-workspace-resource-id {log_analytics_workspace_id} '
+                 ' --lats Enabled --lawri {log_analytics_workspace_id} '
                  ' --blob-auditing-policy-name bapn',
                  checks=[
                      self.check('state', 'Enabled'),
@@ -769,7 +769,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable log analytics target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --sql-pool-name {sql-pool} --state Enabled --log-analytics-target-state Disabled'
+                 ' --sql-pool-name {sql-pool} --state Enabled --lats Disabled'
                  ' --blob-auditing-policy-name bapn',
                  checks=[
                      self.check('state', 'Enabled'),
@@ -805,7 +805,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable event hub target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --sql-pool-name {sql-pool} --state Enabled --event-hub-target-state Enabled'
-                 ' --event-hub-authorization-rule-id {eventhub_auth_rule_id} --event-hub {eventhub_name}'
+                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}'
                  ' --blob-auditing-policy-name bapn',
                  checks=[
                      self.check('state', 'Enabled'),
