@@ -8,8 +8,8 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.command_modules.monitor._client_factory import cf_monitor
 from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
+from azure.cli.command_modules.monitor._client_factory import cf_monitor
 
 
 logger = get_logger(__name__)
@@ -472,7 +472,7 @@ def _get_diagnostic_settings_url(
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     diagnostic_settings_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Synapse/workspaces/{}'.format(
-            get_subscription_id(cmd.cli_ctx), resource_group_name, workspace_name)
+        get_subscription_id(cmd.cli_ctx), resource_group_name, workspace_name)
     if sql_pool_name is not None:
         return diagnostic_settings_url + '/sqlpools/{}'.format(sql_pool_name)
     return diagnostic_settings_url
