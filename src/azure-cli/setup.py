@@ -150,6 +150,9 @@ DEPENDENCIES = [
     'xmltodict~=0.12'
 ]
 
+# On Linux, the distribution (Ubuntu, Debian, etc) and version are checked
+if sys.platform == 'linux':
+    DEPENDENCIES.append('distro')
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
