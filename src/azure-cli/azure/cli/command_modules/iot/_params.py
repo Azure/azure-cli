@@ -115,6 +115,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='A friendly name for the certificate.')
         c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
 
+    for subgroup in ['create', 'update']:
+        with self.argument_context('iot dps certificate {}'.format(subgroup)) as c:
+            c.argument('is_verified', options_list=['--verified', '-v'], arg_type=get_three_state_flag(),
+                       help='A boolean indicating whether or not the certificate is verified.')
+
     # Arguments for IoT Hub
     with self.argument_context('iot hub') as c:
         c.argument('hub_name', hub_name_type, options_list=['--name', '-n'], id_part='name')
@@ -137,6 +142,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    type=int, validator=validate_c2d_max_delivery_count,
                    help='The number of times the IoT hub will attempt to deliver a cloud-to-device'
                         ' message to a device, between 1 and 100.')
+        c.argument('disable_local_auth', options_list=['--disable-local-auth', '--dla'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether or not to disable '
+                        'IoT hub scoped SAS keys for authentication.')
+        c.argument('disable_device_sas', options_list=['--disable-device-sas', '--dds'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether or not to disable all device '
+                        '(including Edge devices but excluding modules) scoped SAS keys for authentication')
+        c.argument('disable_module_sas', options_list=['--disable-module-sas', '--dms'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether or not to disable module-scoped SAS keys for authentication.')
         c.argument('feedback_ttl', options_list=['--feedback-ttl', '--ft'],
                    type=int, validator=validate_feedback_ttl,
                    help='The period of time for which the IoT hub will maintain the feedback for expiration'
@@ -285,6 +301,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
                    completer=FilesCompleter([".cer", ".pem"]), help='The path to the file containing the certificate.')
         c.argument('certificate_name', options_list=['--name', '-n'], help='A friendly name for the certificate.')
+
+    for subgroup in ['create', 'update']:
+        with self.argument_context('iot hub certificate {}'.format(subgroup)) as c:
+            c.argument('is_verified', options_list=['--verified', '-v'], arg_type=get_three_state_flag(),
+                       help='A boolean indicating whether or not the certificate is verified.')
 
     with self.argument_context('iot hub consumer-group') as c:
         c.argument('consumer_group_name', options_list=['--name', '-n'], id_part='child_name_2',
