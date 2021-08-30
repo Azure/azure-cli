@@ -56,7 +56,7 @@ from ._client_factory import web_client_factory, ex_handler_factory, providers_c
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method, raise_missing_token_suggestion
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
-                           should_create_new_rg, set_location, get_site_availability, get_profile_username,
+                           check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
@@ -3789,7 +3789,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         sku = get_sku_to_use(src_dir, html, sku, runtime)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(user, loc, os_name, resource_group_name)
-        _create_new_rg = should_create_new_rg(cmd, rg_name)
+        _create_new_rg = not check_resource_group_exists(cmd, rg_name)
         plan = get_plan_to_use(cmd=cmd,
                                user=user,
                                os_name=os_name,

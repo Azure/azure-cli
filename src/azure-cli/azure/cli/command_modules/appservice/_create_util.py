@@ -111,7 +111,7 @@ def create_resource_group(cmd, rg_name, location):
     return rcf.resource_groups.create_or_update(rg_name, rg_params)
 
 
-def _check_resource_group_exists(cmd, rg_name):
+def check_resource_group_exists(cmd, rg_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.resource_groups.check_existence(rg_name)
 
@@ -310,11 +310,6 @@ def set_location(cmd, sku, location):
     else:
         loc = location
     return loc.replace(" ", "").lower()
-
-
-# check if the RG value to use already exists or new RG to be created
-def should_create_new_rg(cmd, rg_name):
-    return not _check_resource_group_exists(cmd, rg_name)
 
 
 def get_site_availability(cmd, name):
