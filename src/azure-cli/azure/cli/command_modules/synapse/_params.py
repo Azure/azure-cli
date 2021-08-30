@@ -39,6 +39,7 @@ storage_arg_group = "Storage"
 log_analytics_arg_group = "Log Analytics"
 event_hub_arg_group = "Event Hub"
 
+
 def _configure_security_policy_storage_params(arg_ctx):
     arg_ctx.argument('storage_account',
                      options_list=['--storage-account'],

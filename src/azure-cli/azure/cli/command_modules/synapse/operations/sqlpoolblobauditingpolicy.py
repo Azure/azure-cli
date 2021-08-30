@@ -13,6 +13,8 @@ from azure.cli.command_modules.monitor.operations.diagnostics_settings import cr
 
 
 logger = get_logger(__name__)
+
+
 def sqlpool_blob_auditing_policy_update(
         cmd,
         instance,
@@ -297,6 +299,7 @@ def _audit_policy_update_apply_blob_storage_details(
         instance.storage_endpoint = None
         instance.storage_account_access_key = None
 
+
 def _find_storage_account_resource_id(cli_ctx, name):
     '''
     Finds a storage account's resource group by querying ARM resource cache.
@@ -469,10 +472,9 @@ def _get_diagnostic_settings_url(
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     diagnostic_settings_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Synapse/workspaces/{}'.format(
-            get_subscription_id(cmd.cli_ctx),
-            resource_group_name, workspace_name)
+            get_subscription_id(cmd.cli_ctx), resource_group_name, workspace_name)
     if sql_pool_name is not None:
-        return diagnostic_settings_url +'/sqlpools/{}'.format(sql_pool_name)
+        return diagnostic_settings_url + '/sqlpools/{}'.format(sql_pool_name)
     return diagnostic_settings_url
 
 
@@ -875,7 +877,7 @@ def _get_diagnostic_settings_url(
         resource_group_name, workspace_name)
 
     if sql_pool_name is not None:
-        diag_settings = diag_settings+'/sqlpools/{}'.format(sql_pool_name)
+        diag_settings = diag_settings + '/sqlpools/{}'.format(sql_pool_name)
 
     return diag_settings
 
