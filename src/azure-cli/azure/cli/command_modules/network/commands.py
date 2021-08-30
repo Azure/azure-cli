@@ -1500,6 +1500,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_bastion_host')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
+        g.custom_command('ssh', 'ssh_bastion_host')
+        g.custom_command('rdp', 'rdp_bastion_host')
+        g.custom_command('tunnel', 'create_bastion_tunnel')
         g.command('delete', 'begin_delete')
     # endregion
 
