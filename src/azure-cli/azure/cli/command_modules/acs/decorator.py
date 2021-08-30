@@ -25,6 +25,7 @@ from .custom import (
     _set_vm_set_type,
     set_load_balancer_sku,
     get_subscription_id,
+    _ensure_aks_service_principal,
 )
 
 logger = get_logger(__name__)
@@ -163,6 +164,12 @@ class AKSCreateContext:
     # object, it should never be modified, only read-only operations (e.g. validation) can be performed.
     def __init__(self, cmd: AzCliCommand, raw_parameters: Dict):
         self.cmd = cmd
+        if not isinstance(raw_parameters, dict):
+            raise CLIInternalError(
+                "Unexpected raw_parameters object with type '{}'.".format(
+                    type(raw_parameters)
+                )
+            )
         self.raw_param = raw_parameters
         self.intermediates = dict()
         self.mc = None
@@ -1253,6 +1260,135 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_ahub
 
+    # pylint: disable=unused-argument
+    def get_enable_managed_identity_service_principal_and_client_secret(
+        self, enable_validation: bool = False, **kwargs
+    ):
+        """Dynamically obtain the values of enable_managed_identity, service_principal and client_secret according to
+        the context.
+
+        Note: enable_managed_identity will not be decorated into the `mc` object, and changes to the original value
+        will be stored in the intermediates dictionary.
+
+        When service_principal and client_secret are not given and enable_managed_identity is True, dynamic completion
+        will not be triggered. For other cases, dynamic completion will be triggered.
+        When service_principal and client_secret are given, the value of enable_managed_identity will be changed to
+        False.
+        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
+        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
+        calling function "_ensure_aks_service_principal".
+        When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
+        CLIError.
+
+        :return: A tuple of enable_managed_identity, service_principal and client_secret
+        """
+
+        # service_principal
+        sp_parameter_name = "service_principal"
+        sp_property_name_in_mc = "client_id"
+        # read the original value passed by the command
+        sp_raw_value = self.raw_param.get(sp_parameter_name)
+        # try to read the property value corresponding to the parameter from the `mc` object
+        sp_value_obtained_from_mc = None
+        if self.mc and self.mc.service_principal_profile:
+            sp_value_obtained_from_mc = getattr(
+                self.mc.service_principal_profile, sp_property_name_in_mc
+            )
+        # set default value
+        sp_read_from_mc = False
+        if sp_value_obtained_from_mc is not None:
+            service_principal = sp_value_obtained_from_mc
+            sp_read_from_mc = True
+        else:
+            service_principal = sp_raw_value
+
+        # client_secret
+        secret_parameter_name = "client_secret"
+        secret_property_name_in_mc = "secret"
+        # read the original value passed by the command
+        secret_raw_value = self.raw_param.get(secret_parameter_name)
+        # try to read the property value corresponding to the parameter from the `mc` object
+        secret_value_obtained_from_mc = None
+        if self.mc and self.mc.service_principal_profile:
+            secret_value_obtained_from_mc = getattr(
+                self.mc.service_principal_profile, secret_property_name_in_mc
+            )
+        # set default value
+        secret_read_from_mc = False
+        if secret_value_obtained_from_mc is not None:
+            client_secret = secret_value_obtained_from_mc
+            secret_read_from_mc = True
+        else:
+            client_secret = secret_raw_value
+
+        # consistent check
+        if sp_read_from_mc != secret_read_from_mc:
+            raise CLIInternalError(
+                "Inconsistent state detected, one of sp and secret is read from the `mc` object."
+            )
+
+        # enable_managed_identity
+        managed_identity_parameter_name = "enable_managed_identity"
+        # Note: This parameter will not be decorated into the `mc` object.
+        # read the original value passed by the command
+        managed_identity_raw_value = self.raw_param.get(
+            managed_identity_parameter_name
+        )
+        # try to read from intermediates
+        managed_identity_intermediate = self.get_intermediate(
+            managed_identity_parameter_name, None
+        )
+
+        # set default value
+        if managed_identity_intermediate is not None:
+            enable_managed_identity = managed_identity_intermediate
+        else:
+            enable_managed_identity = managed_identity_raw_value
+
+        # dynamic completion for enable_managed_identity
+        if service_principal and client_secret:
+            enable_managed_identity = False
+            # add to intermediate
+            self.set_intermediate(
+                managed_identity_parameter_name,
+                enable_managed_identity,
+                overwrite_exists=True,
+            )
+
+        # dynamic completion for service_principal and client_secret
+        dynamic_completion = False
+        # check whether the parameter meet the conditions of dynamic completion
+        if not (
+            enable_managed_identity and
+            not service_principal and
+            not client_secret
+        ):
+            dynamic_completion = True
+        # disable dynamic completion if the value is read from `mc`
+        dynamic_completion = (
+            dynamic_completion and
+            not sp_read_from_mc and
+            not secret_read_from_mc
+        )
+        if dynamic_completion:
+            principal_obj = _ensure_aks_service_principal(
+                cli_ctx=self.cmd.cli_ctx,
+                service_principal=service_principal,
+                client_secret=client_secret,
+                subscription_id=self.get_intermediate(
+                    "subscription_id", None
+                ),
+                dns_name_prefix=self.get_dns_name_prefix(),
+                fqdn_subdomain=self.get_fqdn_subdomain(),
+                location=self.get_location(),
+                name=self.get_name(),
+            )
+            service_principal = principal_obj.get("service_principal")
+            client_secret = principal_obj.get("client_secret")
+
+        # these parameters do not need validation
+        return enable_managed_identity, service_principal, client_secret
+
 
 class AKSCreateDecorator:
     def __init__(
@@ -1346,6 +1482,10 @@ class AKSCreateDecorator:
         return mc
 
     def set_up_windows_profile(self, mc):
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
         (
             windows_admin_username,
             windows_admin_password,
@@ -1369,6 +1509,38 @@ class AKSCreateDecorator:
             self.context.remove_intermediate("windows_admin_password")
         return mc
 
+    def set_up_service_principal_profile(self, mc):
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        # If customer explicitly provide a service principal, disable managed identity.
+        (
+            enable_managed_identity,
+            service_principal,
+            client_secret,
+        ) = (
+            self.context.get_enable_managed_identity_service_principal_and_client_secret()
+        )
+        # Skip create service principal profile for the cluster if the cluster enables managed identity
+        # and customer doesn't explicitly provide a service principal.
+        if not (
+            enable_managed_identity and
+            not service_principal and
+            not client_secret
+        ):
+            service_principal_profile = (
+                self.models.ManagedClusterServicePrincipalProfile(
+                    client_id=service_principal, secret=client_secret
+                )
+            )
+            mc.service_principal_profile = service_principal_profile
+            # clean up intermediates after `mc` is decorated
+            self.context.remove_intermediate("service_principal")
+            self.context.remove_intermediate("client_secret")
+        return mc
+
     def construct_default_mc(self):
         # An all-in-one function used to create the complete `ManagedCluster` object, which will later be
         # passed as a parameter to the underlying SDK (mgmt-containerservice) to send the actual request.
@@ -1383,4 +1555,6 @@ class AKSCreateDecorator:
         mc = self.set_up_linux_profile(mc)
         # set up windows profile
         mc = self.set_up_windows_profile(mc)
+        # set up service principal profile
+        mc = self.set_up_service_principal_profile(mc)
         return mc
