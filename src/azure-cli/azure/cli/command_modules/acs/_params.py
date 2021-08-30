@@ -181,7 +181,7 @@ def load_arguments(self, _):
                    '--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('nodepool_name', type=str, default='nodepool1',
                    help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
-        c.argument('os_sku', type=str, options_list=['--os-sku'], completer=get_ossku_completion_list)
+        c.argument('os_sku', completer=get_ossku_completion_list)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('aad_client_app_id')
@@ -389,7 +389,7 @@ def load_arguments(self, _):
                        '--node-vm-size', '-s'], completer=get_vm_size_completion_list)
             c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
             c.argument('os_type', type=str)
-            c.argument('os_sku', type=str, options_list=['--os-sku'], completer=get_ossku_completion_list)
+            c.argument('os_sku', completer=get_ossku_completion_list)
             c.argument('enable_cluster_autoscaler', options_list=[
                        "--enable-cluster-autoscaler", "-e"], action='store_true')
             c.argument('node_taints', type=str, validator=validate_taints)
