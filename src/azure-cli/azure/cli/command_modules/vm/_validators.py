@@ -1273,7 +1273,13 @@ def process_vm_create_namespace(cmd, namespace):
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
+    _validate_capacity_reservation_group(cmd, namespace)
+
 # endregion
+
+
+def process_vm_update_namespace(cmd, namespace):
+    _validate_capacity_reservation_group(cmd, namespace)
 
 
 # region VMSS Create Validators
@@ -1590,6 +1596,8 @@ def process_vmss_create_namespace(cmd, namespace):
     if namespace.eviction_policy and not namespace.priority:
         raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
 
+    _validate_capacity_reservation_group(cmd, namespace)
+
 
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
     if not namespace.instance_id:
@@ -1598,6 +1606,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
                            " Please use --instance-id to specify a VM instance")
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
+    _validate_capacity_reservation_group(cmd, namespace)
 # endregion
 
 
@@ -1938,3 +1947,22 @@ def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
             'name': namespace.edge_zone,
             'type': 'EdgeZone'
         }
+
+
+def _validate_capacity_reservation_group(cmd, namespace):
+
+    if namespace.capacity_reservation_group == 'None':
+        namespace.capacity_reservation_group = ''
+
+    elif namespace.capacity_reservation_group:
+
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        if not is_valid_resource_id(namespace.capacity_reservation_group):
+            namespace.capacity_reservation_group = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute',
+                type='CapacityReservationGroups',
+                name=namespace.capacity_reservation_group
+            )

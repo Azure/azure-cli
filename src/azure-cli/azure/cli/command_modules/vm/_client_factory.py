@@ -178,3 +178,11 @@ def cf_shared_gallery_image(cli_ctx, *_):
 
 def cf_shared_gallery_image_version(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).shared_gallery_image_versions
+
+
+def cf_capacity_reservation_groups(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).capacity_reservation_groups
+
+
+def cf_capacity_reservations(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).capacity_reservations

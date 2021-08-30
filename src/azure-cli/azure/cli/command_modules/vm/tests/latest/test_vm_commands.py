@@ -5824,5 +5824,171 @@ class DiskZRSScenarioTest(ScenarioTest):
         self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku StandardSSD_ZRS --zone 1', expect_failure=True)
 
 
+class CapacityReservationScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_', location='centraluseuap')
+    def test_capacity_reservation(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'reservation_group': self.create_random_name('cli_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_reservation_name_', 40),
+            'reservation_group2': self.create_random_name('cli_reservation_group2_', 40),
+            'reservation_name2': self.create_random_name('cli_reservation_name2_', 40),
+            'sku': 'Standard_DS1_v2',
+            'vm': self.create_random_name('vm', 10),
+            'vmss': self.create_random_name('vmss', 10),
+            'username': 'ubuntu',
+            'auth': 'ssh',
+            'image': 'UbuntuLTS',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.kwargs['reservation_group_id1'] = self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --tags key=val --zones 1 2', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val'})
+        ]).get_output_in_json()['id']
+
+        self.cmd('capacity reservation group update -n {reservation_group} -g {rg} --tags key=val key1=val1', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('tags', {'key': 'val', 'key1': 'val1'})
+        ])
+
+        self.cmd('capacity reservation group show -n {reservation_group} -g {rg}', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val', 'key1': 'val1'})
+        ])
+
+        self.cmd('capacity reservation group list -g {rg} --query "[?name==\'{reservation_group}\']" ', checks=[
+            self.check('[0].name', '{reservation_group}'),
+            self.check('[0].zones', ['1', '2']),
+            self.check('[0].tags', {'key': 'val', 'key1': 'val1'})
+        ])
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} --sku {sku} --capacity 5 --zone 1 --tags key=val', checks=[
+            self.check('name', '{reservation_name}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 5),
+            self.check('zones', ['1']),
+            self.check('tags', {'key': 'val'}),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('capacity reservation update -c {reservation_group} -n {reservation_name} -g {rg} --capacity 3 --tags key=val key1=val1', checks=[
+            self.check('name', '{reservation_name}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 3),
+            self.check('tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} --instance-view', checks=[
+            self.check('name', '{reservation_name}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 3),
+            self.check('tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('zones', ['1']),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded')
+        ])
+
+        self.cmd('capacity reservation list -c {reservation_group} -g {rg} --query "[?name==\'{reservation_name}\']" ', checks=[
+            self.check('[0].name', '{reservation_name}'),
+            self.check('[0].sku.name', '{sku}'),
+            self.check('[0].sku.capacity', 3),
+            self.check('[0].tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('[0].zones', ['1']),
+            self.check('[0].provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('capacity reservation group show -n {reservation_group} -g {rg} --instance-view', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('instanceView.capacityReservations[0].name', '{reservation_name}')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {username} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --nsg-rule None --capacity-reservation-group {reservation_group} --zone 1 ')
+
+        self.kwargs['vm_id'] = self.cmd('vm show -g {rg} -n {vm} ', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('capacityReservation.capacityReservationGroup.id', '{reservation_group_id1}', case_sensitive=False),
+        ]).get_output_in_json()['id']
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image {image} --admin-username deploy --ssh-key-value "{ssh_key}" --capacity-reservation-group {reservation_group} --zone 1 ', checks=[
+            self.check('vmss.provisioningState', 'Succeeded'),
+            self.check('vmss.virtualMachineProfile.capacityReservation.capacityReservationGroup.id', '{reservation_group_id1}', case_sensitive=False),
+        ])
+
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss} ', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.capacityReservation.capacityReservationGroup.id', '{reservation_group_id1}', case_sensitive=False),
+        ]).get_output_in_json()['id']
+
+        vm_associated = self.cmd('capacity reservation group list -g {rg} --query "[?name==\'{reservation_group}\']" --vm-instance --vmss-instance', checks=[
+            self.check('[0].name', '{reservation_group}'),
+            self.check('[0].zones', ['1', '2']),
+            self.check('[0].tags', {'key': 'val', 'key1': 'val1'})
+        ]).get_output_in_json()[0]['virtualMachinesAssociated']
+
+        vm_associated_list = [i['id'].lower() for i in vm_associated]
+        self.assertTrue(self.kwargs['vm_id'].lower() in vm_associated_list)
+        contains_vmss_id = False
+        for id in vm_associated_list:
+            if self.kwargs['vmss_id'].lower() in id:
+                contains_vmss_id = True
+                break
+        self.assertTrue(contains_vmss_id)
+
+        self.kwargs['reservation_group_id2'] = self.cmd('capacity reservation group create -n {reservation_group2} -g {rg} --tags key=val --zones 1 2', checks=[
+            self.check('name', '{reservation_group2}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val'})
+        ]).get_output_in_json()['id']
+
+        self.cmd('capacity reservation create -c {reservation_group2} -n {reservation_name2} -g {rg} --sku {sku} --capacity 5 --zone 1 --tags key=val', checks=[
+            self.check('name', '{reservation_name2}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 5),
+            self.check('zones', ['1']),
+            self.check('tags', {'key': 'val'}),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # Updating capacity reservation group requires the VM(s) to be deallocated.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+
+        self.cmd('vm update -g {rg} -n {vm} --capacity-reservation-group {reservation_group2}')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('capacityReservation.capacityReservationGroup.id', '{reservation_group_id2}', case_sensitive=False),
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --capacity-reservation-group {reservation_group2}')
+
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.capacityReservation.capacityReservationGroup.id', '{reservation_group_id2}', case_sensitive=False),
+        ])
+
+        # Updating capacity reservation group requires the VM(s) to be deallocated.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+
+        # Before delete the capacity reservation that has been associated with VM/VMSS, we need to disassociate the capacity reservation group first
+        self.cmd('vm update -g {rg} -n {vm} --capacity-reservation-group None')
+
+        self.cmd('vmss update -g {rg} -n {vmss} --capacity-reservation-group None')
+
+        self.cmd('capacity reservation delete -c {reservation_group} -n {reservation_name} -g {rg} --yes')
+        self.cmd('capacity reservation delete -c {reservation_group2} -n {reservation_name2} -g {rg} --yes')
+
+        self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
+        self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
+
+
 if __name__ == '__main__':
     unittest.main()
