@@ -1264,14 +1264,21 @@ class AKSCreateContext:
     def get_enable_managed_identity_service_principal_and_client_secret(
         self, enable_validation: bool = False, **kwargs
     ):
-        """Dynamically obtain the values of enable_managed_identity, service_principal and client_secret according to the context.
+        """Dynamically obtain the values of enable_managed_identity, service_principal and client_secret according to
+        the context.
 
-        Note: enable_managed_identity will not be decorated into the `mc` object, and changes to the original value will be stored in the intermediates dictionary.
+        Note: enable_managed_identity will not be decorated into the `mc` object, and changes to the original value
+        will be stored in the intermediates dictionary.
 
-        When service_principal and client_secret are not given and enable_managed_identity is True, dynamic completion will not be triggered. For other cases, dynamic completion will be triggered.
-        When service_principal and client_secret are given, the value of enable_managed_identity will be changed to False.
-        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to create a service principal. The parameters subscription_id, location and name (cluster) are also required when calling function "_ensure_aks_service_principal".
-        When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise CLIError.
+        When service_principal and client_secret are not given and enable_managed_identity is True, dynamic completion
+        will not be triggered. For other cases, dynamic completion will be triggered.
+        When service_principal and client_secret are given, the value of enable_managed_identity will be changed to
+        False.
+        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
+        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
+        calling function "_ensure_aks_service_principal".
+        When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
+        CLIError.
 
         :return: A tuple of enable_managed_identity, service_principal and client_secret
         """
