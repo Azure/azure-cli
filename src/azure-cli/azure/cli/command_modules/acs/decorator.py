@@ -1257,7 +1257,7 @@ class AKSCreateContext:
     # pylint: disable=unused-argument,too-many-statements
     def get_enable_managed_identity_service_principal_and_client_secret(
         self, **kwargs
-    ):
+    ) -> Tuple[bool, Union[str, None], Union[str, None]]:
         """Dynamically obtain the values of enable_managed_identity, service_principal and client_secret according to
         the context.
 
@@ -1276,7 +1276,6 @@ class AKSCreateContext:
 
         :return: A tuple of enable_managed_identity, service_principal and client_secret
         """
-
         # service_principal
         sp_parameter_name = "service_principal"
         sp_property_name_in_mc = "client_id"
