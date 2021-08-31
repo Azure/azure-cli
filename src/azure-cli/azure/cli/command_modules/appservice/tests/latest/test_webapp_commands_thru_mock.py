@@ -97,8 +97,15 @@ class TestWebappMocked(unittest.TestCase):
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
         client.web_apps.create_or_update_host_name_binding.return_value = binding
+        client.web_apps.create_or_update_host_name_binding_slot.return_value = binding
         # action
         result = add_hostname(cmd_mock, 'g1', webapp.name, domain)
+
+        # assert
+        self.assertEqual(result.domain_id, domain)
+
+         # action- Slot
+        result = add_hostname(cmd_mock, 'g1', webapp.name, domain, 'slot1')
 
         # assert
         self.assertEqual(result.domain_id, domain)
