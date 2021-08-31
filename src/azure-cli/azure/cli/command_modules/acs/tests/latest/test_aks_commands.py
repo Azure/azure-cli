@@ -2414,10 +2414,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                  '--resource-group={resource_group} '
                  '--cluster-name={name} '
                  '--name={node_pool_name_second} '
-                 '--os-sku Ubuntu',
+                 '--os-sku CBLMariner',
                  checks=[
                     self.check('provisioningState', 'Succeeded'),
-                    self.check('osSku', 'Ubuntu'),
+                    self.check('osSku', 'CBLMariner'),
                  ])
 
         # delete
