@@ -288,7 +288,7 @@ def iot_dps_certificate_get(client, dps_name, resource_group_name, certificate_n
     return client.dps_certificate.get(certificate_name, resource_group_name, dps_name)
 
 
-def iot_dps_certificate_create(client, dps_name, resource_group_name, certificate_name, certificate_path):
+def iot_dps_certificate_create(client, dps_name, resource_group_name, certificate_name, certificate_path, is_verified=None):
     cert_list = client.dps_certificate.list(resource_group_name, dps_name)
     for cert in cert_list.value:
         if cert.name == certificate_name:
@@ -297,17 +297,17 @@ def iot_dps_certificate_create(client, dps_name, resource_group_name, certificat
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-    return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, None, certificate)
+    return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, None, certificate, is_verified)
 
 
-def iot_dps_certificate_update(client, dps_name, resource_group_name, certificate_name, certificate_path, etag):
+def iot_dps_certificate_update(client, dps_name, resource_group_name, certificate_name, certificate_path, etag, is_verified=None):
     cert_list = client.dps_certificate.list(resource_group_name, dps_name)
     for cert in cert_list.value:
         if cert.name == certificate_name:
             certificate = open_certificate(certificate_path)
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-            return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, etag, certificate)
+            return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, etag, certificate, is_verified)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot dps certificate create' to create a new certificate."
                    .format(certificate_name))
 
@@ -317,7 +317,12 @@ def iot_dps_certificate_delete(client, dps_name, resource_group_name, certificat
 
 
 def iot_dps_certificate_gen_code(client, dps_name, resource_group_name, certificate_name, etag):
-    return client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
+    response = client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
+    properties = getattr(response, 'properties', {})
+    cert = getattr(properties, 'certificate', None)
+    if isinstance(cert, bytearray):
+        response.properties.certificate = response.properties.certificate.decode('utf-8')
+    return response
 
 
 def iot_dps_certificate_verify(client, dps_name, resource_group_name, certificate_name, certificate_path, etag):
@@ -339,7 +344,7 @@ def iot_hub_certificate_get(client, hub_name, certificate_name, resource_group_n
     return client.certificates.get(resource_group_name, hub_name, certificate_name)
 
 
-def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_path, resource_group_name=None):
+def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_path, resource_group_name=None, is_verified=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     # Get list of certs
     cert_list = client.certificates.list_by_iot_hub(resource_group_name, hub_name)
@@ -350,13 +355,12 @@ def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_p
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-
-    cert_properties = CertificateProperties(certificate=certificate)
+    cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
     cert_description = CertificateDescription(properties=cert_properties)
     return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
 
 
-def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None):
+def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None, is_verified=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     cert_list = client.certificates.list_by_iot_hub(resource_group_name, hub_name)
     for cert in cert_list.value:
@@ -364,7 +368,7 @@ def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_p
             certificate = open_certificate(certificate_path)
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-            cert_properties = CertificateProperties(certificate=certificate)
+            cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
             cert_description = CertificateDescription(properties=cert_properties)
             return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate."
@@ -397,6 +401,9 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    retention_day=1,
                    c2d_ttl=1,
                    c2d_max_delivery_count=10,
+                   disable_local_auth=None,
+                   disable_device_sas=None,
+                   disable_module_sas=None,
                    feedback_lock_duration=5,
                    feedback_ttl=1,
                    feedback_max_delivery_count=10,
@@ -463,7 +470,10 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                                   messaging_endpoints=msg_endpoint_dic,
                                   storage_endpoints=storage_endpoint_dic,
                                   cloud_to_device=cloud_to_device_properties,
-                                  min_tls_version=min_tls_version)
+                                  min_tls_version=min_tls_version,
+                                  disable_local_auth=disable_local_auth,
+                                  disable_device_sas=disable_device_sas,
+                                  disable_module_sas=disable_module_sas)
     properties.enable_file_upload_notifications = enable_fileupload_notifications
 
     hub_description = IotHubDescription(location=location,
@@ -520,6 +530,9 @@ def update_iot_hub_custom(instance,
                           retention_day=None,
                           c2d_ttl=None,
                           c2d_max_delivery_count=None,
+                          disable_local_auth=None,
+                          disable_device_sas=None,
+                          disable_module_sas=None,
                           feedback_lock_duration=None,
                           feedback_ttl=None,
                           feedback_max_delivery_count=None,
@@ -567,22 +580,7 @@ def update_iot_hub_custom(instance,
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
     # if setting a fileupload storage identity or changing fileupload to identity-based
     if fileupload_storage_identity or fileupload_storage_authentication_type == AuthenticationType.IdentityBased.value:
-        instance_identity = _get_hub_identity_type(instance)
-
-        # if hub has no identity
-        if not instance_identity or instance_identity == IdentityType.none.value:
-            raise ArgumentUsageError('Hub has no identity assigned, please assign a system or user-assigned managed identity to use for file-upload with `az iot hub identity assign`')
-
-        has_system_identity = instance_identity in [IdentityType.system_assigned.value, IdentityType.system_assigned_user_assigned.value]
-        has_user_identity = instance_identity in [IdentityType.user_assigned.value, IdentityType.system_assigned_user_assigned.value]
-
-        # if changing storage identity to '[system]'
-        if fileupload_storage_identity in [None, SYSTEM_ASSIGNED_IDENTITY]:
-            if not has_system_identity:
-                raise ArgumentUsageError('System managed identity must be enabled in order to use managed identity for file upload')
-        # if changing to user identity and hub has no user identities
-        elif fileupload_storage_identity and not has_user_identity:
-            raise ArgumentUsageError('User identity {} must be added to hub in order to use it for file upload'.format(fileupload_storage_identity))
+        _validate_fileupload_identity(instance, fileupload_storage_identity)
 
     default_storage_endpoint = _process_fileupload_args(
         instance.properties.storage_endpoints['$default'],
@@ -593,6 +591,14 @@ def update_iot_hub_custom(instance,
         fileupload_storage_container_uri,
         fileupload_storage_identity,
     )
+
+    # sas token authentication switches
+    if disable_local_auth is not None:
+        instance.properties.disable_local_auth = disable_local_auth
+    if disable_device_sas is not None:
+        instance.properties.disable_device_sas = disable_device_sas
+    if disable_module_sas is not None:
+        instance.properties.disable_module_sas = disable_module_sas
 
     instance.properties.storage_endpoints['$default'] = default_storage_endpoint
 
@@ -1344,6 +1350,25 @@ def _process_fileupload_args(
             raise ArgumentUsageError('In order to set a file upload storage identity, you must set the file upload storage authentication type (--fsa) to IdentityBased')
 
     return default_storage_endpoint
+
+
+def _validate_fileupload_identity(instance, fileupload_storage_identity):
+    instance_identity = _get_hub_identity_type(instance)
+
+    # if hub has no identity
+    if not instance_identity or instance_identity == IdentityType.none.value:
+        raise ArgumentUsageError('Hub has no identity assigned, please assign a system or user-assigned managed identity to use for file-upload with `az iot hub identity assign`')
+
+    has_system_identity = instance_identity in [IdentityType.system_assigned.value, IdentityType.system_assigned_user_assigned.value]
+    has_user_identity = instance_identity in [IdentityType.user_assigned.value, IdentityType.system_assigned_user_assigned.value]
+
+    # if changing storage identity to '[system]'
+    if fileupload_storage_identity in [None, SYSTEM_ASSIGNED_IDENTITY]:
+        if not has_system_identity:
+            raise ArgumentUsageError('System managed identity must be enabled in order to use managed identity for file upload')
+    # if changing to user identity and hub has no user identities
+    elif fileupload_storage_identity and not has_user_identity:
+        raise ArgumentUsageError('User identity {} must be added to hub in order to use it for file upload'.format(fileupload_storage_identity))
 
 
 def _get_hub_identity_type(instance):
