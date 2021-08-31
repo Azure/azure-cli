@@ -186,7 +186,7 @@ def _postgres_parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
-    single_az = result[0].zone_redundant_ha_supported
+    single_az = not result[0].zone_redundant_ha_supported
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -218,7 +218,7 @@ def _mysql_parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
-    single_az = 'ZoneRedundant' in result[0].supported_ha_mode
+    single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
