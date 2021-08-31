@@ -6,10 +6,10 @@
 from azure.mgmt.synapse.models import BlobAuditingPolicyState
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
-from knack.util import CLIError
-from knack.log import get_logger
 from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
 from azure.cli.command_modules.monitor._client_factory import cf_monitor
+from knack.util import CLIError
+from knack.log import get_logger
 
 
 logger = get_logger(__name__)
