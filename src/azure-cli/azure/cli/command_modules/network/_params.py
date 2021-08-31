@@ -192,7 +192,7 @@ def load_arguments(self, _):
         c.argument('cert_password', help='The certificate password')
         c.argument('http_settings_port', help='The HTTP settings port.')
         c.argument('servers', ag_servers_type)
-        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault. You need enable soft delete for keyvault to use this feature.", is_preview=True)
+        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault. You need enable soft delete for keyvault to use this feature.")
         c.argument('ssl_cert_name', options_list='--ssl-certificate-name', help="The certificate name. Default will be `<application-gateway-name>SslCert`.")
 
     with self.argument_context('network application-gateway update', arg_group=None) as c:
@@ -358,7 +358,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
         c.argument('cert_password', help='Certificate password.')
-        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault.", is_preview=True)
+        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault.")
 
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')
