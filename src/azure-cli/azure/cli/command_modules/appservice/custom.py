@@ -710,7 +710,8 @@ def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
 def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
     DeletedAppRestoreRequest = cmd.get_models('DeletedAppRestoreRequest')
     request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restore_from_deleted_app', slot, request)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_restore_from_deleted_app',
+                                   slot, request)
 
 
 def list_function_app(cmd, resource_group_name=None):
@@ -1629,11 +1630,7 @@ def enable_local_git(cmd, resource_group_name, name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     site_config = get_site_configs(cmd, resource_group_name, name, slot)
     site_config.scm_type = 'LocalGit'
-    if slot is None:
-        client.web_apps.create_or_update_configuration(resource_group_name, name, site_config)
-    else:
-        client.web_apps.create_or_update_configuration_slot(resource_group_name, name,
-                                                            site_config, slot)
+    _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update_configuration', slot, site_config)
 
     return {'url': _get_local_git_url(cmd.cli_ctx, client, resource_group_name, name, slot)}
 
