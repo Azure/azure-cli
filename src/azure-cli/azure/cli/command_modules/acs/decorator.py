@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.prompting import NoTTYException, prompt, prompt_pass
+from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 from knack.log import get_logger
 from typing import Any, List, Dict, Tuple, Union
 
@@ -26,14 +26,22 @@ from .custom import (
     set_load_balancer_sku,
     get_subscription_id,
     _ensure_aks_service_principal,
+    _get_user_assigned_identity,
+    subnet_role_assignment_exists,
+    _add_role_assignment,
 )
 
 logger = get_logger(__name__)
 
 
-def safe_list_get(li: List, idx: int, default: Any = None):
-    # Attempt to get the element with index `idx` from an object `li` (which should be a `list`),
-    # if the index is invalid (like out of range), return `default` (whose default value is `None`)
+def safe_list_get(li: List, idx: int, default: Any = None) -> Any:
+    """Get an element from a list without raising IndexError.
+
+    Attempt to get the element with index idx from a list-like object li, and if the index is invalid (such as out of
+    range), return default (whose default value is None).
+
+    :return: an element of any type
+    """
     if isinstance(li, list):
         try:
             return li[idx]
@@ -44,8 +52,10 @@ def safe_list_get(li: List, idx: int, default: Any = None):
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class AKSCreateModels:
-    # Used to store models (i.e. the corresponding class of a certain api version specified by `resource_type`)
-    # which would be used during the creation process.
+    """Store the models used in aks_create.
+
+    The api version of the class corresponding to a model is determined by resource_type.
+    """
     def __init__(
         self,
         cmd: AzCommandsLoader,
@@ -145,23 +155,24 @@ class AKSCreateModels:
 
 # pylint: disable=too-many-public-methods
 class AKSCreateContext:
-    # Used to store intermediate variables (usually this stores the dynamically completed value of the parameter,
-    # which has not been decorated into the `mc` object, and some pure intermediate variables (such as the
-    # subscription ID)) and a copy of the original function parameters, and provide "getter" methods for all
-    # parameters.
-    # To dynamically complete a parameter or check the validity of a parameter, please provide a "getter" function
-    # named `get_xxx`, where `xxx` is the parameter name. In this function, the process of obtaining parameter
-    # values, dynamic completion (optional), and validation (optional) should be followed. The obtaining of
-    # parameter values should further follow the order of obtaining from the `mc` object, from the intermediates,
-    # or from the original value.
-    # Note: Dynamic completion will also perform some operations that regulate parameter values, such as
-    # converting int 0 to None.
-    # Attention: In case of checking the validity of parameters, be sure not to set the `enable_validation` to
-    # `True` to avoid loop calls, when using the getter function to obtain the value of other parameters.
-    # Attention: After the parameter is dynamically completed, it must be added to the intermediates; and after
-    # the parameter is decorated into the `mc` object, the corresponding intermediate should be deleted.
-    # Attention: One of the most basic principles is that when the parameter/profile is decorated into the `mc`
-    # object, it should never be modified, only read-only operations (e.g. validation) can be performed.
+    """Implement getter functions for all parameters in aks_create.
+
+    Note: One of the most basic principles is that when parameters are put into a certain profile, and then
+    decorated into the ManagedCluster object, it shouldn't and can't be modified, only read-only operations
+    (e.g. validation) can be performed.
+
+    This class also stores a copy of the original function parameters, some intermediate variables (such as the
+    subscription ID) and a reference of the ManagedCluster object.
+
+    When adding a new parameter for aks_create, please also provide a "getter" function named `get_xxx`, where `xxx` is
+    the parameter name. In this function, the process of obtaining parameter values, dynamic completion (optional),
+    and validation (optional) should be followed. The obtaining of parameter values should further follow the order
+    of obtaining from the ManagedCluster object or from the original value.
+
+    Attention: In case of checking the validity of parameters, make sure enable_validation is never set to True and
+    read_only is set to True when necessary to avoid loop calls, when using the getter function to obtain the value of
+    other parameters.
+    """
     def __init__(self, cmd: AzCliCommand, raw_parameters: Dict):
         self.cmd = cmd
         if not isinstance(raw_parameters, dict):
@@ -309,7 +320,7 @@ class AKSCreateContext:
         """Dynamically obtain the value of ssh_key_value according to the context.
 
         When both dns_name_prefix and fqdn_subdomain are not assigned, dynamic completion will be triggerd. Function
-        "_get_default_dns_prefix" will be called to create a default dns_name_prefix composed of name(cluster),
+        "_get_default_dns_prefix" will be called to create a default dns_name_prefix composed of name (cluster),
         resource_group_name, and subscription_id.
 
         This function supports the option of enable_validation. When enabled, it will check if both dns_name_prefix and
@@ -1306,7 +1317,7 @@ class AKSCreateContext:
 
         When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
-        tty(pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
+        tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
         raised.
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
@@ -1404,7 +1415,7 @@ class AKSCreateContext:
     def get_enable_ahub(self, **kwargs) -> bool:
         """Obtain the value of enable_ahub.
 
-        Note: This parameter will not be directly decorated into the `mc` object.
+        Note: enable_ahub will not be directly decorated into the `mc` object.
 
         :return: bool
         """
@@ -1437,8 +1448,9 @@ class AKSCreateContext:
         When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
         completion will not be triggered. For other cases, dynamic completion will be triggered.
         When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
-        create a service principal. The parameters subscription_id, location and name(cluster) are also required when
-        calling function "_ensure_aks_service_principal".
+        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
+        calling function "_ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
+        the request.
         When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
         CLIError.
 
@@ -1527,19 +1539,19 @@ class AKSCreateContext:
         # these parameters do not need validation
         return service_principal, client_secret
 
+    # pylint: disable=unused-argument
     def get_enable_managed_identity(
-        self, enable_validation=False, **kwargs
+        self, enable_validation: bool = False, **kwargs
     ) -> bool:
         """Dynamically obtain the values of service_principal and client_secret according to the context.
 
-        Note: This parameter will not be directly decorated into the `mc` object.
+        Note: enable_managed_identity will not be directly decorated into the `mc` object.
 
         When both service_principal and client_secret are assigned and enable_managed_identity is True, dynamic
         completion will be triggered. The value of enable_managed_identity will be set to False.
 
         :return: bool
         """
-        # Note: This parameter will not be decorated into the `mc` object.
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_managed_identity")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1578,6 +1590,81 @@ class AKSCreateContext:
             pass
         return enable_managed_identity
 
+    # pylint: disable=unused-argument
+    def get_skip_subnet_role_assignment(self, **kwargs) -> bool:
+        """Obtain the value of skip_subnet_role_assignment.
+
+        Note: skip_subnet_role_assignment will not be decorated into the `mc` object.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        skip_subnet_role_assignment = self.raw_param.get("skip_subnet_role_assignment")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return skip_subnet_role_assignment
+
+    # pylint: disable=unused-argument
+    def get_assign_identity(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of assign_identity.
+
+        Note: assign_identity will not be decorated into the `mc` object.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        assign_identity = self.raw_param.get("assign_identity")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return assign_identity
+
+    # pylint: disable=unused-argument
+    def get_user_assigned_identity_client_id(self, **kwargs) -> str:
+        """Obtain the client_id of user assigned identity.
+
+        Note: this is not a parameter of aks_create, and it will not be decorated into the `mc` object.
+
+        Parse assign_identity and use ManagedServiceIdentityClient to send the request, get the client_id field in the
+        returned identity object. ResourceNotFoundError, ClientRequestError or InvalidArgumentValueError exceptions
+        may be raised in the above process.
+
+        :return: string
+        """
+        return _get_user_assigned_identity(self.cmd.cli_ctx, self.get_assign_identity()).client_id
+
+    # pylint: disable=unused-argument
+    def get_user_assigned_identity_object_id(self, **kwargs) -> str:
+        """Obtain the principal_id of user assigned identity.
+
+        Note: this is not a parameter of aks_create, and it will not be decorated into the `mc` object.
+
+        Parse assign_identity and use ManagedServiceIdentityClient to send the request, get the principal_id field in
+        the returned identity object. ResourceNotFoundError, ClientRequestError or InvalidArgumentValueError exceptions
+        may be raised in the above process.
+
+        :return: string
+        """
+        return _get_user_assigned_identity(self.cmd.cli_ctx, self.get_assign_identity()).principal_id
+
+    # pylint: disable=unused-argument
+    def get_yes(self, **kwargs) -> bool:
+        """Obtain the value of yes.
+
+        Note: yes will not be decorated into the `mc` object.
+
+        The value of this parameter should be provided by user explicitly.
+
+        :return: yes
+        """
+        # read the original value passed by the command
+        yes = self.raw_param.get("yes")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return yes
+
 
 class AKSCreateDecorator:
     def __init__(
@@ -1602,6 +1689,13 @@ class AKSCreateDecorator:
         self.resource_type = resource_type
 
     def init_mc(self):
+        """Initialize the ManagedCluster object with required parameter location.
+
+        The function "get_subscription_id" will be called, which depends on "az login" in advance, the returned
+        subscription_id will be stored as an intermediate.
+
+        :return: the ManagedCluster object
+        """
         # get subscription id and store as intermediate
         subscription_id = get_subscription_id(self.cmd.cli_ctx)
         self.context.set_intermediate(
@@ -1727,6 +1821,68 @@ class AKSCreateDecorator:
             self.context.remove_intermediate("service_principal")
             self.context.remove_intermediate("client_secret")
         return mc
+
+    def process_add_role_assignment_for_vnet_subnet(self, mc):
+        need_post_creation_vnet_permission_granting = False
+        vnet_subnet_id = self.context.get_vnet_subnet_id()
+        skip_subnet_role_assignment = (
+            self.context.get_skip_subnet_role_assignment()
+        )
+        if (
+            vnet_subnet_id and
+            not skip_subnet_role_assignment and
+            not subnet_role_assignment_exists(self.cmd, vnet_subnet_id)
+        ):
+            # if service_principal_profile is None, then this cluster is an MSI cluster,
+            # and the service principal does not exist. Two cases:
+            # 1. For system assigned identity, we just tell user to grant the
+            # permission after the cluster is created to keep consistent with portal experience.
+            # 2. For user assigned identity, we can grant needed permission to
+            # user provided user assigned identity before creating managed cluster.
+            service_principal_profile = mc.service_principal_profile
+            assign_identity = self.context.get_assign_identity()
+            if service_principal_profile is None and not assign_identity:
+                msg = (
+                    "It is highly recommended to use USER assigned identity "
+                    "(option --assign-identity) when you want to bring your own"
+                    "subnet, which will have no latency for the role assignment to "
+                    "take effect. When using SYSTEM assigned identity, "
+                    "azure-cli will grant Network Contributor role to the "
+                    "system assigned identity after the cluster is created, and "
+                    "the role assignment will take some time to take effect, see "
+                    "https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, "
+                    "proceed to create cluster with system assigned identity?"
+                )
+                if not self.context.get_yes() and not prompt_y_n(
+                    msg, default="n"
+                ):
+                    return None
+                need_post_creation_vnet_permission_granting = True
+            else:
+                scope = vnet_subnet_id
+                identity_client_id = ""
+                if assign_identity:
+                    identity_client_id = (
+                        self.context.get_user_assigned_identity_client_id()
+                    )
+                else:
+                    identity_client_id = service_principal_profile.client_id
+                if not _add_role_assignment(
+                    self.cmd,
+                    "Network Contributor",
+                    identity_client_id,
+                    scope=scope,
+                ):
+                    logger.warning(
+                        "Could not create a role assignment for subnet. "
+                        "Are you an Owner on this subscription?"
+                    )
+        # store need_post_creation_vnet_permission_granting as an intermediate
+        self.context.set_intermediate(
+            "need_post_creation_vnet_permission_granting",
+            need_post_creation_vnet_permission_granting,
+            True,
+        )
 
     def construct_default_mc(self):
         # An all-in-one function used to create the complete `ManagedCluster` object, which will later be
