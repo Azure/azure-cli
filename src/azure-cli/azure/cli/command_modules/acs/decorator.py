@@ -1429,26 +1429,20 @@ class AKSCreateContext:
         return enable_ahub
 
     # pylint: disable=unused-argument,too-many-statements
-    def get_enable_managed_identity_service_principal_and_client_secret(
+    def get_service_principal_and_client_secret(
         self, **kwargs
-    ) -> Tuple[bool, Union[str, None], Union[str, None]]:
-        """Dynamically obtain the values of enable_managed_identity, service_principal and client_secret according to
-        the context.
+    ) -> Tuple[Union[str, None], Union[str, None]]:
+        """Dynamically obtain the values of service_principal and client_secret according to the context.
 
-        Note: enable_managed_identity will not be decorated into the `mc` object, and changes to the original value
-        will be stored in the intermediates dictionary.
-
-        When service_principal and client_secret are not given and enable_managed_identity is True, dynamic completion
-        will not be triggered. For other cases, dynamic completion will be triggered.
-        When service_principal and client_secret are given, the value of enable_managed_identity will be changed to
-        False.
+        When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
+        completion will not be triggered. For other cases, dynamic completion will be triggered.
         When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
-        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
+        create a service principal. The parameters subscription_id, location and name(cluster) are also required when
         calling function "_ensure_aks_service_principal".
         When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
         CLIError.
 
-        :return: A tuple of enable_managed_identity, service_principal and client_secret
+        :return: a tuple containing two elements of string or None
         """
         # service_principal
         sp_parameter_name = "service_principal"
@@ -1494,37 +1488,14 @@ class AKSCreateContext:
                 "Inconsistent state detected, one of sp and secret is read from the `mc` object."
             )
 
-        # enable_managed_identity
-        managed_identity_parameter_name = "enable_managed_identity"
-        # Note: This parameter will not be decorated into the `mc` object.
-        # read the original value passed by the command
-        managed_identity_raw_value = self.raw_param.get(
-            managed_identity_parameter_name
-        )
-        # try to read from intermediates
-        managed_identity_intermediate = self.get_intermediate(
-            managed_identity_parameter_name, None
-        )
-
-        # set default value
-        if managed_identity_intermediate is not None:
-            enable_managed_identity = managed_identity_intermediate
-        else:
-            enable_managed_identity = managed_identity_raw_value
-
-        # dynamic completion for enable_managed_identity
-        if service_principal and client_secret:
-            enable_managed_identity = False
-            # add to intermediate
-            self.set_intermediate(
-                managed_identity_parameter_name,
-                enable_managed_identity,
-                overwrite_exists=True,
-            )
+        # skip dynamic completion & validation if option read_only is specified
+        if kwargs.get("read_only"):
+            return service_principal, client_secret
 
         # dynamic completion for service_principal and client_secret
         dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
+        enable_managed_identity = self.get_enable_managed_identity(read_only=True)
         if not (
             enable_managed_identity and
             not service_principal and
@@ -1554,7 +1525,58 @@ class AKSCreateContext:
             client_secret = principal_obj.get("client_secret")
 
         # these parameters do not need validation
-        return enable_managed_identity, service_principal, client_secret
+        return service_principal, client_secret
+
+    def get_enable_managed_identity(
+        self, enable_validation=False, **kwargs
+    ) -> bool:
+        """Dynamically obtain the values of service_principal and client_secret according to the context.
+
+        Note: This parameter will not be directly decorated into the `mc` object.
+
+        When both service_principal and client_secret are assigned and enable_managed_identity is True, dynamic
+        completion will be triggered. The value of enable_managed_identity will be set to False.
+
+        :return: bool
+        """
+        # Note: This parameter will not be decorated into the `mc` object.
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("enable_managed_identity")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.identity:
+            value_obtained_from_mc = self.mc.identity.type is not None
+
+        # set default value
+        read_from_mc = False
+        if value_obtained_from_mc is not None:
+            enable_managed_identity = value_obtained_from_mc
+            read_from_mc = True
+        else:
+            enable_managed_identity = raw_value
+
+        # skip dynamic completion & validation if option read_only is specified
+        if kwargs.get("read_only"):
+            return enable_managed_identity
+
+        dynamic_completion = False
+        # check whether the parameter meet the conditions of dynamic completion
+        (
+            service_principal,
+            client_secret,
+        ) = self.get_service_principal_and_client_secret(read_only=True)
+        if service_principal and client_secret:
+            dynamic_completion = True
+        # disable dynamic completion if the value is read from `mc`
+        dynamic_completion = dynamic_completion and not read_from_mc
+        if dynamic_completion:
+            enable_managed_identity = False
+
+        # validation
+        if enable_validation:
+            # TODO: add validation
+            pass
+        return enable_managed_identity
 
 
 class AKSCreateDecorator:
@@ -1684,12 +1706,10 @@ class AKSCreateDecorator:
 
         # If customer explicitly provide a service principal, disable managed identity.
         (
-            enable_managed_identity,
             service_principal,
             client_secret,
-        ) = (
-            self.context.get_enable_managed_identity_service_principal_and_client_secret()
-        )
+        ) = self.context.get_service_principal_and_client_secret()
+        enable_managed_identity = self.context.get_enable_managed_identity()
         # Skip create service principal profile for the cluster if the cluster enables managed identity
         # and customer doesn't explicitly provide a service principal.
         if not (

@@ -939,7 +939,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_2 = AKSCreateContext(self.cmd, {"enable_ahub": True})
         self.assertEqual(ctx_2.get_enable_ahub(), True)
 
-    def test_get_enable_managed_identity_service_principal_and_client_secret(
+    def test_get_service_principal_and_client_secret(
         self,
     ):
         # default
@@ -952,8 +952,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(
-            ctx_1.get_enable_managed_identity_service_principal_and_client_secret(),
-            (True, None, None),
+            ctx_1.get_service_principal_and_client_secret(),
+            (None, None),
         )
 
         # dynamic completion
@@ -970,9 +970,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_2.set_intermediate(
             "subscription_id", "1234-5678", overwrite_exists=True
         )
-        self.assertEqual(
-            ctx_2.get_intermediate("enable_managed_identity"), None
-        )
         with patch(
             "azure.cli.command_modules.acs.decorator._get_rg_location",
             return_value="test_location",
@@ -981,12 +978,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
             return_value=None,
         ):
             self.assertEqual(
-                ctx_2.get_enable_managed_identity_service_principal_and_client_secret(),
-                (False, "test_service_principal", "test_client_secret"),
+                ctx_2.get_service_principal_and_client_secret(),
+                ("test_service_principal", "test_client_secret"),
             )
-        self.assertEqual(
-            ctx_2.get_intermediate("enable_managed_identity"), False
-        )
 
         # dynamic completion
         ctx_3 = AKSCreateContext(
@@ -1013,8 +1007,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
             return_value=("test_service_principal", "test_aad_session_key"),
         ):
             self.assertEqual(
-                ctx_3.get_enable_managed_identity_service_principal_and_client_secret(),
-                (True, "test_service_principal", "test_client_secret"),
+                ctx_3.get_service_principal_and_client_secret(),
+                ("test_service_principal", "test_client_secret"),
             )
         service_principal_profile = (
             self.models.ManagedClusterServicePrincipalProfile(
@@ -1028,8 +1022,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_3.attach_mc(mc)
         self.assertEqual(
-            ctx_3.get_enable_managed_identity_service_principal_and_client_secret(),
-            (False, "test_mc_service_principal", "test_mc_client_secret"),
+            ctx_3.get_service_principal_and_client_secret(),
+            ("test_mc_service_principal", "test_mc_client_secret"),
         )
 
         # dynamic completion
@@ -1054,7 +1048,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             return_value=None,
         ):
             with self.assertRaises(CLIError):
-                ctx_4.get_enable_managed_identity_service_principal_and_client_secret()
+                ctx_4.get_service_principal_and_client_secret()
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
@@ -1291,12 +1285,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             location="test_location", windows_profile=windows_profile_2
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
-        self.assertEqual(
-            dec_2.context.get_intermediate("windows_admin_username"), None
-        )
-        self.assertEqual(
-            dec_2.context.get_intermediate("windows_admin_password"), None
-        )
 
     def test_set_up_service_principal_profile(self):
         # default value in `aks_create`
