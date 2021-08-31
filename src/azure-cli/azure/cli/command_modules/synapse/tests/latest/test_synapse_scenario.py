@@ -697,13 +697,13 @@ class SynapseScenarioTests(ScenarioTest):
 
         # test show command
         self.cmd('az synapse sql pool audit-policy show '
-                 '--workspace-name {workspace} --resource-group {rg} --sql-pool-name {sql-pool} ',
+                 '--workspace-name {workspace} --resource-group {rg} --name {sql-pool} ',
                  checks=[
                      self.check('state', 'Disabled')
                  ])
 
         # update audit policy - enable
-        self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace} --sql-pool-name {sql-pool} '
+        self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace} --name {sql-pool} '
              ' --state Enabled --bsts Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
              ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapname',
              checks=[
@@ -714,7 +714,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get audit policy
         self.cmd('az synapse sql pool audit-policy show '
-             '--workspace-name {workspace} --resource-group {rg} --sql-pool-name {sql-pool} --blob-auditing-policy-name bapname',
+             '--workspace-name {workspace} --resource-group {rg} --name {sql-pool} --blob-auditing-policy-name bapname',
              checks=[
                  self.check('state', 'Enabled'),
                  self.check('blobStorageTargetState', 'Enabled'),
@@ -723,7 +723,7 @@ class SynapseScenarioTests(ScenarioTest):
                  self.check('isAzureMonitorTargetEnabled', False)])
 
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-             ' --sql-pool-name {sql-pool} --state Enabled --bsts Enabled --storage-account {storage-account}'
+             ' --name {sql-pool} --state Enabled --bsts Enabled --storage-account {storage-account}'
              ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapn',
              checks=[
                  self.check('state', 'Enabled'),
@@ -733,7 +733,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-             ' --sql-pool-name {sql-pool} --state Disabled --blob-auditing-policy-name bapn',
+             ' --name {sql-pool} --state Disabled --blob-auditing-policy-name bapn',
              checks=[
                  self.check('state', 'Disabled'),
                  self.check('retentionDays', self.kwargs['retention-days']),
@@ -749,7 +749,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - enable log analytics target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --sql-pool-name {sql-pool} --state Enabled'
+                 ' --name {sql-pool} --state Enabled'
                  ' --lats Enabled --lawri {log_analytics_workspace_id} '
                  ' --blob-auditing-policy-name bapn',
                  checks=[
@@ -759,7 +759,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
         self.cmd('az synapse sql pool audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --sql-pool-name {sql-pool} ',
+                 ' --name {sql-pool} ',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -769,7 +769,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable log analytics target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --sql-pool-name {sql-pool} --state Enabled --lats Disabled'
+                 ' --name {sql-pool} --state Enabled --lats Disabled'
                  ' --blob-auditing-policy-name bapn',
                  checks=[
                      self.check('state', 'Enabled'),
@@ -778,7 +778,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('az synapse sql pool audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --sql-pool-name {sql-pool}',
+                 ' --name {sql-pool}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -804,7 +804,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - enable event hub target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --sql-pool-name {sql-pool} --state Enabled --event-hub-target-state Enabled'
+                 ' --name {sql-pool} --state Enabled --event-hub-target-state Enabled'
                  ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}'
                  ' --blob-auditing-policy-name bapn',
                  checks=[
@@ -814,7 +814,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
         self.cmd('az synapse sql pool audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 '  --sql-pool-name {sql-pool}',
+                 '  --name {sql-pool}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -824,7 +824,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable event hub target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 '  --sql-pool-name {sql-pool} --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapn',
+                 '  --name {sql-pool} --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapn',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -832,7 +832,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('az synapse sql pool audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --sql-pool-name {sql-pool}',
+                 ' --name {sql-pool}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),

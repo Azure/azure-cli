@@ -556,7 +556,7 @@ short-summary: Get a SQL pool's auditing policy.
 examples:
   - name: Get a SQL pool's auditing policy.
     text: |-
-        az synapse sql pool audit-policy show --sql-pool-name sqlpool --workspace-name testsynapseworkspace --resource-group rg
+        az synapse sql pool audit-policy show --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
 """
 
 helps['synapse sql pool audit-policy update'] = """
@@ -566,47 +566,47 @@ long-summary: If the policy is being enabled, `--storage-account` or both `--sto
 examples:
   - name: Enable by storage account name.
     text: |
-        az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --blob-storage-target-state Enabled --storage-account mystorage \\
         --blob-auditing-policy-name bapname
   - name: Enable by storage endpoint and key.
     text: |
-        az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --blob-storage-target-state Enabled \\
         --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY== \\
         --blob-auditing-policy-name bapname
   - name: Set the list of audit actions.
     text: |
-        az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\
         --blob-auditing-policy-name bapname
   - name: Disable an auditing policy.
     text: |-
-        az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Disabled --blob-auditing-policy-name bapname
   - name: Enable a log analytics auditing policy.
     text: |
-        az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --log-analytics-target-state Enabled \\
         --log-analytics-workspace-resource-id myworkspaceresourceid --blob-auditing-policy-name bapname
   - name: Disable a log analytics auditing policy.
     text: |
-        az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --log-analytics-target-state Disabled --blob-auditing-policy-name bapname
   - name: Enable an event hub auditing policy.
     text: |
-        az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --event-hub-target-state Enabled \\
         --event-hub-authorization-rule-id eventhubauthorizationruleid --event-hub eventhubname \\
         --blob-auditing-policy-name bapname
   - name: Enable an event hub auditing policy for default event hub.
     text: |
-        az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --event-hub-target-state Enabled \\
         --event-hub-authorization-rule-id eventhubauthorizationruleid --blob-auditing-policy-name bapname
   - name: Disable an event hub auditing policy.
     text: |
-        az synapse sql pool audit-policy update --sql-pool-name sqlpool --workspace-name testsynapseworkspace \\
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapname
 """
 
