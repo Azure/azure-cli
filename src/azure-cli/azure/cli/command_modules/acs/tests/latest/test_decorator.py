@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-from re import T
 from knack import CLI
 from knack.util import CLIError
 import tempfile
