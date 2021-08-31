@@ -461,3 +461,6 @@ def load_command_table(self, _):
     with self.command_group('staticwebapp secrets', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_secrets')
         g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
+
+    from .logicapp.commands import load_logicapp_commands
+    load_logicapp_commands(self.command_group)

@@ -51,6 +51,8 @@ from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMi
 
 from .tunnel import TunnelServer
 
+from .utils import _get_location_from_resource_group
+
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
@@ -1902,12 +1904,6 @@ def _parse_frequency(cmd, frequency):
         raise CLIError('Frequency must be positive')
 
     return frequency_num, frequency_unit
-
-
-def _get_location_from_resource_group(cli_ctx, resource_group_name):
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-    group = client.resource_groups.get(resource_group_name)
-    return group.location
 
 
 def _get_location_from_webapp(client, resource_group_name, webapp):

@@ -84,3 +84,11 @@ def raise_missing_token_suggestion():
                                        "If you need to create a Github Personal Access Token, "
                                        "please run with the '--login-with-github' flag or follow "
                                        "the steps found at the following link:\n{0}".format(pat_documentation))
+
+
+def _get_location_from_resource_group(cli_ctx, resource_group_name):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    group = client.resource_groups.get(resource_group_name)
+    return group.location
