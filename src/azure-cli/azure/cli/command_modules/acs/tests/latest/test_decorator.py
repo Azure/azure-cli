@@ -284,16 +284,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(
             ctx_1.get_dns_name_prefix(), "testname-testrgname-1234-5"
         )
-        self.assertEqual(
-            ctx_1.get_intermediate("dns_name_prefix"),
-            "testname-testrgname-1234-5",
-        )
         mc = self.models.ManagedCluster(
             location="test_location", dns_prefix="test_mc_dns_name_prefix"
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_dns_name_prefix(), "test_mc_dns_name_prefix")
-        self.assertEqual(ctx_1.get_intermediate("dns_name_prefix"), None)
 
         # invalid parameter with validation
         ctx_2 = AKSCreateContext(
@@ -314,11 +309,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
             return_value="test_location",
         ):
             self.assertEqual(ctx_1.get_location(), "test_location")
-        self.assertEqual(ctx_1.get_intermediate("location"), "test_location")
         mc = self.models.ManagedCluster(location="test_mc_location")
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_location(), "test_mc_location")
-        self.assertEqual(ctx_1.get_intermediate("location"), None)
 
     def test_get_kubernetes_version(self):
         # default
@@ -352,10 +345,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
             self.cmd, {"vm_set_type": None, "kubernetes_version": ""}
         )
         self.assertEqual(ctx_1.get_vm_set_type(), "VirtualMachineScaleSets")
-        self.assertEqual(
-            ctx_1.get_intermediate("vm_set_type"),
-            "VirtualMachineScaleSets",
-        )
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             name="test_ap_name", type="test_mc_vm_set_type"
         )
@@ -364,7 +353,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_vm_set_type(), "test_mc_vm_set_type")
-        self.assertEqual(ctx_1.get_intermediate("vm_set_type"), None)
 
         # custom value & dynamic completion
         ctx_2 = AKSCreateContext(
@@ -372,10 +360,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
             {"vm_set_type": "availabilityset", "kubernetes_version": ""},
         )
         self.assertEqual(ctx_2.get_vm_set_type(), "AvailabilitySet")
-        self.assertEqual(
-            ctx_2.get_intermediate("vm_set_type"),
-            "AvailabilitySet",
-        )
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             name="test_ap_name", type="test_mc_vm_set_type"
         )
@@ -384,7 +368,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_2.attach_mc(mc)
         self.assertEqual(ctx_2.get_vm_set_type(), "test_mc_vm_set_type")
-        self.assertEqual(ctx_2.get_intermediate("vm_set_type"), None)
 
     def test_get_load_balancer_sku(self):
         # default & dynamic completion
@@ -410,10 +393,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
             {"load_balancer_sku": None, "kubernetes_version": "1.12.0"},
         )
         self.assertEqual(ctx_2.get_load_balancer_sku(), "basic")
-        self.assertEqual(
-            ctx_2.get_intermediate("load_balancer_sku"),
-            "basic",
-        )
         network_profile = self.models.ContainerServiceNetworkProfile(
             load_balancer_sku="test_mc_load_balancer_sku"
         )
@@ -424,7 +403,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(
             ctx_2.get_load_balancer_sku(), "test_mc_load_balancer_sku"
         )
-        self.assertEqual(ctx_2.get_intermediate("load_balancer_sku"), None)
 
         # invalid parameter with validation
         ctx_3 = AKSCreateContext(
@@ -521,10 +499,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(
             ctx_2.get_nodepool_name(enable_trim=True), "test_nodepoo"
         )
-        self.assertEqual(
-            ctx_2.get_intermediate("nodepool_name"),
-            "test_nodepoo",
-        )
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             name="test_nodepool_name"
         )
@@ -535,15 +509,10 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(
             ctx_2.get_nodepool_name(enable_trim=True), "test_nodepool_name"
         )
-        self.assertEqual(ctx_2.get_intermediate("nodepool_name"), None)
 
         # dynamic completion
         ctx_3 = AKSCreateContext(self.cmd, {"nodepool_name": None})
         self.assertEqual(ctx_3.get_nodepool_name(enable_trim=True), "nodepool1")
-        self.assertEqual(
-            ctx_3.get_intermediate("nodepool_name"),
-            "nodepool1",
-        )
 
     def test_get_nodepool_tags(self):
         # default
@@ -917,10 +886,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 ctx_2.get_windows_admin_username_and_password(),
                 ("test_win_admin_name", "test_win_admin_pd"),
             )
-        self.assertEqual(
-            ctx_2.get_intermediate("windows_admin_username"),
-            "test_win_admin_name",
-        )
         windows_profile = self.models.ManagedClusterWindowsProfile(
             # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
             admin_username="test_mc_win_admin_name",
@@ -951,10 +916,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 ctx_3.get_windows_admin_username_and_password(),
                 ("test_win_admin_name", "test_win_admin_pd"),
             )
-        self.assertEqual(
-            ctx_3.get_intermediate("windows_admin_password"),
-            "test_win_admin_pd",
-        )
         windows_profile = self.models.ManagedClusterWindowsProfile(
             # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
             admin_username="test_mc_win_admin_name",

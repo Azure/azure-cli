@@ -313,13 +313,12 @@ class AKSCreateContext:
         resource_group_name, and subscription_id.
 
         This function supports the option of enable_validation. When enabled, it will check if both dns_name_prefix and
-        fqdn_subdomain are assigend, if so, throw the MutuallyExclusiveArgumentError.
+        fqdn_subdomain are assigend, if so, raise the MutuallyExclusiveArgumentError.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
-        :return: string
+        :return: string or None
         """
         parameter_name = "dns_name_prefix"
-
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -353,10 +352,6 @@ class AKSCreateContext:
                 resource_group_name=self.get_resource_group_name(),
                 subscription_id=self.get_intermediate("subscription_id"),
             )
-            # add to intermediate
-            self.set_intermediate(
-                parameter_name, dns_name_prefix, overwrite_exists=True
-            )
 
         # validation
         if enable_validation:
@@ -377,7 +372,6 @@ class AKSCreateContext:
         :return: string
         """
         parameter_name = "location"
-
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -437,7 +431,7 @@ class AKSCreateContext:
         Note: no_ssh_key will not be decorated into the `mc` object.
 
         This function supports the option of enable_validation. When enabled, it will check if both dns_name_prefix and
-        fqdn_subdomain are assigend, if so, throw the MutuallyExclusiveArgumentError.
+        fqdn_subdomain are assigend, if so, raise the MutuallyExclusiveArgumentError.
         This function supports the option of enable_validation. When enabled, it will call "_validate_ssh_key" to
         verify the validity of ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped;
         otherwise, a CLIError will be raised when the value of ssh_key_value is invalid.
@@ -469,7 +463,6 @@ class AKSCreateContext:
         :return: string
         """
         parameter_name = "vm_set_type"
-
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -518,13 +511,12 @@ class AKSCreateContext:
         kubernetes_version.
 
         This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
-        to "basic" when api_server_authorized_ip_ranges is assigned, if so, throw the MutuallyExclusiveArgumentError.
+        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
         :return: string
         """
         parameter_name = "load_balancer_sku"
-
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -570,10 +562,15 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_api_server_authorized_ip_ranges(
         self, enable_validation: bool = False, **kwargs
-    ):
-        # TODO: need update, raw input should be str, output should be List[str]
-        parameter_name = "api_server_authorized_ip_ranges"
+    ) -> Union[str, List[str], None]:
+        """Obtain the value of api_server_authorized_ip_ranges.
 
+        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
+        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+
+        :return: string, empty list or list of strings, or None
+        """
+        parameter_name = "api_server_authorized_ip_ranges"
         # read the original value passed by the command
         raw_value = self.raw_param.get(parameter_name)
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -606,6 +603,13 @@ class AKSCreateContext:
     def get_fqdn_subdomain(
         self, enable_validation: bool = False, **kwargs
     ) -> Union[str, None]:
+        """Obtain the value of fqdn_subdomain.
+
+        This function supports the option of enable_validation. When enabled, it will check if both dns_name_prefix and
+        fqdn_subdomain are assigend, if so, raise the MutuallyExclusiveArgumentError.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("fqdn_subdomain")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -623,7 +627,7 @@ class AKSCreateContext:
 
         # validation
         if enable_validation:
-            if fqdn_subdomain and self.get_dns_name_prefix():
+            if fqdn_subdomain and self.get_dns_name_prefix(read_only=True):
                 raise MutuallyExclusiveArgumentError(
                     "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
                 )
@@ -631,12 +635,18 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_nodepool_name(self, **kwargs) -> str:
-        parameter_name = "nodepool_name"
+        """Dynamically obtain the value of nodepool_name according to the context.
 
+        When additional option enable_trim is enabled, dynamic completion will be triggerd.
+
+        This function supports the option of enable_trim. When enabled, it will normalize the value of nodepool_name.
+        If no value is assigned, the default value "nodepool1" is set, and if the string length is greater than 12,
+        it is truncated.
+
+        :return: string
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_name")
-        # try to read from intermediates
-        intermediate = self.get_intermediate(parameter_name, None)
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
@@ -650,11 +660,7 @@ class AKSCreateContext:
         read_from_mc = False
         if value_obtained_from_mc is not None:
             nodepool_name = value_obtained_from_mc
-            # clean up intermediate if `mc` has been decorated
-            self.remove_intermediate(parameter_name)
             read_from_mc = True
-        elif intermediate is not None:
-            nodepool_name = intermediate
         else:
             nodepool_name = raw_value
 
@@ -669,16 +675,16 @@ class AKSCreateContext:
                 nodepool_name = "nodepool1"
             else:
                 nodepool_name = nodepool_name[:12]
-            # add to intermediate
-            self.set_intermediate(
-                parameter_name, nodepool_name, overwrite_exists=True
-            )
 
         # this parameter does not need validation
         return nodepool_name
 
     # pylint: disable=unused-argument
-    def get_nodepool_tags(self, **kwargs) -> Union[Dict, None]:
+    def get_nodepool_tags(self, **kwargs) -> Union[Dict[str, str], None]:
+        """Obtain the value of nodepool_tags.
+
+        :return: Dictionary or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_tags")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -701,7 +707,11 @@ class AKSCreateContext:
         return nodepool_tags
 
     # pylint: disable=unused-argument
-    def get_nodepool_labels(self, **kwargs) -> Union[Dict, None]:
+    def get_nodepool_labels(self, **kwargs) -> Union[Dict[str, str], None]:
+        """Obtain the value of nodepool_labels.
+
+        :return: Dictionary or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_labels")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -725,6 +735,15 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_node_count(self, enable_validation: bool = False, **kwargs) -> int:
+        """Obtain the value of node_count.
+
+        This function supports the option of enable_validation. When enabled, on the premise that
+        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
+        raise the RequiredArgumentMissingError; if will also check whether node_count is between min_count and
+        max_count, if not, raise the InvalidArgumentValueError.
+
+        :return: int
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_count")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -763,6 +782,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_node_vm_size(self, **kwargs) -> str:
+        """Obtain the value of node_vm_size.
+
+        :return: string
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_vm_size")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -786,6 +809,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_vnet_subnet_id(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of vnet_subnet_id.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("vnet_subnet_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -809,6 +836,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_ppg(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of ppg(proximity_placement_group_id).
+
+        :return: string or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("ppg")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -834,6 +865,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_zones(self, **kwargs) -> Union[List[str], None]:
+        """Obtain the value of zones.
+
+        :return: list of strings or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("zones")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -857,6 +892,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_enable_node_public_ip(self, **kwargs) -> bool:
+        """Obtain the value of enable_node_public_ip.
+
+        :return: bool
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_node_public_ip")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -882,6 +921,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_node_public_ip_prefix_id(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of node_public_ip_prefix_id.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_public_ip_prefix_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -907,6 +950,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_enable_encryption_at_host(self, **kwargs) -> bool:
+        """Obtain the value of enable_encryption_at_host.
+
+        :return: bool
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_encryption_at_host")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -932,6 +979,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_enable_ultra_ssd(self, **kwargs) -> bool:
+        """Obtain the value of enable_ultra_ssd.
+
+        :return: bool
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_ultra_ssd")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -955,7 +1006,12 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_max_pods(self, **kwargs) -> Union[int, None]:
-        # Note: int 0 is converted to None
+        """Obtain the value of max_pods.
+
+        Note: int 0 is converted to None.
+
+        :return: int or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("max_pods")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -983,7 +1039,12 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_node_osdisk_size(self, **kwargs) -> Union[int, None]:
-        # Note: int 0 is converted to None
+        """Obtain the value of node_osdisk_size.
+
+        Note: int 0 is converted to None.
+
+        :return: int or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_osdisk_size")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1012,6 +1073,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_node_osdisk_type(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of node_osdisk_size.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_osdisk_type")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1037,6 +1102,17 @@ class AKSCreateContext:
     def get_enable_cluster_autoscaler(
         self, enable_validation: bool = False, **kwargs
     ) -> bool:
+        """Obtain the value of enable_cluster_autoscaler.
+
+        This function supports the option of enable_validation. When enabled, on the premise that
+        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
+        raise the RequiredArgumentMissingError; if will also check whether min_count is less than max_count and
+        node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
+        enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
+        if so, raise the RequiredArgumentMissingError.
+
+        :return: bool
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_cluster_autoscaler")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1085,7 +1161,17 @@ class AKSCreateContext:
     def get_min_count(
         self, enable_validation: bool = False, **kwargs
     ) -> Union[int, None]:
-        # Note: the default value of the parameter is None
+        """Obtain the value of min_count.
+
+        This function supports the option of enable_validation. When enabled, on the premise that
+        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
+        raise the RequiredArgumentMissingError; if will also check whether min_count is less than max_count and
+        node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
+        enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
+        if so, raise the RequiredArgumentMissingError.
+
+        :return: int or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("min_count")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1134,7 +1220,17 @@ class AKSCreateContext:
     def get_max_count(
         self, enable_validation: bool = False, **kwargs
     ) -> Union[int, None]:
-        # Note: the default value of the parameter is None
+        """Obtain the value of max_count.
+
+        This function supports the option of enable_validation. When enabled, on the premise that
+        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
+        raise the RequiredArgumentMissingError; if will also check whether min_count is less than max_count and
+        node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
+        enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
+        if so, raise the RequiredArgumentMissingError.
+
+        :return: int or None
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("max_count")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1181,6 +1277,10 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_admin_username(self, **kwargs) -> str:
+        """Obtain the value of admin_username.
+
+        :return: str
+        """
         # read the original value passed by the command
         raw_value = self.raw_param.get("admin_username")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1202,13 +1302,20 @@ class AKSCreateContext:
     def get_windows_admin_username_and_password(
         self, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None]]:
+        """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
+
+        When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
+        triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
+        tty(pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
+        raised.
+
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
+        :return: a tuple containing two elements of string or None
+        """
         # windows_admin_username
         # read the original value passed by the command
         username_raw_value = self.raw_param.get("windows_admin_username")
-        # try to read from intermediates
-        username_intermediate = self.get_intermediate(
-            "windows_admin_username", None
-        )
         # try to read the property value corresponding to the parameter from the `mc` object
         username_value_obtained_from_mc = None
         if self.mc and self.mc.windows_profile:
@@ -1221,18 +1328,12 @@ class AKSCreateContext:
         if username_value_obtained_from_mc is not None:
             windows_admin_username = username_value_obtained_from_mc
             username_read_from_mc = True
-        elif username_intermediate is not None:
-            windows_admin_username = username_intermediate
         else:
             windows_admin_username = username_raw_value
 
         # windows_admin_password
         # read the original value passed by the command
         password_raw_value = self.raw_param.get("windows_admin_password")
-        # try to read from intermediates
-        password_intermediate = self.get_intermediate(
-            "windows_admin_password", None
-        )
         # try to read the property value corresponding to the parameter from the `mc` object
         password_value_obtained_from_mc = None
         if self.mc and self.mc.windows_profile:
@@ -1245,10 +1346,18 @@ class AKSCreateContext:
         if password_value_obtained_from_mc is not None:
             windows_admin_password = password_value_obtained_from_mc
             password_read_from_mc = True
-        elif password_intermediate is not None:
-            windows_admin_password = password_intermediate
         else:
             windows_admin_password = password_raw_value
+
+        # consistent check
+        if username_read_from_mc != password_read_from_mc:
+            raise CLIInternalError(
+                "Inconsistent state detected, one of windows admin name and password is read from the `mc` object."
+            )
+
+        # skip dynamic completion & validation if option read_only is specified
+        if kwargs.get("read_only"):
+            return windows_admin_username, windows_admin_password
 
         username_dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
@@ -1268,12 +1377,6 @@ class AKSCreateContext:
                 raise NoTTYError(
                     "Please specify username for Windows in non-interactive mode."
                 )
-            # add to intermediate
-            self.set_intermediate(
-                "windows_admin_username",
-                windows_admin_username,
-                overwrite_exists=True,
-            )
 
         password_dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
@@ -1293,21 +1396,33 @@ class AKSCreateContext:
                 raise NoTTYError(
                     "Please specify both username and password in non-interactive mode."
                 )
-            # add to intermediate
-            self.set_intermediate(
-                "windows_admin_password",
-                windows_admin_password,
-                overwrite_exists=True,
-            )
 
         # these parameters does not need validation
         return windows_admin_username, windows_admin_password
 
     # pylint: disable=unused-argument
     def get_enable_ahub(self, **kwargs) -> bool:
-        # Note: This parameter will not be decorated into the `mc` object.
+        """Obtain the value of enable_ahub.
+
+        Note: This parameter will not be directly decorated into the `mc` object.
+
+        :return: bool
+        """
         # read the original value passed by the command
         enable_ahub = self.raw_param.get("enable_ahub")
+
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("enable_ahub")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.windows_profile:
+            value_obtained_from_mc = self.mc.windows_profile.license_type == "Windows_Server"
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            enable_ahub = value_obtained_from_mc
+        else:
+            enable_ahub = raw_value
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
