@@ -10,7 +10,7 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-lines
+# pylint: disable=no-self-use,too-many-lines,no-else-return
 import json
 import os
 
@@ -1836,27 +1836,60 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
 
 # region VirtualMachines Images
-def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None,
-                   all=False):  # pylint: disable=redefined-builtin
-    load_thru_services = all
+def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False, edge_zone=None):  # pylint: disable=redefined-builtin
+    load_thru_services = all or edge_zone is not None
 
     if load_thru_services:
-        if not publisher_name and not offer and not sku:
+        if not publisher_name and not offer and not sku and not edge_zone:
             logger.warning("You are retrieving all the images from server which could take more than a minute. "
-                           "To shorten the wait, provide '--publisher', '--offer' or '--sku'. Partial name search "
-                           "is supported.")
-        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location)
+                           "To shorten the wait, provide '--publisher', '--offer' , '--sku' or '--edge-zone'."
+                           " Partial name search is supported.")
+        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone)
     else:
         all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku)
-        logger.warning(
-            'You are viewing an offline list of images, use --all to retrieve an up-to-date list')
+        logger.warning('You are viewing an offline list of images, use --all to retrieve an up-to-date list')
 
-    for i in all_images:
-        i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
+    if edge_zone is not None:
+        for i in all_images:
+            i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['edge_zone'], i['version']])
+    else:
+        for i in all_images:
+            i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
     return all_images
 
 
-def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
+def list_offers(cmd, publisher_name, location, edge_zone=None):
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.list_offers(location=location, edge_zone=edge_zone, publisher_name=publisher_name)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+        return client.list_offers(location=location, publisher_name=publisher_name)
+
+
+def list_publishers(cmd, location, edge_zone=None):
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+        return client.list_publishers(location=location)
+
+
+def list_sku(cmd, location, publisher_name, offer, edge_zone=None,):
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.list_skus(location=location, edge_zone=edge_zone,
+                                          publisher_name=publisher_name, offer=offer)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+        return client.list_skus(location=location, publisher_name=publisher_name, offer=offer)
+
+
+def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None, edge_zone=None):
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
                                            InvalidArgumentValueError)
@@ -1864,19 +1897,30 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
     location = location or get_one_of_subscription_locations(cmd.cli_ctx)
     error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
     if urn:
-        if any([publisher, offer, sku, version]):
-            recommendation = 'Try to use --urn publisher:offer:sku:version only'
+        if any([publisher, offer, sku, edge_zone, version]):
+            recommendation = 'Try to use --urn publisher:offer:sku:version or' \
+                             ' --urn publisher:offer:sku:edge_zone:version'
             raise MutuallyExclusiveArgumentError(error_msg, recommendation)
         items = urn.split(":")
-        if len(items) != 4:
-            raise InvalidArgumentValueError('--urn should be in the format of publisher:offer:sku:version')
-        publisher, offer, sku, version = urn.split(":")
+        if len(items) != 4 and len(items) != 5:
+            raise InvalidArgumentValueError(
+                '--urn should be in the format of publisher:offer:sku:version or publisher:offer:sku:edge_zone:version')
+        if len(items) == 5:
+            publisher, offer, sku, edge_zone, version = urn.split(":")
+        elif len(items) == 4:
+            publisher, offer, sku, version = urn.split(":")
         if version.lower() == 'latest':
             version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
     elif not publisher or not offer or not sku or not version:
         raise RequiredArgumentMissingError(error_msg)
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machine_images.get(location, publisher, offer, sku, version)
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.get(location=location, edge_zone=edge_zone, publisher_name=publisher, offer=offer,
+                                    skus=sku, version=version)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx)
+        return client.virtual_machine_images.get(location, publisher, offer, sku, version)
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):

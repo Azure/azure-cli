@@ -160,7 +160,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # active workspace
         self.cmd(
-            'az synapse workspace key update --name default --key-identifier {key-identifier} --is-active True  --resource-group {rg} --workspace-name {workspace}', checks=[
+            'az synapse workspace activate --name default --key-identifier {key-identifier} --resource-group {rg} --workspace-name {workspace}', checks=[
                 self.check('name', 'default'),
                 self.check('type', 'Microsoft.Synapse/workspaces/keys')
             ])

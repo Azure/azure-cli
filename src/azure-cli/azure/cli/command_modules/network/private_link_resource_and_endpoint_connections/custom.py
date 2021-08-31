@@ -41,7 +41,7 @@ def register_providers():
     # "Microsoft.Migrate/migrateProjects", "2020-06-01-preview", False
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
     # "Microsoft.OffAzure/masterSites", "2020-07-07", False
-    # "Microsoft.Purview/accounts", "2020-12-01-preview", True
+    _register_one_provider("Microsoft.Purview/accounts", "2021-07-01", True)
     _register_one_provider('Microsoft.PowerBI/privateLinkServicesForPowerBI', '2020-06-01', False)
     _register_one_provider('Microsoft.Search/searchServices', '2020-08-01', True)
     _register_one_provider("Microsoft.ServiceBus/namespaces", "2018-01-01-preview", True)

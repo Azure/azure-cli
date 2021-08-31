@@ -64,6 +64,14 @@ regions_in_prod = [
     "westus",
 ]
 
+auto_upgrade_channels = [
+    "rapid",
+    "stable",
+    "patch",
+    "node-image",
+    "none"
+]
+
 storage_profile_types = ["StorageAccount", "ManagedDisks"]
 nodepool_mode_type = ["System", "User"]
 
@@ -203,6 +211,7 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type([CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                                                             CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
+        c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('enable_cluster_autoscaler', action='store_true')
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile,
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
@@ -234,6 +243,7 @@ def load_arguments(self, _):
         c.argument('enable_private_cluster', action='store_true')
         c.argument('private_dns_zone')
         c.argument('fqdn_subdomain')
+        c.argument('disable_public_fqdn', action='store_true')
         c.argument('nodepool_tags', nargs='*', validator=validate_nodepool_tags,
                    help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
         c.argument('enable_managed_identity', action='store_true')
@@ -296,10 +306,13 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int,
                    validator=validate_load_balancer_idle_timeout)
+        c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
         c.argument('enable_ahub', options_list=['--enable-ahub'])
         c.argument('disable_ahub', options_list=['--disable-ahub'])
+        c.argument('enable_public_fqdn', action='store_true')
+        c.argument('disable_public_fqdn', action='store_true')
         c.argument('windows_admin_password', options_list=[
                    '--windows-admin-password'])
         c.argument('enable_managed_identity', action='store_true')
@@ -333,6 +346,7 @@ def load_arguments(self, _):
                    help='If specified, overwrite the default context name.')
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
+        c.argument('public_fqdn', default=False, action='store_true')
 
     for scope in ['aks', 'acs kubernetes', 'acs dcos']:
         with self.argument_context('{} install-cli'.format(scope)) as c:
