@@ -2109,6 +2109,24 @@ def list_deployment_stacks_at_resource_group(cmd, resourcegroup):
     raise CLIError("Please enter the resource group")
 
 
+def delete_deployment_stacks_at_subscription(cmd, name=None, stack=None):
+    if name or stack:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        if name:
+            return rcf.deployment_stacks.begin_delete_at_subscription(name)
+        return rcf.deployment_stacks.begin_delete_at_subscription(stack.split('/')[-1])
+    raise CLIError("Please enter the stack name or stack resource id")
+
+
+def delete_deployment_stacks_at_resource_group(cmd, name=None, resourcegroup = None, stack=None):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    if name and resourcegroup:
+        return rcf.deployment_stacks.begin_delete_at_resource_group(resourcegroup, name)
+    if stack:
+        return rcf.deployment_stacks.begin_delete_at_resource_group(stack.split('/')[4], stack.split('/')[-1])
+    raise CLIError("Please enter the (stack name and resource group) or stack resource id")
+
+
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.list_at_subscription_scope(deployment_name)
