@@ -522,8 +522,8 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
                              "https://docs.microsoft.com/cli/azure/use-cli-effectively#quoting-issues"
 
             # Recommendation especially for PowerShell
-            parent_proc = get_parent_proc_name().lower()
-            if parent_proc in ("powershell.exe", "pwsh.exe"):
+            parent_proc = get_parent_proc_name()
+            if parent_proc and parent_proc.lower() in ("powershell.exe", "pwsh.exe"):
                 recommendation += "\nPowerShell requires additional quoting rules. See " \
                                   "https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md"
 
@@ -1261,6 +1261,8 @@ def _get_parent_proc_name():
 def get_parent_proc_name():
     # This function wraps _get_parent_proc_name, as psutil calls are time-consuming, so use a
     # function-level cache to save the result.
+    # NOTE: The return value may be None if getting parent proc name fails, so always remember to
+    # check it first before calling string methods like lower().
     if not hasattr(get_parent_proc_name, "return_value"):
         parent_proc_name = _get_parent_proc_name()
         setattr(get_parent_proc_name, "return_value", parent_proc_name)
