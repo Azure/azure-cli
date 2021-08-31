@@ -333,7 +333,12 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_template_spec', validator=_validate_template_spec, confirmation=True)
     
     with self.command_group('stacks', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('sub-show', 'list_deployment_stacks')
+        g.custom_command('sub-show', 'show_deployment_stacks_at_subscription')
+        g.custom_command('group-show', 'show_deployment_stacks_at_resource_group')
+        g.custom_command('sub-list', 'list_deployment_stacks_at_subscription')
+        g.custom_command('group-list', 'list_deployment_stacks_at_resource_group')
+        g.custom_command('sub-delete', 'delete_deployment_stacks_at_subscription')
+        g.custom_command('group-delete', 'delete_deployment_stacks_at_resource_group')
 
 
     # az deployment group

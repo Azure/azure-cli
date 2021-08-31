@@ -2078,9 +2078,35 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-def list_deployment_stacks(cmd, name):
+
+def show_deployment_stacks_at_subscription(cmd, name=None, stack=None):
+    if name or stack:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        if name:
+            return rcf.deployment_stacks.get_at_subscription(name)
+        return rcf.deployment_stacks.get_at_subscription(stack.split('/')[-1]) 
+    raise CLIError("Please enter the stack name or stack resource id")
+
+
+def show_deployment_stacks_at_resource_group(cmd, name=None, resourcegroup=None, stack=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    return rcf.deployment_stacks.get_at_subscription(name)
+    if name and resourcegroup:
+        return rcf.deployment_stacks.get_at_resource_group(resourcegroup, name)
+    if stack:
+        return rcf.deployment_stacks.get_at_resource_group(stack.split('/')[4], stack.split('/')[-1])
+    raise CLIError("Please enter the (stack name and resource group) or stack resource id")
+
+
+def list_deployment_stacks_at_subscription(cmd):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    return rcf.deployment_stacks.list_at_subscription()
+
+
+def list_deployment_stacks_at_resource_group(cmd, resourcegroup):
+    if resourcegroup:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        return rcf.deployment_stacks.list_at_resource_group(resourcegroup)
+    raise CLIError("Please enter the resource group")
 
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
