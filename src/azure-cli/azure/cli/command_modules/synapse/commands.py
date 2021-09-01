@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.commands import CliCommandType
-from ._validators import validate_audit_policy_arguments
 
 
 # pylint: disable=line-too-long, too-many-statements, too-many-locals
