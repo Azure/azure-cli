@@ -63,6 +63,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', 'IotCentralClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
+    MGMT_IOTDPS = ('azure.mgmt.iothubprovisioningservices', 'IotDpsClient')
     MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShift4Client')
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
@@ -221,6 +222,7 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
         ResourceType.MGMT_IOTHUB: '2021-07-01',
+        ResourceType.MGMT_IOTDPS: '2020-03-01',
         ResourceType.MGMT_IOTCENTRAL: '2018-09-01',
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
