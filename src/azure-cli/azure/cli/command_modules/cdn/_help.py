@@ -114,10 +114,14 @@ examples:
         --origin www.example.com 80 443
         /subscriptions/subid/resourcegroups/rg1/providers/Microsoft.Network/privateLinkServices/pls1
         eastus "Please approve this request"
-  - name: Create an endpoint with a custom domain with compression and only HTTPS.
+  - name: Create an https-only endpoint with a custom domain origin and support compression for Azure CDN's default compression MIME types.
     text: >
         az cdn endpoint create -g group -n endpoint --profile-name profile
         --origin www.example.com --no-http --enable-compression
+  - name: Create an endpoint with a custom domain origin and support compression for specific MIME types.
+    text: >
+        az cdn endpoint create -g group -n endpoint --profile-name profile
+        --origin www.example.com --enable-compression --content-types-to-compress text/plain text/html
 """
 
 helps['cdn endpoint delete'] = """
