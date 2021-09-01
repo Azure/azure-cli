@@ -1679,6 +1679,14 @@ class AKSCreateDecorator:
         raw_parameters: Dict,
         resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
     ):
+        """Internal controller of aks_create.
+
+        Break down the all-in-one aks_create function into several relatively independent functions (some of them have
+        a certain order dependency) that only focus on a specific profile or process a specific piece of logic.
+        In addition, an overall control function is provided. By calling the aforementioned independent functions one
+        by one, a complete ManagedCluster object is gradually decorated and finally requests are sent to create a
+        cluster.
+        """
         self.cmd = cmd
         self.client = client
         self.models = models
@@ -1711,6 +1719,10 @@ class AKSCreateDecorator:
         return mc
 
     def set_up_agent_pool_profiles(self, mc):
+        """Set up agent pool profiles for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
         if not isinstance(mc, self.models.ManagedCluster):
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
@@ -1746,12 +1758,17 @@ class AKSCreateDecorator:
         return mc
 
     def set_up_linux_profile(self, mc):
+        """Set up linux profile for the ManagedCluster object.
+
+        Linux profile is just used for SSH access to VMs, so it will be omitted if --no-ssh-key option was specified.
+
+        :return: the ManagedCluster object
+        """
         if not isinstance(mc, self.models.ManagedCluster):
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
 
-        # LinuxProfile is just used for SSH access to VMs, so omit it if --no-ssh-key was specified.
         if not self.context.get_no_ssh_key(enable_validation=True):
             ssh_config = self.models.ContainerServiceSshConfiguration(
                 public_keys=[
@@ -1769,6 +1786,10 @@ class AKSCreateDecorator:
         return mc
 
     def set_up_windows_profile(self, mc):
+        """Set up windows profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
         if not isinstance(mc, self.models.ManagedCluster):
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
@@ -1797,6 +1818,13 @@ class AKSCreateDecorator:
         return mc
 
     def set_up_service_principal_profile(self, mc):
+        """Set up service principal profile for the ManagedCluster object.
+
+        The function "_ensure_aks_service_principal" will be called if the user provides an incomplete sp and secret
+        pair, which internally used GraphRbacManagementClient to send the request to create sp.
+
+        :return: the ManagedCluster object
+        """
         if not isinstance(mc, self.models.ManagedCluster):
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
@@ -1826,7 +1854,25 @@ class AKSCreateDecorator:
             self.context.remove_intermediate("client_secret")
         return mc
 
-    def process_add_role_assignment_for_vnet_subnet(self, mc):
+    def process_add_role_assignment_for_vnet_subnet(self, mc) -> None:
+        """Add role assignment for vent subnet.
+
+        The function "subnet_role_assignment_exists" will be called to verfiy if the role assignment already exists for
+        the subnet, which internally used AuthorizationManagementClient to send the request.
+        The function "_get_user_assigned_identity" will be called to get the client id of the user assigned identity,
+        which internally used ManagedServiceIdentityClient to send the request.
+        The function "_add_role_assignment" will be called to add role assignment for the subnet, which internally used
+        AuthorizationManagementClient to send the request.
+
+        This function will store an intermediate need_post_creation_vnet_permission_granting.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
         need_post_creation_vnet_permission_granting = False
         vnet_subnet_id = self.context.get_vnet_subnet_id()
         skip_subnet_role_assignment = (
@@ -1889,12 +1935,17 @@ class AKSCreateDecorator:
         )
 
     def construct_default_mc(self):
-        # An all-in-one function used to create the complete `ManagedCluster` object, which will later be
-        # passed as a parameter to the underlying SDK (mgmt-containerservice) to send the actual request.
-        # Note: to reduce the risk of regression introduced by refactoring, this function is not complete
-        # and is being implemented gradually.
+        """The overall control function used to construct the default ManagedCluster object.
 
-        # initialize the `ManagedCluster` object, also set up the intermediate named "subscription_id"
+        Note: To reduce the risk of regression introduced by refactoring, this function is not complete
+        and is being implemented gradually.
+
+        The complete ManagedCluster object will later be passed as a parameter to the underlying SDK
+        (mgmt-containerservice) to send the actual request.
+
+        :return: the ManagedCluster object
+        """
+        # initialize the ManagedCluster object
         mc = self.init_mc()
         # set up agent pool profile(s)
         mc = self.set_up_agent_pool_profiles(mc)
@@ -1906,4 +1957,6 @@ class AKSCreateDecorator:
         mc = self.set_up_service_principal_profile(mc)
         # add role assignment for vent subnet
         self.process_add_role_assignment_for_vnet_subnet(mc)
+
+        # TODO: set up other profiles
         return mc
