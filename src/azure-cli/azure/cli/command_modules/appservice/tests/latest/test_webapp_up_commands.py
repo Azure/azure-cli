@@ -294,6 +294,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @live_only()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_invalid_name(self, resource_group):
         webapp_name = self.create_random_name('invalid_name', 40)
@@ -324,6 +325,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_name_exists_not_in_subscription(self, resource_group):
