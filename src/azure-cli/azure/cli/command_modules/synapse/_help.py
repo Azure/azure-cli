@@ -607,7 +607,7 @@ examples:
   - name: Disable an event hub auditing policy.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapname
+        --resource-group rg  --event-hub-target-state Disabled --blob-auditing-policy-name bapname
 """
 
 helps['synapse workspace key'] = """

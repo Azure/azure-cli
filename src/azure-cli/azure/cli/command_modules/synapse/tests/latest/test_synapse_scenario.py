@@ -460,45 +460,6 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'Enabled')
                  ])
 
-    @record_only()
-    def test_sql_pool_audit_policy(self):
-        self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'zes0508test1pool',
-            'storage-account': 'chayangstoragewestus2'
-        })
-
-        # test show command
-        self.cmd('az synapse sql pool audit-policy show '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
-                 checks=[
-                     self.check('state', 'Disabled')
-                 ])
-
-        # test validator
-        self.cmd('az synapse sql pool audit-policy update '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
-
-        # test for updating state from Disabled to Enabled with storage and retention days
-        self.cmd('az synapse sql pool audit-policy update --state Enabled --storage-account {storage-account} '
-                 '--retention-days 7 --name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
-        self.cmd('az synapse sql pool audit-policy show '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
-                 checks=[
-                     self.check('state', 'Enabled')
-                 ])
-
-        # test for updating state from Enabled to Disabled
-        self.cmd('az synapse sql pool audit-policy update --state Disabled '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
-        self.cmd('az synapse sql pool audit-policy show '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
-                 checks=[
-                     self.check('state', 'Disabled')
-                 ])
-
 
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_ws_audit_policy_logentry_eventhub(self):
@@ -668,15 +629,15 @@ class SynapseScenarioTests(ScenarioTest):
     def test_sql_pool_audit_policy_logentry_eventhub(self):
         self.kwargs.update({
             'location': 'eastus',
-            'log_analytics_workspace_name': self.create_random_name("laws", 20),#'logAnalyticstestsql',
+            'log_analytics_workspace_name': self.create_random_name("laws", 20),
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
             'performance-level': 'DW400c',
             'retention-days': '30',
             'audit-actions-expected': ['SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP'],
             'audit-actions-input': 'SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP',
-            'eventhub_name': self.create_random_name("ehsrv", 20),#'testehsrv02',
-            'eventhub_namespace':  self.create_random_name("ehnamespace", 20),  #'testehnamespace02',
-            'eventhub_auth_rule': self.create_random_name("ehauthruledb", 20),  #'testehauthruledb02',
+            'eventhub_name': self.create_random_name("ehsrv", 20),
+            'eventhub_namespace':  self.create_random_name("ehnamespace", 20),
+            'eventhub_auth_rule': self.create_random_name("ehauthruledb", 20),
         })
 
         # create a workspace
@@ -875,44 +836,6 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
         self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
 
-    @record_only()
-    def test_sql_audit_policy(self):
-        self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
-            'storage-account': 'chayangstoragewestus2'
-        })
-
-        # test show command
-        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                 --blob-auditing-policy-name bapname',
-                 checks=[
-                     self.check('state', 'Disabled')
-                 ])
-
-        # test validator of this command
-        self.cmd('az synapse sql audit-policy update --workspace-name {workspace} --resource-group {rg} \
-                 --blob-auditing-policy-name bapname', expect_failure=True)
-
-        # test for updating state from Disabled to Enabled with storage and retention days
-        self.cmd('az synapse sql audit-policy update --state Enabled --storage-account {storage-account} '
-                 '--retention-days 7 --workspace-name {workspace} --resource-group {rg} \
-                 --blob-auditing-policy-name bapname')
-        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                --blob-auditing-policy-name bapname',
-                 checks=[
-                     self.check('state', 'Enabled')
-                 ])
-
-        # test for updating state from Enabled to Disabled
-        self.cmd('az synapse sql audit-policy update --state Disabled '
-                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname')
-        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                 --blob-auditing-policy-name bapname',
-                 checks=[
-                     self.check('state', 'Disabled')
-                 ])
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
