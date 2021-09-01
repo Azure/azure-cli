@@ -4749,7 +4749,7 @@ short-summary: Update a custom IP prefix resource.
 examples:
   - name: Update a custom IP prefix resource.
     text: |
-        az network custom-ip prefix update --name MyCustomIpPrefix --resource-group MyResourceGroup --set useRemoteGateways=true
+        az network custom-ip prefix update --name MyCustomIpPrefix --resource-group MyResourceGroup --tags foo=doo
 """
 
 helps['network public-ip'] = """
