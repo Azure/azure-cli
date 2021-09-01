@@ -286,7 +286,7 @@ class TestWebappMocked(unittest.TestCase):
         restore_deleted_webapp(cmd_mock, '12345', 'rg', 'web1', None, True)
 
         # assert
-        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'restore_from_deleted_app', None, request)
+        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'begin_restore_from_deleted_app', None, request)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_list_webapp_snapshots(self, site_op_mock):
