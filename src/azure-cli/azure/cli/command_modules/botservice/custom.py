@@ -8,6 +8,7 @@ import os
 import shutil
 from uuid import UUID
 
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
 from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
@@ -22,7 +23,6 @@ from azure.mgmt.botservice.models import (
     ConnectionSetting,
     ConnectionSettingProperties,
     ConnectionSettingParameter,
-    ErrorException,
     Sku)
 
 from knack.util import CLIError
@@ -86,7 +86,7 @@ def __handle_failed_name_check(name_response, cmd, client, resource_group_name, 
         existing_bot = get_bot(cmd, client, resource_group_name, resource_name)
         logger.warning('Provided bot name already exists in Resource Group. Returning bot information:')
         return existing_bot
-    except ErrorException as e:
+    except HttpResponseError as e:
         if e.error.error.code == 'ResourceNotFound':
             code = e.error.error.code
             message = e.error.error.message

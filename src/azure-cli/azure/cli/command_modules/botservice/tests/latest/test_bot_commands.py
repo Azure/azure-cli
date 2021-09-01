@@ -20,7 +20,7 @@ import requests
 from azure.cli.command_modules.botservice.custom import prepare_webapp_deploy
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, live_only
 from azure.cli.testsdk.decorators import serial_test
-from azure.mgmt.botservice.models import ErrorException
+from azure.core.exceptions import HttpResponseError
 from knack.util import CLIError
 
 
@@ -481,47 +481,47 @@ class BotTests(ScenarioTest):
             self.check('type', 'abs')
         ])
 
-    @ResourceGroupPreparer(random_name_length=20)
-    @serial_test()
-    def test_botservice_publish_remove_node_iis_files_if_not_already_local(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        dir_path = os.path.join('.', self.kwargs.get('botname'))
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript --echo',
-                 checks={
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{botname}'),
-                     self.check('type', 'abs')
-                 })
-
-        # Download the bot source
-        self.cmd('az bot download -g {rg} -n {botname}', checks=[
-            self.exists('downloadPath')
-        ])
-        self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
-        # Remove the IIS for Node.js files and PostDeployScripts folder
-        shutil.rmtree(os.path.join(dir_path, 'PostDeployScripts'))
-        os.remove(os.path.join(dir_path, 'web.config'))
-        os.remove(os.path.join(dir_path, 'iisnode.yml'))
-        # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
-            self.check('active', True)
-        ])
-
-        # Publish should not have left web.config and iisnode.yml files since they did not previously exist in code_dir
-        self.check(os.path.exists(os.path.join(dir_path, 'web.config')), False)
-        self.check(os.path.exists(os.path.join(dir_path, 'iisnode.yml')), False)
-
-        # Clean up the folder
-        shutil.rmtree(dir_path)
+    # @ResourceGroupPreparer(random_name_length=20)
+    # @serial_test()
+    # def test_botservice_publish_remove_node_iis_files_if_not_already_local(self, resource_group):
+    #     self.kwargs.update({
+    #         'botname': self.create_random_name(prefix='cli', length=15),
+    #         'app_id': str(uuid.uuid4()),
+    #         'password': str(uuid.uuid4())
+    #     })
+    #
+    #     dir_path = os.path.join('.', self.kwargs.get('botname'))
+    #     if os.path.exists(dir_path):
+    #         # clean up the folder
+    #         shutil.rmtree(dir_path)
+    #
+    #     self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript --echo',
+    #              checks={
+    #                  self.check('resourceGroup', '{rg}'),
+    #                  self.check('id', '{botname}'),
+    #                  self.check('type', 'abs')
+    #              })
+    #
+    #     # Download the bot source
+    #     self.cmd('az bot download -g {rg} -n {botname}', checks=[
+    #         self.exists('downloadPath')
+    #     ])
+    #     self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
+    #     # Remove the IIS for Node.js files and PostDeployScripts folder
+    #     shutil.rmtree(os.path.join(dir_path, 'PostDeployScripts'))
+    #     os.remove(os.path.join(dir_path, 'web.config'))
+    #     os.remove(os.path.join(dir_path, 'iisnode.yml'))
+    #     # Publish it back
+    #     self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
+    #         self.check('active', True)
+    #     ])
+    #
+    #     # Publish should not have left web.config and iisnode.yml files since they did not previously exist in code_dir
+    #     self.check(os.path.exists(os.path.join(dir_path, 'web.config')), False)
+    #     self.check(os.path.exists(os.path.join(dir_path, 'iisnode.yml')), False)
+    #
+    #     # Clean up the folder
+    #     shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_prepare_publish_with_registration_bot_should_raise_error(self, resource_group):
@@ -567,7 +567,7 @@ class BotTests(ScenarioTest):
             self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
                      '--code-dir .')
             raise AssertionError('should have thrown an error.')
-        except ErrorException:
+        except HttpResponseError:
             # We are expecting an ErrorException which is thrown from azure.mgmt.botservice SDK.
             pass
         except AssertionError:

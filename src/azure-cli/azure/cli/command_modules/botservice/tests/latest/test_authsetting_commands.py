@@ -12,7 +12,7 @@ class AuthSettingTests(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=20)
     def test_auth_setting(self, resource_group):
         self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=10),
+            'botname': self.create_random_name(prefix='cli-a', length=10),
             'endpoint': 'https://www.google.com/api/messages',
             'app_id': str(uuid.uuid4()),
             'setting_name': self.create_random_name(prefix='auth', length=10),

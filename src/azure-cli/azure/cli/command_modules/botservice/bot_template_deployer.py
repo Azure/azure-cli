@@ -82,7 +82,7 @@ class BotTemplateDeployer:
             "appId": appid,
             "appSecret": password,
             "serverFarmId": "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/serverfarms/{2}".format(
-                client.config.subscription_id, resource_group_name, resource_name),
+                client._config.subscription_id, resource_group_name, resource_name),
             "zipUrl": zip_url,
             "botEnv": "prod",
             "createServerFarm": True,

@@ -70,7 +70,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
                                '.com' in raw_bot_properties.properties.endpoint)
             host = 'https://portal.azure.com/' if is_public_azure else 'https://portal.azure.us/'
             subscription_id = get_subscription_id(cmd.cli_ctx)
-            tenant_id = profile.get_subscription(subscription=client.config.subscription_id)['tenantId']
+            tenant_id = profile.get_subscription(subscription=client._config.subscription_id)['tenantId']
             settings_url = host + '#@{}/resource/subscriptions/{}/resourceGroups/{}/providers/Microsoft.BotService/botServices/{}/app_settings'.format(tenant_id, subscription_id, resource_group_name, resource_name)  # pylint: disable=line-too-long
 
             logger.warning('"MicrosoftAppPassword" and "botFilePath" not found in application settings')
@@ -91,8 +91,8 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
             'appPassword': app_password,
             'endpoint': raw_bot_properties.properties.endpoint,
             'resourceGroup': str(resource_group_name),
-            'tenantId': profile.get_subscription(subscription=client.config.subscription_id)['tenantId'],
-            'subscriptionId': client.config.subscription_id,
+            'tenantId': profile.get_subscription(subscription=client._config.subscription_id)['tenantId'],
+            'subscriptionId': client._config.subscription_id,
             'serviceName': resource_name
         }
 
