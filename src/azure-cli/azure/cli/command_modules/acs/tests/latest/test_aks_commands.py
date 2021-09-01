@@ -4819,7 +4819,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_autoscaler(self, resource_group, resource_group_location):
+    def test_aks_create_autoscaler_then_update(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'name': aks_name,
@@ -4835,7 +4835,45 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('autoScalerProfile.scanInterval', '30s'),
             self.check('autoScalerProfile.expander', 'least-waste'),
+            self.check('agentPoolProfiles[0].enableAutoScaling', True),
             self.check('agentPoolProfiles[0].minCount', 1),
+            self.check('agentPoolProfiles[0].maxCount', 3)
+        ])
+
+        # disable autoscaler
+        disable_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} --disable-cluster-autoscaler'
+        self.cmd(disable_autoscaler_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].enableAutoScaling', False),
+            self.check('agentPoolProfiles[0].minCount', None),
+            self.check('agentPoolProfiles[0].maxCount', None)
+        ])
+
+        # enable autoscaler
+        enable_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                                '--enable-cluster-autoscaler --min-count 2 --max-count 5'
+        self.cmd(enable_autoscaler_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].enableAutoScaling', True),
+            self.check('agentPoolProfiles[0].minCount', 2),
+            self.check('agentPoolProfiles[0].maxCount', 5)
+        ])
+
+        # clear autoscaler profile
+        clear_autoscaler_profile_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                                       '--cluster-autoscaler-profile=""'
+        self.cmd(clear_autoscaler_profile_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoScalerProfile.scanInterval', '10s'),
+            self.check('autoScalerProfile.expander', 'random')
+        ])
+
+        # update autoscaler
+        update_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                                '--update-cluster-autoscaler --min-count 3 --max-count 3'
+        self.cmd(update_autoscaler_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].minCount', 3),
             self.check('agentPoolProfiles[0].maxCount', 3)
         ])
 
@@ -5378,6 +5416,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', False),
         ])
+
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
@@ -5414,6 +5453,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', True),
         ])
+
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
