@@ -225,6 +225,9 @@ parameters:
     short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
     populator-commands:
       - "`az aks get-versions`"
+  - name: --os-sku
+    type: string
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner.
   - name: --ssh-key-value
     type: string
     short-summary: Public key path or key contents to install on node VMs for SSH access. For example, 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'.
@@ -505,6 +508,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --assign-identity <control-plane-identity-resource-id> --assign-kubelet-identity <kubelet-identity-resource-id>
   - name: Create a kubernetes cluster in the Edge Zone.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --location <location> --kubernetes-version 1.20.7 --edge-zone <edge-zone-name>
+  - name: Create a kubernetes cluster with a specific OS SKU
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu
 """
 
 helps['aks update'] = """
@@ -821,6 +826,9 @@ parameters:
   - name: --os-type
     type: string
     short-summary: The OS Type. Linux or Windows.
+  - name: --os-sku
+    type: string
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -864,6 +872,9 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
   - name: Create a nodepool with UltraSSD enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-ultra-ssd
+  - name: Create a nodepool cluster with a specific OS SKU
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku Ubuntu
+
 """
 
 helps['aks nodepool delete'] = """
