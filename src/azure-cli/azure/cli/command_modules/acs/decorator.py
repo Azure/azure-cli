@@ -1632,7 +1632,10 @@ class AKSCreateContext:
 
         :return: string
         """
-        return _get_user_assigned_identity(self.cmd.cli_ctx, self.get_assign_identity()).client_id
+        assigned_identity = self.get_assign_identity()
+        if assigned_identity is None or assigned_identity == "":
+            raise RequiredArgumentMissingError("No assigned identity provided.")
+        return _get_user_assigned_identity(self.cmd.cli_ctx, assigned_identity).client_id
 
     # pylint: disable=unused-argument
     def get_user_assigned_identity_object_id(self, **kwargs) -> str:
@@ -1646,15 +1649,16 @@ class AKSCreateContext:
 
         :return: string
         """
-        return _get_user_assigned_identity(self.cmd.cli_ctx, self.get_assign_identity()).principal_id
+        assigned_identity = self.get_assign_identity()
+        if assigned_identity is None or assigned_identity == "":
+            raise RequiredArgumentMissingError("No assigned identity provided.")
+        return _get_user_assigned_identity(self.cmd.cli_ctx, assigned_identity).principal_id
 
     # pylint: disable=unused-argument
     def get_yes(self, **kwargs) -> bool:
         """Obtain the value of yes.
 
         Note: yes will not be decorated into the `mc` object.
-
-        The value of this parameter should be provided by user explicitly.
 
         :return: yes
         """
@@ -1881,7 +1885,7 @@ class AKSCreateDecorator:
         self.context.set_intermediate(
             "need_post_creation_vnet_permission_granting",
             need_post_creation_vnet_permission_granting,
-            True,
+            overwrite_exists=True,
         )
 
     def construct_default_mc(self):
@@ -1900,4 +1904,6 @@ class AKSCreateDecorator:
         mc = self.set_up_windows_profile(mc)
         # set up service principal profile
         mc = self.set_up_service_principal_profile(mc)
+        # add role assignment for vent subnet
+        self.process_add_role_assignment_for_vnet_subnet(mc)
         return mc

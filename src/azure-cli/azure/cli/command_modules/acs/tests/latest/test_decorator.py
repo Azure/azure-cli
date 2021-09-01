@@ -8,7 +8,7 @@ from knack import CLI
 from knack.util import CLIError
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
@@ -1049,6 +1049,93 @@ class AKSCreateContextTestCase(unittest.TestCase):
             with self.assertRaises(CLIError):
                 ctx_4.get_service_principal_and_client_secret()
 
+    def test_get_enable_managed_identity(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_managed_identity": True,
+                "service_principal": None,
+                "client_secret": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_enable_managed_identity(), True)
+
+        # dynamic completion
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "name": "test_name",
+                "resource_group_name": "test_rg_name",
+                "enable_managed_identity": True,
+                "service_principal": "test_service_principal",
+                "client_secret": "test_client_secret",
+            },
+        )
+        ctx_2.set_intermediate(
+            "subscription_id", "1234-5678", overwrite_exists=True
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            return_value="test_location",
+        ), patch(
+            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
+            return_value=None,
+        ):
+            self.assertEqual(
+                ctx_2.get_service_principal_and_client_secret(),
+                ("test_service_principal", "test_client_secret"),
+            )
+
+    def test_get_skip_subnet_role_assignment(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"skip_subnet_role_assignment": False}
+        )
+        self.assertEqual(ctx_1.get_skip_subnet_role_assignment(), False)
+
+    def test_get_assign_identity(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"assign_identity": None})
+        self.assertEqual(ctx_1.get_assign_identity(), None)
+
+    def test_get_user_assigned_identity_client_id(self):
+        # invalid parameter
+        ctx_1 = AKSCreateContext(self.cmd, {"assign_identity": None})
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_1.get_user_assigned_identity_client_id()
+
+    def test_get_user_assigned_identity_object_id(self):
+        # custom value
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "assign_identity": "/subscriptions/1234/resourcegroups/test_rg/providers/microsoft.managedidentity/userassignedidentities/5678"
+            },
+        )
+        msi_client = Mock()
+        identity_obj = Mock()
+        identity_obj.principal_id = "8765-4321"
+        msi_client.user_assigned_identities.get = Mock(
+            return_value=identity_obj
+        )
+        with patch(
+            "azure.cli.command_modules.acs.custom.get_msi_client",
+            return_value=msi_client,
+        ) as get_msi_client:
+            self.assertEqual(
+                ctx_1.get_user_assigned_identity_object_id(), "8765-4321"
+            )
+        get_msi_client.assert_called_once_with(self.cmd.cli_ctx, "1234")
+        msi_client.user_assigned_identities.get.assert_called_once_with(
+            resource_group_name="test_rg", resource_name="5678"
+        )
+
+    def test_get_yes(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"yes": False})
+        self.assertEqual(ctx_1.get_yes(), False)
+
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -1339,3 +1426,89 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             service_principal_profile=service_principal_profile_2,
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+    def test_process_add_role_assignment_for_vnet_subnet(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "vnet_subnet_id": None,
+                "skip_subnet_role_assignment": False,
+            },
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.process_add_role_assignment_for_vnet_subnet(mc_1)
+        self.assertEqual(
+            dec_1.context.get_intermediate(
+                "need_post_creation_vnet_permission_granting"
+            ),
+            False,
+        )
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "vnet_subnet_id": "test_vnet_subnet_id",
+                "skip_subnet_role_assignment": False,
+                "assign_identity": None,
+                "yes": True,
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        with patch(
+            "azure.cli.command_modules.acs.decorator.subnet_role_assignment_exists",
+            return_value=False,
+        ):
+            dec_2.process_add_role_assignment_for_vnet_subnet(mc_2)
+        self.assertEqual(
+            dec_2.context.get_intermediate(
+                "need_post_creation_vnet_permission_granting"
+            ),
+            True,
+        )
+
+        # custom value
+        dec_3 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "vnet_subnet_id": "test_vnet_subnet_id",
+                "skip_subnet_role_assignment": False,
+                "assign_identity": None,
+            },
+        )
+        service_principal_profile_3 = (
+            self.models.ManagedClusterServicePrincipalProfile(
+                client_id="test_service_principal", secret="test_client_secret"
+            )
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=service_principal_profile_3,
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.subnet_role_assignment_exists",
+            return_value=False,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator._add_role_assignment",
+            return_value=True,
+        ) as add_role_assignment:
+            dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
+        add_role_assignment.assert_called_once_with(
+            self.cmd,
+            "Network Contributor",
+            "test_service_principal",
+            scope="test_vnet_subnet_id",
+        )
+        self.assertEqual(
+            dec_3.context.get_intermediate(
+                "need_post_creation_vnet_permission_granting"
+            ),
+            False,
+        )
