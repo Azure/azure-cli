@@ -3701,7 +3701,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
-              os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False):
+              os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False, ase=None):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -3828,7 +3828,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     # updated we update those
     try:
         create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
-                                number_of_workers=1 if _is_linux else None, location=loc)
+                                number_of_workers=1 if _is_linux else None, location=loc, app_service_environment=ase)
     except Exception as ex:  # pylint: disable=broad-except
         if ex.response.status_code == 409:  # catch 409 conflict when trying to create existing ASP in diff location
             try:
