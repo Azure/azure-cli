@@ -183,6 +183,12 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS
     )
 
+    resource_deploymentstacks_snapshots_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.deploymentstacks.snapshots.operations#ResourceLinksOperations.{}',
+        client_factory=cf_resource_deploymentstacks,
+        resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS
+    )
+
     with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
@@ -339,7 +345,14 @@ def load_command_table(self, _):
         g.custom_command('group-list', 'list_deployment_stacks_at_resource_group')
         g.custom_command('sub-delete', 'delete_deployment_stacks_at_subscription')
         g.custom_command('group-delete', 'delete_deployment_stacks_at_resource_group')
-
+    
+    with self.command_group('stacks snapshot', resource_deploymentstacks_snapshots_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
+        g.custom_command('sub-show', 'show_deployment_stacks_snapshots_at_subscription')
+        g.custom_command('group-show', 'show_deployment_stacks_snapshots_at_resource_group')
+        g.custom_command('sub-list', 'list_deployment_stacks_snapshots_at_subscription')
+        g.custom_command('group-list', 'list_deployment_stacks_snapshots_at_resource_group')
+        g.custom_command('sub-delete', 'delete_deployment_stacks_snapshots_at_subscription')
+        g.custom_command('group-delete', 'delete_deployment_stacks_snapshots_at_resource_group')
 
     # az deployment group
     with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
