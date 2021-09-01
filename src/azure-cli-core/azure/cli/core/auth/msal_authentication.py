@@ -54,25 +54,15 @@ class UserCredential(PublicClientApplication):
 
 class ServicePrincipalCredential(ConfidentialClientApplication):
 
-    def __init__(self, client_id, secret_or_certificate=None, **kwargs):
+    def __init__(self, service_principal_auth, **kwargs):
 
-        import os
-        # If certificate file path is provided, transfer it to MSAL input
-        if os.path.isfile(secret_or_certificate):
-            cert_file = secret_or_certificate
-            with open(cert_file, 'r') as f:
-                cert_str = f.read()
-
-            # Compute the thumbprint
-            from OpenSSL.crypto import load_certificate, FILETYPE_PEM
-            cert = load_certificate(FILETYPE_PEM, cert_str)
-            thumbprint = cert.digest("sha1").decode().replace(' ', '').replace(':', '')
-
-            client_credential = {"private_key": cert_str, "thumbprint": thumbprint}
+        if hasattr(service_principal_auth, 'secret'):
+            client_credential = service_principal_auth.secret
         else:
-            client_credential = secret_or_certificate
+            client_credential = {"private_key": service_principal_auth.cert_file_string,
+                                 "thumbprint": service_principal_auth.thumbprint.replace(':', '')}
 
-        super().__init__(client_id, client_credential=client_credential, **kwargs)
+        super().__init__(service_principal_auth.client_id, client_credential=client_credential, **kwargs)
 
     def get_token(self, *scopes, **kwargs):
         logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)

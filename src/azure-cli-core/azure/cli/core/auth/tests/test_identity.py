@@ -102,7 +102,7 @@ class TestMsalSecretStore(unittest.TestCase):
         from azure.cli.core._identity import MsalSecretStore
         # action
         secret_store = MsalSecretStore()
-        token, file = secret_store.retrieve_secret_of_service_principal("myapp", "mytenant")
+        token, file = secret_store.load_service_principal_cred("myapp", "mytenant")
 
         self.assertEqual(token, "Secret")
 
@@ -121,7 +121,7 @@ class TestMsalSecretStore(unittest.TestCase):
         from azure.cli.core._identity import MsalSecretStore
         # action
         creds_cache = MsalSecretStore()
-        token, file = creds_cache.retrieve_secret_of_service_principal("myapp", "mytenant")
+        token, file = creds_cache.load_service_principal_cred("myapp", "mytenant")
 
         # assert
         self.assertEqual(file, 'junkcert.pem')

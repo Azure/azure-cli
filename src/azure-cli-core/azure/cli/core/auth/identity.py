@@ -5,14 +5,14 @@
 
 import json
 import os
+import re
 
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
 
 from .msal_authentication import UserCredential, ServicePrincipalCredential
-from .util import aad_error_handler, resource_to_scopes, scopes_to_resource, check_result, \
-    decode_access_token
+from .util import aad_error_handler, resource_to_scopes, check_result
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -52,7 +52,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # Build the authority in MSAL style, like https://login.microsoftonline.com/your_tenant
         self.msal_authority = "{}/{}".format(self.authority, self.tenant_id)
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
-        self._cred_cache = None
 
         self._cache_file = os.path.join(get_config_dir(), "tokenCache.bin")
         self._secret_file = os.path.join(get_config_dir(), "secrets.bin")
@@ -143,19 +142,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         result = self.msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
         return check_result(result)
 
-    def login_with_service_principal(self, client_id, secret_or_certificate, scopes=None):
-        cred = ServicePrincipalCredential(client_id, secret_or_certificate, **self._msal_app_kwargs)
+    def login_with_service_principal(self, client_id, secret_or_certificate, use_cert_sn_issuer=None, scopes=None):
+        sp_auth = ServicePrincipalAuth(self.tenant_id, client_id,
+                                       secret_or_certificate, use_cert_sn_issuer=use_cert_sn_issuer)
+        cred = ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
         result = cred.acquire_token_for_client(scopes)
         check_result(result)
-        # Use ClientSecretCredential
-        # TODO: Persist to encrypted cache
-        # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
-        sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, secret=secret_or_certificate)
         entry = sp_auth.get_entry_to_persist()
         self._msal_secret_store.save_service_principal_cred(entry)
-        # backward compatible with ADAL, to be deprecated
-        if self._cred_cache:
-            self._cred_cache.save_service_principal_cred(entry)
 
     def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
         raise NotImplemented
@@ -203,63 +197,13 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return UserCredential(self.client_id, username, **self._msal_app_kwargs)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):
-        secret_or_certificate = self._msal_secret_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)
+        entry = self._msal_secret_store.load_service_principal_cred(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
-        return ServicePrincipalCredential(client_id, secret_or_certificate, **self._msal_app_kwargs)
-
-    def get_environment_credential(self):
-        username = os.environ.get('AZURE_USERNAME')
-        client_id = os.environ.get('AZURE_CLIENT_ID')
-
-        # If the user doesn't provide AZURE_CLIENT_ID, fill it will Azure CLI's client ID
-        if username and not client_id:
-            logger.info("set AZURE_CLIENT_ID=%s", AZURE_CLI_CLIENT_ID)
-            os.environ['AZURE_CLIENT_ID'] = AZURE_CLI_CLIENT_ID
-
-        return EnvironmentCredential(**self._credential_kwargs)
+        sp_auth = ServicePrincipalAuth.build_from_entry(entry)
+        return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
 
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplemented
-
-    def migrate_tokens(self):
-        """Migrate ADAL token cache to MSAL."""
-        logger.warning("Migrating token cache from ADAL to MSAL.")
-
-        entries = AdalCredentialCache()._load_tokens_from_file()  # pylint: disable=protected-access
-        if not entries:
-            logger.debug("No ADAL token cache found.")
-            return
-
-        for entry in entries:
-            try:
-                # TODO: refine the filter logic
-                if 'userId' in entry:
-                    # User account
-                    username = entry['userId']
-                    authority = entry['_authority']
-                    scopes = resource_to_scopes(entry['resource'])
-                    refresh_token = entry['refreshToken']
-
-                    msal_app = self._build_persistent_msal_app(authority)
-                    # TODO: Not work in ADFS:
-                    # {'error': 'invalid_grant', 'error_description': "MSIS9614: The refresh token received in
-                    # 'refresh_token' parameter is invalid."}
-                    logger.warning("Migrating refresh token: username: %s, authority: %s, scopes: %s",
-                                   username, authority, scopes)
-                    token_dict = msal_app.acquire_token_by_refresh_token(refresh_token, scopes)
-                    if 'error' in token_dict:
-                        raise CLIError("Failed to migrate token from ADAL cache to MSAL cache. {}".format(token_dict))
-                else:
-                    # Service principal account
-                    logger.warning("Migrating service principal secret: servicePrincipalId: %s, "
-                                   "servicePrincipalTenant: %s",
-                                   entry['servicePrincipalId'], entry['servicePrincipalTenant'])
-                    self._msal_secret_store.save_service_principal_cred(entry)
-            except CLIError:
-                # Ignore failed tokens
-                continue
-
-        # TODO: Delete accessToken.json after migration (accessToken.json deprecation)
 
     def serialize_token_cache(self, path=None):
         path = path or os.path.join(get_config_dir(), "msal.cache.snapshot.json")
@@ -274,42 +218,40 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
 class ServicePrincipalAuth:   # pylint: disable=too-few-public-methods
 
-    def __init__(self, client_id, tenant_id, secret=None, certificate_file=None, use_cert_sn_issuer=None):
-        if not (secret or certificate_file):
-            raise CLIError('Missing secret or certificate in order to '
+    def __init__(self, tenant_id, client_id, password_arg_value, use_cert_sn_issuer=None):
+        if not password_arg_value:
+            raise CLIError('missing secret or certificate in order to '
                            'authenticate through a service principal')
+
         self.client_id = client_id
         self.tenant_id = tenant_id
-        if certificate_file:
-            from OpenSSL.crypto import load_certificate, FILETYPE_PEM
+
+        if os.path.isfile(password_arg_value):
+            certificate_file = password_arg_value
+            from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
             self.certificate_file = certificate_file
             self.public_certificate = None
-            with open(certificate_file, 'r') as file_reader:
-                self.cert_file_string = file_reader.read()
-                cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
-                self.thumbprint = cert.digest("sha1").decode()
-                if use_cert_sn_issuer:
-                    import re
-                    # low-tech but safe parsing based on
-                    # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
-                    match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
-                                      self.cert_file_string, re.I)
-                    self.public_certificate = match.group('public').strip()
+            try:
+                with open(certificate_file, 'r') as file_reader:
+                    self.cert_file_string = file_reader.read()
+                    cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
+                    self.thumbprint = cert.digest("sha1").decode()
+                    if use_cert_sn_issuer:
+                        # low-tech but safe parsing based on
+                        # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
+                        match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
+                                          self.cert_file_string, re.I)
+                        self.public_certificate = match.group('public').strip()
+            except (UnicodeDecodeError, Error):
+                raise CLIError('Invalid certificate, please use a valid PEM file.')
         else:
-            self.secret = secret
+            self.secret = password_arg_value
 
-    def get_entry_to_persist_legacy(self):
-        entry = {
-            _SERVICE_PRINCIPAL_ID: self.client_id,
-            _SERVICE_PRINCIPAL_TENANT: self.tenant_id,
-        }
-        if hasattr(self, 'secret'):
-            entry[_ACCESS_TOKEN] = self.secret
-        else:
-            entry[_SERVICE_PRINCIPAL_CERT_FILE] = self.certificate_file
-            entry[_SERVICE_PRINCIPAL_CERT_THUMBPRINT] = self.thumbprint
-
-        return entry
+    @classmethod
+    def build_from_entry(cls, entry):
+        return ServicePrincipalAuth(entry.get(_SERVICE_PRINCIPAL_TENANT),
+                                    entry.get(_SERVICE_PRINCIPAL_ID),
+                                    entry.get(_SERVICE_PRINCIPAL_SECRET) or entry.get(_SERVICE_PRINCIPAL_CERT_FILE))
 
     def get_entry_to_persist(self):
         entry = {
@@ -333,7 +275,7 @@ class MsalSecretStore:
         self._service_principal_creds = []
         self._fallback_to_plaintext = fallback_to_plaintext
 
-    def retrieve_secret_of_service_principal(self, sp_id, tenant):
+    def load_service_principal_cred(self, sp_id, tenant):
         self._load_cached_creds()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
@@ -349,7 +291,7 @@ class MsalSecretStore:
                            sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
             cred = matched[0]
 
-        return cred.get(_SERVICE_PRINCIPAL_SECRET, None) or cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
+        return cred
 
     def save_service_principal_cred(self, sp_entry):
         self._load_cached_creds()
@@ -371,6 +313,7 @@ class MsalSecretStore:
 
         if state_changed:
             self._persist_cached_creds()
+        self._serialize_secrets()
 
     def remove_cached_creds(self, user_or_sp):
         self._load_cached_creds()
@@ -444,7 +387,7 @@ class MsalSecretStore:
         # ONLY FOR DEBUGGING PURPOSE. DO NOT USE IN PRODUCTION CODE.
         logger.warning("Secrets are serialized as plain text and saved to `msalSecrets.cache.json`.")
         with open(self._secret_file + ".json", "w") as fd:
-            fd.write(json.dumps(self._service_principal_creds))
+            fd.write(json.dumps(self._service_principal_creds, indent=4))
 
 
 def _read_response_templates():
