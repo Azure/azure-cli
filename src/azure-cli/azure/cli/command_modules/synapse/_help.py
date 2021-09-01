@@ -575,13 +575,14 @@ examples:
         --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
-helps['synapse workspace key update'] = """
+helps['synapse workspace activate'] = """
 type: command
-short-summary: Update a workspace's key or update the state of key to change the workspace state from pending to success state when the workspace is first being provisioned.
+short-summary: Activates a workspace and change it's state from pending to success state when the workspace is first being provisioned and double encryption is enabled.
+long-summary: When creating an Azure Synapse Analytics workspace, you can choose to encrypt all data at rest in the workspace with a customer-managed key which will provide double encryption to the workspace.You may need to set up the encryption environment firstly, such as to create a key vault with purge protection enable and specify Access Polices to the key vault. Then use this cmdlet to activate the new Azure Synapse Analytics workspace which double encryption is enabled using a customer-managed key.
 examples:
-  - name: Update a workspace's key.
+  - name: activate a workspace.
     text: |-
-        az synapse workspace key update --name newkey --workspace-name testsynapseworkspace \\
+        az synapse workspace activate --name newkey --workspace-name testsynapseworkspace \\
         --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
@@ -1438,7 +1439,7 @@ examples:
   - name: Create a notebook.
     text: |-
         az synapse notebook create --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
+          --name testnotebook --file @path/notebook.ipynb
 """
 
 helps['synapse notebook set'] = """
@@ -1448,7 +1449,7 @@ examples:
   - name: Set an exist notebook.
     text: |-
         az synapse notebook set --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
+          --name testnotebook --file @path/notebook.ipynb
 """
 
 helps['synapse notebook import'] = """
@@ -1458,7 +1459,7 @@ examples:
   - name: Import a notebook.
     text: |-
         az synapse notebook import --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
+          --name testnotebook --file @path/notebook.ipynb
 """
 
 helps['synapse notebook show'] = """
@@ -1676,4 +1677,50 @@ examples:
     text: |-
         az synapse integration-runtime-node get-ip-address --workspace-name testsynapseworkspace --resource-group rg \\
           --name selfhostedintegrationruntime --node-name testnode
+"""
+
+helps['synapse managed-private-endpoints'] = """
+type: group
+short-summary: Manage synapse managed private endpoints.
+"""
+
+helps['synapse managed-private-endpoints show'] = """
+type: command
+short-summary: Get a synapse managed private endpoints.
+examples:
+  - name: Get a synapse managed private endpoints.
+    text: |-
+        az synapse managed-private-endpoints show --workspace-name testsynapseworkspace \\
+          --pe-name testendpointname
+"""
+
+helps['synapse managed-private-endpoints create'] = """
+type: command
+short-summary: Create a synapse managed private endpoints.
+examples:
+  - name: Create a synapse managed private endpoints.
+    text: |-
+        az synapse managed-private-endpoints create --workspace-name testsynapseworkspace \\
+          --pe-name testendpointname \\
+          --resource-id '/subscriptions/yoursub/resourceGroups/myResourceGroup/providers/Microsoft.Storage/accounts/myStorageAccount' \\
+          --group-Id blob
+"""
+
+helps['synapse managed-private-endpoints list'] = """
+type: command
+short-summary: List synapse managed private endpoints in a workspace.
+examples:
+  - name: List a synapse managed private endpoints.
+    text: |-
+        az synapse managed-private-endpoints list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse managed-private-endpoints delete'] = """
+type: command
+short-summary: delete synapse managed private endpoints in a workspace.
+examples:
+  - name: Delete a synapse managed private endpoints.
+    text: |-
+        az synapse managed-private-endpoints delete --workspace-name testsynapseworkspace \\
+          --pe-name testendpointname
 """

@@ -1525,6 +1525,11 @@ short-summary: Manage near-realtime metric alert rule conditions.
 helps['monitor metrics alert condition create'] = """
 type: command
 short-summary: Build a metric alert rule condition.
+parameters:
+  - name: --metric
+    short-summary: Name of the metric to base the rule on.
+    populator-commands:
+      - az monitor metrics list-definitions
 examples:
   - name: Build a static condition.
     text: |
@@ -1532,7 +1537,7 @@ examples:
         $dim2 = az monitor metrics alert dimension create -n Instance --op Exclude -v Get Put
         $condition = az monitor metrics alert condition create -t static \n
         --aggregation Count \n
-        --metric "Percentage CPU" \n
+        --metric "CPU Percentage" \n
         --op GreaterThan  \n
         --threshold 95 \n
         --dimension "$dim1" "$dim2"
@@ -1540,7 +1545,7 @@ examples:
     text: |
         $condition = az monitor metrics alert condition create -t dynamic \n
         --aggregation Average \n
-        --metric "Percentage Cpu" \n
+        --metric "CPU Percentage" \n
         --op GreaterOrLessThan \n
         --num-violations 4 \n
         --num-periods 4 \n

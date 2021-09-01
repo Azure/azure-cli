@@ -52,8 +52,8 @@ def load_arguments(self, _):
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
                                                     help="a path to a template file or Bicep file in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
-    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01', help="The template spec resource id.")
-    deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], is_preview=True, help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
+    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], min_api='2019-06-01', help="The template spec resource id.")
+    deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
@@ -61,6 +61,12 @@ def load_arguments(self, _):
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
+    deployment_what_if_type = CLIArgumentType(options_list=['--what-if', '-w'], action='store_true',
+                                              help='Instruct the command to run deployment What-If.',
+                                              min_api='2019-07-01')
+    deployment_what_if_proceed_if_no_change_type = CLIArgumentType(options_list=['--proceed-if-no-change'], action='store_true',
+                                                                   help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.',
+                                                                   min_api='2019-07-01')
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
                                                             arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
                                                             min_api='2019-07-01')
@@ -88,7 +94,7 @@ def load_arguments(self, _):
     ts_display_name_type = CLIArgumentType(options_list=['--display-name', '-d'], help='The display name of the template spec')
     ts_description_type = CLIArgumentType(options_list=['--description'], help='The description of the parent template spec.')
     ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
-    ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], is_preview=True, completer=FilesCompleter(), type=file_type,
+    ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], completer=FilesCompleter(), type=file_type,
                                                    help="A path to a uiFormDefinition file in the file system")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
@@ -143,8 +149,9 @@ def load_arguments(self, _):
 
     with self.argument_context('provider register') as c:
         c.argument('mg', help="The management group id to register.", options_list=['--management-group-id', '-m'])
-        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.")
+        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.", deprecate_info=c.deprecate(hide=True))
         c.argument('wait', action='store_true', help='wait for the registration to finish')
+        c.argument('consent_to_permissions', options_list=['--consent-to-permissions', '-c'], action='store_true', help='A value indicating whether authorization is consented or not.')
 
     with self.argument_context('provider unregister') as c:
         c.argument('wait', action='store_true', help='wait for unregistration to finish')
@@ -157,6 +164,13 @@ def load_arguments(self, _):
         c.argument('feature_name', options_list=['--name', '-n'], help='the feature name')
 
     with self.argument_context('feature list') as c:
+        c.argument('resource_provider_namespace', options_list='--namespace', required=False, help=_PROVIDER_HELP_TEXT)
+
+    with self.argument_context('feature registration') as c:
+        c.argument('resource_provider_namespace', options_list='--namespace', required=True, help=_PROVIDER_HELP_TEXT)
+        c.argument('feature_name', options_list=['--name', '-n'], help='the feature name')
+
+    with self.argument_context('feature registration list') as c:
         c.argument('resource_provider_namespace', options_list='--namespace', required=False, help=_PROVIDER_HELP_TEXT)
 
     with self.argument_context('policy') as c:
@@ -303,6 +317,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -330,6 +346,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -369,6 +387,8 @@ def load_arguments(self, _):
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -405,6 +425,8 @@ def load_arguments(self, _):
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
                    min_api="2019-10-01")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment mg what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -440,6 +462,8 @@ def load_arguments(self, _):
                    arg_type=deployment_what_if_exclude_change_types_type,
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
                    min_api="2019-10-01")
+        c.argument('what_if', arg_type=deployment_what_if_type)
+        c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
     with self.argument_context('deployment tenant what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)

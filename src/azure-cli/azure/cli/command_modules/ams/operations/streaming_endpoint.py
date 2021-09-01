@@ -9,7 +9,8 @@ from azure.cli.command_modules.ams._utils import (create_ip_range, show_resource
 
 from azure.mgmt.media.models import (AkamaiAccessControl, AkamaiSignatureHeaderAuthenticationKey,
                                      CrossSiteAccessPolicies, IPAccessControl,
-                                     StreamingEndpoint, StreamingEndpointAccessControl)
+                                     StreamingEndpoint, StreamingEndpointAccessControl,
+                                     StreamingEntityScaleUnit)
 
 
 def create_streaming_endpoint(cmd, client, resource_group_name, account_name, streaming_endpoint_name,  # pylint: disable=too-many-locals
@@ -43,7 +44,7 @@ def create_streaming_endpoint(cmd, client, resource_group_name, account_name, st
                                            cdn_provider=cdn_provider, cross_site_access_policies=policies,
                                            access_control=streaming_endpoint_access_control)
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name, account_name=account_name,
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name=resource_group_name, account_name=account_name,
                        auto_start=auto_start, streaming_endpoint_name=streaming_endpoint_name,
                        parameters=streaming_endpoint)
 
@@ -65,7 +66,7 @@ def add_akamai_access_control(client, account_name, resource_group_name, streami
 
     streaming_endpoint.access_control.akamai.akamai_signature_header_authentication_key_list.append(auth_key)
 
-    return client.update(resource_group_name, account_name, streaming_endpoint_name, streaming_endpoint)
+    return client.begin_update(resource_group_name, account_name, streaming_endpoint_name, streaming_endpoint)
 
 
 def remove_akamai_access_control(client, account_name, resource_group_name, streaming_endpoint_name, identifier):
@@ -78,7 +79,7 @@ def remove_akamai_access_control(client, account_name, resource_group_name, stre
                 filter(lambda x: x.identifier != identifier,
                        streaming_endpoint.access_control.akamai.akamai_signature_header_authentication_key_list))
 
-    return client.update(resource_group_name, account_name, streaming_endpoint_name, streaming_endpoint)
+    return client.begin_update(resource_group_name, account_name, streaming_endpoint_name, streaming_endpoint)
 
 
 def update_streaming_endpoint_setter(client, resource_group_name, account_name, streaming_endpoint_name,
@@ -90,7 +91,7 @@ def update_streaming_endpoint_setter(client, resource_group_name, account_name, 
                        parameters.access_control.ip.allow))
         parameters.access_control.ip.allow = ips
 
-    return sdk_no_wait(no_wait, client.update, resource_group_name=resource_group_name,
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name=resource_group_name,
                        account_name=account_name, streaming_endpoint_name=streaming_endpoint_name,
                        parameters=parameters)
 
@@ -171,14 +172,20 @@ def create_cross_site_access_policies(client_access_policy, cross_domain_policy)
     return policies
 
 
+def scale(client, resource_group_name, account_name, streaming_endpoint_name, scale_units):
+    parameters = StreamingEntityScaleUnit(scale_unit=scale_units)
+
+    return client.begin_scale(resource_group_name, account_name, streaming_endpoint_name, parameters)
+
+
 def start(cmd, client, resource_group_name, account_name, streaming_endpoint_name,
           no_wait=False):
     if no_wait:
-        return sdk_no_wait(no_wait, client.start, resource_group_name, account_name,
+        return sdk_no_wait(no_wait, client.begin_start, resource_group_name, account_name,
                            streaming_endpoint_name)
 
-    LongRunningOperation(cmd.cli_ctx)(client.start(resource_group_name, account_name,
-                                                   streaming_endpoint_name))
+    LongRunningOperation(cmd.cli_ctx)(client.begin_start(resource_group_name, account_name,
+                                                         streaming_endpoint_name))
 
     return client.get(resource_group_name, account_name, streaming_endpoint_name)
 
@@ -186,11 +193,11 @@ def start(cmd, client, resource_group_name, account_name, streaming_endpoint_nam
 def stop(cmd, client, resource_group_name, account_name,
          streaming_endpoint_name, no_wait=False):
     if no_wait:
-        return sdk_no_wait(no_wait, client.stop, resource_group_name, account_name,
+        return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, account_name,
                            streaming_endpoint_name)
 
-    LongRunningOperation(cmd.cli_ctx)(client.stop(resource_group_name, account_name,
-                                                  streaming_endpoint_name))
+    LongRunningOperation(cmd.cli_ctx)(client.begin_stop(resource_group_name, account_name,
+                                                        streaming_endpoint_name))
 
     return client.get(resource_group_name, account_name, streaming_endpoint_name)
 

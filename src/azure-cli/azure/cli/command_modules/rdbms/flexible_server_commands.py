@@ -102,7 +102,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
         g.command('start', 'begin_start')
         g.custom_command('stop', 'flexible_server_stop', custom_command_type=flexible_server_custom_common)
-        g.custom_command('delete', 'server_delete_func')
+        g.custom_command('delete', 'flexible_server_delete')
         g.show_command('show', 'get')
         g.custom_command('list', 'server_list_custom_func', custom_command_type=flexible_server_custom_common, table_transformer=table_transform_output_list_servers)
         g.generic_update_command('update',
@@ -111,7 +111,7 @@ def load_flexibleserver_command_table(self, _):
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_server_update_custom_func')
         g.custom_wait_command('wait', 'flexible_server_postgresql_get')
-        g.command('restart', 'begin_restart')
+        g.custom_command('restart', 'flexible_server_restart')
 
     with self.command_group('postgres flexible-server firewall-rule', postgres_flexible_firewall_rule_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
@@ -187,7 +187,7 @@ def load_flexibleserver_command_table(self, _):
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_server_update_custom_func')
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
-        g.command('restart', 'begin_restart')
+        g.custom_command('restart', 'flexible_server_restart')
 
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,
                             custom_command_type=flexible_servers_custom_mysql,

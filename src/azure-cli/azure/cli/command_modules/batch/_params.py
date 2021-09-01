@@ -109,7 +109,10 @@ def load_arguments(self, _):
             c.argument('f_ormat', options_list=('--format',), help="The format of the application package binary file.")
 
     with self.argument_context('batch location quotas show') as c:
-        c.argument('location_name', get_location_type(self.cli_ctx), help='The region from which to display the Batch service quotas.')
+        c.argument('location_name', get_location_type(self.cli_ctx), help='The region for which to display the Batch service quotas.')
+
+    with self.argument_context('batch location list-skus') as c:
+        c.argument('location_name', get_location_type(self.cli_ctx), help='The region for which to display the available Batch VM SKUs.')
 
     for command in ['list', 'show', 'create', 'set', 'delete', 'package']:
         with self.argument_context('batch application {}'.format(command)) as c:

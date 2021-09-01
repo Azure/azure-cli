@@ -13,8 +13,10 @@ import secrets
 import string
 import yaml
 from knack.log import get_logger
+from knack.prompting import prompt_y_n, NoTTYException
 from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import AuthenticationError
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -171,16 +173,50 @@ def get_postgres_tiers(sku_info):
 def get_postgres_list_skus_info(cmd, location):
     list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.execute(location)
-    return _parse_list_skus(list_skus_result, 'postgres')
+    return _postgres_parse_list_skus(list_skus_result, 'postgres')
 
 
 def get_mysql_list_skus_info(cmd, location):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.list(location)
-    return _parse_list_skus(list_skus_result, 'mysql')
+    return _mysql_parse_list_skus(list_skus_result, 'mysql')
 
 
-def _parse_list_skus(result, database_engine):
+def _postgres_parse_list_skus(result, database_engine):
+    result = _get_list_from_paged_response(result)
+    single_az = False
+    if not result:
+        raise InvalidArgumentValueError("No available SKUs in this location")
+    if len(result) == 1:
+        single_az = True
+
+    tiers = result[0].supported_flexible_server_editions
+    tiers_dict = {}
+    for tier_info in tiers:
+        tier_name = tier_info.name
+        tier_dict = {}
+
+        skus = set()
+        versions = set()
+        for version in tier_info.supported_server_versions:
+            versions.add(version.name)
+            for vcores in version.supported_vcores:
+                skus.add(vcores.name)
+        tier_dict["skus"] = skus
+        tier_dict["versions"] = versions
+
+        storage_info = tier_info.supported_storage_editions[0]
+        storage_sizes = set()
+        for size in storage_info.supported_storage_mb:
+            storage_sizes.add(int(size.storage_size_mb // 1024))
+        tier_dict["storage_sizes"] = storage_sizes
+
+        tiers_dict[tier_name] = tier_dict
+
+    return tiers_dict, single_az
+
+
+def _mysql_parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
     single_az = False
     if not result:
@@ -200,30 +236,20 @@ def _parse_list_skus(result, database_engine):
         versions = set()
         for version in tier_info.supported_server_versions:
             versions.add(version.name)
-            for vcores in version.supported_vcores:
-                skus.add(vcores.name)
-                if database_engine == 'mysql':
-                    sku_iops_dict[vcores.name] = vcores.supported_iops
+            for supported_sku in version.supported_skus:
+                skus.add(supported_sku.name)
+                sku_iops_dict[supported_sku.name] = supported_sku.supported_iops
         tier_dict["skus"] = skus
         tier_dict["versions"] = versions
 
         storage_info = tier_info.supported_storage_editions[0]
-        if database_engine == 'mysql':
-            tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
-            tier_dict["storage_sizes"] = (int(storage_info.min_storage_size.storage_size_mb) // 1024,
-                                          int(storage_info.max_storage_size.storage_size_mb) // 1024)
-            iops_dict[tier_name] = sku_iops_dict
-        elif database_engine == 'postgres':
-            storage_sizes = set()
-            for size in storage_info.supported_storage_mb:
-                storage_sizes.add(int(size.storage_size_mb // 1024))
-            tier_dict["storage_sizes"] = storage_sizes
 
+        tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
+        tier_dict["storage_sizes"] = (int(storage_info.min_storage_size) // 1024, int(storage_info.max_storage_size) // 1024)
+        iops_dict[tier_name] = sku_iops_dict
         tiers_dict[tier_name] = tier_dict
 
-    if database_engine == 'mysql':
-        return tiers_dict, iops_dict, single_az
-    return tiers_dict, single_az
+    return tiers_dict, single_az, iops_dict
 
 
 def _get_available_values(sku_info, argument, tier=None):
@@ -416,3 +442,21 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
 def get_git_root_dir():
     process = run_subprocess_get_output("git rev-parse --show-toplevel")
     return process.stdout.read().strip().decode('UTF-8')
+
+
+def get_user_confirmation(message, yes=False):
+    if yes:
+        return True
+    try:
+        if not prompt_y_n(message):
+            return False
+        return True
+    except NoTTYException:
+        raise CLIError(
+            'Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+def _is_resource_name(resource):
+    if len(resource.split('/')) == 1:
+        return True
+    return False

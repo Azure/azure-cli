@@ -62,7 +62,7 @@ def load_arguments(self, _):
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
-     ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState,
+     ExpressRouteLinkMacSecCipher,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType, GatewayLoadBalancerTunnelProtocol,
      GatewayLoadBalancerTunnelInterfaceType, VpnNatRuleType, VpnNatRuleMode) = self.get_models(
@@ -74,7 +74,7 @@ def load_arguments(self, _):
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
-         'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState',
+         'ExpressRouteLinkMacSecCipher',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
          'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType', 'GatewayLoadBalancerTunnelProtocol',
          'GatewayLoadBalancerTunnelInterfaceType', 'VpnNatRuleType', 'VpnNatRuleMode')
@@ -106,8 +106,8 @@ def load_arguments(self, _):
     http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
     ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
     app_gateway_name_type = CLIArgumentType(help='Name of the application gateway.', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
+    bastion_host_name_type = CLIArgumentType(help='Name of the bastion host.', options_list='--bastion-host-name', completer=get_resource_name_completion_list('Microsoft.Network/bastionHosts'), id_part='name')
     express_route_link_macsec_cipher_type = CLIArgumentType(get_enum_type(ExpressRouteLinkMacSecCipher))
-    express_route_link_admin_state_type = CLIArgumentType(get_enum_type(ExpressRouteLinkAdminState))
     zone_compatible_type = CLIArgumentType(
         options_list=['--zone', '-z'],
         nargs='+',
@@ -192,7 +192,8 @@ def load_arguments(self, _):
         c.argument('cert_password', help='The certificate password')
         c.argument('http_settings_port', help='The HTTP settings port.')
         c.argument('servers', ag_servers_type)
-        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault. You need enable soft delete for keyvault to use this feature.", is_preview=True)
+        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault. You need enable soft delete for keyvault to use this feature.")
+        c.argument('ssl_cert_name', options_list='--ssl-certificate-name', help="The certificate name. Default will be `<application-gateway-name>SslCert`.")
 
     with self.argument_context('network application-gateway update', arg_group=None) as c:
         c.argument('sku', default=None)
@@ -357,7 +358,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
         c.argument('cert_password', help='Certificate password.')
-        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault.", is_preview=True)
+        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault.")
 
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')
@@ -715,9 +716,9 @@ def load_arguments(self, _):
         c.argument('serial_number', options_list=['--serial-number', '-s'], help='Serial number.')
 
     with self.argument_context('network dns record-set srv') as c:
-        c.argument('priority', options_list=['--priority', '-p'], help='Priority metric.')
-        c.argument('weight', options_list=['--weight', '-w'], help='Weight metric.')
-        c.argument('port', options_list=['--port', '-r'], help='Service port.')
+        c.argument('priority', type=int, options_list=['--priority', '-p'], help='Priority metric.')
+        c.argument('weight', type=int, options_list=['--weight', '-w'], help='Weight metric.')
+        c.argument('port', type=int, options_list=['--port', '-r'], help='Service port.')
         c.argument('target', options_list=['--target', '-t'], help='Target domain name.')
 
     with self.argument_context('network dns record-set txt') as c:
@@ -848,7 +849,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network express-route port link update', min_api='2019-08-01') as c:
         c.argument('admin_state',
-                   arg_type=express_route_link_admin_state_type,
+                   arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True),
                    help='Enable/Disable administrative state of an ExpressRoute Link')
 
     with self.argument_context('network express-route port link update', arg_group='MACsec', min_api='2019-08-01') as c:
@@ -857,6 +858,7 @@ def load_arguments(self, _):
         c.argument('macsec_ckn_secret_identifier',
                    help='The connectivity key name (CKN) that stored in the KeyVault.')
         c.argument('macsec_cipher', arg_type=express_route_link_macsec_cipher_type, help='Cipher Method')
+        c.argument('macsec_sci_state', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True), help='Sci mode', min_api='2020-06-01')
 
     with self.argument_context('network express-route port location', min_api='2018-08-01') as c:
         c.argument('location_name', options_list=['--location', '-l'])
@@ -1713,6 +1715,18 @@ def load_arguments(self, _):
         c.argument('network_profile_name', network_profile_name, options_list=['--name', '-n'])
     # endregion
 
+    # region CustomIpPrefix
+    with self.argument_context('network custom-ip prefix') as c:
+        c.argument('custom_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/customIpPrefixes'), id_part='name', help='The name of the custom IP prefix.')
+        c.argument('signed_message', help='Signed message for WAN validation.')
+        c.argument('authorization_message', help='Authorization message for WAN validation.')
+        c.argument('custom_ip_prefix_parent', help='The Parent CustomIpPrefix for IPv6 /64 CustomIpPrefix.', options_list=['--cip-prefix-parent', '-c'])
+        c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
+        c.argument('zone', zone_compatible_type, min_api='2020-08-01')
+        c.argument('cidr', help='The prefix range in CIDR notation. Should include the start address and the prefix length.')
+
+    # endregion
+
     # region PublicIPAddresses
     with self.argument_context('network public-ip') as c:
         c.argument('public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')
@@ -1723,6 +1737,7 @@ def load_arguments(self, _):
         c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
         c.argument('ip_tags', nargs='+', min_api='2017-11-01', help="Space-separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
+        c.argument('ip_address', help='The IP address associated with the public IP address resource.')
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
@@ -1752,6 +1767,7 @@ def load_arguments(self, _):
     with self.argument_context('network public-ip prefix create') as c:
         c.argument('edge_zone', edge_zone)
         c.argument('version', min_api='2019-08-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
+        c.argument('custom_ip_prefix_name', min_api='2020-06-01', help='The customIpPrefix that this prefix is associated with.')
     # endregion
 
     # region RouteFilters
@@ -2083,6 +2099,10 @@ def load_arguments(self, _):
         c.argument('hosted_subnet', help='The ID of a subnet where Route Server would be deployed')
         c.argument('allow_branch_to_branch_traffic', options_list=['--allow-b2b-traffic'],
                    arg_type=get_three_state_flag(), help='Allow branch to branch traffic.')
+        c.argument('public_ip_address', validator=get_public_ip_validator(),
+                   help='The name or ID of the public IP address.',
+                   completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'),
+                   min_api='2021-02-01')
 
     with self.argument_context('network routeserver create') as c:
         c.argument('virtual_hub_name', id_part=None)
@@ -2147,10 +2167,20 @@ def load_arguments(self, _):
 
     # region Bastion
     with self.argument_context('network bastion') as c:
-        c.argument('bastion_host_name', help='Name of the Bastion Host.', options_list=['--name', '-n'])
+        c.argument('bastion_host_name', bastion_host_name_type, options_list=['--name', '-n'])
         c.argument('public_ip_address', help='Name or ID of the Azure public IP. The SKU of the public IP must be Standard.', validator=get_public_ip_validator())
         c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
+        c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
+        c.argument('target_resource_id', help='ResourceId of the target Virtual Machine.', options_list=['--target-resource-id'])
         c.ignore('subnet')
+    for item in ['ssh', 'rdp']:
+        with self.argument_context('network bastion {}'.format(item)) as c:
+            c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
+            c.argument('username', help='User name for SSH connections.', options_list=['--username'])
+            c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
+    with self.argument_context('network bastion tunnel') as c:
+        c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
+        c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
     # endregion
 
     # region security partner provider

@@ -30,7 +30,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
     cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
-    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections)
+    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -444,12 +444,23 @@ def load_command_table(self, _):
         min_api='2020-05-01'
     )
 
+    network_custom_ip_prefix_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
+        client_factory=cf_custom_ip_prefixes,
+        min_api='2020-06-01'
+    )
+
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
 
     network_load_balancers_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_load_balancers,
         min_api='2020-08-01'
+    )
+
+    network_nic_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_network_interfaces
     )
 
     # endregion
@@ -819,6 +830,8 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='update_express_route_port_link',
                                  supports_no_wait=True,
+                                 child_collection_prop_name='links',
+                                 child_arg_name='link_name',
                                  min_api='2019-08-01')
 
     with self.command_group('network express-route port location', network_er_port_locations_sdk) as g:
@@ -897,7 +910,8 @@ def load_command_table(self, _):
         g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
                                  getter_name='lb_get',
                                  getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
+                                 setter_name='update_lb_frontend_ip_configuration_setter',
+                                 setter_type=network_load_balancers_custom,
                                  custom_func_name='set_lb_frontend_ip_configuration',
                                  validator=process_lb_frontend_ip_namespace)
 
@@ -1051,7 +1065,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_nic_ip_config')
         g.generic_update_command('update',
                                  child_collection_prop_name='ip_configurations', child_arg_name='ip_config_name',
-                                 setter_name='begin_create_or_update',
+                                 setter_name='update_nic_ip_config_setter',
+                                 setter_type=network_nic_custom,
                                  custom_func_name='set_nic_ip_config')
         g.command('list', list_network_resource_property(resource, subresource), command_type=network_util)
         g.show_command('show', get_network_resource_property_entry(resource, subresource), command_type=network_util)
@@ -1197,6 +1212,15 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)
         g.custom_show_command('show', 'show_nw_troubleshooting_result', validator=process_nw_troubleshooting_show_namespace)
     # endregion
+
+    # region CustomIpPrefix
+    with self.command_group('network custom-ip prefix', network_custom_ip_prefix_sdk, client_factory=cf_custom_ip_prefixes, is_preview=True, min_api='2020-06-01') as g:
+        g.custom_command('create', 'create_custom_ip_prefix', supports_no_wait=True)
+        g.command('delete', 'begin_delete')
+        g.custom_command('list', 'list_custom_ip_prefixes')
+        g.show_command('show')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix', supports_no_wait=True)
+    # endRegion
 
     # region PublicIPAddresses
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
@@ -1476,6 +1500,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_bastion_host')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
+        g.custom_command('ssh', 'ssh_bastion_host')
+        g.custom_command('rdp', 'rdp_bastion_host')
+        g.custom_command('tunnel', 'create_bastion_tunnel')
         g.command('delete', 'begin_delete')
     # endregion
 
