@@ -3972,12 +3972,24 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--uptime-sla '
+                     '--uptime-sla'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.tier', 'Paid')
+        ])
+
+        # update to no uptime sla
+        no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
+        self.cmd(no_uptime_sla_cmd, checks=[
+            self.check('sku.tier', 'Free')
+        ])
+
+        # update to uptime sla again
+        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
+        self.cmd(uptime_sla_cmd, checks=[
+            self.is_empty()
         ])
 
         # delete
@@ -4989,7 +5001,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create acr
-        create_acr_cmd = 'acr create -n {acr_name} -g {resource_group} --sku basic'
+        create_acr_cmd = 'acr create -g {resource_group} -n {acr_name} --sku basic'
         self.cmd(create_acr_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
@@ -5453,6 +5465,66 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', True),
         ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # live only due to dependency `_add_role_assignment` is not mocked
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
+    def test_aks_update_attatch_acr(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        acr_name = self.create_random_name('cliaksacr', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'acr_name': acr_name
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('servicePrincipalProfile.clientId', sp_name)
+        ])
+
+        # create acr
+        create_acr_cmd = 'acr create -g {resource_group} -n {acr_name} --sku basic'
+        self.cmd(create_acr_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # build command to check role assignment
+        subscription_id = self.get_subscription_id()
+        acr_scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ContainerRegistry/registries/{}".format(
+            subscription_id, resource_group, acr_name
+        )
+        self.kwargs.update({"acr_scope": acr_scope})
+        role_assignment_check_cmd = (
+            "role assignment list --assignee {sp_name} --scope {acr_scope}"
+        )
+
+        # attach acr
+        attach_cmd = "aks update --resource-group={resource_group} --name={name} --attach-acr={acr_name}"
+        self.cmd(attach_cmd)
+
+        # check role assignment
+        self.cmd(role_assignment_check_cmd, checks=[self.check('length(@) == `1`', True)])
+
+        # detach acr
+        attach_cmd = 'aks update --resource-group={resource_group} --name={name} --detach-acr={acr_name}'
+        self.cmd(attach_cmd)
+
+        # check role assignment
+        self.cmd(role_assignment_check_cmd, checks=[self.is_empty()])
 
         # delete
         self.cmd(
