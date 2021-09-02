@@ -733,7 +733,7 @@ examples:
 helps['sig image-definition list-shared'] = """
 type: command
 short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant (preview).
-long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact 'shared image gallery' team to register for preview if you're interested in using this feature).
+long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact 'shared image gallery' team: sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: List an image definition in a gallery shared directly to your subscription in the given location.
     text: |
@@ -748,7 +748,7 @@ examples:
 helps['sig image-definition show-shared'] = """
 type: command
 short-summary: Get a shared gallery image (preview).
-long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant (private preview feature, please contact 'shared image gallery' team to register for preview if you're interested in using this feature).
+long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant (private preview feature, please contact 'shared image gallery' team: sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: Get an image definition in a gallery shared directly to your subscription or tenant in the given location.
     text: |
@@ -899,7 +899,7 @@ examples:
 helps['sig image-version list-shared'] = """
 type: command
 short-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant (preview).
-long-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact 'shared image gallery' team to register for preview if you're interested in using this feature).
+long-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact 'shared image gallery' team: sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: List image versions in a gallery shared directly to your subscription in the given location and image definition.
     text: |
@@ -914,7 +914,7 @@ examples:
 helps['sig image-version show-shared'] = """
 type: command
 short-summary: Get an image version in a gallery shared directly to your subscription or tenant (preview).
-long-summary: Get an image version in a gallery shared directly to your subscription or tenant  (private preview feature, please contact 'shared image gallery' team to register for preview if you're interested in using this feature).
+long-summary: Get an image version in a gallery shared directly to your subscription or tenant  (private preview feature, please contact 'shared image gallery' team: sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: Get an image version in a gallery shared directly to your subscription or tenant in the given location.
     text: |
@@ -971,7 +971,7 @@ examples:
 helps['sig list-shared'] = """
 type: command
 short-summary: List all galleries shared directly to your subscription or tenant (preview).
-long-summary: List all galleries shared directly to your subscription or tenant (private preview feature, please contact 'shared image gallery' team to register for preview if you're interested in using this feature).
+long-summary: List all galleries shared directly to your subscription or tenant (private preview feature, please contact 'shared image gallery' team: sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: List galleries shared directly to your subscription in a given location
     text: |
@@ -1037,7 +1037,7 @@ examples:
 helps['sig show-shared'] = """
 type: command
 short-summary: Get a gallery that has been shared directly to your subscription or tenant (preview).
-long-summary: Get a gallery that has been shared directly to your subscription or tenant  (private preview feature, please contact 'shared image gallery' team to register for preview if you're interested in using this feature).
+long-summary: Get a gallery that has been shared directly to your subscription or tenant  (private preview feature, please contact 'shared image gallery' team: sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: Get a gallery that has been shared directly to your subscription or tenant in the given location.
     text: |
@@ -1421,7 +1421,7 @@ examples:
   - name: Create multiple VMs. In this example, 3 VMs are created. They are MyVm0, MyVm1, MyVm2.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image centos --count 3
-  - name: Create a VM from shared gallery image (private preview feature, please contact 'shared image gallery' team to register for preview if you're interested in using this feature).
+  - name: Create a VM from shared gallery image (private preview feature, please contact 'shared image gallery' team: sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
 """
