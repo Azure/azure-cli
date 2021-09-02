@@ -2605,11 +2605,12 @@ parameters:
   - name: --image
     type: string
     short-summary: >
-        The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
+        The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI. In addition, it also supports shared gallery image.
         Valid URN format: "Publisher:Offer:Sku:Version".
     populator-commands:
       - az vm image list
       - az vm image show
+      - az sig image-version show-shared
   - name: --ssh-key-values
     short-summary: Space-separated list of SSH public keys or public key file paths.
 examples:
@@ -2672,6 +2673,9 @@ examples:
   - name: Create a VMSS that supports SpotRestore.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup  --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group --enable-spot-restore True --spot-restore-timeout PT1H
+  - name: Create a VMSS from shared gallery image. (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
 """
 
 helps['vmss deallocate'] = """

@@ -4293,6 +4293,8 @@ class VMGalleryImage(ScenarioTest):
             'vm': self.create_random_name('vm', 16),
             'vm_with_shared_gallery': self.create_random_name('vm_sg', 16),
             'vm_with_shared_gallery_version': self.create_random_name('vm_sgv', 16),
+            'vm_with_shared_gallery_version2': self.create_random_name('vm_sgv2', 16),
+            'vmss_with_shared_gallery_version': self.create_random_name('vmss', 16),
             'gallery': self.create_random_name('gellery', 16),
             'image': self.create_random_name('image', 16),
             'version': '1.1.2',
@@ -4323,6 +4325,21 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version2} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None --os-type linux')
+
+        self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
+            self.check('storageProfile.osDisk.osType', 'Linux'),
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} --generate-ssh-keys --upgrade-policy-mode automatic --admin-username clitest1 ')
+
+        self.cmd('vmss show -g {rg} -n {vmss_with_shared_gallery_version}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
         ])
 
         # gallery permissions must be reset, or the resource group can't be deleted
