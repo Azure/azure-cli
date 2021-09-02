@@ -110,6 +110,8 @@ def load_command_table(self, _):
 
     appservice_domains = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_domains#{}')
 
+    logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
@@ -462,5 +464,10 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_staticsite_secrets')
         g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
 
-    from .logicapp.commands import load_logicapp_commands
-    load_logicapp_commands(self.command_group)
+    with self.command_group('logicapp') as g:
+        g.custom_command('delete', 'delete_function_app')
+
+    with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
+        g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_logicapp', table_transformer=transform_web_output)
