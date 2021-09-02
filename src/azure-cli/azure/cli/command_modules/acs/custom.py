@@ -1657,8 +1657,9 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     except subprocess.CalledProcessError as err:
         raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
-        return output
-    raise AzureInternalError("Failed to check the ACR.")
+        print(output)
+    else:
+        raise AzureInternalError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
