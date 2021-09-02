@@ -29,6 +29,7 @@ from .custom import (
     _get_user_assigned_identity,
     subnet_role_assignment_exists,
     _add_role_assignment,
+    _ensure_aks_acr,
 )
 
 logger = get_logger(__name__)
@@ -1660,7 +1661,7 @@ class AKSCreateContext:
 
         Note: yes will not be decorated into the `mc` object.
 
-        :return: yes
+        :return: bool
         """
         # read the original value passed by the command
         yes = self.raw_param.get("yes")
@@ -1668,6 +1669,36 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return yes
+
+    # pylint: disable=unused-argument
+    def get_attach_acr(self, **kwargs) -> str:
+        """Obtain the value of attach_acr.
+
+        Note: attach_acr will not be decorated into the `mc` object.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        attach_acr = self.raw_param.get("attach_acr")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return attach_acr
+
+    # pylint: disable=unused-argument
+    def get_no_wait(self, **kwargs) -> bool:
+        """Obtain the value of no_wait.
+
+        Note: no_wait will not be decorated into the `mc` object.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        no_wait = self.raw_param.get("no_wait")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return no_wait
 
 
 class AKSCreateDecorator:
@@ -1866,7 +1897,7 @@ class AKSCreateDecorator:
 
         This function will store an intermediate need_post_creation_vnet_permission_granting.
 
-        :return: the ManagedCluster object
+        :return: None
         """
         if not isinstance(mc, self.models.ManagedCluster):
             raise CLIInternalError(
@@ -1933,6 +1964,47 @@ class AKSCreateDecorator:
             need_post_creation_vnet_permission_granting,
             overwrite_exists=True,
         )
+
+    def process_attach_acr(self, mc):
+        """Attach acr for the cluster.
+
+        The function "_ensure_aks_acr" will be called to create an AcrPull role assignment for the acr, which
+        internally used AuthorizationManagementClient to send the request.
+
+        :return: None
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+        attach_acr = self.context.get_attach_acr()
+        if attach_acr:
+            if self.context.get_enable_managed_identity():
+                if self.context.get_no_wait():
+                    raise MutuallyExclusiveArgumentError(
+                        "When --attach-acr and --enable-managed-identity are both specified, "
+                        "--no-wait is not allowed, please wait until the whole operation succeeds."
+                    )
+                # Attach acr operation will be handled after the cluster is created
+            else:
+                service_principal_profile = mc.service_principal_profile
+                # newly added check, check whether client_id exists before creating role assignment
+                if (
+                    service_principal_profile is None or
+                    not service_principal_profile.client_id
+                ):
+                    raise CLIInternalError(
+                        "No service principal is found to create the acrpull role assignment for acr."
+                    )
+                subscription_id = self.context.get_intermediate(
+                    "subscription_id"
+                )
+                _ensure_aks_acr(
+                    self.cmd,
+                    client_id=service_principal_profile.client_id,
+                    acr_name_or_id=attach_acr,
+                    subscription_id=subscription_id,
+                )
 
     def construct_default_mc(self):
         """The overall control function used to construct the default ManagedCluster object.
