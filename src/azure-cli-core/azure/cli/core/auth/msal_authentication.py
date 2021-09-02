@@ -60,7 +60,7 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
             client_credential = service_principal_auth.secret
         else:
             client_credential = {"private_key": service_principal_auth.cert_file_string,
-                                 "thumbprint": service_principal_auth.thumbprint.replace(':', '')}
+                                 "thumbprint": service_principal_auth.thumbprint}
 
         super().__init__(service_principal_auth.client_id, client_credential=client_credential, **kwargs)
 

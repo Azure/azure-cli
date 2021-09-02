@@ -46,7 +46,6 @@ _STATE = 'state'
 _USER_TYPE = 'type'
 _USER = 'user'
 _SERVICE_PRINCIPAL = 'servicePrincipal'
-_IS_ENVIRONMENT_CREDENTIAL = 'isEnvironmentCredential'
 _SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH = 'useCertSNIssuerAuth'
 _TOKEN_ENTRY_USER_ID = 'userId'
 _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
@@ -305,56 +304,18 @@ class Profile:
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
         result = [x for x in subscriptions
                   if user_or_sp.lower() == x[_USER_ENTITY][_USER_NAME].lower()]
+        subscriptions = [x for x in subscriptions if x not in result]
+        #self._storage[_SUBSCRIPTIONS] = subscriptions
 
-        if result:
-            # Remove the account from the profile
-            subscriptions = [x for x in subscriptions if x not in result]
-            self._storage[_SUBSCRIPTIONS] = subscriptions
-            logger.warning("Account '%s' has been logged out from Azure CLI.", user_or_sp)
-        else:
-            # https://english.stackexchange.com/questions/5302/log-in-to-or-log-into-or-login-to
-            logger.warning("Account '%s' was not logged in to Azure CLI.", user_or_sp)
-
-        # Log out from MSAL cache
         identity = Identity(self._authority)
-        accounts = identity.get_user(user_or_sp)
-        if accounts:
-            logger.info("The credential of '%s' were found from MSAL encrypted cache.", user_or_sp)
-            if clear_credential:
-                identity.logout_user(user_or_sp)
-                logger.warning("The credential of '%s' were cleared from MSAL encrypted cache. This account is "
-                               "also logged out from other SDK tools which use Azure CLI's credential "
-                               "via Single Sign-On.", user_or_sp)
-            else:
-                logger.warning("The credential of '%s' is still stored in MSAL encrypted cached. Other SDK tools may "
-                               "use Azure CLI\'s credential via Single Sign-On. "
-                               'To clear the credential, run `az logout --username %s --clear-credential`.',
-                               user_or_sp, user_or_sp)
-        else:
-            # remove service principle secret
-            identity.logout_sp(user_or_sp)
+        identity.logout_user(user_or_sp)
+        identity.logout_service_principal(user_or_sp)
 
-    def logout_all(self, clear_credential):
+    def logout_all(self):
         self._storage[_SUBSCRIPTIONS] = []
-        logger.warning('All accounts were logged out.')
 
-        # Deal with MSAL cache
         identity = Identity(self._authority)
-        accounts = identity.get_user()
-        if accounts:
-            logger.info("These credentials were found from MSAL encrypted cache: %s", accounts)
-            if clear_credential:
-                identity.logout_all()
-                logger.warning('All credentials store in MSAL encrypted cache were cleared.')
-            else:
-                logger.warning('These credentials are still stored in MSAL encrypted cached:')
-                for account in identity.get_user():
-                    logger.warning(account['username'])
-                logger.warning('Other SDK tools may use Azure CLI\'s credential via Single Sign-On. '
-                               'To clear all credentials, run `az account clear --clear-credential`. '
-                               'To clear one of them, run `az logout --username USERNAME --clear-credential`.')
-        else:
-            logger.warning('No credential was not found from MSAL encrypted cache.')
+        accounts = identity.logout_all_users()
 
     def get_login_credentials(self, resource=None, client_id=None, subscription_id=None, aux_subscriptions=None,
                               aux_tenants=None):
@@ -372,16 +333,12 @@ class Profile:
 
         use_msal = self._storage.get(_USE_MSAL_TOKEN_CACHE)
         if not use_msal:
-            identity = Identity()
-            identity.migrate_tokens()
             self._storage[_USE_MSAL_TOKEN_CACHE] = True
 
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
 
         account = self.get_subscription(subscription_id)
-
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
         managed_identity_type, managed_identity_id = Profile._try_parse_msi_account_name(account)
 
@@ -416,7 +373,7 @@ class Profile:
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None, epoch_expires_on=True):
+    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None):
         # Convert resource to scopes
         if resource and not scopes:
             scopes = resource_to_scopes(resource)
@@ -448,11 +405,8 @@ class Profile:
         else:
             credential = self._create_credential(account, tenant)
             token = credential.get_token(*scopes)
-            if epoch_expires_on:
-                expires_on = token.expires_on
-            else:
-                import datetime
-                expires_on = datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+            import datetime
+            expires_on = datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
 
             token_entry = {
                 'accessToken': token.token,
@@ -465,57 +419,6 @@ class Profile:
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
-
-    def get_msal_token(self, scopes, data):
-        """
-        This is added for VM SSH feature with backward compatible interface.
-        data contains token_type (ssh-cert), key_id and JWK.
-        """
-        account = self.get_subscription()
-        identity_type = account[_USER_ENTITY][_USER_TYPE]
-        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        tenant = account[_TENANT_ID]
-        identity = Identity(authority=self._authority, tenant_id=tenant)
-
-        # Raise error for managed identity and Cloud Shell
-        not_support_message = "VM SSH currently doesn't support {}."
-
-        # managed identity
-        managed_identity_type, _ = Profile._try_parse_msi_account_name(account)
-        if managed_identity_type:
-            raise CLIError(not_support_message.format("managed identity"))
-
-        # Cloud Shell
-        if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            raise CLIError(not_support_message.format("Cloud Shell"))
-
-        # user
-        if identity_type == _USER:
-            username = username_or_sp_id
-            app = identity.get_user_credential(username)
-            result = app.acquire_token_silent_with_error(scopes, app.account, data=data)
-
-            # If acquire_token_silent_with_error failed, interactively get new RT and AT
-            if not result or 'error' in result:
-                if result:
-                    logger.warning(result['error_description'])
-
-                # Retry login with VM SSH as resource
-                result = app.acquire_token_interactive(scopes, login_hint=username, data=data)
-
-        # service principal
-        elif identity_type == _SERVICE_PRINCIPAL:
-            app = identity.get_service_principal_credential(username_or_sp_id)
-            result = app.acquire_token_for_client(scopes, data=data)
-
-        else:
-            raise CLIError("Unknown identity type {}".format(identity_type))
-
-        if 'error' in result:
-            from azure.cli.core.auth import aad_error_handler
-            aad_error_handler(result)
-
-        return username_or_sp_id, result["access_token"]
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
                               user_assigned_identity_id=None, managed_identity_info=None):
@@ -706,27 +609,18 @@ class Profile:
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         tenant_id = tenant_id if tenant_id else account[_TENANT_ID]
-        # _IS_ENVIRONMENT_CREDENTIAL doesn't exist for normal account
-        is_environment = account[_USER_ENTITY].get(_IS_ENVIRONMENT_CREDENTIAL)
-
         identity = Identity(client_id=client_id, authority=self._authority, tenant_id=tenant_id)
-
-        if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            if tenant_id:
-                raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-            return identity.get_managed_identity_credential()
-
-        # EnvironmentCredential. Ignore user_type
-        if is_environment:
-            return identity.get_environment_credential()
 
         # User
         if user_type == _USER:
             return identity.get_user_credential(username_or_sp_id)
 
         # Service Principal
-        use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
-        return identity.get_service_principal_credential(username_or_sp_id, use_cert_sn_issuer)
+        if user_type == _SERVICE_PRINCIPAL:
+            use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
+            return identity.get_service_principal_credential(username_or_sp_id, use_cert_sn_issuer)
+
+        raise NotImplementedError
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()
@@ -790,7 +684,7 @@ class Profile:
             if user_type == _SERVICE_PRINCIPAL:
                 result['clientId'] = account[_USER_ENTITY][_USER_NAME]
                 msal_cache = MsalSecretStore(True)
-                secret, certificate_file = msal_cache.load_service_principal_cred(
+                secret, certificate_file = msal_cache.load_credential(
                     account[_USER_ENTITY][_USER_NAME], account[_TENANT_ID])
                 if secret:
                     result['clientSecret'] = secret

@@ -741,14 +741,14 @@ class TestProfile(unittest.TestCase):
         # verify
         self.assertEqual(user, self.user1)
 
-    @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
-    @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
-    def test_get_login_credentials(self, app_mock, get_token_mock):
+    @mock.patch('azure.cli.core.auth.identity.UserCredential')
+    def test_get_login_credentials(self, user_credential_mock):
+        user_credential_mock.get_token.return_value = self.access_token
+
         cli = DummyCli()
-        get_token_mock.return_value = TestProfile.raw_token1
         # setup
         storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
                                              'MSI-DEV-INC', self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
@@ -764,7 +764,7 @@ class TestProfile(unittest.TestCase):
 
         # verify the cred.get_token()
         token = cred.get_token()
-        self.assertEqual(token, self.raw_token1)
+        self.assertEqual(token, self.access_token)
 
     @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
@@ -1572,7 +1572,7 @@ class TestProfile(unittest.TestCase):
         creds_cache = MsalSecretStore()
 
         # action
-        creds_cache.save_service_principal_cred(test_sp2)
+        creds_cache.save_credential(test_sp2)
 
         # assert
         self.assertEqual(creds_cache._service_principal_creds, [test_sp, test_sp2])
@@ -1600,7 +1600,7 @@ class TestProfile(unittest.TestCase):
         creds_cache = MsalSecretStore()
 
         # action
-        creds_cache.save_service_principal_cred(test_sp)
+        creds_cache.save_credential(test_sp)
 
         # assert
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
@@ -1630,7 +1630,7 @@ class TestProfile(unittest.TestCase):
         new_creds = test_sp.copy()
         new_creds['accessToken'] = 'Secret2'
         # action
-        creds_cache.save_service_principal_cred(new_creds)
+        creds_cache.save_credential(new_creds)
 
         # assert
         self.assertEqual(creds_cache._service_principal_creds, [new_creds])
@@ -1658,7 +1658,7 @@ class TestProfile(unittest.TestCase):
         creds_cache = MsalSecretStore()
 
         # action logout a service principal
-        creds_cache.remove_cached_creds('myapp')
+        creds_cache.remove_credential('myapp')
 
         # assert
         self.assertEqual(creds_cache._service_principal_creds, [])
@@ -1676,7 +1676,7 @@ class TestProfile(unittest.TestCase):
 
         # assert
         with self.assertRaises(CLIError) as context:
-            creds_cache._load_cached_creds()
+            creds_cache._load_persistence()
 
         self.assertTrue(re.findall(r'bad error for you', str(context.exception)))
 
@@ -1723,51 +1723,6 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(mock_auth_context.acquire_token.call_count, 2)
 
         # With pytest, use -o log_cli=True to manually check the log
-
-    @mock.patch('azure.cli.core._identity.Identity.get_user_credential', autospec=True)
-    def test_get_access_token_for_scopes(self, get_user_credential_mock):
-        credential_mock = get_user_credential_mock.return_value
-        credential_mock.get_token.return_value = self.access_token
-
-        cli = DummyCli()
-        profile = Profile(cli_ctx=cli)
-        token = profile.get_access_token_for_scopes(self.user1, self.tenant_id, *self.msal_scopes)
-
-        get_user_credential_mock.assert_called_with(mock.ANY, self.user1)
-        credential_mock.get_token.assert_called_with(*self.msal_scopes)
-        self.assertEqual(token, self.raw_token1)
-
-    @mock.patch('msal.PublicClientApplication.acquire_token_silent_with_error', autospec=True)
-    @mock.patch('msal.PublicClientApplication.get_accounts', autospec=True)
-    def test_get_msal_token(self, get_accounts_mock, acquire_token_silent_with_error_mock):
-        cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock)
-
-        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
-        profile._set_subscriptions(consolidated)
-
-        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]
-        data = {
-            "token_type": "ssh-cert",
-            "req_cnf": "fake_jwk",
-            "key_id": "fake_id"
-        }
-        mock_return_value = {
-            'token_type': 'ssh-cert',
-            'scope': 'https://pas.windows.net/CheckMyAccess/Linux/user_impersonation https://pas.windows.net/CheckMyAccess/Linux/.default',
-            'expires_in': 3599,
-            'ext_expires_in': 3599,
-            'access_token': 'fake access token',
-            'refresh_token': 'fake refresh token',
-            'id_token': 'fake id token'
-        }
-        acquire_token_silent_with_error_mock.return_value = mock_return_value
-
-        username, access_token = profile.get_msal_token(scopes, data)
-        self.assertEqual(username, self.user1)
-        self.assertEqual(access_token, 'fake access token')
-        acquire_token_silent_with_error_mock.assert_called_with(mock.ANY, scopes, get_accounts_mock.return_value[0], data=data)
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods

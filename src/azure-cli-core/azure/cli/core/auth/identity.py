@@ -53,7 +53,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.msal_authority = "{}/{}".format(self.authority, self.tenant_id)
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
 
-        self._cache_file = os.path.join(get_config_dir(), "tokenCache.bin")
+        self._token_cache_file = os.path.join(get_config_dir(), "tokenCache.bin")
         self._secret_file = os.path.join(get_config_dir(), "secrets.bin")
         self._fallback_to_plaintext = kwargs.pop('fallback_to_plaintext', True)
 
@@ -94,9 +94,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # patch_token_cache_add(self.msal_app.remove_account)
 
     def _load_msal_cache(self):
-        from .token_cache import load_persisted_token_cache
+        from .persistence import load_persisted_token_cache
         # Store for user token persistence
-        cache = load_persisted_token_cache(self._cache_file, self._fallback_to_plaintext)
+        cache = load_persisted_token_cache(self._token_cache_file, self._fallback_to_plaintext)
         cache._reload_if_necessary()  # pylint: disable=protected-access
         return cache
 
@@ -149,45 +149,32 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         result = cred.acquire_token_for_client(scopes)
         check_result(result)
         entry = sp_auth.get_entry_to_persist()
-        self._msal_secret_store.save_service_principal_cred(entry)
+        self._msal_secret_store.save_credential(entry)
 
     def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
-        raise NotImplemented
+        raise NotImplementedError
 
     def login_in_cloud_shell(self, scopes):
-        raise NotImplemented
+        raise NotImplementedError
 
     def logout_user(self, user):
         accounts = self.msal_app.get_accounts(user)
-        logger.info('Before account removal:')
-        logger.info(json.dumps(accounts))
-
-        # `accounts` are the same user in all tenants, log out all of them
         for account in accounts:
             self.msal_app.remove_account(account)
 
-        accounts = self.msal_app.get_accounts(user)
-        logger.info('After account removal:')
-        logger.info(json.dumps(accounts))
+    def logout_all_users(self):
+        try:
+            os.remove(self._token_cache_file)
+        except FileNotFoundError:
+            pass
 
-    def logout_sp(self, sp):
+    def logout_service_principal(self, sp):
         # remove service principal secrets
-        self._msal_secret_store.remove_cached_creds(sp)
+        self._msal_secret_store.remove_credential(sp)
 
-    def logout_all(self):
-        # TODO: Support multi-authority logout
-        accounts = self.msal_app.get_accounts()
-        logger.info('Before account removal:')
-        logger.info(json.dumps(accounts))
-
-        for account in accounts:
-            self.msal_app.remove_account(account)
-
-        accounts = self.msal_app.get_accounts()
-        logger.info('After account removal:')
-        logger.info(json.dumps(accounts))
+    def logout_all_service_principal(self, sp):
         # remove service principal secrets
-        self._msal_secret_store.remove_all_cached_creds()
+        self._msal_secret_store.remove_all_credentials()
 
     def get_user(self, user=None):
         accounts = self.msal_app.get_accounts(user) if user else self.msal_app.get_accounts()
@@ -197,7 +184,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return UserCredential(self.client_id, username, **self._msal_app_kwargs)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):
-        entry = self._msal_secret_store.load_service_principal_cred(client_id, self.tenant_id)
+        entry = self._msal_secret_store.load_credential(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
         sp_auth = ServicePrincipalAuth.build_from_entry(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
@@ -235,15 +222,15 @@ class ServicePrincipalAuth:   # pylint: disable=too-few-public-methods
                 with open(certificate_file, 'r') as file_reader:
                     self.cert_file_string = file_reader.read()
                     cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
-                    self.thumbprint = cert.digest("sha1").decode()
+                    self.thumbprint = cert.digest("sha1").decode().replace(':', '')
                     if use_cert_sn_issuer:
                         # low-tech but safe parsing based on
                         # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
-                        match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
+                        match = re.search(r'-+BEGIN CERTIFICATE.+-+(?P<public>[^-]+)-+END CERTIFICATE.+-+',
                                           self.cert_file_string, re.I)
                         self.public_certificate = match.group('public').strip()
-            except (UnicodeDecodeError, Error):
-                raise CLIError('Invalid certificate, please use a valid PEM file.')
+            except (UnicodeDecodeError, Error) as ex:
+                raise CLIError('Invalid certificate, please use a valid PEM file. Error detail: {}'.format(ex))
         else:
             self.secret = password_arg_value
 
@@ -275,8 +262,8 @@ class MsalSecretStore:
         self._service_principal_creds = []
         self._fallback_to_plaintext = fallback_to_plaintext
 
-    def load_service_principal_cred(self, sp_id, tenant):
-        self._load_cached_creds()
+    def load_credential(self, sp_id, tenant):
+        self._load_persistence()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
@@ -293,8 +280,8 @@ class MsalSecretStore:
 
         return cred
 
-    def save_service_principal_cred(self, sp_entry):
-        self._load_cached_creds()
+    def save_credential(self, sp_entry):
+        self._load_persistence()
         matched = [x for x in self._service_principal_creds
                    if sp_entry[_SERVICE_PRINCIPAL_ID] == x[_SERVICE_PRINCIPAL_ID] and
                    sp_entry[_SERVICE_PRINCIPAL_TENANT] == x[_SERVICE_PRINCIPAL_TENANT]]
@@ -312,38 +299,40 @@ class MsalSecretStore:
             state_changed = True
 
         if state_changed:
-            self._persist_cached_creds()
+            self._save_persistence()
         self._serialize_secrets()
 
-    def remove_cached_creds(self, user_or_sp):
-        self._load_cached_creds()
+    def remove_credential(self, sp_id):
+        self._load_persistence()
         state_changed = False
 
         # clear service principal creds
         matched = [x for x in self._service_principal_creds
-                   if x[_SERVICE_PRINCIPAL_ID] == user_or_sp]
+                   if x[_SERVICE_PRINCIPAL_ID] == sp_id]
         if matched:
             state_changed = True
             self._service_principal_creds = [x for x in self._service_principal_creds
                                              if x not in matched]
 
         if state_changed:
-            self._persist_cached_creds()
+            self._save_persistence()
 
-    def remove_all_cached_creds(self):
+    def remove_all_credentials(self):
         try:
             os.remove(self._secret_file)
         except FileNotFoundError:
             pass
 
-    def _persist_cached_creds(self):
-        persistence = self._build_persistence()
+    def _save_persistence(self):
+        from .persistence import build_persistence
+        persistence = build_persistence(self._secret_file)
         from msal_extensions import CrossPlatLock
         with CrossPlatLock(self._lock_file):
             persistence.save(json.dumps(self._service_principal_creds))
 
-    def _load_cached_creds(self):
-        persistence = self._build_persistence()
+    def _load_persistence(self):
+        from .persistence import build_persistence
+        persistence = build_persistence(self._secret_file)
         from msal_extensions import CrossPlatLock
         from msal_extensions.persistence import PersistenceNotFound
         with CrossPlatLock(self._lock_file):
@@ -355,33 +344,6 @@ class MsalSecretStore:
                 raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
                                "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
                                "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
-
-    def _build_persistence(self):
-        # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/blob/0.2.2/sample/persistence_sample.py
-        from msal_extensions import FilePersistenceWithDataProtection, \
-            KeychainPersistence, \
-            LibsecretPersistence, \
-            FilePersistence
-
-        import sys
-        if sys.platform.startswith('win'):
-            return FilePersistenceWithDataProtection(self._secret_file)
-        if sys.platform.startswith('darwin'):
-            # todo: support darwin
-            return KeychainPersistence(self._secret_file, "Microsoft.Developer.IdentityService", "MSALCustomCache")
-        if sys.platform.startswith('linux'):
-            try:
-                return LibsecretPersistence(
-                    self._secret_file,
-                    schema_name="MSALCustomToken",
-                    attributes={"MsalClientID": "Microsoft.Developer.IdentityService"}
-                )
-            except:  # pylint: disable=bare-except
-                if not self._fallback_to_plaintext:
-                    raise
-                # todo: add missing lib in message
-                logger.warning("Encryption unavailable. Opting in to plain text.")
-        return FilePersistence(self._secret_file)
 
     def _serialize_secrets(self):
         # ONLY FOR DEBUGGING PURPOSE. DO NOT USE IN PRODUCTION CODE.
