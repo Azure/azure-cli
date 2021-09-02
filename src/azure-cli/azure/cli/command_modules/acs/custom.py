@@ -1657,8 +1657,9 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     except subprocess.CalledProcessError as err:
         raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
-        return output
-    raise AzureInternalError("Failed to check the ACR.")
+        print(output)
+    else:
+        raise AzureInternalError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -2020,6 +2021,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_rbac=None,
                vm_set_type=None,
                skip_subnet_role_assignment=False,
+               os_sku=None,
                enable_cluster_autoscaler=False,
                cluster_autoscaler_profile=None,
                network_plugin=None,
@@ -2152,6 +2154,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
+        os_sku=os_sku,
         vnet_subnet_id=vnet_subnet_id,
         proximity_placement_group_id=ppg,
         availability_zones=zones,
@@ -4006,6 +4009,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       ppg=None,
                       max_pods=0,
                       os_type="Linux",
+                      os_sku=None,
                       min_count=None,
                       max_count=None,
                       enable_cluster_autoscaler=False,
@@ -4060,6 +4064,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
+        os_sku=os_sku,
         vnet_subnet_id=vnet_subnet_id,
         proximity_placement_group_id=ppg,
         agent_pool_type="VirtualMachineScaleSets",
