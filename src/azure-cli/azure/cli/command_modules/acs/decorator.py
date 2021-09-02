@@ -1671,7 +1671,7 @@ class AKSCreateContext:
         return yes
 
     # pylint: disable=unused-argument
-    def get_attach_acr(self, **kwargs) -> str:
+    def get_attach_acr(self, **kwargs) -> Union[str, None]:
         """Obtain the value of attach_acr.
 
         Note: attach_acr will not be decorated into the `mc` object.
@@ -2029,6 +2029,8 @@ class AKSCreateDecorator:
         mc = self.set_up_service_principal_profile(mc)
         # add role assignment for vent subnet
         self.process_add_role_assignment_for_vnet_subnet(mc)
+        # attach acr (add role assignment for acr)
+        self.process_attach_acr(mc)
 
         # TODO: set up other profiles
         return mc
