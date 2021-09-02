@@ -187,6 +187,12 @@ class AKSCreateContext:
         self.mc = None
 
     def attach_mc(self, mc):
+        """Attach the ManagedCluster object to the context.
+
+        The `mc` object is only allowed to be attached once, and attaching again will raise a CLIInternalError.
+
+        :return: None
+        """
         if self.mc is None:
             self.mc = mc
         else:
@@ -198,6 +204,13 @@ class AKSCreateContext:
             )
 
     def get_intermediate(self, variable_name: str, default_value: Any = None):
+        """Get the value of an intermediate by its name.
+
+        Get the value from the intermediates dictionary with variable_name as the key. If variable_name does not exist,
+        default_value will be returned.
+
+        :return: Any
+        """
         if variable_name not in self.intermediates:
             msg = "The intermediate '{}' does not exist, return default value '{}'.".format(
                 variable_name, default_value
@@ -208,6 +221,14 @@ class AKSCreateContext:
     def set_intermediate(
         self, variable_name: str, value: Any, overwrite_exists: bool = False
     ):
+        """Set the value of an intermediate by its name.
+
+        In the case that the intermediate value already exists, if overwrite_exists is enabled, the value will be
+        overwritten and the log will be output at the debug level, otherwise the value will not be overwritten and
+        the log will be output at the warning level, which by default will be output to stderr and seen by user.
+
+        :return: None
+        """
         if variable_name in self.intermediates:
             if overwrite_exists:
                 msg = "The intermediate '{}' is overwritten. Original value: '{}', new value: '{}'.".format(
@@ -228,6 +249,12 @@ class AKSCreateContext:
             self.intermediates[variable_name] = value
 
     def remove_intermediate(self, variable_name: str):
+        """Remove the value of an intermediate by its name.
+
+        No exception will be raised if the intermediate does not exist,
+
+        :return: None
+        """
         self.intermediates.pop(variable_name, None)
 
     # pylint: disable=unused-argument
