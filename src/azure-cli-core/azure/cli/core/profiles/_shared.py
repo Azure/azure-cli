@@ -155,7 +155,7 @@ AZURE_API_PROFILES = {
             'shared_galleries': '2020-09-30',
             'virtual_machine_scale_sets': '2021-04-01'
         }),
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2020-09-01',
@@ -220,7 +220,7 @@ AZURE_API_PROFILES = {
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
-        ResourceType.MGMT_IOTHUB: '2021-03-31',
+        ResourceType.MGMT_IOTHUB: '2021-07-01',
         ResourceType.MGMT_IOTCENTRAL: '2018-09-01',
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
@@ -245,7 +245,7 @@ AZURE_API_PROFILES = {
             'virtual_machine_scale_sets': '2020-06-01'
         }),
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',

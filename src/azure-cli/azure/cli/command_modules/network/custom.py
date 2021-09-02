@@ -15,12 +15,18 @@ from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
-from azure.cli.command_modules.network._client_factory import network_client_factory
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
+    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError
+from azure.cli.core.profiles import ResourceType, supported_api_version
 
+from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-from azure.cli.core.profiles import ResourceType, supported_api_version
-from azure.cli.core.azclierror import ResourceNotFoundError, UnrecognizedArgumentError
+
+import threading
+import time
+import platform
+import subprocess
 
 logger = get_logger(__name__)
 
@@ -7576,6 +7582,179 @@ def list_bastion_host(cmd, resource_group_name=None):
     if resource_group_name is not None:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list()
+
+
+SSH_EXTENSION_NAME = 'ssh'
+SSH_EXTENSION_MODULE = 'azext_ssh.custom'
+SSH_EXTENSION_VERSION = '0.1.3'
+
+
+def _get_azext_module(extension_name, module_name):
+    try:
+        # Adding the installed extension in the path
+        from azure.cli.core.extension.operations import add_extension_to_path
+        add_extension_to_path(extension_name)
+        # Import the extension module
+        from importlib import import_module
+        azext_custom = import_module(module_name)
+        return azext_custom
+    except ImportError as ie:
+        raise CLIError(ie)
+
+
+def _test_extension(extension_name):
+    from azure.cli.core.extension import (get_extension)
+    from pkg_resources import parse_version
+    ext = get_extension(extension_name)
+    if parse_version(ext.version) < parse_version(SSH_EXTENSION_VERSION):
+        raise CLIError('SSH Extension (version >= "{}") must be installed'.format(SSH_EXTENSION_VERSION))
+
+
+def _get_ssh_path(ssh_command="ssh"):
+    import os
+    ssh_path = ssh_command
+
+    if platform.system() == 'Windows':
+        arch_data = platform.architecture()
+        is_32bit = arch_data[0] == '32bit'
+        sys_path = 'SysNative' if is_32bit else 'System32'
+        system_root = os.environ['SystemRoot']
+        system32_path = os.path.join(system_root, sys_path)
+        ssh_path = os.path.join(system32_path, "openSSH", (ssh_command + ".exe"))
+        logger.debug("Platform architecture: %s", str(arch_data))
+        logger.debug("System Root: %s", system_root)
+        logger.debug("Attempting to run ssh from path %s", ssh_path)
+
+        if not os.path.isfile(ssh_path):
+            raise CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
+    else:
+        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
+
+    return ssh_path
+
+
+def _get_rdp_path(rdp_command="mstsc"):
+    import os
+    rdp_path = rdp_command
+
+    if platform.system() == 'Windows':
+        arch_data = platform.architecture()
+        sys_path = 'System32'
+        system_root = os.environ['SystemRoot']
+        system32_path = os.path.join(system_root, sys_path)
+        rdp_path = os.path.join(system32_path, (rdp_command + ".exe"))
+        logger.debug("Platform architecture: %s", str(arch_data))
+        logger.debug("System Root: %s", system_root)
+        logger.debug("Attempting to run rdp from path %s", rdp_path)
+
+        if not os.path.isfile(rdp_path):
+            raise CLIError("Could not find " + rdp_command + ".exe. Is the rdp client installed?")
+    else:
+        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
+
+    return rdp_path
+
+
+def _get_host(username, ip):
+    return username + "@" + ip
+
+
+def _build_args(cert_file, private_key_file):
+    private_key = []
+    certificate = []
+    if private_key_file:
+        private_key = ["-i", private_key_file]
+    if cert_file:
+        certificate = ["-o", "CertificateFile=" + cert_file]
+    return private_key + certificate
+
+
+def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, username=None, ssh_key=None):
+
+    _test_extension(SSH_EXTENSION_NAME)
+
+    if not resource_port:
+        resource_port = 22
+    if not is_valid_resource_id(target_resource_id):
+        raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
+
+    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+    if auth_type.lower() == 'password':
+        if username is None:
+            raise RequiredArgumentMissingError("Please enter username with --username.")
+        command = [_get_ssh_path(), _get_host(username, 'localhost')]
+    elif auth_type.lower() == 'aad':
+        azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
+        public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)  # pylint: disable=protected-access
+        cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file + '-cert.pub')  # pylint: disable=protected-access
+        command = [_get_ssh_path(), _get_host(username, 'localhost')]
+        command = command + _build_args(cert_file, private_key_file)
+    elif auth_type.lower() == 'ssh-key':
+        if username is None or ssh_key is None:
+            raise RequiredArgumentMissingError("Please enter username --username and ssh cert location --ssh-key.")
+        command = [_get_ssh_path(), _get_host(username, 'localhost')]
+        command = command + _build_args(None, ssh_key)
+    else:
+        raise UnrecognizedArgumentError("Unknown auth type. Use one of password, aad or akv.")
+    command = command + ["-p", str(tunnel_server.local_port)]
+    command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
+    command = command + ['-o', "LogLevel=Error"]
+    logger.debug("Running ssh command %s", ' '.join(command))
+    try:
+        subprocess.call(command, shell=platform.system() == 'Windows')
+    except Exception as ex:
+        raise CLIInternalError(ex)
+
+
+def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None):
+    if not resource_port:
+        resource_port = 3389
+    if not is_valid_resource_id(target_resource_id):
+        raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
+
+    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+    command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
+    logger.debug("Running rdp command %s", ' '.join(command))
+    subprocess.call(command, shell=platform.system() == 'Windows')
+    tunnel_server.cleanup()
+
+
+def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
+    from .tunnel import TunnelServer
+    client = network_client_factory(cmd.cli_ctx).bastion_hosts
+    bastion = client.get(resource_group_name, name)
+    if port is None:
+        port = 0  # Will auto-select a free port from 1024-65535
+    tunnel_server = TunnelServer(cmd.cli_ctx, 'localhost', port, bastion, vm_id, resource_port)
+    return tunnel_server
+
+
+def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port, port, timeout=None):
+    if not is_valid_resource_id(target_resource_id):
+        raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
+    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port, port)
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+    logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
+    logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
+    logger.warning('Ctrl + C to close')
+
+    if timeout:
+        time.sleep(int(timeout))
+    else:
+        while t.is_alive():
+            time.sleep(5)
+
+
+def _start_tunnel(tunnel_server):
+    tunnel_server.start_server()
 # endregion
 
 
@@ -7684,9 +7863,7 @@ def create_network_virtual_appliance_site(cmd, client, resource_group_name, netw
                                                           allow=allow,
                                                           optimize=optimize,
                                                           default=default
-                                                      )
-                                                  ))
-
+                                                      )))
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, network_virtual_appliance_name, site_name, virtual_appliance_site)
 

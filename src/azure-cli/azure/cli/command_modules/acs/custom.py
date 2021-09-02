@@ -102,7 +102,7 @@ from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
 from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
 from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
-from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM
+from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM, CONST_PRIVATE_DNS_ZONE_NONE
 from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
 
 logger = get_logger(__name__)
@@ -2020,6 +2020,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_rbac=None,
                vm_set_type=None,
                skip_subnet_role_assignment=False,
+               os_sku=None,
                enable_cluster_autoscaler=False,
                cluster_autoscaler_profile=None,
                network_plugin=None,
@@ -2057,6 +2058,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_private_cluster=False,
                private_dns_zone=None,
                fqdn_subdomain=None,
+               disable_public_fqdn=False,
                enable_managed_identity=True,
                assign_identity=None,
                attach_acr=None,
@@ -2076,6 +2078,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
+    auto_upgrade_profile = None
     ManagedClusterWindowsProfile = cmd.get_models('ManagedClusterWindowsProfile',
                                                   resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                   operation_group='managed_clusters')
@@ -2150,6 +2153,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
+        os_sku=os_sku,
         vnet_subnet_id=vnet_subnet_id,
         proximity_placement_group_id=ppg,
         availability_zones=zones,
@@ -2433,7 +2437,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             cluster_identity_object_id,
             assign_kubelet_identity)
 
-    auto_upgrade_profile = None
     if auto_upgrade_channel is not None:
         auto_upgrade_profile = ManagedClusterAutoUpgradeProfile(upgrade_channel=auto_upgrade_channel)
 
@@ -2457,6 +2460,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         identity_profile=identity_profile,
         auto_upgrade_profile=auto_upgrade_profile
     )
+
+    if disable_public_fqdn:
+        if not enable_private_cluster:
+            raise ArgumentUsageError("--disable-public-fqdn should only be used with --enable-private-cluster")
+        mc.api_server_access_profile.enable_private_cluster_public_fqdn = False
 
     use_custom_private_dns_zone = False
     if private_dns_zone:
@@ -2638,14 +2646,25 @@ def aks_get_versions(cmd, client, location):
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser(
                             '~'), '.kube', 'config'),
-                        overwrite_existing=False, context_name=None):
+                        overwrite_existing=False, context_name=None, public_fqdn=False):
     credentialResults = None
+    serverType = None
+    if public_fqdn:
+        serverType = 'public'
     if admin:
-        credentialResults = client.list_cluster_admin_credentials(
-            resource_group_name, name)
+        if serverType is None:
+            credentialResults = client.list_cluster_admin_credentials(
+                resource_group_name, name)
+        else:
+            credentialResults = client.list_cluster_admin_credentials(
+                resource_group_name, name, serverType)
     else:
-        credentialResults = client.list_cluster_user_credentials(
-            resource_group_name, name)
+        if serverType is None:
+            credentialResults = client.list_cluster_user_credentials(
+                resource_group_name, name)
+        else:
+            credentialResults = client.list_cluster_user_credentials(
+                resource_group_name, name, serverType)
 
     # Check if KUBECONFIG environmental variable is set
     # If path is different than default then that means -f/--file is passed
@@ -2768,6 +2787,8 @@ def aks_update(cmd, client, resource_group_name, name,
                assign_identity=None,
                yes=False,
                no_wait=False,
+               enable_public_fqdn=False,
+               disable_public_fqdn=False,
                enable_azure_rbac=False,
                disable_azure_rbac=False):
     ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
@@ -2811,7 +2832,9 @@ def aks_update(cmd, client, resource_group_name, name,
             not auto_upgrade_channel and
             not windows_admin_password and
             not enable_managed_identity and
-            not assign_identity):
+            not assign_identity and
+            not enable_public_fqdn and
+            not disable_public_fqdn):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2835,7 +2858,9 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--enable-managed-identity" or '
                        '"--assign-identity" or '
                        '"--enable-azure-rbac" or '
-                       '"--disable-azure-rbac"')
+                       '"--disable-azure-rbac" or '
+                       '"--enable-public-fqdn" or '
+                       '"--disable-public-fqdn"')
 
     if not enable_managed_identity and assign_identity:
         raise CLIError(
@@ -2983,11 +3008,25 @@ def aks_update(cmd, client, resource_group_name, name,
     if disable_ahub:
         instance.windows_profile.license_type = 'None'
 
-    if instance.auto_upgrade_profile is None:
-        instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
-
     if auto_upgrade_channel is not None:
+        if instance.auto_upgrade_profile is None:
+            instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
         instance.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
+
+    if enable_public_fqdn and disable_public_fqdn:
+        raise MutuallyExclusiveArgumentError(
+            'Cannot specify "--enable-public-fqdn" and "--disable-public-fqdn" at the same time')
+    is_private_cluster = instance.api_server_access_profile is not None and instance.api_server_access_profile.enable_private_cluster  # pylint: disable=line-too-long
+    if enable_public_fqdn:
+        if not is_private_cluster:
+            raise ArgumentUsageError('--enable-public-fqdn can only be used for private cluster')
+        instance.api_server_access_profile.enable_private_cluster_public_fqdn = True
+    if disable_public_fqdn:
+        if not is_private_cluster:
+            raise ArgumentUsageError('--disable-public-fqdn can only be used for private cluster')
+        if instance.api_server_access_profile.private_dns_zone.lower() == CONST_PRIVATE_DNS_ZONE_NONE:
+            raise ArgumentUsageError('--disable-public-fqdn cannot be applied for none mode private dns zone cluster')
+        instance.api_server_access_profile.enable_private_cluster_public_fqdn = False
 
     if windows_admin_password:
         instance.windows_profile.admin_password = windows_admin_password
@@ -3969,6 +4008,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       ppg=None,
                       max_pods=0,
                       os_type="Linux",
+                      os_sku=None,
                       min_count=None,
                       max_count=None,
                       enable_cluster_autoscaler=False,
@@ -4023,6 +4063,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
+        os_sku=os_sku,
         vnet_subnet_id=vnet_subnet_id,
         proximity_placement_group_id=ppg,
         agent_pool_type="VirtualMachineScaleSets",
@@ -4098,6 +4139,14 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
             'Conflicting flags. Upgrading the Kubernetes version will also '
             'upgrade node image version. If you only want to upgrade the '
             'node version please use the "--node-image-only" option only.'
+        )
+
+    # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
+    if max_surge and node_image_only:
+        raise MutuallyExclusiveArgumentError(
+            'Conflicting flags. Unable to specify max-surge with node-image-only.'
+            'If you want to use max-surge with a node image upgrade, please first '
+            'update max-surge using "az aks nodepool update --max-surge".'
         )
 
     if node_image_only:

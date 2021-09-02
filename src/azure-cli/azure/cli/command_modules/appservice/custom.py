@@ -56,7 +56,7 @@ from ._client_factory import web_client_factory, ex_handler_factory, providers_c
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method, raise_missing_token_suggestion
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
-                           should_create_new_rg, set_location, get_site_availability, get_profile_username,
+                           check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
@@ -710,7 +710,8 @@ def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
 def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
     DeletedAppRestoreRequest = cmd.get_models('DeletedAppRestoreRequest')
     request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restore_from_deleted_app', slot, request)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_restore_from_deleted_app',
+                                   slot, request)
 
 
 def list_function_app(cmd, resource_group_name=None):
@@ -1436,10 +1437,13 @@ def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
         raise CLIError("'{}' app doesn't exist".format(webapp_name))
     binding = HostNameBinding(site_name=webapp.name)
     if slot is None:
-        return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
+        return client.web_apps.create_or_update_host_name_binding(resource_group_name=resource_group_name,
+                                                                  name=webapp.name, host_name=hostname,
+                                                                  host_name_binding=binding)
 
-    return client.web_apps.create_or_update_host_name_binding_slot(resource_group_name, webapp.name, hostname, binding,
-                                                                   slot)
+    return client.web_apps.create_or_update_host_name_binding_slot(resource_group_name=resource_group_name,
+                                                                   name=webapp.name, host_name=hostname,
+                                                                   slot=slot, host_name_binding=binding)
 
 
 def delete_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
@@ -1626,11 +1630,7 @@ def enable_local_git(cmd, resource_group_name, name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     site_config = get_site_configs(cmd, resource_group_name, name, slot)
     site_config.scm_type = 'LocalGit'
-    if slot is None:
-        client.web_apps.create_or_update_configuration(resource_group_name, name, site_config)
-    else:
-        client.web_apps.create_or_update_configuration_slot(resource_group_name, name,
-                                                            site_config, slot)
+    _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update_configuration', slot, site_config)
 
     return {'url': _get_local_git_url(cmd.cli_ctx, client, resource_group_name, name, slot)}
 
@@ -3788,8 +3788,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         logger.warning("The webapp '%s' doesn't exist", name)
         sku = get_sku_to_use(src_dir, html, sku, runtime)
         loc = set_location(cmd, sku, location)
-        rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
-        _create_new_rg = should_create_new_rg(cmd, rg_name, _is_linux)
+        rg_name = get_rg_to_use(user, loc, os_name, resource_group_name)
+        _create_new_rg = not check_resource_group_exists(cmd, rg_name)
         plan = get_plan_to_use(cmd=cmd,
                                user=user,
                                os_name=os_name,

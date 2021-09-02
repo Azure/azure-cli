@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.27.1"
+VERSION = "2.27.2"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -75,7 +75,7 @@ DEPENDENCIES = [
     'azure-mgmt-cognitiveservices~=12.0.0',
     'azure-mgmt-compute~=22.1.0',
     'azure-mgmt-consumption~=2.0',
-    'azure-mgmt-containerinstance~=1.4',
+    'azure-mgmt-containerinstance~=8.0.0',
     'azure-mgmt-containerregistry==8.1.0',
     'azure-mgmt-containerservice~=16.1.0',
     'azure-mgmt-cosmosdb~=6.4.0',
@@ -92,9 +92,9 @@ DEPENDENCIES = [
     'azure-mgmt-hdinsight~=8.0.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=9.0.0b1',
-    'azure-mgmt-iothub==2.0.0',
-    'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-keyvault==9.0.0',
+    'azure-mgmt-iothub==2.1.0',
+    'azure-mgmt-iothubprovisioningservices~=0.3.0',
+    'azure-mgmt-keyvault==9.1.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=11.0.0',
     'azure-mgmt-managedservices~=1.0',
@@ -115,7 +115,7 @@ DEPENDENCIES = [
     'azure-mgmt-redis~=13.0.0',
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource==18.0.0',
+    'azure-mgmt-resource==19.0.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=1.0.0',
@@ -150,6 +150,9 @@ DEPENDENCIES = [
     'xmltodict~=0.12'
 ]
 
+# On Linux, the distribution (Ubuntu, Debian, etc) and version are checked
+if sys.platform == 'linux':
+    DEPENDENCIES.append('distro')
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()

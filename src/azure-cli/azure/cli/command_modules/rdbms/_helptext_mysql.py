@@ -16,7 +16,7 @@ helps['mysql flexible-server create'] = """
 type: command
 short-summary: Create a flexible server.
 examples:
-  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with VNET enabled by default.
+  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with Public access enabled by default.
     text: |
         az mysql flexible-server create
   - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with all public IPs (0.0.0.0 - 255.255.255.255).

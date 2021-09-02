@@ -1455,7 +1455,7 @@ short-summary: Add an OWASP CRS exclusion rule to the WAF policy managed rules.
 
 helps['network application-gateway waf-policy managed-rule exclusion remove'] = """
 type: command
-short-summary: List all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
+short-summary: Remove all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
 """
 
 helps['network application-gateway waf-policy managed-rule exclusion list'] = """
@@ -4749,7 +4749,7 @@ short-summary: Update a custom IP prefix resource.
 examples:
   - name: Update a custom IP prefix resource.
     text: |
-        az network custom-ip prefix update --name MyCustomIpPrefix --resource-group MyResourceGroup --set useRemoteGateways=true
+        az network custom-ip prefix update --name MyCustomIpPrefix --resource-group MyResourceGroup --tags foo=doo
 """
 
 helps['network public-ip'] = """
@@ -7093,6 +7093,39 @@ examples:
     text: |
         az network bastion show --name MyBastionHost --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['network bastion ssh'] = """
+type: command
+short-summary: SSH to a virtual machine using Tunneling from Azure Bastion.
+examples:
+  - name: SSH to virtual machine using Azure Bastion using password.
+    text: |
+        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type password --username xyz
+  - name: SSH to virtual machine using Azure Bastion using ssh key file.
+    text: |
+        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type ssh-key-file --username xyz --ssh-key C:/filepath/sshkey.pem
+  - name: SSH to virtual machine using Azure Bastion using AAD.
+    text: |
+        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type AAD
+"""
+
+helps['network bastion rdp'] = """
+type: command
+short-summary: RDP to target Virtual Machine using Tunneling from Azure Bastion.
+examples:
+  - name: RDP to virtual machine using Azure Bastion.
+    text: |
+        az network bastion rdp --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId
+"""
+
+helps['network bastion tunnel'] = """
+type: command
+short-summary: Show a Azure bastion host machine.
+examples:
+  - name: Show a Azure bastion host machine.
+    text: |
+        az network bastion tunnel --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --resource-port 111 --port 222
 """
 
 helps['network security-partner-provider'] = """
