@@ -245,12 +245,16 @@ examples:
   - name: Set the list of audit actions.
     text: |
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
-        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\
+        --actions SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\
         --blob-auditing-policy-name bapolicyname
   - name: Disable an auditing policy.
     text: |-
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
         --state Disabled --blob-auditing-policy-name bapolicyname
+  - name: Disable a blob storage auditing policy.
+    text: |-
+        az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
+        --blob-storage-target-state Disabled --blob-auditing-policy-name bapname
   - name: Enable a log analytics auditing policy.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws --state Enabled \\
@@ -578,12 +582,16 @@ examples:
   - name: Set the list of audit actions.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\
+        --resource-group rg --actions SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\
         --blob-auditing-policy-name bapname
   - name: Disable an auditing policy.
     text: |-
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Disabled --blob-auditing-policy-name bapname
+  - name: Disable a blob storage auditing policy.
+    text: |-
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
+        --resource-group rg --blob-storage-target-state Disabled --blob-auditing-policy-name bapname
   - name: Enable a log analytics auditing policy.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
