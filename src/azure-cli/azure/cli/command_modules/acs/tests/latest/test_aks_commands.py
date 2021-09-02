@@ -5507,7 +5507,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         acr_scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ContainerRegistry/registries/{}".format(
             subscription_id, resource_group, acr_name
         )
-        self.kwargs.update({"acr_scope": acr_scope})
+        self.kwargs.update({"sp_name": sp_name, "acr_scope": acr_scope})
         role_assignment_check_cmd = (
             "role assignment list --assignee {sp_name} --scope {acr_scope}"
         )
