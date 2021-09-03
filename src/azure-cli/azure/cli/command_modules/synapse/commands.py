@@ -314,7 +314,8 @@ def load_command_table(self, _):
                             client_factory=cf_synapse_client_integrationruntimes_factory) as g:
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
-        g.custom_command('create', 'create', supports_no_wait=True)
+        g.custom_command('managed create', 'Managed_Create', supports_no_wait=True)
+        g.custom_command('self-hosted create', 'Selfhosted_Create', supports_no_wait=True)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('update', 'update')
         g.command('upgrade', 'upgrade')

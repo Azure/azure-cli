@@ -8,21 +8,29 @@ from azure.mgmt.synapse.models import (IntegrationRuntimeResource,
                                        IntegrationRuntimeRegenerateKeyParameters, UpdateIntegrationRuntimeRequest)
 
 
-def create(cmd, client, resource_group_name, workspace_name, integration_runtime_name, integration_runtime_type,
+def Managed_Create(cmd, client, resource_group_name, workspace_name, integration_runtime_name,
            description=None, if_match=None, location='AutoResolve', compute_type='General',
            core_count=8, time_to_live=0, no_wait=False):
     property_files = {}
-    property_files['type'] = integration_runtime_type
+    property_files['type'] = 'Managed'
     property_files['description'] = description
-    if integration_runtime_type == 'Managed':
-        property_files['typeProperties'] = {}
-        property_files['typeProperties']['computeProperties'] = {}
-        property_files['typeProperties']['computeProperties']['location'] = location
-        property_files['typeProperties']['computeProperties']['dataFlowProperties'] = {}
-        property_files['typeProperties']['computeProperties']['dataFlowProperties']['computeType'] = compute_type
-        property_files['typeProperties']['computeProperties']['dataFlowProperties']['coreCount'] = core_count
-        property_files['typeProperties']['computeProperties']['dataFlowProperties']['timeToLive'] = time_to_live
-    properties = IntegrationRuntimeResource(type=integration_runtime_type, properties=property_files)
+    property_files['typeProperties'] = {}
+    property_files['typeProperties']['computeProperties'] = {}
+    property_files['typeProperties']['computeProperties']['location'] = location
+    property_files['typeProperties']['computeProperties']['dataFlowProperties'] = {}
+    property_files['typeProperties']['computeProperties']['dataFlowProperties']['computeType'] = compute_type
+    property_files['typeProperties']['computeProperties']['dataFlowProperties']['coreCount'] = core_count
+    property_files['typeProperties']['computeProperties']['dataFlowProperties']['timeToLive'] = time_to_live
+    properties = IntegrationRuntimeResource(type='Managed', properties=property_files)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, workspace_name,
+                       integration_runtime_name, properties, if_match)
+
+def Selfhosted_Create(cmd, client, resource_group_name, workspace_name, integration_runtime_name,
+           description=None, if_match=None, no_wait=False):
+    property_files = {}
+    property_files['type'] = 'SelfHosted'
+    property_files['description'] = description
+    properties = IntegrationRuntimeResource(type='SelfHosted', properties=property_files)
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, workspace_name,
                        integration_runtime_name, properties, if_match)
 

@@ -1510,14 +1510,24 @@ type: group
 short-summary: Manage Synapse's integration runtimes.
 """
 
-helps['synapse integration-runtime create'] = """
+helps['synapse integration-runtime managed create'] = """
 type: command
-short-summary: Create an integration runtime.
+short-summary: Create an managed integration runtime.
 examples:
-  - name: Create an integration runtime.
+  - name: Create an managed integration runtime.
     text: |-
-        az synapse integration-runtime create --workspace-name testsynapseworkspace --resource-group rg \\
-          --name testintegrationruntime --type Managed
+        az synapse integration-runtime managed create --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime 
+"""
+
+helps['synapse integration-runtime self-hosted create'] = """
+type: command
+short-summary: Create an self-hosted integration runtime.
+examples:
+  - name: Create an self-hosted integration runtime.
+    text: |-
+        az synapse integration-runtime self-hosted create --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime 
 """
 
 helps['synapse integration-runtime update'] = """

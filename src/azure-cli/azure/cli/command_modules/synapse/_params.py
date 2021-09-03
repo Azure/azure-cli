@@ -691,21 +691,26 @@ def load_arguments(self, _):
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part=None)
 
-    for scope in ['show', 'create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status']:
+    for scope in ['show', 'managed create', 'self-hosted create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status']:
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
 
-    with self.argument_context('synapse integration-runtime create') as c:
-        c.argument('integration_runtime_type', options_list=['--type'], arg_type=get_enum_type(['Managed', 'SelfHosted']), help='The integration runtime type.')
+    with self.argument_context('synapse integration-runtime managed create') as c:
         c.argument('description', help='The integration runtime description.')
         c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
                    'which it should match existing entity or can be * for unconditional update.')
-        # Managed
-        c.argument('location', arg_group='Managed', help='The integration runtime location.')
-        c.argument('compute_type', arg_group='Managed', arg_type=get_enum_type(['General', 'MemoryOptimized', 'ComputeOptimized']),
+        c.argument('location', help='The integration runtime location.')
+        c.argument('compute_type', arg_type=get_enum_type(['General', 'MemoryOptimized', 'ComputeOptimized']),
                    help='Compute type of the data flow cluster which will execute data flow job.')
-        c.argument('core_count', arg_group='Managed', help='Core count of the data flow cluster which will execute data flow job.')
-        c.argument('time_to_live', arg_group='Managed', help='Time to live (in minutes) setting of the data flow cluster which will execute data flow job.')
+        c.argument('core_count', help='Core count of the data flow cluster which will execute data flow job.')
+        c.argument('time_to_live', help='Time to live (in minutes) setting of the data flow cluster which will execute data flow job.')
+
+    with self.argument_context('synapse integration-runtime self-hosted create') as c:
+        c.argument('description', help='The integration runtime description.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
 
     with self.argument_context('synapse integration-runtime update') as c:
         c.argument('auto_update', arg_type=get_enum_type(['On', 'Off']), help='Enable or disable the self-hosted integration runtime auto-update.')
