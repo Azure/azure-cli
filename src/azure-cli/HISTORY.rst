@@ -8,8 +8,8 @@ Release History
 
 **ACR**
 
-* : `az acr create/update`: Add support for disabling export through `--allow-exports` (#19065)
-* : `az acr`: Bump core api-version to `2021-06-01-preview` from `2020-11-01-preview`. agent_pool, tasks and runs operations unchanged from `2019-06-01-preview` (#19065)
+* `az acr create/update`: Add support for disabling export through `--allow-exports` (#19065)
+* `az acr`: Bump core api-version to `2021-06-01-preview` from `2020-11-01-preview`. agent_pool, tasks and runs operations unchanged from `2019-06-01-preview` (#19065)
 * `az acr task credential`: Fix the issue where task credentials were not used (#19241)
 * `az acr task logs`: Fix the AttributeError when querying the task logs (#19366)
 
@@ -24,7 +24,7 @@ Release History
 * Upgrade api-version to `2021-07-01` for ACS module (#19245)
 * `az aks create/update`: Add support for private cluster public fqdn feature (#19302)
 * Revert PR #18825: az aks create/update: Add parameter --auto-upgrade-channel to support auto upgrade (with fix) (#19297)
-* `aks create\aks nodepool add`: Add parameter ` --os-sku` to support choosing the underlying container host OS (#19374)
+* `aks create/aks nodepool add`: Add parameter ` --os-sku` to support choosing the underlying container host OS (#19374)
 
 **AMS**
 
@@ -36,15 +36,15 @@ Release History
 
 **App Service**
 
-* : `az webapp config storage-account list/add/update/delete`: Remove preview flag (#19177)
+* `az webapp config storage-account list/add/update/delete`: Remove preview flag (#19177)
 * Fix #18497: `functionapp identity show`: Fix the crashes when the functionapp name does not reference an existing functionapp (#19127)
-* :  az webapp config set : Add additional help examples for powershell users (#19185)
-* : Fix #17818: `az functionapp update`:  Add instance validation for updating functionapp (#19141)
+* `az webapp config set`: Add additional help examples for powershell users (#19185)
+* Fix #17818: `az functionapp update`:  Add instance validation for updating functionapp (#19141)
 * `az webapp config hostname add`: Fix the issue caused by AttributeError (#19188)
 * `az webapp config hostname add`: Fix the issue caused by AttributeError (#19348)
-* : Fix #16470: `az staticwebapp secrets`: Add commands to manage deployment secrets (#19347)
-* : `az webapp deployment source config-local-git`: Fix the issue caused by AttributeError when slot option is specified (#19404)
-* : `az webapp deleted restore` : Fix the issue that 'WebAppsOperations' object has no attribute 'restore_from_deleted_app' (#19404)
+* Fix #16470: `az staticwebapp secrets`: Add commands to manage deployment secrets (#19347)
+* `az webapp deployment source config-local-git`: Fix the issue caused by AttributeError when slot option is specified (#19404)
+* `az webapp deleted restore` : Fix the issue that 'WebAppsOperations' object has no attribute 'restore_from_deleted_app' (#19404)
 * `az webapp up`: Add ability to deploy Linux and Windows webapps to the same resource group (#19344)
 * `az webapp up`: Add support for deploying to an App Service Environment (#19425)
 * : Fix #19098: `az webapp deployment slot auto-swap `: Fix the AttributeError error for parameters `--slot --disable` (#19376)
