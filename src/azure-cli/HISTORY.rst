@@ -26,10 +26,6 @@ Release History
 * Revert PR #18825: az aks create/update: Add parameter --auto-upgrade-channel to support auto upgrade (with fix) (#19297)
 * `aks create/aks nodepool add`: Add parameter ` --os-sku` to support choosing the underlying container host OS (#19374)
 
-**AMS**
-
-* Update python to track 2 (#18687)
-
 **App Config**
 
 * `appconfig kv import/export`: Add endpoint validation during import and export (#19145)
