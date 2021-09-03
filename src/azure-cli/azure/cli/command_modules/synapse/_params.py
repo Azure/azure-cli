@@ -120,10 +120,6 @@ def load_arguments(self, _):
                    help='The flag of enabling auto pause.')
         c.argument('delay', arg_group='AutoPause', help='The delay time whose unit is minute.')
 
-        # Environment Configuration
-        c.argument('library_requirements', arg_group='Environment Configuration',
-                   help='The library requirements file.')
-
         # Default Folder
         c.argument('spark_events_folder', arg_group='Default Folder', help='The Spark events folder.')
         c.argument('spark_log_folder', arg_group='Default Folder', help='The default Spark log folder.')
