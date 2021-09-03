@@ -372,7 +372,7 @@ Upgrade batch management-plane to [azure-batch-mgmt 16.0.0](https://pypi.org/pro
 
 **Azurestack**
 
-* [ACR][AKS] Add azurestack hybrid profile for AKS (#18118)
+* Azure Stack Hub Support for AKS and ACR has been added in 2020-09-01-hybrid profile (#18118)
 
 **Backup**
 
