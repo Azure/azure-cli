@@ -128,7 +128,7 @@ Release History
 
 **Storage**
 
-* Fix #10765 to refine error message when account key is incorrect padding (#13965)
+* Fix #10765: Refine error message when account key is incorrect padding (#13965)
 
 **Synapse**
 
