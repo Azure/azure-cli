@@ -18,6 +18,7 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 
+from ._consts import CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
 from .custom import (
     _get_rg_location,
     _validate_ssh_key,
@@ -1779,6 +1780,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return no_wait
 
+    # pylint: disable=unused-argument
     def get_load_balancer_managed_outbound_ip_count(self, **kwargs) -> Union[int, None]:
         """Obtain the value of load_balancer_managed_outbound_ip_count.
 
@@ -1810,6 +1812,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return load_balancer_managed_outbound_ip_count
 
+    # pylint: disable=unused-argument
     def get_load_balancer_outbound_ips(self, **kwargs) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ips.
 
@@ -1841,6 +1844,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return load_balancer_outbound_ips
 
+    # pylint: disable=unused-argument
     def get_load_balancer_outbound_ip_prefixes(self, **kwargs) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ip_prefixes.
 
@@ -1872,6 +1876,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return load_balancer_outbound_ip_prefixes
 
+    # pylint: disable=unused-argument
     def get_load_balancer_outbound_ports(self, **kwargs) -> Union[int, None]:
         """Obtain the value of load_balancer_outbound_ports.
 
@@ -1902,6 +1907,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return load_balancer_outbound_ports
 
+    # pylint: disable=unused-argument
     def get_load_balancer_idle_timeout(self, **kwargs) -> Union[int, None]:
         """Obtain the value of load_balancer_idle_timeout.
 
@@ -1931,6 +1937,85 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return load_balancer_idle_timeout
+
+    # pylint: disable=unused-argument
+    def get_outbound_type(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Obtain the value of outbound_type.
+
+        Note: The parameters involved in the validation are not verified in their own getters.
+
+        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
+        parameters, the value in load_balancer_profile will be used for validation.
+        This function supports the option of enable_validation. When enabled, if the value of outbound_type is
+        userDefinedRouting (CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING), the following checks will be performed. If
+        load_balancer_sku is set to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not
+        assigned, a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
+        load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
+        will be raised.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get(
+            "outbound_type"
+        )
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if (
+            self.mc and
+            self.mc.network_profile
+        ):
+            value_obtained_from_mc = (
+                self.mc.network_profile.outbound_type
+            )
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            outbound_type = value_obtained_from_mc
+        else:
+            outbound_type = raw_value
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        # Note: The parameters involved in the validation are not verified in their own getters.
+        if enable_validation:
+            if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+                # Should not enable read_only for get_load_balancer_sku, since its default value is None, and it has
+                # not been decorated into the mc object at this time, only the value after dynamic completion is
+                # meaningful here.
+                if self.get_load_balancer_sku() == "basic":
+                    raise InvalidArgumentValueError(
+                        "userDefinedRouting doesn't support basic load balancer sku"
+                    )
+
+                if self.get_vnet_subnet_id() in ["", None]:
+                    raise RequiredArgumentMissingError(
+                        "--vnet-subnet-id must be specified for userDefinedRouting and it must \
+                    be pre-configured with a route table with egress rules"
+                    )
+
+                load_balancer_profile = kwargs.get("load_balancer_profile")
+                if load_balancer_profile:
+                    if (
+                        load_balancer_profile.managed_outbound_i_ps or
+                        load_balancer_profile.outbound_ip_s or
+                        load_balancer_profile.outbound_ip_prefixes
+                    ):
+                        raise MutuallyExclusiveArgumentError(
+                            "userDefinedRouting doesn't support customizing a standard load balancer with IP addresses"
+                        )
+                else:
+                    if (
+                        self.get_load_balancer_managed_outbound_ip_count() or
+                        self.get_load_balancer_outbound_ips() or
+                        self.get_load_balancer_outbound_ip_prefixes()
+                    ):
+                        raise MutuallyExclusiveArgumentError(
+                            "userDefinedRouting doesn't support customizing a standard load balancer with IP addresses"
+                        )
+
+        return outbound_type
 
 
 class AKSCreateDecorator:
@@ -2249,6 +2334,7 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+        # build load balancer profile, which is part of the network profile
         load_balancer_profile = create_load_balancer_profile(
             self.cmd,
             self.get_load_balancer_managed_outbound_ip_count(),
@@ -2257,6 +2343,10 @@ class AKSCreateDecorator:
             self.get_load_balancer_outbound_ports(),
             self.get_load_balancer_idle_timeout(),
             models=self.models.lb_models,
+        )
+        # build outbound type, which is part of the network profile
+        outbound_type = self.context.get_outbound_type(
+            enable_validation=True, load_balancer_profile=load_balancer_profile
         )
         return mc
 
