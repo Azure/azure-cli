@@ -406,6 +406,8 @@ class NetworkCustomIpPrefix(ScenarioTest):
         # Test custom prefix CRUD
         self.cmd('network custom-ip prefix create -g {rg} -n {prefix} --cidr 40.40.40.0/24')
         self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+        # self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --commission')
+        # self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --decommission')
         self.cmd('network custom-ip prefix list -g {rg}',
                  checks=self.check('length(@)', 1))
         # Delete operation isn't ready.

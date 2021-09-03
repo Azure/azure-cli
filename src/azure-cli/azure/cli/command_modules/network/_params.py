@@ -1725,6 +1725,9 @@ def load_arguments(self, _):
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
         c.argument('cidr', help='The prefix range in CIDR notation. Should include the start address and the prefix length.')
 
+    with self.argument_context('network custom-ip prefix update') as c:
+        c.argument('commission', help='Commission the custom ip prefix.')
+        c.argument('decommission', help='Decommision the custom ip prefix')
     # endregion
 
     # region PublicIPAddresses
