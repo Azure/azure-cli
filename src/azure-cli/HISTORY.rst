@@ -23,7 +23,7 @@ Release History
 * Fix incorrectly passed parameter for option `--assign-kubelet-identity` in aks create sub-command (#19157)
 * Upgrade api-version to `2021-07-01` for ACS module (#19245)
 * `az aks create/update`: Add support for private cluster public fqdn feature (#19302)
-* Revert PR #18825: az aks create/update: Add parameter --auto-upgrade-channel to support auto upgrade (with fix) (#19297)
+* Revert PR #18825: `az aks create/update`: Add parameter `--auto-upgrade-channel` to support auto upgrade (with fix) (#19297)
 * `aks create/aks nodepool add`: Add parameter ` --os-sku` to support choosing the underlying container host OS (#19374)
 
 **App Config**
