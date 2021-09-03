@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
+import re
 import unittest
 from unittest import mock
 import os
@@ -1000,6 +1001,12 @@ class WebappSlotScenarioTest(ScenarioTest):
             JMESPathCheck("length([?name=='{}'])".format(slot2), 1),
             JMESPathCheck("length([?name=='{}'])".format(slot), 1),
         ])
+        self.cmd('webapp deployment slot auto-swap -g {} -n {} -s {}'.format(resource_group, webapp, slot), checks=[
+            JMESPathCheck("autoSwapSlotName", "production")
+        ])
+        self.cmd('webapp deployment slot auto-swap -g {} -n {} -s {} --disable'.format(resource_group, webapp, slot), checks=[
+            JMESPathCheck("autoSwapSlotName", None)
+        ])
         self.cmd(
             'webapp deployment slot delete -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
         # try another way to delete a slot and exercise all options
@@ -1903,34 +1910,12 @@ class WebappOneDeployScenarioTest(ScenarioTest):
 
 class DomainScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_domain_e2e(self, resource_group):
+    def test_domain_create(self, resource_group):
         contacts = os.path.join(TEST_DIR, 'domain-contact.json')
-        webapp_name = "test-webapp-hostname"
-        plan_name = "webapp-plan"
-        slot = 'test'
-        # Pre-Requisite: HostNames created
-        apphostname = "adorenow.net"
-        slothostname = "managedcerts.net"
         self.cmd("appservice domain create -g {} --hostname {} --contact-info=@\'{}\' --dryrun".format(
             resource_group, "testuniquedomainname1.com", contacts)
         ).assert_with_checks([
             JMESPathCheck('agreement_keys', "['DNRA', 'DNPA']")
-        ])
-        plan_id = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(
-            resource_group, plan_name)).get_output_in_json()['id']
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_id), checks=[
-            JMESPathCheck('name', webapp_name)])
-        self.cmd("webapp config hostname add -g {} --webapp-name {} --hostname {} ".format(
-            resource_group, webapp_name, apphostname)
-        ).assert_with_checks([
-            JMESPathCheck('siteName', webapp_name)
-        ])
-         #create an empty slot
-        self.cmd('webapp deployment slot create -g {} -n {} --slot {} --debug'.format(resource_group, webapp_name, slot))
-        self.cmd("webapp config hostname add -g {} --webapp-name {} --slot {} --hostname {} ".format(
-            resource_group, webapp_name, slot, slothostname)
-        ).assert_with_checks([
-            JMESPathCheck('name', "{}/{}/{}".format(webapp_name, slot, slothostname))
         ])
 
 

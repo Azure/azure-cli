@@ -94,7 +94,7 @@ DEPENDENCIES = [
     'azure-mgmt-iotcentral~=9.0.0b1',
     'azure-mgmt-iothub==2.1.0',
     'azure-mgmt-iothubprovisioningservices~=0.3.0',
-    'azure-mgmt-keyvault==9.0.0',
+    'azure-mgmt-keyvault==9.1.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=11.0.0',
     'azure-mgmt-managedservices~=1.0',
@@ -150,6 +150,9 @@ DEPENDENCIES = [
     'xmltodict~=0.12'
 ]
 
+# On Linux, the distribution (Ubuntu, Debian, etc) and version are checked
+if sys.platform == 'linux':
+    DEPENDENCIES.append('distro')
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
