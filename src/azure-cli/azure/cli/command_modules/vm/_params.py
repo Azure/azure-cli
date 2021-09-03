@@ -927,6 +927,9 @@ def load_arguments(self, _):
                        help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
             c.argument('max_price', min_api='2019-03-01', type=float, is_preview=True,
                        help='The maximum price (in US Dollars) you are willing to pay for a Spot VM/VMSS. -1 indicates that the Spot VM/VMSS should not be evicted for price reasons')
+            c.argument('capacity_reservation_group', options_list=['--capacity-reservation-group', '--crg'],
+                       help='The ID or name of the capacity reservation group that is used to allocate. Pass in "None" to disassociate the capacity reservation group. Please note that if you want to delete a VM/VMSS that has been associated with capacity reservation group, you need to disassociate the capacity reservation group first.',
+                       min_api='2021-04-01', is_preview=True)
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', help=license_msg, arg_type=get_enum_type(
@@ -1159,3 +1162,35 @@ def load_arguments(self, _):
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
     # endRegion
+
+    with self.argument_context('capacity reservation group') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-n'],
+                   help='The name of the capacity reservation group.')
+        c.argument('tags', tags_type)
+
+    with self.argument_context('capacity reservation group create') as c:
+        c.argument('zones', zones_type, help='Availability Zones to use for this capacity reservation group. If not provided, the group supports only regional resources in the region. If provided, enforces each capacity reservation in the group to be in one of the zones.')
+
+    with self.argument_context('capacity reservation group show') as c:
+        c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve the list of instance views of the capacity reservations under the capacity reservation group which is a snapshot of the runtime properties of a capacity reservation that is managed by the platform and can change outside of control plane operations.')
+
+    with self.argument_context('capacity reservation group list') as c:
+        c.argument('vm_instance', action='store_true', help='Retrieve the Virtual Machine Instance which are associated to capacity reservation group in the response.')
+        c.argument('vmss_instance', action='store_true', help='Retrieve the ScaleSet VM Instance which are associated to capacity reservation group in the response.')
+
+    with self.argument_context('capacity reservation') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-c'],
+                   help='The name of the capacity reservation group.')
+        c.argument('capacity_reservation_name', options_list=['--capacity-reservation-name', '-n'],
+                   help='The name of the capacity reservation.')
+        c.argument('capacity', type=int, help='Specify the number of virtual machines in the scale set.')
+        c.argument('tags', tags_type)
+
+    with self.argument_context('capacity reservation create') as c:
+        c.argument('zone', zone_type, help='Availability Zone to use for this capacity reservation. The zone has to be single value and also should be part for the list of zones specified during the capacity reservation group creation. If not provided, the reservation supports only non-zonal deployments. If provided, enforces VM/VMSS using this capacity reservation to be in same zone.')
+        c.argument('sku_name', options_list=['--sku', '-s'], required=True, help='The SKU of the resource for which capacity needs be reserved. Currently VM Skus with the capability called "CapacityReservationSupported" set to true are supported. Refer to List Microsoft.Compute SKUs in a region (https://docs.microsoft.com/rest/api/compute/resourceskus/list) for supported values.')
+
+    with self.argument_context('capacity reservation show') as c:
+        c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve a snapshot of the runtime properties of the capacity reservation that is managed by the platform and can change outside of control plane operations.')

@@ -403,7 +403,6 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
     def on_request(self, request):
         http_request = request.http_request
-        logger.info(http_request.data)
         if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
             template = http_request.data["properties"]["template"]
             if not isinstance(template, JsonCTemplate):
