@@ -1631,7 +1631,6 @@ def enable_local_git(cmd, resource_group_name, name, slot=None):
     site_config = get_site_configs(cmd, resource_group_name, name, slot)
     site_config.scm_type = 'LocalGit'
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update_configuration', slot, site_config)
-
     return {'url': _get_local_git_url(cmd.cli_ctx, client, resource_group_name, name, slot)}
 
 
@@ -2168,7 +2167,7 @@ def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot
     client = web_client_factory(cmd.cli_ctx)
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
     site_config.auto_swap_slot_name = '' if disable else (auto_swap_slot or 'production')
-    return client.web_apps.update_configuration_slot(resource_group_name, webapp, site_config, slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp, 'update_configuration', slot, site_config)
 
 
 def list_slots(cmd, resource_group_name, webapp):

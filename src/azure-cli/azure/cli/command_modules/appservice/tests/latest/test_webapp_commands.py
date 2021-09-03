@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
+import re
 import unittest
 from unittest import mock
 import os
@@ -999,6 +1000,12 @@ class WebappSlotScenarioTest(ScenarioTest):
             JMESPathCheck("length([])", 2),
             JMESPathCheck("length([?name=='{}'])".format(slot2), 1),
             JMESPathCheck("length([?name=='{}'])".format(slot), 1),
+        ])
+        self.cmd('webapp deployment slot auto-swap -g {} -n {} -s {}'.format(resource_group, webapp, slot), checks=[
+            JMESPathCheck("autoSwapSlotName", "production")
+        ])
+        self.cmd('webapp deployment slot auto-swap -g {} -n {} -s {} --disable'.format(resource_group, webapp, slot), checks=[
+            JMESPathCheck("autoSwapSlotName", None)
         ])
         self.cmd(
             'webapp deployment slot delete -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
