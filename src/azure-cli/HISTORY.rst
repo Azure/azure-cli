@@ -47,7 +47,7 @@ Release History
 * `az webapp deleted restore` : Fix the issue that 'WebAppsOperations' object has no attribute 'restore_from_deleted_app' (#19404)
 * `az webapp up`: Add ability to deploy Linux and Windows webapps to the same resource group (#19344)
 * `az webapp up`: Add support for deploying to an App Service Environment (#19425)
-* : Fix #19098: `az webapp deployment slot auto-swap `: Fix the AttributeError error for parameters `--slot --disable` (#19376)
+* Fix #19098: `az webapp deployment slot auto-swap `: Fix the AttributeError error for parameters `--slot --disable` (#19376)
 
 **ARM**
 
