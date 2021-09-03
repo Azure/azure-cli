@@ -339,21 +339,22 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_template_spec', validator=_validate_template_spec, confirmation=True)
     
     with self.command_group('stacks', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('sub-show', 'show_deployment_stacks_at_subscription')
-        g.custom_command('group-show', 'show_deployment_stacks_at_resource_group')
-        g.custom_command('sub-list', 'list_deployment_stacks_at_subscription')
-        g.custom_command('group-list', 'list_deployment_stacks_at_resource_group')
-        g.custom_command('sub-delete', 'delete_deployment_stacks_at_subscription')
-        g.custom_command('group-delete', 'delete_deployment_stacks_at_resource_group')
+        g.custom_command('sub-show', 'show_deployment_stack_at_subscription')
+        g.custom_command('group-show', 'show_deployment_stack_at_resource_group')
+        g.custom_command('sub-list', 'list_deployment_stack_at_subscription')
+        g.custom_command('group-list', 'list_deployment_stack_at_resource_group')
+        g.custom_command('sub-delete', 'delete_deployment_stack_at_subscription')
+        g.custom_command('group-delete', 'delete_deployment_stack_at_resource_group')
+        g.custom_command('sub-create', 'create_deployment_stack_at_subscription')
     
     with self.command_group('stacks snapshot', resource_deploymentstacks_snapshots_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('sub-show', 'show_deployment_stacks_snapshots_at_subscription')
-        g.custom_command('group-show', 'show_deployment_stacks_snapshots_at_resource_group')
-        g.custom_command('sub-list', 'list_deployment_stacks_snapshots_at_subscription')
-        g.custom_command('group-list', 'list_deployment_stacks_snapshots_at_resource_group')
-        g.custom_command('sub-delete', 'delete_deployment_stacks_snapshots_at_subscription')
-        g.custom_command('group-delete', 'delete_deployment_stacks_snapshots_at_resource_group')
-
+        g.custom_command('sub-show', 'show_deployment_stack_snapshot_at_subscription')
+        g.custom_command('group-show', 'show_deployment_stack_snapshot_at_resource_group')
+        g.custom_command('sub-list', 'list_deployment_stack_snapshot_at_subscription')
+        g.custom_command('group-list', 'list_deployment_stack_snapshot_at_resource_group')
+        g.custom_command('sub-delete', 'delete_deployment_stack_snapshot_at_subscription')
+        g.custom_command('group-delete', 'delete_deployment_stack_snapshot_at_resource_group')
+    
     # az deployment group
     with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('list', 'list_deployments_at_resource_group', table_transformer=transform_deployments_list)
