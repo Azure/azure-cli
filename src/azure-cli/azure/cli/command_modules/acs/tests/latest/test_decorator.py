@@ -159,6 +159,42 @@ class AKSCreateModelsTestCase(unittest.TestCase):
             models.ExtendedLocationTypes,
             getattr(module, "ExtendedLocationTypes"),
         )
+        # not directly used
+        self.assertEqual(
+            models.ManagedClusterAPIServerAccessProfile,
+            getattr(module, "ManagedClusterAPIServerAccessProfile"),
+        )
+        # load balancer models
+        self.assertEqual(
+            models.lb_models.get("ManagedClusterLoadBalancerProfile"),
+            getattr(module, "ManagedClusterLoadBalancerProfile"),
+        )
+        self.assertEqual(
+            models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            ),
+            getattr(
+                module, "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            ),
+        )
+        self.assertEqual(
+            models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            ),
+            getattr(module, "ManagedClusterLoadBalancerProfileOutboundIPs"),
+        )
+        self.assertEqual(
+            models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+            ),
+            getattr(
+                module, "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+            ),
+        )
+        self.assertEqual(
+            models.lb_models.get("ResourceReference"),
+            getattr(module, "ResourceReference"),
+        )
 
 
 class AKSCreateContextTestCase(unittest.TestCase):
@@ -415,7 +451,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
             ctx_3.get_load_balancer_sku(enable_validation=True)
 
     def test_get_api_server_authorized_ip_ranges(self):
-        # TODO: need update, raw input should be str, output should be List[str]
         # default
         ctx_1 = AKSCreateContext(
             self.cmd,
@@ -933,10 +968,17 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"enable_ahub": False})
         self.assertEqual(ctx_1.get_enable_ahub(), False)
-
-        # custom value
-        ctx_2 = AKSCreateContext(self.cmd, {"enable_ahub": True})
-        self.assertEqual(ctx_2.get_enable_ahub(), True)
+        windows_profile = self.models.ManagedClusterWindowsProfile(
+            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
+            admin_username="test_mc_win_admin",
+            admin_password="test_mc_win_admin_password",
+            license_type="Windows_Server",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", windows_profile=windows_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_ahub(), True)
 
     def test_get_service_principal_and_client_secret(
         self,
@@ -1060,6 +1102,12 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(ctx_1.get_enable_managed_identity(), True)
+        identity = self.models.ManagedClusterIdentity()
+        mc = self.models.ManagedCluster(
+            location="test_location", identity=identity
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_managed_identity(), False)
 
         # dynamic completion
         ctx_2 = AKSCreateContext(
@@ -1145,6 +1193,153 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"no_wait": False})
         self.assertEqual(ctx_1.get_no_wait(), False)
+
+    def test_get_load_balancer_managed_outbound_ip_count(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_managed_outbound_ip_count": None,
+            },
+        )
+        self.assertEqual(
+            ctx_1.get_load_balancer_managed_outbound_ip_count(), None
+        )
+        load_balancer_profile = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            managed_outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            )(count=10)
+        )
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_load_balancer_managed_outbound_ip_count(), 10
+        )
+
+    def test_get_load_balancer_outbound_ips(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_outbound_ips": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_load_balancer_outbound_ips(), None)
+        load_balancer_profile = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            )(
+                public_i_ps=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_public_ip"
+                    )
+                ]
+            )
+        )
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_load_balancer_outbound_ips(),
+            [
+                self.models.lb_models.get("ResourceReference")(
+                    id="test_public_ip"
+                )
+            ],
+        )
+
+    def test_get_load_balancer_outbound_ip_prefixes(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_outbound_ip_prefixes": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_load_balancer_outbound_ip_prefixes(), None)
+        load_balancer_profile = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            outbound_ip_prefixes=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+            )(
+                public_ip_prefixes=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_public_ip_prefix"
+                    )
+                ]
+            )
+        )
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_load_balancer_outbound_ip_prefixes(),
+            [
+                self.models.lb_models.get("ResourceReference")(
+                    id="test_public_ip_prefix"
+                )
+            ],
+        )
+
+    def test_get_load_balancer_outbound_ports(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_outbound_ports": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_load_balancer_outbound_ports(), None)
+        load_balancer_profile = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(allocated_outbound_ports=10)
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_load_balancer_outbound_ports(), 10)
+
+    def test_get_load_balancer_idle_timeout(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_idle_timeout": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_load_balancer_idle_timeout(), None)
+        load_balancer_profile = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(idle_timeout_in_minutes=10)
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_load_balancer_idle_timeout(), 10)
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
@@ -1582,3 +1777,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         ensure_assignment.assert_called_once_with(
             self.cmd, "test_service_principal", "test_registry_id", False
         )
+
+    def test_set_up_network_profile(self):
+        pass
