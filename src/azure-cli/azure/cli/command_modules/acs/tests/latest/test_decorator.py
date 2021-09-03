@@ -21,6 +21,9 @@ from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core._config import ENV_VAR_PREFIX
 
+from azure.cli.command_modules.acs._consts import (
+    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+)
 from azure.cli.command_modules.acs.decorator import (
     AKSCreateModels,
     AKSCreateContext,
@@ -1340,6 +1343,84 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_load_balancer_idle_timeout(), 10)
+
+    def test_get_outbound_type(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "outbound_type": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_outbound_type(), None)
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            outbound_type="test_outbound_type"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_outbound_type(), "test_outbound_type")
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                "load_balancer_sku": "basic",
+            },
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_outbound_type(enable_validation=True)
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_3.get_outbound_type(enable_validation=True)
+
+        # invalid parameter
+        ctx_4 = AKSCreateContext(
+            self.cmd,
+            {
+                "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                "vnet_subnet_id": "test_vnet_subnet_id",
+                "load_balancer_managed_outbound_ip_count": 10,
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_4.get_outbound_type(enable_validation=True)
+
+        # invalid parameter
+        ctx_5 = AKSCreateContext(
+            self.cmd,
+            {
+                "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                "vnet_subnet_id": "test_vnet_subnet_id",
+            },
+        )
+        load_balancer_profile = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            outbound_ip_prefixes=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+            )(
+                public_ip_prefixes=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_public_ip_prefix"
+                    )
+                ]
+            )
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_5.get_outbound_type(
+                enable_validation=True,
+                load_balancer_profile=load_balancer_profile,
+            )
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):

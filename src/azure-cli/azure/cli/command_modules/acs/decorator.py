@@ -18,8 +18,10 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 
-from ._consts import CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-from .custom import (
+from azure.cli.command_modules.acs._consts import (
+    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+)
+from azure.cli.command_modules.acs.custom import (
     _get_rg_location,
     _validate_ssh_key,
     _get_default_dns_prefix,
@@ -290,7 +292,7 @@ class AKSCreateContext:
                 logger.debug(msg)
                 self.intermediates[variable_name] = value
             elif self.intermediates.get(variable_name) != value:
-                msg = "The intermediate '{}' already exists, but overwrite is not enabled." \
+                msg = "The intermediate '{}' already exists, but overwrite is not enabled. " \
                     "Original value: '{}', candidate value: '{}'.".format(
                         variable_name,
                         self.intermediates.get(variable_name),
@@ -1991,15 +1993,15 @@ class AKSCreateContext:
 
                 if self.get_vnet_subnet_id() in ["", None]:
                     raise RequiredArgumentMissingError(
-                        "--vnet-subnet-id must be specified for userDefinedRouting and it must \
-                    be pre-configured with a route table with egress rules"
+                        "--vnet-subnet-id must be specified for userDefinedRouting and it must "
+                        "be pre-configured with a route table with egress rules"
                     )
 
                 load_balancer_profile = kwargs.get("load_balancer_profile")
                 if load_balancer_profile:
                     if (
                         load_balancer_profile.managed_outbound_i_ps or
-                        load_balancer_profile.outbound_ip_s or
+                        load_balancer_profile.outbound_i_ps or
                         load_balancer_profile.outbound_ip_prefixes
                     ):
                         raise MutuallyExclusiveArgumentError(
@@ -2344,6 +2346,7 @@ class AKSCreateDecorator:
             self.get_load_balancer_idle_timeout(),
             models=self.models.lb_models,
         )
+
         # build outbound type, which is part of the network profile
         outbound_type = self.context.get_outbound_type(
             enable_validation=True, load_balancer_profile=load_balancer_profile
