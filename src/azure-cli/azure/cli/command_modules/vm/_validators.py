@@ -421,8 +421,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     elif namespace.storage_profile == StorageProfile.SharedGalleryImage:
         required = ['image']
-        forbidden = ['os_type', 'attach_os_disk', 'storage_account',
-                     'storage_container_name', 'use_unmanaged_disk']
+        forbidden = ['attach_os_disk', 'storage_account', 'storage_container_name', 'use_unmanaged_disk']
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
