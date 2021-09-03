@@ -90,7 +90,7 @@ Release History
 * Add a new command group `az network custom-ip prefix`. (#19218)
 * `az network public-ip`: Add parameter `--ip-address`. (#19218)
 * `network public-ip prefix create`: Add parameter `--custom-ip-prefix-name`. (#19218)
-* Fix'az network dns record-set [record-type] add-record' is not idempotent (#19237)
+* `az network dns record-set {record-type} add-record`: Support idempotent (#19237)
 * PrivateLink supports `Microsoft.Purview/accounts` 2021-07-01 (#19338)
 * `az network bastion ssh`: connect to a Virtual machine through ssh using Bastion Tunneling. (#19240)
 * `az network bastion rdp`: connect to a Virtual machine through native RDP using Bastion Tunneling. (#19240)
