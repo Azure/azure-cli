@@ -927,6 +927,20 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         storage_properties['imageReference'] = {
             'id': image
         }
+    if storage_profile == StorageProfile.SharedGalleryImage:
+        storage_properties['osDisk'] = {
+            'caching': os_caching,
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
+            "name": os_disk_name,
+            "createOption": "fromImage"
+        }
+        storage_properties['imageReference'] = {
+            'sharedGalleryImageId': image
+        }
+        if os_disk_encryption_set is not None:
+            storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set
+            }
 
     if disk_info:
         data_disks = [v for k, v in disk_info.items() if k != 'os']
