@@ -2522,11 +2522,11 @@ class AKSCreateDecorator:
         # build load balancer profile, which is part of the network profile
         load_balancer_profile = create_load_balancer_profile(
             self.cmd,
-            self.get_load_balancer_managed_outbound_ip_count(),
-            self.get_load_balancer_outbound_ips(),
-            self.get_load_balancer_outbound_ip_prefixes(),
-            self.get_load_balancer_outbound_ports(),
-            self.get_load_balancer_idle_timeout(),
+            self.context.get_load_balancer_managed_outbound_ip_count(),
+            self.context.get_load_balancer_outbound_ips(),
+            self.context.get_load_balancer_outbound_ip_prefixes(),
+            self.context.get_load_balancer_outbound_ports(),
+            self.context.get_load_balancer_idle_timeout(),
             models=self.models.lb_models,
         )
 
@@ -2535,21 +2535,59 @@ class AKSCreateDecorator:
             enable_validation=True, load_balancer_profile=load_balancer_profile
         )
 
-        load_balancer_sku = self.context.get_load_balancer_sku(enable_validation=True)
-        if load_balancer_sku == "basic":
-            # load balancer sku must be standard when load balancer profile is provided
-            load_balancer_profile = None
-        network_profile = self.models.ContainerServiceNetworkProfile(
-            network_plugin=self.context.get_network_plugin(enable_validation=True),
-            pod_cidr=self.context.get_pod_cidr(enable_validation=True),
-            service_cidr=self.context.get_service_cidr(enable_validation=True),
-            dns_service_ip=self.context.get_dns_service_ip(enable_validation=True),
-            docker_bridge_cidr=self.context.get_docker_bridge_address(enable_validation=True),
-            network_policy=self.context.get_network_policy(enable_validation=True),
-            load_balancer_sku=load_balancer_sku,
-            load_balancer_profile=load_balancer_profile,
-            outbound_type=outbound_type,
+        # verify load balancer sku, which is part of the network profile
+        load_balancer_sku = self.context.get_load_balancer_sku(
+            enable_validation=True
         )
+
+        network_plugin = self.context.get_network_plugin(enable_validation=True)
+        pod_cidr = self.context.get_pod_cidr(enable_validation=True)
+        service_cidr = self.context.get_service_cidr(enable_validation=True)
+        dns_service_ip = self.context.get_dns_service_ip(enable_validation=True)
+        docker_bridge_address = self.context.get_docker_bridge_address(
+            enable_validation=True
+        )
+        network_policy = self.context.get_network_policy(enable_validation=True)
+
+        network_profile = None
+        if any(
+            [
+                network_plugin,
+                pod_cidr,
+                service_cidr,
+                dns_service_ip,
+                docker_bridge_address,
+                network_policy,
+            ]
+        ):
+            # Attention: RP would return UnexpectedLoadBalancerSkuForCurrentOutboundConfiguration internal server error
+            # if load_balancer_sku is set to basic and load_balancer_profile is assigned.
+            # Attention: SDK provides default values for pod_cidr, service_cidr, dns_service_ip, docker_bridge_cidr
+            # and outbound_type, and they might be overwritten to None.
+            network_profile = self.models.ContainerServiceNetworkProfile(
+                network_plugin=network_plugin,
+                pod_cidr=pod_cidr,
+                service_cidr=service_cidr,
+                dns_service_ip=dns_service_ip,
+                docker_bridge_cidr=docker_bridge_address,
+                network_policy=network_policy,
+                load_balancer_sku=load_balancer_sku,
+                load_balancer_profile=load_balancer_profile,
+                outbound_type=outbound_type,
+            )
+        else:
+            if load_balancer_sku == "standard" or load_balancer_profile:
+                network_profile = self.models.ContainerServiceNetworkProfile(
+                    network_plugin="kubenet",
+                    load_balancer_sku=load_balancer_sku,
+                    load_balancer_profile=load_balancer_profile,
+                    outbound_type=outbound_type,
+                )
+            if load_balancer_sku == "basic":
+                # load balancer sku must be standard when load balancer profile is provided
+                network_profile = self.models.ContainerServiceNetworkProfile(
+                    load_balancer_sku=load_balancer_sku,
+                )
         mc.network_profile = network_profile
         return mc
 

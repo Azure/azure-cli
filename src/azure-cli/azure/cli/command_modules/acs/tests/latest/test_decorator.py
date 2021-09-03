@@ -1423,6 +1423,198 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 load_balancer_profile=load_balancer_profile,
             )
 
+    def test_get_network_plugin(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "network_plugin": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_network_plugin(), None)
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            network_plugin="test_network_plugin"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_network_plugin(), "test_network_plugin")
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "network_plugin": "azure",
+                "pod_cidr": "test_pod_cidr",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_network_plugin(enable_validation=True)
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "pod_cidr": "test_pod_cidr",
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_3.get_network_plugin(enable_validation=True)
+
+    def test_get_pod_cidr(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "pod_cidr": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_pod_cidr(), None)
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            pod_cidr="test_pod_cidr"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_pod_cidr(), "test_pod_cidr")
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "network_plugin": "azure",
+                "pod_cidr": "test_pod_cidr",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_pod_cidr(enable_validation=True)
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "pod_cidr": "test_pod_cidr",
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_3.get_pod_cidr(enable_validation=True)
+
+    def test_get_service_cidr(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "service_cidr": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_service_cidr(), None)
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            service_cidr="test_service_cidr"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_service_cidr(), "test_service_cidr")
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "service_cidr": "test_service_cidr",
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_2.get_service_cidr(enable_validation=True)
+
+    def test_get_dns_service_ip(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "dns_service_ip": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_dns_service_ip(), None)
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            dns_service_ip="test_dns_service_ip"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_dns_service_ip(), "test_dns_service_ip")
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "dns_service_ip": "test_dns_service_ip",
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_2.get_dns_service_ip(enable_validation=True)
+
+    def test_get_docker_bridge_address(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "docker_bridge_address": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_docker_bridge_address(), None)
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            docker_bridge_cidr="test_docker_bridge_address"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_docker_bridge_address(), "test_docker_bridge_address"
+        )
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "docker_bridge_address": "test_docker_bridge_address",
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_2.get_docker_bridge_address(enable_validation=True)
+
+    def test_get_network_policy(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "network_policy": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_network_policy(), None)
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            network_policy="test_network_policy"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_network_policy(), "test_network_policy")
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "network_policy": "test_network_policy",
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_2.get_network_policy(enable_validation=True)
+
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -1861,4 +2053,45 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
     def test_set_up_network_profile(self):
-        pass
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "load_balancer_sku": None,
+                "load_balancer_managed_outbound_ip_count": None,
+                "load_balancer_outbound_ips": None,
+                "load_balancer_outbound_ip_prefixes": None,
+                "load_balancer_outbound_ports": None,
+                "load_balancer_idle_timeout": None,
+                "outbound_type": None,
+                "network_plugin": None,
+                "pod_cidr": None,
+                "service_cidr": None,
+                "dns_service_ip": None,
+                "docker_bridge_cidr": None,
+                "network_policy": None,
+            },
+        )
+
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_network_profile(mc_1)
+
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            pod_cidr="10.244.0.0/16",
+            service_cidr="10.0.0.0/16",
+            dns_service_ip="10.0.0.10",
+            docker_bridge_cidr="172.17.0.1/16",
+            load_balancer_sku="standard",
+            outbound_type=None
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_1
+        )
+        self.assertEqual(dec_mc_1.network_profile.load_balancer_profile, ground_truth_mc_1.network_profile.load_balancer_profile)
+        print()
+        print(vars(dec_mc_1.network_profile))
+        print(vars(ground_truth_mc_1.network_profile))
+        self.assertEqual(dec_mc_1.network_profile, ground_truth_mc_1.network_profile)
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
