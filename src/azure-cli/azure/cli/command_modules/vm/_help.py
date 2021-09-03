@@ -3235,3 +3235,138 @@ examples:
         az vm monitor metrics list-definitions --name MyIDVirtualMachine --resource-group MyResourceGroup
     crafted: true
 """
+
+helps['capacity reservation'] = """
+type: group
+short-summary: Manage capacity.
+"""
+
+helps['capacity reservation group'] = """
+type: group
+short-summary: Manage capacity reservation group.
+"""
+
+helps['capacity reservation group create'] = """
+type: command
+short-summary: Create capacity reservation group.
+examples:
+  - name: Create a capacity reservation group.
+    text: az capacity reservation group create -n ReservationGroupName -g MyResourceGroup
+  - name: Create a capacity reservation group with specific zones.
+    text: |
+        az capacity reservation group create -n ReservationGroupName -l centraluseuap \\
+            -g MyResourceGroup --tags key=val --zones 1 2
+"""
+
+helps['capacity reservation group update'] = """
+type: command
+short-summary: Update capacity reservation group.
+examples:
+  - name: Update a capacity reservation group.
+    text: az capacity reservation group update -n ReservationGroupName -g MyResourceGroup --tags key=val
+"""
+
+helps['capacity reservation group delete'] = """
+type: command
+short-summary: Delete capacity reservation group.
+examples:
+  - name: Delete a capacity reservation group.
+    text: az capacity reservation group delete -n ReservationGroupName -g MyResourceGroup --yes
+"""
+
+helps['capacity reservation group show'] = """
+type: command
+short-summary: Show capacity reservation group.
+examples:
+  - name: Get a capacity reservation group.
+    text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup
+  - name: Get a capacity reservation group containing the instance views of the capacity reservations under the capacity reservation group
+    text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup --instance-view
+"""
+
+helps['capacity reservation group list'] = """
+type: command
+short-summary: List the capacity reservation groups.
+examples:
+  - name: List the capacity reservation groups.
+    text: az capacity reservation group list -g MyResourceGroup
+  - name: List the capacity reservation groups containing VM instances and VMSS instance which are associated to capacity reservation group
+    text: az capacity reservation group list -g MyResourceGroup --vm-instance --vmss-instance
+"""
+
+helps['capacity'] = """
+type: group
+short-summary: Manage capacity.
+"""
+
+helps['capacity reservation'] = """
+type: group
+short-summary: Manage capacity reservation.
+"""
+
+helps['capacity reservation create'] = """
+type: command
+short-summary: Create capacity reservation.
+examples:
+  - name: Create a capacity reservation.
+    text: |
+        az capacity reservation create -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --sku Standard_A0
+  - name: Create a capacity reservation with specific capacity and zones.
+    text: |
+        az capacity reservation create -c ReservationGroupName -n ReservationName -l centraluseuap \\
+            -g MyResourceGroup  --sku Standard_A1_v2 --capacity 5 \\
+                --zone 1 --tags key=val
+"""
+
+helps['capacity reservation update'] = """
+type: command
+short-summary: Update capacity reservation.
+examples:
+  - name: Update a capacity reservation.
+    text: |
+        az capacity reservation update -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --capacity 5 --tags key=val
+"""
+
+helps['capacity reservation delete'] = """
+type: command
+short-summary: Delete capacity reservation.
+examples:
+  - name: Delete a capacity reservation.
+    text: |
+        az capacity reservation delete -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --yes
+"""
+
+helps['capacity reservation show'] = """
+type: command
+short-summary: Show capacity reservation.
+examples:
+  - name: Get a capacity reservation.
+    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
+  - name: Get a capacity reservation containing the instance views.
+    text: |
+        az capacity reservation show -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --instance-view
+"""
+
+helps['capacity reservation show'] = """
+type: command
+short-summary: Show capacity reservation.
+examples:
+  - name: Get a capacity reservation.
+    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
+  - name: Get a capacity reservation containing the instance views.
+    text: |
+        az capacity reservation show -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --instance-view
+"""
+
+helps['capacity reservation list'] = """
+type: command
+short-summary: List capacity reservation.
+examples:
+  - name: List the capacity reservations.
+    text: az capacity reservation list -c ReservationGroupName -g MyResourceGroup
+"""
