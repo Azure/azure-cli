@@ -5,7 +5,7 @@
 
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 from knack.log import get_logger
-from typing import Any, List, Dict, Tuple, Union
+from typing import Any, List, Dict, Tuple, TypeVar, Union
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
@@ -30,9 +30,15 @@ from .custom import (
     subnet_role_assignment_exists,
     _add_role_assignment,
     _ensure_aks_acr,
+    create_load_balancer_profile,
 )
 
 logger = get_logger(__name__)
+
+# type variables
+ManagedCluster = TypeVar("ManagedCluster")
+ContainerServiceClient = TypeVar("ContainerServiceClient")
+ResourceReference = TypeVar("ResourceReference")
 
 
 def safe_list_get(li: List, idx: int, default: Any = None) -> Any:
@@ -152,6 +158,52 @@ class AKSCreateModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
+        # init load balancer models
+        self.init_lb_models()
+
+    def init_lb_models(self) -> None:
+        """Initialize models used by load balancer.
+
+        The models are stored in a dictionary, the key is the model name and the value is the model type.
+
+        :return: None
+        """
+        lb_models = {}
+        lb_models["ManagedClusterLoadBalancerProfile"] = self.__cmd.get_models(
+            "ManagedClusterLoadBalancerProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        lb_models[
+            "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+        ] = self.__cmd.get_models(
+            "ManagedClusterLoadBalancerProfileManagedOutboundIPs",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        lb_models[
+            "ManagedClusterLoadBalancerProfileOutboundIPs"
+        ] = self.__cmd.get_models(
+            "ManagedClusterLoadBalancerProfileOutboundIPs",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        lb_models[
+            "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+        ] = self.__cmd.get_models(
+            "ManagedClusterLoadBalancerProfileOutboundIPPrefixes",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        lb_models["ResourceReference"] = self.__cmd.get_models(
+            "ResourceReference",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.lb_models = lb_models
+        # uncomment the followings to add these models as class attributes
+        # for model_name, model_type in lb_models.items():
+        #     setattr(self, model_name, model_type)
 
 
 # pylint: disable=too-many-public-methods
@@ -186,7 +238,7 @@ class AKSCreateContext:
         self.intermediates = dict()
         self.mc = None
 
-    def attach_mc(self, mc):
+    def attach_mc(self, mc: ManagedCluster) -> None:
         """Attach the ManagedCluster object to the context.
 
         The `mc` object is only allowed to be attached once, and attaching again will raise a CLIInternalError.
@@ -203,7 +255,7 @@ class AKSCreateContext:
                 )
             )
 
-    def get_intermediate(self, variable_name: str, default_value: Any = None):
+    def get_intermediate(self, variable_name: str, default_value: Any = None) -> Any:
         """Get the value of an intermediate by its name.
 
         Get the value from the intermediates dictionary with variable_name as the key. If variable_name does not exist,
@@ -220,7 +272,7 @@ class AKSCreateContext:
 
     def set_intermediate(
         self, variable_name: str, value: Any, overwrite_exists: bool = False
-    ):
+    ) -> None:
         """Set the value of an intermediate by its name.
 
         In the case that the intermediate value already exists, if overwrite_exists is enabled, the value will be
@@ -248,7 +300,7 @@ class AKSCreateContext:
         else:
             self.intermediates[variable_name] = value
 
-    def remove_intermediate(self, variable_name: str):
+    def remove_intermediate(self, variable_name: str) -> None:
         """Remove the value of an intermediate by its name.
 
         No exception will be raised if the intermediate does not exist,
@@ -1727,12 +1779,165 @@ class AKSCreateContext:
         # this parameter does not need validation
         return no_wait
 
+    def get_load_balancer_managed_outbound_ip_count(self, **kwargs) -> Union[int, None]:
+        """Obtain the value of load_balancer_managed_outbound_ip_count.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get(
+            "load_balancer_managed_outbound_ip_count"
+        )
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.load_balancer_profile and
+            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps
+        ):
+            value_obtained_from_mc = (
+                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
+            )
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            load_balancer_managed_outbound_ip_count = value_obtained_from_mc
+        else:
+            load_balancer_managed_outbound_ip_count = raw_value
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return load_balancer_managed_outbound_ip_count
+
+    def get_load_balancer_outbound_ips(self, **kwargs) -> Union[str, List[ResourceReference], None]:
+        """Obtain the value of load_balancer_outbound_ips.
+
+        :return: string, list of ResourceReference, or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get(
+            "load_balancer_outbound_ips"
+        )
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.load_balancer_profile and
+            self.mc.network_profile.load_balancer_profile.outbound_i_ps
+        ):
+            value_obtained_from_mc = (
+                self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
+            )
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            load_balancer_outbound_ips = value_obtained_from_mc
+        else:
+            load_balancer_outbound_ips = raw_value
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return load_balancer_outbound_ips
+
+    def get_load_balancer_outbound_ip_prefixes(self, **kwargs) -> Union[str, List[ResourceReference], None]:
+        """Obtain the value of load_balancer_outbound_ip_prefixes.
+
+        :return: string, list of ResourceReference, or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get(
+            "load_balancer_outbound_ip_prefixes"
+        )
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.load_balancer_profile and
+            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes
+        ):
+            value_obtained_from_mc = (
+                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
+            )
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            load_balancer_outbound_ip_prefixes = value_obtained_from_mc
+        else:
+            load_balancer_outbound_ip_prefixes = raw_value
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return load_balancer_outbound_ip_prefixes
+
+    def get_load_balancer_outbound_ports(self, **kwargs) -> Union[int, None]:
+        """Obtain the value of load_balancer_outbound_ports.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get(
+            "load_balancer_outbound_ports"
+        )
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.load_balancer_profile
+        ):
+            value_obtained_from_mc = (
+                self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
+            )
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            load_balancer_outbound_ports = value_obtained_from_mc
+        else:
+            load_balancer_outbound_ports = raw_value
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return load_balancer_outbound_ports
+
+    def get_load_balancer_idle_timeout(self, **kwargs) -> Union[int, None]:
+        """Obtain the value of load_balancer_idle_timeout.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get(
+            "load_balancer_idle_timeout"
+        )
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.load_balancer_profile
+        ):
+            value_obtained_from_mc = (
+                self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
+            )
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            load_balancer_idle_timeout = value_obtained_from_mc
+        else:
+            load_balancer_idle_timeout = raw_value
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return load_balancer_idle_timeout
+
 
 class AKSCreateDecorator:
     def __init__(
         self,
         cmd: AzCliCommand,
-        client,
+        client: ContainerServiceClient,
         models: AKSCreateModels,
         raw_parameters: Dict,
         resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
@@ -1758,7 +1963,7 @@ class AKSCreateDecorator:
         # `_populate_api_server_access_profile` defined in `_helpers.py`
         self.resource_type = resource_type
 
-    def init_mc(self):
+    def init_mc(self) -> ManagedCluster:
         """Initialize the ManagedCluster object with required parameter location.
 
         The function "get_subscription_id" will be called, which depends on "az login" in advance, the returned
@@ -1776,7 +1981,7 @@ class AKSCreateDecorator:
         mc = self.models.ManagedCluster(location=self.context.get_location())
         return mc
 
-    def set_up_agent_pool_profiles(self, mc):
+    def set_up_agent_pool_profiles(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up agent pool profiles for the ManagedCluster object.
 
         :return: the ManagedCluster object
@@ -1815,7 +2020,7 @@ class AKSCreateDecorator:
         mc.agent_pool_profiles = [agent_pool_profile]
         return mc
 
-    def set_up_linux_profile(self, mc):
+    def set_up_linux_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up linux profile for the ManagedCluster object.
 
         Linux profile is just used for SSH access to VMs, so it will be omitted if --no-ssh-key option was specified.
@@ -1843,7 +2048,7 @@ class AKSCreateDecorator:
             mc.linux_profile = linux_profile
         return mc
 
-    def set_up_windows_profile(self, mc):
+    def set_up_windows_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up windows profile for the ManagedCluster object.
 
         :return: the ManagedCluster object
@@ -1875,7 +2080,7 @@ class AKSCreateDecorator:
             self.context.remove_intermediate("windows_admin_password")
         return mc
 
-    def set_up_service_principal_profile(self, mc):
+    def set_up_service_principal_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up service principal profile for the ManagedCluster object.
 
         The function "_ensure_aks_service_principal" will be called if the user provides an incomplete sp and secret
@@ -1912,7 +2117,7 @@ class AKSCreateDecorator:
             self.context.remove_intermediate("client_secret")
         return mc
 
-    def process_add_role_assignment_for_vnet_subnet(self, mc) -> None:
+    def process_add_role_assignment_for_vnet_subnet(self, mc: ManagedCluster) -> None:
         """Add role assignment for vent subnet.
 
         The function "subnet_role_assignment_exists" will be called to verfiy if the role assignment already exists for
@@ -1992,7 +2197,7 @@ class AKSCreateDecorator:
             overwrite_exists=True,
         )
 
-    def process_attach_acr(self, mc):
+    def process_attach_acr(self, mc: ManagedCluster) -> None:
         """Attach acr for the cluster.
 
         The function "_ensure_aks_acr" will be called to create an AcrPull role assignment for the acr, which
@@ -2033,7 +2238,29 @@ class AKSCreateDecorator:
                     subscription_id=subscription_id,
                 )
 
-    def construct_default_mc(self):
+    def set_up_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up network profile for the ManagedCluster object.
+
+        TODO: set up network profile
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+        load_balancer_profile = create_load_balancer_profile(
+            self.cmd,
+            self.get_load_balancer_managed_outbound_ip_count(),
+            self.get_load_balancer_outbound_ips(),
+            self.get_load_balancer_outbound_ip_prefixes(),
+            self.get_load_balancer_outbound_ports(),
+            self.get_load_balancer_idle_timeout(),
+            models=self.models.lb_models,
+        )
+        return mc
+
+    def construct_default_mc(self) -> ManagedCluster:
         """The overall control function used to construct the default ManagedCluster object.
 
         Note: To reduce the risk of regression introduced by refactoring, this function is not complete
@@ -2058,6 +2285,8 @@ class AKSCreateDecorator:
         self.process_add_role_assignment_for_vnet_subnet(mc)
         # attach acr (add role assignment for acr)
         self.process_attach_acr(mc)
+        # set up network profile
+        mc = self.set_up_network_profile(mc)
 
         # TODO: set up other profiles
         return mc
