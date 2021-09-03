@@ -132,8 +132,7 @@ Release History
 
 **Synapse**
 
-* [BREAKING CHANGE] `az synapse workspace key activate`: Make command more clearer (#19304)
-* Code owner change (#19119)
+* [BREAKING CHANGE] Rename `az synapse workspace key update` to `az synapse workspace key activate` and remove `--is-active` (#19304)
 * Optimize submit spark job arguments (#19038)
 * `az synapse`: Add managed private endpoints feature. (#19117)
 * Spark pool remove library requirement (#19358)
