@@ -2375,12 +2375,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
-            'name': aks_name
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
         })
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--generate-ssh-keys ' \
                      '--vm-set-type VirtualMachineScaleSets -c 1 ' \
-                     '--os-sku Ubuntu'
+                     '--os-sku Ubuntu ' \
+                     '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].osSku', 'Ubuntu'),
@@ -2399,12 +2400,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'node_pool_name': node_pool_name,
-            'node_pool_name_second': node_pool_name_second
+            'node_pool_name_second': node_pool_name_second,
+            'ssh_key_value': self.generate_ssh_keys()
         })
 
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--nodepool-name {node_pool_name} ' \
-                     '-c 1'
+                     '--nodepool-name {node_pool_name} -c 1 ' \
+                     '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -4673,12 +4675,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--generate-ssh-keys --enable-managed-identity ' \
-                     '--auto-upgrade-channel rapid'
+                     '--enable-managed-identity ' \
+                     '--auto-upgrade-channel rapid ' \
+                     '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoUpgradeProfile.upgradeChannel', 'rapid')
