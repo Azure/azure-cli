@@ -12,14 +12,15 @@ from ..constant import SynapseSqlCreateMode, SqlPoolConnectionClientAuthenticati
 
 # Synapse sqlpool
 def create_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_name, performance_level, tags=None,
-                    no_wait=False):
+                    storage_account_type=None, no_wait=False):
     workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
     workspace_object = workspace_client.get(resource_group_name, workspace_name)
     location = workspace_object.location
 
     sku = Sku(name=performance_level)
 
-    sql_pool_info = SqlPool(sku=sku, location=location, create_mode=SynapseSqlCreateMode.Default, tags=tags)
+    sql_pool_info = SqlPool(sku=sku, location=location, create_mode=SynapseSqlCreateMode.Default,
+                            storage_account_type=storage_account_type, tags=tags)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, workspace_name, sql_pool_name, sql_pool_info)
 
@@ -32,7 +33,7 @@ def update_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_n
 
 def restore_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_name, destination_name,
                      performance_level=None, restore_point_in_time=None, source_database_deletion_date=None,
-                     no_wait=False, **kwargs):
+                     storage_account_type=None, tags=None, no_wait=False, **kwargs):
     """
     Restores an existing or deleted SQL pool (i.e. create with 'Restore'
     or 'PointInTimeRestore' create mode.)
@@ -58,7 +59,8 @@ def restore_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_
 
     sku = Sku(name=performance_level)
     dest_sql_pool_info = SqlPool(sku=sku, location=source_sql_pool_info.location, create_mode=create_mode,
-                                 restore_point_in_time=restore_point_in_time, source_database_id=source_database_id)
+                                 restore_point_in_time=restore_point_in_time, storage_account_type=storage_account_type,
+                                 source_database_id=source_database_id, tags=tags)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, workspace_name, destination_name,
                        dest_sql_pool_info)
