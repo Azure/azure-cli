@@ -413,6 +413,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             self.cmd,
             {"load_balancer_sku": None, "kubernetes_version": ""},
         )
+        self.assertEqual(ctx_1.get_load_balancer_sku(read_only=True), None)
         self.assertEqual(ctx_1.get_load_balancer_sku(), "standard")
         network_profile = self.models.ContainerServiceNetworkProfile(
             load_balancer_sku="test_mc_load_balancer_sku"
