@@ -134,13 +134,14 @@ class CacheObject:
 
         if len(args) > 2:
             raise CLIError('expected 2 args, got {}: {}'.format(len(args), args))
-        if len(copy_kwargs) > 1:
-            raise CLIError('expected 1 kwarg, got {}: {}'.format(len(copy_kwargs), copy_kwargs))
 
         try:
             resource_name = args[-1]
         except IndexError:
-            resource_name = list(copy_kwargs.values())[0]
+            if len(copy_kwargs) > 1:
+                resource_name = copy_kwargs.pop('resource_name', None) or list(copy_kwargs.values())[0]
+            else:
+                resource_name = list(copy_kwargs.values())[0]
 
         self._resource_group = resource_group
         self._resource_name = resource_name
@@ -419,9 +420,10 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
             logger.warning(message)
             return _get_operation()
         return cache_obj
-    except Exception:  # pylint: disable=broad-except
+    except Exception as exception:  # pylint: disable=broad-except
         message = "{model} '{name}' not found in cache. Retrieving from Azure...".format(**cache_obj.prop_dict())
         logger.debug(message)
+        logger.error(exception)
         return _get_operation()
 
 
