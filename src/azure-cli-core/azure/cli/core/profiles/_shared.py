@@ -154,8 +154,6 @@ AZURE_API_PROFILES = {
             'gallery_image_versions': '2020-09-30',
             'shared_galleries': '2020-09-30',
             'virtual_machine_scale_sets': '2021-04-01',
-            'restore_points': '2021-07-01',
-            'restore-point-collections': '2021-07-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
