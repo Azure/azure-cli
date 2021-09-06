@@ -1353,7 +1353,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "outbound_type": None,
             },
         )
-        self.assertEqual(ctx_1.get_outbound_type(), None)
+        self.assertEqual(ctx_1.get_outbound_type(), "loadBalancer")
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
             outbound_type="test_outbound_type"
         )
@@ -2079,19 +2079,112 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.set_up_network_profile(mc_1)
 
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
-            pod_cidr="10.244.0.0/16",
-            service_cidr="10.0.0.0/16",
-            dns_service_ip="10.0.0.10",
-            docker_bridge_cidr="172.17.0.1/16",
+            network_plugin="kubenet",               # default value in SDK
+            pod_cidr="10.244.0.0/16",               # default value in SDK
+            service_cidr="10.0.0.0/16",             # default value in SDK
+            dns_service_ip="10.0.0.10",             # default value in SDK
+            docker_bridge_cidr="172.17.0.1/16",     # default value in SDK
             load_balancer_sku="standard",
-            outbound_type=None
+            outbound_type="loadBalancer",
         )
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location", network_profile=network_profile_1
         )
-        self.assertEqual(dec_mc_1.network_profile.load_balancer_profile, ground_truth_mc_1.network_profile.load_balancer_profile)
-        print()
-        print(vars(dec_mc_1.network_profile))
-        print(vars(ground_truth_mc_1.network_profile))
-        self.assertEqual(dec_mc_1.network_profile, ground_truth_mc_1.network_profile)
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "load_balancer_sku": None,
+                "load_balancer_managed_outbound_ip_count": 3,
+                "load_balancer_outbound_ips": "test_ip_1,test_ip_2",
+                "load_balancer_outbound_ip_prefixes": None,
+                "load_balancer_outbound_ports": 5,
+                "load_balancer_idle_timeout": None,
+                "outbound_type": None,
+                "network_plugin": "kubenet",
+                "pod_cidr": "10.246.0.0/16",
+                "service_cidr": None,
+                "dns_service_ip": None,
+                "docker_bridge_cidr": None,
+                "network_policy": None,
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_network_profile(mc_2)
+
+        load_balancer_profile_2 = self.models.lb_models.get("ManagedClusterLoadBalancerProfile")(
+            managed_outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            )(count=3),
+            outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            )(
+                public_i_ps=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_1"
+                    ),
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_2"
+                    )
+                ]
+            ),
+            allocated_outbound_ports=5
+        )
+
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            network_plugin="kubenet",
+            pod_cidr="10.246.0.0/16",
+            service_cidr=None,                  # overwritten to None
+            dns_service_ip=None,                # overwritten to None
+            docker_bridge_cidr=None,            # overwritten to None
+            load_balancer_sku="standard",
+            outbound_type="loadBalancer",
+            load_balancer_profile=load_balancer_profile_2
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # custom value
+        dec_3 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "load_balancer_sku": "basic",
+                "load_balancer_managed_outbound_ip_count": 5,
+                "load_balancer_outbound_ips": None,
+                "load_balancer_outbound_ip_prefixes": "test_ip_prefix_1,test_ip_prefix_2",
+                "load_balancer_outbound_ports": None,
+                "load_balancer_idle_timeout": 20,
+                "outbound_type": None,
+                "network_plugin": None,
+                "pod_cidr": None,
+                "service_cidr": None,
+                "dns_service_ip": None,
+                "docker_bridge_cidr": None,
+                "network_policy": None,
+            },
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_mc_3 = dec_3.set_up_network_profile(mc_3)
+
+        network_profile_3 = self.models.ContainerServiceNetworkProfile(
+            network_plugin="kubenet",               # default value in SDK
+            pod_cidr="10.244.0.0/16",               # default value in SDK
+            service_cidr="10.0.0.0/16",             # default value in SDK
+            dns_service_ip="10.0.0.10",             # default value in SDK
+            docker_bridge_cidr="172.17.0.1/16",     # default value in SDK
+            load_balancer_sku="basic",
+            outbound_type="loadBalancer",
+            load_balancer_profile=None,             # profile dropped when lb sku is basic
+        )
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_3
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)

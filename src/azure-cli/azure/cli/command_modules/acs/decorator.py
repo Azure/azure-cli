@@ -19,6 +19,7 @@ from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.acs._consts import (
+    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
 )
 from azure.cli.command_modules.acs.custom import (
@@ -422,9 +423,8 @@ class AKSCreateContext:
 
         :return: string or None
         """
-        parameter_name = "dns_name_prefix"
         # read the original value passed by the command
-        raw_value = self.raw_param.get(parameter_name)
+        raw_value = self.raw_param.get("dns_name_prefix")
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc:
@@ -473,11 +473,12 @@ class AKSCreateContext:
         to get the location of the provided resource group, which internally used ResourceManagementClient to send
         the request.
 
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
         :return: string
         """
-        parameter_name = "location"
         # read the original value passed by the command
-        raw_value = self.raw_param.get(parameter_name)
+        raw_value = self.raw_param.get("location")
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc:
@@ -490,6 +491,10 @@ class AKSCreateContext:
             read_from_mc = True
         else:
             location = raw_value
+
+        # skip dynamic completion & validation if option read_only is specified
+        if kwargs.get("read_only"):
+            return location
 
         dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
@@ -564,9 +569,8 @@ class AKSCreateContext:
 
         :return: string
         """
-        parameter_name = "vm_set_type"
         # read the original value passed by the command
-        raw_value = self.raw_param.get(parameter_name)
+        raw_value = self.raw_param.get("vm_set_type")
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
@@ -588,8 +592,7 @@ class AKSCreateContext:
         if kwargs.get("read_only"):
             return vm_set_type
 
-        # the value verified by the validator may have case problems, and the
-        # "_set_vm_set_type" function will adjust it
+        # the value verified by the validator may have case problems, and function "_set_vm_set_type" will adjust it
         dynamic_completion = True
         # disable dynamic completion if the value is read from `mc`
         dynamic_completion = dynamic_completion and not read_from_mc
@@ -675,9 +678,8 @@ class AKSCreateContext:
 
         :return: string, empty list or list of strings, or None
         """
-        parameter_name = "api_server_authorized_ip_ranges"
         # read the original value passed by the command
-        raw_value = self.raw_param.get(parameter_name)
+        raw_value = self.raw_param.get("api_server_authorized_ip_ranges")
         # try to read the property value corresponding to the parameter from the `mc` object
         value_obtained_from_mc = None
         if self.mc and self.mc.api_server_access_profile:
@@ -1548,19 +1550,17 @@ class AKSCreateContext:
         When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
         CLIError.
 
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
         :return: a tuple containing two elements of string or None
         """
         # service_principal
-        sp_parameter_name = "service_principal"
-        sp_property_name_in_mc = "client_id"
         # read the original value passed by the command
-        sp_raw_value = self.raw_param.get(sp_parameter_name)
+        sp_raw_value = self.raw_param.get("service_principal")
         # try to read the property value corresponding to the parameter from the `mc` object
         sp_value_obtained_from_mc = None
         if self.mc and self.mc.service_principal_profile:
-            sp_value_obtained_from_mc = getattr(
-                self.mc.service_principal_profile, sp_property_name_in_mc
-            )
+            sp_value_obtained_from_mc = self.mc.service_principal_profile.client_id
         # set default value
         sp_read_from_mc = False
         if sp_value_obtained_from_mc is not None:
@@ -1570,16 +1570,12 @@ class AKSCreateContext:
             service_principal = sp_raw_value
 
         # client_secret
-        secret_parameter_name = "client_secret"
-        secret_property_name_in_mc = "secret"
         # read the original value passed by the command
-        secret_raw_value = self.raw_param.get(secret_parameter_name)
+        secret_raw_value = self.raw_param.get("client_secret")
         # try to read the property value corresponding to the parameter from the `mc` object
         secret_value_obtained_from_mc = None
         if self.mc and self.mc.service_principal_profile:
-            secret_value_obtained_from_mc = getattr(
-                self.mc.service_principal_profile, secret_property_name_in_mc
-            )
+            secret_value_obtained_from_mc = self.mc.service_principal_profile.secret
         # set default value
         secret_read_from_mc = False
         if secret_value_obtained_from_mc is not None:
@@ -1643,6 +1639,8 @@ class AKSCreateContext:
 
         When both service_principal and client_secret are assigned and enable_managed_identity is True, dynamic
         completion will be triggered. The value of enable_managed_identity will be set to False.
+
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
         :return: bool
         """
@@ -1957,6 +1955,9 @@ class AKSCreateContext:
 
         Note: The parameters involved in the validation are not verified in their own getters.
 
+        When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
+        CONST_OUTBOUND_TYPE_LOAD_BALANCER.
+
         This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
         parameters, the value in load_balancer_profile will be used for validation.
         This function supports the option of enable_validation. When enabled, if the value of outbound_type is
@@ -1965,6 +1966,7 @@ class AKSCreateContext:
         assigned, a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
         will be raised.
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
         :return: string or None
         """
@@ -1983,12 +1985,25 @@ class AKSCreateContext:
             )
 
         # set default value
+        read_from_mc = False
         if value_obtained_from_mc is not None:
             outbound_type = value_obtained_from_mc
+            read_from_mc = True
         else:
             outbound_type = raw_value
 
-        # this parameter does not need dynamic completion
+        # skip dynamic completion & validation if option read_only is specified
+        if kwargs.get("read_only"):
+            return outbound_type
+
+        dynamic_completion = False
+        # check whether the parameter meet the conditions of dynamic completion
+        if outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+            dynamic_completion = True
+        # disable dynamic completion if the value is read from `mc`
+        dynamic_completion = dynamic_completion and not read_from_mc
+        if dynamic_completion:
+            outbound_type = CONST_OUTBOUND_TYPE_LOAD_BALANCER
 
         # validation
         # Note: The parameters involved in the validation are not verified in their own getters.
