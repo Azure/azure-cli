@@ -1136,6 +1136,16 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1 = AKSCreateContext(self.cmd, {"yes": False})
         self.assertEqual(ctx_1.get_yes(), False)
 
+    def test_get_attach_acr(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"attach_acr": None})
+        self.assertEqual(ctx_1.get_attach_acr(), None)
+
+    def test_get_no_wait(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"no_wait": False})
+        self.assertEqual(ctx_1.get_no_wait(), False)
+
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -1511,4 +1521,64 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "need_post_creation_vnet_permission_granting"
             ),
             False,
+        )
+
+    def test_process_attach_acr(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "attach_acr": None,
+            },
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.process_attach_acr(mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "attach_acr": "test_attach_acr",
+                "enable_managed_identity": True,
+                "no_wait": True,
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_2.process_attach_acr(mc_2)
+
+        # custom value
+        dec_3 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "attach_acr": "test_attach_acr",
+                "enable_managed_identity": False,
+            },
+        )
+        service_principal_profile_3 = (
+            self.models.ManagedClusterServicePrincipalProfile(
+                client_id="test_service_principal", secret="test_client_secret"
+            )
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=service_principal_profile_3,
+        )
+        registry = Mock()
+        registry.id = "test_registry_id"
+        with patch(
+            "azure.cli.command_modules.acs.custom.get_resource_by_name",
+            return_value=registry,
+        ), patch(
+            "azure.cli.command_modules.acs.custom._ensure_aks_acr_role_assignment"
+        ) as ensure_assignment:
+            dec_3.process_attach_acr(mc_3)
+        ensure_assignment.assert_called_once_with(
+            self.cmd, "test_service_principal", "test_registry_id", False
         )
