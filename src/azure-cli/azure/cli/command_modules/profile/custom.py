@@ -61,8 +61,7 @@ def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     return profile.get_subscription(subscription)
 
 
-def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None,
-                     epoch_expires_on=False):
+def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None):
     """
     get AAD token to access to a specified resource.
     Use 'az cloud show' command for other Azure resources
@@ -73,7 +72,7 @@ def get_access_token(cmd, subscription=None, resource=None, scopes=None, resourc
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,
-                                                        tenant=tenant, epoch_expires_on=epoch_expires_on)
+                                                        tenant=tenant)
 
     token_entry = creds[2]
     # MSIAuthentication's token entry has `expires_on`, while ADAL's token entry has `expiresOn`

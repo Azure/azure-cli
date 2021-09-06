@@ -300,12 +300,12 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def logout(self, user_or_sp, clear_credential):
+    def logout(self, user_or_sp):
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
         result = [x for x in subscriptions
                   if user_or_sp.lower() == x[_USER_ENTITY][_USER_NAME].lower()]
         subscriptions = [x for x in subscriptions if x not in result]
-        #self._storage[_SUBSCRIPTIONS] = subscriptions
+        self._storage[_SUBSCRIPTIONS] = subscriptions
 
         identity = Identity(self._authority)
         identity.logout_user(user_or_sp)
@@ -315,7 +315,7 @@ class Profile:
         self._storage[_SUBSCRIPTIONS] = []
 
         identity = Identity(self._authority)
-        accounts = identity.logout_all_users()
+        identity.logout_all_users()
 
     def get_login_credentials(self, resource=None, client_id=None, subscription_id=None, aux_subscriptions=None,
                               aux_tenants=None):
@@ -406,11 +406,13 @@ class Profile:
             credential = self._create_credential(account, tenant)
             token = credential.get_token(*scopes)
             import datetime
-            expires_on = datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+
+            # BREAKING CHANGE
+            # expires_on = datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
 
             token_entry = {
                 'accessToken': token.token,
-                'expiresOn': expires_on
+                'expiresOn': token.expires_on
             }
 
             # (tokenType, accessToken, tokenEntry)
