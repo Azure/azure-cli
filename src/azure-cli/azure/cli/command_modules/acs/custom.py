@@ -104,6 +104,7 @@ from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
 from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM, CONST_PRIVATE_DNS_ZONE_NONE
 from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
+from .decorator import AKSCreateModels
 
 logger = get_logger(__name__)
 
@@ -2265,13 +2266,16 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 logger.warning('Could not create a role assignment for subnet. '
                                'Are you an Owner on this subscription?')
 
+    # store all the models used by load balancer
+    lb_models = AKSCreateModels(cmd).lb_models
     load_balancer_profile = create_load_balancer_profile(
         cmd,
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
         load_balancer_outbound_ports,
-        load_balancer_idle_timeout)
+        load_balancer_idle_timeout,
+        models=lb_models)
 
     if attach_acr:
         if enable_managed_identity:
@@ -2958,6 +2962,8 @@ def aks_update(cmd, client, resource_group_name, name,
         )
 
     if update_lb_profile:
+        # store all the models used by load balancer
+        lb_models = AKSCreateModels(cmd).lb_models
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
             cmd,
             load_balancer_managed_outbound_ip_count,
@@ -2965,7 +2971,8 @@ def aks_update(cmd, client, resource_group_name, name,
             load_balancer_outbound_ip_prefixes,
             load_balancer_outbound_ports,
             load_balancer_idle_timeout,
-            instance.network_profile.load_balancer_profile)
+            instance.network_profile.load_balancer_profile,
+            models=lb_models)
 
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
