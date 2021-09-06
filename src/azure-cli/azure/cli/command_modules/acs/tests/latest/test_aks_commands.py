@@ -2429,7 +2429,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
-    def test_aks_control_plane_user_assigned_identity_then_update(self, resource_group, resource_group_location):
+    def test_aks_control_plane_user_assigned_identity(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
@@ -2525,23 +2525,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('agentPoolProfiles[0].count', 3)
         ])
-
-        # update assignd identity
-        new_identity_resource_id = self.generate_user_assigned_identity_resource_id(resource_group)
-        self.kwargs.update({
-            "new_identity_resource_id": new_identity_resource_id
-        })
-        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                     '--enable-managed-identity --assign-identity={new_identity_resource_id}'
-        self.cmd(
-            update_cmd,
-            checks=[
-                self.check(
-                    "identity.userAssignedIdentities | keys(@) | contains(@, '{}')".format(new_identity_resource_id),
-                    True,
-                )
-            ],
-        )
 
         # delete
         self.cmd(
@@ -5616,6 +5599,49 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # check role assignment
         self.cmd(role_assignment_check_cmd, checks=[self.is_empty()])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_SP_then_update_to_user_assigned_identity(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('servicePrincipalProfile.clientId', sp_name)
+        ])
+
+        # update to assignd identity
+        identity_resource_id = self.generate_user_assigned_identity_resource_id(resource_group)
+        self.kwargs.update({
+            "identity_resource_id": identity_resource_id
+        })
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-managed-identity --assign-identity={identity_resource_id}'
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check(
+                    "identity.userAssignedIdentities | keys(@) | contains(@, '{}')".format(identity_resource_id),
+                    True,
+                )
+            ],
+        )
 
         # delete
         self.cmd(
