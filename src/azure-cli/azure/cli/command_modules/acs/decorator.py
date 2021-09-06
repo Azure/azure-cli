@@ -2107,7 +2107,7 @@ class AKSCreateContext:
                     raise MutuallyExclusiveArgumentError(
                         "Please use kubenet as the network plugin type when pod_cidr is specified"
                     )
-                elif network_plugin in ["", None]:
+                if network_plugin in ["", None]:
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
                     )

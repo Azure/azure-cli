@@ -53,9 +53,9 @@ def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips
     if not profile:
         return profile
 
-    outbound_ip_resources = _get_load_balancer_outbound_ips(cmd, outbound_ips)
+    outbound_ip_resources = _get_load_balancer_outbound_ips(cmd, outbound_ips, models)
     outbound_ip_prefix_resources = _get_load_balancer_outbound_ip_prefixes(
-        cmd, outbound_ip_prefixes)
+        cmd, outbound_ip_prefixes, models)
 
     if managed_outbound_ip_count or outbound_ip_resources or outbound_ip_prefix_resources:
         # ips -> i_ps due to track 2 naming issue
@@ -68,10 +68,8 @@ def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips
                 "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
             )
             # ips -> i_ps due to track 2 naming issue
-            profile.managed_outbound_i_ps = (
-                ManagedClusterLoadBalancerProfileManagedOutboundIPs(
-                    count=managed_outbound_ip_count
-                )
+            profile.managed_outbound_i_ps = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
+                count=managed_outbound_ip_count
             )
         if outbound_ip_resources:
             ManagedClusterLoadBalancerProfileOutboundIPs = models.get(
@@ -86,10 +84,8 @@ def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips
             ManagedClusterLoadBalancerProfileOutboundIPPrefixes = models.get(
                 "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
             )
-            profile.outbound_ip_prefixes = (
-                ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
-                    public_ip_prefixes=outbound_ip_prefix_resources
-                )
+            profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
+                public_ip_prefixes=outbound_ip_prefix_resources
             )
     if outbound_ports:
         profile.allocated_outbound_ports = outbound_ports

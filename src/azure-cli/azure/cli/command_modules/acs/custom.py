@@ -104,7 +104,6 @@ from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
 from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM, CONST_PRIVATE_DNS_ZONE_NONE
 from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
-from .decorator import AKSCreateModels
 
 logger = get_logger(__name__)
 
@@ -2266,6 +2265,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 logger.warning('Could not create a role assignment for subnet. '
                                'Are you an Owner on this subscription?')
 
+    from azure.cli.command_modules.acs.decorator import AKSCreateModels
     # store all the models used by load balancer
     lb_models = AKSCreateModels(cmd).lb_models
     load_balancer_profile = create_load_balancer_profile(
@@ -2962,6 +2962,7 @@ def aks_update(cmd, client, resource_group_name, name,
         )
 
     if update_lb_profile:
+        from azure.cli.command_modules.acs.decorator import AKSCreateModels
         # store all the models used by load balancer
         lb_models = AKSCreateModels(cmd).lb_models
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
