@@ -18,7 +18,7 @@ from urllib.parse import urlparse
 from packaging.version import parse
 
 from azure.cli.core import CommandIndex
-from azure.cli.core.util import CLIError, reload_module
+from azure.cli.core.util import CLIError, reload_module, rmtree_with_retry
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli,
                                       EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
@@ -559,22 +559,3 @@ def check_distro_consistency():
                      "for your distribution or change the above file accordingly.")
         logger.debug("Linux distro check: %s has '%s', current distro is '%s'",
                      LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
-
-
-def rmtree_with_retry(path):
-    # A workaround for https://bugs.python.org/issue33240
-    # Retry shutil.rmtree several times, but even if it fails after several retries, don't block the command execution.
-    retry_num = 3
-    import time
-    while True:
-        try:
-            shutil.rmtree(path)
-            return
-        except OSError as err:
-            if retry_num > 0:
-                logger.warning("Failed to delete '%s': %s. Retrying ...", path, err)
-                retry_num -= 1
-                time.sleep(1)
-            else:
-                logger.warning("Failed to delete '%s': %s. You may try to delete it manually.", path, err)
-                break

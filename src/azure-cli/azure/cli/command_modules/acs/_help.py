@@ -225,6 +225,9 @@ parameters:
     short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
     populator-commands:
       - "`az aks get-versions`"
+  - name: --os-sku
+    type: string
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner.
   - name: --ssh-key-value
     type: string
     short-summary: Public key path or key contents to install on node VMs for SSH access. For example, 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'.
@@ -312,6 +315,9 @@ parameters:
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
     long-summary: Select between loadBalancer and userDefinedRouting. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
+  - name: --auto-upgrade-channel
+    type: string
+    short-summary: Specify the upgrade channel for autoupgrade.
   - name: --enable-cluster-autoscaler
     type: bool
     short-summary: Enable cluster autoscaler, default value is false.
@@ -502,6 +508,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --assign-identity <control-plane-identity-resource-id> --assign-kubelet-identity <kubelet-identity-resource-id>
   - name: Create a kubernetes cluster in the Edge Zone.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --location <location> --kubernetes-version 1.20.7 --edge-zone <edge-zone-name>
+  - name: Create a kubernetes cluster with a specific OS SKU
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu
 """
 
 helps['aks update'] = """
@@ -549,6 +557,9 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --auto-upgrade-channel
+    type: string
+    short-summary: Specify the upgrade channel for autoupgrade.
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -815,6 +826,9 @@ parameters:
   - name: --os-type
     type: string
     short-summary: The OS Type. Linux or Windows.
+  - name: --os-sku
+    type: string
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -858,6 +872,9 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
   - name: Create a nodepool with UltraSSD enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-ultra-ssd
+  - name: Create a nodepool cluster with a specific OS SKU
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku Ubuntu
+
 """
 
 helps['aks nodepool delete'] = """
@@ -943,7 +960,7 @@ parameters:
     short-summary: Only upgrade agent pool's node image.
   - name: --max-surge
     type: string
-    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
 """
 
 helps['aks remove-dev-spaces'] = """

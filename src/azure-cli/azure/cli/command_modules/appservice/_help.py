@@ -2511,6 +2511,27 @@ helps['staticwebapp users update'] = """
       text: az staticwebapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor
 """
 
+helps['staticwebapp secrets'] = """
+    type: group
+    short-summary: Manage deployment token for the static app
+"""
+
+helps['staticwebapp secrets list'] = """
+    type: command
+    short-summary: List the deployment token for the static app.
+    examples:
+    - name: List deployment token
+      text: az staticwebapp secrets list --name MyStaticAppName
+"""
+
+helps['staticwebapp secrets reset-api-key'] = """
+    type: command
+    short-summary: Reset the deployment token for the static app.
+    examples:
+    - name: Reset deployment token
+      text: az staticwebapp secrets reset-api-key --name MyStaticAppName
+"""
+
 helps['webapp deploy'] = """
     type: command
     short-summary: Deploys a provided artifact to Azure Web Apps.

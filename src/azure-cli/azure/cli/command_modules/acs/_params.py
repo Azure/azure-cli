@@ -16,7 +16,7 @@ from azure.cli.core.profiles import ResourceType
 from knack.arguments import CLIArgumentType
 
 from ._completers import (
-    get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
+    get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list, get_ossku_completion_list)
 from ._validators import (
     validate_cluster_autoscaler_profile, validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_nodes_count,
@@ -62,6 +62,14 @@ regions_in_prod = [
     "southeastasia",
     "westeurope",
     "westus",
+]
+
+auto_upgrade_channels = [
+    "rapid",
+    "stable",
+    "patch",
+    "node-image",
+    "none"
 ]
 
 storage_profile_types = ["StorageAccount", "ManagedDisks"]
@@ -181,6 +189,7 @@ def load_arguments(self, _):
                    '--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('nodepool_name', type=str, default='nodepool1',
                    help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
+        c.argument('os_sku', completer=get_ossku_completion_list)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('aad_client_app_id')
@@ -203,6 +212,7 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type([CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                                                             CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
+        c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('enable_cluster_autoscaler', action='store_true')
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile,
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
@@ -297,6 +307,7 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int,
                    validator=validate_load_balancer_idle_timeout)
+        c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
         c.argument('enable_ahub', options_list=['--enable-ahub'])
@@ -388,6 +399,7 @@ def load_arguments(self, _):
                        '--node-vm-size', '-s'], completer=get_vm_size_completion_list)
             c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
             c.argument('os_type', type=str)
+            c.argument('os_sku', completer=get_ossku_completion_list)
             c.argument('enable_cluster_autoscaler', options_list=[
                        "--enable-cluster-autoscaler", "-e"], action='store_true')
             c.argument('node_taints', type=str, validator=validate_taints)
