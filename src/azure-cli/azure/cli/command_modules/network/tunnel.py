@@ -74,14 +74,13 @@ class TunnelServer:
 
     def _get_auth_token(self):
         profile = Profile(cli_ctx=self.cli_ctx)
-        user = profile.get_current_account_user()
         # Generate an Azure token with the VSTS resource app id
-        auth_token = profile.get_access_token_for_resource(user, None, None)
+        auth_token, _, _ = profile.get_raw_token()
         content = {
             'resourceId': self.remote_host,
             'protocol': 'tcptunnel',
             'workloadHostPort': self.remote_port,
-            'aztoken': auth_token,
+            'aztoken': auth_token[1],
             'token': self.last_token,
         }
         if self.node_id:
@@ -93,10 +92,11 @@ class TunnelServer:
         response = requests.post(web_address, data=content, headers=custom_header,
                                  verify=(not should_disable_connection_verify()))
         response_json = None
-
+        
         if response.content is not None:
             response_json = json.loads(response.content.decode("utf-8"))
 
+        logger.info(response_json)
         if response.status_code not in [200]:
             if response_json is not None and response_json["message"] is not None:
                 exp = CloudError(response, error=response_json["message"])

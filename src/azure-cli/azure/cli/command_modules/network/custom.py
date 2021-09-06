@@ -7573,7 +7573,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(None, ssh_key)
     else:
-        raise UnrecognizedArgumentError("Unknown auth type. Use one of password, aad or akv.")
+        raise UnrecognizedArgumentError("Unknown auth type. Use one of password, aad or ssh-key as option.")
     command = command + ["-p", str(tunnel_server.local_port)]
     command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
     command = command + ['-o', "LogLevel=Error"]
