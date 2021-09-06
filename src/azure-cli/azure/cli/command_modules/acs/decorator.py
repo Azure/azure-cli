@@ -2526,7 +2526,7 @@ class AKSCreateDecorator:
     def set_up_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up network profile for the ManagedCluster object.
 
-        Build load balancer profile and verify outbound type first, then set up network profile.
+        Build load balancer profile, verify outbound type and load balancer sku first, then set up network profile.
 
         :return: the ManagedCluster object
         """
@@ -2546,6 +2546,8 @@ class AKSCreateDecorator:
         )
 
         # verify outbound type, which is part of the network profile
+        # Note: Validation internally depends on load_balancer_sku, which is a temporary value that is
+        # dynamically completed.
         outbound_type = self.context.get_outbound_type(
             enable_validation=True, load_balancer_profile=load_balancer_profile
         )
