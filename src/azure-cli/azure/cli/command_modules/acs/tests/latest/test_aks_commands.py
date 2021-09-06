@@ -2429,7 +2429,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
-    def test_aks_control_plane_user_assigned_identity(self, resource_group, resource_group_location):
+    def test_aks_control_plane_user_assigned_identity_then_update(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
@@ -2484,8 +2484,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.exists('identity'),
-            self.exists('identityProfile')
+            self.exists('identityProfile'),
+            self.check(
+                'identity.userAssignedIdentities | keys(@) | contains(@, "{}")'.format(
+                    self.kwargs.get("identity_resource_id")
+                ),
+                True,
+            )
         ])
 
         # get-credentials
@@ -2520,6 +2525,23 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('agentPoolProfiles[0].count', 3)
         ])
+
+        # update assignd identity
+        new_identity_resource_id = self.generate_user_assigned_identity_resource_id(resource_group)
+        self.kwargs.update({
+            "new_identity_resource_id": new_identity_resource_id
+        })
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--assign-identity={new_identity_resource_id}'
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check(
+                    'identity.userAssignedIdentities | keys(@) | contains(@, "{}")'.format(new_identity_resource_id),
+                    True,
+                )
+            ],
+        )
 
         # delete
         self.cmd(
@@ -4955,7 +4977,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_loadbalancer(self, resource_group, resource_group_location):
+    def test_aks_create_loadbalancer_then_update(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'name': aks_name,
@@ -4973,6 +4995,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 2048),
             self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 5),
             self.check('networkProfile.loadBalancerProfile.effectiveOutboundIPs | length(@) == `2`', True)
+        ])
+
+        # update
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--load-balancer-outbound-ports 1024 --load-balancer-idle-timeout 10'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 1024),
+            self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 10)
         ])
 
         # delete
