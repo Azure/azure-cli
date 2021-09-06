@@ -29,6 +29,7 @@ from .custom import (
     _get_user_assigned_identity,
     subnet_role_assignment_exists,
     _add_role_assignment,
+    _ensure_aks_acr,
 )
 
 logger = get_logger(__name__)
@@ -186,6 +187,12 @@ class AKSCreateContext:
         self.mc = None
 
     def attach_mc(self, mc):
+        """Attach the ManagedCluster object to the context.
+
+        The `mc` object is only allowed to be attached once, and attaching again will raise a CLIInternalError.
+
+        :return: None
+        """
         if self.mc is None:
             self.mc = mc
         else:
@@ -197,6 +204,13 @@ class AKSCreateContext:
             )
 
     def get_intermediate(self, variable_name: str, default_value: Any = None):
+        """Get the value of an intermediate by its name.
+
+        Get the value from the intermediates dictionary with variable_name as the key. If variable_name does not exist,
+        default_value will be returned.
+
+        :return: Any
+        """
         if variable_name not in self.intermediates:
             msg = "The intermediate '{}' does not exist, return default value '{}'.".format(
                 variable_name, default_value
@@ -207,6 +221,14 @@ class AKSCreateContext:
     def set_intermediate(
         self, variable_name: str, value: Any, overwrite_exists: bool = False
     ):
+        """Set the value of an intermediate by its name.
+
+        In the case that the intermediate value already exists, if overwrite_exists is enabled, the value will be
+        overwritten and the log will be output at the debug level, otherwise the value will not be overwritten and
+        the log will be output at the warning level, which by default will be output to stderr and seen by user.
+
+        :return: None
+        """
         if variable_name in self.intermediates:
             if overwrite_exists:
                 msg = "The intermediate '{}' is overwritten. Original value: '{}', new value: '{}'.".format(
@@ -227,6 +249,12 @@ class AKSCreateContext:
             self.intermediates[variable_name] = value
 
     def remove_intermediate(self, variable_name: str):
+        """Remove the value of an intermediate by its name.
+
+        No exception will be raised if the intermediate does not exist,
+
+        :return: None
+        """
         self.intermediates.pop(variable_name, None)
 
     # pylint: disable=unused-argument
@@ -1660,7 +1688,7 @@ class AKSCreateContext:
 
         Note: yes will not be decorated into the `mc` object.
 
-        :return: yes
+        :return: bool
         """
         # read the original value passed by the command
         yes = self.raw_param.get("yes")
@@ -1668,6 +1696,36 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return yes
+
+    # pylint: disable=unused-argument
+    def get_attach_acr(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of attach_acr.
+
+        Note: attach_acr will not be decorated into the `mc` object.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        attach_acr = self.raw_param.get("attach_acr")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return attach_acr
+
+    # pylint: disable=unused-argument
+    def get_no_wait(self, **kwargs) -> bool:
+        """Obtain the value of no_wait.
+
+        Note: no_wait will not be decorated into the `mc` object.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        no_wait = self.raw_param.get("no_wait")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return no_wait
 
 
 class AKSCreateDecorator:
@@ -1866,7 +1924,7 @@ class AKSCreateDecorator:
 
         This function will store an intermediate need_post_creation_vnet_permission_granting.
 
-        :return: the ManagedCluster object
+        :return: None
         """
         if not isinstance(mc, self.models.ManagedCluster):
             raise CLIInternalError(
@@ -1934,6 +1992,47 @@ class AKSCreateDecorator:
             overwrite_exists=True,
         )
 
+    def process_attach_acr(self, mc):
+        """Attach acr for the cluster.
+
+        The function "_ensure_aks_acr" will be called to create an AcrPull role assignment for the acr, which
+        internally used AuthorizationManagementClient to send the request.
+
+        :return: None
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+        attach_acr = self.context.get_attach_acr()
+        if attach_acr:
+            if self.context.get_enable_managed_identity():
+                if self.context.get_no_wait():
+                    raise MutuallyExclusiveArgumentError(
+                        "When --attach-acr and --enable-managed-identity are both specified, "
+                        "--no-wait is not allowed, please wait until the whole operation succeeds."
+                    )
+                # Attach acr operation will be handled after the cluster is created
+            else:
+                service_principal_profile = mc.service_principal_profile
+                # newly added check, check whether client_id exists before creating role assignment
+                if (
+                    service_principal_profile is None or
+                    not service_principal_profile.client_id
+                ):
+                    raise CLIInternalError(
+                        "No service principal is found to create the acrpull role assignment for acr."
+                    )
+                subscription_id = self.context.get_intermediate(
+                    "subscription_id"
+                )
+                _ensure_aks_acr(
+                    self.cmd,
+                    client_id=service_principal_profile.client_id,
+                    acr_name_or_id=attach_acr,
+                    subscription_id=subscription_id,
+                )
+
     def construct_default_mc(self):
         """The overall control function used to construct the default ManagedCluster object.
 
@@ -1957,6 +2056,8 @@ class AKSCreateDecorator:
         mc = self.set_up_service_principal_profile(mc)
         # add role assignment for vent subnet
         self.process_add_role_assignment_for_vnet_subnet(mc)
+        # attach acr (add role assignment for acr)
+        self.process_attach_acr(mc)
 
         # TODO: set up other profiles
         return mc
