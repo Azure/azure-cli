@@ -5632,7 +5632,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "identity_resource_id": identity_resource_id
         })
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                     '--enable-managed-identity --assign-identity={identity_resource_id}'
+                     '--enable-managed-identity --assign-identity={identity_resource_id} --yes'
         self.cmd(
             update_cmd,
             checks=[
