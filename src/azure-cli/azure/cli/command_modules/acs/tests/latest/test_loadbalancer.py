@@ -5,18 +5,8 @@
 import unittest
 from unittest import mock
 
-from knack import CLI
-
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
-from azure.cli.core.cloud import get_active_cloud
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
-
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterLoadBalancerProfile
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
-from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs import _loadbalancer as loadbalancer
+
 
 class TestLoadBalancer(unittest.TestCase):
 
@@ -27,6 +17,22 @@ class TestLoadBalancer(unittest.TestCase):
         outbound_ip_prefixes = None
         outbound_ports = 80
         idle_timeout = 3600
+
+        from azure.cli.command_modules.acs.decorator import AKSCreateModels
+        # store all the models used by load balancer
+        lb_models = AKSCreateModels(cmd).lb_models
+        ManagedClusterLoadBalancerProfile = lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )
+        ManagedClusterLoadBalancerProfileManagedOutboundIPs = lb_models.get(
+            "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+        )
+        ManagedClusterLoadBalancerProfileOutboundIPs = lb_models.get(
+            "ManagedClusterLoadBalancerProfileOutboundIPs"
+        )
+        ManagedClusterLoadBalancerProfileOutboundIPPrefixes = lb_models.get(
+            "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+        )
 
         profile = ManagedClusterLoadBalancerProfile()
         profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
@@ -39,8 +45,16 @@ class TestLoadBalancer(unittest.TestCase):
             public_ip_prefixes="public_ip_prefixes"
         )
 
-        p = loadbalancer.configure_load_balancer_profile(cmd,
-            managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes, outbound_ports, idle_timeout, profile)
+        p = loadbalancer.configure_load_balancer_profile(
+            cmd,
+            managed_outbound_ip_count,
+            outbound_ips,
+            outbound_ip_prefixes,
+            outbound_ports,
+            idle_timeout,
+            profile,
+            lb_models,
+        )
 
         self.assertIsNotNone(p.managed_outbound_i_ps)
         self.assertIsNone(p.outbound_i_ps)
