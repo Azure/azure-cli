@@ -2536,7 +2536,6 @@ class AKSCreateDecorator:
             )
         # build load balancer profile, which is part of the network profile
         load_balancer_profile = create_load_balancer_profile(
-            self.cmd,
             self.context.get_load_balancer_managed_outbound_ip_count(),
             self.context.get_load_balancer_outbound_ips(),
             self.context.get_load_balancer_outbound_ip_prefixes(),

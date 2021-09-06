@@ -2269,7 +2269,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     # store all the models used by load balancer
     lb_models = AKSCreateModels(cmd).lb_models
     load_balancer_profile = create_load_balancer_profile(
-        cmd,
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
@@ -2966,7 +2965,6 @@ def aks_update(cmd, client, resource_group_name, name,
         # store all the models used by load balancer
         lb_models = AKSCreateModels(cmd).lb_models
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
-            cmd,
             load_balancer_managed_outbound_ip_count,
             load_balancer_outbound_ips,
             load_balancer_outbound_ip_prefixes,

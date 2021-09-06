@@ -3,11 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
-
-# pylint: disable=no-name-in-module,import-error
-from azure.cli.core.profiles import ResourceType
-
+from distutils.version import StrictVersion
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -24,17 +20,17 @@ def set_load_balancer_sku(sku, kubernetes_version):
     return "standard"
 
 
-def update_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
+def update_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                  outbound_ports, idle_timeout, profile, models):
     """parse and update an existing load balancer profile"""
     if not is_load_balancer_profile_provided(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                              outbound_ports, idle_timeout):
         return profile
-    return configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
+    return configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                            outbound_ports, idle_timeout, profile, models)
 
 
-def create_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
+def create_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                  outbound_ports, idle_timeout, models):
     """parse and build load balancer profile"""
     if not is_load_balancer_profile_provided(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
@@ -43,19 +39,19 @@ def create_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, o
 
     ManagedClusterLoadBalancerProfile = models.get("ManagedClusterLoadBalancerProfile")
     profile = ManagedClusterLoadBalancerProfile()
-    return configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
+    return configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                            outbound_ports, idle_timeout, profile, models)
 
 
-def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes, outbound_ports,
+def configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes, outbound_ports,
                                     idle_timeout, profile, models):
     """configure a load balancer with customer supplied values"""
     if not profile:
         return profile
 
-    outbound_ip_resources = _get_load_balancer_outbound_ips(cmd, outbound_ips, models)
+    outbound_ip_resources = _get_load_balancer_outbound_ips(outbound_ips, models)
     outbound_ip_prefix_resources = _get_load_balancer_outbound_ip_prefixes(
-        cmd, outbound_ip_prefixes, models)
+        outbound_ip_prefixes, models)
 
     if managed_outbound_ip_count or outbound_ip_resources or outbound_ip_prefix_resources:
         # ips -> i_ps due to track 2 naming issue
@@ -103,7 +99,7 @@ def is_load_balancer_profile_provided(managed_outbound_ip_count, outbound_ips, i
                 idle_timeout])
 
 
-def _get_load_balancer_outbound_ips(cmd, load_balancer_outbound_ips, models):
+def _get_load_balancer_outbound_ips(load_balancer_outbound_ips, models):
     """parse load balancer profile outbound IP ids and return an array of references to the outbound IP resources"""
     load_balancer_outbound_ip_resources = None
     ResourceReference = models.get("ResourceReference")
@@ -114,7 +110,7 @@ def _get_load_balancer_outbound_ips(cmd, load_balancer_outbound_ips, models):
     return load_balancer_outbound_ip_resources
 
 
-def _get_load_balancer_outbound_ip_prefixes(cmd, load_balancer_outbound_ip_prefixes, models):
+def _get_load_balancer_outbound_ip_prefixes(load_balancer_outbound_ip_prefixes, models):
     """parse load balancer profile outbound IP prefix ids and return an array \
     of references to the outbound IP prefix resources"""
     load_balancer_outbound_ip_prefix_resources = None
