@@ -2486,7 +2486,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.exists('identityProfile'),
             self.check(
-                "identity.userAssignedIdentities | keys(@) | contains(@, '{}'')".format(
+                "identity.userAssignedIdentities | keys(@) | contains(@, '{}')".format(
                     self.kwargs.get("identity_resource_id")
                 ),
                 True,
