@@ -2,24 +2,16 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import importlib
 import unittest
 from unittest import mock
 
-from knack import CLI
-
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
-from azure.cli.core.cloud import get_active_cloud
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
-
-from azure.mgmt.containerservice.v2020_11_01.models import ManagedClusterLoadBalancerProfile
-from azure.mgmt.containerservice.v2020_11_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
-from azure.mgmt.containerservice.v2020_11_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
-from azure.mgmt.containerservice.v2020_11_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
-from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.acs import _loadbalancer as loadbalancer
 
+
 class TestLoadBalancer(unittest.TestCase):
-    
+
     def test_configure_load_balancer_profile(self):
         cmd = mock.MagicMock()
         managed_outbound_ip_count = 5
@@ -27,6 +19,38 @@ class TestLoadBalancer(unittest.TestCase):
         outbound_ip_prefixes = None
         outbound_ports = 80
         idle_timeout = 3600
+
+        # load models directly (instead of through the `get_sdk` method provided by the cli component)
+        from azure.cli.core.profiles._shared import AZURE_API_PROFILES
+        sdk_profile = AZURE_API_PROFILES["2020-09-01-hybrid"][
+            ResourceType.MGMT_CONTAINERSERVICE
+        ]
+        api_version = sdk_profile.default_api_version
+        module_name = "azure.mgmt.containerservice.v{}.models".format(
+            api_version.replace("-", "_")
+        )
+        module = importlib.import_module(module_name)
+
+        ManagedClusterLoadBalancerProfile = getattr(
+            module, "ManagedClusterLoadBalancerProfile"
+        )
+        ManagedClusterLoadBalancerProfileManagedOutboundIPs = getattr(
+            module, "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+        )
+        ManagedClusterLoadBalancerProfileOutboundIPs = getattr(
+            module, "ManagedClusterLoadBalancerProfileOutboundIPs"
+        )
+        ManagedClusterLoadBalancerProfileOutboundIPPrefixes = getattr(
+            module, "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+        )
+        ResourceReference = getattr(module, "ResourceReference")
+        lb_models = {
+            "ManagedClusterLoadBalancerProfile": ManagedClusterLoadBalancerProfile,
+            "ManagedClusterLoadBalancerProfileManagedOutboundIPs": ManagedClusterLoadBalancerProfileManagedOutboundIPs,
+            "ManagedClusterLoadBalancerProfileOutboundIPs": ManagedClusterLoadBalancerProfileOutboundIPs,
+            "ManagedClusterLoadBalancerProfileOutboundIPPrefixes": ManagedClusterLoadBalancerProfileOutboundIPPrefixes,
+            "ResourceReference": ResourceReference,
+        }
 
         profile = ManagedClusterLoadBalancerProfile()
         profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
@@ -39,8 +63,16 @@ class TestLoadBalancer(unittest.TestCase):
             public_ip_prefixes="public_ip_prefixes"
         )
 
-        p = loadbalancer.configure_load_balancer_profile(cmd,
-            managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes, outbound_ports, idle_timeout, profile)
+        p = loadbalancer.configure_load_balancer_profile(
+            cmd,
+            managed_outbound_ip_count,
+            outbound_ips,
+            outbound_ip_prefixes,
+            outbound_ports,
+            idle_timeout,
+            profile,
+            lb_models,
+        )
 
         self.assertIsNotNone(p.managed_outbound_i_ps)
         self.assertIsNone(p.outbound_i_ps)
