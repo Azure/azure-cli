@@ -354,8 +354,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # # TODO: remove when issue #9392 is addressed.
-    # @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -2528,7 +2526,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
     def test_aks_create_with_ingress_appgw_addon(self, resource_group, resource_group_location):
@@ -2769,8 +2766,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # # TODO: Remove when issue #9392 is addressed.
-    # @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_service_no_wait_msi(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
@@ -2856,8 +2851,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
-    # # TODO: remove when issue #9392 is addressed.
-    # @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
     def test_aks_create_scale_with_custom_nodepool_name_msi(self, resource_group, resource_group_location):
         create_version, _ = self._get_versions(resource_group_location)
@@ -2945,8 +2938,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('[0].scope', '{vnet_subnet_id}')
         ])
 
-    # # TODO: Remove when issue #9392 is addressed.
-    # @live_only()
     @AllowLargeResponse(8192)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default_service_with_skip_role_assignment_msi(self, resource_group, resource_group_location):
@@ -4439,7 +4430,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 'addonProfiles.ACCSGXDevicePlugin.config.ACCSGXQuoteHelperEnabled', "true")
         ])
 
-    # @live_only()  # without live only fails with need az login
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_enable_addons_confcom_addon(self, resource_group, resource_group_location):
@@ -4465,7 +4455,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 'addonProfiles.ACCSGXDevicePlugin.config.ACCSGXQuoteHelperEnabled', "false")
         ])
 
-    # @live_only()  # without live only fails with need az login
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_disable_addons_confcom_addon(self, resource_group, resource_group_location):
@@ -4757,7 +4746,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_enable_utlra_ssd(self, resource_group, resource_group_location):
@@ -5602,6 +5590,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    # @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
