@@ -145,6 +145,7 @@ DEPENDENCIES = [
     'pytz==2019.1',
     'scp~=0.13.2',
     'semver==2.13.0',
+    'six~=1.12',
     'sshtunnel~=0.1.4',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12'

@@ -74,18 +74,10 @@ def get_access_token(cmd, subscription=None, resource=None, scopes=None, resourc
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,
                                                         tenant=tenant)
 
-    token_entry = creds[2]
-    # MSIAuthentication's token entry has `expires_on`, while ADAL's token entry has `expiresOn`
-    # Unify to ISO `expiresOn`, like "2020-06-30 06:14:41"
-    if 'expires_on' in token_entry:
-        # https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
-        token_entry['expiresOn'] = _fromtimestamp(int(token_entry['expires_on']))\
-            .strftime("%Y-%m-%d %H:%M:%S.%f")
-
     result = {
         'tokenType': creds[0],
         'accessToken': creds[1],
-        'expiresOn': creds[2].get('expiresOn', 'N/A'),
+        'expiresOn': creds[2].get('expiresOn', None),
         'tenant': tenant
     }
     if subscription:

@@ -3,22 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import collections
-
 import os
 import os.path
-import re
 from copy import deepcopy
 from enum import Enum
 
+from azure.cli.core._session import ACCOUNT
+from azure.cli.core.auth.identity import Identity, AZURE_CLI_CLIENT_ID
+from azure.cli.core.auth.util import resource_to_scopes, can_launch_browser
+from azure.cli.core.azclierror import AuthenticationError
+from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.cli.core.util import in_cloud_console
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import in_cloud_console
-from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.auth import (Identity, ServicePrincipalStore, AZURE_CLI_CLIENT_ID,
-                                 resource_to_scopes, can_launch_browser)
-from azure.cli.core.azclierror import AuthenticationError
 
 logger = get_logger(__name__)
 
@@ -400,7 +397,6 @@ class Profile:
         else:
             credential = self._create_credential(account, tenant)
             token = credential.get_token(*scopes)
-            import datetime
 
             # BREAKING CHANGE
             # expires_on = datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -419,7 +415,6 @@ class Profile:
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
                               user_assigned_identity_id=None):
-        import sys
         consolidated = []
         for s in subscriptions:
             subscription_dict = {

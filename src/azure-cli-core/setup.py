@@ -47,7 +47,7 @@ DEPENDENCIES = [
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
     'azure-common~=1.1',
-    'azure-core==1.17.0',
+    'azure-core==1.18.0',
     'azure-mgmt-core==1.3.0b3',
     'cryptography>=3.2,<3.4',
     'humanfriendly>=4.7,<10.0',
@@ -59,7 +59,6 @@ DEPENDENCIES = [
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests[socks]~=2.25.1',
-    'six~=1.12',
     'urllib3[secure]>=1.26.5',
 ]
 
