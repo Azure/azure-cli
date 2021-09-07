@@ -494,8 +494,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
-    # # TODO: Remove when issue #9392 is addressed.
-    # @live_only()
+    # live only due to role assignment is not mocked
+    @live_only()
     @AllowLargeResponse(8192)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default_service_without_SP_and_with_role_assignment(self, resource_group, resource_group_location):
@@ -519,8 +519,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('[0].scope', '{vnet_subnet_id}')
         ])
 
-    # # TODO: Remove when issue #9392 is addressed.
-    # @live_only()
+    # live only due to workspace is not mocked
+    @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_monitoring_addon(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -2549,7 +2549,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 'addonProfiles.ingressApplicationGateway.config.subnetCIDR', "10.2.0.0/16")
         ])
 
-    # @live_only()
+    # live only due to role assignment is not mocked
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_byo_subnet_with_ingress_appgw_addon(self, resource_group, resource_group_location):
@@ -2605,7 +2606,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'addon_client_id': addon_client_id,
         })
 
-    # @live_only()
+    # live only due to role assignment is not mocked
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_byo_appgw_with_ingress_appgw_addon(self, resource_group, resource_group_location):
@@ -2915,8 +2917,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
-    # # TODO: Remove when issue #9392 is addressed.
-    # @live_only()
+    # live only due to role assignment is not mocked
+    @live_only()
     @AllowLargeResponse(8192)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default_service_without_skip_role_assignment_msi(self, resource_group, resource_group_location):
@@ -2969,8 +2971,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
-    # # TODO: Remove when issue #9392 is addressed.
-    # @live_only()
+    # live only due to workspace is not mocked
+    @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default_service_with_monitoring_addon_msi(self, resource_group, resource_group_location):
         # kwargs for string formatting
@@ -4638,7 +4640,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # @live_only()
+    # live only due to workspace is not mocked
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
     @AKSCustomRoleBasedServicePrincipalPreparer()
@@ -4700,7 +4703,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # @live_only()
+    # live only due to "could not grant Managed Identity Operator permission to cluster identity at scope ..."
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_custom_kubelet_identity(self, resource_group, resource_group_location):

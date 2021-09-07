@@ -191,7 +191,7 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
             # and ScenarioTest.create_random_name. This is so that when self.create_random_name is called for the
             # first time during live or playback, it would have the same value.
             # In short, the default sp preparer in live mode does not call moniker, which leads to inconsistent counts.
-            # _ = self.moniker
+            _ = self.moniker
 
             # When performing live test and recording, original sp and secret will be returned, but sp and secret would
             # be replaced by azure.cli.command_modules.acs.tests.latest.recording_processors.KeyReplacer with
