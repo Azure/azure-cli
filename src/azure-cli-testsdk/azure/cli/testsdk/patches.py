@@ -52,17 +52,6 @@ def patch_load_cached_subscriptions(unit_test):
                     "name": MOCKED_USER_NAME,
                     "type": "user"
                 }
-            },
-            {
-                "id": AUX_SUBSCRIPTION,
-                "state": "Enabled",
-                "name": "Azure CLI Tests with TTL = 2 Days",
-                "tenantId": AUX_TENANT,
-                "isDefault": False,
-                "user": {
-                    "name": MOCKED_USER_NAME,
-                    "type": "user"
-                }
             }
         ]
 
@@ -73,32 +62,21 @@ def patch_load_cached_subscriptions(unit_test):
 
 def patch_retrieve_token_for_user(unit_test):
 
-    class PublicClientApplicationMock:
+    class UserCredentialMock:
 
         def __init__(self, *args, **kwargs):
             pass
 
-        def get_accounts(self, username):
-            return [{
-                'home_account_id': '182c0000-0000-0000-0000-000000000000.54820000-0000-0000-0000-000000000000',
-                'environment': 'login.microsoftonline.com',
-                'realm': 'organizations',
-                'local_account_id': '182c0000-0000-0000-0000-000000000000',
-                'username': MOCKED_USER_NAME,
-                'authority_type': 'MSSTS'
-            }]
-
-    def _mock_get_token(*args, **kwargs):  # pylint: disable=unused-argument
-        from azure.core.credentials import AccessToken
-        import time
-        fake_raw_token = 'top-secret-token-for-you'
-        now = int(time.time())
-        # Mock sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:230
-        return AccessToken(fake_raw_token, now + 3600)
+        def get_token(*args, **kwargs):  # pylint: disable=unused-argument
+            from azure.core.credentials import AccessToken
+            import time
+            fake_raw_token = 'top-secret-token-for-you'
+            now = int(time.time())
+            # Mock sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:230
+            return AccessToken(fake_raw_token, now + 3600)
 
     # Creating a PublicClientApplication will trigger an HTTP request to validate the tenant. Patch it!
-    mock_in_unit_test(unit_test, 'msal.PublicClientApplication', PublicClientApplicationMock)
-    mock_in_unit_test(unit_test, 'azure.identity.InteractiveBrowserCredential.get_token', _mock_get_token)
+    mock_in_unit_test(unit_test, 'azure.cli.core.auth.identity.UserCredential', UserCredentialMock)
 
 
 def patch_long_run_operation_delay(unit_test):

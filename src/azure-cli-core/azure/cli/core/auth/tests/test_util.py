@@ -6,24 +6,10 @@
 # pylint: disable=protected-access
 
 import unittest
-from ..util import _extract_claims, scopes_to_resource, resource_to_scopes, _generate_login_command
+from ..util import scopes_to_resource, resource_to_scopes, _generate_login_command
 
 
 class TestUtil(unittest.TestCase):
-
-    def test_extract_claims(self):
-        challenge = 'Bearer ' \
-                    'authorization_uri="https://login.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", ' \
-                    'error="invalid_token", ' \
-                    'error_description="User session has been revoked", ' \
-                    'claims="eyJhY2Nlc3NfdG9rZW4iOnsibmJmIjp7ImVzc2VudGlhbCI6dHJ1ZSwgInZhbHVlIjoiMTYxODgyNjE0OSJ9fX0="'
-        expected = 'eyJhY2Nlc3NfdG9rZW4iOnsibmJmIjp7ImVzc2VudGlhbCI6dHJ1ZSwgInZhbHVlIjoiMTYxODgyNjE0OSJ9fX0='
-        result = _extract_claims(challenge)
-        assert expected == result
-
-        # Multiple www-authenticate headers
-        result = _extract_claims(', '.join((challenge, challenge)))
-        assert result is None
 
     def test_scopes_to_resource(self):
         # scopes as a list

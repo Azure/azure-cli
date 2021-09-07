@@ -3,15 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 import os
 import unittest
 from unittest import mock
 
-import msal_extensions.persistence
-from azure.cli.core.auth.identity import Identity, ServicePrincipalAuth, MsalSecretStore
+from azure.cli.core.auth.identity import Identity, ServicePrincipalAuth, ServicePrincipalStore
 from knack.util import CLIError
-from msal_extensions import FilePersistence
 
 
 class TestIdentity(unittest.TestCase):
@@ -56,10 +53,10 @@ class TestServicePrincipalAuth(unittest.TestCase):
 
 class TestMsalSecretStore(unittest.TestCase):
 
-    @mock.patch('azure.cli.core.auth.persistence.build_persistence', autospec=True)
-    def test_load_service_principal_secret(self, build_persistence_mock):
-        persistence = MemoryPersistence()
-        build_persistence_mock.return_value = persistence
+    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
+    def test_load_credential(self, load_secret_store_mock):
+        store = MemoryStore()
+        load_secret_store_mock.return_value = store
 
         test_sp = {
             'servicePrincipalId': 'myapp',
@@ -67,16 +64,16 @@ class TestMsalSecretStore(unittest.TestCase):
             'secret': 'Secret'
         }
 
-        secret_store = MsalSecretStore(None)
-        persistence._content = [test_sp]
+        secret_store = ServicePrincipalStore(None)
+        store._content = [test_sp]
 
         entry = secret_store.load_credential("myapp", "mytenant")
         self.assertEqual(entry['secret'], "Secret")
 
-    @mock.patch('azure.cli.core.auth.persistence.build_persistence', autospec=True)
-    def test_save_service_principal_secret(self, build_persistence_mock):
-        test_file = os.path.join(os.path.dirname(__file__), "test.json")
-        build_persistence_mock.return_value = FilePersistence(test_file)
+    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
+    def test_save_credential(self, load_secret_store_mock):
+        store = MemoryStore()
+        load_secret_store_mock.return_value = store
 
         test_sp = {
             'servicePrincipalId': 'myapp',
@@ -84,20 +81,16 @@ class TestMsalSecretStore(unittest.TestCase):
             'secret': 'Secret'
         }
 
-        secret_store = MsalSecretStore(test_file)
+        secret_store = ServicePrincipalStore(None)
         secret_store.save_credential(test_sp)
 
-        with open(test_file, 'r') as f:
-            result = json.load(f)
-        assert result[0] == test_sp
+        assert store._content == [test_sp]
 
-        try:
-            os.remove(test_file)
-        except:
-            pass
+    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
+    def test_save_credential_add_new(self, load_secret_store_mock):
+        store = MemoryStore()
+        load_secret_store_mock.return_value = store
 
-    @mock.patch('azure.cli.core.auth.persistence.build_persistence', autospec=True)
-    def test_credscache_add_new_sp_creds(self, build_persistence_mock):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -108,141 +101,58 @@ class TestMsalSecretStore(unittest.TestCase):
             "servicePrincipalTenant": "mytenant2",
             "secret": "Secret2"
         }
-        mock_open_for_write1.return_value = None
-        mock_open_for_write2.return_value = None
-        mock_open_for_write3.return_value = None
-        mock_read_file1.return_value = json.dumps([test_sp])
-        mock_read_file2.return_value = json.dumps([test_sp])
-        mock_read_file3.return_value = json.dumps([test_sp])
-        from azure.cli.core._identity import MsalSecretStore
-        creds_cache = MsalSecretStore()
 
-        # action
-        creds_cache.save_credential(test_sp2)
+        store._content = [test_sp]
+        secret_store = ServicePrincipalStore(None)
+        secret_store.save_credential(test_sp2)
+        assert store._content == [test_sp, test_sp2]
 
-        # assert
-        self.assertEqual(creds_cache._service_principal_creds, [test_sp, test_sp2])
+    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
+    def test_save_credential_update_existing(self, load_secret_store_mock):
+        store = MemoryStore()
+        load_secret_store_mock.return_value = store
 
-    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
-    @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
-    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
-    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.save', autospec=True)
-    @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
-    @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
-    def test_credscache_add_preexisting_sp_creds(self, mock_open_for_write1, mock_open_for_write2, mock_open_for_write3,
-                                                 mock_read_file1, mock_read_file2, mock_read_file3):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
             "accessToken": "Secret"
         }
-        mock_open_for_write1.return_value = None
-        mock_open_for_write2.return_value = None
-        mock_open_for_write3.return_value = None
-        mock_read_file1.return_value = json.dumps([test_sp])
-        mock_read_file2.return_value = json.dumps([test_sp])
-        mock_read_file3.return_value = json.dumps([test_sp])
-        from azure.cli.core._identity import MsalSecretStore
-        creds_cache = MsalSecretStore()
 
-        # action
-        creds_cache.save_credential(test_sp)
-
-        # assert
-        self.assertEqual(creds_cache._service_principal_creds, [test_sp])
-
-    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
-    @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
-    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
-    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.save', autospec=True)
-    @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
-    @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
-    def test_credscache_add_preexisting_sp_new_secret(self, mock_open_for_write1, mock_open_for_write2,
-                                                      mock_open_for_write3, mock_read_file1,
-                                                      mock_read_file2, mock_read_file3):
-        test_sp = {
-            "servicePrincipalId": "myapp",
-            "servicePrincipalTenant": "mytenant",
-            "accessToken": "Secret"
-        }
-        mock_open_for_write1.return_value = None
-        mock_open_for_write2.return_value = None
-        mock_open_for_write3.return_value = None
-        mock_read_file1.return_value = json.dumps([test_sp])
-        mock_read_file2.return_value = json.dumps([test_sp])
-        mock_read_file3.return_value = json.dumps([test_sp])
-        from azure.cli.core._identity import MsalSecretStore
-        creds_cache = MsalSecretStore()
+        store._content = [test_sp]
         new_creds = test_sp.copy()
         new_creds['accessToken'] = 'Secret2'
-        # action
-        creds_cache.save_credential(new_creds)
 
-        # assert
-        self.assertEqual(creds_cache._service_principal_creds, [new_creds])
+        secret_store = ServicePrincipalStore(None)
+        secret_store.save_credential(new_creds)
+        assert store._content == [new_creds]
 
-    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
-    @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
-    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
-    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.save', autospec=True)
-    @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
-    @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
-    def test_credscache_remove_creds(self, mock_open_for_write1, mock_open_for_write2, mock_open_for_write3,
-                                     mock_read_file1, mock_read_file2, mock_read_file3):
+    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
+    def test_remove_credential(self, load_secret_store_mock):
+        store = MemoryStore()
+        load_secret_store_mock.return_value = store
+
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
             "accessToken": "Secret"
         }
-        mock_open_for_write1.return_value = None
-        mock_open_for_write2.return_value = None
-        mock_open_for_write3.return_value = None
-        mock_read_file1.return_value = json.dumps([test_sp])
-        mock_read_file2.return_value = json.dumps([test_sp])
-        mock_read_file3.return_value = json.dumps([test_sp])
-        from azure.cli.core._identity import MsalSecretStore
-        creds_cache = MsalSecretStore()
 
-        # action logout a service principal
-        creds_cache.remove_credential('myapp')
-
-        # assert
-        self.assertEqual(creds_cache._service_principal_creds, [])
-
-    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
-    @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
-    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
-    def test_credscache_good_error_on_file_corruption(self, mock_read_file1, mock_read_file2, mock_read_file3):
-        mock_read_file1.side_effect = ValueError('a bad error for you')
-        mock_read_file2.side_effect = ValueError('a bad error for you')
-        mock_read_file3.side_effect = ValueError('a bad error for you')
-
-        from azure.cli.core._identity import MsalSecretStore
-        creds_cache = MsalSecretStore()
-
-        # assert
-        with self.assertRaises(CLIError) as context:
-            creds_cache._load_persistence()
-
-        self.assertTrue(re.findall(r'bad error for you', str(context.exception)))
+        store._content = [test_sp]
+        secret_store = ServicePrincipalStore(None)
+        secret_store.remove_credential('myapp')
+        assert store._content == []
 
 
-class MemoryPersistence(msal_extensions.persistence.BasePersistence):
+class MemoryStore:
 
     def __init__(self):
-        self._content = None
+        self._content = []
 
     def save(self, content):
         self._content = content
 
     def load(self):
         return self._content
-
-    def time_last_modified(self):
-        pass
-
-    def get_location(self):
-        pass
 
 
 if __name__ == '__main__':

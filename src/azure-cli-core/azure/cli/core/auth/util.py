@@ -17,7 +17,7 @@ def aad_error_handler(error, **kwargs):
     login_message = _generate_login_message(**kwargs)
 
     from azure.cli.core.azclierror import AuthenticationError
-    raise AuthenticationError(msg, recommendation=login_message)
+    raise AuthenticationError(msg, recommendation=login_message, msal_result=error)
 
 
 def _generate_login_command(scopes=None, claims=None):
@@ -167,28 +167,3 @@ def decode_claims(claims: str):
         pass
 
     return claims
-
-
-def handle_response_401_track1(response):
-    """Generate recommendation when ARM returns 401 to Track 1 SDK."""
-    challenge = response.response.headers.get('WWW-Authenticate')
-    claims = _extract_claims(challenge)
-
-    recommendation = (
-        "The access token has expired or been revoked by Continuous Access Evaluation. "
-        "Silent re-authentication will be attempted in the future.\n{}")
-    login_message = _generate_login_message(claims=claims)
-    return recommendation.format(login_message)
-
-
-def _extract_claims(challenge):
-    # Copied from azure.mgmt.core.policies._authentication._parse_claims_challenge
-    from azure.mgmt.core.policies._authentication import _parse_challenges
-    parsed_challenges = _parse_challenges(challenge)
-    if len(parsed_challenges) != 1 or "claims" not in parsed_challenges[0].parameters:
-        # no or multiple challenges, or no claims directive
-        return None
-
-    encoded_claims = parsed_challenges[0].parameters["claims"]
-    padding_needed = -len(encoded_claims) % 4
-    return encoded_claims + "=" * padding_needed

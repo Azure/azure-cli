@@ -16,8 +16,9 @@ from knack.util import CLIError
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import in_cloud_console
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.auth import (Identity, MsalSecretStore, AZURE_CLI_CLIENT_ID,
+from azure.cli.core.auth import (Identity, ServicePrincipalStore, AZURE_CLI_CLIENT_ID,
                                  resource_to_scopes, can_launch_browser)
+from azure.cli.core.azclierror import AuthenticationError
 
 logger = get_logger(__name__)
 
@@ -615,11 +616,11 @@ class Profile:
 
         raise NotImplementedError
 
-    def refresh_accounts(self, subscription_finder=None):
+    def refresh_accounts(self):
         subscriptions = self.load_cached_subscriptions()
         to_refresh = subscriptions
 
-        subscription_finder = subscription_finder or SubscriptionFinder(self.cli_ctx)
+        subscription_finder = SubscriptionFinder(self.cli_ctx)
         refreshed_list = set()
         result = []
         for s in to_refresh:
@@ -636,8 +637,7 @@ class Profile:
                     subscriptions = subscription_finder.find_using_specific_tenant(tenant, identity_credential)
                 else:
                     # pylint: disable=protected-access
-                    subscriptions = subscription_finder. \
-                        find_using_common_tenant(user_name, identity_credential)  # pylint: disable=protected-access
+                    subscriptions = subscription_finder.find_using_common_tenant(user_name, identity_credential)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
                                "modified. You can run 'az login' later to explicitly refresh them", user_name, ex)
@@ -657,52 +657,6 @@ class Profile:
             result += consolidated
 
         self._set_subscriptions(result, merge=False)
-
-    def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
-        # TODO: Use MSAL
-        from collections import OrderedDict
-        account = self.get_subscription(subscription_id)
-
-        # is the credential created through command like 'create-for-rbac'?
-        result = OrderedDict()
-        if name and (password or cert_file):
-            result['clientId'] = name
-            if password:
-                result['clientSecret'] = password
-            else:
-                result['clientCertificate'] = cert_file
-            result['subscriptionId'] = subscription_id or account[_SUBSCRIPTION_ID]
-        else:  # has logged in through cli
-            user_type = account[_USER_ENTITY].get(_USER_TYPE)
-            if user_type == _SERVICE_PRINCIPAL:
-                result['clientId'] = account[_USER_ENTITY][_USER_NAME]
-                msal_cache = MsalSecretStore(True)
-                secret, certificate_file = msal_cache.load_credential(
-                    account[_USER_ENTITY][_USER_NAME], account[_TENANT_ID])
-                if secret:
-                    result['clientSecret'] = secret
-                else:
-                    # we can output 'clientCertificateThumbprint' if asked
-                    result['clientCertificate'] = certificate_file
-                result['subscriptionId'] = account[_SUBSCRIPTION_ID]
-            else:
-                raise CLIError('SDK Auth file is only applicable when authenticated using a service principal')
-
-        result[_TENANT_ID] = account[_TENANT_ID]
-        endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
-        endpoint_mappings['active_directory'] = 'activeDirectoryEndpointUrl'
-        endpoint_mappings['resource_manager'] = 'resourceManagerEndpointUrl'
-        endpoint_mappings['active_directory_graph_resource_id'] = 'activeDirectoryGraphResourceId'
-        endpoint_mappings['sql_management'] = 'sqlManagementEndpointUrl'
-        endpoint_mappings['gallery'] = 'galleryEndpointUrl'
-        endpoint_mappings['management'] = 'managementEndpointUrl'
-        from azure.cli.core.cloud import CloudEndpointNotSetException
-        for e in endpoint_mappings:
-            try:
-                result[endpoint_mappings[e]] = getattr(get_active_cloud(self.cli_ctx).endpoints, e)
-            except CloudEndpointNotSetException:
-                result[endpoint_mappings[e]] = None
-        return result
 
     def get_installation_id(self):
         installation_id = self._storage.get(_INSTALLATION_ID)
@@ -784,24 +738,22 @@ class SubscriptionFinder:
             identity = Identity(self.authority, tenant_id,
                                 allow_unencrypted=self.cli_ctx.config
                                 .getboolean('core', 'allow_fallback_to_plaintext', fallback=True))
+
+            specific_tenant_credential = identity.get_user_credential(username)
+
             try:
-                specific_tenant_credential = identity.get_user_credential(username)
-            # TODO: handle MSAL exceptions
-            except adal.AdalError as ex:
+                subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential)
+            except AuthenticationError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
                 # with other tenants.
-                msg = (getattr(ex, 'error_response', None) or {}).get('error_description') or ''
+                msg = ex.error_msg
                 if 'AADSTS50076' in msg:
                     # The tenant requires MFA and can't be accessed with home tenant's refresh token
                     mfa_tenants.append(t)
                 else:
                     logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
-
-            subscriptions = self.find_using_specific_tenant(
-                tenant_id,
-                specific_tenant_credential)
 
             if not subscriptions:
                 empty_tenants.append(t)

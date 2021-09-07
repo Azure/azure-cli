@@ -59,7 +59,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         self._msal_app_instance = None
         # Store for Service principal credential persistence
-        self._msal_secret_store = MsalSecretStore(self._secret_file, fallback_to_plaintext=self._fallback_to_plaintext)
+        self._msal_secret_store = ServicePrincipalStore(self._secret_file, fallback_to_plaintext=self._fallback_to_plaintext)
         self._msal_app_kwargs = {
             "authority": self.msal_authority,
             "token_cache": self._load_msal_cache(),
@@ -252,13 +252,14 @@ class ServicePrincipalAuth:   # pylint: disable=too-few-public-methods
         return entry
 
 
-class MsalSecretStore:
+class ServicePrincipalStore:
     """Caches secrets in MSAL custom secret store for Service Principal authentication.
     """
 
-    def __init__(self, secret_file, fallback_to_plaintext=True):
+    def __init__(self, secret_file=None, fallback_to_plaintext=True):
+        from .persistence import load_secret_store
+        self._secret_store = load_secret_store(secret_file, fallback_to_plaintext)
         self._secret_file = secret_file
-        self._lock_file = self._secret_file + '.lock'
         self._service_principal_creds = []
         self._fallback_to_plaintext = fallback_to_plaintext
 
@@ -300,7 +301,6 @@ class MsalSecretStore:
 
         if state_changed:
             self._save_persistence()
-        self._serialize_secrets()
 
     def remove_credential(self, sp_id):
         self._load_persistence()
@@ -324,26 +324,10 @@ class MsalSecretStore:
             pass
 
     def _save_persistence(self):
-        from .persistence import build_persistence
-        persistence = build_persistence(self._secret_file)
-        from msal_extensions import CrossPlatLock
-        with CrossPlatLock(self._lock_file):
-            persistence.save(json.dumps(self._service_principal_creds))
+        self._secret_store.save(self._service_principal_creds)
 
     def _load_persistence(self):
-        from .persistence import build_persistence
-        persistence = build_persistence(self._secret_file)
-        from msal_extensions import CrossPlatLock
-        from msal_extensions.persistence import PersistenceNotFound
-        with CrossPlatLock(self._lock_file):
-            try:
-                self._service_principal_creds = json.loads(persistence.load())
-            except PersistenceNotFound:
-                pass
-            except Exception as ex:
-                raise CLIError("Failed to load token files. If you can reproduce, please log an issue at "
-                               "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
-                               "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+        self._service_principal_creds = self._secret_store.load()
 
     def _serialize_secrets(self):
         # ONLY FOR DEBUGGING PURPOSE. DO NOT USE IN PRODUCTION CODE.
