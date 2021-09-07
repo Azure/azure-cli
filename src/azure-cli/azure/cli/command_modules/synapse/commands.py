@@ -318,6 +318,8 @@ def load_command_table(self, _):
         g.custom_command('self-hosted create', 'Selfhosted_Create', supports_no_wait=True)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('update', 'update')
+        g.command('start', 'begin_start', supports_no_wait=True)
+        g.command('stop', 'begin_stop', confirmation=True, supports_no_wait=True)
         g.command('upgrade', 'upgrade')
         g.command('list-auth-key', 'list', command_type=synapse_integrationruntimeauthkeys_sdk,
                   client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)

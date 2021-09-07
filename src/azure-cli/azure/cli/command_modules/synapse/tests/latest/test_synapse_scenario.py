@@ -1265,14 +1265,15 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    #@record_only()
+    @record_only()
     def test_integration_runtime(self):
         self.kwargs.update({
             'rg': 'chayang-test-rg',
             'workspace': 'zes0219test',
             'name': 'integrationruntime',
             'selfhosted-name': 'selfhostedir',
-            'selfhosted-integration-runtime': 'IntegrationRuntime0219selfhosted0507'})
+            'selfhosted-integration-runtime': 'IntegrationRuntime0219selfhosted0507',
+            'ssisirname':'testssisir'})
 
         # create managed integration runtime
         self.cmd(
@@ -1287,7 +1288,6 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('name', self.kwargs['selfhosted-name'])
             ])
-
 
         # get integration runtime
         self.cmd(
@@ -1361,8 +1361,8 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse integration-runtime sync-credentials --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
 
         # get connection info
-        self.cmd(
-            'az synapse integration-runtime get-connection-info --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+        #self.cmd(
+        #    'az synapse integration-runtime get-connection-info --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
 
         # get status
         self.cmd(
@@ -1370,6 +1370,15 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
+
+        # start/stop ssis integration runtime
+        self.cmd(
+            'az synapse integration-runtime start --resource-group {rg} --workspace-name {workspace} --name {ssisirname}',
+            checks=[
+                self.check('properties.state', 'Started')
+            ])
+        self.cmd(
+            'az synapse integration-runtime stop --resource-group {rg} --workspace-name {workspace} --name {ssisirname} -y')
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)

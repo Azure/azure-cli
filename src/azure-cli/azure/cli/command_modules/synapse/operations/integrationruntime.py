@@ -50,3 +50,4 @@ def update(cmd, client, resource_group_name, workspace_name, integration_runtime
     )
     return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, integration_runtime_name,
                        update_integration_runtime_request)
+

@@ -691,7 +691,7 @@ def load_arguments(self, _):
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part=None)
 
-    for scope in ['show', 'managed create', 'self-hosted create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status']:
+    for scope in ['show', 'managed create', 'self-hosted create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status', 'start', 'stop']:
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
 

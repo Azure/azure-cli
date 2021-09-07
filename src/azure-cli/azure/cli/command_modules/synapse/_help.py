@@ -1644,6 +1644,26 @@ examples:
           --name selfhostedintegrationruntime
 """
 
+helps['synapse integration-runtime start'] = """
+type: command
+short-summary: start an SSIS integration runtime.
+examples:
+  - name: start an SSIS integration runtime.
+    text: |-
+        az synapse integration-runtime start --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime stop'] = """
+type: command
+short-summary: stop an SSIS integration runtime.
+examples:
+  - name: stop an SSIS integration runtime.
+    text: |-
+        az synapse integration-runtime stop --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
 helps['synapse integration-runtime-node'] = """
 type: group
 short-summary: Manage Synapse's self-hosted integration runtime nodes.
