@@ -702,6 +702,8 @@ class AKSCreateContext:
     def get_nodepool_name(self, **kwargs) -> str:
         """Dynamically obtain the value of nodepool_name according to the context.
 
+        Note: SDK performs the following validation {'required': True, 'pattern': r'^[a-z][a-z0-9]{0,11}$'}.
+
         When additional option enable_trim is enabled, dynamic completion will be triggerd.
 
         This function supports the option of enable_trim. When enabled, it will normalize the value of nodepool_name.
@@ -1102,6 +1104,7 @@ class AKSCreateContext:
         """Obtain the value of node_osdisk_size.
 
         Note: int 0 is converted to None.
+        Note: SDK performs the following validation {'maximum': 2048, 'minimum': 0}.
 
         :return: int or None
         """
@@ -1338,6 +1341,8 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_admin_username(self, **kwargs) -> str:
         """Obtain the value of admin_username.
+
+        Note: SDK performs the following validation {'required': True, 'pattern': r'^[A-Za-z][-A-Za-z0-9_]*$'}.
 
         :return: str
         """
@@ -1714,6 +1719,8 @@ class AKSCreateContext:
     def get_load_balancer_managed_outbound_ip_count(self, **kwargs) -> Union[int, None]:
         """Obtain the value of load_balancer_managed_outbound_ip_count.
 
+        Note: SDK performs the following validation {'maximum': 100, 'minimum': 1}.
+
         :return: int or None
         """
         # read the original value passed by the command
@@ -1739,6 +1746,8 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_load_balancer_outbound_ips(self, **kwargs) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ips.
+
+        Note: SDK performs the following validation {'maximum': 16, 'minimum': 1}.
 
         :return: string, list of ResourceReference, or None
         """
@@ -1792,6 +1801,8 @@ class AKSCreateContext:
     def get_load_balancer_outbound_ports(self, **kwargs) -> Union[int, None]:
         """Obtain the value of load_balancer_outbound_ports.
 
+        Note: SDK performs the following validation {'maximum': 64000, 'minimum': 0}.
+
         :return: int or None
         """
         # read the original value passed by the command
@@ -1817,6 +1828,8 @@ class AKSCreateContext:
     def get_load_balancer_idle_timeout(self, **kwargs) -> Union[int, None]:
         """Obtain the value of load_balancer_idle_timeout.
 
+        Note: SDK performs the following validation {'maximum': 120, 'minimum': 4}.
+
         :return: int or None
         """
         # read the original value passed by the command
@@ -1840,7 +1853,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_outbound_type(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
-        """Obtain the value of outbound_type.
+        """Dynamically obtain the value of outbound_type according to the context.
 
         Note: The parameters involved in the validation are not verified in their own getters.
 
@@ -1921,6 +1934,15 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_network_plugin(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Obtain the value of network_plugin.
+
+        This function supports the option of enable_validation. When enabled, in case network_plugin is assigned, if
+        pod_cidr is assigned and the value of network_plugin is azure, a MutuallyExclusiveArgumentError will be
+        raised; otherwise, if any of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address or network_policy
+        is assigned, a RequiredArgumentMissingError will be raised.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         network_plugin = self.raw_param.get("network_plugin")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1955,6 +1977,17 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_pod_cidr(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Obtain the value of pod_cidr.
+
+        Note: SDK performs the following validation
+        {'pattern': r'^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
+
+        This function supports the option of enable_validation. When enabled, if pod_cidr is assigned but
+        network_plugin is not assigned or its value equals to azure a RequiredArgumentMissingError or
+        MutuallyExclusiveArgumentError will be raised respectively.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         pod_cidr = self.raw_param.get("pod_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1983,6 +2016,16 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_service_cidr(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Obtain the value of service_cidr.
+
+        Note: SDK performs the following validation
+        {'pattern': r'^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
+
+        This function supports the option of enable_validation. When enabled, if service_cidr is assigned but
+        network_plugin is not assigned a RequiredArgumentMissingError will be raised.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         service_cidr = self.raw_param.get("service_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2007,6 +2050,16 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_dns_service_ip(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Obtain the value of dns_service_ip.
+
+        Note: SDK performs the following validation
+        {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}.
+
+        This function supports the option of enable_validation. When enabled, if dns_service_ip is assigned but
+        network_plugin is not assigned a RequiredArgumentMissingError will be raised.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         dns_service_ip = self.raw_param.get("dns_service_ip")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2031,6 +2084,16 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_docker_bridge_address(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Obtain the value of docker_bridge_address.
+
+        Note: SDK performs the following validation
+        {'pattern': r'^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
+
+        This function supports the option of enable_validation. When enabled, if docker_bridge_cidr is assigned but
+        network_plugin is not assigned a RequiredArgumentMissingError will be raised.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         docker_bridge_address = self.raw_param.get("docker_bridge_address")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2056,6 +2119,13 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_network_policy(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Obtain the value of corresponding.
+
+        This function supports the option of enable_validation. When enabled, if network_policy is assigned but
+        network_plugin is not assigned a RequiredArgumentMissingError will be raised.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         network_policy = self.raw_param.get("network_policy")
         # try to read the property value corresponding to the parameter from the `mc` object
