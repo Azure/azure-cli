@@ -496,13 +496,8 @@ class AKSCreateContext:
         if kwargs.get("read_only"):
             return location
 
-        dynamic_completion = False
-        # check whether the parameter meet the conditions of dynamic completion
-        if location is None:
-            dynamic_completion = True
-        # disable dynamic completion if the value is read from `mc`
-        dynamic_completion = dynamic_completion and not read_from_mc
-        if dynamic_completion:
+        # dynamic completion
+        if not read_from_mc and location is None:
             location = _get_rg_location(
                 self.cmd.cli_ctx, self.get_resource_group_name()
             )
@@ -592,11 +587,9 @@ class AKSCreateContext:
         if kwargs.get("read_only"):
             return vm_set_type
 
+        # dynamic completion
         # the value verified by the validator may have case problems, and function "_set_vm_set_type" will adjust it
-        dynamic_completion = True
-        # disable dynamic completion if the value is read from `mc`
-        dynamic_completion = dynamic_completion and not read_from_mc
-        if dynamic_completion:
+        if not read_from_mc:
             vm_set_type = _set_vm_set_type(
                 vm_set_type=vm_set_type,
                 kubernetes_version=self.get_kubernetes_version(),
@@ -642,13 +635,8 @@ class AKSCreateContext:
         if kwargs.get("read_only"):
             return load_balancer_sku
 
-        dynamic_completion = False
-        # check whether the parameter meet the conditions of dynamic completion
-        if not load_balancer_sku:
-            dynamic_completion = True
-        # disable dynamic completion if the value is read from `mc`
-        dynamic_completion = dynamic_completion and not read_from_mc
-        if dynamic_completion:
+        # dynamic completion
+        if not read_from_mc and load_balancer_sku is None:
             load_balancer_sku = safe_lower(
                 set_load_balancer_sku(
                     sku=load_balancer_sku,
@@ -771,13 +759,8 @@ class AKSCreateContext:
         else:
             nodepool_name = raw_value
 
-        dynamic_completion = False
-        # check whether the parameter meet the conditions of dynamic completion
-        if kwargs.get("enable_trim", False):
-            dynamic_completion = True
-        # disable dynamic completion if the value is read from `mc`
-        dynamic_completion = dynamic_completion and not read_from_mc
-        if dynamic_completion:
+        # dynamic completion
+        if not read_from_mc and kwargs.get("enable_trim", False):
             if not nodepool_name:
                 nodepool_name = "nodepool1"
             else:
@@ -1996,13 +1979,8 @@ class AKSCreateContext:
         if kwargs.get("read_only"):
             return outbound_type
 
-        dynamic_completion = False
-        # check whether the parameter meet the conditions of dynamic completion
-        if outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
-            dynamic_completion = True
-        # disable dynamic completion if the value is read from `mc`
-        dynamic_completion = dynamic_completion and not read_from_mc
-        if dynamic_completion:
+        # dynamic completion
+        if not read_from_mc and outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
             outbound_type = CONST_OUTBOUND_TYPE_LOAD_BALANCER
 
         # validation
