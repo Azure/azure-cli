@@ -1980,7 +1980,7 @@ class AKSCreateContext:
         """Obtain the value of pod_cidr.
 
         Note: SDK performs the following validation
-        {'pattern': r'^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
 
         This function supports the option of enable_validation. When enabled, if pod_cidr is assigned but
         network_plugin is not assigned or its value equals to azure a RequiredArgumentMissingError or
@@ -2019,7 +2019,7 @@ class AKSCreateContext:
         """Obtain the value of service_cidr.
 
         Note: SDK performs the following validation
-        {'pattern': r'^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
 
         This function supports the option of enable_validation. When enabled, if service_cidr is assigned but
         network_plugin is not assigned a RequiredArgumentMissingError will be raised.
@@ -2053,7 +2053,7 @@ class AKSCreateContext:
         """Obtain the value of dns_service_ip.
 
         Note: SDK performs the following validation
-        {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}.
+        {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}.
 
         This function supports the option of enable_validation. When enabled, if dns_service_ip is assigned but
         network_plugin is not assigned a RequiredArgumentMissingError will be raised.
@@ -2087,7 +2087,7 @@ class AKSCreateContext:
         """Obtain the value of docker_bridge_address.
 
         Note: SDK performs the following validation
-        {'pattern': r'^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
 
         This function supports the option of enable_validation. When enabled, if docker_bridge_cidr is assigned but
         network_plugin is not assigned a RequiredArgumentMissingError will be raised.
