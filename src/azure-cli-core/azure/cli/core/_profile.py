@@ -172,41 +172,35 @@ class Profile:
         if user_identity:
             username = user_identity['username']
 
-        # List tenants and find subscriptions by calling ARM
-        if find_subscriptions:
-            subscription_finder = SubscriptionFinder(self.cli_ctx)
+        subscription_finder = SubscriptionFinder(self.cli_ctx)
 
-            # Create credentials
-            if user_identity:
-                credential = identity.get_user_credential(username)
-            else:
-                credential = identity.get_service_principal_credential(username)
-
-            if tenant:
-                subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
-            else:
-                subscriptions = subscription_finder.find_using_common_tenant(username, credential)
-
-            if not subscriptions and not allow_no_subscriptions:
-                if username:
-                    msg = "No subscriptions found for {}.".format(username)
-                else:
-                    # Don't show username if bare 'az login' is used
-                    msg = "No subscriptions found."
-                raise CLIError(msg)
-
-            if allow_no_subscriptions:
-                t_list = [s.tenant_id for s in subscriptions]
-                bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
-                profile = Profile(cli_ctx=self.cli_ctx)
-                tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
-                subscriptions.extend(tenant_accounts)
-                if not subscriptions:
-                    return []
+        # Create credentials
+        if user_identity:
+            credential = identity.get_user_credential(username)
         else:
-            # Build a tenant account
-            bare_tenant = tenant or user_identity['tenantId']
-            subscriptions = self._build_tenant_level_accounts([bare_tenant])
+            credential = identity.get_service_principal_credential(username)
+
+        if tenant:
+            subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
+        else:
+            subscriptions = subscription_finder.find_using_common_tenant(username, credential)
+
+        if not subscriptions and not allow_no_subscriptions:
+            if username:
+                msg = "No subscriptions found for {}.".format(username)
+            else:
+                # Don't show username if bare 'az login' is used
+                msg = "No subscriptions found."
+            raise CLIError(msg)
+
+        if allow_no_subscriptions:
+            t_list = [s.tenant_id for s in subscriptions]
+            bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
+            profile = Profile(cli_ctx=self.cli_ctx)
+            tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
+            subscriptions.extend(tenant_accounts)
+            if not subscriptions:
+                return []
 
         consolidated = self._normalize_properties(username, subscriptions,
                                                   is_service_principal, bool(use_cert_sn_issuer))
@@ -423,7 +417,7 @@ class Profile:
                 str(tenant if tenant else account[_TENANT_ID]))
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
-                              user_assigned_identity_id=None, managed_identity_info=None):
+                              user_assigned_identity_id=None):
         import sys
         consolidated = []
         for s in subscriptions:
@@ -443,16 +437,13 @@ class Profile:
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
                 _transform_subscription_for_multiapi(s, subscription_dict)
 
-            if cert_sn_issuer_auth:
-                subscription_dict[_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
+            consolidated.append(subscription_dict)
 
-            # This will be deprecated and client_id will be the only persisted ID
             if cert_sn_issuer_auth:
                 consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
             if user_assigned_identity_id:
                 consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
 
-            consolidated.append(subscription_dict)
         return consolidated
 
     def _build_tenant_level_accounts(self, tenants):
@@ -846,7 +837,6 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def find_using_specific_tenant(self, tenant, credential):
-        from azure.cli.core.auth import CredentialAdaptor
         client = self._create_subscription_client(credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []

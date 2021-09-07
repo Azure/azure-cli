@@ -341,7 +341,7 @@ class MsalSecretStore:
             except PersistenceNotFound:
                 pass
             except Exception as ex:
-                raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
+                raise CLIError("Failed to load token files. If you can reproduce, please log an issue at "
                                "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
                                "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
 
