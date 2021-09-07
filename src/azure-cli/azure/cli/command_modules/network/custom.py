@@ -704,11 +704,15 @@ def show_trusted_client_certificate(cmd, resource_group_name, application_gatewa
     ncf = network_client_factory(cmd.cli_ctx)
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
 
+    instance = None
     for cert in appgw.trusted_client_certificates:
         if cert.name == client_cert_name:
-            return cert
+            instance = cert
+            break
     else:
         raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
+
+    return instance
 
 
 def show_ag_backend_health(cmd, client, resource_group_name, application_gateway_name, expand=None,
@@ -823,7 +827,7 @@ def update_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_p
     if client_auth_configuration is not None:
         ApplicationGatewayClientAuthConfiguration = cmd.get_models('ApplicationGatewayClientAuthConfiguration')
         instance.client_auth_configuration = ApplicationGatewayClientAuthConfiguration(
-            verify_client_cert_issuer_dn=False if client_auth_configuration == 'False' else True
+            verify_client_cert_issuer_dn=(client_auth_configuration == 'True')
         )
 
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
@@ -855,11 +859,14 @@ def show_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_pro
     ncf = network_client_factory(cmd.cli_ctx)
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
 
+    instance = None
     for profile in appgw.ssl_profiles:
         if profile.name == ssl_profile_name:
-            return profile
+            instance = profile
+            break
     else:
         raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
+    return instance
 
 # endregion
 
