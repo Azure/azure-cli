@@ -424,19 +424,12 @@ class AKSCreateContext:
         :return: string or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("dns_name_prefix")
+        dns_name_prefix = self.raw_param.get("dns_name_prefix")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc:
-            value_obtained_from_mc = self.mc.dns_prefix
-
-        # set default value
         read_from_mc = False
-        if value_obtained_from_mc is not None:
-            dns_name_prefix = value_obtained_from_mc
+        if self.mc and self.mc.dns_prefix:
+            dns_name_prefix = self.mc.dns_prefix
             read_from_mc = True
-        else:
-            dns_name_prefix = raw_value
 
         # skip dynamic completion & validation if option read_only is specified
         if kwargs.get("read_only"):
@@ -478,19 +471,12 @@ class AKSCreateContext:
         :return: string
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("location")
+        location = self.raw_param.get("location")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc:
-            value_obtained_from_mc = self.mc.location
-
-        # set default value
         read_from_mc = False
-        if value_obtained_from_mc is not None:
-            location = value_obtained_from_mc
+        if self.mc and self.mc.location:
+            location = self.mc.location
             read_from_mc = True
-        else:
-            location = raw_value
 
         # skip dynamic completion & validation if option read_only is specified
         if kwargs.get("read_only"):
@@ -512,17 +498,10 @@ class AKSCreateContext:
         :return: string
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("kubernetes_version")
+        kubernetes_version = self.raw_param.get("kubernetes_version")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc:
-            value_obtained_from_mc = self.mc.kubernetes_version
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            kubernetes_version = value_obtained_from_mc
-        else:
-            kubernetes_version = raw_value
+        if self.mc and self.mc.kubernetes_version:
+            kubernetes_version = self.mc.kubernetes_version
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -604,7 +583,7 @@ class AKSCreateContext:
     ) -> Union[str, None]:
         """Dynamically obtain the value of load_balancer_sku according to the context.
 
-        Note: Return lowercase string.
+        Note: When returning a string, it will always be lowercase.
 
         When load_balancer_sku is not assigned, dynamic completion will be triggerd. Function "set_load_balancer_sku"
         will be called and the corresponding load balancer sku will be returned according to the value of
@@ -617,19 +596,18 @@ class AKSCreateContext:
         :return: string or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("load_balancer_sku")
+        load_balancer_sku = safe_lower(self.raw_param.get("load_balancer_sku"))
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.network_profile:
-            value_obtained_from_mc = self.mc.network_profile.load_balancer_sku
-
-        # set default value
         read_from_mc = False
-        if value_obtained_from_mc is not None:
-            load_balancer_sku = safe_lower(value_obtained_from_mc)
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.load_balancer_sku
+        ):
+            load_balancer_sku = safe_lower(
+                self.mc.network_profile.load_balancer_sku
+            )
             read_from_mc = True
-        else:
-            load_balancer_sku = safe_lower(raw_value)
 
         # skip dynamic completion & validation if option read_only is specified
         if kwargs.get("read_only"):
@@ -667,19 +645,18 @@ class AKSCreateContext:
         :return: string, empty list or list of strings, or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("api_server_authorized_ip_ranges")
+        api_server_authorized_ip_ranges = self.raw_param.get(
+            "api_server_authorized_ip_ranges"
+        )
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.api_server_access_profile:
-            value_obtained_from_mc = (
+        if (
+            self.mc and
+            self.mc.api_server_access_profile and
+            self.mc.api_server_access_profile.authorized_ip_ranges
+        ):
+            api_server_authorized_ip_ranges = (
                 self.mc.api_server_access_profile.authorized_ip_ranges
             )
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            api_server_authorized_ip_ranges = value_obtained_from_mc
-        else:
-            api_server_authorized_ip_ranges = raw_value
 
         # this parameter does not need dynamic completion
 
@@ -706,17 +683,10 @@ class AKSCreateContext:
         :return: string or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("fqdn_subdomain")
+        fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc:
-            value_obtained_from_mc = self.mc.fqdn_subdomain
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            fqdn_subdomain = value_obtained_from_mc
-        else:
-            fqdn_subdomain = raw_value
+        if self.mc and self.mc.fqdn_subdomain:
+            fqdn_subdomain = self.mc.fqdn_subdomain
 
         # this parameter does not need dynamic completion
 
@@ -1372,17 +1342,14 @@ class AKSCreateContext:
         :return: str
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("admin_username")
+        admin_username = self.raw_param.get("admin_username")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.linux_profile:
-            value_obtained_from_mc = self.mc.linux_profile.admin_username
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            admin_username = value_obtained_from_mc
-        else:
-            admin_username = raw_value
+        if (
+            self.mc and
+            self.mc.linux_profile and
+            self.mc.linux_profile.admin_username
+        ):
+            admin_username = self.mc.linux_profile.admin_username
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1405,39 +1372,29 @@ class AKSCreateContext:
         """
         # windows_admin_username
         # read the original value passed by the command
-        username_raw_value = self.raw_param.get("windows_admin_username")
+        windows_admin_username = self.raw_param.get("windows_admin_username")
         # try to read the property value corresponding to the parameter from the `mc` object
-        username_value_obtained_from_mc = None
-        if self.mc and self.mc.windows_profile:
-            username_value_obtained_from_mc = (
-                self.mc.windows_profile.admin_username
-            )
-
-        # set default value
         username_read_from_mc = False
-        if username_value_obtained_from_mc is not None:
-            windows_admin_username = username_value_obtained_from_mc
+        if (
+            self.mc and
+            self.mc.windows_profile and
+            self.mc.windows_profile.admin_username
+        ):
+            windows_admin_username = self.mc.windows_profile.admin_username
             username_read_from_mc = True
-        else:
-            windows_admin_username = username_raw_value
 
         # windows_admin_password
         # read the original value passed by the command
-        password_raw_value = self.raw_param.get("windows_admin_password")
+        windows_admin_password = self.raw_param.get("windows_admin_password")
         # try to read the property value corresponding to the parameter from the `mc` object
-        password_value_obtained_from_mc = None
-        if self.mc and self.mc.windows_profile:
-            password_value_obtained_from_mc = (
-                self.mc.windows_profile.admin_password
-            )
-
-        # set default value
         password_read_from_mc = False
-        if password_value_obtained_from_mc is not None:
-            windows_admin_password = password_value_obtained_from_mc
+        if (
+            self.mc and
+            self.mc.windows_profile and
+            self.mc.windows_profile.admin_password
+        ):
+            windows_admin_password = self.mc.windows_profile.admin_password
             password_read_from_mc = True
-        else:
-            windows_admin_password = password_raw_value
 
         # consistent check
         if username_read_from_mc != password_read_from_mc:
@@ -1500,19 +1457,9 @@ class AKSCreateContext:
         """
         # read the original value passed by the command
         enable_ahub = self.raw_param.get("enable_ahub")
-
-        # read the original value passed by the command
-        raw_value = self.raw_param.get("enable_ahub")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
         if self.mc and self.mc.windows_profile:
-            value_obtained_from_mc = self.mc.windows_profile.license_type == "Windows_Server"
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            enable_ahub = value_obtained_from_mc
-        else:
-            enable_ahub = raw_value
+            enable_ahub = self.mc.windows_profile.license_type == "Windows_Server"
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1539,33 +1486,29 @@ class AKSCreateContext:
         """
         # service_principal
         # read the original value passed by the command
-        sp_raw_value = self.raw_param.get("service_principal")
+        service_principal = self.raw_param.get("service_principal")
         # try to read the property value corresponding to the parameter from the `mc` object
-        sp_value_obtained_from_mc = None
-        if self.mc and self.mc.service_principal_profile:
-            sp_value_obtained_from_mc = self.mc.service_principal_profile.client_id
-        # set default value
         sp_read_from_mc = False
-        if sp_value_obtained_from_mc is not None:
-            service_principal = sp_value_obtained_from_mc
+        if (
+            self.mc and
+            self.mc.service_principal_profile and
+            self.mc.service_principal_profile.client_id
+        ):
+            service_principal = self.mc.service_principal_profile.client_id
             sp_read_from_mc = True
-        else:
-            service_principal = sp_raw_value
 
         # client_secret
         # read the original value passed by the command
-        secret_raw_value = self.raw_param.get("client_secret")
+        client_secret = self.raw_param.get("client_secret")
         # try to read the property value corresponding to the parameter from the `mc` object
-        secret_value_obtained_from_mc = None
-        if self.mc and self.mc.service_principal_profile:
-            secret_value_obtained_from_mc = self.mc.service_principal_profile.secret
-        # set default value
         secret_read_from_mc = False
-        if secret_value_obtained_from_mc is not None:
-            client_secret = secret_value_obtained_from_mc
+        if (
+            self.mc and
+            self.mc.service_principal_profile and
+            self.mc.service_principal_profile.secret
+        ):
+            client_secret = self.mc.service_principal_profile.secret
             secret_read_from_mc = True
-        else:
-            client_secret = secret_raw_value
 
         # consistent check
         if sp_read_from_mc != secret_read_from_mc:
@@ -1628,19 +1571,12 @@ class AKSCreateContext:
         :return: bool
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("enable_managed_identity")
+        enable_managed_identity = self.raw_param.get("enable_managed_identity")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.identity:
-            value_obtained_from_mc = self.mc.identity.type is not None
-
-        # set default value
         read_from_mc = False
-        if value_obtained_from_mc is not None:
-            enable_managed_identity = value_obtained_from_mc
+        if self.mc and self.mc.identity:
+            enable_managed_identity = self.mc.identity.type is not None
             read_from_mc = True
-        else:
-            enable_managed_identity = raw_value
 
         # skip dynamic completion & validation if option read_only is specified
         if kwargs.get("read_only"):
@@ -1781,26 +1717,20 @@ class AKSCreateContext:
         :return: int or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get(
+        load_balancer_managed_outbound_ip_count = self.raw_param.get(
             "load_balancer_managed_outbound_ip_count"
         )
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
         if (
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps
+            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
+            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
         ):
-            value_obtained_from_mc = (
+            load_balancer_managed_outbound_ip_count = (
                 self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
             )
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            load_balancer_managed_outbound_ip_count = value_obtained_from_mc
-        else:
-            load_balancer_managed_outbound_ip_count = raw_value
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1813,26 +1743,20 @@ class AKSCreateContext:
         :return: string, list of ResourceReference, or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get(
+        load_balancer_outbound_ips = self.raw_param.get(
             "load_balancer_outbound_ips"
         )
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
         if (
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.outbound_i_ps
+            self.mc.network_profile.load_balancer_profile.outbound_i_ps and
+            self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
         ):
-            value_obtained_from_mc = (
+            load_balancer_outbound_ips = (
                 self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
             )
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            load_balancer_outbound_ips = value_obtained_from_mc
-        else:
-            load_balancer_outbound_ips = raw_value
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1845,26 +1769,20 @@ class AKSCreateContext:
         :return: string, list of ResourceReference, or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get(
+        load_balancer_outbound_ip_prefixes = self.raw_param.get(
             "load_balancer_outbound_ip_prefixes"
         )
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
         if (
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes
+            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes and
+            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
         ):
-            value_obtained_from_mc = (
+            load_balancer_outbound_ip_prefixes = (
                 self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
             )
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            load_balancer_outbound_ip_prefixes = value_obtained_from_mc
-        else:
-            load_balancer_outbound_ip_prefixes = raw_value
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1877,25 +1795,19 @@ class AKSCreateContext:
         :return: int or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get(
+        load_balancer_outbound_ports = self.raw_param.get(
             "load_balancer_outbound_ports"
         )
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
         if (
             self.mc and
             self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile
+            self.mc.network_profile.load_balancer_profile and
+            self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
         ):
-            value_obtained_from_mc = (
+            load_balancer_outbound_ports = (
                 self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
             )
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            load_balancer_outbound_ports = value_obtained_from_mc
-        else:
-            load_balancer_outbound_ports = raw_value
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1908,25 +1820,19 @@ class AKSCreateContext:
         :return: int or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get(
+        load_balancer_idle_timeout = self.raw_param.get(
             "load_balancer_idle_timeout"
         )
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
         if (
             self.mc and
             self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile
+            self.mc.network_profile.load_balancer_profile and
+            self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
         ):
-            value_obtained_from_mc = (
+            load_balancer_idle_timeout = (
                 self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
             )
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            load_balancer_idle_timeout = value_obtained_from_mc
-        else:
-            load_balancer_idle_timeout = raw_value
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1954,26 +1860,16 @@ class AKSCreateContext:
         :return: string or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get(
-            "outbound_type"
-        )
+        outbound_type = self.raw_param.get("outbound_type")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
+        read_from_mc = False
         if (
             self.mc and
-            self.mc.network_profile
+            self.mc.network_profile and
+            self.mc.network_profile.outbound_type
         ):
-            value_obtained_from_mc = (
-                self.mc.network_profile.outbound_type
-            )
-
-        # set default value
-        read_from_mc = False
-        if value_obtained_from_mc is not None:
-            outbound_type = value_obtained_from_mc
+            outbound_type = (self.mc.network_profile.outbound_type)
             read_from_mc = True
-        else:
-            outbound_type = raw_value
 
         # skip dynamic completion & validation if option read_only is specified
         if kwargs.get("read_only"):
@@ -2026,17 +1922,14 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_network_plugin(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
-        raw_value = self.raw_param.get("network_plugin")
+        network_plugin = self.raw_param.get("network_plugin")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.network_profile:
-            value_obtained_from_mc = self.mc.network_profile.network_plugin
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            network_plugin = value_obtained_from_mc
-        else:
-            network_plugin = raw_value
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_plugin
+        ):
+            network_plugin = self.mc.network_profile.network_plugin
 
         # this parameter does not need dynamic completion
 
@@ -2063,17 +1956,14 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_pod_cidr(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
-        raw_value = self.raw_param.get("pod_cidr")
+        pod_cidr = self.raw_param.get("pod_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.network_profile:
-            value_obtained_from_mc = self.mc.network_profile.pod_cidr
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            pod_cidr = value_obtained_from_mc
-        else:
-            pod_cidr = raw_value
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.pod_cidr
+        ):
+            pod_cidr = self.mc.network_profile.pod_cidr
 
         # this parameter does not need dynamic completion
 
@@ -2094,17 +1984,14 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_service_cidr(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
-        raw_value = self.raw_param.get("service_cidr")
+        service_cidr = self.raw_param.get("service_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.network_profile:
-            value_obtained_from_mc = self.mc.network_profile.service_cidr
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            service_cidr = value_obtained_from_mc
-        else:
-            service_cidr = raw_value
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.service_cidr
+        ):
+            service_cidr = self.mc.network_profile.service_cidr
 
         # this parameter does not need dynamic completion
 
@@ -2121,17 +2008,14 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_dns_service_ip(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
-        raw_value = self.raw_param.get("dns_service_ip")
+        dns_service_ip = self.raw_param.get("dns_service_ip")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.network_profile:
-            value_obtained_from_mc = self.mc.network_profile.dns_service_ip
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            dns_service_ip = value_obtained_from_mc
-        else:
-            dns_service_ip = raw_value
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.dns_service_ip
+        ):
+            dns_service_ip = self.mc.network_profile.dns_service_ip
 
         # this parameter does not need dynamic completion
 
@@ -2148,17 +2032,14 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_docker_bridge_address(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
-        raw_value = self.raw_param.get("docker_bridge_address")
+        docker_bridge_address = self.raw_param.get("docker_bridge_address")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.network_profile:
-            value_obtained_from_mc = self.mc.network_profile.docker_bridge_cidr
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            docker_bridge_address = value_obtained_from_mc
-        else:
-            docker_bridge_address = raw_value
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.docker_bridge_cidr
+        ):
+            docker_bridge_address = self.mc.network_profile.docker_bridge_cidr
 
         # this parameter does not need dynamic completion
 
@@ -2176,17 +2057,14 @@ class AKSCreateContext:
     # pylint: disable=unused-argument
     def get_network_policy(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         # read the original value passed by the command
-        raw_value = self.raw_param.get("network_policy")
+        network_policy = self.raw_param.get("network_policy")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.network_profile:
-            value_obtained_from_mc = self.mc.network_profile.network_policy
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            network_policy = value_obtained_from_mc
-        else:
-            network_policy = raw_value
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_policy
+        ):
+            network_policy = self.mc.network_profile.network_policy
 
         # this parameter does not need dynamic completion
 
