@@ -2340,7 +2340,8 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             'ip': '1.2.3.4/32',
             'ip2': '2.3.4.0/24',
             'ip3': '3.4.5.0/24',
-            'ip4': '4.5.0.0/16'
+            'ip4': '4.5.0.0/16',
+            'ip5': '1.2.3.4'
         })
 
         subnet = self._create_subnet().get_output_in_json()
@@ -2457,6 +2458,12 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
 
         # Add twice to make sure there is no duplication
         self.cmd('keyvault network-rule add --ip-address {ip} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 1),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')
+        ])
+
+        # Add ip without CIDR format to make sure there is no duplication
+        self.cmd('keyvault network-rule add --ip-address {ip5} --name {kv} --resource-group {rg}', checks=[
             self.check('length(properties.networkAcls.ipRules)', 1),
             self.check('properties.networkAcls.ipRules[0].value', '{ip}')
         ])

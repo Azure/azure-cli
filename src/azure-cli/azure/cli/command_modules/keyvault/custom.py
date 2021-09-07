@@ -14,6 +14,7 @@ import struct
 import sys
 import time
 import uuid
+from ipaddress import ip_network
 
 from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients, is_azure_stack_profile
 from azure.cli.command_modules.keyvault._validators import _construct_vnet, secret_text_encoding_values
@@ -987,11 +988,18 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
         # if the rule already exists, don't add again
         to_modify = True
         for x in rules.ip_rules:
-            if x.value == ip_address:
+            existing_ip_network = ip_network(x.value)
+            new_ip_network = ip_network(ip_address)
+            if new_ip_network.overlaps(existing_ip_network):
+                logger.warning("This IP/CIDR overlaps with %s, which exists already. Not adding duplicates.", x.value)
                 to_modify = False
                 break
         if to_modify:
             rules.ip_rules.append(IPRule(value=ip_address))
+
+    # if we didn't modify the network rules just return the vault as is
+    if not to_modify:
+        return vault
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
                                 resource_type=ResourceType.MGMT_KEYVAULT,
