@@ -340,40 +340,39 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind='StorageV2')
-    def test_storage_blob_soft_delete(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-        container = self.create_container(account_info)
+    def test_storage_blob_soft_delete(self, resource_group, storage_account_info):
+        container = self.create_container(storage_account_info)
         import time
 
         # create a blob
         local_file = self.create_temp_file(1)
         blob_name = self.create_random_name(prefix='blob', length=24)
 
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', account_info,
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', storage_account_info,
                          container, local_file, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
-                                              account_info, container).get_output_in_json()), 1)
+                                              storage_account_info, container).get_output_in_json()), 1)
 
         # set delete-policy to enable soft-delete
         self.storage_cmd('storage blob service-properties delete-policy update --enable true --days-retained 2',
-                         account_info)
+                         storage_account_info)
         self.storage_cmd('storage blob service-properties delete-policy show',
-                         account_info).assert_with_checks(JMESPathCheck('enabled', True),
-                                                          JMESPathCheck('days', 2))
+                         storage_account_info).assert_with_checks(JMESPathCheck('enabled', True),
+                                                                  JMESPathCheck('days', 2))
         time.sleep(10)
         # soft-delete and check
-        self.storage_cmd('storage blob delete -c {} -n {}', account_info, container, blob_name)
+        self.storage_cmd('storage blob delete -c {} -n {}', storage_account_info, container, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
-                                              account_info, container).get_output_in_json()), 0)
+                                              storage_account_info, container).get_output_in_json()), 0)
 
         time.sleep(30)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {} --include d',
-                                              account_info, container).get_output_in_json()), 1)
+                                              storage_account_info, container).get_output_in_json()), 1)
 
         # undelete and check
-        self.storage_cmd('storage blob undelete -c {} -n {}', account_info, container, blob_name)
+        self.storage_cmd('storage blob undelete -c {} -n {}', storage_account_info, container, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
-                                              account_info, container).get_output_in_json()), 1)
+                                              storage_account_info, container).get_output_in_json()), 1)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
