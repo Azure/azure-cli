@@ -14,6 +14,7 @@ from azure.cli.testsdk.preparers import (
     KEY_VIRTUAL_NETWORK,
 )
 from azure.cli.testsdk.utilities import GraphClientPasswordReplacer
+from azure.cli.command_modules.acs.tests.latest.recording_processors import MOCK_GUID, MOCK_SECRET
 
 
 class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
@@ -181,8 +182,8 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
             ] = self.parameter_password
             return {
                 self.parameter_name: name,
-                self.parameter_password: self.result.get("password")
-                or GraphClientPasswordReplacer.PWD_REPLACEMENT,
+                self.parameter_password: self.result.get("password") or
+                GraphClientPasswordReplacer.PWD_REPLACEMENT,
             }
         else:
             # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live and
@@ -190,12 +191,22 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
             # and ScenarioTest.create_random_name. This is so that when self.create_random_name is called for the
             # first time during live or playback, it would have the same value.
             # In short, the default sp preparer in live mode does not call moniker, which leads to inconsistent counts.
-            _ = self.moniker
-            self.test_class_instance.kwargs[self.key] = self.dev_setting_sp_name
-            self.test_class_instance.kwargs[
-                "{}_pass".format(self.key)
-            ] = self.dev_setting_sp_password
+            # _ = self.moniker
+
+            # When performing live test and recording, original sp and secret will be returned, but sp and secret would
+            # be replaced by azure.cli.command_modules.acs.tests.latest.recording_processors.KeyReplacer with
+            # MOCK_GUID and MOCK_SECRET while recording. When performing recording test, MOCK_GUID and MOCK_SECRET will
+            # be returned.
+            if self.live_test or self.test_class_instance.in_recording:
+                sp_name = self.dev_setting_sp_name
+                sp_password = self.dev_setting_sp_password
+            else:
+                sp_name = MOCK_GUID
+                sp_password = MOCK_SECRET
+
+            self.test_class_instance.kwargs[self.key] = sp_name
+            self.test_class_instance.kwargs["{}_pass".format(self.key)] = sp_password
             return {
-                self.parameter_name: self.dev_setting_sp_name,
-                self.parameter_password: self.dev_setting_sp_password,
+                self.parameter_name: sp_name,
+                self.parameter_password: sp_password,
             }
