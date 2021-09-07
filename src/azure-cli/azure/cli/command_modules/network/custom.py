@@ -403,7 +403,7 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
 
     if cmd.supported_api_version(min_api='2019-09-01'):
         new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
-    
+
     if cmd.supported_api_version(min_api='2020-06-01'):
         new_listener.ssl_profile = SubResource(id=ssl_profile) if ssl_profile else None
 
@@ -432,7 +432,7 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
     if cmd.supported_api_version(min_api='2019-09-01'):
         if firewall_policy is not None:
             instance.firewall_policy = SubResource(id=firewall_policy)
-    
+
     if cmd.supported_api_version(min_api='2020-06-01'):
         if ssl_profile is not None:
             instance.ssl_profile = SubResource(id=ssl_profile)
@@ -812,14 +812,14 @@ def update_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_p
     if policy_type is not None:
         instance.ssl_policy.policy_type = policy_type
     if min_protocol_version is not None:
-        instance.ssl_policy.min_protocol_version = min_protocol_version 
+        instance.ssl_policy.min_protocol_version = min_protocol_version
     if cipher_suites is not None:
-        instance.ssl_policy.cipher_suites = cipher_suites 
+        instance.ssl_policy.cipher_suites = cipher_suites
     if disabled_ssl_protocols is not None:
-        instance.ssl_policy.disabled_ssl_protocols = disabled_ssl_protocols 
+        instance.ssl_policy.disabled_ssl_protocols = disabled_ssl_protocols
     if trusted_client_certificates is not None:
         SubResource = cmd.get_models('SubResource')
-        instance.trusted_client_certificates = [SubResource(id=item) for item in trusted_client_certificates] 
+        instance.trusted_client_certificates = [SubResource(id=item) for item in trusted_client_certificates]
     if client_auth_configuration is not None:
         ApplicationGatewayClientAuthConfiguration = cmd.get_models('ApplicationGatewayClientAuthConfiguration')
         instance.client_auth_configuration = ApplicationGatewayClientAuthConfiguration(

@@ -1513,12 +1513,28 @@ examples:
     text: az network application-gateway client-cert add --gateway-name MyAppGateway -g MyResourceGroup --name MyCert --data Cert.cer
 """
 
+helps['network application-gateway client-cert update'] = """
+type: command
+short-summary: Update trusted client certificate of the application gateway.
+examples:
+  - name: Add trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert update --gateway-name MyAppGateway -g MyResourceGroup --name MyCert --data Cert.cer
+"""
+
 helps['network application-gateway client-cert remove'] = """
 type: command
 short-summary: Remove an existing trusted client certificate of the application gateway.
 examples:
   - name: Remove a trusted client certificate for an existing application gateway.
     text: az network application-gateway client-cert remove --gateway-name MyAppGateway -g MyResourceGroup --name MyCert
+"""
+
+helps['network application-gateway client-cert show'] = """
+type: command
+short-summary: Show an existing trusted client certificate of the application gateway.
+examples:
+  - name: Remove a trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert show --gateway-name MyAppGateway -g MyResourceGroup --name MyCert
 """
 
 helps['network application-gateway client-cert list'] = """
@@ -1542,12 +1558,28 @@ examples:
     text: az network application-gateway ssl-profile add --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
 """
 
+helps['network application-gateway ssl-profile update'] = """
+type: command
+short-summary: Update ssl profiles of the application gateway.
+examples:
+  - name: Add ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile update --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --client-auth-configuration False
+"""
+
 helps['network application-gateway ssl-profile remove'] = """
 type: command
 short-summary: Remove an existing ssl profiles of the application gateway.
 examples:
   - name: Remove ssl profile for an existing application gateway.
     text: az network application-gateway ssl-profile remove --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
+"""
+
+helps['network application-gateway ssl-profile show'] = """
+type: command
+short-summary: Show an existing ssl profiles of the application gateway.
+examples:
+  - name: Remove ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile show --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
 """
 
 helps['network application-gateway ssl-profile list'] = """
