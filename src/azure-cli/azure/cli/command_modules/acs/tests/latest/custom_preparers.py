@@ -176,18 +176,15 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
             except AttributeError:  # live only execute returns None if playing from record
                 pass
 
-            self.test_class_instance.kwargs[self.key] = name
-            self.test_class_instance.kwargs[
-                "{}_pass".format(self.key)
-            ] = self.parameter_password
-            return {
-                self.parameter_name: name,
-                self.parameter_password: self.result.get("password") or
-                GraphClientPasswordReplacer.PWD_REPLACEMENT,
-            }
+            if self.live_test or self.test_class_instance.in_recording:
+                sp_name = name
+                sp_password = self.result.get("password") or GraphClientPasswordReplacer.PWD_REPLACEMENT
+            else:
+                sp_name = MOCK_GUID
+                sp_password = MOCK_SECRET
         else:
-            # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live and
-            # play-back. see SingleValueReplacer.process_request, AbstractPreparer.__call__._preparer_wrapper
+            # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live
+            # and play-back. see SingleValueReplacer.process_request, AbstractPreparer.__call__._preparer_wrapper
             # and ScenarioTest.create_random_name. This is so that when self.create_random_name is called for the
             # first time during live or playback, it would have the same value.
             # In short, the default sp preparer in live mode does not call moniker, which leads to inconsistent counts.
@@ -204,9 +201,10 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
                 sp_name = MOCK_GUID
                 sp_password = MOCK_SECRET
 
-            self.test_class_instance.kwargs[self.key] = sp_name
-            self.test_class_instance.kwargs["{}_pass".format(self.key)] = sp_password
-            return {
-                self.parameter_name: sp_name,
-                self.parameter_password: sp_password,
-            }
+        # update kwargs and return
+        self.test_class_instance.kwargs[self.key] = sp_name
+        self.test_class_instance.kwargs["{}_pass".format(self.key)] = sp_password
+        return {
+            self.parameter_name: sp_name,
+            self.parameter_password: sp_password,
+        }
