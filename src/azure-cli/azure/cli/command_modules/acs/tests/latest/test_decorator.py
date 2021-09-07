@@ -367,7 +367,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_load_balancer_sku(read_only=True), None)
         self.assertEqual(ctx_1.get_load_balancer_sku(), "standard")
         network_profile = self.models.ContainerServiceNetworkProfile(
-            load_balancer_sku="test_mc_load_balancer_sku"
+            load_balancer_sku="test_mc_load_balancer_SKU"
         )
         mc = self.models.ManagedCluster(
             location="test_location", network_profile=network_profile
@@ -404,6 +404,13 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_3.get_load_balancer_sku(enable_validation=True)
+
+        # custom value (lower case)
+        ctx_4 = AKSCreateContext(
+            self.cmd,
+            {"load_balancer_sku": "STANDARD"},
+        )
+        self.assertEqual(ctx_4.get_load_balancer_sku(), "standard")
 
     def test_get_api_server_authorized_ip_ranges(self):
         # default
