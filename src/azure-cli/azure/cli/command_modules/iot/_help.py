@@ -80,9 +80,9 @@ examples:
   - name: Upload a CA certificate PEM file to an Azure IoT Hub device provisioning service.
     text: >
         az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.pem
-  - name: Upload a CA certificate CER file to an Azure IoT Hub device provisioning service.
+  - name: Upload a verified CA certificate CER file to an Azure IoT Hub device provisioning service.
     text: >
-        az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.cer
+        az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.cer --verified
 """
 
 helps['iot dps certificate delete'] = """
@@ -268,9 +268,9 @@ type: command
 short-summary: Create/upload an Azure IoT Hub certificate.
 long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
 examples:
-  - name: Uploads a CA certificate PEM file to an IoT hub.
+  - name: Uploads a verified CA certificate PEM file to an IoT hub.
     text: >
-        az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path /certificates/Certificate.pem
+        az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path /certificates/Certificate.pem --verified
   - name: Uploads a CA certificate CER file to an IoT hub.
     text: >
         az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path /certificates/Certificate.cer
@@ -405,6 +405,9 @@ examples:
   - name: Create an IoT Hub with a system-assigned managed identity, and assign a role and scope to a storage account for the created identity.
     text: >
         az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --mi-system-assigned --role "Storage Blob Data Contributor" --scopes {resourceId}
+  - name: Create an IoT Hub with local authentication, device SAS keys, and module SAS keys all disabled
+    text: >
+        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --disable-local-auth --disable-device-sas --disable-module-sas
 """
 
 helps['iot hub delete'] = """
@@ -830,6 +833,9 @@ examples:
     text: >
         az iot hub update -n MyIoTHub --fileupload-notification-max-delivery-count 50
         --fileupload-notification-ttl 48 --fileupload-notifications --fileupload-notification-lock-duration 10
+  - name: Update the IoT Hub local authentication, device SAS, and module SAS settings
+    text: >
+        az iot hub update -n MyIoTHub --disable-local-auth --disable-device-sas false --disable-module-sas true
 """
 
 helps['iot central'] = """

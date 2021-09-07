@@ -101,7 +101,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
   condition: succeeded()
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
 
   steps:
   - task: UsePythonVersion@0
@@ -576,7 +576,7 @@ jobs:
                   -e CLI_VERSION=$CLI_VERSION \
                   -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                   --name azurecli \
-                  python:3.6 \
+                  python:3.9 \
                   /mnt/scripts/run.sh
 
        # clean up
@@ -598,7 +598,7 @@ jobs:
   dependsOn: BuildHomebrewFormula
   condition: succeeded()
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -638,7 +638,7 @@ jobs:
   # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   condition: false
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -737,9 +737,9 @@ jobs:
       Focal:
         deb_system: ubuntu
         distro: focal
-      Groovy:
+      Hirsute:
         deb_system: ubuntu
-        distro: groovy
+        distro: hirsute
       Jessie:
         deb_system: debian
         distro: jessie
@@ -749,6 +749,9 @@ jobs:
       Buster:
         deb_system: debian
         distro: buster
+      Bullseye:
+        deb_system: debian
+        distro: bullseye
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'

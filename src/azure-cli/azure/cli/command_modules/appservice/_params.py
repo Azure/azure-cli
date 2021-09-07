@@ -19,7 +19,7 @@ from ._completers import get_hostname_completion_list
 from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
-                          validate_service_tag)
+                          validate_service_tag, validate_public_cloud)
 
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
@@ -618,6 +618,7 @@ def load_arguments(self, _):
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
@@ -970,7 +971,7 @@ def load_arguments(self, _):
     with self.argument_context('appservice domain show-terms') as c:
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
-    with self.argument_context('staticwebapp') as c:
+    with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
         c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
         c.argument('token', options_list=['--token', '-t'],

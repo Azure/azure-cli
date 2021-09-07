@@ -18,7 +18,7 @@ helps['postgres flexible-server create'] = """
 type: command
 short-summary: Create a flexible server.
 examples:
-  - name: Create a PostgreSQL flexible server with default params ( resource group, location, servername, username, password ) with VNET enabled by default.
+  - name: Create a PostgreSQL flexible server with default params ( resource group, location, servername, username, password ) with public access enabled by default.
     text: |
         az postgres flexible-server create
 

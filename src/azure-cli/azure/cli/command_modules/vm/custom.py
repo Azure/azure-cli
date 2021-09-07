@@ -10,7 +10,7 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-lines
+# pylint: disable=no-self-use,too-many-lines,no-else-return
 import json
 import os
 
@@ -737,7 +737,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None, user_data=None):
+              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -955,7 +955,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
-        user_data=user_data)
+        user_data=user_data, capacity_reservation_group=capacity_reservation_group)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1374,7 +1374,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
-              enable_vtpm=None, user_data=None, **kwargs):
+              enable_vtpm=None, user_data=None, capacity_reservation_group=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1401,6 +1401,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if user_data is not None:
         from azure.cli.core.util import b64encode
         vm.user_data = b64encode(user_data)
+
+    if capacity_reservation_group is not None:
+        CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
+        SubResource = cmd.get_models('SubResource')
+        sub_resource = SubResource(id=capacity_reservation_group)
+        capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
+        vm.capacity_reservation = capacity_reservation
 
     if ultra_ssd_enabled is not None:
         if vm.additional_capabilities is None:
@@ -1836,27 +1843,60 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
 
 # region VirtualMachines Images
-def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None,
-                   all=False):  # pylint: disable=redefined-builtin
-    load_thru_services = all
+def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False, edge_zone=None):  # pylint: disable=redefined-builtin
+    load_thru_services = all or edge_zone is not None
 
     if load_thru_services:
-        if not publisher_name and not offer and not sku:
+        if not publisher_name and not offer and not sku and not edge_zone:
             logger.warning("You are retrieving all the images from server which could take more than a minute. "
-                           "To shorten the wait, provide '--publisher', '--offer' or '--sku'. Partial name search "
-                           "is supported.")
-        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location)
+                           "To shorten the wait, provide '--publisher', '--offer' , '--sku' or '--edge-zone'."
+                           " Partial name search is supported.")
+        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone)
     else:
         all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku)
-        logger.warning(
-            'You are viewing an offline list of images, use --all to retrieve an up-to-date list')
+        logger.warning('You are viewing an offline list of images, use --all to retrieve an up-to-date list')
 
-    for i in all_images:
-        i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
+    if edge_zone is not None:
+        for i in all_images:
+            i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['edge_zone'], i['version']])
+    else:
+        for i in all_images:
+            i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
     return all_images
 
 
-def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
+def list_offers(cmd, publisher_name, location, edge_zone=None):
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.list_offers(location=location, edge_zone=edge_zone, publisher_name=publisher_name)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+        return client.list_offers(location=location, publisher_name=publisher_name)
+
+
+def list_publishers(cmd, location, edge_zone=None):
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+        return client.list_publishers(location=location)
+
+
+def list_sku(cmd, location, publisher_name, offer, edge_zone=None,):
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.list_skus(location=location, edge_zone=edge_zone,
+                                          publisher_name=publisher_name, offer=offer)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+        return client.list_skus(location=location, publisher_name=publisher_name, offer=offer)
+
+
+def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None, edge_zone=None):
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
                                            InvalidArgumentValueError)
@@ -1864,19 +1904,30 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
     location = location or get_one_of_subscription_locations(cmd.cli_ctx)
     error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
     if urn:
-        if any([publisher, offer, sku, version]):
-            recommendation = 'Try to use --urn publisher:offer:sku:version only'
+        if any([publisher, offer, sku, edge_zone, version]):
+            recommendation = 'Try to use --urn publisher:offer:sku:version or' \
+                             ' --urn publisher:offer:sku:edge_zone:version'
             raise MutuallyExclusiveArgumentError(error_msg, recommendation)
         items = urn.split(":")
-        if len(items) != 4:
-            raise InvalidArgumentValueError('--urn should be in the format of publisher:offer:sku:version')
-        publisher, offer, sku, version = urn.split(":")
+        if len(items) != 4 and len(items) != 5:
+            raise InvalidArgumentValueError(
+                '--urn should be in the format of publisher:offer:sku:version or publisher:offer:sku:edge_zone:version')
+        if len(items) == 5:
+            publisher, offer, sku, edge_zone, version = urn.split(":")
+        elif len(items) == 4:
+            publisher, offer, sku, version = urn.split(":")
         if version.lower() == 'latest':
             version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
     elif not publisher or not offer or not sku or not version:
         raise RequiredArgumentMissingError(error_msg)
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machine_images.get(location, publisher, offer, sku, version)
+    if edge_zone is not None:
+        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
+                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        return edge_zone_client.get(location=location, edge_zone=edge_zone, publisher_name=publisher, offer=offer,
+                                    skus=sku, version=version)
+    else:
+        client = _compute_client_factory(cmd.cli_ctx)
+        return client.virtual_machine_images.get(location, publisher, offer, sku, version)
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
@@ -2475,7 +2526,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                user_data=None, network_api_version=None):
+                user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
+                capacity_reservation_group=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2728,7 +2780,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
-            orchestration_mode=orchestration_mode, network_api_version=network_api_version)
+            orchestration_mode=orchestration_mode, network_api_version=network_api_version,
+            enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
+            capacity_reservation_group=capacity_reservation_group)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3003,7 +3057,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, max_batch_instance_percent=None,
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
-                user_data=None, **kwargs):
+                user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3045,6 +3100,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if user_data is not None:
         vmss.virtual_machine_profile.user_data = b64encode(user_data)
 
+    if capacity_reservation_group is not None:
+        CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
+        SubResource = cmd.get_models('SubResource')
+        sub_resource = SubResource(id=capacity_reservation_group)
+        capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
+        vmss.virtual_machine_profile.capacity_reservation = capacity_reservation
+
     if enable_terminate_notification is not None or terminate_notification_time is not None:
         if vmss.virtual_machine_profile.scheduled_events_profile is None:
             ScheduledEventsProfile = cmd.get_models('ScheduledEventsProfile')
@@ -3077,6 +3139,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if scale_in_policy is not None:
         ScaleInPolicy = cmd.get_models('ScaleInPolicy')
         vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy)
+
+    if enable_spot_restore is not None:
+        vmss.spot_restore_policy.enabled = enable_spot_restore
+
+    if spot_restore_timeout is not None:
+        vmss.spot_restore_policy.restore_timeout = spot_restore_timeout
 
     if priority is not None:
         vmss.virtual_machine_profile.priority = priority
@@ -3945,3 +4013,95 @@ def get_gallery_instance(cmd, resource_group_name, gallery_name):
     client = cf_vm_cl(cmd.cli_ctx)
     SelectPermissions = cmd.get_models('SelectPermissions', operation_group='shared_galleries')
     return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
+
+
+def create_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, location=None,
+                                      tags=None, zones=None):
+    CapacityReservationGroup = cmd.get_models('CapacityReservationGroup')
+    capacity_reservation_group = CapacityReservationGroup(location=location, tags=tags, zones=zones)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   capacity_reservation_group_name=capacity_reservation_group_name,
+                                   parameters=capacity_reservation_group)
+
+
+def update_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, tags=None):
+    CapacityReservationGroupUpdate = cmd.get_models('CapacityReservationGroupUpdate')
+    capacity_reservation_group = CapacityReservationGroupUpdate(tags=tags)
+    return client.update(resource_group_name=resource_group_name,
+                         capacity_reservation_group_name=capacity_reservation_group_name,
+                         parameters=capacity_reservation_group)
+
+
+def show_capacity_reservation_group(client, resource_group_name, capacity_reservation_group_name,
+                                    instance_view=None):
+    expand = None
+    if instance_view:
+        expand = 'instanceView'
+    return client.get(resource_group_name=resource_group_name,
+                      capacity_reservation_group_name=capacity_reservation_group_name,
+                      expand=expand)
+
+
+def list_capacity_reservation_group(client, resource_group_name, vm_instance=None, vmss_instance=None):
+
+    expand = None
+    if vm_instance:
+        expand = "virtualMachines/$ref"
+    if vmss_instance:
+        if expand is None:
+            expand = "virtualMachineScaleSetVMs/$ref"
+        else:
+            expand = expand + ",virtualMachineScaleSetVMs/$ref"
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name=resource_group_name, expand=expand)
+    return client.list_by_subscription(expand=expand)
+
+
+def create_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
+                                capacity_reservation_name, location=None, sku_name=None, capacity=None,
+                                zone=None, tags=None):
+    Sku = cmd.get_models('Sku')
+    sku = Sku(name=sku_name, capacity=capacity)
+    CapacityReservation = cmd.get_models('CapacityReservation')
+    capacity_reservation = CapacityReservation(location=location, sku=sku, zones=zone, tags=tags)
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         capacity_reservation_group_name=capacity_reservation_group_name,
+                                         capacity_reservation_name=capacity_reservation_name,
+                                         parameters=capacity_reservation)
+
+
+def update_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
+                                capacity_reservation_name, capacity=None, tags=None):
+    Sku = cmd.get_models('Sku')
+    sku = Sku(capacity=capacity)
+
+    # If only the data of SKU capacity is updated, the original tags will be cleared.
+    # Therefore, before the service fixes this issue, we add this temporary logic
+    if tags is None:
+        capacity_reservation = client.get(resource_group_name=resource_group_name,
+                                          capacity_reservation_group_name=capacity_reservation_group_name,
+                                          capacity_reservation_name=capacity_reservation_name)
+        tags = capacity_reservation.tags
+
+    CapacityReservationUpdate = cmd.get_models('CapacityReservationUpdate')
+    capacity_reservation_update = CapacityReservationUpdate(sku=sku, tags=tags)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               capacity_reservation_group_name=capacity_reservation_group_name,
+                               capacity_reservation_name=capacity_reservation_name,
+                               parameters=capacity_reservation_update)
+
+
+def show_capacity_reservation(client, resource_group_name, capacity_reservation_group_name, capacity_reservation_name,
+                              instance_view=None):
+    expand = None
+    if instance_view:
+        expand = 'instanceView'
+    return client.get(resource_group_name=resource_group_name,
+                      capacity_reservation_group_name=capacity_reservation_group_name,
+                      capacity_reservation_name=capacity_reservation_name, expand=expand)
+
+
+def list_capacity_reservation(client, resource_group_name, capacity_reservation_group_name):
+    return client.list_by_capacity_reservation_group(resource_group_name=resource_group_name,
+                                                     capacity_reservation_group_name=capacity_reservation_group_name)

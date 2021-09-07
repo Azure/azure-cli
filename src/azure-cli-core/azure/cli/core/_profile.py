@@ -19,7 +19,7 @@ from knack.util import CLIError
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
-    is_windows, is_wsl, scopes_to_resource
+    is_windows, is_wsl, scopes_to_resource, resource_to_scopes
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -574,11 +574,7 @@ class Profile:
                            "Please run `az login` with a user account or a service principal.")
 
         if identity_type is None:
-            def _retrieve_token(sdk_resource=None):
-                # When called by
-                #   - Track 1 SDK, use `resource` specified by CLI
-                #   - Track 2 SDK, use `sdk_resource` specified by SDK and ignore `resource` specified by CLI
-                token_resource = sdk_resource or resource
+            def _retrieve_token(token_resource):
                 logger.debug("Retrieving token from ADAL for resource %r", token_resource)
 
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
@@ -591,8 +587,7 @@ class Profile:
                                                                               account[_TENANT_ID],
                                                                               use_cert_sn_issuer)
 
-            def _retrieve_tokens_from_external_tenants(sdk_resource=None):
-                token_resource = sdk_resource or resource
+            def _retrieve_tokens_from_external_tenants(token_resource):
                 logger.debug("Retrieving token from ADAL for external tenants and resource %r", token_resource)
 
                 external_tokens = []
@@ -607,7 +602,8 @@ class Profile:
 
             from azure.cli.core.adal_authentication import AdalAuthentication
             auth_object = AdalAuthentication(_retrieve_token,
-                                             _retrieve_tokens_from_external_tenants if external_tenants_info else None)
+                                             _retrieve_tokens_from_external_tenants if external_tenants_info else None,
+                                             resource=resource)
         else:
             if self._msi_creds is None:
                 self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
@@ -675,7 +671,7 @@ class Profile:
             raise CLIError("Unknown identity type {}".format(identity_type))
 
         if 'error' in result:
-            from azure.cli.core.adal_authentication import aad_error_handler
+            from azure.cli.core.auth.util import aad_error_handler
             aad_error_handler(result)
 
         return username_or_sp_id, result["access_token"]
@@ -721,7 +717,7 @@ class Profile:
                                                                                    use_cert_sn_issuer)
             except adal.AdalError as ex:
                 from azure.cli.core.adal_authentication import adal_error_handler
-                adal_error_handler(ex)
+                adal_error_handler(ex, scopes=resource_to_scopes(resource))
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))

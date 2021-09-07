@@ -166,6 +166,13 @@ def load_arguments(self, _):
     with self.argument_context('feature list') as c:
         c.argument('resource_provider_namespace', options_list='--namespace', required=False, help=_PROVIDER_HELP_TEXT)
 
+    with self.argument_context('feature registration') as c:
+        c.argument('resource_provider_namespace', options_list='--namespace', required=True, help=_PROVIDER_HELP_TEXT)
+        c.argument('feature_name', options_list=['--name', '-n'], help='the feature name')
+
+    with self.argument_context('feature registration list') as c:
+        c.argument('resource_provider_namespace', options_list='--namespace', required=False, help=_PROVIDER_HELP_TEXT)
+
     with self.argument_context('policy') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group where the policy will be applied')
 

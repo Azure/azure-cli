@@ -207,19 +207,22 @@ def _mysql_high_availability_validator(high_availability, standby_availability_z
     if instance:
         tier = instance.sku.tier if tier is None else tier
         auto_grow = instance.storage.auto_grow if auto_grow is None else auto_grow
-    if high_availability is not None and high_availability.lower() == 'enabled':
+        zone = instance.availability_zone if zone is None else zone
+    if high_availability is not None and high_availability.lower() != 'disabled':
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
-        if single_az:
-            raise ArgumentUsageError("This region is single availability zone."
-                                     "High availability is not supported in a single availability zone region.")
+        if single_az and high_availability.lower() == 'zoneredundant':
+            raise ArgumentUsageError("This region is single availability zone. "
+                                     "Zone redundant high availability is not supported "
+                                     "in a single availability zone region.")
         if auto_grow.lower == 'Disabled':
             raise ArgumentUsageError("Enabling High Availability requires Auto grow to be turned ON.")
     if standby_availability_zone:
-        if not high_availability:
+        if not high_availability or high_availability.lower() != 'zoneredundant':
             raise ArgumentUsageError("You need to enable high availability to set standby availability zone.")
         if zone == standby_availability_zone:
-            raise ArgumentUsageError("The zone of the server cannot be same as standby zone.")
+            raise ArgumentUsageError("Your server is in availability zone {}. "
+                                     "The zone of the server cannot be same as the standby zone.".format(zone))
 
 
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
@@ -302,7 +305,7 @@ def _network_arg_validator(subnet, public_access):
 
 
 def maintenance_window_validator(ns):
-    options = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Disabled"]
+    options = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Disabled", "disabled"]
     if ns.maintenance_window:
         parsed_input = ns.maintenance_window.split(':')
         if not parsed_input or len(parsed_input) > 3:
@@ -416,3 +419,9 @@ def validate_mysql_ha_enabled(server):
 def validate_vnet_location(vnet, location):
     if vnet.location != location:
         raise ValidationError("The location of Vnet should be same as the location of the server")
+
+
+def validate_replica_burstable_server(server):
+    if server.sku.tier == 'Burstable':
+        raise ValidationError("Replication for Burstable servers are not supported. "
+                              "Try using GeneralPurpose or MemoryOptimized tiers.")

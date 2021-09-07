@@ -55,6 +55,13 @@ def get_vm_sizes(cli_ctx, location):
     return cf_compute_service(cli_ctx).virtual_machine_sizes.list(location)
 
 
+@Completer
+def get_ossku_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    """Return the list of allowed os-sku values"""
+
+    return ["Ubuntu", "CBLMariner"]
+
+
 def _get_location(cli_ctx, namespace):
     """
     Return an Azure location by using an explicit `--location` argument, then by `--resource-group`, and

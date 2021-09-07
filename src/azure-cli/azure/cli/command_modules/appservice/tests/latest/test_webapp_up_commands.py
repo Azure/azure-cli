@@ -74,7 +74,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', True),
+            JMESPathCheck('properties.reserved', True),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'PremiumV2'),
             JMESPathCheck('sku.name', 'P1v2')
@@ -142,7 +142,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # verify SKU and kind of ASP created
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', True),
+            JMESPathCheck('properties.reserved', True),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Standard'),
             JMESPathCheck('sku.name', 'S1')
@@ -212,7 +212,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # verify SKU and kind of ASP created
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', False),
+            JMESPathCheck('properties.reserved', False),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Free'),
             JMESPathCheck('sku.name', 'F1')
@@ -281,7 +281,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # verify SKU and kind of ASP created
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', False),
+            JMESPathCheck('properties.reserved', False),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Free'),
             JMESPathCheck('sku.name', 'F1')
@@ -294,6 +294,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @live_only()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_invalid_name(self, resource_group):
         webapp_name = self.create_random_name('invalid_name', 40)
@@ -324,6 +325,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_name_exists_not_in_subscription(self, resource_group):
@@ -531,7 +533,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', True),
+            JMESPathCheck('properties.reserved', True),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Standard'),
             JMESPathCheck('sku.name', 'S1')
@@ -891,7 +893,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('appservice plan show', checks=[
-            JMESPathCheck('reserved', True),
+            JMESPathCheck('properties.reserved', True),
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'PremiumV2'),
             JMESPathCheck('sku.name', 'P1v2')
@@ -904,6 +906,101 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_webapp_up_linux_windows_sharing_resource_group(self, resource_group):
+        linux_plan = self.create_random_name('up-pythonplan-linux', 24)
+        linux_webapp_name = self.create_random_name('up-pythonapp-linux', 24)
+        windows_plan = self.create_random_name('up-pythonplan-windows', 26)
+        windows_webapp_name = self.create_random_name('up-pythonapp-windows', 26)
+        zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        up_working_dir = os.path.join(temp_dir, 'python-docs-hello-world')
+        os.chdir(up_working_dir)
+
+        # test linux dryrun operation
+        result = self.cmd('webapp up -n {} --sku  S1 --dryrun'
+                          .format(linux_webapp_name)).get_output_in_json()
+        self.assertTrue(result['sku'].lower() == 'standard')
+        self.assertTrue(result['name'].startswith(linux_webapp_name))
+        self.assertTrue(result['src_path'].replace(
+            os.sep + os.sep, os.sep), up_working_dir)
+        self.assertTrue(result['runtime_version'] == 'python|3.7')
+        self.assertTrue(result['os'].lower() == 'linux')
+
+        # test the full linux E2E operation works
+        full_result = self.cmd(
+            'webapp up -n {} --sku  S1 -g {} --plan {} --os-type linux'.format(linux_webapp_name, resource_group, linux_plan)).get_output_in_json()
+        self.assertTrue(result['name'] == full_result['name'])
+
+        # Verify linux app is created
+        # since we set local context, -n and -g are no longer required
+        self.cmd('webapp show', checks=[
+            JMESPathCheck('name', linux_webapp_name),
+            JMESPathCheck('httpsOnly', True),
+            JMESPathCheck('kind', 'app,linux'),
+            JMESPathCheck('resourceGroup', resource_group)
+        ])
+
+        self.cmd('webapp config show', checks=[
+            JMESPathCheck('linuxFxVersion', 'PYTHON|3.7'),
+            JMESPathCheck('tags.cli', 'None'),
+        ])
+
+        self.cmd('webapp config appsettings list', checks=[
+            JMESPathCheck('[0].name', 'SCM_DO_BUILD_DURING_DEPLOYMENT'),
+            JMESPathCheck('[0].value', 'True')
+        ])
+
+
+
+        # test windows dryrun operation
+        result = self.cmd("webapp up -n {} --sku  S1 --dryrun -r 'python|3.6' --os-type windows --plan {}"
+                          .format(windows_webapp_name, windows_plan)).get_output_in_json()
+        self.assertEqual(result['sku'].lower(), 'standard')
+        self.assertTrue(result['name'].startswith(windows_webapp_name))
+        self.assertTrue(result['src_path'].replace(
+            os.sep + os.sep, os.sep), up_working_dir)
+        self.assertEqual(result['runtime_version'], 'python|3.6')
+        self.assertEqual(result['os'].lower(), 'windows')
+
+        # test the full windows E2E operation works
+        full_result = self.cmd(
+            'webapp up -n {} --sku  S1 -g {} --plan {}'.format(windows_webapp_name, resource_group, windows_plan)).get_output_in_json()
+        self.assertTrue(result['name'] == full_result['name'])
+
+        # Verify windows app is created
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, windows_webapp_name), checks=[
+            JMESPathCheck('name', windows_webapp_name),
+            JMESPathCheck('httpsOnly', True),
+            JMESPathCheck('resourceGroup', resource_group)
+        ])
+
+        # verify windows SKU and kind of ASP created
+        self.cmd('appservice plan show', checks=[
+            JMESPathCheck('properties.reserved', True),
+            JMESPathCheck('name', windows_plan),
+            JMESPathCheck('sku.tier', 'Standard'),
+            JMESPathCheck('sku.name', 'S1')
+        ])
+
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
 
 if __name__ == '__main__':
     unittest.main()

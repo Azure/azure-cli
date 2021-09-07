@@ -63,7 +63,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', 'IotCentralClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
-    MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
+    MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShift4Client')
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
@@ -155,7 +155,7 @@ AZURE_API_PROFILES = {
             'shared_galleries': '2020-09-30',
             'virtual_machine_scale_sets': '2021-04-01'
         }),
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2020-09-01',
@@ -220,12 +220,12 @@ AZURE_API_PROFILES = {
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
-        ResourceType.MGMT_IOTHUB: '2021-03-31',
+        ResourceType.MGMT_IOTHUB: '2021-07-01',
         ResourceType.MGMT_IOTCENTRAL: '2018-09-01',
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-05-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-07-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         })
@@ -245,7 +245,7 @@ AZURE_API_PROFILES = {
             'virtual_machine_scale_sets': '2020-06-01'
         }),
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',

@@ -403,7 +403,6 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
     def on_request(self, request):
         http_request = request.http_request
-        logger.info(http_request.data)
         if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
             template = http_request.data["properties"]["template"]
             if not isinstance(template, JsonCTemplate):
@@ -2212,6 +2211,20 @@ def unregister_feature(client, resource_provider_namespace, feature_name):
     logger.warning("Once the feature '%s' is unregistered, invoking 'az provider register -n %s' is required "
                    "to get the change propagated", feature_name, resource_provider_namespace)
     return client.unregister(resource_provider_namespace, feature_name)
+
+
+def list_feature_registrations(client, resource_provider_namespace=None):
+    if resource_provider_namespace:
+        return client.list_by_subscription(provider_namespace=resource_provider_namespace)
+    return client.list_all_by_subscription()
+
+
+def create_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.create_or_update(resource_provider_namespace, feature_name, {})
+
+
+def delete_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.delete(resource_provider_namespace, feature_name)
 
 
 # pylint: disable=inconsistent-return-statements,too-many-locals

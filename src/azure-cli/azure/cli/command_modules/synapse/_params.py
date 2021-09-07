@@ -15,6 +15,7 @@ from ._completers import get_role_definition_name_completion_list
 from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnectionClientType, PrincipalType, \
     SqlPoolConnectionClientAuthenticationType, ItemType
 from .action import AddFilters, AddOrderBy
+from shlex import split
 
 workspace_name_arg_type = CLIArgumentType(help='The workspace name.',
                                           completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
@@ -55,7 +56,7 @@ def _configure_security_or_audit_policy_storage_params(arg_ctx):
 
 def load_arguments(self, _):
     # synapse workspace
-    for scope in ['show', 'create', 'update', 'delete', 'activate']:
+    for scope in ['show', 'create', 'update', 'delete']:
         with self.argument_context('synapse workspace ' + scope) as c:
             c.argument('workspace_name', arg_type=name_type, id_part='name', help='The workspace name.')
 
@@ -85,6 +86,10 @@ def load_arguments(self, _):
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
 
+    with self.argument_context('synapse workspace activate') as c:
+        c.argument('workspace_name', id_part='name', help='The workspace name.')
+        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+        c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace customer-managed key display name. All existing keys can be found using /"az synapse workspace key list/" cmdlet.')
     # synapse spark pool
     with self.argument_context('synapse spark pool') as c:
         c.argument('workspace_name', id_part='name', help='The workspace name.')
@@ -114,10 +119,6 @@ def load_arguments(self, _):
         c.argument('enable_auto_pause', arg_type=get_three_state_flag(), arg_group='AutoPause',
                    help='The flag of enabling auto pause.')
         c.argument('delay', arg_group='AutoPause', help='The delay time whose unit is minute.')
-
-        # Environment Configuration
-        c.argument('library_requirements', arg_group='Environment Configuration',
-                   help='The library requirements file.')
 
         # Default Folder
         c.argument('spark_events_folder', arg_group='Default Folder', help='The Spark events folder.')
@@ -345,16 +346,12 @@ def load_arguments(self, _):
     with self.argument_context('synapse workspace key list') as c:
         c.argument('workspace_name', id_part=None, help='The workspace name.')
 
-    for scope in ['show', 'create', 'delete', 'update']:
+    for scope in ['show', 'create', 'delete']:
         with self.argument_context('synapse workspace key ' + scope) as c:
             c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace customer-managed key display name. All existing keys can be found using /"az synapse workspace key list/" cmdlet.')
 
     with self.argument_context('synapse workspace key create') as c:
         c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
-
-    with self.argument_context('synapse workspace key update') as c:
-        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
-        c.argument('is_active', arg_type=get_three_state_flag(), help='Set True to change the workspace state from pending to success state.')
 
     # synapse workspace managed-identity
     with self.argument_context('synapse workspace managed-identity') as c:
@@ -380,7 +377,7 @@ def load_arguments(self, _):
         c.argument('main_definition_file', help='The main file used for the job.')
         c.argument('main_class_name',
                    help='The fully-qualified identifier or the main class that is in the main definition file.')
-        c.argument('command_line_arguments', options_list=['--arguments'], nargs='+',
+        c.argument('command_line_arguments', options_list=['--arguments'], type=split, nargs='+',
                    help='Optional arguments to the job (Note: please use storage URIs for file arguments).')
         c.argument('archives', nargs='+', help='The array of archives.')
         c.argument('job_name', arg_type=name_type, help='The Spark job name.')
@@ -732,3 +729,16 @@ def load_arguments(self, _):
                    help='Enable or disable the self-hosted integration runtime auto-update.')
         c.argument('update_delay_offset',
                    help='The time of the day for the self-hosted integration runtime auto-update.')
+
+    # synapse managed private endpoints
+    for scope in ['show', 'create', 'delete']:
+        with self.argument_context('synapse managed-private-endpoints ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
+            c.argument('managed_private_endpoint_name', options_list=['--pe-name'], help='The managed private endpoint name.')
+
+    with self.argument_context('synapse managed-private-endpoints list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    with self.argument_context('synapse managed-private-endpoints create') as c:
+        c.argument('private_Link_Resource_Id', options_list=['--resource-id'], help='The ARM resource ID of the resource to which the managed private endpoint is created. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}')
+        c.argument('group_Id', help='The groupId to which the managed private endpoint is created')

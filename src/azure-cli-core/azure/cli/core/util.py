@@ -4,17 +4,18 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
-import sys
-import json
-import getpass
 import base64
 import binascii
-import platform
-import ssl
-import re
+import getpass
+import json
 import logging
-
+import os
+import platform
+import re
+import ssl
+import sys
 from urllib.request import urlopen
+
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -271,7 +272,7 @@ def get_installed_cli_distributions():
 def get_latest_from_github(package_path='azure-cli'):
     try:
         import requests
-        git_url = "https://raw.githubusercontent.com/Azure/azure-cli/master/src/{}/setup.py".format(package_path)
+        git_url = "https://raw.githubusercontent.com/Azure/azure-cli/main/src/{}/setup.py".format(package_path)
         response = requests.get(git_url, timeout=10)
         if response.status_code != 200:
             logger.info("Failed to fetch the latest version from '%s' with status code '%s' and reason '%s'",
@@ -379,7 +380,6 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
             else:
                 _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
         _print()
-    import os
     _print("Python location '{}'".format(os.path.abspath(sys.executable)))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
@@ -522,8 +522,8 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
                              "https://docs.microsoft.com/cli/azure/use-cli-effectively#quoting-issues"
 
             # Recommendation especially for PowerShell
-            parent_proc = get_parent_proc_name().lower()
-            if parent_proc in ("powershell.exe", "pwsh.exe"):
+            parent_proc = get_parent_proc_name()
+            if parent_proc and parent_proc.lower() in ("powershell.exe", "pwsh.exe"):
                 recommendation += "\nPowerShell requires additional quoting rules. See " \
                                   "https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md"
 
@@ -581,7 +581,6 @@ def hash_string(value, length=16, force_lower=False):
 
 
 def in_cloud_console():
-    import os
     return os.environ.get('ACC_CLOUD', None)
 
 
@@ -610,7 +609,6 @@ DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 
 
 def should_disable_connection_verify():
-    import os
     return bool(os.environ.get(DISABLE_VERIFY_VARIABLE_NAME))
 
 
@@ -657,7 +655,8 @@ def open_page_in_browser(url):
         try:
             # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
-            return subprocess.Popen(['powershell.exe', '-NoProfile', '-Command', 'Start-Process "{}"'.format(url)])
+            return subprocess.Popen(
+                ['powershell.exe', '-NoProfile', '-Command', 'Start-Process "{}"'.format(url)]).wait()
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
@@ -695,7 +694,6 @@ def is_windows():
 
 
 def can_launch_browser():
-    import os
     import webbrowser
     platform_name, _ = _get_platform_info()
     if is_wsl() or platform_name != 'linux':
@@ -829,7 +827,6 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     # Borrow AZURE_HTTP_USER_AGENT from msrest
     # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
     _ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
-    import os
     if _ENV_ADDITIONAL_USER_AGENT in os.environ:
         agents.append(os.environ[_ENV_ADDITIONAL_USER_AGENT])
 
@@ -1097,7 +1094,6 @@ def get_az_user_agent():
 
     agents = ["AZURECLI/{}".format(core_version)]
 
-    import os
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     if _ENV_AZ_INSTALLER in os.environ:
         agents.append('({})'.format(os.environ[_ENV_AZ_INSTALLER]))
@@ -1240,28 +1236,33 @@ def _get_parent_proc_name():
         logger.debug(ex)
         return None
 
-    import os
-    parent = psutil.Process(os.getpid()).parent()
+    try:
+        parent = psutil.Process(os.getpid()).parent()
 
-    # On Windows, when CLI is run inside a virtual env, there will be 2 python.exe.
-    if parent and parent.name().lower() == 'python.exe':
-        parent = parent.parent()
+        # On Windows, when CLI is run inside a virtual env, there will be 2 python.exe.
+        if parent and parent.name().lower() == 'python.exe':
+            parent = parent.parent()
 
-    if parent:
-        # On Windows, powershell.exe launches cmd.exe to launch python.exe.
-        grandparent = parent.parent()
-        if grandparent:
-            grandparent_name = grandparent.name().lower()
-            if grandparent_name in ("powershell.exe", "pwsh.exe"):
-                return grandparent.name()
-        # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
-        return parent.name()
+        if parent:
+            # On Windows, powershell.exe launches cmd.exe to launch python.exe.
+            grandparent = parent.parent()
+            if grandparent:
+                grandparent_name = grandparent.name().lower()
+                if grandparent_name in ("powershell.exe", "pwsh.exe"):
+                    return grandparent.name()
+            # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
+            return parent.name()
+    except psutil.AccessDenied as ex:
+        # Ignore due to https://github.com/giampaolo/psutil/issues/1980
+        logger.debug(ex)
     return None
 
 
 def get_parent_proc_name():
     # This function wraps _get_parent_proc_name, as psutil calls are time-consuming, so use a
     # function-level cache to save the result.
+    # NOTE: The return value may be None if getting parent proc name fails, so always remember to
+    # check it first before calling string methods like lower().
     if not hasattr(get_parent_proc_name, "return_value"):
         parent_proc_name = _get_parent_proc_name()
         setattr(get_parent_proc_name, "return_value", parent_proc_name)
@@ -1272,3 +1273,23 @@ def is_modern_terminal():
     """In addition to knack.util.is_modern_terminal, detect Cloud Shell."""
     import knack.util
     return knack.util.is_modern_terminal() or in_cloud_console()
+
+
+def rmtree_with_retry(path):
+    # A workaround for https://bugs.python.org/issue33240
+    # Retry shutil.rmtree several times, but even if it fails after several retries, don't block the command execution.
+    retry_num = 3
+    import time
+    while True:
+        try:
+            import shutil
+            shutil.rmtree(path)
+            return
+        except OSError as err:
+            if retry_num > 0:
+                logger.warning("Failed to delete '%s': %s. Retrying ...", path, err)
+                retry_num -= 1
+                time.sleep(1)
+            else:
+                logger.warning("Failed to delete '%s': %s. You may try to delete it manually.", path, err)
+                break

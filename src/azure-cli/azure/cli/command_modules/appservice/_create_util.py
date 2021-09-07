@@ -111,7 +111,7 @@ def create_resource_group(cmd, rg_name, location):
     return rcf.resource_groups.create_or_update(rg_name, rg_params)
 
 
-def _check_resource_group_exists(cmd, rg_name):
+def check_resource_group_exists(cmd, rg_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.resource_groups.check_existence(rg_name)
 
@@ -312,14 +312,6 @@ def set_location(cmd, sku, location):
     return loc.replace(" ", "").lower()
 
 
-# check if the RG value to use already exists and follows the OS requirements or new RG to be created
-def should_create_new_rg(cmd, rg_name, is_linux):
-    if (_check_resource_group_exists(cmd, rg_name) and
-            _check_resource_group_supports_os(cmd, rg_name, is_linux)):
-        return False
-    return True
-
-
 def get_site_availability(cmd, name):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
     client = web_client_factory(cmd.cli_ctx)
@@ -343,17 +335,11 @@ def get_app_details(cmd, name):
     return None
 
 
-def get_rg_to_use(cmd, user, loc, os_name, rg_name=None):
+def get_rg_to_use(user, loc, os_name, rg_name=None):
     default_rg = "{}_rg_{}_{}".format(user, os_name, loc.replace(" ", "").lower())
-    # check if RG exists & can be used
-    if rg_name is not None and _check_resource_group_exists(cmd, rg_name):
-        if _check_resource_group_supports_os(cmd, rg_name, os_name.lower() == 'linux'):
-            return rg_name
-        raise CLIError("The ResourceGroup '{}' cannot be used with the os '{}'. Use a different RG".format(rg_name,
-                                                                                                           os_name))
-    if rg_name is None:
-        rg_name = default_rg
-    return rg_name
+    if rg_name is not None:
+        return rg_name
+    return default_rg
 
 
 def get_profile_username():

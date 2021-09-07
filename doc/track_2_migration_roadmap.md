@@ -13,7 +13,7 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 - If Track 1 SDK is in preview (0.x.x or x.x.xrc), the lower priority.
 - Extenison has lower priority.
 
-## Here is the proposed roadmap for managment plane migration. (Total ~60 CLI modules: 6 completed and ~60 extensions: 20 completed.)
+## Here is the proposed roadmap for managment plane migration. (Total 60 CLI modules and 78 extensions)
 
 - To meet CAE requirements (`CAE support` column is `Yes` in the table below), 
   - 12 services need to be migrated by the end of 0/30/2021.
@@ -21,8 +21,6 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 - Totally 18 services need to be migrated by the end of 06/30/2021.
 - To achieve this goal:
   - We need notify service teams ahead of time so that they have sufficient time to migrate.
-  - If there is no Track 2 SDK for those services, we'll release stable Track 2 SDK version for them before 03/11/2021.
-  - If the Track 2 SDK for those services is in preview, we'll release stable Track 2 SDK version for them before 02/11/2021.
 
 | Module   | CAE support | Migration Status | ETA |Latest Track 2 SDK Status | Latest Track 1 SDK status  | Release frequency | CLI Module or Extension |
 | --------- |:-------------:| :-----:|:-----:|:--:|:--:|:--:|:--:|
@@ -52,8 +50,8 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | HDInsight | Yes |**Completed** | 06/30/2021 | GA (7.0.0) | GA (2.1.0) | Medium (Once two months) | Module |
 | Kusto |  Yes |**Completed** | 06/30/2021 |Preview (1.0.0b1) | Preview (0.10.0) | Medium (Once two months | Module |
 | ACS   |  Yes |**Completed** | 06/30/2021 |ContainerService: GA (14.0.0)<br> ContainerInstance: GA (7.0.0) | ContainerService: GA (11.0.0)<br> ContainerInstance: GA (2.0.0) | Medium (Once two months) | Module |
-| SQL   | No |**In progress** | 06/30/2021 |GA (1.0.0) | Preview (0.25.0) | Medium (Once two months) | Module |
-| ACR   | Yes |**In progress** | 06/30/2021 |Preview (8.0.0b1) | Preview (3.0.0rc16) | Medium (Once two months) | Module |
+| SQL   | No |**Completed** | 06/30/2021 |GA (1.0.0) | Preview (0.25.0) | Medium (Once two months) | Module |
+| ACR   | Yes |**Completed** | 06/30/2021 |Preview (8.0.0b1) | Preview (3.0.0rc16) | Medium (Once two months) | Module |
 |**Phase 3** |  |  | | | |  |||
 | NatGateway || **Completed** | N/A |Network: GA (8.0.0) | Network: GA (2.2.0) | Use Network package| Module |
 | Search |  |**Completed** | N/A |GA (8.0.0) | GA (3.0.0) | Low (Once a year) | Module |
@@ -70,26 +68,27 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | DMS |  |**Completed** | N/A |DataMigration: Preview (9.0.0b1) | DataMigration: GA (4.1.0) | Low (Once a year) | Module |
 | Redis   | |**Completed** | N/A |GA (12.0.0) | Preview (7.0.0rc2) | Low (Once a year) | Module |
 | CognitiveServices | |**Completed** | N/A | GA (11.0.0) | GA (6.3.0) | Low (Once half year) | Module |
+| SQLVM |  |**Completed** | N/A |N/A| SQLVirtualMachine: Preview (0.5.0) | N/A | Module |
+| IoT | | **Completed** | N/A |IoTHub: GA (1.0.0) <br> IoTCentral: N/A <br> IoTHubProvisioningServices: N/A | IoTHub: Preview (0.12.0) <br> IoTCentral: GA (4.0.0) <br> IoTHubProvisioningServices: Preview (0.2.0)| | Module |
+| Security |  |**Completed** | N/A |GA (1.0.0) | Preview (0.6.0) | Medium (Once three months) | Module |
+| Container   |   |**Completed** | N/A | ContainerInstance: GA (7.0.0) |  ContainerInstance: GA (2.0.0) | Medium (Once two months) | Module |
+| DataBoxEdge (CLI own) |  |**Completed** | N/A|Preview (1.0.0b1) | Preview (0.2.0) | Low (Once a year) | Module |
+| AMS   |  |**Completed** | N/A |Media: Preview (7.0.0b1) |Media: GA (3.0.0) | Low (Once a year) | Module |
+| IoT | | **Completed** | N/A |IoTHub: GA (1.0.0) <br> IoTCentral: N/A <br> IoTHubProvisioningServices: N/A | IoTHub: Preview (0.12.0) <br> IoTCentral: GA (4.0.0) <br> IoTHubProvisioningServices: Preview (0.2.0)| | Module |
+| ARO   |  |**Completed** | N/A|RedhatOpenShift: Preview (1.0.0b1) | RedhatOpenShift: Preview (0.1.0) | Low (Once a year) | Module |
 | DeploymentManager |  |**Completed (deprecated)**  | N/A|Preview (1.0.0b1) | Preview (0.2.0) | Low (Once two years) | Module |
 | Reservations |  |**Completed (too old)** | N/A |Preview (1.0.0b1) | Preview (0.8.0) | Low (Once half year) | Module |
 | Consumption |  |**Completed (too old)** | N/A |GA (8.0.0) | GA (3.0.0) | Low (Once a year) | Module |
 | DLA (CLI own)|  | **Completed (too old)** | N/A |N/A | DataLakeAnalytics: Preview (0.6.0) | | Module |
 | DLS (CLI own)|  | **Completed (too old)** | N/A (Will incorporate into storage SDK) |N/A | DataLakeStore: Preview (0.5.0) | | Module |
 | ManagedServices | |**Completed (too old)**| N/A| Preview (6.0.0b1) | GA (1.0.0) | Low (Once two years) | Module |
-| DataBoxEdge (CLI own) |  |**In progress** | N/A|Preview (1.0.0b1) | Preview (0.2.0) | Low (Once a year) | Module |
-| AMS   |  |**In progress** | N/A |Media: Preview (7.0.0b1) |Media: GA (3.0.0) | Low (Once a year) | Module |
-| IoT | | **In progress** | N/A |IoTHub: GA (1.0.0) <br> IoTCentral: N/A <br> IoTHubProvisioningServices: N/A | IoTHub: Preview (0.12.0) <br> IoTCentral: GA (4.0.0) <br> IoTHubProvisioningServices: Preview (0.2.0)| | Module |
-| Security |  |**In progress** | N/A |GA (1.0.0) | Preview (0.6.0) | Medium (Once three months) | Module |
-| EventHub   |  |**In progress** | N/A |GA (8.0.0) | GA (4.2.0) | Low (Once a year) | Module |
-| Relay |  |**In progress** | N/A|GA (1.0.0) | Preview (0.2.0) | Low (Once two years) | Module |
-| BotService   |  |**In progress** | N/A|Preview (1.0.0b1) | Preview (0.2.0) | Low (Once two years) | Module |
-| APIM   | |**In progress** | N/A |APIManagement: GA (1.0.0) | APIManagement: Preview (0.2.0) | Low (Once a year) | Module |
-| Role (CLI own)  | |**TODO on demand** | N/A | Authorization: GA (1.0.0)<br>MSI: N/A | Authorization: Preview (0.61.0)<br>MSI: GA (1.0.0) | Low (Once a year) | Module |
-| SQLVM |  |**Complete by the end of Sep** | N/A |N/A| SQLVirtualMachine: Preview (0.5.0) | N/A | Module |
-| ServiceFabric |  |**TODO at the beginnig of Aug** | N/A|Preview (1.0.0) | Preview (0.5.0) | Low (Once a year) | Module |
-| ARO   |  |**TODO in July** | N/A|RedhatOpenShift: Preview (1.0.0b1) | RedhatOpenShift: Preview (0.1.0) | Low (Once a year) | Module |
-| Container   |   |**TODO on demand** | N/A | ContainerInstance: GA (7.0.0) |  ContainerInstance: GA (2.0.0) | Medium (Once two months) | Module |
-| Lab  | |Not Started | N/A |DevTestLabs: GA (9.0.0) | DevTestLabs: GA (4.0.0) | Low (Once half year) | Module |
+| BotService   |  |**Block by service team** | N/A|Preview (1.0.0b1) | Preview (0.2.0) | Low (Once two years) | Module |
+| APIM   | |**Block by service team** | N/A |APIManagement: GA (1.0.0) | APIManagement: Preview (0.2.0) | Low (Once a year) | Module |
+| ServiceFabric |  |**On demand (no new feature)** | N/A|Preview (1.0.0) | Preview (0.5.0) | Low (Once a year) | Module |
+| EventHub   |  |**On demand (no new feature)** | N/A |GA (8.0.0) | GA (4.2.0) | Low (Once a year) | Module |
+| Relay |  |**On demand (no new feature)** | N/A|GA (1.0.0) | Preview (0.2.0) | Low (Once two years) | Module |
+| Role (CLI own)  | |**On demand (no new feature)** | N/A | Authorization: GA (1.0.0)<br>MSI: N/A | Authorization: Preview (0.61.0)<br>MSI: GA (1.0.0) | Low (Once a year) | Module |
+| Lab  | |**On demand (no new feature)** | N/A |DevTestLabs: GA (9.0.0) | DevTestLabs: GA (4.0.0) | Low (Once half year) | Module |
 | HealthCareAPIs   |  | **Completed** | N/A |Vendored_Preview (0.3.0) | N/A | N/A | Extension |
 | Communication   |  | **Completed** | N/A |Vendored_SDK | N/A | N/A | Extension |
 | Footprint   |  | **Completed** | N/A |Vendored_SDK | N/A | N/A | Extension |
@@ -140,6 +139,11 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | StorageSync (CLI own)  | | **Completed** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | SpringCloud   | | **Completed** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | VMWare   | | **Completed** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
+| ConnectedK8S   | | **Completed** | N/A |N/A | Vendored_Preview (0.1.1) | N/A | Extension |
+| BluePrint (CLI own)  | | **Completed** | N/A|N/A | Vendored_Preview (2018-11-01-preview) | N/A | Extension |
+| K8S-Configuration  | | **Completed**| N/A|N/A | Vendored_SDK) | N/A | Extension |
+| K8S-Extension  | | **Completed** | N/A|N/A | Vendored_SDK) | N/A | Extension |
+| DMS-Preview   | | **Completed** | N/A |N/A | Vendored_GA (4.0.0) | N/A | Extension |
 | Connection-Monitor-Preview (CLI own)  | | **Completed (already moved to CLI module)** | N/A |N/A | Vendored_SDK | N/A | Extension |
 | Dev-Spaces   | | **Completed (No SDK)** | N/A |N/A | N/A | N/A | Extension |
 | Cli-Translator   | | **Completed (No SDK)** | N/A |N/A | N/A | N/A |
@@ -162,9 +166,4 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | Support   | | **Completed (no new features)** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | ManagementPartner   | | **Completed (no new features)** | N/A|N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | Log-Analytics (CLI own)  | | **Completed (data plane)** | N/A|N/A | Vendored_Preview (0.1.0) | N/A | Extension |
-| ConnectedK8S   | | **In progress** | N/A |N/A | Vendored_Preview (0.1.1) | N/A | Extension |
-| BluePrint (CLI own)  | | **In progress** | N/A|N/A | Vendored_Preview (2018-11-01-preview) | N/A | Extension |
-| DMS-Preview   | | **In progress** | N/A |N/A | Vendored_GA (4.0.0) | N/A | Extension |
-| K8S-Configuration  | | **In progress**| N/A|N/A | Vendored_SDK) | N/A | Extension |
-| K8S-Extension  | | **In progress** | N/A|N/A | Vendored_SDK) | N/A | Extension |
-| WebApp   | | Not Started | N/A |N/A | N/A | N/A | Extension |
+| WebApp   | | **On demand (no new feature)** | N/A |N/A | N/A | N/A | Extension |
