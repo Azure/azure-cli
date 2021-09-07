@@ -21,6 +21,21 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.acs._consts import (
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+    CONST_KUBE_DASHBOARD_ADDON_NAME,
+    CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+    CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_VIRTUAL_NODE_ADDON_NAME,
+    CONST_VIRTUAL_NODE_SUBNET_NAME,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+    CONST_INGRESS_APPGW_SUBNET_CIDR,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+    CONST_INGRESS_APPGW_SUBNET_ID,
+    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
+    CONST_INGRESS_APPGW_ADDON_NAME,
+    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_CONFCOM_ADDON_NAME,
 )
 from azure.cli.command_modules.acs.custom import (
     _get_rg_location,
@@ -35,6 +50,8 @@ from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
     _ensure_aks_acr,
     create_load_balancer_profile,
+    _ensure_default_log_analytics_workspace_for_monitoring,
+    _ensure_container_insights_for_monitoring,
 )
 
 logger = get_logger(__name__)
@@ -163,6 +180,11 @@ class AKSCreateModels:
         )
         self.ExtendedLocationTypes = self.__cmd.get_models(
             "ExtendedLocationTypes",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterAddonProfile = self.__cmd.get_models(
+            "ManagedClusterAddonProfile",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
@@ -2149,6 +2171,223 @@ class AKSCreateContext:
 
         return network_policy
 
+    # pylint: disable=unused-argument
+    def get_enable_addons(self, **kwargs) -> Union[str, List[str]]:
+        """Obtain the value of enable_addons.
+
+        Note: enable_addons will not be decorated into the `mc` object.
+
+        This function supports the option of enable_split. When enabled, it will split the string into a list with
+        "," as the delimiter.
+
+        :return: string or list of string
+        """
+        # read the original value passed by the command
+        enable_addons = self.raw_param.get("enable_addons")
+
+        if kwargs.get("enable_split", False):
+            enable_addons = enable_addons.split(',') if enable_addons else []
+
+        # this parameter does not need validation
+        return enable_addons
+
+    # pylint: disable=unused-argument
+    def get_workspace_resource_id(self, **kwargs) -> str:
+        # read the original value passed by the command
+        workspace_resource_id = self.raw_param.get("workspace_resource_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        read_from_mc = False
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_MONITORING_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID)
+        ):
+            workspace_resource_id = self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID)
+            read_from_mc = True
+
+        # skip dynamic completion & validation if option read_only is specified
+        if kwargs.get("read_only"):
+            return workspace_resource_id
+
+        # dynamic completion
+        if not read_from_mc:
+            if workspace_resource_id is None:
+                # use default workspace if exists else create default workspace
+                workspace_resource_id = (
+                    _ensure_default_log_analytics_workspace_for_monitoring(
+                        self.cmd,
+                        self.intermediates.get("subscription_id", None),
+                        self.get_resource_group_name(),
+                    )
+                )
+            # normalize
+            workspace_resource_id = workspace_resource_id.strip()
+            if not workspace_resource_id.startswith("/"):
+                workspace_resource_id = "/" + workspace_resource_id
+            if workspace_resource_id.endswith("/"):
+                workspace_resource_id = workspace_resource_id.rstrip("/")
+
+        # this parameter does not need validation
+        return workspace_resource_id
+
+    # pylint: disable=unused-argument
+    def get_virtual_node_addon_os_type(self, **kwargs) -> str:
+        return "Linux"
+
+    # pylint: disable=unused-argument
+    def get_aci_subnet_name(self, **kwargs) -> str:
+        # read the original value passed by the command
+        aci_subnet_name = self.raw_param.get("aci_subnet_name")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_VIRTUAL_NODE_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_VIRTUAL_NODE_ADDON_NAME +
+                self.get_virtual_node_addon_os_type()
+            ).config.get(CONST_VIRTUAL_NODE_SUBNET_NAME)
+        ):
+            aci_subnet_name = self.mc.addon_profiles.get(
+                CONST_VIRTUAL_NODE_ADDON_NAME +
+                self.get_virtual_node_addon_os_type()
+            ).config.get(CONST_VIRTUAL_NODE_SUBNET_NAME)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return aci_subnet_name
+
+    # pylint: disable=unused-argument
+    def get_appgw_name(self, **kwargs) -> str:
+        # read the original value passed by the command
+        appgw_name = self.raw_param.get("appgw_name")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME)
+        ):
+            appgw_name = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_name
+
+    # pylint: disable=unused-argument
+    def get_appgw_subnet_cidr(self, **kwargs) -> str:
+        # read the original value passed by the command
+        appgw_subnet_cidr = self.raw_param.get("appgw_subnet_cidr")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_CIDR)
+        ):
+            appgw_subnet_cidr = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_CIDR)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_subnet_cidr
+
+    # pylint: disable=unused-argument
+    def get_appgw_id(self, **kwargs) -> str:
+        # read the original value passed by the command
+        appgw_id = self.raw_param.get("appgw_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID)
+        ):
+            appgw_id = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_id
+
+    # pylint: disable=unused-argument
+    def get_appgw_subnet_id(self, **kwargs) -> str:
+        # read the original value passed by the command
+        appgw_subnet_id = self.raw_param.get("appgw_subnet_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_ID)
+        ):
+            appgw_subnet_id = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_ID)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_subnet_id
+
+    # pylint: disable=unused-argument
+    def get_appgw_watch_namespace(self, **kwargs) -> str:
+        # read the original value passed by the command
+        appgw_watch_namespace = self.raw_param.get("appgw_watch_namespace")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_WATCH_NAMESPACE)
+        ):
+            appgw_watch_namespace = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_WATCH_NAMESPACE)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_watch_namespace
+
+    # pylint: disable=unused-argument
+    def get_enable_sgxquotehelper(self, **kwargs) -> str:
+        # read the original value passed by the command
+        enable_sgxquotehelper = self.raw_param.get("enable_sgxquotehelper")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_CONFCOM_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_CONFCOM_ADDON_NAME
+            ).config.get(CONST_ACC_SGX_QUOTE_HELPER_ENABLED)
+        ):
+            enable_sgxquotehelper = self.mc.addon_profiles.get(
+                CONST_CONFCOM_ADDON_NAME
+            ).config.get(CONST_ACC_SGX_QUOTE_HELPER_ENABLED)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_sgxquotehelper
+
 
 class AKSCreateDecorator:
     def __init__(
@@ -2533,6 +2772,94 @@ class AKSCreateDecorator:
         mc.network_profile = network_profile
         return mc
 
+    def set_up_addon_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up addon profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+        ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
+        addon_profiles = {}
+        addons = self.context.get_enable_addons(enable_split=True)
+        if 'http_application_routing' in addons:
+            addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
+                enabled=True)
+            addons.remove('http_application_routing')
+        if 'kube-dashboard' in addons:
+            addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(
+                enabled=True)
+            addons.remove('kube-dashboard')
+        # TODO: can we help the user find a workspace resource ID?
+        if 'monitoring' in addons:
+            workspace_resource_id = self.context.get_workspace_resource_id()
+            addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
+                enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
+            # post
+            _ensure_container_insights_for_monitoring(self.cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
+            # set intermediate
+            self.context.set_intermediate("monitoring", True, overwrite_exists=True)
+            addons.remove('monitoring')
+        # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
+        elif self.context.get_workspace_resource_id(read_only=True):
+            raise RequiredArgumentMissingError(
+                '"--workspace-resource-id" requires "--enable-addons monitoring".')
+        if 'azure-policy' in addons:
+            addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
+                enabled=True)
+            addons.remove('azure-policy')
+        if 'virtual-node' in addons:
+            aci_subnet_name = self.context.get_aci_subnet_name()
+            vnet_subnet_id = self.context.get_vnet_subnet_id()
+            if not aci_subnet_name or not vnet_subnet_id:
+                raise RequiredArgumentMissingError(
+                    '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
+            # TODO: how about aciConnectorwindows, what is its addon name?
+            os_type = self.context.get_virtual_node_addon_os_type()
+            addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
+            )
+            # set intermediate
+            self.context.set_intermediate("enable_virtual_node", True, overwrite_exists=True)
+            addons.remove('virtual-node')
+        if 'ingress-appgw' in addons:
+            addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
+            appgw_name = self.context.get_appgw_name()
+            appgw_subnet_cidr = self.context.get_appgw_subnet_cidr()
+            appgw_id = self.context.get_appgw_id()
+            appgw_subnet_id = self.context.get_appgw_subnet_id()
+            appgw_watch_namespace = self.context.get_appgw_watch_namespace()
+            if appgw_name is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
+            if appgw_subnet_cidr is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
+            if appgw_id is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
+            if appgw_subnet_id is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
+            if appgw_watch_namespace is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
+            addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
+            # set intermediate
+            self.context.set_intermediate("ingress_appgw_addon_enabled", True, overwrite_exists=True)
+            addons.remove('ingress-appgw')
+        if 'confcom' in addons:
+            addon_profile = ManagedClusterAddonProfile(
+                enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
+            if self.context.get_enable_sgxquotehelper():
+                addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+            addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
+            addons.remove('confcom')
+        # error out if any (unrecognized) addons remain
+        if addons:
+            raise InvalidArgumentValueError('"{}" {} not recognized by the --enable-addons argument.'.format(
+                ",".join(addons), "are" if len(addons) > 1 else "is"))
+        mc.addon_profiles = addon_profiles
+        return mc
+
     def construct_default_mc(self) -> ManagedCluster:
         """The overall control function used to construct the default ManagedCluster object.
 
@@ -2560,6 +2887,8 @@ class AKSCreateDecorator:
         self.process_attach_acr(mc)
         # set up network profile
         mc = self.set_up_network_profile(mc)
+        # set up addon profile
+        mc = self.set_up_addon_profile(mc)
 
         # TODO: set up other profiles
         return mc
