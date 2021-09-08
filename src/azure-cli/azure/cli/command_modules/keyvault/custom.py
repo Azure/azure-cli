@@ -997,7 +997,8 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                 existing_ip_network = ip_network(x.value)
                 new_ip_network = ip_network(ip)
                 if new_ip_network.overlaps(existing_ip_network):
-                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.", ip, x.value)
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.value)
                     to_modify = False
                     break
             if to_modify:
