@@ -1631,7 +1631,6 @@ def enable_local_git(cmd, resource_group_name, name, slot=None):
     site_config = get_site_configs(cmd, resource_group_name, name, slot)
     site_config.scm_type = 'LocalGit'
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update_configuration', slot, site_config)
-
     return {'url': _get_local_git_url(cmd.cli_ctx, client, resource_group_name, name, slot)}
 
 
@@ -2168,7 +2167,7 @@ def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot
     client = web_client_factory(cmd.cli_ctx)
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
     site_config.auto_swap_slot_name = '' if disable else (auto_swap_slot or 'production')
-    return client.web_apps.update_configuration_slot(resource_group_name, webapp, site_config, slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp, 'update_configuration', slot, site_config)
 
 
 def list_slots(cmd, resource_group_name, webapp):
@@ -3701,7 +3700,8 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
-              os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False):
+              os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
+              app_service_environment=None):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -3828,7 +3828,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     # updated we update those
     try:
         create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
-                                number_of_workers=1 if _is_linux else None, location=loc)
+                                number_of_workers=1 if _is_linux else None, location=loc,
+                                app_service_environment=app_service_environment)
     except Exception as ex:  # pylint: disable=broad-except
         if ex.response.status_code == 409:  # catch 409 conflict when trying to create existing ASP in diff location
             try:

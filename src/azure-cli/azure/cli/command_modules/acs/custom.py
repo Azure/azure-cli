@@ -1657,8 +1657,9 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     except subprocess.CalledProcessError as err:
         raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
-        return output
-    raise AzureInternalError("Failed to check the ACR.")
+        print(output)
+    else:
+        raise AzureInternalError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -2264,13 +2265,16 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 logger.warning('Could not create a role assignment for subnet. '
                                'Are you an Owner on this subscription?')
 
+    from azure.cli.command_modules.acs.decorator import AKSCreateModels
+    # store all the models used by load balancer
+    lb_models = AKSCreateModels(cmd).lb_models
     load_balancer_profile = create_load_balancer_profile(
-        cmd,
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
         load_balancer_outbound_ports,
-        load_balancer_idle_timeout)
+        load_balancer_idle_timeout,
+        models=lb_models)
 
     if attach_acr:
         if enable_managed_identity:
@@ -2957,14 +2961,17 @@ def aks_update(cmd, client, resource_group_name, name,
         )
 
     if update_lb_profile:
+        from azure.cli.command_modules.acs.decorator import AKSCreateModels
+        # store all the models used by load balancer
+        lb_models = AKSCreateModels(cmd).lb_models
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
-            cmd,
             load_balancer_managed_outbound_ip_count,
             load_balancer_outbound_ips,
             load_balancer_outbound_ip_prefixes,
             load_balancer_outbound_ports,
             load_balancer_idle_timeout,
-            instance.network_profile.load_balancer_profile)
+            instance.network_profile.load_balancer_profile,
+            models=lb_models)
 
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
