@@ -352,7 +352,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
         create_version, _ = self._get_versions(resource_group_location)
@@ -2843,7 +2843,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_scale_with_custom_nodepool_name_msi(self, resource_group, resource_group_location):
         create_version, _ = self._get_versions(resource_group_location)
         # kwargs for string formatting
