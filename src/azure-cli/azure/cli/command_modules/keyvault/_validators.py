@@ -438,6 +438,7 @@ def validate_subnet(cmd, namespace):
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
+
 def validate_ip_address(cmd, namespace):
     # if there are overlapping ip ranges, throw an exception
     ip_address = namespace.ip_address
@@ -452,6 +453,7 @@ def validate_ip_address(cmd, namespace):
                 continue
             if ip_address_network.overlaps(ip_address_network2):
                 raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} provided are overlapping: --ip_address ip1 [ip2]...")
+
 
 def validate_role_assignment_args(ns):
     if not any([ns.role_assignment_name, ns.scope, ns.assignee, ns.assignee_object_id, ns.role, ns.ids]):
