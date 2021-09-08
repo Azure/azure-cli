@@ -435,7 +435,10 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     if res.status_code == 409:
         raise CLIError("There may be an ongoing deployment or your app setting has WEBSITE_RUN_FROM_PACKAGE. "
                        "Please track your deployment in {} and ensure the WEBSITE_RUN_FROM_PACKAGE app setting "
-                       "is removed.".format(deployment_status_url))
+                       "is removed. Use 'az webapp config appsettings list --name MyWebapp --resource-group "
+                       "MyResourceGroup --subscription MySubscription' to list app settings and 'az webapp "
+                       "config appsettings delete --name MyWebApp --resource-group MyResourceGroup "
+                       "--setting-names `{setting-names}`' to delete them.".format(deployment_status_url))
 
     # check the status of async deployment
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
@@ -3754,7 +3757,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         app_details = get_app_details(cmd, name)
         if app_details is None:
             raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that the app "
-                           "is a part of the current subscription".format(name))
+                           "is a part of the current subscription if updating an existing app. If creating "
+                           "a new app, app names must be globally unique. Please try a more unique name or "
+                           "leave unspecified to receive a randomly generated name.".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
             raise CLIError("The webapp '{}' exists in ResourceGroup '{}' and does not "
@@ -3779,7 +3784,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         if current_os.lower() != os_name.lower():
             raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
                            "'{}'. Please create a new app "
-                           "to continue this operation.".format(name, current_os, src_dir, os_name))
+                           "to continue this operation. For more information on default behaviors, "
+                           "see https://docs.microsoft.com/en-us/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
+                           .format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
         # Get site config to check the runtime version
@@ -4217,7 +4224,8 @@ def _make_onedeploy_request(params):
 
     # check if there's an ongoing process
     if response.status_code == 409:
-        raise CLIError("Another deployment is in progress. You can track the ongoing deployment at {}"
+        raise CLIError("Another deployment is in progress. Please wait until that process is complete before "
+                       "starting a new deployment. You can track the ongoing deployment at {}"
                        .format(deployment_status_url))
 
     # check if an error occured during deployment
