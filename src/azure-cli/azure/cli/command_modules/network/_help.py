@@ -5956,7 +5956,7 @@ short-summary: Place the CLI in a waiting state until a condition of the vnet ga
 examples:
   - name: Wait for vnet gateway nat rule to return as created.
     text: |
-        az network vnet-gateway nat-rule wait -g MyResourceGroup --gateway-name MyVnetGateway --name Nat --created
+        az network vnet-gateway nat-rule wait -g MyResourceGroup --name Nat --created
 """
 
 helps['network vnet-gateway nat-rule add'] = """
