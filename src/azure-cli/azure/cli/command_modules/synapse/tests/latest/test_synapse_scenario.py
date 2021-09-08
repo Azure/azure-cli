@@ -460,44 +460,347 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'Enabled')
                  ])
 
-    @record_only()
-    def test_sql_pool_audit_policy(self):
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    def test_sql_ws_audit_policy_logentry_eventhub(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'zes0508test1pool',
-            'storage-account': 'chayangstoragewestus2'
+            'location': 'eastus',
+            'log_analytics_workspace_name': self.create_random_name("laws", 20),
+            'retention-days': '30',
+            'audit-actions-input': 'DATABASE_LOGOUT_GROUP',
+            'audit-actions-expected': ['DATABASE_LOGOUT_GROUP'],
+            'eventhub_name': self.create_random_name("ehsrv", 20),
+            'eventhub_namespace': self.create_random_name("ehnamespace", 20),
+            'eventhub_auth_rule': self.create_random_name("ehauthruledb", 20),
         })
+
+        # create a workspace
+        self._create_workspace_eastus()
+
+        self.kwargs['storage-endpoint'] = self._get_storage_endpoint(self.kwargs['storage-account'], self.kwargs['rg'])
+        self.kwargs['storage-key'] = self._get_storage_key(self.kwargs['storage-account'], self.kwargs['rg'])
+
+        # test show command
+        self.cmd('az synapse sql audit-policy show '
+                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname',
+                 checks=[
+                     self.check('state', 'Disabled')
+                 ])
+
+        self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --state Enabled --bsts Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
+                 ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapname',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('storageEndpoint', self.kwargs['storage-endpoint']),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])
+                 ])
+
+        # get audit policy
+        self.cmd('az synapse sql audit-policy show '
+                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('blobStorageTargetState', 'Enabled'),
+                     self.check('logAnalyticsTargetState', 'Disabled'),
+                     self.check('eventHubTargetState', 'Disabled'),
+                     self.check('isAzureMonitorTargetEnabled', False)])
+
+        self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --state Enabled --bsts Enabled --storage-account {storage-account}'
+                 ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('storageEndpoint', self.kwargs['storage-endpoint']),
+                     self.check('retentionDays',  self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # update audit policy - disable
+        self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --state Disabled --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Disabled'),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # create log analytics workspace
+        self.kwargs['log_analytics_workspace_id']= self.cmd('az monitor log-analytics workspace create --resource-group {rg} '
+                 '--workspace-name {log_analytics_workspace_name}',
+                 checks=[
+                     self.check('name', self.kwargs['log_analytics_workspace_name']),
+                     self.check('provisioningState', 'Succeeded')]).get_output_in_json()['id']
+
+        # update audit policy - enable log analytics target
+        self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --state Enabled'
+                 ' --lats Enabled --lawri {log_analytics_workspace_id} '
+                 ' --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # get audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
+                 ' --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('blobStorageTargetState', 'Enabled'),
+                     self.check('logAnalyticsTargetState', 'Enabled'),
+                     self.check('eventHubTargetState', 'Disabled'),
+                     self.check('isAzureMonitorTargetEnabled', True)])
+
+        # update audit policy - disable log analytics target
+        self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --state Enabled --lats Disabled'
+                 ' --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
+                 ' --blob-auditing-policy-name bapname',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('blobStorageTargetState', 'Enabled'),
+                     self.check('logAnalyticsTargetState', 'Disabled'),
+                     self.check('eventHubTargetState', 'Disabled'),
+                     self.check('isAzureMonitorTargetEnabled', False)])
+
+        # create event hub namespace
+        self.cmd('az eventhubs namespace create --resource-group {rg} -n {eventhub_namespace} --location eastus',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')])
+
+        # create event hub
+        self.cmd('az eventhubs eventhub create --resource-group {rg} -n {eventhub_name} --namespace-name {eventhub_namespace}',
+                 checks=[
+                     self.check('status', 'Active')])
+
+        # create event hub autorization rule
+        self.kwargs['eventhub_auth_rule_id'] = self.cmd(
+            'az eventhubs namespace authorization-rule create --resource-group {rg} -n {eventhub_auth_rule} '
+            '--namespace-name {eventhub_namespace} --rights Listen Manage Send').get_output_in_json()['id']
+
+        # update audit policy - enable event hub target
+        self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --state Enabled --event-hub-target-state Enabled'
+                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}'
+                 ' --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # get audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
+                 ' --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('blobStorageTargetState', 'Enabled'),
+                     self.check('logAnalyticsTargetState', 'Disabled'),
+                     self.check('eventHubTargetState', 'Enabled'),
+                     self.check('isAzureMonitorTargetEnabled', True)])
+
+        # update audit policy - disable event hub target
+        self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
+                 ' --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('isAzureMonitorTargetEnabled', False),
+                     self.check('blobStorageTargetState', 'Enabled'),
+                     self.check('logAnalyticsTargetState', 'Disabled'),
+                     self.check('eventHubTargetState', 'Disabled'),
+                     self.check('isAzureMonitorTargetEnabled', False)])
+
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    def test_sql_pool_audit_policy_logentry_eventhub(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'log_analytics_workspace_name': self.create_random_name("laws", 20),
+            'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
+            'performance-level': 'DW400c',
+            'retention-days': '30',
+            'audit-actions-expected': ['SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP'],
+            'audit-actions-input': 'SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP',
+            'eventhub_name': self.create_random_name("ehsrv", 20),
+            'eventhub_namespace':  self.create_random_name("ehnamespace", 20),
+            'eventhub_auth_rule': self.create_random_name("ehauthruledb", 20),
+        })
+
+        # create a workspace
+        self._create_workspace_eastus()
+
+        # create sql pool
+        sql_pool = self.cmd(
+            'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
+            '--workspace {workspace} --resource-group {rg}', checks=[
+                self.check('name', self.kwargs['sql-pool']),
+                self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('status', 'Online')
+            ]).get_output_in_json()
+
+        self.kwargs['storage-endpoint'] = self._get_storage_endpoint(self.kwargs['storage-account'], self.kwargs['rg'])
+        self.kwargs['storage-key'] = self._get_storage_key(self.kwargs['storage-account'], self.kwargs['rg'])
 
         # test show command
         self.cmd('az synapse sql pool audit-policy show '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
+                 '--workspace-name {workspace} --resource-group {rg} --name {sql-pool} ',
                  checks=[
                      self.check('state', 'Disabled')
                  ])
 
-        # test validator
-        self.cmd('az synapse sql pool audit-policy update '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
+        # update audit policy - enable
+        self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace} --name {sql-pool} '
+             ' --state Enabled --bsts Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
+             ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapname',
+             checks=[
+                 self.check('state', 'Enabled'),
+                 self.check('storageEndpoint', self.kwargs['storage-endpoint']),
+                 self.check('retentionDays', self.kwargs['retention-days']),
+                 self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
-        # test for updating state from Disabled to Enabled with storage and retention days
-        self.cmd('az synapse sql pool audit-policy update --state Enabled --storage-account {storage-account} '
-                 '--retention-days 7 --name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
+        # get audit policy
         self.cmd('az synapse sql pool audit-policy show '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
-                 checks=[
-                     self.check('state', 'Enabled')
-                 ])
+             '--workspace-name {workspace} --resource-group {rg} --name {sql-pool} --blob-auditing-policy-name bapname',
+             checks=[
+                 self.check('state', 'Enabled'),
+                 self.check('blobStorageTargetState', 'Enabled'),
+                 self.check('logAnalyticsTargetState', 'Disabled'),
+                 self.check('eventHubTargetState', 'Disabled'),
+                 self.check('isAzureMonitorTargetEnabled', False)])
 
-        # test for updating state from Enabled to Disabled
-        self.cmd('az synapse sql pool audit-policy update --state Disabled '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
-        self.cmd('az synapse sql pool audit-policy show '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
+        self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
+             ' --name {sql-pool} --state Enabled --bsts Enabled --storage-account {storage-account}'
+             ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapn',
+             checks=[
+                 self.check('state', 'Enabled'),
+                 self.check('storageEndpoint', self.kwargs['storage-endpoint']),
+                 self.check('retentionDays', self.kwargs['retention-days']),
+                 self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # update audit policy - disable
+        self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
+             ' --name {sql-pool} --state Disabled --blob-auditing-policy-name bapn',
+             checks=[
+                 self.check('state', 'Disabled'),
+                 self.check('retentionDays', self.kwargs['retention-days']),
+                 self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        ## create log analytics workspace
+        self.kwargs['log_analytics_workspace_id']= self.cmd('az monitor log-analytics workspace create --resource-group {rg} '
+                                              '--workspace-name {log_analytics_workspace_name}',
+                                              checks=[
+                                                  self.check('name', self.kwargs['log_analytics_workspace_name']),
+                                                  self.check('provisioningState',
+                                                                'Succeeded')]).get_output_in_json()['id']
+
+        # update audit policy - enable log analytics target
+        self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --name {sql-pool} --state Enabled'
+                 ' --lats Enabled --lawri {log_analytics_workspace_id} '
+                 ' --blob-auditing-policy-name bapn',
                  checks=[
-                     self.check('state', 'Disabled')
-                 ])
+                     self.check('state', 'Enabled'),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # get audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('az synapse sql pool audit-policy show --resource-group {rg} --workspace-name {workspace}'
+                 ' --name {sql-pool} ',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('blobStorageTargetState', 'Enabled'),
+                     self.check('logAnalyticsTargetState', 'Enabled'),
+                     self.check('eventHubTargetState', 'Disabled'),
+                     self.check('isAzureMonitorTargetEnabled', True)])
+
+        # update audit policy - disable log analytics target
+        self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --name {sql-pool} --state Enabled --lats Disabled'
+                 ' --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
+        self.cmd('az synapse sql pool audit-policy show --resource-group {rg} --workspace-name {workspace}'
+                 ' --name {sql-pool}',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('blobStorageTargetState', 'Enabled'),
+                     self.check('logAnalyticsTargetState', 'Disabled'),
+                     self.check('eventHubTargetState', 'Disabled'),
+                     self.check('isAzureMonitorTargetEnabled', False)])
+
+        # create event hub namespace
+        self.cmd('az eventhubs namespace create --resource-group {rg} -n {eventhub_namespace} --location eastus',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')])
+
+        # create event hub
+        self.cmd('az eventhubs eventhub create --resource-group {rg} -n {eventhub_name} --namespace-name {eventhub_namespace}',
+                 checks=[
+                     self.check('status', 'Active')])
+
+
+        # create event hub autorization rule
+        self.kwargs['eventhub_auth_rule_id'] = self.cmd(
+            'az eventhubs namespace authorization-rule create --resource-group {rg} -n {eventhub_auth_rule} '
+            '--namespace-name {eventhub_namespace} --rights Listen Manage Send').get_output_in_json()['id']
+
+        # update audit policy - enable event hub target
+        self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 ' --name {sql-pool} --state Enabled --event-hub-target-state Enabled'
+                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}'
+                 ' --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # get audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('az synapse sql pool audit-policy show --resource-group {rg} --workspace-name {workspace}'
+                 '  --name {sql-pool}',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('blobStorageTargetState', 'Enabled'),
+                     self.check('logAnalyticsTargetState', 'Disabled'),
+                     self.check('eventHubTargetState', 'Enabled'),
+                     self.check('isAzureMonitorTargetEnabled', True)])
+
+        # update audit policy - disable event hub target
+        self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
+                 '  --name {sql-pool} --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapn',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('retentionDays', self.kwargs['retention-days']),
+                     self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
+
+        # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
+        self.cmd('az synapse sql pool audit-policy show --resource-group {rg} --workspace-name {workspace}'
+                 ' --name {sql-pool}',
+                 checks=[
+                     self.check('state', 'Enabled'),
+                     self.check('blobStorageTargetState', 'Enabled'),
+                     self.check('logAnalyticsTargetState', 'Disabled'),
+                     self.check('eventHubTargetState', 'Disabled'),
+                     self.check('isAzureMonitorTargetEnabled', False)])
+
 
     @record_only()
     def test_sql_aad_admin(self):
@@ -533,44 +836,6 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
         self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
 
-    @record_only()
-    def test_sql_audit_policy(self):
-        self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
-            'storage-account': 'chayangstoragewestus2'
-        })
-
-        # test show command
-        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                 --blob-auditing-policy-name bapname',
-                 checks=[
-                     self.check('state', 'Disabled')
-                 ])
-
-        # test validator of this command
-        self.cmd('az synapse sql audit-policy update --workspace-name {workspace} --resource-group {rg} \
-                 --blob-auditing-policy-name bapname', expect_failure=True)
-
-        # test for updating state from Disabled to Enabled with storage and retention days
-        self.cmd('az synapse sql audit-policy update --state Enabled --storage-account {storage-account} '
-                 '--retention-days 7 --workspace-name {workspace} --resource-group {rg} \
-                 --blob-auditing-policy-name bapname')
-        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                --blob-auditing-policy-name bapname',
-                 checks=[
-                     self.check('state', 'Enabled')
-                 ])
-
-        # test for updating state from Enabled to Disabled
-        self.cmd('az synapse sql audit-policy update --state Disabled '
-                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname')
-        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                 --blob-auditing-policy-name bapname',
-                 checks=[
-                     self.check('state', 'Disabled')
-                 ])
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
@@ -901,6 +1166,54 @@ class SynapseScenarioTests(ScenarioTest):
     def _create_storage_account(self):
         self.kwargs.update({
             'location': self.location,
+            'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
+        })
+
+        # Wait some time to improve robustness
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(60)
+
+        # create storage account
+        self.cmd(
+            'az storage account create --name {storage-account} --resource-group {rg} --enable-hierarchical-namespace true --location {location}',
+            checks=[
+                self.check('name', self.kwargs['storage-account']),
+                self.check('type', 'Microsoft.Storage/storageAccounts'),
+                self.check('provisioningState', 'Succeeded')
+            ])
+
+    def _create_workspace_eastus(self, *additional_create_params):
+        self.kwargs.update({
+            'workspace': self.create_random_name(prefix='clitest', length=16),
+            'location': 'eastus',
+            'file-system': 'testfilesystem',
+            'login-user': 'cliuser1',
+            'login-password': self.create_random_name(prefix='Pswd1', length=16)
+        })
+
+        # Create adlsgen2
+        self._create_storage_account_eastus()
+
+        # Wait some time to improve robustness
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(60)
+
+        # create synapse workspace
+        self.cmd(
+            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+            '--file-system {file-system} --sql-admin-login-user {login-user} '
+            '--sql-admin-login-password {login-password}'
+            ' --location {location} ' + ' '.join(additional_create_params), checks=[
+                self.check('name', self.kwargs['workspace']),
+                self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded')
+            ])
+
+    def _create_storage_account_eastus(self):
+        self.kwargs.update({
+            'location': 'eastus',
             'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
         })
 
@@ -1362,6 +1675,16 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
+
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('az storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+
+    def _get_storage_key(self, storage_account, resource_group):
+        return self.cmd('az storage account keys list -g {} -n {} --query [0].value'
+                        .format(resource_group, storage_account)).get_output_in_json()
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
