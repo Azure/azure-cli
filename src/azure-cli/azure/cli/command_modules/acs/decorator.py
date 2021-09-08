@@ -2235,7 +2235,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return workspace_resource_id
 
-    # pylint: disable=unused-argument
+    # pylint: disable=unused-argument,no-self-use
     def get_virtual_node_addon_os_type(self, **kwargs) -> str:
         return "Linux"
 
@@ -2247,7 +2247,9 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.addon_profiles and
-            CONST_VIRTUAL_NODE_ADDON_NAME in self.mc.addon_profiles and
+            CONST_VIRTUAL_NODE_ADDON_NAME +
+            self.get_virtual_node_addon_os_type()
+            in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
                 CONST_VIRTUAL_NODE_ADDON_NAME +
                 self.get_virtual_node_addon_os_type()
@@ -2772,8 +2774,9 @@ class AKSCreateDecorator:
         mc.network_profile = network_profile
         return mc
 
-    def set_up_addon_profile(self, mc: ManagedCluster) -> ManagedCluster:
-        """Set up addon profile for the ManagedCluster object.
+    # pylint: disable=too-many-statements
+    def set_up_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up addon profiles for the ManagedCluster object.
 
         :return: the ManagedCluster object
         """
