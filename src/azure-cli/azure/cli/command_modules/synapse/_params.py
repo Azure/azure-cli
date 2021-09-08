@@ -616,6 +616,10 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
 
+    with self.argument_context('synapse trigger wait') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
     # synapse artifacts trigger run
     with self.argument_context('synapse trigger-run rerun') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)

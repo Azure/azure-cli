@@ -1297,6 +1297,11 @@ examples:
           --name testtrigger
 """
 
+helps['synapse trigger wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a trigger is met.
+"""
+
 helps['synapse trigger subscribe-to-event'] = """
 type: command
 short-summary: Subscribe event trigger to events.
@@ -1510,6 +1515,11 @@ type: group
 short-summary: Manage Synapse's integration runtimes.
 """
 
+helps['synapse integration-runtime managed'] = """
+    type: group
+    short-summary: Manage integration runtime with synapse sub group managed
+"""
+
 helps['synapse integration-runtime managed create'] = """
 type: command
 short-summary: Create an managed integration runtime.
@@ -1517,7 +1527,12 @@ examples:
   - name: Create an managed integration runtime.
     text: |-
         az synapse integration-runtime managed create --workspace-name testsynapseworkspace --resource-group rg \\
-          --name testintegrationruntime 
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime self-hosted'] = """
+    type: group
+    short-summary: Manage integration runtime with synapse sub group self-hosted
 """
 
 helps['synapse integration-runtime self-hosted create'] = """
@@ -1527,7 +1542,7 @@ examples:
   - name: Create an self-hosted integration runtime.
     text: |-
         az synapse integration-runtime self-hosted create --workspace-name testsynapseworkspace --resource-group rg \\
-          --name testintegrationruntime 
+          --name testintegrationruntime
 """
 
 helps['synapse integration-runtime update'] = """

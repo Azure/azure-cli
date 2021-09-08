@@ -164,7 +164,7 @@ def load_command_table(self, _):
         client_factory=None)
 
     synapse_trigger_sdk = CliCommandType(
-        operation_tmpl='azure.synapse.artifacts.operations#TriggerOperations.{}',
+        operations_tmpl='azure.synapse.artifacts.operations#TriggerOperations.{}',
         client_factory=None)
 
     synapse_data_flow_sdk = CliCommandType(
@@ -458,6 +458,7 @@ def load_command_table(self, _):
         g.custom_command('unsubscribe-from-event', 'unsubscribe_trigger_from_events', supports_no_wait=True)
         g.custom_command('start', 'start_trigger', supports_no_wait=True)
         g.custom_command('stop', 'stop_trigger', supports_no_wait=True)
+        g.custom_wait_command('wait', 'get_trigger')
 
     # Data Plane Commands --Artifacts trigger run operations
     with self.command_group('synapse trigger-run', synapse_trigger_run_sdk,

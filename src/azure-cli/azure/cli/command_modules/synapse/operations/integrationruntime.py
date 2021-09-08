@@ -9,8 +9,8 @@ from azure.mgmt.synapse.models import (IntegrationRuntimeResource,
 
 
 def Managed_Create(cmd, client, resource_group_name, workspace_name, integration_runtime_name,
-           description=None, if_match=None, location='AutoResolve', compute_type='General',
-           core_count=8, time_to_live=0, no_wait=False):
+                   description=None, if_match=None, location='AutoResolve', compute_type='General',
+                   core_count=8, time_to_live=0, no_wait=False):
     property_files = {}
     property_files['type'] = 'Managed'
     property_files['description'] = description
@@ -25,8 +25,9 @@ def Managed_Create(cmd, client, resource_group_name, workspace_name, integration
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, workspace_name,
                        integration_runtime_name, properties, if_match)
 
+
 def Selfhosted_Create(cmd, client, resource_group_name, workspace_name, integration_runtime_name,
-           description=None, if_match=None, no_wait=False):
+                      description=None, if_match=None, no_wait=False):
     property_files = {}
     property_files['type'] = 'SelfHosted'
     property_files['description'] = description
@@ -50,4 +51,3 @@ def update(cmd, client, resource_group_name, workspace_name, integration_runtime
     )
     return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, integration_runtime_name,
                        update_integration_runtime_request)
-
