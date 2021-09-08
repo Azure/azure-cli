@@ -4720,7 +4720,7 @@ examples:
         az network custom-ip prefix create --location westus2 --name MyCustomIpPrefix --resource-group MyResourceGroup
 """
 
-helps['network custom-ip prefix create'] = """
+helps['network custom-ip prefix wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the custom ip prefix is met.
 examples:
