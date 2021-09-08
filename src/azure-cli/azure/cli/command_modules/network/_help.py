@@ -4752,6 +4752,15 @@ examples:
         az network custom-ip prefix create --location westus2 --name MyCustomIpPrefix --resource-group MyResourceGroup
 """
 
+helps['network custom-ip prefix wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the custom ip prefix is met.
+examples:
+  - name: Wait for custom ip prefix to return as created.
+    text: |
+        az network custom-ip prefix wait --name MyCustomIpPrefix --resource-group MyResourceGroup --created
+"""
+
 helps['network custom-ip prefix delete'] = """
 type: command
 short-summary: Delete a custom IP prefix resource.
@@ -5826,6 +5835,11 @@ type: group
 short-summary: Manage packet capture on a virtual network gateway.
 """
 
+helps['network vnet-gateway packet-capture wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vnet gateway packet capture is met.
+"""
+
 helps['network vnet-gateway packet-capture start'] = """
 type: command
 short-summary: Start packet capture on a virtual network gateway.
@@ -5882,6 +5896,11 @@ examples:
 helps['network vnet-gateway vpn-client ipsec-policy'] = """
 type: group
 short-summary: Manage the VPN client connection ipsec-policy for P2S client connection of the virtual network gateway.
+"""
+
+helps['network vnet-gateway vpn-client ipsec-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vnet gateway vpn client ipsec policy is met.
 """
 
 helps['network vnet-gateway vpn-client ipsec-policy show'] = """
@@ -5953,6 +5972,11 @@ examples:
 helps['network vnet-gateway nat-rule'] = """
 type: group
 short-summary: Manage nat rule in a virtual network gateway
+"""
+
+helps['network vnet-gateway nat-rule wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vnet gateway nat rule is met.
 """
 
 helps['network vnet-gateway nat-rule add'] = """
@@ -6159,6 +6183,11 @@ examples:
 helps['network vpn-connection packet-capture'] = """
 type: group
 short-summary: Manage packet capture on a VPN connection.
+"""
+
+helps['network vpn-connection packet-capture wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vpn connection packet capture is met.
 """
 
 helps['network vpn-connection packet-capture start'] = """
