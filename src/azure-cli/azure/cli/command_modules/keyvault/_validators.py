@@ -9,6 +9,7 @@ import binascii
 from datetime import datetime
 import re
 import sys
+from ipaddress import ip_network
 
 from enum import Enum
 from knack.deprecation import Deprecated
@@ -16,7 +17,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -437,6 +438,20 @@ def validate_subnet(cmd, namespace):
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
+def validate_ip_address(cmd, namespace):
+    # if there are overlapping ip ranges, throw an exception
+    ip_address = namespace.ip_address
+
+    if not ip_address:
+        return
+
+    ip_address_networks = [ip_network(ip) for ip in ip_address]
+    for id, ip_address_network in enumerate(ip_address_networks):
+        for id2, ip_address_network2 in enumerate(ip_address_networks):
+            if id == id2:
+                continue
+            if ip_address_network.overlaps(ip_address_network2):
+                raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} provided are overlapping: --ip_address ip1 [ip2]...")
 
 def validate_role_assignment_args(ns):
     if not any([ns.role_assignment_name, ns.scope, ns.assignee, ns.assignee_object_id, ns.role, ns.ids]):

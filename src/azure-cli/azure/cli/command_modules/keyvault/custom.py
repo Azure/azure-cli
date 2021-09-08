@@ -991,17 +991,18 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
     if ip_address:
         rules.ip_rules = rules.ip_rules or []
         # if the rule already exists, don't add again
-        to_modify = True
-        for x in rules.ip_rules:
-            existing_ip_network = ip_network(x.value)
-            new_ip_network = ip_network(ip_address)
-            if new_ip_network.overlaps(existing_ip_network):
-                logger.warning("This IP/CIDR overlaps with %s, which exists already. Not adding duplicates.", x.value)
-                to_modify = False
-                break
-        if to_modify:
-            rules.ip_rules.append(IPRule(value=ip_address))
-            to_update = True
+        for ip in ip_address:
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.value)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.", ip, x.value)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IPRule(value=ip))
+                to_update = True
 
     # if we didn't modify the network rules just return the vault as is
     if not to_update:
