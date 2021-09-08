@@ -1220,6 +1220,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_custom_ip_prefixes')
         g.show_command('show')
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix', supports_no_wait=True)
+        g.wait_command('wait')
     # endRegion
 
     # region PublicIPAddresses
@@ -1370,6 +1371,7 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
         g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
         g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
@@ -1379,6 +1381,7 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
         g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
         g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
+        g.wait_command('wait')
 
     # with self.command_group
 
@@ -1404,6 +1407,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
         g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
         g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
+        g.wait_command('wait')
     # endregion
 
     # region VirtualNetworkGatewayConnections
@@ -1432,6 +1436,7 @@ def load_command_table(self, _):
     with self.command_group('network vpn-connection packet-capture', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections, is_preview=True, min_api='2019-07-01') as g:
         g.custom_command('start', 'start_vpn_conn_package_capture', supports_no_wait=True)
         g.custom_command('stop', 'stop_vpn_conn_package_capture', supports_no_wait=True)
+        g.wait_command('wait')
 
     # endregion
 
