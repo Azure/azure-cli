@@ -593,16 +593,8 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             raise ex
 
 
-def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
-    webapp = app_instance
-    if not app_instance:  # when the routine is invoked as a help method, not through commands
-        webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    if not webapp:
-        raise ResourceNotFoundError("WebApp'{}', is not found on RG '{}'.".format(name, resource_group_name))
-    webapp.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
-    _rename_server_farm_props(webapp)
-    _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
-    return webapp
+def show_webapp(cmd, resource_group_name, name, slot=None):
+    return _show_app(cmd, resource_group_name, name, "Webapp", slot)
 
 
 # for generic updater
@@ -696,6 +688,10 @@ def get_functionapp(cmd, resource_group_name, name, slot=None):
     return function_app
 
 
+def show_functionapp(cmd, resource_group_name, name, slot=None):
+    return _show_app(cmd, resource_group_name, name, "Functionapp", slot)
+
+
 def list_webapp(cmd, resource_group_name=None):
     full_list = _list_app(cmd.cli_ctx, resource_group_name)
     # ignore apps with kind==null & not functions apps
@@ -717,6 +713,33 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 def list_function_app(cmd, resource_group_name=None):
     return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
                        _list_app(cmd.cli_ctx, resource_group_name)))
+
+
+def _show_app(cmd, resource_group_name, name, kind, slot=None):
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not app:
+        raise ResourceNotFoundError("Unable to find {} '{}', in RG '{}'.".format(
+                                    kind, name, resource_group_name))
+
+    external_kind = _kind_to_external_kind(app.kind) if app else None
+    if external_kind != kind:
+        raise ResourceNotFoundError(
+            "Unable to find {} '{}', in RG '{}'".format(kind, name, resource_group_name),
+            "Use 'az {} show' to show {}s".format(external_kind.lower(), external_kind))
+
+    app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    _rename_server_farm_props(app)
+    _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+    print("ASFDALFH")
+    return app
+
+
+def _kind_to_external_kind(kind):
+    if "workflow" in kind:
+        return "Logicapp"
+    if "function" in kind:
+        return "Functionapp"
+    return "Webapp"
 
 
 def _list_app(cli_ctx, resource_group_name=None):
