@@ -5806,10 +5806,6 @@ short-summary: Manage packet capture on a virtual network gateway.
 helps['network vnet-gateway packet-capture wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the vnet gateway packet capture is met.
-examples:
-  - name: Wait for vnet gateway packet capture to return as created.
-    text: |
-        az network vnet-gateway packet-capture wait -g MyResourceGroup -n MyVnetGateway --created
 """
 
 helps['network vnet-gateway packet-capture start'] = """
@@ -5873,10 +5869,6 @@ short-summary: Manage the VPN client connection ipsec-policy for P2S client conn
 helps['network vnet-gateway vpn-client ipsec-policy wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the vnet gateway vpn client ipsec policy is met.
-examples:
-  - name: Wait for vnet gateway vpn client ipsec policy to return as created.
-    text: |
-        az network vnet-gateway vpn-client ipsec-policy wait -g MyResourceGroup -n MyVnetGateway --created
 """
 
 helps['network vnet-gateway vpn-client ipsec-policy show'] = """
@@ -5953,10 +5945,6 @@ short-summary: Manage nat rule in a virtual network gateway
 helps['network vnet-gateway nat-rule wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the vnet gateway nat rule is met.
-examples:
-  - name: Wait for vnet gateway nat rule to return as created.
-    text: |
-        az network vnet-gateway nat-rule wait -g MyResourceGroup --name Nat --created
 """
 
 helps['network vnet-gateway nat-rule add'] = """
@@ -6168,10 +6156,6 @@ short-summary: Manage packet capture on a VPN connection.
 helps['network vpn-connection packet-capture wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the vpn connection packet capture is met.
-examples:
-  - name: Wait for vpn connection packet capture to return as created.
-    text: |
-        az network vpn-connection packet-capture wait -g MyResourceGroup -n MyConnection --created
 """
 
 helps['network vpn-connection packet-capture start'] = """
