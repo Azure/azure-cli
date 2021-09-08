@@ -481,7 +481,7 @@ class AKSCreateContext:
         return dns_name_prefix
 
     # pylint: disable=unused-argument
-    def get_location(self, **kwargs) -> str:
+    def get_location(self, **kwargs) -> Union[str, None]:
         """Dynamically obtain the value of location according to the context.
 
         When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
@@ -490,7 +490,7 @@ class AKSCreateContext:
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
-        :return: string
+        :return: string or None
         """
         # read the original value passed by the command
         location = self.raw_param.get("location")
@@ -554,7 +554,7 @@ class AKSCreateContext:
         return no_ssh_key
 
     # pylint: disable=unused-argument
-    def get_vm_set_type(self, **kwargs) -> str:
+    def get_vm_set_type(self, **kwargs) -> Union[str, None]:
         """Dynamically obtain the value of vm_set_type according to the context.
 
         Dynamic completion will be triggerd by default. Function "_set_vm_set_type" will be called and the
@@ -563,7 +563,7 @@ class AKSCreateContext:
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
-        :return: string
+        :return: string or None
         """
         # read the original value passed by the command
         raw_value = self.raw_param.get("vm_set_type")
@@ -1662,7 +1662,7 @@ class AKSCreateContext:
     def get_user_assigned_identity_client_id(self, **kwargs) -> str:
         """Obtain the client_id of user assigned identity.
 
-        Note: this is not a parameter of aks_create, and it will not be decorated into the `mc` object.
+        Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
 
         Parse assign_identity and use ManagedServiceIdentityClient to send the request, get the client_id field in the
         returned identity object. ResourceNotFoundError, ClientRequestError or InvalidArgumentValueError exceptions
@@ -1679,7 +1679,7 @@ class AKSCreateContext:
     def get_user_assigned_identity_object_id(self, **kwargs) -> str:
         """Obtain the principal_id of user assigned identity.
 
-        Note: this is not a parameter of aks_create, and it will not be decorated into the `mc` object.
+        Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
 
         Parse assign_identity and use ManagedServiceIdentityClient to send the request, get the principal_id field in
         the returned identity object. ResourceNotFoundError, ClientRequestError or InvalidArgumentValueError exceptions
@@ -2172,7 +2172,7 @@ class AKSCreateContext:
         return network_policy
 
     # pylint: disable=unused-argument
-    def get_enable_addons(self, **kwargs) -> Union[str, List[str]]:
+    def get_enable_addons(self, **kwargs) -> Union[str, List[str], None]:
         """Obtain the value of enable_addons.
 
         Note: enable_addons will not be decorated into the `mc` object.
@@ -2180,7 +2180,7 @@ class AKSCreateContext:
         This function supports the option of enable_split. When enabled, it will split the string into a list with
         "," as the delimiter.
 
-        :return: string or list of string
+        :return: string, empty list or list of strings, or None
         """
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
@@ -2192,7 +2192,17 @@ class AKSCreateContext:
         return enable_addons
 
     # pylint: disable=unused-argument
-    def get_workspace_resource_id(self, **kwargs) -> str:
+    def get_workspace_resource_id(self, **kwargs) -> Union[str, None]:
+        """Dynamically obtain the value of workspace_resource_id according to the context.
+
+        When both workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
+        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        subscription_id and resource_group_name.
+
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         workspace_resource_id = self.raw_param.get("workspace_resource_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2237,10 +2247,20 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument,no-self-use
     def get_virtual_node_addon_os_type(self, **kwargs) -> str:
+        """Obtain the os_type of virtual node addon.
+
+        Note: This is not a parameter of aks_create.
+
+        :return: string
+        """
         return "Linux"
 
     # pylint: disable=unused-argument
-    def get_aci_subnet_name(self, **kwargs) -> str:
+    def get_aci_subnet_name(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of aci_subnet_name.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         aci_subnet_name = self.raw_param.get("aci_subnet_name")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2265,7 +2285,11 @@ class AKSCreateContext:
         return aci_subnet_name
 
     # pylint: disable=unused-argument
-    def get_appgw_name(self, **kwargs) -> str:
+    def get_appgw_name(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_name.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         appgw_name = self.raw_param.get("appgw_name")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2286,7 +2310,11 @@ class AKSCreateContext:
         return appgw_name
 
     # pylint: disable=unused-argument
-    def get_appgw_subnet_cidr(self, **kwargs) -> str:
+    def get_appgw_subnet_cidr(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_subnet_cidr.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         appgw_subnet_cidr = self.raw_param.get("appgw_subnet_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2307,7 +2335,11 @@ class AKSCreateContext:
         return appgw_subnet_cidr
 
     # pylint: disable=unused-argument
-    def get_appgw_id(self, **kwargs) -> str:
+    def get_appgw_id(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_id.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         appgw_id = self.raw_param.get("appgw_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2328,7 +2360,11 @@ class AKSCreateContext:
         return appgw_id
 
     # pylint: disable=unused-argument
-    def get_appgw_subnet_id(self, **kwargs) -> str:
+    def get_appgw_subnet_id(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_subnet_id.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         appgw_subnet_id = self.raw_param.get("appgw_subnet_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2349,7 +2385,11 @@ class AKSCreateContext:
         return appgw_subnet_id
 
     # pylint: disable=unused-argument
-    def get_appgw_watch_namespace(self, **kwargs) -> str:
+    def get_appgw_watch_namespace(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_watch_namespace.
+
+        :return: string or None
+        """
         # read the original value passed by the command
         appgw_watch_namespace = self.raw_param.get("appgw_watch_namespace")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2370,7 +2410,11 @@ class AKSCreateContext:
         return appgw_watch_namespace
 
     # pylint: disable=unused-argument
-    def get_enable_sgxquotehelper(self, **kwargs) -> str:
+    def get_enable_sgxquotehelper(self, **kwargs) -> bool:
+        """Obtain the value of enable_sgxquotehelper.
+
+        :return: bool
+        """
         # read the original value passed by the command
         enable_sgxquotehelper = self.raw_param.get("enable_sgxquotehelper")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2800,7 +2844,7 @@ class AKSCreateDecorator:
             workspace_resource_id = self.context.get_workspace_resource_id()
             addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
-            # post
+            # post-process
             _ensure_container_insights_for_monitoring(self.cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
             # set intermediate
             self.context.set_intermediate("monitoring", True, overwrite_exists=True)
@@ -2890,8 +2934,8 @@ class AKSCreateDecorator:
         self.process_attach_acr(mc)
         # set up network profile
         mc = self.set_up_network_profile(mc)
-        # set up addon profile
-        mc = self.set_up_addon_profile(mc)
+        # set up addon profiles
+        mc = self.set_up_addon_profiles(mc)
 
         # TODO: set up other profiles
         return mc
