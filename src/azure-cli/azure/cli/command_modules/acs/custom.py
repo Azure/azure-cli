@@ -1662,7 +1662,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         if test_hook_data:
             test_configs = test_hook_data.get("configs", None)
             if test_configs and test_configs.get("returnOutput", False):
-                return(output)
+                return output
     else:
         raise AzureInternalError("Failed to check the ACR.")
 
