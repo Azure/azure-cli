@@ -1733,7 +1733,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'show', 'delete', 'exists', 'move', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs directory {}'.format(item)) as c:
-            c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name (i.e. container name).", required=True)
+            c.extra('file_system_name', options_list=['-f', '--file-system'],
+                    help="File system name (i.e. container name).", required=True)
             c.extra('directory_path', options_list=['--name', '-n'],
                     help="The name of directory.", required=True)
             c.extra('timeout', timeout_type)
@@ -1743,7 +1744,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('umask', umask_type)
 
     with self.argument_context('storage fs directory list') as c:
-        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name (i.e. container name).", required=True)
+        c.extra('file_system_name', options_list=['-f', '--file-system'],
+                help="File system name (i.e. container name).", required=True)
         c.argument('recursive', arg_type=get_three_state_flag(), default=True,
                    help='Look into sub-directories recursively when set to true.')
         c.argument('path', help="Filter the results to return only paths under the specified path.")
@@ -1782,7 +1784,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('source')
 
     with self.argument_context('storage fs file list') as c:
-        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name (i.e. container name).", required=True)
+        c.extra('file_system_name', options_list=['-f', '--file-system'],
+                help="File system name (i.e. container name).", required=True)
         c.argument('recursive', arg_type=get_three_state_flag(), default=True,
                    help='Look into sub-directories recursively when set to true.')
         c.argument('exclude_dir', action='store_true',
