@@ -5072,15 +5072,31 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         except subprocess.CalledProcessError as err:
             raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
-        # check acr
-        check_cmd = 'aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io'
-        self.cmd(check_cmd, checks=[
-            StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
-        ])
+        # create test hook file
+        hook_file_path = self.get_test_data_file_path("test_aks_create_attach_acr.hook")
+        test_hook_data = {
+            "configs": {
+                "returnOutput": True,
+            }
+        }
+        with open(hook_file_path, "w") as f:
+            json.dump(test_hook_data, f)
 
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+        try:
+           # check acr
+            check_cmd = 'aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io'
+            self.cmd(check_cmd, checks=[
+                StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
+            ])
+        # clean up test hook file even if test failed
+        finally:
+            if os.path.exists(hook_file_path):
+                # delete file
+                os.remove(hook_file_path)
+
+            # delete cluster
+            self.cmd(
+                'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     # live only due to role assignment is not mocked
     @live_only()
