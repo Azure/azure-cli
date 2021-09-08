@@ -1688,7 +1688,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     for item in ['create', 'show', 'delete', 'exists', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['--name', '-n'],
-                    help="File system name.", required=True)
+                    help="File system name (i.e. container name).", required=True)
             c.extra('timeout', timeout_type)
 
     with self.argument_context('storage fs create') as c:
@@ -1701,7 +1701,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_file_system_permissions = self.get_sdk('_models#FileSystemSasPermissions',
                                                  resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
         c.register_sas_arguments()
-        c.argument('file_system', options_list=['--name', '-n'], help="File system name.")
+        c.argument('file_system', options_list=['--name', '-n'], help="File system name (i.e. container name).")
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy.')
         c.argument('permission', options_list='--permissions',
@@ -1733,7 +1733,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'show', 'delete', 'exists', 'move', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs directory {}'.format(item)) as c:
-            c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+            c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name (i.e. container name).", required=True)
             c.extra('directory_path', options_list=['--name', '-n'],
                     help="The name of directory.", required=True)
             c.extra('timeout', timeout_type)
@@ -1743,7 +1743,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('umask', umask_type)
 
     with self.argument_context('storage fs directory list') as c:
-        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name (i.e. container name).", required=True)
         c.argument('recursive', arg_type=get_three_state_flag(), default=True,
                    help='Look into sub-directories recursively when set to true.')
         c.argument('path', help="Filter the results to return only paths under the specified path.")
@@ -1782,7 +1782,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('source')
 
     with self.argument_context('storage fs file list') as c:
-        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name (i.e. container name).", required=True)
         c.argument('recursive', arg_type=get_three_state_flag(), default=True,
                    help='Look into sub-directories recursively when set to true.')
         c.argument('exclude_dir', action='store_true',
@@ -1802,7 +1802,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                  'metadata show']:
         with self.argument_context('storage fs file {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['-f', '--file-system'],
-                    help='File system name.', required=True)
+                    help='File system name (i.e. container name).', required=True)
             c.extra('path', options_list=['-p', '--path'], help="The file path in a file system.",
                     required=True)
             c.extra('timeout', timeout_type)
@@ -1828,7 +1828,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
         c.register_content_settings_argument(t_file_content_settings, update=False)
         c.extra('file_system_name', options_list=['-f', '--file-system'],
-                help='File system name.', required=True)
+                help='File system name (i.e. container name).', required=True)
         c.extra('path', options_list=['-p', '--path'], required=True,
                 help="The original file path users want to move in a file system.")
         c.argument('new_name', options_list=['--new-path'],
@@ -1859,7 +1859,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         with self.argument_context('storage fs access {}'.format(item)) as c:
             from ._validators import validate_access_control
             c.extra('file_system_name', options_list=['-f', '--file-system'],
-                    help='File system name.', required=True)
+                    help='File system name (i.e. container name).', required=True)
             c.extra('directory_path', options_list=['-p', '--path'],
                     help='The path to a file or directory in the specified file system.', required=True)
             c.argument('permissions', validator=validate_access_control)
