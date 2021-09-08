@@ -16,6 +16,8 @@ import ssl
 import sys
 import uuid
 import base64
+import os.path
+from os import path
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
@@ -2127,27 +2129,82 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = N
         return rcf.deployment_stacks.begin_delete_at_resource_group(stack_arr[4], stack_arr[-1])
     raise CLIError("Please enter the (stack name and resource group) or stack resource id")
 
-def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_url = None, parameters = None, param_uri = None, debug_setting = None):
-    if not deployment_scope:
-        deployment_scope = "subscription"
+def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
+    # if not deployment_scope:
+    #     deployment_scope = "subscription"
+    # rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
+    # ds = rcf.deployment_stacks.models.DeploymentStack()
+    # ds.template = json.load(open(template_file))
+    # print(ds)
+    # ds.description = "harshpateltest1"
+    # ds.deployment_scope = "/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321"
+    # ds.update_behavior = "Detach"
+    # ds.location = "eastus"
+
+    # print(rcf.deployment_stacks.begin_create_or_update_at_subscription(name, ds))
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    
+    t_spec, t_uri = None, None
+    p_uri = None
 
-    ds = rcf.deployment_stacks.models.DeploymentStack()
-    templateLink = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
-    templateLink.id = template_file
-    ds.template_link = templateLink
-    print(ds)
-    ds.description = "harshpateltest1"
-    ds.deployment_scope = "/subscriptions/69fa7d44-e916-4be7-8c65-62e5a05f9be1"
-    ds.update_behavior = "Detach"
-    ds.location = "eastus"
+    if template_file:
+        if path.exists(template_file):
+            t_uri = template_file
+        else:
+            raise CLIError("Please enter a valid file path")
+    elif template_spec:
+        t_spec = template_spec
+    elif template_uri:
+        t_uri = template_uri
+    else:
+        # we assume this will end the code
+        raise CLIError("Please enter one of the following: template file, template spec, or template url")
+    
+    if param_file:
+        pass
+    elif param_uri:
+        p_uri = param_uri
+    
+    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, update_behavior = update_behavior, deployment_scope = deployment_scope)
+    deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
-    print(rcf.deployment_stacks.begin_create_or_update_at_subscription(name, ds))
+    if t_spec:
+        deployment_stacks_template_link.id = t_spec
+        deployment_stack_model.template_link = deployment_stacks_template_link
+    elif t_uri:
+        #need to validate
+        deployment_stacks_template_link.id = t_uri
+        deployment_stack_model.template_link = deployment_stacks_template_link
+    else:
+        deployment_stack_model.template = json.load(open(template_file))
+    
+    deployment_stack_model.deployment_scope = "/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321"
+
+    
+    print(rcf.deployment_stacks.begin_create_or_update_at_subscription(name, deployment_stack_model))
 
 
-    # print(rcf)
-    # print(rcf.deployment_stacks)
-    # return rcf.deployment_stacks.DeploymentStack("", location, update_behavior, deployment_scope)
+
+
+
+    #  ds.template = json.load(open(template_file))
+    # print(ds)
+    # ds.description = "harshpateltest1"
+    # ds.deployment_scope = "/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321"
+    # ds.update_behavior = "Detach"
+    # ds.location = "eastus"
+
+    # print(rcf.deployment_stacks.begin_create_or_update_at_subscription(name, ds))
+    
+
+    
+    
+
+
+
+
+    
 
 
 
