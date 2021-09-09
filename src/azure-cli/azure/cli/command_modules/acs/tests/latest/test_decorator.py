@@ -242,7 +242,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
         public_key = "{} {}".format(key.get_name(), key.get_base64())
 
         # default
-        ctx_1 = AKSCreateContext(self.cmd, {"ssh_key_value": public_key, "no_ssh_key": False})
+        ctx_1 = AKSCreateContext(
+            self.cmd, {"ssh_key_value": public_key, "no_ssh_key": False}
+        )
         self.assertEqual(
             ctx_1.get_ssh_key_value_and_no_ssh_key(), (public_key, False)
         )
@@ -261,7 +263,10 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         with self.assertRaises(CLIError):
-            self.assertEqual(ctx_1.get_ssh_key_value_and_no_ssh_key(), "test_mc_ssh_key_value")
+            self.assertEqual(
+                ctx_1.get_ssh_key_value_and_no_ssh_key(),
+                "test_mc_ssh_key_value",
+            )
 
         # invalid key with validation
         ctx_2 = AKSCreateContext(
@@ -292,7 +297,10 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_3.attach_mc(mc_3)
         with self.assertRaises(CLIInternalError):
-            self.assertEqual(ctx_3.get_ssh_key_value_and_no_ssh_key(), "test_mc_ssh_key_value")
+            self.assertEqual(
+                ctx_3.get_ssh_key_value_and_no_ssh_key(),
+                "test_mc_ssh_key_value",
+            )
 
     def test_get_dns_name_prefix(self):
         # default & dynamic completion
@@ -471,7 +479,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(
-            ctx_2.get_api_server_authorized_ip_ranges(enable_validation=True),
+            ctx_2.get_api_server_authorized_ip_ranges(),
             "test_api_server_authorized_ip_ranges",
         )
 
@@ -513,9 +521,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_2 = AKSCreateContext(
             self.cmd, {"nodepool_name": "test_nodepool_name"}
         )
-        self.assertEqual(
-            ctx_2.get_nodepool_name(enable_trim=True), "test_nodepoo"
-        )
+        self.assertEqual(ctx_2.get_nodepool_name(), "test_nodepoo")
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             name="test_nodepool_name"
         )
@@ -523,13 +529,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
             location="test_location", agent_pool_profiles=[agent_pool_profile]
         )
         ctx_2.attach_mc(mc)
-        self.assertEqual(
-            ctx_2.get_nodepool_name(enable_trim=True), "test_nodepool_name"
-        )
+        self.assertEqual(ctx_2.get_nodepool_name(), "test_nodepool_name")
 
         # dynamic completion
         ctx_3 = AKSCreateContext(self.cmd, {"nodepool_name": None})
-        self.assertEqual(ctx_3.get_nodepool_name(enable_trim=True), "nodepool1")
+        self.assertEqual(ctx_3.get_nodepool_name(), "nodepool1")
 
     def test_get_nodepool_tags(self):
         # default
@@ -559,31 +563,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(
             ctx_1.get_nodepool_labels(), {"key1": "value1", "key2": "value2"}
         )
-
-    def test_get_node_count(self):
-        # default
-        ctx_1 = AKSCreateContext(self.cmd, {"node_count": 3})
-        self.assertEqual(ctx_1.get_node_count(), 3)
-        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", count=20
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", agent_pool_profiles=[agent_pool_profile]
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_node_count(), 20)
-
-        # valid parameter with validation
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {
-                "node_count": 5,
-                "enable_cluster_autoscaler": True,
-                "min_count": 3,
-                "max_count": 10,
-            },
-        )
-        self.assertEqual(ctx_2.get_node_count(enable_validation=True), 5)
 
     def test_get_node_vm_size(self):
         # default
@@ -744,18 +723,38 @@ class AKSCreateContextTestCase(unittest.TestCase):
             ctx_1.get_node_osdisk_type(), "test_mc_node_osdisk_type"
         )
 
-    def test_get_enable_cluster_autoscaler(self):
+    def test_get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count(
+        self,
+    ):
         # default
-        ctx_1 = AKSCreateContext(self.cmd, {"enable_cluster_autoscaler": False})
-        self.assertEqual(ctx_1.get_enable_cluster_autoscaler(), False)
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "node_count": 3,
+                "enable_cluster_autoscaler": False,
+                "min_count": None,
+                "max_count": None,
+            },
+        )
+        self.assertEqual(
+            ctx_1.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count(),
+            (3, False, None, None),
+        )
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", enable_auto_scaling=True
+            name="test_nodepool_name",
+            count=5,
+            enable_auto_scaling=True,
+            min_count=1,
+            max_count=10,
         )
         mc = self.models.ManagedCluster(
             location="test_location", agent_pool_profiles=[agent_pool_profile]
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_enable_cluster_autoscaler(), True)
+        self.assertEqual(
+            ctx_1.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count(),
+            (5, True, 1, 10),
+        )
 
         # invalid parameter with validation
         ctx_2 = AKSCreateContext(
@@ -768,33 +767,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_2.get_enable_cluster_autoscaler(enable_validation=True)
-
-    def test_get_min_count(self):
-        # default
-        ctx_1 = AKSCreateContext(self.cmd, {"min_count": None})
-        self.assertEqual(ctx_1.get_min_count(), None)
-        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", min_count=5
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", agent_pool_profiles=[agent_pool_profile]
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_min_count(), 5)
-
-        # invalid parameter with validation
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {
-                "node_count": 5,
-                "enable_cluster_autoscaler": False,
-                "min_count": 3,
-                "max_count": None,
-            },
-        )
-        with self.assertRaises(RequiredArgumentMissingError):
-            ctx_2.get_min_count(enable_validation=True)
+            ctx_2.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
 
         # invalid parameter with validation
         ctx_3 = AKSCreateContext(
@@ -807,36 +780,10 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(InvalidArgumentValueError):
-            ctx_3.get_min_count(enable_validation=True)
-
-    def test_get_max_count(self):
-        # default
-        ctx_1 = AKSCreateContext(self.cmd, {"max_count": None})
-        self.assertEqual(ctx_1.get_max_count(), None)
-        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", max_count=10
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", agent_pool_profiles=[agent_pool_profile]
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_max_count(), 10)
+            ctx_3.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
 
         # invalid parameter with validation
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {
-                "node_count": 5,
-                "enable_cluster_autoscaler": False,
-                "min_count": None,
-                "max_count": 10,
-            },
-        )
-        with self.assertRaises(RequiredArgumentMissingError):
-            ctx_2.get_max_count(enable_validation=True)
-
-        # invalid parameter with validation
-        ctx_3 = AKSCreateContext(
+        ctx_4 = AKSCreateContext(
             self.cmd,
             {
                 "node_count": 5,
@@ -846,7 +793,20 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(InvalidArgumentValueError):
-            ctx_3.get_max_count(enable_validation=True)
+            ctx_4.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
+
+        # invalid parameter with validation
+        ctx_5 = AKSCreateContext(
+            self.cmd,
+            {
+                "node_count": 5,
+                "enable_cluster_autoscaler": False,
+                "min_count": 3,
+                "max_count": None,
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_5.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
 
     def test_get_admin_username(self):
         # default

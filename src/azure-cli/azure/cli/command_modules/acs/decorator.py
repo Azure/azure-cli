@@ -394,7 +394,7 @@ class AKSCreateContext:
         ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped. Otherwise, a CLIError will
         be raised when the value of ssh_key_value is invalid.
 
-        :return: a tuple containing two elements: string type ssh_key_value and bool type no_ssh_key
+        :return: a tuple containing two elements: ssh_key_value of string type and no_ssh_key of bool type
         """
         # ssh_key_value
         # read the original value passed by the command
@@ -697,14 +697,11 @@ class AKSCreateContext:
 
         return self._get_load_balancer_sku(enable_validation=True)
 
-    # pylint: disable=unused-argument
-    def get_api_server_authorized_ip_ranges(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[str, List[str], None]:
+    def get_api_server_authorized_ip_ranges(self) -> Union[str, List[str], None]:
         """Obtain the value of api_server_authorized_ip_ranges.
 
-        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
-        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+        This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic" when
+        api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
 
         :return: string, empty list or list of strings, or None
         """
@@ -725,18 +722,16 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if enable_validation:
-            if (
-                api_server_authorized_ip_ranges and
-                self._get_load_balancer_sku(enable_validation=False) == "basic"
-            ):
-                raise MutuallyExclusiveArgumentError(
-                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-                )
+        if (
+            api_server_authorized_ip_ranges and
+            self._get_load_balancer_sku(enable_validation=False) == "basic"
+        ):
+            raise MutuallyExclusiveArgumentError(
+                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+            )
         return api_server_authorized_ip_ranges
 
-    # pylint: disable=unused-argument
-    def get_fqdn_subdomain(self, **kwargs) -> Union[str, None]:
+    def get_fqdn_subdomain(self) -> Union[str, None]:
         """Obtain the value of fqdn_subdomain.
 
         This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
@@ -759,17 +754,13 @@ class AKSCreateContext:
             )
         return fqdn_subdomain
 
-    # pylint: disable=unused-argument
-    def get_nodepool_name(self, enable_trim: bool = False, **kwargs) -> str:
+    def get_nodepool_name(self) -> str:
         """Dynamically obtain the value of nodepool_name according to the context.
 
         Note: SDK performs the following validation {'required': True, 'pattern': r'^[a-z][a-z0-9]{0,11}$'}.
 
-        When additional option enable_trim is enabled, dynamic completion will be triggerd.
-
-        This function supports the option of enable_trim. When enabled, it will normalize the value of nodepool_name.
-        If no value is assigned, the default value "nodepool1" is set, and if the string length is greater than 12,
-        it is truncated.
+        This function will normalize the parameter by default. If no value is assigned, the default value "nodepool1"
+        is set, and if the string length is greater than 12, it is truncated.
 
         :return: string
         """
@@ -785,15 +776,11 @@ class AKSCreateContext:
                 value_obtained_from_mc = agent_pool_profile.name
 
         # set default value
-        read_from_mc = False
         if value_obtained_from_mc is not None:
             nodepool_name = value_obtained_from_mc
-            read_from_mc = True
         else:
             nodepool_name = raw_value
-
-        # dynamic completion
-        if not read_from_mc and enable_trim:
+            # normalize
             if not nodepool_name:
                 nodepool_name = "nodepool1"
             else:
@@ -802,8 +789,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return nodepool_name
 
-    # pylint: disable=unused-argument
-    def get_nodepool_tags(self, **kwargs) -> Union[Dict[str, str], None]:
+    def get_nodepool_tags(self) -> Union[Dict[str, str], None]:
         """Obtain the value of nodepool_tags.
 
         :return: Dictionary or None
@@ -829,8 +815,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return nodepool_tags
 
-    # pylint: disable=unused-argument
-    def get_nodepool_labels(self, **kwargs) -> Union[Dict[str, str], None]:
+    def get_nodepool_labels(self) -> Union[Dict[str, str], None]:
         """Obtain the value of nodepool_labels.
 
         :return: Dictionary or None
@@ -856,55 +841,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return nodepool_labels
 
-    # pylint: disable=unused-argument
-    def get_node_count(self, enable_validation: bool = False, **kwargs) -> int:
-        """Obtain the value of node_count.
-
-        This function supports the option of enable_validation. When enabled, on the premise that
-        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
-        raise the RequiredArgumentMissingError; if will also check whether node_count is between min_count and
-        max_count, if not, raise the InvalidArgumentValueError.
-
-        :return: int
-        """
-        # read the original value passed by the command
-        raw_value = self.raw_param.get("node_count")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.agent_pool_profiles:
-            agent_pool_profile = safe_list_get(
-                self.mc.agent_pool_profiles, 0, None
-            )
-            if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.count
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            node_count = value_obtained_from_mc
-        else:
-            node_count = raw_value
-
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
-            min_count = self.get_min_count()
-            max_count = self.get_max_count()
-            if enable_cluster_autoscaler:
-                if min_count is None or max_count is None:
-                    raise RequiredArgumentMissingError(
-                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-                    )
-                if node_count < min_count or node_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "node-count is not in the range of min-count and max-count"
-                    )
-
-        return int(node_count)
-
-    # pylint: disable=unused-argument
-    def get_node_vm_size(self, **kwargs) -> str:
+    def get_node_vm_size(self) -> str:
         """Obtain the value of node_vm_size.
 
         :return: string
@@ -930,8 +867,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return node_vm_size
 
-    # pylint: disable=unused-argument
-    def get_vnet_subnet_id(self, **kwargs) -> Union[str, None]:
+    def get_vnet_subnet_id(self) -> Union[str, None]:
         """Obtain the value of vnet_subnet_id.
 
         :return: string or None
@@ -957,8 +893,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return vnet_subnet_id
 
-    # pylint: disable=unused-argument
-    def get_ppg(self, **kwargs) -> Union[str, None]:
+    def get_ppg(self) -> Union[str, None]:
         """Obtain the value of ppg(proximity_placement_group_id).
 
         :return: string or None
@@ -986,8 +921,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return ppg
 
-    # pylint: disable=unused-argument
-    def get_zones(self, **kwargs) -> Union[List[str], None]:
+    def get_zones(self) -> Union[List[str], None]:
         """Obtain the value of zones.
 
         :return: list of strings or None
@@ -1013,8 +947,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return zones
 
-    # pylint: disable=unused-argument
-    def get_enable_node_public_ip(self, **kwargs) -> bool:
+    def get_enable_node_public_ip(self) -> bool:
         """Obtain the value of enable_node_public_ip.
 
         :return: bool
@@ -1042,8 +975,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_node_public_ip
 
-    # pylint: disable=unused-argument
-    def get_node_public_ip_prefix_id(self, **kwargs) -> Union[str, None]:
+    def get_node_public_ip_prefix_id(self) -> Union[str, None]:
         """Obtain the value of node_public_ip_prefix_id.
 
         :return: string or None
@@ -1071,8 +1003,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return node_public_ip_prefix_id
 
-    # pylint: disable=unused-argument
-    def get_enable_encryption_at_host(self, **kwargs) -> bool:
+    def get_enable_encryption_at_host(self) -> bool:
         """Obtain the value of enable_encryption_at_host.
 
         :return: bool
@@ -1100,8 +1031,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_encryption_at_host
 
-    # pylint: disable=unused-argument
-    def get_enable_ultra_ssd(self, **kwargs) -> bool:
+    def get_enable_ultra_ssd(self) -> bool:
         """Obtain the value of enable_ultra_ssd.
 
         :return: bool
@@ -1127,11 +1057,11 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_ultra_ssd
 
-    # pylint: disable=unused-argument
-    def get_max_pods(self, **kwargs) -> Union[int, None]:
+    def get_max_pods(self) -> Union[int, None]:
         """Obtain the value of max_pods.
 
-        Note: int 0 is converted to None.
+        This function will normalize the parameter by default. The parameter will be converted to int, but int 0 is
+        converted to None.
 
         :return: int or None
         """
@@ -1160,12 +1090,13 @@ class AKSCreateContext:
         # this parameter does not need validation
         return max_pods
 
-    # pylint: disable=unused-argument
-    def get_node_osdisk_size(self, **kwargs) -> Union[int, None]:
+    def get_node_osdisk_size(self) -> Union[int, None]:
         """Obtain the value of node_osdisk_size.
 
-        Note: int 0 is converted to None.
         Note: SDK performs the following validation {'maximum': 2048, 'minimum': 0}.
+
+        This function will normalize the parameter by default. The parameter will be converted to int, but int 0 is
+        converted to None.
 
         :return: int or None
         """
@@ -1191,12 +1122,10 @@ class AKSCreateContext:
             else:
                 node_osdisk_size = None
 
-        # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_osdisk_size
 
-    # pylint: disable=unused-argument
-    def get_node_osdisk_type(self, **kwargs) -> Union[str, None]:
+    def get_node_osdisk_type(self) -> Union[str, None]:
         """Obtain the value of node_osdisk_size.
 
         :return: string or None
@@ -1222,21 +1151,39 @@ class AKSCreateContext:
         # this parameter does not need validation
         return node_osdisk_type
 
-    # pylint: disable=unused-argument
-    def get_enable_cluster_autoscaler(
-        self, enable_validation: bool = False, **kwargs
-    ) -> bool:
-        """Obtain the value of enable_cluster_autoscaler.
+    def get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count(
+        self,
+    ) -> Tuple[int, bool, Union[int, None], Union[int, None]]:
+        """Obtain the value of node_count, enable_cluster_autoscaler, min_count and max_count.
 
-        This function supports the option of enable_validation. When enabled, on the premise that
-        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
-        raise the RequiredArgumentMissingError; if will also check whether min_count is less than max_count and
-        node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
-        enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
-        if so, raise the RequiredArgumentMissingError.
+        This function will verify the parameter by default. On the premise that enable_cluster_autoscaler is enabled,
+        it will check whether both min_count and max_count are assigned, if not, raise the RequiredArgumentMissingError;
+        if will also check whether min_count is less than max_count and node_count is between min_count and max_count,
+        if not, raise the InvalidArgumentValueError. If enable_cluster_autoscaler is not enabled, it will check whether
+        any of min_count or max_count is assigned, if so, raise the RequiredArgumentMissingError.
 
-        :return: bool
+        :return: a tuple containing four elements: node_count of int type, enable_cluster_autoscaler of bool type,
+        min_count of int type or None and max_count of int type or None
         """
+        # node_count
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("node_count")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                value_obtained_from_mc = agent_pool_profile.count
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            node_count = value_obtained_from_mc
+        else:
+            node_count = raw_value
+
+        # enable_cluster_autoscaler
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_cluster_autoscaler")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1254,48 +1201,7 @@ class AKSCreateContext:
         else:
             enable_cluster_autoscaler = raw_value
 
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            min_count = self.get_min_count()
-            max_count = self.get_max_count()
-            node_count = self.get_node_count()
-            if enable_cluster_autoscaler:
-                if min_count is None or max_count is None:
-                    raise RequiredArgumentMissingError(
-                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-                    )
-                if min_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "Value of min-count should be less than or equal to value of max-count"
-                    )
-                if node_count < min_count or node_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "node-count is not in the range of min-count and max-count"
-                    )
-            else:
-                if min_count is not None or max_count is not None:
-                    raise RequiredArgumentMissingError(
-                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
-                    )
-        return enable_cluster_autoscaler
-
-    # pylint: disable=unused-argument
-    def get_min_count(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[int, None]:
-        """Obtain the value of min_count.
-
-        This function supports the option of enable_validation. When enabled, on the premise that
-        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
-        raise the RequiredArgumentMissingError; if will also check whether min_count is less than max_count and
-        node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
-        enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
-        if so, raise the RequiredArgumentMissingError.
-
-        :return: int or None
-        """
+        # min_count
         # read the original value passed by the command
         raw_value = self.raw_param.get("min_count")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1313,48 +1219,7 @@ class AKSCreateContext:
         else:
             min_count = raw_value
 
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
-            max_count = self.get_max_count()
-            node_count = self.get_node_count()
-            if enable_cluster_autoscaler:
-                if min_count is None or max_count is None:
-                    raise RequiredArgumentMissingError(
-                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-                    )
-                if min_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "Value of min-count should be less than or equal to value of max-count"
-                    )
-                if node_count < min_count or node_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "node-count is not in the range of min-count and max-count"
-                    )
-            else:
-                if min_count is not None or max_count is not None:
-                    raise RequiredArgumentMissingError(
-                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
-                    )
-        return min_count
-
-    # pylint: disable=unused-argument
-    def get_max_count(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[int, None]:
-        """Obtain the value of max_count.
-
-        This function supports the option of enable_validation. When enabled, on the premise that
-        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
-        raise the RequiredArgumentMissingError; if will also check whether min_count is less than max_count and
-        node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
-        enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
-        if so, raise the RequiredArgumentMissingError.
-
-        :return: int or None
-        """
+        # max_count
         # read the original value passed by the command
         raw_value = self.raw_param.get("max_count")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1372,32 +1237,28 @@ class AKSCreateContext:
         else:
             max_count = raw_value
 
-        # this parameter does not need dynamic completion
+        # these parameters do not need dynamic completion
 
         # validation
-        if enable_validation:
-            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
-            min_count = self.get_min_count()
-            node_count = self.get_node_count()
-            if enable_cluster_autoscaler:
-                if min_count is None or max_count is None:
-                    raise RequiredArgumentMissingError(
-                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-                    )
-                if min_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "Value of min-count should be less than or equal to value of max-count"
-                    )
-                if node_count < min_count or node_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "node-count is not in the range of min-count and max-count"
-                    )
-            else:
-                if min_count is not None or max_count is not None:
-                    raise RequiredArgumentMissingError(
-                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
-                    )
-        return max_count
+        if enable_cluster_autoscaler:
+            if min_count is None or max_count is None:
+                raise RequiredArgumentMissingError(
+                    "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                )
+            if min_count > max_count:
+                raise InvalidArgumentValueError(
+                    "Value of min-count should be less than or equal to value of max-count"
+                )
+            if node_count < min_count or node_count > max_count:
+                raise InvalidArgumentValueError(
+                    "node-count is not in the range of min-count and max-count"
+                )
+        else:
+            if min_count is not None or max_count is not None:
+                raise RequiredArgumentMissingError(
+                    "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
+                )
+        return node_count, enable_cluster_autoscaler, min_count, max_count
 
     # pylint: disable=unused-argument
     def get_admin_username(self, **kwargs) -> str:
@@ -2569,12 +2430,20 @@ class AKSCreateDecorator:
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
 
+        (
+            node_count,
+            enable_auto_scaling,
+            min_count,
+            max_count,
+        ) = (
+            self.context.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
+        )
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             # Must be 12 chars or less before ACS RP adds to it
-            name=self.context.get_nodepool_name(enable_trim=True),
+            name=self.context.get_nodepool_name(),
             tags=self.context.get_nodepool_tags(),
             node_labels=self.context.get_nodepool_labels(),
-            count=self.context.get_node_count(enable_validation=True),
+            count=node_count,
             vm_size=self.context.get_node_vm_size(),
             os_type="Linux",
             vnet_subnet_id=self.context.get_vnet_subnet_id(),
@@ -2589,11 +2458,9 @@ class AKSCreateDecorator:
             mode="System",
             os_disk_size_gb=self.context.get_node_osdisk_size(),
             os_disk_type=self.context.get_node_osdisk_type(),
-            min_count=self.context.get_min_count(enable_validation=True),
-            max_count=self.context.get_max_count(enable_validation=True),
-            enable_auto_scaling=self.context.get_enable_cluster_autoscaler(
-                enable_validation=True
-            ),
+            min_count=min_count,
+            max_count=max_count,
+            enable_auto_scaling=enable_auto_scaling,
         )
         mc.agent_pool_profiles = [agent_pool_profile]
         return mc
