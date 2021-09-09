@@ -2235,11 +2235,7 @@ class AKSCreateContext:
                     )
                 )
             # normalize
-            workspace_resource_id = workspace_resource_id.strip()
-            if not workspace_resource_id.startswith("/"):
-                workspace_resource_id = "/" + workspace_resource_id
-            if workspace_resource_id.endswith("/"):
-                workspace_resource_id = workspace_resource_id.rstrip("/")
+            workspace_resource_id = "/" + workspace_resource_id.strip(" /")
 
         # this parameter does not need validation
         return workspace_resource_id
