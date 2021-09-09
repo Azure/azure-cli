@@ -6,6 +6,7 @@
 from typing import Any, Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._consts import (
+    ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
     CONST_AZURE_POLICY_ADDON_NAME,
     CONST_CONFCOM_ADDON_NAME,
@@ -2171,7 +2172,7 @@ class AKSCreateContext:
         return network_policy
 
     # pylint: disable=unused-argument
-    def get_enable_addons(self, **kwargs) -> Union[str, List[str], None]:
+    def get_enable_addons(self, enable_validation: bool = False, **kwargs) -> Union[str, List[str], None]:
         """Obtain the value of enable_addons.
 
         Note: enable_addons will not be decorated into the `mc` object.
@@ -2187,7 +2188,35 @@ class AKSCreateContext:
         if kwargs.get("enable_split_comma_separated_str", False):
             enable_addons = enable_addons.split(',') if enable_addons else []
 
-        # this parameter does not need validation
+        # validation
+        if enable_validation:
+            if isinstance(enable_addons, list):
+                validation_addons = enable_addons
+            else:
+                validation_addons = enable_addons.split(',') if enable_addons else []
+
+            # check duplicate addons
+            duplicate_addons_set = {
+                x for x in validation_addons if validation_addons.count(x) >= 2
+            }
+            if len(duplicate_addons_set) != 0:
+                raise InvalidArgumentValueError(
+                    "Duplicate addon{} '{}' found in option --enable-addons.".format(
+                        "s" if len(duplicate_addons_set) > 1 else "",
+                        ",".join(duplicate_addons_set),
+                    )
+                )
+
+            # check unrecognized addons
+            enable_addons_set = set(validation_addons)
+            invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
+            if len(invalid_addons_set) != 0:
+                raise InvalidArgumentValueError(
+                    "'{}' {} not recognized by the --enable-addons argument.".format(
+                        ",".join(invalid_addons_set),
+                        "are" if len(invalid_addons_set) > 1 else "is",
+                    )
+                )
         return enable_addons
 
     # pylint: disable=unused-argument
@@ -2825,7 +2854,8 @@ class AKSCreateDecorator:
             )
         ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
         addon_profiles = {}
-        addons = self.context.get_enable_addons(enable_split_comma_separated_str=True)
+        # error out if any unrecognized or duplicate addon provided
+        addons = self.context.get_enable_addons(enable_validation=True, enable_split_comma_separated_str=True)
         if 'http_application_routing' in addons:
             addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
@@ -2895,10 +2925,6 @@ class AKSCreateDecorator:
                 addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
             addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
             addons.remove('confcom')
-        # error out if any (unrecognized) addons remain
-        if addons:
-            raise InvalidArgumentValueError('"{}" {} not recognized by the --enable-addons argument.'.format(
-                ",".join(addons), "are" if len(addons) > 1 else "is"))
         mc.addon_profiles = addon_profiles
         return mc
 
