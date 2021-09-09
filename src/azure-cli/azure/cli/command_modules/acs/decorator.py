@@ -3,45 +3,63 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
-from knack.log import get_logger
-from typing import Any, List, Dict, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Tuple, TypeVar, Union
 
+from azure.cli.command_modules.acs._consts import (
+    ADDONS,
+    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_CONFCOM_ADDON_NAME,
+    CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+    CONST_INGRESS_APPGW_ADDON_NAME,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+    CONST_INGRESS_APPGW_SUBNET_CIDR,
+    CONST_INGRESS_APPGW_SUBNET_ID,
+    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
+    CONST_KUBE_DASHBOARD_ADDON_NAME,
+    CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_VIRTUAL_NODE_ADDON_NAME,
+    CONST_VIRTUAL_NODE_SUBNET_NAME,
+)
+from azure.cli.command_modules.acs.custom import (
+    _add_role_assignment,
+    _ensure_aks_acr,
+    _ensure_aks_service_principal,
+    _ensure_container_insights_for_monitoring,
+    _ensure_default_log_analytics_workspace_for_monitoring,
+    _get_default_dns_prefix,
+    _get_rg_location,
+    _get_user_assigned_identity,
+    _set_vm_set_type,
+    _validate_ssh_key,
+    create_load_balancer_profile,
+    get_subscription_id,
+    set_load_balancer_sku,
+    subnet_role_assignment_exists,
+)
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
     CLIInternalError,
-    MutuallyExclusiveArgumentError,
-    RequiredArgumentMissingError,
     InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
     NoTTYError,
+    RequiredArgumentMissingError,
 )
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
-
-from azure.cli.command_modules.acs._consts import (
-    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
-    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
-)
-from azure.cli.command_modules.acs.custom import (
-    _get_rg_location,
-    _validate_ssh_key,
-    _get_default_dns_prefix,
-    _set_vm_set_type,
-    set_load_balancer_sku,
-    get_subscription_id,
-    _ensure_aks_service_principal,
-    _get_user_assigned_identity,
-    subnet_role_assignment_exists,
-    _add_role_assignment,
-    _ensure_aks_acr,
-    create_load_balancer_profile,
-)
+from knack.log import get_logger
+from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 
 logger = get_logger(__name__)
 
 # type variables
-ManagedCluster = TypeVar("ManagedCluster")
 ContainerServiceClient = TypeVar("ContainerServiceClient")
+ManagedCluster = TypeVar("ManagedCluster")
+ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
 ResourceReference = TypeVar("ResourceReference")
 
 
@@ -163,6 +181,11 @@ class AKSCreateModels:
         )
         self.ExtendedLocationTypes = self.__cmd.get_models(
             "ExtendedLocationTypes",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ManagedClusterAddonProfile = self.__cmd.get_models(
+            "ManagedClusterAddonProfile",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
@@ -409,7 +432,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_dns_name_prefix(
-        self, enable_validation: bool = False, **kwargs
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> Union[str, None]:
         """Dynamically obtain the value of ssh_key_value according to the context.
 
@@ -432,7 +455,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return dns_name_prefix
 
         dynamic_completion = False
@@ -459,7 +482,7 @@ class AKSCreateContext:
         return dns_name_prefix
 
     # pylint: disable=unused-argument
-    def get_location(self, **kwargs) -> str:
+    def get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
         """Dynamically obtain the value of location according to the context.
 
         When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
@@ -468,7 +491,7 @@ class AKSCreateContext:
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
-        :return: string
+        :return: string or None
         """
         # read the original value passed by the command
         location = self.raw_param.get("location")
@@ -479,7 +502,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return location
 
         # dynamic completion
@@ -532,7 +555,7 @@ class AKSCreateContext:
         return no_ssh_key
 
     # pylint: disable=unused-argument
-    def get_vm_set_type(self, **kwargs) -> str:
+    def get_vm_set_type(self, read_only: bool = False, **kwargs) -> Union[str, None]:
         """Dynamically obtain the value of vm_set_type according to the context.
 
         Dynamic completion will be triggerd by default. Function "_set_vm_set_type" will be called and the
@@ -541,7 +564,7 @@ class AKSCreateContext:
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
-        :return: string
+        :return: string or None
         """
         # read the original value passed by the command
         raw_value = self.raw_param.get("vm_set_type")
@@ -563,7 +586,7 @@ class AKSCreateContext:
             vm_set_type = raw_value
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return vm_set_type
 
         # dynamic completion
@@ -579,7 +602,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_load_balancer_sku(
-        self, enable_validation: bool = False, **kwargs
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> Union[str, None]:
         """Dynamically obtain the value of load_balancer_sku according to the context.
 
@@ -610,7 +633,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return load_balancer_sku
 
         # dynamic completion
@@ -699,7 +722,7 @@ class AKSCreateContext:
         return fqdn_subdomain
 
     # pylint: disable=unused-argument
-    def get_nodepool_name(self, **kwargs) -> str:
+    def get_nodepool_name(self, enable_trim: bool = False, **kwargs) -> str:
         """Dynamically obtain the value of nodepool_name according to the context.
 
         Note: SDK performs the following validation {'required': True, 'pattern': r'^[a-z][a-z0-9]{0,11}$'}.
@@ -732,7 +755,7 @@ class AKSCreateContext:
             nodepool_name = raw_value
 
         # dynamic completion
-        if not read_from_mc and kwargs.get("enable_trim", False):
+        if not read_from_mc and enable_trim:
             if not nodepool_name:
                 nodepool_name = "nodepool1"
             else:
@@ -1362,7 +1385,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_windows_admin_username_and_password(
-        self, **kwargs
+        self, read_only: bool = False, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
 
@@ -1408,7 +1431,7 @@ class AKSCreateContext:
             )
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return windows_admin_username, windows_admin_password
 
         username_dynamic_completion = False
@@ -1472,7 +1495,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument,too-many-statements
     def get_service_principal_and_client_secret(
-        self, **kwargs
+        self, read_only: bool = False, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the values of service_principal and client_secret according to the context.
 
@@ -1522,7 +1545,7 @@ class AKSCreateContext:
             )
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return service_principal, client_secret
 
         # dynamic completion for service_principal and client_secret
@@ -1562,7 +1585,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_enable_managed_identity(
-        self, enable_validation: bool = False, **kwargs
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> bool:
         """Dynamically obtain the values of service_principal and client_secret according to the context.
 
@@ -1571,6 +1594,7 @@ class AKSCreateContext:
         When both service_principal and client_secret are assigned and enable_managed_identity is True, dynamic
         completion will be triggered. The value of enable_managed_identity will be set to False.
 
+        This function supports the option of enable_validation. When enabled, it will ...
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
         :return: bool
@@ -1584,7 +1608,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return enable_managed_identity
 
         dynamic_completion = False
@@ -1640,7 +1664,7 @@ class AKSCreateContext:
     def get_user_assigned_identity_client_id(self, **kwargs) -> str:
         """Obtain the client_id of user assigned identity.
 
-        Note: this is not a parameter of aks_create, and it will not be decorated into the `mc` object.
+        Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
 
         Parse assign_identity and use ManagedServiceIdentityClient to send the request, get the client_id field in the
         returned identity object. ResourceNotFoundError, ClientRequestError or InvalidArgumentValueError exceptions
@@ -1657,7 +1681,7 @@ class AKSCreateContext:
     def get_user_assigned_identity_object_id(self, **kwargs) -> str:
         """Obtain the principal_id of user assigned identity.
 
-        Note: this is not a parameter of aks_create, and it will not be decorated into the `mc` object.
+        Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
 
         Parse assign_identity and use ManagedServiceIdentityClient to send the request, get the principal_id field in
         the returned identity object. ResourceNotFoundError, ClientRequestError or InvalidArgumentValueError exceptions
@@ -1852,7 +1876,13 @@ class AKSCreateContext:
         return load_balancer_idle_timeout
 
     # pylint: disable=unused-argument
-    def get_outbound_type(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+    def get_outbound_type(
+        self,
+        enable_validation: bool = False,
+        read_only: bool = False,
+        load_balancer_profile: ManagedClusterLoadBalancerProfile = None,
+        **kwargs
+    ) -> Union[str, None]:
         """Dynamically obtain the value of outbound_type according to the context.
 
         Note: The parameters involved in the validation are not verified in their own getters.
@@ -1860,8 +1890,6 @@ class AKSCreateContext:
         When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
 
-        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
-        parameters, the value in load_balancer_profile will be used for validation.
         This function supports the option of enable_validation. When enabled, if the value of outbound_type is
         userDefinedRouting (CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING), the following checks will be performed. If
         load_balancer_sku is set to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not
@@ -1869,6 +1897,8 @@ class AKSCreateContext:
         load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
         will be raised.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
+        parameters, the value in load_balancer_profile will be used for validation.
 
         :return: string or None
         """
@@ -1885,7 +1915,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return outbound_type
 
         # dynamic completion
@@ -1910,7 +1940,6 @@ class AKSCreateContext:
                         "be pre-configured with a route table with egress rules"
                     )
 
-                load_balancer_profile = kwargs.get("load_balancer_profile")
                 if load_balancer_profile:
                     if (
                         load_balancer_profile.managed_outbound_i_ps or
@@ -2148,6 +2177,300 @@ class AKSCreateContext:
                     )
 
         return network_policy
+
+    # pylint: disable=unused-argument
+    def get_enable_addons(
+        self,
+        enable_validation: bool = False,
+        enable_split_comma_separated_str: bool = False,
+        **kwargs
+    ) -> Union[str, List[str], None]:
+        """Obtain the value of enable_addons.
+
+        Note: enable_addons will not be decorated into the `mc` object.
+
+        This function supports the option of enable_validation. When enabled, it will check whether the provided addons
+        have duplicate or invalid values, and raise a InvalidArgumentValueError if found.
+        This function supports the option of enable_split_comma_separated_str. When enabled, it will split the string
+        into a list with "," as the delimiter.
+
+        :return: string, empty list or list of strings, or None
+        """
+        # read the original value passed by the command
+        enable_addons = self.raw_param.get("enable_addons")
+
+        if enable_split_comma_separated_str:
+            enable_addons = enable_addons.split(',') if enable_addons else []
+
+        # validation
+        if enable_validation:
+            if isinstance(enable_addons, list):
+                validation_addons = enable_addons
+            else:
+                validation_addons = enable_addons.split(',') if enable_addons else []
+
+            # check duplicate addons
+            duplicate_addons_set = {
+                x for x in validation_addons if validation_addons.count(x) >= 2
+            }
+            if len(duplicate_addons_set) != 0:
+                raise InvalidArgumentValueError(
+                    "Duplicate addon{} '{}' found in option --enable-addons.".format(
+                        "s" if len(duplicate_addons_set) > 1 else "",
+                        ",".join(duplicate_addons_set),
+                    )
+                )
+
+            # check unrecognized addons
+            enable_addons_set = set(validation_addons)
+            invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
+            if len(invalid_addons_set) != 0:
+                raise InvalidArgumentValueError(
+                    "'{}' {} not recognized by the --enable-addons argument.".format(
+                        ",".join(invalid_addons_set),
+                        "are" if len(invalid_addons_set) > 1 else "is",
+                    )
+                )
+        return enable_addons
+
+    # pylint: disable=unused-argument
+    def get_workspace_resource_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+        """Dynamically obtain the value of workspace_resource_id according to the context.
+
+        When both workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
+        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        subscription_id and resource_group_name.
+
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        workspace_resource_id = self.raw_param.get("workspace_resource_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        read_from_mc = False
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_MONITORING_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID)
+        ):
+            workspace_resource_id = self.mc.addon_profiles.get(
+                CONST_MONITORING_ADDON_NAME
+            ).config.get(CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID)
+            read_from_mc = True
+
+        # skip dynamic completion & validation if option read_only is specified
+        if read_only:
+            return workspace_resource_id
+
+        # dynamic completion
+        if not read_from_mc:
+            if workspace_resource_id is None:
+                # use default workspace if exists else create default workspace
+                workspace_resource_id = (
+                    _ensure_default_log_analytics_workspace_for_monitoring(
+                        self.cmd,
+                        self.intermediates.get("subscription_id", None),
+                        self.get_resource_group_name(),
+                    )
+                )
+            # normalize
+            workspace_resource_id = "/" + workspace_resource_id.strip(" /")
+
+        # this parameter does not need validation
+        return workspace_resource_id
+
+    # pylint: disable=unused-argument,no-self-use
+    def get_virtual_node_addon_os_type(self, **kwargs) -> str:
+        """Obtain the os_type of virtual node addon.
+
+        Note: This is not a parameter of aks_create.
+
+        :return: string
+        """
+        return "Linux"
+
+    # pylint: disable=unused-argument
+    def get_aci_subnet_name(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of aci_subnet_name.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        aci_subnet_name = self.raw_param.get("aci_subnet_name")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_VIRTUAL_NODE_ADDON_NAME +
+            self.get_virtual_node_addon_os_type()
+            in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_VIRTUAL_NODE_ADDON_NAME +
+                self.get_virtual_node_addon_os_type()
+            ).config.get(CONST_VIRTUAL_NODE_SUBNET_NAME)
+        ):
+            aci_subnet_name = self.mc.addon_profiles.get(
+                CONST_VIRTUAL_NODE_ADDON_NAME +
+                self.get_virtual_node_addon_os_type()
+            ).config.get(CONST_VIRTUAL_NODE_SUBNET_NAME)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return aci_subnet_name
+
+    # pylint: disable=unused-argument
+    def get_appgw_name(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_name.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        appgw_name = self.raw_param.get("appgw_name")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME)
+        ):
+            appgw_name = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_name
+
+    # pylint: disable=unused-argument
+    def get_appgw_subnet_cidr(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_subnet_cidr.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        appgw_subnet_cidr = self.raw_param.get("appgw_subnet_cidr")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_CIDR)
+        ):
+            appgw_subnet_cidr = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_CIDR)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_subnet_cidr
+
+    # pylint: disable=unused-argument
+    def get_appgw_id(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        appgw_id = self.raw_param.get("appgw_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID)
+        ):
+            appgw_id = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_id
+
+    # pylint: disable=unused-argument
+    def get_appgw_subnet_id(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_subnet_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        appgw_subnet_id = self.raw_param.get("appgw_subnet_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_ID)
+        ):
+            appgw_subnet_id = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_ID)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_subnet_id
+
+    # pylint: disable=unused-argument
+    def get_appgw_watch_namespace(self, **kwargs) -> Union[str, None]:
+        """Obtain the value of appgw_watch_namespace.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        appgw_watch_namespace = self.raw_param.get("appgw_watch_namespace")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_WATCH_NAMESPACE)
+        ):
+            appgw_watch_namespace = self.mc.addon_profiles.get(
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ).config.get(CONST_INGRESS_APPGW_WATCH_NAMESPACE)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return appgw_watch_namespace
+
+    # pylint: disable=unused-argument
+    def get_enable_sgxquotehelper(self, **kwargs) -> bool:
+        """Obtain the value of enable_sgxquotehelper.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_sgxquotehelper = self.raw_param.get("enable_sgxquotehelper")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_CONFCOM_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_CONFCOM_ADDON_NAME
+            ).config.get(CONST_ACC_SGX_QUOTE_HELPER_ENABLED)
+        ):
+            enable_sgxquotehelper = self.mc.addon_profiles.get(
+                CONST_CONFCOM_ADDON_NAME
+            ).config.get(CONST_ACC_SGX_QUOTE_HELPER_ENABLED)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_sgxquotehelper
 
 
 class AKSCreateDecorator:
@@ -2533,6 +2856,92 @@ class AKSCreateDecorator:
         mc.network_profile = network_profile
         return mc
 
+    # pylint: disable=too-many-statements
+    def set_up_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up addon profiles for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+        ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
+        addon_profiles = {}
+        # error out if any unrecognized or duplicate addon provided
+        addons = self.context.get_enable_addons(enable_validation=True, enable_split_comma_separated_str=True)
+        if 'http_application_routing' in addons:
+            addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
+                enabled=True)
+            addons.remove('http_application_routing')
+        if 'kube-dashboard' in addons:
+            addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(
+                enabled=True)
+            addons.remove('kube-dashboard')
+        # TODO: can we help the user find a workspace resource ID?
+        if 'monitoring' in addons:
+            workspace_resource_id = self.context.get_workspace_resource_id()
+            addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
+                enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
+            # post-process
+            _ensure_container_insights_for_monitoring(self.cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
+            # set intermediate
+            self.context.set_intermediate("monitoring", True, overwrite_exists=True)
+            addons.remove('monitoring')
+        # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
+        elif self.context.get_workspace_resource_id(read_only=True):
+            raise RequiredArgumentMissingError(
+                '"--workspace-resource-id" requires "--enable-addons monitoring".')
+        if 'azure-policy' in addons:
+            addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
+                enabled=True)
+            addons.remove('azure-policy')
+        if 'virtual-node' in addons:
+            aci_subnet_name = self.context.get_aci_subnet_name()
+            vnet_subnet_id = self.context.get_vnet_subnet_id()
+            if not aci_subnet_name or not vnet_subnet_id:
+                raise RequiredArgumentMissingError(
+                    '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
+            # TODO: how about aciConnectorwindows, what is its addon name?
+            os_type = self.context.get_virtual_node_addon_os_type()
+            addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
+            )
+            # set intermediate
+            self.context.set_intermediate("enable_virtual_node", True, overwrite_exists=True)
+            addons.remove('virtual-node')
+        if 'ingress-appgw' in addons:
+            addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
+            appgw_name = self.context.get_appgw_name()
+            appgw_subnet_cidr = self.context.get_appgw_subnet_cidr()
+            appgw_id = self.context.get_appgw_id()
+            appgw_subnet_id = self.context.get_appgw_subnet_id()
+            appgw_watch_namespace = self.context.get_appgw_watch_namespace()
+            if appgw_name is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
+            if appgw_subnet_cidr is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
+            if appgw_id is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
+            if appgw_subnet_id is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
+            if appgw_watch_namespace is not None:
+                addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
+            addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
+            # set intermediate
+            self.context.set_intermediate("ingress_appgw_addon_enabled", True, overwrite_exists=True)
+            addons.remove('ingress-appgw')
+        if 'confcom' in addons:
+            addon_profile = ManagedClusterAddonProfile(
+                enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
+            if self.context.get_enable_sgxquotehelper():
+                addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+            addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
+            addons.remove('confcom')
+        mc.addon_profiles = addon_profiles
+        return mc
+
     def construct_default_mc(self) -> ManagedCluster:
         """The overall control function used to construct the default ManagedCluster object.
 
@@ -2560,6 +2969,8 @@ class AKSCreateDecorator:
         self.process_attach_acr(mc)
         # set up network profile
         mc = self.set_up_network_profile(mc)
+        # set up addon profiles
+        mc = self.set_up_addon_profiles(mc)
 
         # TODO: set up other profiles
         return mc
