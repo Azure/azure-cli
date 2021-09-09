@@ -241,18 +241,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         key = paramiko.RSAKey.generate(2048)
         public_key = "{} {}".format(key.get_name(), key.get_base64())
 
-        # # default
-        # ctx_1 = AKSCreateContext(self.cmd, {"no_ssh_key": False})
-        # self.assertEqual(ctx_1.get_no_ssh_key(), False)
-
-        # # invalid key & valid parameter with validation
-        # ctx_2 = AKSCreateContext(
-        #     self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": True}
-        # )
-        # self.assertEqual(
-        #     ctx_2.get_ssh_key_value(enable_validation=True), "fake-key"
-        # )
-
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"ssh_key_value": public_key, "no_ssh_key": False})
         self.assertEqual(
@@ -280,14 +268,14 @@ class AKSCreateContextTestCase(unittest.TestCase):
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": False}
         )
         with self.assertRaises(CLIError):
-            ctx_2.get_ssh_key_value_and_no_ssh_key(enable_validation=True)
+            ctx_2.get_ssh_key_value_and_no_ssh_key()
 
         # invalid key & valid parameter with validation
         ctx_3 = AKSCreateContext(
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": True}
         )
         self.assertEqual(
-            ctx_3.get_ssh_key_value_and_no_ssh_key(enable_validation=True), ("fake-key", True)
+            ctx_3.get_ssh_key_value_and_no_ssh_key(), ("fake-key", True)
         )
         ssh_config_3 = self.models.ContainerServiceSshConfiguration(
             public_keys=[
@@ -399,7 +387,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             self.cmd,
             {"load_balancer_sku": None, "kubernetes_version": ""},
         )
-        self.assertEqual(ctx_1.get_load_balancer_sku(read_only=True), None)
+        self.assertEqual(ctx_1._get_load_balancer_sku(read_only=True), None)
         self.assertEqual(ctx_1.get_load_balancer_sku(), "standard")
         network_profile = self.models.ContainerServiceNetworkProfile(
             load_balancer_sku="test_mc_load_balancer_SKU"
@@ -438,7 +426,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_3.get_load_balancer_sku(enable_validation=True)
+            ctx_3.get_load_balancer_sku()
 
         # custom value (lower case)
         ctx_4 = AKSCreateContext(

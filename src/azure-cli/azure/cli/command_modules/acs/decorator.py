@@ -346,8 +346,7 @@ class AKSCreateContext:
         """
         self.intermediates.pop(variable_name, None)
 
-    # pylint: disable=unused-argument
-    def get_resource_group_name(self, **kwargs) -> str:
+    def get_resource_group_name(self) -> str:
         """Obtain the value of resource_group_name.
 
         Note: resource_group_name will not be decorated into the `mc` object.
@@ -363,8 +362,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return resource_group_name
 
-    # pylint: disable=unused-argument
-    def get_name(self, **kwargs) -> str:
+    def get_name(self) -> str:
         """Obtain the value of name.
 
         Note: name will not be decorated into the `mc` object.
@@ -380,8 +378,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return name
 
-    # pylint: disable=unused-argument
-    def get_ssh_key_value_and_no_ssh_key(self, **kwargs) -> Tuple[str, bool]:
+    def get_ssh_key_value_and_no_ssh_key(self) -> Tuple[str, bool]:
         """Obtain the value of ssh_key_value and no_ssh_key.
 
         Note: no_ssh_key will not be decorated into the `mc` object.
@@ -493,8 +490,7 @@ class AKSCreateContext:
                 )
         return dns_name_prefix
 
-    # pylint: disable=unused-argument
-    def get_dns_name_prefix(self, **kwargs) -> Union[str, None]:
+    def get_dns_name_prefix(self) -> Union[str, None]:
         """Dynamically obtain the value of dns_name_prefix according to the context.
 
         When both dns_name_prefix and fqdn_subdomain are not assigned, dynamic completion will be triggerd. Function
@@ -510,8 +506,8 @@ class AKSCreateContext:
         return self._get_dns_name_prefix(enable_validation=True)
 
     # pylint: disable=unused-argument
-    def get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
-        """Dynamically obtain the value of location according to the context.
+    def _get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of location according to the context.
 
         When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
         to get the location of the provided resource group, which internally used ResourceManagementClient to send
@@ -542,8 +538,19 @@ class AKSCreateContext:
         # this parameter does not need validation
         return location
 
-    # pylint: disable=unused-argument
-    def get_kubernetes_version(self, **kwargs) -> str:
+    def get_location(self) -> Union[str, None]:
+        """Dynamically obtain the value of location according to the context.
+
+        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        to get the location of the provided resource group, which internally used ResourceManagementClient to send
+        the request.
+
+        :return: string or None
+        """
+
+        return self._get_location()
+
+    def get_kubernetes_version(self) -> str:
         """Obtain the value of kubernetes_version.
 
         :return: string
@@ -559,8 +566,8 @@ class AKSCreateContext:
         return kubernetes_version
 
     # pylint: disable=unused-argument
-    def get_vm_set_type(self, read_only: bool = False, **kwargs) -> Union[str, None]:
-        """Dynamically obtain the value of vm_set_type according to the context.
+    def _get_vm_set_type(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of vm_set_type according to the context.
 
         Dynamic completion will be triggerd by default. Function "_set_vm_set_type" will be called and the
         corresponding vm set type will be returned according to the value of kubernetes_version. It will also
@@ -604,11 +611,24 @@ class AKSCreateContext:
         # this parameter does not need validation
         return vm_set_type
 
+    def get_vm_set_type(self) -> Union[str, None]:
+        """Dynamically obtain the value of vm_set_type according to the context.
+
+        Dynamic completion will be triggerd by default. Function "_set_vm_set_type" will be called and the
+        corresponding vm set type will be returned according to the value of kubernetes_version. It will also
+        normalize the value as server validation is case-sensitive.
+
+        :return: string or None
+        """
+
+        # this parameter does not need validation
+        return self._get_vm_set_type()
+
     # pylint: disable=unused-argument
-    def get_load_balancer_sku(
+    def _get_load_balancer_sku(
         self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> Union[str, None]:
-        """Dynamically obtain the value of load_balancer_sku according to the context.
+        """Internal function to dynamically obtain the value of load_balancer_sku according to the context.
 
         Note: When returning a string, it will always be lowercase.
 
@@ -660,6 +680,23 @@ class AKSCreateContext:
                 )
         return load_balancer_sku
 
+    def get_load_balancer_sku(self) -> Union[str, None]:
+        """Dynamically obtain the value of load_balancer_sku according to the context.
+
+        Note: When returning a string, it will always be lowercase.
+
+        When load_balancer_sku is not assigned, dynamic completion will be triggerd. Function "set_load_balancer_sku"
+        will be called and the corresponding load balancer sku will be returned according to the value of
+        kubernetes_version.
+
+        This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic" when
+        api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+
+        :return: string or None
+        """
+
+        return self._get_load_balancer_sku(enable_validation=True)
+
     # pylint: disable=unused-argument
     def get_api_server_authorized_ip_ranges(
         self, enable_validation: bool = False, **kwargs
@@ -691,7 +728,7 @@ class AKSCreateContext:
         if enable_validation:
             if (
                 api_server_authorized_ip_ranges and
-                self.get_load_balancer_sku() == "basic"
+                self._get_load_balancer_sku(enable_validation=False) == "basic"
             ):
                 raise MutuallyExclusiveArgumentError(
                     "--api-server-authorized-ip-ranges can only be used with standard load balancer"
@@ -1930,7 +1967,7 @@ class AKSCreateContext:
                 # Should not enable read_only for get_load_balancer_sku, since its default value is None, and it has
                 # not been decorated into the mc object at this time, only the value after dynamic completion is
                 # meaningful here.
-                if self.get_load_balancer_sku() == "basic":
+                if self._get_load_balancer_sku(enable_validation=False) == "basic":
                     raise InvalidArgumentValueError(
                         "userDefinedRouting doesn't support basic load balancer sku"
                     )
@@ -2801,9 +2838,7 @@ class AKSCreateDecorator:
         )
 
         # verify load balancer sku, which is part of the network profile
-        load_balancer_sku = self.context.get_load_balancer_sku(
-            enable_validation=True
-        )
+        load_balancer_sku = self.context.get_load_balancer_sku()
 
         network_plugin = self.context.get_network_plugin(enable_validation=True)
         pod_cidr = self.context.get_pod_cidr(enable_validation=True)
