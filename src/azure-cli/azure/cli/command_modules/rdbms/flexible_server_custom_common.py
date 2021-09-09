@@ -85,13 +85,18 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_name=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    if not os.path.exists(properties):
+    properties_filepath = os.path.join(os.path.abspath(os.getcwd()), properties)
+    if not os.path.exists(properties_filepath):
         raise FileOperationError("Properties file does not exist in the given location")
+    with open(properties_filepath, "r") as f:
+        json_data = f.read()
     if migration_name is None:
         # Convert a UUID to a string of hex digits in standard form
         migration_name = str(uuid.uuid4())
-
-    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
+    migration_name_available = migration_check_name_availability(cmd, client, resource_group_name, server_name, migration_name).get("nameAvailable")
+    if not migration_name_available:
+        raise CLIError("There is already a migration with the same name. Please try a different one.")
+    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, json_data)
 
     return r.json()
 

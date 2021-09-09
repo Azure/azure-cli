@@ -186,7 +186,7 @@ type: command
 short-summary: Create a new migration workflow for a flexible server.
 examples:
   - name: Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file.
-    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --properties @"migrationConfig.json"
+    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --properties "migrationConfig.json"
 """
 
 helps['postgres flexible-server migration list'] = """
@@ -236,7 +236,7 @@ type: command
 short-summary: Checks if the provided migration-name can be used.
 examples:
   - name: Check if the migration-name provided is available for your migration workflow.
-    text: az postgres flexible-server migration check-name-availability --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    text: az postgres flexible-server migration check-name-availability --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 """
 
 helps['postgres flexible-server parameter'] = """

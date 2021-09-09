@@ -586,8 +586,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='Migration target server name.')
                 if scope == "create":
                     c.argument('properties', options_list=['--properties', '-b'],
-                               help='Request properties. Use @{file} to load from a file. For quoting issues in different terminals, '
-                               'see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
+                               help='Request properties. Use double or no quotes to pass in filepath as argument. Relative path is also supported')
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
                 elif scope == "show":
