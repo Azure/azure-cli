@@ -1427,7 +1427,7 @@ def cli_cosmosdb_identity_show(client, resource_group_name, account_name):
 def cli_cosmosdb_identity_assign(client,
                                  resource_group_name,
                                  account_name):
-    """ Show the identity associated with a Cosmos DB account """
+    """ Update the identity associated with a Cosmos DB account """
 
     existing = client.get(resource_group_name, account_name)
 
