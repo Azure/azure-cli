@@ -44,8 +44,8 @@ def build_persistence(location, fallback_to_plaintext=False):
                 # a remote ssh session being active simultaneously.
                 location,
                 schema_name="my_schema_name",
-                attributes={"my_attr1": "foo", "my_attr2": "bar"},
-                )
+                attributes={"my_attr1": "foo", "my_attr2": "bar"}
+            )
         except:  # pylint: disable=bare-except
             if not fallback_to_plaintext:
                 raise

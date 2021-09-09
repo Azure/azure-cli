@@ -3,17 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
-from typing import Tuple, List
-
 import requests
-from azure.cli.core.util import in_cloud_console
-from azure.core.credentials import AccessToken
-from azure.identity import CredentialUnavailableError, AuthenticationRequiredError
 from knack.log import get_logger
 from knack.util import CLIError
 
-from .util import resource_to_scopes, aad_error_handler
+from .util import resource_to_scopes
 
 logger = get_logger(__name__)
 
@@ -39,21 +33,9 @@ class CredentialAdaptor:
             if self._external_credentials:
                 external_tenant_tokens = [cred.get_token(*scopes) for cred in self._external_credentials]
             return token, external_tenant_tokens
-        except CLIError as err:
-            if in_cloud_console():
-                CredentialAdaptor._log_hostname()
-            raise err
-        except AuthenticationRequiredError as err:
-            err_dict = json.loads(err.response.text())
-            aad_error_handler(err_dict, scopes=err.scopes, claims=err.claims)
-        except CredentialUnavailableError as err:
-            err_dict = json.loads(err.response.text())
-            aad_error_handler(err_dict)
         except requests.exceptions.SSLError as err:
-            from .util import SSLERROR_TEMPLATE
+            from azure.cli.core.util import SSLERROR_TEMPLATE
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
-        except requests.exceptions.ConnectionError as err:
-            raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
 
     def signed_session(self, session=None):
         logger.debug("CredentialAdaptor.get_token")

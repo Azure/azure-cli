@@ -99,7 +99,7 @@ def account_clear(cmd, clear_credential=True):
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    profile.logout_all(clear_credential)
+    profile.logout_all()
 
 
 # pylint: disable=inconsistent-return-statements, too-many-branches
@@ -107,7 +107,6 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
           identity=False, use_device_code=False, use_cert_sn_issuer=None, tenant_access=False, environment=False,
           scopes=None, claims_challenge=None):
     """Log in to access Azure subscriptions"""
-    from adal.adal_error import AdalError
     import requests
 
     # quick argument usage check
@@ -146,50 +145,25 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     else:
         interactive = True
 
-    if environment:
-        return profile.login_with_environment_credential(find_subscriptions=not tenant_access)
-
-    try:
-        subscriptions = profile.login(
-            interactive,
-            username,
-            password,
-            service_principal,
-            tenant,
-            scopes=scopes,
-            use_device_code=use_device_code,
-            allow_no_subscriptions=allow_no_subscriptions,
-            use_cert_sn_issuer=use_cert_sn_issuer,
-            find_subscriptions=not tenant_access,
-            claims_challenge=claims_challenge)
-    except AdalError as err:
-        # try polish unfriendly server errors
-        if username:
-            msg = str(err)
-            suggestion = "For cross-check, try 'az login' to authenticate through browser."
-            if ('ID3242:' in msg) or ('Server returned an unknown AccountType' in msg):
-                raise CLIError("The user name might be invalid. " + suggestion)
-            if 'Server returned error in RSTR - ErrorCode' in msg:
-                raise CLIError("Logging in through command line is not supported. " + suggestion)
-            if 'wstrust' in msg:
-                raise CLIError("Authentication failed due to error of '" + msg + "' "
-                               "This typically happens when attempting a Microsoft account, which requires "
-                               "interactive login. Please invoke 'az login' to cross check. "
-                               # pylint: disable=line-too-long
-                               "More details are available at https://github.com/AzureAD/microsoft-authentication-library-for-python/wiki/Username-Password-Authentication")
-        raise CLIError(err)
-    except requests.exceptions.SSLError as err:
-        from azure.cli.core.util import SSLERROR_TEMPLATE
-        raise CLIError(SSLERROR_TEMPLATE + " Error detail: {}".format(str(err)))
-    except requests.exceptions.ConnectionError as err:
-        raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
+    subscriptions = profile.login(
+        interactive,
+        username,
+        password,
+        service_principal,
+        tenant,
+        scopes=scopes,
+        use_device_code=use_device_code,
+        allow_no_subscriptions=allow_no_subscriptions,
+        use_cert_sn_issuer=use_cert_sn_issuer,
+        find_subscriptions=not tenant_access,
+        claims_challenge=claims_challenge)
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
     return all_subscriptions
 
 
-def logout(cmd, username=None, clear_credential=True):
+def logout(cmd, username=None):
     """Log out to remove access to Azure subscriptions"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
@@ -197,18 +171,12 @@ def logout(cmd, username=None, clear_credential=True):
     profile = Profile(cli_ctx=cmd.cli_ctx)
     if not username:
         username = profile.get_current_account_user()
-    profile.logout(username, clear_credential)
+    profile.logout(username)
 
 
 def list_locations(cmd):
     from azure.cli.core.commands.parameters import get_subscription_locations
     return get_subscription_locations(cmd.cli_ctx)
-
-
-def export_msal_cache(cmd, path=None):  # pylint: disable=unused-argument
-    from azure.cli.core.auth import Identity
-    identity = Identity()
-    identity.serialize_token_cache(path)
 
 
 def check_cli(cmd):
@@ -241,13 +209,3 @@ def check_cli(cmd):
         print('CLI self-test completed: OK')
     else:
         raise CLIError(exceptions)
-
-
-def _fromtimestamp(t):
-    # datetime.datetime can't be patched:
-    #   TypeError: can't set attributes of built-in/extension type 'datetime.datetime'
-    # So we wrap datetime.datetime.fromtimestamp with this function.
-    # https://docs.python.org/3/library/unittest.mock-examples.html#partial-mocking
-    # https://williambert.online/2011/07/how-to-unit-testing-in-django-with-mocking-and-patching/
-    from datetime import datetime
-    return datetime.fromtimestamp(t)

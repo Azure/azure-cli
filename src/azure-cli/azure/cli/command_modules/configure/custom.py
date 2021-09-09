@@ -48,54 +48,6 @@ def _print_cur_configuration(file_config):
         print('\n'.join(['{} = {}'.format(ev, os.environ[ev]) for ev in env_vars]))
 
 
-def _config_env_public_azure(cli_ctx, _):
-    from adal.adal_error import AdalError
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core._profile import Profile
-    from azure.cli.core.profiles import ResourceType
-    # Determine if user logged in
-
-    try:
-        list(get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources.list())
-    except CLIError:
-        # Not logged in
-        login_successful = False
-        while not login_successful:
-            method_index = prompt_choice_list(MSG_PROMPT_LOGIN, LOGIN_METHOD_LIST)
-            answers['login_index'] = method_index
-            answers['login_options'] = str(LOGIN_METHOD_LIST)
-            profile = Profile(cli_ctx=cli_ctx)
-            interactive = False
-            username = None
-            password = None
-            service_principal = None
-            tenant = None
-            if method_index == 0:  # device auth
-                interactive = True
-            elif method_index == 1:  # username and password
-                username = prompt('Username: ')
-                password = prompt_pass(msg='Password: ')
-            elif method_index == 2:  # service principal with secret
-                service_principal = True
-                username = prompt('Service principal: ')
-                tenant = prompt('Tenant: ')
-                password = prompt_pass(msg='Client secret: ')
-            elif method_index == 3:  # skip
-                return
-            try:
-                profile.login(
-                    interactive,
-                    username,
-                    password,
-                    service_principal,
-                    tenant)
-                login_successful = True
-                logger.warning('Login successful!')
-            except AdalError as err:
-                logger.error('Login error!')
-                logger.error(err)
-
-
 def _handle_global_configuration(config, cloud_forbid_telemetry):
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(config.config_path))

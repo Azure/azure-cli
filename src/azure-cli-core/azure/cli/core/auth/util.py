@@ -20,16 +20,11 @@ def aad_error_handler(error, **kwargs):
     raise AuthenticationError(msg, recommendation=login_message, msal_result=error)
 
 
-def _generate_login_command(scopes=None, claims=None):
+def _generate_login_command(scopes=None):
     login_command = ['az login']
 
-    # Rejected by Continuous Access Evaluation, then by Conditional Access
-    if claims:
-        login_command.append('--claims {}'.format(encode_claims(claims)))
-        return 'az logout\n' + ' '.join(login_command)
-
     # Rejected by Conditional Access policy, like MFA
-    elif scopes:
+    if scopes:
         login_command.append('--scope {}'.format(' '.join(scopes)))
 
     return ' '.join(login_command)
@@ -143,27 +138,3 @@ def decode_access_token(access_token):
     # Access token consists of headers.claims.signature. Decode the claim part
     decoded_str = decode_part(access_token.split('.')[1])
     return json.loads(decoded_str)
-
-
-def encode_claims(claims: str):
-    import base64
-    try:
-        base64.urlsafe_b64decode(claims)
-        is_base64 = True
-    except ValueError:
-        is_base64 = False
-
-    if not is_base64:
-        claims = base64.urlsafe_b64encode(claims.encode()).decode()
-
-    return claims
-
-
-def decode_claims(claims: str):
-    import base64
-    try:
-        claims = base64.urlsafe_b64decode(claims).decode()
-    except ValueError:
-        pass
-
-    return claims

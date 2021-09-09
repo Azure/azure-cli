@@ -12,7 +12,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from .msal_authentication import UserCredential, ServicePrincipalCredential
-from .util import aad_error_handler, resource_to_scopes, check_result
+from .util import aad_error_handler, check_result
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -59,11 +59,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         self._msal_app_instance = None
         # Store for Service principal credential persistence
-        self._msal_secret_store = ServicePrincipalStore(self._secret_file, fallback_to_plaintext=self._fallback_to_plaintext)
+        self._msal_secret_store = ServicePrincipalStore(self._secret_file,
+                                                        fallback_to_plaintext=self._fallback_to_plaintext)
         self._msal_app_kwargs = {
             "authority": self.msal_authority,
-            "token_cache": self._load_msal_cache(),
-            "client_capabilities": ["CP1"]
+            "token_cache": self._load_msal_cache()
         }
 
         # TODO: Allow disabling SSL verification
@@ -172,7 +172,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # remove service principal secrets
         self._msal_secret_store.remove_credential(sp)
 
-    def logout_all_service_principal(self, sp):
+    def logout_all_service_principal(self):
         # remove service principal secrets
         self._msal_secret_store.remove_all_credentials()
 
@@ -183,14 +183,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def get_user_credential(self, username):
         return UserCredential(self.client_id, username, **self._msal_app_kwargs)
 
-    def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):
+    def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):  # pylint: disable=unused-argument
         entry = self._msal_secret_store.load_credential(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
         sp_auth = ServicePrincipalAuth.build_from_entry(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
 
     def get_managed_identity_credential(self, client_id=None):
-        raise NotImplemented
+        raise NotImplementedError
 
     def serialize_token_cache(self, path=None):
         path = path or os.path.join(get_config_dir(), "msal.cache.snapshot.json")

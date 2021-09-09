@@ -354,7 +354,7 @@ class Profile:
             external_credentials = []
             for external_tenant in external_tenants:
                 external_credentials.append(self._create_credential(account, external_tenant, client_id=client_id))
-            from azure.cli.core.auth import CredentialAdaptor
+            from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
             cred = CredentialAdaptor(credential,
                                      external_credentials=external_credentials,
                                      resource=resource)
@@ -397,9 +397,6 @@ class Profile:
         else:
             credential = self._create_credential(account, tenant)
             token = credential.get_token(*scopes)
-
-            # BREAKING CHANGE
-            # expires_on = datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
 
             token_entry = {
                 'accessToken': token.token,
@@ -805,7 +802,7 @@ class SubscriptionFinder:
                                    .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, self.cli_ctx.cloud.profile))
         api_version = get_api_version(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
         client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, credential)
-        # TODO: Support CAE
+
         client = client_type(credential, api_version=api_version,
                              base_url=self.cli_ctx.cloud.endpoints.resource_manager,
                              **client_kwargs)
