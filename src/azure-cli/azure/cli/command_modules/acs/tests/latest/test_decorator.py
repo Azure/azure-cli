@@ -1607,7 +1607,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(
-            ctx_2.get_enable_addons(enable_split=True),
+            ctx_2.get_enable_addons(enable_split_comma_separated_str=True),
             ["test_addon_1", "test_addon_2"],
         )
 

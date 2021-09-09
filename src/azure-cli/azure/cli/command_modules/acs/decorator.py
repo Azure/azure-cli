@@ -2176,15 +2176,15 @@ class AKSCreateContext:
 
         Note: enable_addons will not be decorated into the `mc` object.
 
-        This function supports the option of enable_split. When enabled, it will split the string into a list with
-        "," as the delimiter.
+        This function supports the option of enable_split_comma_separated_str. When enabled, it will split the string
+        into a list with "," as the delimiter.
 
         :return: string, empty list or list of strings, or None
         """
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
 
-        if kwargs.get("enable_split", False):
+        if kwargs.get("enable_split_comma_separated_str", False):
             enable_addons = enable_addons.split(',') if enable_addons else []
 
         # this parameter does not need validation
@@ -2825,7 +2825,7 @@ class AKSCreateDecorator:
             )
         ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
         addon_profiles = {}
-        addons = self.context.get_enable_addons(enable_split=True)
+        addons = self.context.get_enable_addons(enable_split_comma_separated_str=True)
         if 'http_application_routing' in addons:
             addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
