@@ -381,24 +381,25 @@ class AKSCreateContext:
         return name
 
     # pylint: disable=unused-argument
-    def get_ssh_key_value(
-        self, enable_validation: bool = False, **kwargs
-    ) -> str:
-        """Obtain the value of ssh_key_value.
+    def get_ssh_key_value_and_no_ssh_key(self, **kwargs) -> Tuple[str, bool]:
+        """Obtain the value of ssh_key_value and no_ssh_key.
 
-        If the user does not specify this parameter, the validator function "validate_ssh_key" checks the default file
-        location "~/.ssh/id_rsa.pub", if the file exists, read its content and return; otherise, create a key pair at
-        "~/.ssh/id_rsa.pub" and return the public key.
-        If the user provides a string-like input, the validator function "validate_ssh_key" checks whether it is a file
-        path, if so, read its content and return; if it is a valid public key, return it; otherwise, create a key pair
-        there and return the public key.
+        Note: no_ssh_key will not be decorated into the `mc` object.
 
-        This function supports the option of enable_validation. When enabled, it will call "_validate_ssh_key" to
-        verify the validity of ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped;
-        otherwise, a CLIError will be raised when the value of ssh_key_value is invalid.
+        If the user does not explicitly specify --ssh-key-value, the validator function "validate_ssh_key" will check
+        the default file location "~/.ssh/id_rsa.pub", if the file exists, read its content and return. Otherise,
+        create a key pair at "~/.ssh/id_rsa.pub" and return the public key.
+        If the user provides a string-like input for --ssh-key-value, the validator function "validate_ssh_key" will
+        check whether it is a file path, if so, read its content and return; if it is a valid public key, return it.
+        Otherwise, create a key pair there and return the public key.
 
-        :return: string
+        This function will verify the parameters by default. It will call "_validate_ssh_key" to verify the validity of
+        ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped. Otherwise, a CLIError will
+        be raised when the value of ssh_key_value is invalid.
+
+        :return: a tuple containing two elements: string type ssh_key_value and bool type no_ssh_key
         """
+        # ssh_key_value
         # read the original value passed by the command
         raw_value = self.raw_param.get("ssh_key_value")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -416,19 +417,30 @@ class AKSCreateContext:
                 value_obtained_from_mc = public_key_obj.key_data
 
         # set default value
+        read_from_mc = False
         if value_obtained_from_mc is not None:
             ssh_key_value = value_obtained_from_mc
+            read_from_mc = True
         else:
             ssh_key_value = raw_value
 
-        # this parameter does not need dynamic completion
+        # no_ssh_key
+        # read the original value passed by the command
+        no_ssh_key = self.raw_param.get("no_ssh_key")
+
+        # consistent check
+        if read_from_mc and no_ssh_key:
+            raise CLIInternalError(
+                "Inconsistent state detected, ssh_key_value is read from the `mc` object while no_ssh_key is enabled."
+            )
+
+        # these parameters do not need dynamic completion
 
         # validation
-        if enable_validation:
-            _validate_ssh_key(
-                no_ssh_key=self.get_no_ssh_key(), ssh_key_value=ssh_key_value
-            )
-        return ssh_key_value
+        _validate_ssh_key(
+            no_ssh_key=no_ssh_key, ssh_key_value=ssh_key_value
+        )
+        return ssh_key_value, no_ssh_key
 
     # pylint: disable=unused-argument
     def get_dns_name_prefix(
@@ -529,30 +541,6 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return kubernetes_version
-
-    # pylint: disable=unused-argument
-    def get_no_ssh_key(self, enable_validation: bool = False, **kwargs) -> bool:
-        """Obtain the value of name.
-
-        Note: no_ssh_key will not be decorated into the `mc` object.
-
-        This function supports the option of enable_validation. When enabled, it will call "_validate_ssh_key" to
-        verify the validity of ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped;
-        otherwise, a CLIError will be raised when the value of ssh_key_value is invalid.
-
-        :return: bool
-        """
-        # read the original value passed by the command
-        no_ssh_key = self.raw_param.get("no_ssh_key")
-
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            _validate_ssh_key(
-                no_ssh_key=no_ssh_key, ssh_key_value=self.get_ssh_key_value()
-            )
-        return no_ssh_key
 
     # pylint: disable=unused-argument
     def get_vm_set_type(self, read_only: bool = False, **kwargs) -> Union[str, None]:
@@ -2572,13 +2560,12 @@ class AKSCreateDecorator:
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
 
-        if not self.context.get_no_ssh_key(enable_validation=True):
+        ssh_key_value, no_ssh_key = self.context.get_ssh_key_value_and_no_ssh_key()
+        if not no_ssh_key:
             ssh_config = self.models.ContainerServiceSshConfiguration(
                 public_keys=[
                     self.models.ContainerServiceSshPublicKey(
-                        key_data=self.context.get_ssh_key_value(
-                            enable_validation=True
-                        )
+                        key_data=ssh_key_value
                     )
                 ]
             )

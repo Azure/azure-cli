@@ -36,6 +36,7 @@ from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockCmd,
 )
 from azure.cli.core.azclierror import (
+    CLIInternalError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
@@ -234,16 +235,28 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1 = AKSCreateContext(self.cmd, {"name": "test_name"})
         self.assertEqual(ctx_1.get_name(), "test_name")
 
-    def test_get_ssh_key_value(self):
+    def test_get_ssh_key_value_and_no_ssh_key(self):
         import paramiko
 
         key = paramiko.RSAKey.generate(2048)
         public_key = "{} {}".format(key.get_name(), key.get_base64())
 
+        # # default
+        # ctx_1 = AKSCreateContext(self.cmd, {"no_ssh_key": False})
+        # self.assertEqual(ctx_1.get_no_ssh_key(), False)
+
+        # # invalid key & valid parameter with validation
+        # ctx_2 = AKSCreateContext(
+        #     self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": True}
+        # )
+        # self.assertEqual(
+        #     ctx_2.get_ssh_key_value(enable_validation=True), "fake-key"
+        # )
+
         # default
-        ctx_1 = AKSCreateContext(self.cmd, {"ssh_key_value": public_key})
+        ctx_1 = AKSCreateContext(self.cmd, {"ssh_key_value": public_key, "no_ssh_key": False})
         self.assertEqual(
-            ctx_1.get_ssh_key_value(enable_validation=True), public_key
+            ctx_1.get_ssh_key_value_and_no_ssh_key(), (public_key, False)
         )
         ssh_config = self.models.ContainerServiceSshConfiguration(
             public_keys=[
@@ -259,22 +272,39 @@ class AKSCreateContextTestCase(unittest.TestCase):
             location="test_location", linux_profile=linux_profile
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_ssh_key_value(), "test_mc_ssh_key_value")
+        with self.assertRaises(CLIError):
+            self.assertEqual(ctx_1.get_ssh_key_value_and_no_ssh_key(), "test_mc_ssh_key_value")
 
         # invalid key with validation
         ctx_2 = AKSCreateContext(
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": False}
         )
         with self.assertRaises(CLIError):
-            ctx_2.get_ssh_key_value(enable_validation=True)
+            ctx_2.get_ssh_key_value_and_no_ssh_key(enable_validation=True)
 
         # invalid key & valid parameter with validation
         ctx_3 = AKSCreateContext(
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": True}
         )
         self.assertEqual(
-            ctx_3.get_ssh_key_value(enable_validation=True), "fake-key"
+            ctx_3.get_ssh_key_value_and_no_ssh_key(enable_validation=True), ("fake-key", True)
         )
+        ssh_config_3 = self.models.ContainerServiceSshConfiguration(
+            public_keys=[
+                self.models.ContainerServiceSshPublicKey(
+                    key_data="test_mc_ssh_key_value"
+                )
+            ]
+        )
+        linux_profile_3 = self.models.ContainerServiceLinuxProfile(
+            admin_username="test_user", ssh=ssh_config_3
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location", linux_profile=linux_profile_3
+        )
+        ctx_3.attach_mc(mc_3)
+        with self.assertRaises(CLIInternalError):
+            self.assertEqual(ctx_3.get_ssh_key_value_and_no_ssh_key(), "test_mc_ssh_key_value")
 
     def test_get_dns_name_prefix(self):
         # default & dynamic completion
@@ -331,19 +361,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(
             ctx_1.get_kubernetes_version(), "test_mc_kubernetes_version"
-        )
-
-    def test_get_no_ssh_key(self):
-        # default
-        ctx_1 = AKSCreateContext(self.cmd, {"no_ssh_key": False})
-        self.assertEqual(ctx_1.get_no_ssh_key(), False)
-
-        # invalid key & valid parameter with validation
-        ctx_2 = AKSCreateContext(
-            self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": True}
-        )
-        self.assertEqual(
-            ctx_2.get_ssh_key_value(enable_validation=True), "fake-key"
         )
 
     def test_get_vm_set_type(self):
