@@ -965,7 +965,7 @@ short-summary: Manage web apps.
 
 helps['webapp auth'] = """
 type: group
-short-summary: Manage webapp authentication and authorization
+short-summary: Manage webapp authentication and authorization. To use v2 auth commands, run "az extension add --name authV2" to add the authV2 CLI extension.
 """
 
 helps['webapp auth show'] = """
@@ -2055,7 +2055,7 @@ examples:
 
 helps['webapp update'] = """
 type: command
-short-summary: Update a web app.
+short-summary: Update an existing web app.
 examples:
   - name: Update the tags of a web app.
     text: >
