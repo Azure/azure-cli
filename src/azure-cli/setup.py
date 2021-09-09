@@ -137,7 +137,6 @@ DEPENDENCIES = [
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'fabric~=2.4',
     'javaproperties==0.5.1',
-    'jsmin~=2.2.2',
     'jsondiff==1.2.0',
     'packaging~=20.9',
     'PyGithub~=1.38',
