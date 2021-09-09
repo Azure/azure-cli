@@ -45,10 +45,8 @@ class UserCredential(PublicClientApplication):
         # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
         logger.debug("UserCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
-        claims = kwargs.pop('claims', None)
-        result = self.acquire_token_silent_with_error(list(scopes), self.account, claims_challenge=claims,
-                                                      **kwargs)
-        check_result(result, scopes=scopes, claims=claims)
+        result = self.acquire_token_silent_with_error(list(scopes), self.account, **kwargs)
+        check_result(result, scopes=scopes)
         return _build_sdk_access_token(result)
 
 

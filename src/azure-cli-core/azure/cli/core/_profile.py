@@ -308,6 +308,7 @@ class Profile:
 
         identity = Identity(self._authority)
         identity.logout_all_users()
+        identity.logout_all_service_principal()
 
     def get_login_credentials(self, resource=None, client_id=None, subscription_id=None, aux_subscriptions=None,
                               aux_tenants=None):

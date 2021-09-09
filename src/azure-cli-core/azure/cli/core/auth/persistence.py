@@ -7,7 +7,6 @@
 # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/blob/dev/sample/token_cache_sample.py
 
 import json
-import logging
 import sys
 
 from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersistence, LibsecretPersistence,
@@ -15,6 +14,9 @@ from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersiste
 from msal_extensions.persistence import PersistenceNotFound
 
 from knack.util import CLIError
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def load_persisted_token_cache(location, fallback_to_plaintext):
@@ -49,7 +51,7 @@ def build_persistence(location, fallback_to_plaintext=False):
         except:  # pylint: disable=bare-except
             if not fallback_to_plaintext:
                 raise
-            logging.exception("Encryption unavailable. Opting in to plain text.")
+            logger.exception("Encryption unavailable. Opting in to plain text.")
     return FilePersistence(location)
 
 
