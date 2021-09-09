@@ -2092,59 +2092,47 @@ class AKSCreateContext:
                 )
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
 
-    # pylint: disable=unused-argument
-    def get_enable_addons(
-        self,
-        enable_validation: bool = False,
-        enable_split_comma_separated_str: bool = False,
-        **kwargs
-    ) -> Union[str, List[str], None]:
+    def get_enable_addons(self) -> Union[List[str], None]:
         """Obtain the value of enable_addons.
 
         Note: enable_addons will not be decorated into the `mc` object.
 
-        This function supports the option of enable_validation. When enabled, it will check whether the provided addons
-        have duplicate or invalid values, and raise a InvalidArgumentValueError if found.
-        This function supports the option of enable_split_comma_separated_str. When enabled, it will split the string
-        into a list with "," as the delimiter.
+        This function will verify the parameters by default. It will check whether the provided addons have duplicate or
+        invalid values, and raise a InvalidArgumentValueError if found.
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
 
-        :return: string, empty list or list of strings, or None
+        :return: empty list or list of strings, or None
         """
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
 
-        if enable_split_comma_separated_str:
-            enable_addons = enable_addons.split(',') if enable_addons else []
+        # normalize
+        enable_addons = enable_addons.split(',') if enable_addons else []
 
         # validation
-        if enable_validation:
-            if isinstance(enable_addons, list):
-                validation_addons = enable_addons
-            else:
-                validation_addons = enable_addons.split(',') if enable_addons else []
-
-            # check duplicate addons
-            duplicate_addons_set = {
-                x for x in validation_addons if validation_addons.count(x) >= 2
-            }
-            if len(duplicate_addons_set) != 0:
-                raise InvalidArgumentValueError(
-                    "Duplicate addon{} '{}' found in option --enable-addons.".format(
-                        "s" if len(duplicate_addons_set) > 1 else "",
-                        ",".join(duplicate_addons_set),
-                    )
+        # check duplicate addons
+        duplicate_addons_set = {
+            x for x in enable_addons if enable_addons.count(x) >= 2
+        }
+        if len(duplicate_addons_set) != 0:
+            raise InvalidArgumentValueError(
+                "Duplicate addon{} '{}' found in option --enable-addons.".format(
+                    "s" if len(duplicate_addons_set) > 1 else "",
+                    ",".join(duplicate_addons_set),
                 )
+            )
 
-            # check unrecognized addons
-            enable_addons_set = set(validation_addons)
-            invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
-            if len(invalid_addons_set) != 0:
-                raise InvalidArgumentValueError(
-                    "'{}' {} not recognized by the --enable-addons argument.".format(
-                        ",".join(invalid_addons_set),
-                        "are" if len(invalid_addons_set) > 1 else "is",
-                    )
+        # check unrecognized addons
+        enable_addons_set = set(enable_addons)
+        invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
+        if len(invalid_addons_set) != 0:
+            raise InvalidArgumentValueError(
+                "'{}' {} not recognized by the --enable-addons argument.".format(
+                    ",".join(invalid_addons_set),
+                    "are" if len(invalid_addons_set) > 1 else "is",
                 )
+            )
         return enable_addons
 
     # pylint: disable=unused-argument
@@ -2197,8 +2185,8 @@ class AKSCreateContext:
         # this parameter does not need validation
         return workspace_resource_id
 
-    # pylint: disable=unused-argument,no-self-use
-    def get_virtual_node_addon_os_type(self, **kwargs) -> str:
+    # pylint: disable=no-self-use
+    def get_virtual_node_addon_os_type(self) -> str:
         """Obtain the os_type of virtual node addon.
 
         Note: This is not a parameter of aks_create.
@@ -2207,8 +2195,7 @@ class AKSCreateContext:
         """
         return "Linux"
 
-    # pylint: disable=unused-argument
-    def get_aci_subnet_name(self, **kwargs) -> Union[str, None]:
+    def get_aci_subnet_name(self) -> Union[str, None]:
         """Obtain the value of aci_subnet_name.
 
         :return: string or None
@@ -2236,8 +2223,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return aci_subnet_name
 
-    # pylint: disable=unused-argument
-    def get_appgw_name(self, **kwargs) -> Union[str, None]:
+    def get_appgw_name(self) -> Union[str, None]:
         """Obtain the value of appgw_name.
 
         :return: string or None
@@ -2261,8 +2247,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_name
 
-    # pylint: disable=unused-argument
-    def get_appgw_subnet_cidr(self, **kwargs) -> Union[str, None]:
+    def get_appgw_subnet_cidr(self) -> Union[str, None]:
         """Obtain the value of appgw_subnet_cidr.
 
         :return: string or None
@@ -2286,8 +2271,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_subnet_cidr
 
-    # pylint: disable=unused-argument
-    def get_appgw_id(self, **kwargs) -> Union[str, None]:
+    def get_appgw_id(self) -> Union[str, None]:
         """Obtain the value of appgw_id.
 
         :return: string or None
@@ -2311,8 +2295,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_id
 
-    # pylint: disable=unused-argument
-    def get_appgw_subnet_id(self, **kwargs) -> Union[str, None]:
+    def get_appgw_subnet_id(self) -> Union[str, None]:
         """Obtain the value of appgw_subnet_id.
 
         :return: string or None
@@ -2336,8 +2319,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_subnet_id
 
-    # pylint: disable=unused-argument
-    def get_appgw_watch_namespace(self, **kwargs) -> Union[str, None]:
+    def get_appgw_watch_namespace(self) -> Union[str, None]:
         """Obtain the value of appgw_watch_namespace.
 
         :return: string or None
@@ -2361,8 +2343,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_watch_namespace
 
-    # pylint: disable=unused-argument
-    def get_enable_sgxquotehelper(self, **kwargs) -> bool:
+    def get_enable_sgxquotehelper(self) -> bool:
         """Obtain the value of enable_sgxquotehelper.
 
         :return: bool
@@ -2516,6 +2497,7 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+
         (
             windows_admin_username,
             windows_admin_password,
@@ -2662,6 +2644,7 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+
         attach_acr = self.context.get_attach_acr()
         if attach_acr:
             if self.context.get_enable_managed_identity():
@@ -2702,6 +2685,7 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+
         # build load balancer profile, which is part of the network profile
         load_balancer_profile = create_load_balancer_profile(
             self.context.get_load_balancer_managed_outbound_ip_count(),
@@ -2712,16 +2696,17 @@ class AKSCreateDecorator:
             models=self.models.lb_models,
         )
 
-        # verify outbound type, which is part of the network profile
+        # verify outbound type
         # Note: Validation internally depends on load_balancer_sku, which is a temporary value that is
         # dynamically completed.
         outbound_type = self.context.get_outbound_type(
             load_balancer_profile=load_balancer_profile
         )
 
-        # verify load balancer sku, which is part of the network profile
+        # verify load balancer sku
         load_balancer_sku = self.context.get_load_balancer_sku()
 
+        # verify network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
         network_plugin = self.context.get_network_plugin()
         (
             pod_cidr,
@@ -2732,14 +2717,6 @@ class AKSCreateDecorator:
         ) = (
             self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
         )
-        # pod_cidr = self.context.get_pod_cidr(enable_validation=True)
-        # service_cidr = self.context.get_service_cidr(enable_validation=True)
-        # dns_service_ip = self.context.get_dns_service_ip(enable_validation=True)
-        # docker_bridge_address = self.context.get_docker_bridge_address(
-        #     enable_validation=True
-        # )
-        # network_policy = self.context.get_network_policy(enable_validation=True)
-
         network_profile = None
         if any(
             [
@@ -2792,10 +2769,11 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+
         ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
         addon_profiles = {}
         # error out if any unrecognized or duplicate addon provided
-        addons = self.context.get_enable_addons(enable_validation=True, enable_split_comma_separated_str=True)
+        addons = self.context.get_enable_addons()
         if 'http_application_routing' in addons:
             addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)

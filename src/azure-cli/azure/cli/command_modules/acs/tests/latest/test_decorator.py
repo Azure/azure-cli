@@ -1480,18 +1480,18 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "enable_addons": None,
             },
         )
-        self.assertEqual(ctx_1.get_enable_addons(enable_validation=True), None)
+        self.assertEqual(ctx_1.get_enable_addons(), [])
 
         # custom value
         ctx_2 = AKSCreateContext(
             self.cmd,
             {
-                "enable_addons": "test_addon_1,test_addon_2",
+                "enable_addons": "http_application_routing,monitoring",
             },
         )
         self.assertEqual(
-            ctx_2.get_enable_addons(enable_split_comma_separated_str=True),
-            ["test_addon_1", "test_addon_2"],
+            ctx_2.get_enable_addons(),
+            ["http_application_routing", "monitoring"],
         )
 
         # invalid parameter
@@ -1502,7 +1502,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(InvalidArgumentValueError):
-            ctx_3.get_enable_addons(enable_validation=True)
+            ctx_3.get_enable_addons()
 
         # invalid parameter
         ctx_4 = AKSCreateContext(
@@ -1512,7 +1512,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(InvalidArgumentValueError):
-            ctx_4.get_enable_addons(enable_validation=True)
+            ctx_4.get_enable_addons()
 
     def test_get_workspace_resource_id(self):
         # default
