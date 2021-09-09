@@ -438,7 +438,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
                        "is removed. Use 'az webapp config appsettings list --name MyWebapp --resource-group "
                        "MyResourceGroup --subscription MySubscription' to list app settings and 'az webapp "
                        "config appsettings delete --name MyWebApp --resource-group MyResourceGroup "
-                       "--setting-names `{setting-names}`' to delete them.".format(deployment_status_url))
+                       "--setting-names <setting-names> to delete them.".format(deployment_status_url))
 
     # check the status of async deployment
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
