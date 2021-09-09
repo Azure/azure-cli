@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.28.1
+++++++
+
+**ARM**
+
+Hotfix: Fix #19468: pip installs azure-cli 2.0.73 because of the dependency on deprecated package `jsmin` (#19495)
+
 2.28.0
 ++++++
 
