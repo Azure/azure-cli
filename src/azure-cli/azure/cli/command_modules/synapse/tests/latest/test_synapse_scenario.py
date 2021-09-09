@@ -8,7 +8,7 @@ import os
 import unittest
 import time
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, record_only
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -18,7 +18,8 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    def test_workspaces(self, resource_group):
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    def test_workspaces(self, resource_group, storage_account):
         # create a workspace
         self._create_workspace()
 
@@ -58,6 +59,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
     def test_managed_virtual_network_workspace(self):
         # test workspace with managed virtual network
         self._create_workspace("--enable-managed-virtual-network")
@@ -70,6 +72,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
     def test_spark_pool(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -229,6 +232,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
     def test_sql_pool(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -574,7 +578,8 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    def test_ip_firewall_rules(self, resource_group):
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    def test_ip_firewall_rules(self, resource_group, storage_account):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
             'rg': 'rg',
@@ -880,7 +885,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # Create adlsgen2
-        self._create_storage_account()
+        # self._create_storage_account()
 
         # Wait some time to improve robustness
         if self.is_live or self.in_recording:
@@ -920,6 +925,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
     def test_linked_service(self):
         self.kwargs.update({
             'name': 'linkedservice',
@@ -968,6 +974,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
     def test_dataset(self):
         self.kwargs.update({
             'name': 'dataset'})
@@ -1198,6 +1205,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
     def test_notebook(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
