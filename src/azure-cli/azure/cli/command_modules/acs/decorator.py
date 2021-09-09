@@ -57,8 +57,9 @@ from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 logger = get_logger(__name__)
 
 # type variables
-ManagedCluster = TypeVar("ManagedCluster")
 ContainerServiceClient = TypeVar("ContainerServiceClient")
+ManagedCluster = TypeVar("ManagedCluster")
+ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
 ResourceReference = TypeVar("ResourceReference")
 
 
@@ -431,7 +432,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_dns_name_prefix(
-        self, enable_validation: bool = False, **kwargs
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> Union[str, None]:
         """Dynamically obtain the value of ssh_key_value according to the context.
 
@@ -454,7 +455,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return dns_name_prefix
 
         dynamic_completion = False
@@ -481,7 +482,7 @@ class AKSCreateContext:
         return dns_name_prefix
 
     # pylint: disable=unused-argument
-    def get_location(self, **kwargs) -> Union[str, None]:
+    def get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
         """Dynamically obtain the value of location according to the context.
 
         When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
@@ -501,7 +502,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return location
 
         # dynamic completion
@@ -554,7 +555,7 @@ class AKSCreateContext:
         return no_ssh_key
 
     # pylint: disable=unused-argument
-    def get_vm_set_type(self, **kwargs) -> Union[str, None]:
+    def get_vm_set_type(self, read_only: bool = False, **kwargs) -> Union[str, None]:
         """Dynamically obtain the value of vm_set_type according to the context.
 
         Dynamic completion will be triggerd by default. Function "_set_vm_set_type" will be called and the
@@ -585,7 +586,7 @@ class AKSCreateContext:
             vm_set_type = raw_value
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return vm_set_type
 
         # dynamic completion
@@ -601,7 +602,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_load_balancer_sku(
-        self, enable_validation: bool = False, **kwargs
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> Union[str, None]:
         """Dynamically obtain the value of load_balancer_sku according to the context.
 
@@ -632,7 +633,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return load_balancer_sku
 
         # dynamic completion
@@ -721,7 +722,7 @@ class AKSCreateContext:
         return fqdn_subdomain
 
     # pylint: disable=unused-argument
-    def get_nodepool_name(self, **kwargs) -> str:
+    def get_nodepool_name(self, enable_trim: bool = False, **kwargs) -> str:
         """Dynamically obtain the value of nodepool_name according to the context.
 
         Note: SDK performs the following validation {'required': True, 'pattern': r'^[a-z][a-z0-9]{0,11}$'}.
@@ -754,7 +755,7 @@ class AKSCreateContext:
             nodepool_name = raw_value
 
         # dynamic completion
-        if not read_from_mc and kwargs.get("enable_trim", False):
+        if not read_from_mc and enable_trim:
             if not nodepool_name:
                 nodepool_name = "nodepool1"
             else:
@@ -1384,7 +1385,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_windows_admin_username_and_password(
-        self, **kwargs
+        self, read_only: bool = False, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
 
@@ -1430,7 +1431,7 @@ class AKSCreateContext:
             )
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return windows_admin_username, windows_admin_password
 
         username_dynamic_completion = False
@@ -1494,7 +1495,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument,too-many-statements
     def get_service_principal_and_client_secret(
-        self, **kwargs
+        self, read_only: bool = False, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the values of service_principal and client_secret according to the context.
 
@@ -1544,7 +1545,7 @@ class AKSCreateContext:
             )
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return service_principal, client_secret
 
         # dynamic completion for service_principal and client_secret
@@ -1584,7 +1585,7 @@ class AKSCreateContext:
 
     # pylint: disable=unused-argument
     def get_enable_managed_identity(
-        self, enable_validation: bool = False, **kwargs
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> bool:
         """Dynamically obtain the values of service_principal and client_secret according to the context.
 
@@ -1593,6 +1594,7 @@ class AKSCreateContext:
         When both service_principal and client_secret are assigned and enable_managed_identity is True, dynamic
         completion will be triggered. The value of enable_managed_identity will be set to False.
 
+        This function supports the option of enable_validation. When enabled, it will ...
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
         :return: bool
@@ -1606,7 +1608,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return enable_managed_identity
 
         dynamic_completion = False
@@ -1874,7 +1876,13 @@ class AKSCreateContext:
         return load_balancer_idle_timeout
 
     # pylint: disable=unused-argument
-    def get_outbound_type(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+    def get_outbound_type(
+        self,
+        enable_validation: bool = False,
+        read_only: bool = False,
+        load_balancer_profile: ManagedClusterLoadBalancerProfile = None,
+        **kwargs
+    ) -> Union[str, None]:
         """Dynamically obtain the value of outbound_type according to the context.
 
         Note: The parameters involved in the validation are not verified in their own getters.
@@ -1882,8 +1890,6 @@ class AKSCreateContext:
         When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
 
-        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
-        parameters, the value in load_balancer_profile will be used for validation.
         This function supports the option of enable_validation. When enabled, if the value of outbound_type is
         userDefinedRouting (CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING), the following checks will be performed. If
         load_balancer_sku is set to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not
@@ -1891,6 +1897,8 @@ class AKSCreateContext:
         load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
         will be raised.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
+        parameters, the value in load_balancer_profile will be used for validation.
 
         :return: string or None
         """
@@ -1907,7 +1915,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return outbound_type
 
         # dynamic completion
@@ -1932,7 +1940,6 @@ class AKSCreateContext:
                         "be pre-configured with a route table with egress rules"
                     )
 
-                load_balancer_profile = kwargs.get("load_balancer_profile")
                 if load_balancer_profile:
                     if (
                         load_balancer_profile.managed_outbound_i_ps or
@@ -2172,11 +2179,18 @@ class AKSCreateContext:
         return network_policy
 
     # pylint: disable=unused-argument
-    def get_enable_addons(self, enable_validation: bool = False, **kwargs) -> Union[str, List[str], None]:
+    def get_enable_addons(
+        self,
+        enable_validation: bool = False,
+        enable_split_comma_separated_str: bool = False,
+        **kwargs
+    ) -> Union[str, List[str], None]:
         """Obtain the value of enable_addons.
 
         Note: enable_addons will not be decorated into the `mc` object.
 
+        This function supports the option of enable_validation. When enabled, it will check whether the provided addons
+        have duplicate or invalid values, and raise a InvalidArgumentValueError if found.
         This function supports the option of enable_split_comma_separated_str. When enabled, it will split the string
         into a list with "," as the delimiter.
 
@@ -2185,7 +2199,7 @@ class AKSCreateContext:
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
 
-        if kwargs.get("enable_split_comma_separated_str", False):
+        if enable_split_comma_separated_str:
             enable_addons = enable_addons.split(',') if enable_addons else []
 
         # validation
@@ -2220,7 +2234,7 @@ class AKSCreateContext:
         return enable_addons
 
     # pylint: disable=unused-argument
-    def get_workspace_resource_id(self, **kwargs) -> Union[str, None]:
+    def get_workspace_resource_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
         """Dynamically obtain the value of workspace_resource_id according to the context.
 
         When both workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
@@ -2249,7 +2263,7 @@ class AKSCreateContext:
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
-        if kwargs.get("read_only"):
+        if read_only:
             return workspace_resource_id
 
         # dynamic completion
