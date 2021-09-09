@@ -54,10 +54,13 @@ class MigrationScenarioTest(ScenarioTest):
         target_resource_group_name = "raganesa-t-m-pg-1"
         target_server_name = "raganesa-t-m-pg-1-vnet"
 
-        # test create migration - success
-        result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-name {} --properties @migrationVNet.json'
+        # test check migration name availability -success
+        result = self.cmd('{} flexible-server migration check-name-availability --subscription {} --resource-group {} --name {} --migration-name {} '
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
-
+        
+        # test create migration - success
+        result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-name {} --properties migrationVNet.json'
+                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
         migration_name = result['name']
 
         # test list migrations - success, with filter
