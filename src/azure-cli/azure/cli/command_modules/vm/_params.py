@@ -14,7 +14,7 @@ from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
     get_location_type, get_resource_name_completion_list, tags_type, get_three_state_flag,
-    file_type, get_enum_type, zone_type, zones_type)
+    file_type, get_enum_type, zone_type, zones_type, resource_group_name_type)
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
@@ -1163,6 +1163,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
     # endRegion
 
+    # region Capacity
     with self.argument_context('capacity reservation group') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-n'],
@@ -1194,3 +1195,42 @@ def load_arguments(self, _):
 
     with self.argument_context('capacity reservation show') as c:
         c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve a snapshot of the runtime properties of the capacity reservation that is managed by the platform and can change outside of control plane operations.')
+    # endRegion
+
+    # region Restore point collection
+    with self.argument_context('restore-point collections list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+
+    with self.argument_context('restore-point collection show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('restore_point_collection_name', options_list=['--name', '-n', '--restore-point-collection-name'],
+                   type=str, help='The name of the restore point collection.', id_part='name')
+
+    with self.argument_context('restore-point collections create') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('restore_point_collection_name', options_list=['--name', '-n', '--restore-point-collection-name'],
+                   type=str, help='The name of the restore point collection.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('id_', options_list=['--id'], type=str, help='Resource Id of the source resource used to create '
+                   'this restore point collection', arg_group='Source')
+
+    with self.argument_context('restore-point collections update') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('restore_point_collection_name', options_list=['--name', '-n', '--restore-point-collection-name'],
+                   type=str, help='The name of the restore point collection.', id_part='name')
+        c.argument('tags', tags_type)
+        c.argument('id_', options_list=['--id'], type=str, help='Resource Id of the source resource used to create '
+                   'this restore point collection', arg_group='Source')
+
+    with self.argument_context('restore-point collections delete') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('restore_point_collection_name', options_list=['--name', '-n', '--restore-point-collection-name'],
+                   type=str, help='The name of the Restore Point Collection.', id_part='name')
+
+    with self.argument_context('restore-point collections wait') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('restore_point_collection_name', options_list=['--name', '-n', '--restore-point-collection-name'],
+                   type=str, help='The name of the restore point collection.', id_part='name')
+    # endRegion
