@@ -443,10 +443,10 @@ class AKSCreateContext:
         return ssh_key_value, no_ssh_key
 
     # pylint: disable=unused-argument
-    def get_dns_name_prefix(
+    def _get_dns_name_prefix(
         self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> Union[str, None]:
-        """Dynamically obtain the value of ssh_key_value according to the context.
+        """Internal function to dynamically obtain the value of dns_name_prefix according to the context.
 
         When both dns_name_prefix and fqdn_subdomain are not assigned, dynamic completion will be triggerd. Function
         "_get_default_dns_prefix" will be called to create a default dns_name_prefix composed of name (cluster),
@@ -492,6 +492,22 @@ class AKSCreateContext:
                     "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
                 )
         return dns_name_prefix
+
+    # pylint: disable=unused-argument
+    def get_dns_name_prefix(self, **kwargs) -> Union[str, None]:
+        """Dynamically obtain the value of dns_name_prefix according to the context.
+
+        When both dns_name_prefix and fqdn_subdomain are not assigned, dynamic completion will be triggerd. Function
+        "_get_default_dns_prefix" will be called to create a default dns_name_prefix composed of name (cluster),
+        resource_group_name, and subscription_id.
+
+        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
+        are assigend, if so, raise the MutuallyExclusiveArgumentError.
+
+        :return: string or None
+        """
+
+        return self._get_dns_name_prefix(enable_validation=True)
 
     # pylint: disable=unused-argument
     def get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
@@ -683,13 +699,11 @@ class AKSCreateContext:
         return api_server_authorized_ip_ranges
 
     # pylint: disable=unused-argument
-    def get_fqdn_subdomain(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[str, None]:
+    def get_fqdn_subdomain(self, **kwargs) -> Union[str, None]:
         """Obtain the value of fqdn_subdomain.
 
-        This function supports the option of enable_validation. When enabled, it will check if both dns_name_prefix and
-        fqdn_subdomain are assigend, if so, raise the MutuallyExclusiveArgumentError.
+        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
+        are assigend, if so, raise the MutuallyExclusiveArgumentError.
 
         :return: string or None
         """
@@ -702,11 +716,10 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if enable_validation:
-            if fqdn_subdomain and self.get_dns_name_prefix(read_only=True):
-                raise MutuallyExclusiveArgumentError(
-                    "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
-                )
+        if fqdn_subdomain and self._get_dns_name_prefix(read_only=True):
+            raise MutuallyExclusiveArgumentError(
+                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+            )
         return fqdn_subdomain
 
     # pylint: disable=unused-argument
@@ -1560,7 +1573,7 @@ class AKSCreateContext:
                 subscription_id=self.get_intermediate(
                     "subscription_id", None
                 ),
-                dns_name_prefix=self.get_dns_name_prefix(),
+                dns_name_prefix=self._get_dns_name_prefix(enable_validation=False),
                 fqdn_subdomain=self.get_fqdn_subdomain(),
                 location=self.get_location(),
                 name=self.get_name(),

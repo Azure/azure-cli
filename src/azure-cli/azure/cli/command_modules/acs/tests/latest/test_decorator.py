@@ -336,7 +336,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_dns_name_prefix(enable_validation=True)
+            ctx_2.get_dns_name_prefix()
 
     def test_get_location(self):
         # default & dynamic completion
@@ -497,18 +497,16 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_fqdn_subdomain(), "test_mc_fqdn_subdomain")
 
-        # valid parameter with validation
+        # invalid parameter with validation
         ctx_2 = AKSCreateContext(
             self.cmd,
             {
-                "dns_name_prefix": None,
+                "dns_name_prefix": "test_dns_name_prefix",
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
         )
-        self.assertEqual(
-            ctx_2.get_fqdn_subdomain(enable_validation=True),
-            "test_fqdn_subdomain",
-        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_fqdn_subdomain()
 
     def test_get_nodepool_name(self):
         # default
