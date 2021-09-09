@@ -5924,15 +5924,14 @@ def update_custom_ip_prefix(instance,
                             signed_message=None,
                             authorization_message=None,
                             tags=None,
-                            commission=False,
-                            decommission=False):
+                            commission=None):
     if tags is not None:
         instance.tags = tags
     if signed_message is not None:
         instance.signed_message = signed_message
     if authorization_message is not None:
         instance.authorization_message = authorization_message
-    if commission or decommission:
+    if commission is not None:
         instance.commissioned_state = "Commissioning" if commission else "Decommissioning"
     return instance
 # endregion
