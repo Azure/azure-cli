@@ -3,56 +3,55 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
-from knack.log import get_logger
-from typing import Any, List, Dict, Tuple, TypeVar, Union
-
-from azure.cli.core import AzCommandsLoader
-from azure.cli.core.azclierror import (
-    CLIInternalError,
-    MutuallyExclusiveArgumentError,
-    RequiredArgumentMissingError,
-    InvalidArgumentValueError,
-    NoTTYError,
-)
-from azure.cli.core.commands import AzCliCommand
-from azure.cli.core.profiles import ResourceType
+from typing import Any, Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._consts import (
-    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
-    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_CONFCOM_ADDON_NAME,
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+    CONST_INGRESS_APPGW_ADDON_NAME,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+    CONST_INGRESS_APPGW_SUBNET_CIDR,
+    CONST_INGRESS_APPGW_SUBNET_ID,
+    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
-    CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
-    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
-    CONST_INGRESS_APPGW_SUBNET_CIDR,
-    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
-    CONST_INGRESS_APPGW_SUBNET_ID,
-    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
-    CONST_INGRESS_APPGW_ADDON_NAME,
-    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
-    CONST_CONFCOM_ADDON_NAME,
 )
 from azure.cli.command_modules.acs.custom import (
-    _get_rg_location,
-    _validate_ssh_key,
-    _get_default_dns_prefix,
-    _set_vm_set_type,
-    set_load_balancer_sku,
-    get_subscription_id,
-    _ensure_aks_service_principal,
-    _get_user_assigned_identity,
-    subnet_role_assignment_exists,
     _add_role_assignment,
     _ensure_aks_acr,
-    create_load_balancer_profile,
-    _ensure_default_log_analytics_workspace_for_monitoring,
+    _ensure_aks_service_principal,
     _ensure_container_insights_for_monitoring,
+    _ensure_default_log_analytics_workspace_for_monitoring,
+    _get_default_dns_prefix,
+    _get_rg_location,
+    _get_user_assigned_identity,
+    _set_vm_set_type,
+    _validate_ssh_key,
+    create_load_balancer_profile,
+    get_subscription_id,
+    set_load_balancer_sku,
+    subnet_role_assignment_exists,
 )
+from azure.cli.core import AzCommandsLoader
+from azure.cli.core.azclierror import (
+    CLIInternalError,
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+    NoTTYError,
+    RequiredArgumentMissingError,
+)
+from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.profiles import ResourceType
+from knack.log import get_logger
+from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 
 logger = get_logger(__name__)
 

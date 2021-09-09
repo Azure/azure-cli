@@ -4,45 +4,44 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-from knack.util import CLIError
 import unittest
 from unittest.mock import Mock, patch
 
-from azure.cli.core.azclierror import (
-    MutuallyExclusiveArgumentError,
-    RequiredArgumentMissingError,
-    InvalidArgumentValueError,
-)
-from azure.cli.core.profiles import ResourceType
-
-from azure.cli.command_modules.acs.tests.latest.mocks import (
-    MockClient,
-    MockCLI,
-    MockCmd,
-)
 from azure.cli.command_modules.acs._consts import (
-    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_CONFCOM_ADDON_NAME,
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+    CONST_INGRESS_APPGW_ADDON_NAME,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+    CONST_INGRESS_APPGW_SUBNET_CIDR,
+    CONST_INGRESS_APPGW_SUBNET_ID,
+    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
-    CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
-    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
-    CONST_INGRESS_APPGW_SUBNET_CIDR,
-    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
-    CONST_INGRESS_APPGW_SUBNET_ID,
-    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
-    CONST_INGRESS_APPGW_ADDON_NAME,
-    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
-    CONST_CONFCOM_ADDON_NAME,
 )
 from azure.cli.command_modules.acs.decorator import (
-    AKSCreateModels,
     AKSCreateContext,
     AKSCreateDecorator,
+    AKSCreateModels,
 )
+from azure.cli.command_modules.acs.tests.latest.mocks import (
+    MockCLI,
+    MockClient,
+    MockCmd,
+)
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+    RequiredArgumentMissingError,
+)
+from azure.cli.core.profiles import ResourceType
+from knack.util import CLIError
 
 
 class AKSCreateModelsTestCase(unittest.TestCase):
@@ -2462,8 +2461,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
         self.assertEqual(dec_1.context.get_intermediate("monitoring"), None)
-        self.assertEqual(dec_1.context.get_intermediate("enable_virtual_node"), None)
-        self.assertEqual(dec_1.context.get_intermediate("ingress_appgw_addon_enabled"), None)
+        self.assertEqual(
+            dec_1.context.get_intermediate("enable_virtual_node"), None
+        )
+        self.assertEqual(
+            dec_1.context.get_intermediate("ingress_appgw_addon_enabled"), None
+        )
 
         # custom value
         dec_2 = AKSCreateDecorator(
@@ -2514,8 +2517,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
         self.assertEqual(dec_2.context.get_intermediate("monitoring"), True)
-        self.assertEqual(dec_2.context.get_intermediate("enable_virtual_node"), True)
-        self.assertEqual(dec_2.context.get_intermediate("ingress_appgw_addon_enabled"), True)
+        self.assertEqual(
+            dec_2.context.get_intermediate("enable_virtual_node"), True
+        )
+        self.assertEqual(
+            dec_2.context.get_intermediate("ingress_appgw_addon_enabled"), True
+        )
 
         # custom value
         dec_3 = AKSCreateDecorator(
