@@ -14,6 +14,7 @@ import struct
 import sys
 import time
 import uuid
+from ipaddress import ip_network
 
 from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients, is_azure_stack_profile
 from azure.cli.command_modules.keyvault._validators import _construct_vnet, secret_text_encoding_values
@@ -970,6 +971,10 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
     vault.properties.network_acls = vault.properties.network_acls or _create_network_rule_set(cmd)
     rules = vault.properties.network_acls
 
+    if not subnet and not ip_address:
+        logger.warning('No subnet or ip address supplied.')
+
+    to_update = False
     if subnet:
         rules.virtual_network_rules = rules.virtual_network_rules or []
 
@@ -981,17 +986,28 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                 break
         if to_modify:
             rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
+            to_update = True
 
     if ip_address:
         rules.ip_rules = rules.ip_rules or []
         # if the rule already exists, don't add again
-        to_modify = True
-        for x in rules.ip_rules:
-            if x.value == ip_address:
-                to_modify = False
-                break
-        if to_modify:
-            rules.ip_rules.append(IPRule(value=ip_address))
+        for ip in ip_address:
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.value)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.value)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IPRule(value=ip))
+                to_update = True
+
+    # if we didn't modify the network rules just return the vault as is
+    if not to_update:
+        return vault
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
                                 resource_type=ResourceType.MGMT_KEYVAULT,
