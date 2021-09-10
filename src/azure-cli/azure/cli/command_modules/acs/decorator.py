@@ -346,8 +346,7 @@ class AKSCreateContext:
         """
         self.intermediates.pop(variable_name, None)
 
-    # pylint: disable=unused-argument
-    def get_resource_group_name(self, **kwargs) -> str:
+    def get_resource_group_name(self) -> str:
         """Obtain the value of resource_group_name.
 
         Note: resource_group_name will not be decorated into the `mc` object.
@@ -363,8 +362,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return resource_group_name
 
-    # pylint: disable=unused-argument
-    def get_name(self, **kwargs) -> str:
+    def get_name(self) -> str:
         """Obtain the value of name.
 
         Note: name will not be decorated into the `mc` object.
@@ -380,25 +378,25 @@ class AKSCreateContext:
         # this parameter does not need validation
         return name
 
-    # pylint: disable=unused-argument
-    def get_ssh_key_value(
-        self, enable_validation: bool = False, **kwargs
-    ) -> str:
-        """Obtain the value of ssh_key_value.
+    def get_ssh_key_value_and_no_ssh_key(self) -> Tuple[str, bool]:
+        """Obtain the value of ssh_key_value and no_ssh_key.
 
-        If the user does not specify this parameter, the validator function "validate_ssh_key" checks the default file
-        location "~/.ssh/id_rsa.pub", if the file exists, read its content and return; otherise, create a key pair at
-        "~/.ssh/id_rsa.pub" and return the public key.
-        If the user provides a string-like input, the validator function "validate_ssh_key" checks whether it is a file
-        path, if so, read its content and return; if it is a valid public key, return it; otherwise, create a key pair
-        there and return the public key.
+        Note: no_ssh_key will not be decorated into the `mc` object.
 
-        This function supports the option of enable_validation. When enabled, it will call "_validate_ssh_key" to
-        verify the validity of ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped;
-        otherwise, a CLIError will be raised when the value of ssh_key_value is invalid.
+        If the user does not explicitly specify --ssh-key-value, the validator function "validate_ssh_key" will check
+        the default file location "~/.ssh/id_rsa.pub", if the file exists, read its content and return. Otherise,
+        create a key pair at "~/.ssh/id_rsa.pub" and return the public key.
+        If the user provides a string-like input for --ssh-key-value, the validator function "validate_ssh_key" will
+        check whether it is a file path, if so, read its content and return; if it is a valid public key, return it.
+        Otherwise, create a key pair there and return the public key.
 
-        :return: string
+        This function will verify the parameters by default. It will call "_validate_ssh_key" to verify the validity of
+        ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped. Otherwise, a CLIError will
+        be raised when the value of ssh_key_value is invalid.
+
+        :return: a tuple containing two elements: ssh_key_value of string type and no_ssh_key of bool type
         """
+        # ssh_key_value
         # read the original value passed by the command
         raw_value = self.raw_param.get("ssh_key_value")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -416,25 +414,36 @@ class AKSCreateContext:
                 value_obtained_from_mc = public_key_obj.key_data
 
         # set default value
+        read_from_mc = False
         if value_obtained_from_mc is not None:
             ssh_key_value = value_obtained_from_mc
+            read_from_mc = True
         else:
             ssh_key_value = raw_value
 
-        # this parameter does not need dynamic completion
+        # no_ssh_key
+        # read the original value passed by the command
+        no_ssh_key = self.raw_param.get("no_ssh_key")
+
+        # consistent check
+        if read_from_mc and no_ssh_key:
+            raise CLIInternalError(
+                "Inconsistent state detected, ssh_key_value is read from the `mc` object while no_ssh_key is enabled."
+            )
+
+        # these parameters do not need dynamic completion
 
         # validation
-        if enable_validation:
-            _validate_ssh_key(
-                no_ssh_key=self.get_no_ssh_key(), ssh_key_value=ssh_key_value
-            )
-        return ssh_key_value
+        _validate_ssh_key(
+            no_ssh_key=no_ssh_key, ssh_key_value=ssh_key_value
+        )
+        return ssh_key_value, no_ssh_key
 
     # pylint: disable=unused-argument
-    def get_dns_name_prefix(
+    def _get_dns_name_prefix(
         self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> Union[str, None]:
-        """Dynamically obtain the value of ssh_key_value according to the context.
+        """Internal function to dynamically obtain the value of dns_name_prefix according to the context.
 
         When both dns_name_prefix and fqdn_subdomain are not assigned, dynamic completion will be triggerd. Function
         "_get_default_dns_prefix" will be called to create a default dns_name_prefix composed of name (cluster),
@@ -481,9 +490,24 @@ class AKSCreateContext:
                 )
         return dns_name_prefix
 
+    def get_dns_name_prefix(self) -> Union[str, None]:
+        """Dynamically obtain the value of dns_name_prefix according to the context.
+
+        When both dns_name_prefix and fqdn_subdomain are not assigned, dynamic completion will be triggerd. Function
+        "_get_default_dns_prefix" will be called to create a default dns_name_prefix composed of name (cluster),
+        resource_group_name, and subscription_id.
+
+        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
+        are assigend, if so, raise the MutuallyExclusiveArgumentError.
+
+        :return: string or None
+        """
+
+        return self._get_dns_name_prefix(enable_validation=True)
+
     # pylint: disable=unused-argument
-    def get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
-        """Dynamically obtain the value of location according to the context.
+    def _get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of location according to the context.
 
         When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
         to get the location of the provided resource group, which internally used ResourceManagementClient to send
@@ -514,8 +538,19 @@ class AKSCreateContext:
         # this parameter does not need validation
         return location
 
-    # pylint: disable=unused-argument
-    def get_kubernetes_version(self, **kwargs) -> str:
+    def get_location(self) -> Union[str, None]:
+        """Dynamically obtain the value of location according to the context.
+
+        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        to get the location of the provided resource group, which internally used ResourceManagementClient to send
+        the request.
+
+        :return: string or None
+        """
+
+        return self._get_location()
+
+    def get_kubernetes_version(self) -> str:
         """Obtain the value of kubernetes_version.
 
         :return: string
@@ -531,32 +566,8 @@ class AKSCreateContext:
         return kubernetes_version
 
     # pylint: disable=unused-argument
-    def get_no_ssh_key(self, enable_validation: bool = False, **kwargs) -> bool:
-        """Obtain the value of name.
-
-        Note: no_ssh_key will not be decorated into the `mc` object.
-
-        This function supports the option of enable_validation. When enabled, it will call "_validate_ssh_key" to
-        verify the validity of ssh_key_value. If parameter no_ssh_key is set to True, verification will be skipped;
-        otherwise, a CLIError will be raised when the value of ssh_key_value is invalid.
-
-        :return: bool
-        """
-        # read the original value passed by the command
-        no_ssh_key = self.raw_param.get("no_ssh_key")
-
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            _validate_ssh_key(
-                no_ssh_key=no_ssh_key, ssh_key_value=self.get_ssh_key_value()
-            )
-        return no_ssh_key
-
-    # pylint: disable=unused-argument
-    def get_vm_set_type(self, read_only: bool = False, **kwargs) -> Union[str, None]:
-        """Dynamically obtain the value of vm_set_type according to the context.
+    def _get_vm_set_type(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of vm_set_type according to the context.
 
         Dynamic completion will be triggerd by default. Function "_set_vm_set_type" will be called and the
         corresponding vm set type will be returned according to the value of kubernetes_version. It will also
@@ -600,11 +611,24 @@ class AKSCreateContext:
         # this parameter does not need validation
         return vm_set_type
 
+    def get_vm_set_type(self) -> Union[str, None]:
+        """Dynamically obtain the value of vm_set_type according to the context.
+
+        Dynamic completion will be triggerd by default. Function "_set_vm_set_type" will be called and the
+        corresponding vm set type will be returned according to the value of kubernetes_version. It will also
+        normalize the value as server validation is case-sensitive.
+
+        :return: string or None
+        """
+
+        # this parameter does not need validation
+        return self._get_vm_set_type()
+
     # pylint: disable=unused-argument
-    def get_load_balancer_sku(
+    def _get_load_balancer_sku(
         self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> Union[str, None]:
-        """Dynamically obtain the value of load_balancer_sku according to the context.
+        """Internal function to dynamically obtain the value of load_balancer_sku according to the context.
 
         Note: When returning a string, it will always be lowercase.
 
@@ -656,14 +680,28 @@ class AKSCreateContext:
                 )
         return load_balancer_sku
 
-    # pylint: disable=unused-argument
-    def get_api_server_authorized_ip_ranges(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[str, List[str], None]:
+    def get_load_balancer_sku(self) -> Union[str, None]:
+        """Dynamically obtain the value of load_balancer_sku according to the context.
+
+        Note: When returning a string, it will always be lowercase.
+
+        When load_balancer_sku is not assigned, dynamic completion will be triggerd. Function "set_load_balancer_sku"
+        will be called and the corresponding load balancer sku will be returned according to the value of
+        kubernetes_version.
+
+        This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic" when
+        api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+
+        :return: string or None
+        """
+
+        return self._get_load_balancer_sku(enable_validation=True)
+
+    def get_api_server_authorized_ip_ranges(self) -> Union[str, List[str], None]:
         """Obtain the value of api_server_authorized_ip_ranges.
 
-        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
-        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+        This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic" when
+        api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
 
         :return: string, empty list or list of strings, or None
         """
@@ -684,24 +722,20 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if enable_validation:
-            if (
-                api_server_authorized_ip_ranges and
-                self.get_load_balancer_sku() == "basic"
-            ):
-                raise MutuallyExclusiveArgumentError(
-                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-                )
+        if (
+            api_server_authorized_ip_ranges and
+            self._get_load_balancer_sku(enable_validation=False) == "basic"
+        ):
+            raise MutuallyExclusiveArgumentError(
+                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+            )
         return api_server_authorized_ip_ranges
 
-    # pylint: disable=unused-argument
-    def get_fqdn_subdomain(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[str, None]:
+    def get_fqdn_subdomain(self) -> Union[str, None]:
         """Obtain the value of fqdn_subdomain.
 
-        This function supports the option of enable_validation. When enabled, it will check if both dns_name_prefix and
-        fqdn_subdomain are assigend, if so, raise the MutuallyExclusiveArgumentError.
+        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
+        are assigend, if so, raise the MutuallyExclusiveArgumentError.
 
         :return: string or None
         """
@@ -714,24 +748,19 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if enable_validation:
-            if fqdn_subdomain and self.get_dns_name_prefix(read_only=True):
-                raise MutuallyExclusiveArgumentError(
-                    "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
-                )
+        if fqdn_subdomain and self._get_dns_name_prefix(read_only=True):
+            raise MutuallyExclusiveArgumentError(
+                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+            )
         return fqdn_subdomain
 
-    # pylint: disable=unused-argument
-    def get_nodepool_name(self, enable_trim: bool = False, **kwargs) -> str:
+    def get_nodepool_name(self) -> str:
         """Dynamically obtain the value of nodepool_name according to the context.
 
         Note: SDK performs the following validation {'required': True, 'pattern': r'^[a-z][a-z0-9]{0,11}$'}.
 
-        When additional option enable_trim is enabled, dynamic completion will be triggerd.
-
-        This function supports the option of enable_trim. When enabled, it will normalize the value of nodepool_name.
-        If no value is assigned, the default value "nodepool1" is set, and if the string length is greater than 12,
-        it is truncated.
+        This function will normalize the parameter by default. If no value is assigned, the default value "nodepool1"
+        is set, and if the string length is greater than 12, it is truncated.
 
         :return: string
         """
@@ -747,15 +776,11 @@ class AKSCreateContext:
                 value_obtained_from_mc = agent_pool_profile.name
 
         # set default value
-        read_from_mc = False
         if value_obtained_from_mc is not None:
             nodepool_name = value_obtained_from_mc
-            read_from_mc = True
         else:
             nodepool_name = raw_value
-
-        # dynamic completion
-        if not read_from_mc and enable_trim:
+            # normalize
             if not nodepool_name:
                 nodepool_name = "nodepool1"
             else:
@@ -764,8 +789,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return nodepool_name
 
-    # pylint: disable=unused-argument
-    def get_nodepool_tags(self, **kwargs) -> Union[Dict[str, str], None]:
+    def get_nodepool_tags(self) -> Union[Dict[str, str], None]:
         """Obtain the value of nodepool_tags.
 
         :return: Dictionary or None
@@ -791,8 +815,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return nodepool_tags
 
-    # pylint: disable=unused-argument
-    def get_nodepool_labels(self, **kwargs) -> Union[Dict[str, str], None]:
+    def get_nodepool_labels(self) -> Union[Dict[str, str], None]:
         """Obtain the value of nodepool_labels.
 
         :return: Dictionary or None
@@ -818,55 +841,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return nodepool_labels
 
-    # pylint: disable=unused-argument
-    def get_node_count(self, enable_validation: bool = False, **kwargs) -> int:
-        """Obtain the value of node_count.
-
-        This function supports the option of enable_validation. When enabled, on the premise that
-        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
-        raise the RequiredArgumentMissingError; if will also check whether node_count is between min_count and
-        max_count, if not, raise the InvalidArgumentValueError.
-
-        :return: int
-        """
-        # read the original value passed by the command
-        raw_value = self.raw_param.get("node_count")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.agent_pool_profiles:
-            agent_pool_profile = safe_list_get(
-                self.mc.agent_pool_profiles, 0, None
-            )
-            if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.count
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            node_count = value_obtained_from_mc
-        else:
-            node_count = raw_value
-
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
-            min_count = self.get_min_count()
-            max_count = self.get_max_count()
-            if enable_cluster_autoscaler:
-                if min_count is None or max_count is None:
-                    raise RequiredArgumentMissingError(
-                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-                    )
-                if node_count < min_count or node_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "node-count is not in the range of min-count and max-count"
-                    )
-
-        return int(node_count)
-
-    # pylint: disable=unused-argument
-    def get_node_vm_size(self, **kwargs) -> str:
+    def get_node_vm_size(self) -> str:
         """Obtain the value of node_vm_size.
 
         :return: string
@@ -892,8 +867,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return node_vm_size
 
-    # pylint: disable=unused-argument
-    def get_vnet_subnet_id(self, **kwargs) -> Union[str, None]:
+    def get_vnet_subnet_id(self) -> Union[str, None]:
         """Obtain the value of vnet_subnet_id.
 
         :return: string or None
@@ -919,8 +893,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return vnet_subnet_id
 
-    # pylint: disable=unused-argument
-    def get_ppg(self, **kwargs) -> Union[str, None]:
+    def get_ppg(self) -> Union[str, None]:
         """Obtain the value of ppg(proximity_placement_group_id).
 
         :return: string or None
@@ -948,8 +921,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return ppg
 
-    # pylint: disable=unused-argument
-    def get_zones(self, **kwargs) -> Union[List[str], None]:
+    def get_zones(self) -> Union[List[str], None]:
         """Obtain the value of zones.
 
         :return: list of strings or None
@@ -975,8 +947,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return zones
 
-    # pylint: disable=unused-argument
-    def get_enable_node_public_ip(self, **kwargs) -> bool:
+    def get_enable_node_public_ip(self) -> bool:
         """Obtain the value of enable_node_public_ip.
 
         :return: bool
@@ -1004,8 +975,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_node_public_ip
 
-    # pylint: disable=unused-argument
-    def get_node_public_ip_prefix_id(self, **kwargs) -> Union[str, None]:
+    def get_node_public_ip_prefix_id(self) -> Union[str, None]:
         """Obtain the value of node_public_ip_prefix_id.
 
         :return: string or None
@@ -1033,8 +1003,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return node_public_ip_prefix_id
 
-    # pylint: disable=unused-argument
-    def get_enable_encryption_at_host(self, **kwargs) -> bool:
+    def get_enable_encryption_at_host(self) -> bool:
         """Obtain the value of enable_encryption_at_host.
 
         :return: bool
@@ -1062,8 +1031,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_encryption_at_host
 
-    # pylint: disable=unused-argument
-    def get_enable_ultra_ssd(self, **kwargs) -> bool:
+    def get_enable_ultra_ssd(self) -> bool:
         """Obtain the value of enable_ultra_ssd.
 
         :return: bool
@@ -1089,11 +1057,11 @@ class AKSCreateContext:
         # this parameter does not need validation
         return enable_ultra_ssd
 
-    # pylint: disable=unused-argument
-    def get_max_pods(self, **kwargs) -> Union[int, None]:
+    def get_max_pods(self) -> Union[int, None]:
         """Obtain the value of max_pods.
 
-        Note: int 0 is converted to None.
+        This function will normalize the parameter by default. The parameter will be converted to int, but int 0 is
+        converted to None.
 
         :return: int or None
         """
@@ -1122,12 +1090,13 @@ class AKSCreateContext:
         # this parameter does not need validation
         return max_pods
 
-    # pylint: disable=unused-argument
-    def get_node_osdisk_size(self, **kwargs) -> Union[int, None]:
+    def get_node_osdisk_size(self) -> Union[int, None]:
         """Obtain the value of node_osdisk_size.
 
-        Note: int 0 is converted to None.
         Note: SDK performs the following validation {'maximum': 2048, 'minimum': 0}.
+
+        This function will normalize the parameter by default. The parameter will be converted to int, but int 0 is
+        converted to None.
 
         :return: int or None
         """
@@ -1153,12 +1122,10 @@ class AKSCreateContext:
             else:
                 node_osdisk_size = None
 
-        # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_osdisk_size
 
-    # pylint: disable=unused-argument
-    def get_node_osdisk_type(self, **kwargs) -> Union[str, None]:
+    def get_node_osdisk_type(self) -> Union[str, None]:
         """Obtain the value of node_osdisk_size.
 
         :return: string or None
@@ -1184,21 +1151,40 @@ class AKSCreateContext:
         # this parameter does not need validation
         return node_osdisk_type
 
-    # pylint: disable=unused-argument
-    def get_enable_cluster_autoscaler(
-        self, enable_validation: bool = False, **kwargs
-    ) -> bool:
-        """Obtain the value of enable_cluster_autoscaler.
+    # pylint: disable=too-many-branches
+    def get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count(
+        self,
+    ) -> Tuple[int, bool, Union[int, None], Union[int, None]]:
+        """Obtain the value of node_count, enable_cluster_autoscaler, min_count and max_count.
 
-        This function supports the option of enable_validation. When enabled, on the premise that
-        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
-        raise the RequiredArgumentMissingError; if will also check whether min_count is less than max_count and
-        node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
-        enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
-        if so, raise the RequiredArgumentMissingError.
+        This function will verify the parameter by default. On the premise that enable_cluster_autoscaler is enabled,
+        it will check whether both min_count and max_count are assigned, if not, raise the RequiredArgumentMissingError;
+        if will also check whether min_count is less than max_count and node_count is between min_count and max_count,
+        if not, raise the InvalidArgumentValueError. If enable_cluster_autoscaler is not enabled, it will check whether
+        any of min_count or max_count is assigned, if so, raise the RequiredArgumentMissingError.
 
-        :return: bool
+        :return: a tuple containing four elements: node_count of int type, enable_cluster_autoscaler of bool type,
+        min_count of int type or None and max_count of int type or None
         """
+        # node_count
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("node_count")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                value_obtained_from_mc = agent_pool_profile.count
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            node_count = value_obtained_from_mc
+        else:
+            node_count = raw_value
+
+        # enable_cluster_autoscaler
         # read the original value passed by the command
         raw_value = self.raw_param.get("enable_cluster_autoscaler")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1216,48 +1202,7 @@ class AKSCreateContext:
         else:
             enable_cluster_autoscaler = raw_value
 
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            min_count = self.get_min_count()
-            max_count = self.get_max_count()
-            node_count = self.get_node_count()
-            if enable_cluster_autoscaler:
-                if min_count is None or max_count is None:
-                    raise RequiredArgumentMissingError(
-                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-                    )
-                if min_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "Value of min-count should be less than or equal to value of max-count"
-                    )
-                if node_count < min_count or node_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "node-count is not in the range of min-count and max-count"
-                    )
-            else:
-                if min_count is not None or max_count is not None:
-                    raise RequiredArgumentMissingError(
-                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
-                    )
-        return enable_cluster_autoscaler
-
-    # pylint: disable=unused-argument
-    def get_min_count(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[int, None]:
-        """Obtain the value of min_count.
-
-        This function supports the option of enable_validation. When enabled, on the premise that
-        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
-        raise the RequiredArgumentMissingError; if will also check whether min_count is less than max_count and
-        node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
-        enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
-        if so, raise the RequiredArgumentMissingError.
-
-        :return: int or None
-        """
+        # min_count
         # read the original value passed by the command
         raw_value = self.raw_param.get("min_count")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1275,48 +1220,7 @@ class AKSCreateContext:
         else:
             min_count = raw_value
 
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
-            max_count = self.get_max_count()
-            node_count = self.get_node_count()
-            if enable_cluster_autoscaler:
-                if min_count is None or max_count is None:
-                    raise RequiredArgumentMissingError(
-                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-                    )
-                if min_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "Value of min-count should be less than or equal to value of max-count"
-                    )
-                if node_count < min_count or node_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "node-count is not in the range of min-count and max-count"
-                    )
-            else:
-                if min_count is not None or max_count is not None:
-                    raise RequiredArgumentMissingError(
-                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
-                    )
-        return min_count
-
-    # pylint: disable=unused-argument
-    def get_max_count(
-        self, enable_validation: bool = False, **kwargs
-    ) -> Union[int, None]:
-        """Obtain the value of max_count.
-
-        This function supports the option of enable_validation. When enabled, on the premise that
-        enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are assigned, if not,
-        raise the RequiredArgumentMissingError; if will also check whether min_count is less than max_count and
-        node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
-        enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
-        if so, raise the RequiredArgumentMissingError.
-
-        :return: int or None
-        """
+        # max_count
         # read the original value passed by the command
         raw_value = self.raw_param.get("max_count")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -1334,35 +1238,30 @@ class AKSCreateContext:
         else:
             max_count = raw_value
 
-        # this parameter does not need dynamic completion
+        # these parameters do not need dynamic completion
 
         # validation
-        if enable_validation:
-            enable_cluster_autoscaler = self.get_enable_cluster_autoscaler()
-            min_count = self.get_min_count()
-            node_count = self.get_node_count()
-            if enable_cluster_autoscaler:
-                if min_count is None or max_count is None:
-                    raise RequiredArgumentMissingError(
-                        "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-                    )
-                if min_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "Value of min-count should be less than or equal to value of max-count"
-                    )
-                if node_count < min_count or node_count > max_count:
-                    raise InvalidArgumentValueError(
-                        "node-count is not in the range of min-count and max-count"
-                    )
-            else:
-                if min_count is not None or max_count is not None:
-                    raise RequiredArgumentMissingError(
-                        "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
-                    )
-        return max_count
+        if enable_cluster_autoscaler:
+            if min_count is None or max_count is None:
+                raise RequiredArgumentMissingError(
+                    "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                )
+            if min_count > max_count:
+                raise InvalidArgumentValueError(
+                    "Value of min-count should be less than or equal to value of max-count"
+                )
+            if node_count < min_count or node_count > max_count:
+                raise InvalidArgumentValueError(
+                    "node-count is not in the range of min-count and max-count"
+                )
+        else:
+            if min_count is not None or max_count is not None:
+                raise RequiredArgumentMissingError(
+                    "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
+                )
+        return node_count, enable_cluster_autoscaler, min_count, max_count
 
-    # pylint: disable=unused-argument
-    def get_admin_username(self, **kwargs) -> str:
+    def get_admin_username(self) -> str:
         """Obtain the value of admin_username.
 
         Note: SDK performs the following validation {'required': True, 'pattern': r'^[A-Za-z][-A-Za-z0-9_]*$'}.
@@ -1384,10 +1283,11 @@ class AKSCreateContext:
         return admin_username
 
     # pylint: disable=unused-argument
-    def get_windows_admin_username_and_password(
+    def _get_windows_admin_username_and_password(
         self, read_only: bool = False, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None]]:
-        """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
+        """Internal function to dynamically obtain the value of windows_admin_username and windows_admin_password
+        according to the context.
 
         When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
@@ -1396,7 +1296,8 @@ class AKSCreateContext:
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
-        :return: a tuple containing two elements of string or None
+        :return: a tuple containing two elements: windows_admin_username of string type or None and
+        windows_admin_password of string type or None
         """
         # windows_admin_username
         # read the original value passed by the command
@@ -1475,8 +1376,23 @@ class AKSCreateContext:
         # these parameters does not need validation
         return windows_admin_username, windows_admin_password
 
-    # pylint: disable=unused-argument
-    def get_enable_ahub(self, **kwargs) -> bool:
+    def get_windows_admin_username_and_password(
+        self,
+    ) -> Tuple[Union[str, None], Union[str, None]]:
+        """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
+
+        When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
+        triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
+        tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
+        raised.
+
+        :return: a tuple containing two elements: windows_admin_username of string type or None and
+        windows_admin_password of string type or None
+        """
+
+        return self._get_windows_admin_username_and_password()
+
+    def get_enable_ahub(self) -> bool:
         """Obtain the value of enable_ahub.
 
         Note: enable_ahub will not be directly decorated into the `mc` object.
@@ -1494,10 +1410,11 @@ class AKSCreateContext:
         return enable_ahub
 
     # pylint: disable=unused-argument,too-many-statements
-    def get_service_principal_and_client_secret(
+    def _get_service_principal_and_client_secret(
         self, read_only: bool = False, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None]]:
-        """Dynamically obtain the values of service_principal and client_secret according to the context.
+        """Internal function to dynamically obtain the values of service_principal and client_secret according to the
+        context.
 
         When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
         completion will not be triggered. For other cases, dynamic completion will be triggered.
@@ -1510,7 +1427,8 @@ class AKSCreateContext:
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
-        :return: a tuple containing two elements of string or None
+        :return: a tuple containing two elements: service_principal of string type or None and client_secret of
+        string type or None
         """
         # service_principal
         # read the original value passed by the command
@@ -1551,7 +1469,7 @@ class AKSCreateContext:
         # dynamic completion for service_principal and client_secret
         dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
-        enable_managed_identity = self.get_enable_managed_identity(read_only=True)
+        enable_managed_identity = self._get_enable_managed_identity(read_only=True)
         if not (
             enable_managed_identity and
             not service_principal and
@@ -1572,7 +1490,7 @@ class AKSCreateContext:
                 subscription_id=self.get_intermediate(
                     "subscription_id", None
                 ),
-                dns_name_prefix=self.get_dns_name_prefix(),
+                dns_name_prefix=self._get_dns_name_prefix(enable_validation=False),
                 fqdn_subdomain=self.get_fqdn_subdomain(),
                 location=self.get_location(),
                 name=self.get_name(),
@@ -1583,11 +1501,32 @@ class AKSCreateContext:
         # these parameters do not need validation
         return service_principal, client_secret
 
+    def get_service_principal_and_client_secret(
+        self
+    ) -> Tuple[Union[str, None], Union[str, None]]:
+        """Dynamically obtain the values of service_principal and client_secret according to the context.
+
+        When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
+        completion will not be triggered. For other cases, dynamic completion will be triggered.
+        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
+        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
+        calling function "_ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
+        the request.
+        When service_principal is given but client_secret is not, function "_ensure_aks_service_principal" would raise
+        CLIError.
+
+        :return: a tuple containing two elements: service_principal of string type or None and client_secret of
+        string type or None
+        """
+
+        return self._get_service_principal_and_client_secret()
+
     # pylint: disable=unused-argument
-    def get_enable_managed_identity(
+    def _get_enable_managed_identity(
         self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> bool:
-        """Dynamically obtain the values of service_principal and client_secret according to the context.
+        """Internal function to dynamically obtain the values of service_principal and client_secret according to the
+        context.
 
         Note: enable_managed_identity will not be directly decorated into the `mc` object.
 
@@ -1611,17 +1550,12 @@ class AKSCreateContext:
         if read_only:
             return enable_managed_identity
 
-        dynamic_completion = False
-        # check whether the parameter meet the conditions of dynamic completion
+        # dynamic completion
         (
             service_principal,
             client_secret,
-        ) = self.get_service_principal_and_client_secret(read_only=True)
-        if service_principal and client_secret:
-            dynamic_completion = True
-        # disable dynamic completion if the value is read from `mc`
-        dynamic_completion = dynamic_completion and not read_from_mc
-        if dynamic_completion:
+        ) = self._get_service_principal_and_client_secret(read_only=True)
+        if not read_from_mc and service_principal and client_secret:
             enable_managed_identity = False
 
         # validation
@@ -1630,8 +1564,20 @@ class AKSCreateContext:
             pass
         return enable_managed_identity
 
-    # pylint: disable=unused-argument
-    def get_skip_subnet_role_assignment(self, **kwargs) -> bool:
+    def get_enable_managed_identity(self) -> bool:
+        """Dynamically obtain the values of service_principal and client_secret according to the context.
+
+        Note: enable_managed_identity will not be directly decorated into the `mc` object.
+
+        When both service_principal and client_secret are assigned and enable_managed_identity is True, dynamic
+        completion will be triggered. The value of enable_managed_identity will be set to False.
+
+        :return: bool
+        """
+
+        return self._get_enable_managed_identity(enable_validation=True)
+
+    def get_skip_subnet_role_assignment(self) -> bool:
         """Obtain the value of skip_subnet_role_assignment.
 
         Note: skip_subnet_role_assignment will not be decorated into the `mc` object.
@@ -1645,8 +1591,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return skip_subnet_role_assignment
 
-    # pylint: disable=unused-argument
-    def get_assign_identity(self, **kwargs) -> Union[str, None]:
+    def get_assign_identity(self) -> Union[str, None]:
         """Obtain the value of assign_identity.
 
         Note: assign_identity will not be decorated into the `mc` object.
@@ -1660,8 +1605,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return assign_identity
 
-    # pylint: disable=unused-argument
-    def get_user_assigned_identity_client_id(self, **kwargs) -> str:
+    def get_user_assigned_identity_client_id(self) -> str:
         """Obtain the client_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
@@ -1677,8 +1621,7 @@ class AKSCreateContext:
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return _get_user_assigned_identity(self.cmd.cli_ctx, assigned_identity).client_id
 
-    # pylint: disable=unused-argument
-    def get_user_assigned_identity_object_id(self, **kwargs) -> str:
+    def get_user_assigned_identity_object_id(self) -> str:
         """Obtain the principal_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
@@ -1694,8 +1637,7 @@ class AKSCreateContext:
             raise RequiredArgumentMissingError("No assigned identity provided.")
         return _get_user_assigned_identity(self.cmd.cli_ctx, assigned_identity).principal_id
 
-    # pylint: disable=unused-argument
-    def get_yes(self, **kwargs) -> bool:
+    def get_yes(self) -> bool:
         """Obtain the value of yes.
 
         Note: yes will not be decorated into the `mc` object.
@@ -1709,8 +1651,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return yes
 
-    # pylint: disable=unused-argument
-    def get_attach_acr(self, **kwargs) -> Union[str, None]:
+    def get_attach_acr(self) -> Union[str, None]:
         """Obtain the value of attach_acr.
 
         Note: attach_acr will not be decorated into the `mc` object.
@@ -1721,11 +1662,23 @@ class AKSCreateContext:
         attach_acr = self.raw_param.get("attach_acr")
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        # validation
+        if attach_acr:
+            if self.get_enable_managed_identity() and self.get_no_wait():
+                raise MutuallyExclusiveArgumentError(
+                    "When --attach-acr and --enable-managed-identity are both specified, "
+                    "--no-wait is not allowed, please wait until the whole operation succeeds."
+                )
+                # Attach acr operation will be handled after the cluster is created
+            # newly added check, check whether client_id exists before creating role assignment
+            service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
+            if not service_principal:
+                raise CLIInternalError(
+                    "No service principal provided to create the acrpull role assignment for acr."
+                )
         return attach_acr
 
-    # pylint: disable=unused-argument
-    def get_no_wait(self, **kwargs) -> bool:
+    def get_no_wait(self) -> bool:
         """Obtain the value of no_wait.
 
         Note: no_wait will not be decorated into the `mc` object.
@@ -1739,8 +1692,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return no_wait
 
-    # pylint: disable=unused-argument
-    def get_load_balancer_managed_outbound_ip_count(self, **kwargs) -> Union[int, None]:
+    def get_load_balancer_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of load_balancer_managed_outbound_ip_count.
 
         Note: SDK performs the following validation {'maximum': 100, 'minimum': 1}.
@@ -1767,8 +1719,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return load_balancer_managed_outbound_ip_count
 
-    # pylint: disable=unused-argument
-    def get_load_balancer_outbound_ips(self, **kwargs) -> Union[str, List[ResourceReference], None]:
+    def get_load_balancer_outbound_ips(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ips.
 
         Note: SDK performs the following validation {'maximum': 16, 'minimum': 1}.
@@ -1795,8 +1746,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return load_balancer_outbound_ips
 
-    # pylint: disable=unused-argument
-    def get_load_balancer_outbound_ip_prefixes(self, **kwargs) -> Union[str, List[ResourceReference], None]:
+    def get_load_balancer_outbound_ip_prefixes(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ip_prefixes.
 
         :return: string, list of ResourceReference, or None
@@ -1821,8 +1771,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return load_balancer_outbound_ip_prefixes
 
-    # pylint: disable=unused-argument
-    def get_load_balancer_outbound_ports(self, **kwargs) -> Union[int, None]:
+    def get_load_balancer_outbound_ports(self) -> Union[int, None]:
         """Obtain the value of load_balancer_outbound_ports.
 
         Note: SDK performs the following validation {'maximum': 64000, 'minimum': 0}.
@@ -1848,8 +1797,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return load_balancer_outbound_ports
 
-    # pylint: disable=unused-argument
-    def get_load_balancer_idle_timeout(self, **kwargs) -> Union[int, None]:
+    def get_load_balancer_idle_timeout(self) -> Union[int, None]:
         """Obtain the value of load_balancer_idle_timeout.
 
         Note: SDK performs the following validation {'maximum': 120, 'minimum': 4}.
@@ -1876,16 +1824,16 @@ class AKSCreateContext:
         return load_balancer_idle_timeout
 
     # pylint: disable=unused-argument
-    def get_outbound_type(
+    def _get_outbound_type(
         self,
         enable_validation: bool = False,
         read_only: bool = False,
         load_balancer_profile: ManagedClusterLoadBalancerProfile = None,
         **kwargs
     ) -> Union[str, None]:
-        """Dynamically obtain the value of outbound_type according to the context.
+        """Internal functin to dynamically obtain the value of outbound_type according to the context.
 
-        Note: The parameters involved in the validation are not verified in their own getters.
+        Note: All the external parameters involved in the validation are not verified in their own getters.
 
         When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
@@ -1929,7 +1877,7 @@ class AKSCreateContext:
                 # Should not enable read_only for get_load_balancer_sku, since its default value is None, and it has
                 # not been decorated into the mc object at this time, only the value after dynamic completion is
                 # meaningful here.
-                if self.get_load_balancer_sku() == "basic":
+                if self._get_load_balancer_sku(enable_validation=False) == "basic":
                     raise InvalidArgumentValueError(
                         "userDefinedRouting doesn't support basic load balancer sku"
                     )
@@ -1961,9 +1909,32 @@ class AKSCreateContext:
 
         return outbound_type
 
+    def get_outbound_type(
+        self,
+        load_balancer_profile: ManagedClusterLoadBalancerProfile = None
+    ) -> Union[str, None]:
+        """Dynamically obtain the value of outbound_type according to the context.
+
+        Note: The parameters involved in the validation are not verified in their own getters.
+
+        When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
+        CONST_OUTBOUND_TYPE_LOAD_BALANCER.
+
+        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
+        parameters, the value in load_balancer_profile will be used for validation.
+
+        :return: string or None
+        """
+
+        return self._get_outbound_type(
+            enable_validation=True, load_balancer_profile=load_balancer_profile
+        )
+
     # pylint: disable=unused-argument
-    def get_network_plugin(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
-        """Obtain the value of network_plugin.
+    def _get_network_plugin(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to Obtain the value of network_plugin.
+
+        Note: SDK provides default value "kubenet" for network_plugin.
 
         This function supports the option of enable_validation. When enabled, in case network_plugin is assigned, if
         pod_cidr is assigned and the value of network_plugin is azure, a MutuallyExclusiveArgumentError will be
@@ -1986,37 +1957,79 @@ class AKSCreateContext:
 
         # validation
         if enable_validation:
+            (
+                pod_cidr,
+                service_cidr,
+                dns_service_ip,
+                docker_bridge_address,
+                network_policy,
+            ) = (
+                self.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            )
             if network_plugin:
-                if network_plugin == "azure" and self.get_pod_cidr():
+                if network_plugin == "azure" and pod_cidr:
                     raise MutuallyExclusiveArgumentError(
                         "Please use kubenet as the network plugin type when pod_cidr is specified"
                     )
             else:
                 if (
-                    self.get_pod_cidr() or
-                    self.get_service_cidr() or
-                    self.get_dns_service_ip() or
-                    self.get_docker_bridge_address() or
-                    self.get_network_policy()
+                    pod_cidr or
+                    service_cidr or
+                    dns_service_ip or
+                    docker_bridge_address or
+                    network_policy
                 ):
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
                     )
         return network_plugin
 
-    # pylint: disable=unused-argument
-    def get_pod_cidr(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
-        """Obtain the value of pod_cidr.
+    def get_network_plugin(self) -> Union[str, None]:
+        """Obtain the value of network_plugin.
 
-        Note: SDK performs the following validation
-        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
+        Note: SDK provides default value "kubenet" for network_plugin.
 
-        This function supports the option of enable_validation. When enabled, if pod_cidr is assigned but
-        network_plugin is not assigned or its value equals to azure a RequiredArgumentMissingError or
-        MutuallyExclusiveArgumentError will be raised respectively.
+        This function will verify the parameter by default. When enabled, in case network_plugin is assigned, if
+        pod_cidr is assigned and the value of network_plugin is azure, a MutuallyExclusiveArgumentError will be
+        raised; otherwise, if any of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address or network_policy
+        is assigned, a RequiredArgumentMissingError will be raised.
 
         :return: string or None
         """
+
+        return self._get_network_plugin(enable_validation=True)
+
+    def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+        self,
+    ) -> Tuple[
+        Union[str, None],
+        Union[str, None],
+        Union[str, None],
+        Union[str, None],
+        Union[str, None],
+    ]:
+        """Obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and network_policy.
+
+        Note: SDK provides default value "10.244.0.0/16" and performs the following validation
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for pod_cidr.
+        Note: SDK provides default value "10.0.0.0/16" and performs the following validation
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for service_cidr.
+        Note: SDK provides default value "10.0.0.10" and performs the following validation
+        {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}
+        for dns_service_ip.
+        Note: SDK provides default value "172.17.0.1/16" and performs the following validation
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
+
+        This function will verify the parameters by default. If pod_cidr is assigned and the value of network_plugin
+        is azure, a MutuallyExclusiveArgumentError will be raised; otherwise, if any of pod_cidr, service_cidr,
+        dns_service_ip, docker_bridge_address or network_policy is assigned, a RequiredArgumentMissingError will be
+        raised.
+
+        :return: a tuple of five elements: pod_cidr of string type or None, service_cidr of string type or None,
+        dns_service_ip of string type or None, docker_bridge_address of string type or None, network_policy of
+        string type or None.
+        """
+        # pod_cidr
         # read the original value passed by the command
         pod_cidr = self.raw_param.get("pod_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2027,34 +2040,7 @@ class AKSCreateContext:
         ):
             pod_cidr = self.mc.network_profile.pod_cidr
 
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            if pod_cidr:
-                network_plugin = self.get_network_plugin()
-                if network_plugin == "azure":
-                    raise MutuallyExclusiveArgumentError(
-                        "Please use kubenet as the network plugin type when pod_cidr is specified"
-                    )
-                if network_plugin in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "Please explicitly specify the network plugin type"
-                    )
-        return pod_cidr
-
-    # pylint: disable=unused-argument
-    def get_service_cidr(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
-        """Obtain the value of service_cidr.
-
-        Note: SDK performs the following validation
-        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
-
-        This function supports the option of enable_validation. When enabled, if service_cidr is assigned but
-        network_plugin is not assigned a RequiredArgumentMissingError will be raised.
-
-        :return: string or None
-        """
+        # service_cidr
         # read the original value passed by the command
         service_cidr = self.raw_param.get("service_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2065,30 +2051,7 @@ class AKSCreateContext:
         ):
             service_cidr = self.mc.network_profile.service_cidr
 
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            if service_cidr:
-                network_plugin = self.get_network_plugin()
-                if network_plugin in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "Please explicitly specify the network plugin type"
-                    )
-        return service_cidr
-
-    # pylint: disable=unused-argument
-    def get_dns_service_ip(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
-        """Obtain the value of dns_service_ip.
-
-        Note: SDK performs the following validation
-        {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}.
-
-        This function supports the option of enable_validation. When enabled, if dns_service_ip is assigned but
-        network_plugin is not assigned a RequiredArgumentMissingError will be raised.
-
-        :return: string or None
-        """
+        # dns_service_ip
         # read the original value passed by the command
         dns_service_ip = self.raw_param.get("dns_service_ip")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2099,30 +2062,7 @@ class AKSCreateContext:
         ):
             dns_service_ip = self.mc.network_profile.dns_service_ip
 
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            if dns_service_ip:
-                network_plugin = self.get_network_plugin()
-                if network_plugin in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "Please explicitly specify the network plugin type"
-                    )
-        return dns_service_ip
-
-    # pylint: disable=unused-argument
-    def get_docker_bridge_address(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
-        """Obtain the value of docker_bridge_address.
-
-        Note: SDK performs the following validation
-        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'}.
-
-        This function supports the option of enable_validation. When enabled, if docker_bridge_cidr is assigned but
-        network_plugin is not assigned a RequiredArgumentMissingError will be raised.
-
-        :return: string or None
-        """
+        # docker_bridge_address
         # read the original value passed by the command
         docker_bridge_address = self.raw_param.get("docker_bridge_address")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2133,28 +2073,7 @@ class AKSCreateContext:
         ):
             docker_bridge_address = self.mc.network_profile.docker_bridge_cidr
 
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            if docker_bridge_address:
-                network_plugin = self.get_network_plugin()
-                if network_plugin in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "Please explicitly specify the network plugin type"
-                    )
-
-        return docker_bridge_address
-
-    # pylint: disable=unused-argument
-    def get_network_policy(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
-        """Obtain the value of corresponding.
-
-        This function supports the option of enable_validation. When enabled, if network_policy is assigned but
-        network_plugin is not assigned a RequiredArgumentMissingError will be raised.
-
-        :return: string or None
-        """
+        # network_policy
         # read the original value passed by the command
         network_policy = self.raw_param.get("network_policy")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2165,82 +2084,98 @@ class AKSCreateContext:
         ):
             network_policy = self.mc.network_profile.network_policy
 
-        # this parameter does not need dynamic completion
+        # these parameters do not need dynamic completion
 
         # validation
-        if enable_validation:
-            if network_policy:
-                network_plugin = self.get_network_plugin()
-                if network_plugin in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "Please explicitly specify the network plugin type"
-                    )
+        network_plugin = self._get_network_plugin(enable_validation=False)
+        if network_plugin:
+            if network_plugin == "azure" and pod_cidr:
+                raise MutuallyExclusiveArgumentError(
+                    "Please use kubenet as the network plugin type when pod_cidr is specified"
+                )
+        else:
+            if (
+                pod_cidr or
+                service_cidr or
+                dns_service_ip or
+                docker_bridge_address or
+                network_policy
+            ):
+                raise RequiredArgumentMissingError(
+                    "Please explicitly specify the network plugin type"
+                )
+        return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
 
-        return network_policy
-
-    # pylint: disable=unused-argument
-    def get_enable_addons(
-        self,
-        enable_validation: bool = False,
-        enable_split_comma_separated_str: bool = False,
-        **kwargs
-    ) -> Union[str, List[str], None]:
+    def get_enable_addons(self) -> Union[List[str], None]:
         """Obtain the value of enable_addons.
 
         Note: enable_addons will not be decorated into the `mc` object.
+        Note: Some of the external parameters involved in the validation are not verified in their own getters.
 
-        This function supports the option of enable_validation. When enabled, it will check whether the provided addons
-        have duplicate or invalid values, and raise a InvalidArgumentValueError if found.
-        This function supports the option of enable_split_comma_separated_str. When enabled, it will split the string
-        into a list with "," as the delimiter.
+        This function will verify the parameters by default. It will check whether the provided addons have duplicate or
+        invalid values, and raise a InvalidArgumentValueError if found.
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
 
-        :return: string, empty list or list of strings, or None
+        :return: empty list or list of strings, or None
         """
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
 
-        if enable_split_comma_separated_str:
-            enable_addons = enable_addons.split(',') if enable_addons else []
+        # normalize
+        enable_addons = enable_addons.split(',') if enable_addons else []
 
         # validation
-        if enable_validation:
-            if isinstance(enable_addons, list):
-                validation_addons = enable_addons
-            else:
-                validation_addons = enable_addons.split(',') if enable_addons else []
-
-            # check duplicate addons
-            duplicate_addons_set = {
-                x for x in validation_addons if validation_addons.count(x) >= 2
-            }
-            if len(duplicate_addons_set) != 0:
-                raise InvalidArgumentValueError(
-                    "Duplicate addon{} '{}' found in option --enable-addons.".format(
-                        "s" if len(duplicate_addons_set) > 1 else "",
-                        ",".join(duplicate_addons_set),
-                    )
+        # check duplicate addons
+        duplicate_addons_set = {
+            x for x in enable_addons if enable_addons.count(x) >= 2
+        }
+        if len(duplicate_addons_set) != 0:
+            raise InvalidArgumentValueError(
+                "Duplicate addon{} '{}' found in option --enable-addons.".format(
+                    "s" if len(duplicate_addons_set) > 1 else "",
+                    ",".join(duplicate_addons_set),
                 )
+            )
 
-            # check unrecognized addons
-            enable_addons_set = set(validation_addons)
-            invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
-            if len(invalid_addons_set) != 0:
-                raise InvalidArgumentValueError(
-                    "'{}' {} not recognized by the --enable-addons argument.".format(
-                        ",".join(invalid_addons_set),
-                        "are" if len(invalid_addons_set) > 1 else "is",
-                    )
+        # check unrecognized addons
+        enable_addons_set = set(enable_addons)
+        invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
+        if len(invalid_addons_set) != 0:
+            raise InvalidArgumentValueError(
+                "'{}' {} not recognized by the --enable-addons argument.".format(
+                    ",".join(invalid_addons_set),
+                    "are" if len(invalid_addons_set) > 1 else "is",
                 )
+            )
+
+        # check monitoring/workspace_resource_id
+        workspace_resource_id = self._get_workspace_resource_id(read_only=True)
+        if "monitoring" not in enable_addons and workspace_resource_id:
+            raise RequiredArgumentMissingError(
+                '"--workspace-resource-id" requires "--enable-addons monitoring".')
+
+        # check virtual node/aci_subnet_name/vnet_subnet_id
+        # Note: The external parameters involved in the validation are not verified in their own getters.
+        aci_subnet_name = self.get_aci_subnet_name()
+        vnet_subnet_id = self.get_vnet_subnet_id()
+        if "virtual-node" in enable_addons and not (aci_subnet_name and vnet_subnet_id):
+            raise RequiredArgumentMissingError(
+                '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
         return enable_addons
 
     # pylint: disable=unused-argument
-    def get_workspace_resource_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
-        """Dynamically obtain the value of workspace_resource_id according to the context.
+    def _get_workspace_resource_id(
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
+    ) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of workspace_resource_id according to the context.
 
         When both workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
         "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
         subscription_id and resource_group_name.
 
+        This function supports the option of enable_validation. When enabled, it will check if workspace_resource_id is
+        assigned but 'monitoring' is not specified in enable_addons, if so, raise a RequiredArgumentMissingError.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
         :return: string or None
@@ -2280,11 +2215,30 @@ class AKSCreateContext:
             # normalize
             workspace_resource_id = "/" + workspace_resource_id.strip(" /")
 
+        # validation
+        if enable_validation:
+            enable_addons = self.get_enable_addons()
+            if workspace_resource_id and "monitoring" not in enable_addons:
+                raise RequiredArgumentMissingError(
+                    '"--workspace-resource-id" requires "--enable-addons monitoring".')
+
         # this parameter does not need validation
         return workspace_resource_id
 
-    # pylint: disable=unused-argument,no-self-use
-    def get_virtual_node_addon_os_type(self, **kwargs) -> str:
+    def get_workspace_resource_id(self) -> Union[str, None]:
+        """Dynamically obtain the value of workspace_resource_id according to the context.
+
+        When both workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
+        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        subscription_id and resource_group_name.
+
+        :return: string or None
+        """
+
+        return self._get_workspace_resource_id(enable_validation=True)
+
+    # pylint: disable=no-self-use
+    def get_virtual_node_addon_os_type(self) -> str:
         """Obtain the os_type of virtual node addon.
 
         Note: This is not a parameter of aks_create.
@@ -2293,8 +2247,7 @@ class AKSCreateContext:
         """
         return "Linux"
 
-    # pylint: disable=unused-argument
-    def get_aci_subnet_name(self, **kwargs) -> Union[str, None]:
+    def get_aci_subnet_name(self) -> Union[str, None]:
         """Obtain the value of aci_subnet_name.
 
         :return: string or None
@@ -2322,8 +2275,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return aci_subnet_name
 
-    # pylint: disable=unused-argument
-    def get_appgw_name(self, **kwargs) -> Union[str, None]:
+    def get_appgw_name(self) -> Union[str, None]:
         """Obtain the value of appgw_name.
 
         :return: string or None
@@ -2347,8 +2299,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_name
 
-    # pylint: disable=unused-argument
-    def get_appgw_subnet_cidr(self, **kwargs) -> Union[str, None]:
+    def get_appgw_subnet_cidr(self) -> Union[str, None]:
         """Obtain the value of appgw_subnet_cidr.
 
         :return: string or None
@@ -2372,8 +2323,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_subnet_cidr
 
-    # pylint: disable=unused-argument
-    def get_appgw_id(self, **kwargs) -> Union[str, None]:
+    def get_appgw_id(self) -> Union[str, None]:
         """Obtain the value of appgw_id.
 
         :return: string or None
@@ -2397,8 +2347,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_id
 
-    # pylint: disable=unused-argument
-    def get_appgw_subnet_id(self, **kwargs) -> Union[str, None]:
+    def get_appgw_subnet_id(self) -> Union[str, None]:
         """Obtain the value of appgw_subnet_id.
 
         :return: string or None
@@ -2422,8 +2371,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_subnet_id
 
-    # pylint: disable=unused-argument
-    def get_appgw_watch_namespace(self, **kwargs) -> Union[str, None]:
+    def get_appgw_watch_namespace(self) -> Union[str, None]:
         """Obtain the value of appgw_watch_namespace.
 
         :return: string or None
@@ -2447,8 +2395,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return appgw_watch_namespace
 
-    # pylint: disable=unused-argument
-    def get_enable_sgxquotehelper(self, **kwargs) -> bool:
+    def get_enable_sgxquotehelper(self) -> bool:
         """Obtain the value of enable_sgxquotehelper.
 
         :return: bool
@@ -2504,7 +2451,7 @@ class AKSCreateDecorator:
         self.resource_type = resource_type
 
     def init_mc(self) -> ManagedCluster:
-        """Initialize the ManagedCluster object with required parameter location.
+        """Initialize the ManagedCluster object with required parameter location and attach it to internal context.
 
         The function "get_subscription_id" will be called, which depends on "az login" in advance, the returned
         subscription_id will be stored as an intermediate.
@@ -2519,6 +2466,9 @@ class AKSCreateDecorator:
 
         # initialize the `ManagedCluster` object with mandatory parameters (i.e. location)
         mc = self.models.ManagedCluster(location=self.context.get_location())
+
+        # attach mc to AKSCreateContext
+        self.context.attach_mc(mc)
         return mc
 
     def set_up_agent_pool_profiles(self, mc: ManagedCluster) -> ManagedCluster:
@@ -2531,12 +2481,20 @@ class AKSCreateDecorator:
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
 
+        (
+            node_count,
+            enable_auto_scaling,
+            min_count,
+            max_count,
+        ) = (
+            self.context.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
+        )
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             # Must be 12 chars or less before ACS RP adds to it
-            name=self.context.get_nodepool_name(enable_trim=True),
+            name=self.context.get_nodepool_name(),
             tags=self.context.get_nodepool_tags(),
             node_labels=self.context.get_nodepool_labels(),
-            count=self.context.get_node_count(enable_validation=True),
+            count=node_count,
             vm_size=self.context.get_node_vm_size(),
             os_type="Linux",
             vnet_subnet_id=self.context.get_vnet_subnet_id(),
@@ -2551,11 +2509,9 @@ class AKSCreateDecorator:
             mode="System",
             os_disk_size_gb=self.context.get_node_osdisk_size(),
             os_disk_type=self.context.get_node_osdisk_type(),
-            min_count=self.context.get_min_count(enable_validation=True),
-            max_count=self.context.get_max_count(enable_validation=True),
-            enable_auto_scaling=self.context.get_enable_cluster_autoscaler(
-                enable_validation=True
-            ),
+            min_count=min_count,
+            max_count=max_count,
+            enable_auto_scaling=enable_auto_scaling,
         )
         mc.agent_pool_profiles = [agent_pool_profile]
         return mc
@@ -2572,13 +2528,12 @@ class AKSCreateDecorator:
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
 
-        if not self.context.get_no_ssh_key(enable_validation=True):
+        ssh_key_value, no_ssh_key = self.context.get_ssh_key_value_and_no_ssh_key()
+        if not no_ssh_key:
             ssh_config = self.models.ContainerServiceSshConfiguration(
                 public_keys=[
                     self.models.ContainerServiceSshPublicKey(
-                        key_data=self.context.get_ssh_key_value(
-                            enable_validation=True
-                        )
+                        key_data=ssh_key_value
                     )
                 ]
             )
@@ -2597,6 +2552,7 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+
         (
             windows_admin_username,
             windows_admin_password,
@@ -2654,7 +2610,7 @@ class AKSCreateDecorator:
     def process_add_role_assignment_for_vnet_subnet(self, mc: ManagedCluster) -> None:
         """Add role assignment for vent subnet.
 
-        The function "subnet_role_assignment_exists" will be called to verfiy if the role assignment already exists for
+        The function "subnet_role_assignment_exists" will be called to verify if the role assignment already exists for
         the subnet, which internally used AuthorizationManagementClient to send the request.
         The function "_get_user_assigned_identity" will be called to get the client id of the user assigned identity,
         which internally used ManagedServiceIdentityClient to send the request.
@@ -2743,33 +2699,19 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+
         attach_acr = self.context.get_attach_acr()
         if attach_acr:
-            if self.context.get_enable_managed_identity():
-                if self.context.get_no_wait():
-                    raise MutuallyExclusiveArgumentError(
-                        "When --attach-acr and --enable-managed-identity are both specified, "
-                        "--no-wait is not allowed, please wait until the whole operation succeeds."
-                    )
-                # Attach acr operation will be handled after the cluster is created
-            else:
+            # If enable_managed_identity, attach acr operation will be handled after the cluster is created
+            if not self.context.get_enable_managed_identity():
                 service_principal_profile = mc.service_principal_profile
-                # newly added check, check whether client_id exists before creating role assignment
-                if (
-                    service_principal_profile is None or
-                    not service_principal_profile.client_id
-                ):
-                    raise CLIInternalError(
-                        "No service principal is found to create the acrpull role assignment for acr."
-                    )
-                subscription_id = self.context.get_intermediate(
-                    "subscription_id"
-                )
                 _ensure_aks_acr(
                     self.cmd,
                     client_id=service_principal_profile.client_id,
                     acr_name_or_id=attach_acr,
-                    subscription_id=subscription_id,
+                    subscription_id=self.context.get_intermediate(
+                        "subscription_id"
+                    ),
                 )
 
     def set_up_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -2783,6 +2725,7 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+
         # build load balancer profile, which is part of the network profile
         load_balancer_profile = create_load_balancer_profile(
             self.context.get_load_balancer_managed_outbound_ip_count(),
@@ -2793,27 +2736,27 @@ class AKSCreateDecorator:
             models=self.models.lb_models,
         )
 
-        # verify outbound type, which is part of the network profile
+        # verify outbound type
         # Note: Validation internally depends on load_balancer_sku, which is a temporary value that is
         # dynamically completed.
         outbound_type = self.context.get_outbound_type(
-            enable_validation=True, load_balancer_profile=load_balancer_profile
+            load_balancer_profile=load_balancer_profile
         )
 
-        # verify load balancer sku, which is part of the network profile
-        load_balancer_sku = self.context.get_load_balancer_sku(
-            enable_validation=True
-        )
+        # verify load balancer sku
+        load_balancer_sku = self.context.get_load_balancer_sku()
 
-        network_plugin = self.context.get_network_plugin(enable_validation=True)
-        pod_cidr = self.context.get_pod_cidr(enable_validation=True)
-        service_cidr = self.context.get_service_cidr(enable_validation=True)
-        dns_service_ip = self.context.get_dns_service_ip(enable_validation=True)
-        docker_bridge_address = self.context.get_docker_bridge_address(
-            enable_validation=True
+        # verify network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
+        network_plugin = self.context.get_network_plugin()
+        (
+            pod_cidr,
+            service_cidr,
+            dns_service_ip,
+            docker_bridge_address,
+            network_policy,
+        ) = (
+            self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
         )
-        network_policy = self.context.get_network_policy(enable_validation=True)
-
         network_profile = None
         if any(
             [
@@ -2866,10 +2809,13 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+
         ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
         addon_profiles = {}
         # error out if any unrecognized or duplicate addon provided
-        addons = self.context.get_enable_addons(enable_validation=True, enable_split_comma_separated_str=True)
+        # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
+        # error out if '--enable-addons=virtual-node' is set but aci_subnet_name and vnet_subnet_id are not
+        addons = self.context.get_enable_addons()
         if 'http_application_routing' in addons:
             addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
@@ -2888,20 +2834,12 @@ class AKSCreateDecorator:
             # set intermediate
             self.context.set_intermediate("monitoring", True, overwrite_exists=True)
             addons.remove('monitoring')
-        # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
-        elif self.context.get_workspace_resource_id(read_only=True):
-            raise RequiredArgumentMissingError(
-                '"--workspace-resource-id" requires "--enable-addons monitoring".')
         if 'azure-policy' in addons:
             addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
             addons.remove('azure-policy')
         if 'virtual-node' in addons:
             aci_subnet_name = self.context.get_aci_subnet_name()
-            vnet_subnet_id = self.context.get_vnet_subnet_id()
-            if not aci_subnet_name or not vnet_subnet_id:
-                raise RequiredArgumentMissingError(
-                    '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
             # TODO: how about aciConnectorwindows, what is its addon name?
             os_type = self.context.get_virtual_node_addon_os_type()
             addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(
