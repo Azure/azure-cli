@@ -1444,7 +1444,8 @@ def cli_cosmosdb_identity_show(client, resource_group_name, account_name):
     return cosmos_db_account.identity
 
 
-def cli_cosmosdb_identity_assign(cmd, client,
+def cli_cosmosdb_identity_assign(cmd,
+                                 client,
                                  resource_group_name,
                                  account_name,
                                  identities=None):
