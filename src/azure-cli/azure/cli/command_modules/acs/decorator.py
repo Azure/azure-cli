@@ -1820,7 +1820,7 @@ class AKSCreateContext:
     ) -> Union[str, None]:
         """Internal functin to dynamically obtain the value of outbound_type according to the context.
 
-        Note: The parameters involved in the validation are not verified in their own getters.
+        Note: All the external parameters involved in the validation are not verified in their own getters.
 
         When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
@@ -2097,6 +2097,7 @@ class AKSCreateContext:
         """Obtain the value of enable_addons.
 
         Note: enable_addons will not be decorated into the `mc` object.
+        Note: Some of the external parameters involved in the validation are not verified in their own getters.
 
         This function will verify the parameters by default. It will check whether the provided addons have duplicate or
         invalid values, and raise a InvalidArgumentValueError if found.
@@ -2134,16 +2135,34 @@ class AKSCreateContext:
                     "are" if len(invalid_addons_set) > 1 else "is",
                 )
             )
+
+        # check monitoring/workspace_resource_id
+        workspace_resource_id = self._get_workspace_resource_id(read_only=True)
+        if "monitoring" not in enable_addons and workspace_resource_id:
+            raise RequiredArgumentMissingError(
+                '"--workspace-resource-id" requires "--enable-addons monitoring".')
+
+        # check virtual node/aci_subnet_name/vnet_subnet_id
+        # Note: The external parameters involved in the validation are not verified in their own getters.
+        aci_subnet_name = self.get_aci_subnet_name()
+        vnet_subnet_id = self.get_vnet_subnet_id()
+        if "virtual-node" in enable_addons and not (aci_subnet_name and vnet_subnet_id):
+            raise RequiredArgumentMissingError(
+                '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
         return enable_addons
 
     # pylint: disable=unused-argument
-    def _get_workspace_resource_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+    def _get_workspace_resource_id(
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
+    ) -> Union[str, None]:
         """Internal function to dynamically obtain the value of workspace_resource_id according to the context.
 
         When both workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
         "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
         subscription_id and resource_group_name.
 
+        This function supports the option of enable_validation. When enabled, it will check if workspace_resource_id is
+        assigned but 'monitoring' is not specified in enable_addons, if so, raise a RequiredArgumentMissingError.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
         :return: string or None
@@ -2183,6 +2202,13 @@ class AKSCreateContext:
             # normalize
             workspace_resource_id = "/" + workspace_resource_id.strip(" /")
 
+        # validation
+        if enable_validation:
+            enable_addons = self.get_enable_addons()
+            if workspace_resource_id and "monitoring" not in enable_addons:
+                raise RequiredArgumentMissingError(
+                    '"--workspace-resource-id" requires "--enable-addons monitoring".')
+
         # this parameter does not need validation
         return workspace_resource_id
 
@@ -2196,7 +2222,7 @@ class AKSCreateContext:
         :return: string or None
         """
 
-        return self._get_workspace_resource_id()
+        return self._get_workspace_resource_id(enable_validation=True)
 
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
@@ -2786,6 +2812,8 @@ class AKSCreateDecorator:
         ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
         addon_profiles = {}
         # error out if any unrecognized or duplicate addon provided
+        # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
+        # error out if '--enable-addons=virtual-node' is set but aci_subnet_name and vnet_subnet_id are not
         addons = self.context.get_enable_addons()
         if 'http_application_routing' in addons:
             addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
@@ -2805,20 +2833,12 @@ class AKSCreateDecorator:
             # set intermediate
             self.context.set_intermediate("monitoring", True, overwrite_exists=True)
             addons.remove('monitoring')
-        # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
-        elif self.context._get_workspace_resource_id(read_only=True):
-            raise RequiredArgumentMissingError(
-                '"--workspace-resource-id" requires "--enable-addons monitoring".')
         if 'azure-policy' in addons:
             addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
             addons.remove('azure-policy')
         if 'virtual-node' in addons:
             aci_subnet_name = self.context.get_aci_subnet_name()
-            vnet_subnet_id = self.context.get_vnet_subnet_id()
-            if not aci_subnet_name or not vnet_subnet_id:
-                raise RequiredArgumentMissingError(
-                    '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
             # TODO: how about aciConnectorwindows, what is its addon name?
             os_type = self.context.get_virtual_node_addon_os_type()
             addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(

@@ -1514,6 +1514,27 @@ class AKSCreateContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             ctx_4.get_enable_addons()
 
+        # invalid parameter
+        ctx_5 = AKSCreateContext(
+            self.cmd,
+            {
+                "workspace_resource_id": "/test_workspace_resource_id",
+                "enable_addons": "",
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_5.get_enable_addons()
+
+        # invalid parameter
+        ctx_6 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_addons": "virtual-node",
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_6.get_enable_addons()
+
     def test_get_workspace_resource_id(self):
         # default
         ctx_1 = AKSCreateContext(
@@ -1535,14 +1556,14 @@ class AKSCreateContextTestCase(unittest.TestCase):
             location="test_location", addon_profiles=addon_profiles_1
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_workspace_resource_id(), "test_workspace_resource_id"
-        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_1.get_workspace_resource_id()
 
         # custom value & dynamic completion
         ctx_2 = AKSCreateContext(
             self.cmd,
             {
+                "enable_addons": "monitoring",
                 "workspace_resource_id": "test_workspace_resource_id/",
             },
         )
@@ -1554,6 +1575,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_3 = AKSCreateContext(
             self.cmd,
             {
+                "enable_addons": "monitoring",
                 "resource_group_name": "test_rg_name",
                 "workspace_resource_id": None,
             },
@@ -2485,3 +2507,24 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         mc_4 = self.models.ManagedCluster(location="test_location")
         with self.assertRaises(RequiredArgumentMissingError):
             dec_4.set_up_addon_profiles(mc_4)
+
+        # custom value
+        dec_5 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "enable_addons": "virtual-node",
+                "workspace_resource_id": None,
+                "aci_subnet_name": None,
+                "appgw_name": None,
+                "appgw_subnet_cidr": None,
+                "appgw_id": None,
+                "appgw_subnet_id": None,
+                "appgw_watch_namespace": None,
+                "enable_sgxquotehelper": False,
+            },
+        )
+        mc_5 = self.models.ManagedCluster(location="test_location")
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_5.set_up_addon_profiles(mc_5)
