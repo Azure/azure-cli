@@ -421,7 +421,14 @@ def validate_vnet_location(vnet, location):
         raise ValidationError("The location of Vnet should be same as the location of the server")
 
 
-def validate_replica_burstable_server(server):
+def validate_mysql_replica(cmd, server):
+    # Tier validation
     if server.sku.tier == 'Burstable':
         raise ValidationError("Replication for Burstable servers are not supported. "
                               "Try using GeneralPurpose or MemoryOptimized tiers.")
+
+    # single az validation
+    _, single_az, _ = get_mysql_list_skus_info(cmd, server.location)
+    if single_az:
+        raise ValidationError("Replica can only be created for multi-availability zone regions. "
+                              "The location of the source server is in single availability zone region.")
