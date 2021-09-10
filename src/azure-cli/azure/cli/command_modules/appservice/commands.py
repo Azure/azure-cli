@@ -465,7 +465,7 @@ def load_command_table(self, _):
         g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
 
     with self.command_group('logicapp') as g:
-        g.custom_command('delete', 'delete_function_app')
+        g.custom_command('delete', 'delete_function_app', confirmation=True)
 
     with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())

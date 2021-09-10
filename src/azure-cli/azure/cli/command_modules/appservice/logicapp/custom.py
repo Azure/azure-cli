@@ -6,13 +6,12 @@
 from binascii import hexlify
 from os import urandom
 
-from knack.util import CLIError
 from knack.log import get_logger
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError,
+from azure.cli.core.azclierror import (InvalidArgumentValueError, ResourceNotFoundError, RequiredArgumentMissingError,
                                        MutuallyExclusiveArgumentError)
 
 from azure.cli.command_modules.appservice._appservice_utils import _generic_site_operation
@@ -31,7 +30,10 @@ from azure.cli.command_modules.appservice.custom import (
     _set_remote_or_local_git,
     _fill_ftp_publishing_url)
 
-from ._constants import (FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS,
+from ._constants import (DEFAULT_LOGICAPP_FUNCTION_VERSION,
+                         DEFAULT_LOGICAPP_RUNTIME,
+                         DEFAULT_LOGICAPP_RUNTIME_VERSION,
+                         FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS,
                          FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION,
                          DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION)
 
@@ -46,16 +48,16 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
                     deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches, too-many-locals
-    functions_version = '3'
+    functions_version = DEFAULT_LOGICAPP_FUNCTION_VERSION
     runtime = None
     runtime_version = None
 
     if consumption_plan_location or not deployment_container_image_name:
-        runtime = 'node'
-        runtime_version = '12'
+        runtime = DEFAULT_LOGICAPP_RUNTIME
+        runtime_version = DEFAULT_LOGICAPP_RUNTIME_VERSION
 
     if deployment_source_url and deployment_local_git:
-        raise CLIError(
+        raise MutuallyExclusiveArgumentError(
             'usage error: --deployment-source-url <url> | --deployment-local-git')
 
     if not plan and not consumption_plan_location:
@@ -83,7 +85,7 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
         location = next((loc for loc in locations if loc['name'].lower(
         ) == consumption_plan_location.lower()), None)
         if location is None:
-            raise CLIError(
+            raise InvalidArgumentValueError(
                 "Location is invalid. Use: az logicapp list-consumption-locations")
         logicapp_def.location = consumption_plan_location
         logicapp_def.kind = 'functionapp,workflowapp'
@@ -97,7 +99,7 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
         else:
             plan_info = client.app_service_plans.get(resource_group_name, plan)
         if not plan_info:
-            raise CLIError("The plan '{}' doesn't exist".format(plan))
+            raise ResourceNotFoundError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
         is_linux = plan_info.reserved
         logicapp_def.server_farm_id = plan_info.id
@@ -130,16 +132,14 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
                 if runtime not in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version]:
-                    raise CLIError("An appropriate linux image for runtime:'{}', "
-                                   "functions_version: '{}' was not found".format(runtime, functions_version))
+                    raise InvalidArgumentValueError(
+                        "An appropriate linux image for runtime:'{}', "
+                        "functions_version: '{}' was not found".format(runtime, functions_version))
         if deployment_container_image_name is None:
             site_config.linux_fx_version = _get_linux_fx_functionapp(
                 functions_version, runtime, runtime_version)
     else:
         logicapp_def.kind = 'functionapp,workflowapp'
-        if runtime == "java":
-            site_config.java_version = _get_java_version_functionapp(
-                functions_version, runtime_version)
 
     # adding appsetting to site to make it a workflow
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',

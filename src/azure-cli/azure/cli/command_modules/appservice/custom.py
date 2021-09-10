@@ -51,12 +51,17 @@ from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMi
 
 from .tunnel import TunnelServer
 
-from .utils import (_get_location_from_resource_group, _list_app, _rename_server_farm_props, _get_location_from_webapp)
-
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
-from .utils import _normalize_sku, get_sku_name, retryable_method, raise_missing_token_suggestion
+from .utils import (_normalize_sku,
+                    get_sku_name,
+                    retryable_method,
+                    raise_missing_token_suggestion,
+                    _get_location_from_resource_group,
+                    _list_app,
+                    _rename_server_farm_props,
+                    _get_location_from_webapp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,

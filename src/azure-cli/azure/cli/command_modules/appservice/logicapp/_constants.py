@@ -6,7 +6,9 @@
 LINUX_RUNTIMES = ['dotnet', 'node', 'python', 'java']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 
-
+DEFAULT_LOGICAPP_RUNTIME = 'node'
+DEFAULT_LOGICAPP_RUNTIME_VERSION = '12'
+DEFAULT_LOGICAPP_FUNCTION_VERSION = '3'
 # functions version : default node version
 FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION = {
     '2': '~10',

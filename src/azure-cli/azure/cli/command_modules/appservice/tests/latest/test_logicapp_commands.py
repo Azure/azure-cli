@@ -21,12 +21,8 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # pylint: disable=line-too-long
 # In the future, for any reasons the repository get removed, the source code is under "sample-repo-for-deployment-test"
 # you can use to rebuild the repository
-TEST_REPO_URL = 'https://github.com/yugangw-msft/azure-site-test.git'
-WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
-WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
-LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
-LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
-WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
+WINDOWS_ASP_LOCATION_LOGICAPP = 'francecentral'
+LINUX_ASP_LOCATION_LOGICAPP = 'ukwest'
 DEFAULT_LOCATION = "westus"
 
 class LogicappBasicE2ETest(ScenarioTest):
@@ -60,12 +56,55 @@ class LogicappBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].name', logicapp_name)
         ])
 
-        self.cmd('logicapp delete -g {} -n {}'.format(resource_group, logicapp_name))
+        self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
 
         self.cmd('logicapp list -g {}'.format(resource_group),
         checks=[
             JMESPathCheck('length([])', 0)
         ])
+
+
+class LogicAppOnWindows(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_LOGICAPP)
+    @StorageAccountPreparer()
+    def test_logicapp_windows(self, resource_group, storage_account):
+        logicapp_name = self.create_random_name(
+            'logicappwindowsruntime', 40)
+
+        self.cmd('logicapp create -g {} -n {} -c {} -s {} --os-type Windows'
+                 .format(resource_group, logicapp_name, WINDOWS_ASP_LOCATION_LOGICAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', logicapp_name),
+                     JMESPathCheck('kind', 'functionapp,workflowapp'),
+                     JMESPathCheck('hostNames[0]', logicapp_name + '.azurewebsites.net')])
+        self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
+
+
+class LogicAppOnLinux(ScenarioTest):
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_LOGICAPP)
+    @StorageAccountPreparer()
+    def test_logicapp_on_linux(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        logicapp_name = self.create_random_name(
+            prefix='logicapp-linux', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+            # this weird field means it is a linux
+            JMESPathCheck('reserved', True),
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('logicapp create -g {} -n {} --plan {} -s {}'.format(resource_group, logicapp_name, plan, storage_account), checks=[
+            JMESPathCheck('name', logicapp_name)
+        ])
+        self.cmd('logicapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].name', logicapp_name),
+            JMESPathCheck('[0].kind', 'functionapp,linux,workflowapp')
+        ]).get_output_in_json()
+        # self.assertTrue('functionapp,workflowapp,linux' in result[0]['kind'])
+
+        
+        self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
+
 
 
 if __name__ == '__main__':
