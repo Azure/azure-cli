@@ -157,7 +157,9 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb identity assign') as c:
         c.argument('identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '[system]' to refer to the system assigned identity. Default: '[system]'")
-          
+
+    with self.argument_context('cosmosdb identity remove') as c:
+        c.argument('identities', options_list=['--identities'], nargs='*', help="Space-separated identities to remove. Use '[system]' to refer to the system assigned identity. Default: '[system]'")
 
 # SQL database
     with self.argument_context('cosmosdb sql database') as c:

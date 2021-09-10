@@ -1428,12 +1428,12 @@ def cli_cosmosdb_identity_assign(client,
                                  resource_group_name,
                                  account_name,
                                  identities=None):
-    """ Update the identity associated with a Cosmos DB account """
+    """ Update the identities associated with a Cosmos DB account """
 
     existing = client.get(resource_group_name, account_name)
 
     SYSTEM_ID = '[system]'
-    enable_system = SYSTEM_ID in identities or identities == None
+    enable_system = SYSTEM_ID in identities or identities is None
     new_user_identities = [x for x in identities if x != SYSTEM_ID]
 
     if existing.identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
@@ -1453,9 +1453,9 @@ def cli_cosmosdb_identity_assign(client,
         set_identity = ManagedServiceIdentity(type=identity_types.value)
     else:
         set_identity = ManagedServiceIdentity(
-            type=identity_types.value, 
-            user_identities=new_user_identities + existing.identity.user_assigned_identities
-            )
+            type=identity_types.value,
+            user_identities=new_user_identities + (existing.identity.user_assigned_identities or [])
+        )
 
     params = DatabaseAccountUpdateParameters(identity=set_identity)
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
@@ -1465,22 +1465,42 @@ def cli_cosmosdb_identity_assign(client,
 
 def cli_cosmosdb_identity_remove(client,
                                  resource_group_name,
-                                 account_name):
-    """ Remove the SystemAssigned identity associated with a Cosmos DB account """
+                                 account_name,
+                                 identities=None):
+    """ Remove the identities associated with a Cosmos DB account """
 
     existing = client.get(resource_group_name, account_name)
 
-    # if there is no system ID assigned, do nothing and return
-    if ResourceIdentityType.system_assigned.value not in existing.identity.type:
-        return existing.identity
+    SYSTEM_ID = '[system]'
+    remove_system_assigned_identity = False
+    if SYSTEM_ID in identities:
+        remove_system_assigned_identity = True
+        identities.remove(SYSTEM_ID)
+    if existing.identity is None:
+        return None
+    identities_to_remove = []
+    if identities:
+        existing_identities = {x.lower() for x in list((existing.identity.user_assigned_identities or {}).keys())}
+        identities_to_remove = {x.lower() for x in identities}
+        non_existing = identities_to_remove.difference(existing_identities)
+        if non_existing:
+            raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), account_name))
+        identities_remaining = existing_identities.difference(identities_to_remove)
 
-    # if there is a user identity assigned, set it 
-    # if not, set nonetype
-    if ResourceIdentityType.user_assigned.value in existing.identity.type:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.user_assigned.value)
+    if identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        set_type = ResourceIdentityType.system_assigned_user_assigned
+    elif identities_remaining and remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        set_type = ResourceIdentityType.user_assigned
+    elif identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.user_assigned:
+        set_type = ResourceIdentityType.user_assigned
+    elif not identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        set_type = ResourceIdentityType.system_assigned
+    elif not identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned:
+        set_type = ResourceIdentityType.system_assigned
     else:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.none.value)
-    params = DatabaseAccountUpdateParameters(identity=identity)
+        set_type = ResourceIdentityType.none
+
+    params = DatabaseAccountUpdateParameters(identity=ManagedServiceIdentity(type=set_type, user_assigned_identities=identities_remaining))
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
