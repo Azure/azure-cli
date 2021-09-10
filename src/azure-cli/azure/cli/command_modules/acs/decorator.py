@@ -1662,7 +1662,21 @@ class AKSCreateContext:
         attach_acr = self.raw_param.get("attach_acr")
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        # validation
+        if attach_acr:
+            if self.get_enable_managed_identity() and self.get_no_wait():
+                raise MutuallyExclusiveArgumentError(
+                    "When --attach-acr and --enable-managed-identity are both specified, "
+                    "--no-wait is not allowed, please wait until the whole operation succeeds."
+                )
+                # Attach acr operation will be handled after the cluster is created
+            else:
+                # newly added check, check whether client_id exists before creating role assignment
+                service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
+                if not service_principal:
+                    raise CLIInternalError(
+                        "No service principal is found to create the acrpull role assignment for acr."
+                    )
         return attach_acr
 
     def get_no_wait(self) -> bool:
@@ -2438,7 +2452,7 @@ class AKSCreateDecorator:
         self.resource_type = resource_type
 
     def init_mc(self) -> ManagedCluster:
-        """Initialize the ManagedCluster object with required parameter location.
+        """Initialize the ManagedCluster object with required parameter location and attach it to internal context.
 
         The function "get_subscription_id" will be called, which depends on "az login" in advance, the returned
         subscription_id will be stored as an intermediate.
@@ -2453,6 +2467,9 @@ class AKSCreateDecorator:
 
         # initialize the `ManagedCluster` object with mandatory parameters (i.e. location)
         mc = self.models.ManagedCluster(location=self.context.get_location())
+
+        # attach mc to AKSCreateContext
+        self.context.attach_mc(mc)
         return mc
 
     def set_up_agent_pool_profiles(self, mc: ManagedCluster) -> ManagedCluster:
@@ -2686,31 +2703,16 @@ class AKSCreateDecorator:
 
         attach_acr = self.context.get_attach_acr()
         if attach_acr:
-            if self.context.get_enable_managed_identity():
-                if self.context.get_no_wait():
-                    raise MutuallyExclusiveArgumentError(
-                        "When --attach-acr and --enable-managed-identity are both specified, "
-                        "--no-wait is not allowed, please wait until the whole operation succeeds."
-                    )
-                # Attach acr operation will be handled after the cluster is created
-            else:
+            # If enable_managed_identity, attach acr operation will be handled after the cluster is created
+            if not self.context.get_enable_managed_identity():
                 service_principal_profile = mc.service_principal_profile
-                # newly added check, check whether client_id exists before creating role assignment
-                if (
-                    service_principal_profile is None or
-                    not service_principal_profile.client_id
-                ):
-                    raise CLIInternalError(
-                        "No service principal is found to create the acrpull role assignment for acr."
-                    )
-                subscription_id = self.context.get_intermediate(
-                    "subscription_id"
-                )
                 _ensure_aks_acr(
                     self.cmd,
                     client_id=service_principal_profile.client_id,
                     acr_name_or_id=attach_acr,
-                    subscription_id=subscription_id,
+                    subscription_id=self.context.get_intermediate(
+                        "subscription_id"
+                    ),
                 )
 
     def set_up_network_profile(self, mc: ManagedCluster) -> ManagedCluster:

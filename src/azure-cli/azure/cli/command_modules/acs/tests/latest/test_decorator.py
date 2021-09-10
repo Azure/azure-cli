@@ -1130,6 +1130,29 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1 = AKSCreateContext(self.cmd, {"attach_acr": None})
         self.assertEqual(ctx_1.get_attach_acr(), None)
 
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "attach_acr": "test_attach_acr",
+                "enable_managed_identity": True,
+                "no_wait": True,
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_attach_acr()
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "attach_acr": "test_attach_acr",
+                "enable_managed_identity": False,
+            },
+        )
+        with self.assertRaises(CLIInternalError):
+            ctx_3.get_attach_acr()
+
     def test_get_no_wait(self):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"no_wait": False})
@@ -1804,6 +1827,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             dec_mc = dec_1.init_mc()
         ground_truth_mc = self.models.ManagedCluster(location="test_location")
         self.assertEqual(dec_mc, ground_truth_mc)
+        self.assertEqual(dec_mc, dec_1.context.mc)
 
     def test_set_up_agent_pool_profiles(self):
         # default value in `aks_create`
@@ -2200,15 +2224,16 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_managed_identity": False,
             },
         )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        with self.assertRaises(CLIInternalError):
+            dec_3.process_attach_acr(mc_3)
         service_principal_profile_3 = (
             self.models.ManagedClusterServicePrincipalProfile(
                 client_id="test_service_principal", secret="test_client_secret"
             )
         )
-        mc_3 = self.models.ManagedCluster(
-            location="test_location",
-            service_principal_profile=service_principal_profile_3,
-        )
+        mc_3.service_principal_profile = service_principal_profile_3
+        dec_3.context.attach_mc(mc_3)
         registry = Mock(id="test_registry_id")
         with patch(
             "azure.cli.command_modules.acs.custom.get_resource_by_name",
