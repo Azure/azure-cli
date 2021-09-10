@@ -11,7 +11,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
-                          validate_included_datasets_validator, validate_custom_domain,
+                          validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
                           validate_container_public_access,
                           validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
@@ -237,7 +237,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys', 'failover']:  # pylint: disable=line-too-long
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys', 'failover', 'hns-migration']:  # pylint: disable=line-too-long
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
             c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -663,6 +663,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination_container', options_list=['--destination-container', '-d'],
                    help='The destination storage container name.')
         c.argument('rule_id', rule_id_type)
+
+    with self.argument_context('storage account hns-migration start') as c:
+        c.argument('request_type', options_list=['--type', '--request-type'],
+                   arg_type=get_enum_type(['validation', 'upgrade']), validator=validate_hns_migration_type,
+                   help='Start a validation request for migration or start a migration request')
 
     for item in ['show', 'off']:
         with self.argument_context('storage logging {}'.format(item)) as c:

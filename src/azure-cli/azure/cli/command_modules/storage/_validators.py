@@ -104,6 +104,13 @@ def validate_bypass(namespace):
         namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
 
 
+def validate_hns_migration_type(namespace):
+    if namespace.request_type and namespace.request_type.lower() == 'validation':
+        namespace.request_type = 'HnsOnValidationRequest'
+    if namespace.request_type and namespace.request_type.lower() == 'upgrade':
+        namespace.request_type = 'HnsOnHydrationRequest'
+
+
 def get_config_value(cmd, section, key, default):
     logger.info("Try to get %s %s value from environment variables or config file.", section, key)
     return cmd.cli_ctx.config.get(section, key, default)

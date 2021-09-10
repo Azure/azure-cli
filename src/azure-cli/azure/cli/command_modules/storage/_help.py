@@ -635,6 +635,29 @@ examples:
     crafted: true
 """
 
+helps['storage account hns-migration'] = """
+type: group
+short-summary: Manage storage account migration to enable hierarchical namespace.
+"""
+
+helps['storage account hns-migration start'] = """
+type: command
+short-summary: Validate/Begin migrating a storage account to enable hierarchical namespace.
+examples:
+  - name: Validate migrating a storage account to enable hierarchical namespace.
+    text: az storage account hns-migration start --type validation --name mystorageaccount --resource-group myresourcegroup
+  - name: Begin migrating a storage account to enable hierarchical namespace.
+    text: az storage account hns-migration start --type upgrade --name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account hns-migration stop'] = """
+type: command
+short-summary: Stop the enabling hierarchical namespace migration of a storage account.
+examples:
+  - name: Stop the enabling hierarchical namespace migration of a storage account.
+    text: az storage account hns-migration stop --name mystorageaccount --resource-group myresourcegroup
+"""
+
 helps['storage blob'] = """
 type: group
 short-summary: Manage object storage for unstructured data (blobs).
