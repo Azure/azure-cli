@@ -2036,12 +2036,12 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using '|' delimiter
+  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter
     text: >
-        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|8"
-  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using ':' delimiter
+        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|11"
+  - name: Create a web app with a specified name and a Java 11 runtime using ':' delimiter
     text: >
-        az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:8"
+        az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
     text: >
         az webapp up -l locationName
