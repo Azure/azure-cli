@@ -2437,7 +2437,7 @@ class AKSCreateContext:
             self.mc and
             self.mc.aad_profile
         ):
-            enable_aad = True if self.mc.aad_profile.managed else False
+            enable_aad = bool(self.mc.aad_profile.managed)
 
         # this parameter does not need dynamic completion
 
@@ -2637,7 +2637,7 @@ class AKSCreateContext:
             self.mc and
             self.mc.enable_rbac is not None
         ):
-            disable_rbac = False if self.mc.enable_rbac else True
+            disable_rbac = not self.mc.enable_rbac
 
         # this parameter does not need dynamic completion
 
@@ -2665,7 +2665,7 @@ class AKSCreateContext:
             self.mc and
             self.mc.aad_profile
         ):
-            enable_azure_rbac = True if self.mc.aad_profile.enable_azure_rbac else False
+            enable_azure_rbac = bool(self.mc.aad_profile.enable_azure_rbac)
 
         # this parameter does not need dynamic completion
 
