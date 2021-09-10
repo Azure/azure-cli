@@ -22,6 +22,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
 )
@@ -54,6 +55,7 @@ from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
+from msrestazure.tools import is_valid_resource_id
 
 logger = get_logger(__name__)
 
@@ -190,7 +192,6 @@ class AKSCreateModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        # not directly used
         self.ManagedClusterAPIServerAccessProfile = self.__cmd.get_models(
             "ManagedClusterAPIServerAccessProfile",
             resource_type=self.resource_type,
@@ -672,13 +673,16 @@ class AKSCreateContext:
 
         # validation
         if enable_validation:
-            if (
-                load_balancer_sku == "basic" and
-                self.get_api_server_authorized_ip_ranges()
-            ):
-                raise MutuallyExclusiveArgumentError(
-                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-                )
+            if load_balancer_sku == "basic":
+                if self.get_api_server_authorized_ip_ranges():
+                    raise MutuallyExclusiveArgumentError(
+                        "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+                    )
+                if self.get_enable_private_cluster():
+                    raise MutuallyExclusiveArgumentError(
+                        "Please use standard load balancer for private cluster"
+                    )
+
         return load_balancer_sku
 
     def get_load_balancer_sku(self) -> Union[str, None]:
@@ -698,13 +702,15 @@ class AKSCreateContext:
 
         return self._get_load_balancer_sku(enable_validation=True)
 
-    def get_api_server_authorized_ip_ranges(self) -> Union[str, List[str], None]:
+    def get_api_server_authorized_ip_ranges(self) -> List[str]:
         """Obtain the value of api_server_authorized_ip_ranges.
 
-        This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic" when
-        api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
+        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
 
-        :return: string, empty list or list of strings, or None
+        :return: empty list or list of strings
         """
         # read the original value passed by the command
         api_server_authorized_ip_ranges = self.raw_param.get(
@@ -714,29 +720,43 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.api_server_access_profile and
-            self.mc.api_server_access_profile.authorized_ip_ranges
+            self.mc.api_server_access_profile.authorized_ip_ranges is not None
         ):
             api_server_authorized_ip_ranges = (
                 self.mc.api_server_access_profile.authorized_ip_ranges
             )
 
-        # this parameter does not need dynamic completion
+        # normalize
+        api_server_authorized_ip_ranges = [
+            x.strip()
+            for x in (
+                api_server_authorized_ip_ranges.split(",")
+                if api_server_authorized_ip_ranges
+                else []
+            )
+        ]
 
         # validation
-        if (
-            api_server_authorized_ip_ranges and
-            self._get_load_balancer_sku(enable_validation=False) == "basic"
-        ):
-            raise MutuallyExclusiveArgumentError(
-                "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-            )
+        if api_server_authorized_ip_ranges:
+            if self._get_load_balancer_sku(enable_validation=False) == "basic":
+                raise MutuallyExclusiveArgumentError(
+                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+                )
+            if self._get_enable_private_cluster(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "--api-server-authorized-ip-ranges is not supported for private cluster"
+                )
         return api_server_authorized_ip_ranges
 
-    def get_fqdn_subdomain(self) -> Union[str, None]:
-        """Obtain the value of fqdn_subdomain.
+    # pylint: disable=unused-argument
+    def _get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to obtain the value of fqdn_subdomain.
 
         This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
-        are assigend, if so, raise the MutuallyExclusiveArgumentError.
+        are assigend, if so, raise the MutuallyExclusiveArgumentError. It will also check when both private_dns_zone
+        and fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an
+        InvalidArgumentValueError; Otherwise if the value of private_dns_zone is not a valid resource ID, raise an
+        InvalidArgumentValueError.
 
         :return: string or None
         """
@@ -749,11 +769,37 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if fqdn_subdomain and self._get_dns_name_prefix(read_only=True):
-            raise MutuallyExclusiveArgumentError(
-                "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
-            )
+        if enable_validation:
+            if fqdn_subdomain:
+                if self._get_dns_name_prefix(read_only=True):
+                    raise MutuallyExclusiveArgumentError(
+                        "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+                    )
+                private_dns_zone = self.get_private_dns_zone()
+                if private_dns_zone:
+                    if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
+                        if not is_valid_resource_id(private_dns_zone):
+                            raise InvalidArgumentValueError(
+                                private_dns_zone + " is not a valid Azure resource ID."
+                            )
+                    raise InvalidArgumentValueError(
+                        "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
+                    )
         return fqdn_subdomain
+
+    def get_fqdn_subdomain(self) -> Union[str, None]:
+        """Obtain the value of fqdn_subdomain.
+
+        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
+        are assigend, if so, raise the MutuallyExclusiveArgumentError. It will also check when both private_dns_zone
+        and fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an
+        InvalidArgumentValueError; Otherwise if the value of private_dns_zone is not a valid resource ID, raise an
+        InvalidArgumentValueError.
+
+        :return: string or None
+        """
+
+        return self._get_fqdn_subdomain(enable_validation=True)
 
     def get_nodepool_name(self) -> str:
         """Dynamically obtain the value of nodepool_name according to the context.
@@ -1840,9 +1886,9 @@ class AKSCreateContext:
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
 
         This function supports the option of enable_validation. When enabled, if the value of outbound_type is
-        userDefinedRouting (CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING), the following checks will be performed. If
-        load_balancer_sku is set to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not
-        assigned, a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
+        CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, the following checks will be performed. If load_balancer_sku is set
+        to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not assigned,
+        a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
         will be raised.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
@@ -2114,7 +2160,7 @@ class AKSCreateContext:
         Note: Some of the external parameters involved in the validation are not verified in their own getters.
 
         This function will verify the parameters by default. It will check whether the provided addons have duplicate or
-        invalid values, and raise a InvalidArgumentValueError if found.
+        invalid values, and raise an InvalidArgumentValueError if found.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
@@ -2596,7 +2642,7 @@ class AKSCreateContext:
 
         return self._get_aad_tenant_id()
 
-    def get_aad_admin_group_object_ids(self) -> Union[str, List[str], None]:
+    def get_aad_admin_group_object_ids(self) -> Union[List[str], None]:
         """Obtain the value of aad_admin_group_object_ids.
 
         This function will normalize the parameter by default. It will split the string into a list with "," as the
@@ -2611,7 +2657,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.aad_profile and
-            self.mc.aad_profile.admin_group_object_i_ds
+            self.mc.aad_profile.admin_group_object_i_ds is not None
         ):
             aad_admin_group_object_ids = self.mc.aad_profile.admin_group_object_i_ds
             read_from_mc = True
@@ -2681,8 +2727,7 @@ class AKSCreateContext:
                 )
         return enable_azure_rbac
 
-    # pylint: disable=unused-argument
-    def get_enable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
+    def get_enable_azure_rbac(self) -> bool:
         """Obtain the value of enable_azure_rbac.
 
         This function will verify the parameter by default. If the values of disable_rbac and enable_azure_rbac are
@@ -2693,6 +2738,129 @@ class AKSCreateContext:
         """
 
         return self._get_enable_azure_rbac(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_enable_private_cluster(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of enable_private_cluster.
+
+        This function supports the option of enable_validation. When enabled, if enable_private_cluster is specified
+        and load_balancer_sku is basic or api_server_authorized_ip_ranges is assigned, raise a
+        MutuallyExclusiveArgumentError; Otherwise when enable_private_cluster is not specified and disable_public_fqdn
+        or private_dns_zone is assigned, raise an InvalidArgumentValueError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_private_cluster = self.raw_param.get("enable_private_cluster")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.api_server_access_profile
+        ):
+            enable_private_cluster = bool(self.mc.api_server_access_profile.enable_private_cluster)
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            if enable_private_cluster:
+                if self._get_load_balancer_sku(enable_validation=False) == "basic":
+                    raise MutuallyExclusiveArgumentError(
+                        "Please use standard load balancer for private cluster"
+                    )
+                if self.get_api_server_authorized_ip_ranges():
+                    raise MutuallyExclusiveArgumentError(
+                        "--api-server-authorized-ip-ranges is not supported for private cluster"
+                    )
+            else:
+                if self.get_disable_public_fqdn():
+                    raise InvalidArgumentValueError(
+                        "--disable-public-fqdn should only be used with --enable-private-cluster"
+                    )
+                if self.get_private_dns_zone():
+                    raise InvalidArgumentValueError(
+                        "Invalid private dns zone for public cluster. It should always be empty for public cluster"
+                    )
+        return enable_private_cluster
+
+    def get_enable_private_cluster(self) -> bool:
+        """Obtain the value of enable_private_cluster.
+
+        This function will verify the parameter by default. If enable_private_cluster is specified and load_balancer_sku
+        is basic or api_server_authorized_ip_ranges is assigned, raise a MutuallyExclusiveArgumentError; Otherwise when
+        enable_private_cluster is not specified and disable_public_fqdn or private_dns_zone is assigned, raise an
+        InvalidArgumentValueError.
+
+        :return: bool
+        """
+
+        return self._get_enable_private_cluster(enable_validation=True)
+
+    def get_disable_public_fqdn(self) -> bool:
+        """Obtain the value of disable_public_fqdn.
+
+        This function will verify the parameter by default. If enable_private_cluster is not specified and
+        disable_public_fqdn is assigned, raise an InvalidArgumentValueError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_public_fqdn = self.raw_param.get("disable_public_fqdn")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.api_server_access_profile
+        ):
+            disable_public_fqdn = self.mc.api_server_access_profile.enable_private_cluster_public_fqdn is False
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        enable_private_cluster = self._get_enable_private_cluster(enable_validation=False)
+        if disable_public_fqdn and not enable_private_cluster:
+            raise InvalidArgumentValueError("--disable-public-fqdn should only be used with --enable-private-cluster")
+        return disable_public_fqdn
+
+    def get_private_dns_zone(self) -> Union[str, None]:
+        """Obtain the value of private_dns_zone.
+
+        This function will verify the parameter by default. When private_dns_zone is assigned, if enable_private_cluster
+        is not specified raise an InvalidArgumentValueError. It will also check when both private_dns_zone and
+        fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an
+        InvalidArgumentValueError; Otherwise if the value of private_dns_zone is not a valid resource ID, raise an
+        InvalidArgumentValueError.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        private_dns_zone = self.raw_param.get("private_dns_zone")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.api_server_access_profile and
+            self.mc.api_server_access_profile.private_dns_zone
+        ):
+            private_dns_zone = self.mc.api_server_access_profile.private_dns_zone
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if private_dns_zone:
+            if not self._get_enable_private_cluster(enable_validation=False):
+                raise InvalidArgumentValueError(
+                    "Invalid private dns zone for public cluster. It should always be empty for public cluster"
+                )
+            if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
+                if not is_valid_resource_id(private_dns_zone):
+                    raise InvalidArgumentValueError(
+                        private_dns_zone + " is not a valid Azure resource ID."
+                    )
+            else:
+                if self.get_fqdn_subdomain():
+                    raise InvalidArgumentValueError(
+                        "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
+                    )
+        return private_dns_zone
 
 
 class AKSCreateDecorator:
@@ -3155,7 +3323,7 @@ class AKSCreateDecorator:
         mc.addon_profiles = addon_profiles
         return mc
 
-    def set_up_aad_profile(self, mc) -> ManagedCluster:
+    def set_up_aad_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up aad profile for the ManagedCluster object.
 
         :return: the ManagedCluster object
@@ -3164,6 +3332,7 @@ class AKSCreateDecorator:
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
+
         aad_profile = None
         enable_aad = self.context.get_enable_aad()
         if enable_aad:
@@ -3191,6 +3360,32 @@ class AKSCreateDecorator:
                     tenant_id=aad_tenant_id
                 )
         mc.aad_profile = aad_profile
+        return mc
+
+    def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up api server access profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        api_server_access_profile = None
+        api_server_authorized_ip_ranges = self.context.get_api_server_authorized_ip_ranges()
+        enable_private_cluster = self.context.get_enable_private_cluster()
+        disable_public_fqdn = self.context.get_disable_public_fqdn()
+        private_dns_zone = self.context.get_private_dns_zone()
+        if api_server_authorized_ip_ranges or enable_private_cluster:
+            api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile(
+                authorized_ip_ranges=api_server_authorized_ip_ranges,
+                enable_private_cluster=enable_private_cluster,
+                enable_private_cluster_public_fqdn=False if disable_public_fqdn else None,
+                private_dns_zone=private_dns_zone
+            )
+
+        mc.api_server_access_profile = api_server_access_profile
         return mc
 
     def construct_default_mc(self) -> ManagedCluster:
@@ -3224,6 +3419,8 @@ class AKSCreateDecorator:
         mc = self.set_up_addon_profiles(mc)
         # set up aad profile
         mc = self.set_up_aad_profile(mc)
+        # set up api server access profile
+        mc = self.set_up_api_server_access_profile(mc)
 
         # TODO: set up other profiles
         return mc
