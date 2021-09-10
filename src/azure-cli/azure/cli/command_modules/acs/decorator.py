@@ -1670,13 +1670,12 @@ class AKSCreateContext:
                     "--no-wait is not allowed, please wait until the whole operation succeeds."
                 )
                 # Attach acr operation will be handled after the cluster is created
-            else:
-                # newly added check, check whether client_id exists before creating role assignment
-                service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
-                if not service_principal:
-                    raise CLIInternalError(
-                        "No service principal is found to create the acrpull role assignment for acr."
-                    )
+            # newly added check, check whether client_id exists before creating role assignment
+            service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
+            if not service_principal:
+                raise CLIInternalError(
+                    "No service principal provided to create the acrpull role assignment for acr."
+                )
         return attach_acr
 
     def get_no_wait(self) -> bool:
