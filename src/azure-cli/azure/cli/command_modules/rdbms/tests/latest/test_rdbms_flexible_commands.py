@@ -543,7 +543,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    mysql_location = 'eastus2euap'
+    mysql_location = 'westus2'
 
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_replica_mgmt(self, resource_group):
@@ -556,7 +556,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
 
         # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none --tier GeneralPurpose --sku-name Standard_D2s_v3'
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none --tier GeneralPurpose --sku-name Standard_D2ds_v4'
                  .format(database_engine, resource_group, master_server, location, 256))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
@@ -564,10 +564,11 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         time.sleep(5 * 60)
 
         # test replica create
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2'
                  .format(database_engine, resource_group, replicas[0], result['id']),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('availabilityZone', 2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.tier', result['sku']['tier']),
                      JMESPathCheck('sku.name', result['sku']['name']),
