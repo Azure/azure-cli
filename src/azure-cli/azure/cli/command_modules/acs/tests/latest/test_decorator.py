@@ -1835,7 +1835,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_enable_aad(enable_validation=True)
+            ctx_2.get_enable_aad()
 
         # invalid parameter
         ctx_3 = AKSCreateContext(
@@ -1846,25 +1846,41 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_3.get_enable_aad(enable_validation=True)
+            ctx_3.get_enable_aad()
 
-    def test_get_aad_client_app_id(self):
+    def test_get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+        self,
+    ):
         # default
         ctx_1 = AKSCreateContext(
             self.cmd,
             {
                 "aad_client_app_id": None,
+                "aad_server_app_id": None,
+                "aad_server_app_secret": None,
             },
         )
-        self.assertEqual(ctx_1.get_aad_client_app_id(), None)
+        self.assertEqual(
+            ctx_1.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(),
+            (None, None, None),
+        )
         aad_profile_1 = self.models.ManagedClusterAADProfile(
             client_app_id="test_aad_client_app_id",
+            server_app_id="test_aad_server_app_id",
+            server_app_secret="test_aad_server_app_secret",
         )
         mc = self.models.ManagedCluster(
             location="test_location", aad_profile=aad_profile_1
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_aad_client_app_id(), "test_aad_client_app_id")
+        self.assertEqual(
+            ctx_1.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(),
+            (
+                "test_aad_client_app_id",
+                "test_aad_server_app_id",
+                "test_aad_server_app_secret",
+            ),
+        )
 
         # invalid parameter
         ctx_2 = AKSCreateContext(
@@ -1872,68 +1888,70 @@ class AKSCreateContextTestCase(unittest.TestCase):
             {
                 "enable_aad": True,
                 "aad_client_app_id": "test_aad_client_app_id",
-            },
-        )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_aad_client_app_id(enable_validation=True)
-
-    def test_get_aad_server_app_id(self):
-        # default
-        ctx_1 = AKSCreateContext(
-            self.cmd,
-            {
-                "aad_server_app_id": None,
-            },
-        )
-        self.assertEqual(ctx_1.get_aad_server_app_id(), None)
-        aad_profile_1 = self.models.ManagedClusterAADProfile(
-            server_app_id="test_aad_server_app_id",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", aad_profile=aad_profile_1
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_aad_server_app_id(), "test_aad_server_app_id")
-
-        # invalid parameter
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {
-                "enable_aad": True,
                 "aad_server_app_id": "test_aad_server_app_id",
-            },
-        )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_aad_server_app_id(enable_validation=True)
-
-    def test_get_aad_server_app_secret(self):
-        # default
-        ctx_1 = AKSCreateContext(
-            self.cmd,
-            {
-                "aad_server_app_secret": None,
-            },
-        )
-        self.assertEqual(ctx_1.get_aad_server_app_secret(), None)
-        aad_profile_1 = self.models.ManagedClusterAADProfile(
-            server_app_secret="test_aad_server_app_secret",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", aad_profile=aad_profile_1
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_aad_server_app_secret(), "test_aad_server_app_secret")
-
-        # invalid parameter
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {
-                "enable_aad": True,
                 "aad_server_app_secret": "test_aad_server_app_secret",
             },
         )
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_aad_server_app_secret(enable_validation=True)
+            ctx_2.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
+
+    # def test_get_aad_server_app_id(self):
+    #     # default
+    #     ctx_1 = AKSCreateContext(
+    #         self.cmd,
+    #         {
+    #             "aad_server_app_id": None,
+    #         },
+    #     )
+    #     self.assertEqual(ctx_1.get_aad_server_app_id(), None)
+    #     aad_profile_1 = self.models.ManagedClusterAADProfile(
+    #         server_app_id="test_aad_server_app_id",
+    #     )
+    #     mc = self.models.ManagedCluster(
+    #         location="test_location", aad_profile=aad_profile_1
+    #     )
+    #     ctx_1.attach_mc(mc)
+    #     self.assertEqual(ctx_1.get_aad_server_app_id(), "test_aad_server_app_id")
+
+    #     # invalid parameter
+    #     ctx_2 = AKSCreateContext(
+    #         self.cmd,
+    #         {
+    #             "enable_aad": True,
+    #             "aad_server_app_id": "test_aad_server_app_id",
+    #         },
+    #     )
+    #     with self.assertRaises(MutuallyExclusiveArgumentError):
+    #         ctx_2.get_aad_server_app_id(enable_validation=True)
+
+    # def test_get_aad_server_app_secret(self):
+    #     # default
+    #     ctx_1 = AKSCreateContext(
+    #         self.cmd,
+    #         {
+    #             "aad_server_app_secret": None,
+    #         },
+    #     )
+    #     self.assertEqual(ctx_1.get_aad_server_app_secret(), None)
+    #     aad_profile_1 = self.models.ManagedClusterAADProfile(
+    #         server_app_secret="test_aad_server_app_secret",
+    #     )
+    #     mc = self.models.ManagedCluster(
+    #         location="test_location", aad_profile=aad_profile_1
+    #     )
+    #     ctx_1.attach_mc(mc)
+    #     self.assertEqual(ctx_1.get_aad_server_app_secret(), "test_aad_server_app_secret")
+
+    #     # invalid parameter
+    #     ctx_2 = AKSCreateContext(
+    #         self.cmd,
+    #         {
+    #             "enable_aad": True,
+    #             "aad_server_app_secret": "test_aad_server_app_secret",
+    #         },
+    #     )
+    #     with self.assertRaises(MutuallyExclusiveArgumentError):
+    #         ctx_2.get_aad_server_app_secret(enable_validation=True)
 
     def test_get_aad_tenant_id(self):
         # default
@@ -1961,8 +1979,15 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "aad_client_app_id": "test_aad_client_app_id",
             },
         )
-        profile = Mock(get_login_credentials=Mock(return_value=(None, None, "test_aad_tenant_id")))
-        with patch("azure.cli.command_modules.acs.decorator.Profile", return_value=profile):
+        profile = Mock(
+            get_login_credentials=Mock(
+                return_value=(None, None, "test_aad_tenant_id")
+            )
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=profile,
+        ):
             self.assertEqual(ctx_2.get_aad_tenant_id(), "test_aad_tenant_id")
 
     def test_get_aad_admin_group_object_ids(self):
@@ -1973,7 +1998,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "aad_admin_group_object_ids": None,
             },
         )
-        self.assertEqual(ctx_1.get_aad_admin_group_object_ids(enable_split=True), None)
+        self.assertEqual(ctx_1.get_aad_admin_group_object_ids(), None)
         aad_profile_1 = self.models.ManagedClusterAADProfile(
             admin_group_object_i_ds="test_aad_admin_group_object_ids",
         )
@@ -1981,7 +2006,10 @@ class AKSCreateContextTestCase(unittest.TestCase):
             location="test_location", aad_profile=aad_profile_1
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_aad_admin_group_object_ids(), "test_aad_admin_group_object_ids")
+        self.assertEqual(
+            ctx_1.get_aad_admin_group_object_ids(),
+            "test_aad_admin_group_object_ids",
+        )
 
         # custom value
         ctx_2 = AKSCreateContext(
@@ -1991,7 +2019,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(
-            ctx_2.get_aad_admin_group_object_ids(enable_split=True),
+            ctx_2.get_aad_admin_group_object_ids(),
             ["test_value_1", "test_value_2"],
         )
 
@@ -2019,7 +2047,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_disable_rbac(enable_validation=True)
+            ctx_2.get_disable_rbac()
 
     def test_get_enable_azure_rbac(self):
         # default
@@ -2031,6 +2059,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_enable_azure_rbac(), False)
         aad_profile_1 = self.models.ManagedClusterAADProfile(
+            managed=True,
             enable_azure_rbac=True,
         )
         mc = self.models.ManagedCluster(
@@ -2042,18 +2071,19 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSCreateContext(
             self.cmd,
-            {
-            },
+            {},
         )
         aad_profile_2 = self.models.ManagedClusterAADProfile(
             enable_azure_rbac=True,
         )
         mc_2 = self.models.ManagedCluster(
-            location="test_location", enable_rbac=False, aad_profile=aad_profile_2
+            location="test_location",
+            enable_rbac=False,
+            aad_profile=aad_profile_2,
         )
         ctx_2.attach_mc(mc_2)
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_enable_azure_rbac(enable_validation=True)
+            ctx_2.get_enable_azure_rbac()
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
@@ -2801,129 +2831,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             dec_5.set_up_addon_profiles(mc_5)
 
-    def test_set_up_addon_profiles(self):
-        # default value in `aks_create`
-        dec_1 = AKSCreateDecorator(
-            self.cmd,
-            self.client,
-            self.models,
-            {
-                "enable_addons": None,
-                "workspace_resource_id": None,
-                "aci_subnet_name": None,
-                "appgw_name": None,
-                "appgw_subnet_cidr": None,
-                "appgw_id": None,
-                "appgw_subnet_id": None,
-                "appgw_watch_namespace": None,
-                "enable_sgxquotehelper": False,
-            },
-        )
-
-        mc_1 = self.models.ManagedCluster(location="test_location")
-        dec_mc_1 = dec_1.set_up_addon_profiles(mc_1)
-        ground_truth_mc_1 = self.models.ManagedCluster(
-            location="test_location", addon_profiles={}
-        )
-        self.assertEqual(dec_mc_1, ground_truth_mc_1)
-        self.assertEqual(dec_1.context.get_intermediate("monitoring"), None)
-        self.assertEqual(dec_1.context.get_intermediate("enable_virtual_node"), None)
-        self.assertEqual(dec_1.context.get_intermediate("ingress_appgw_addon_enabled"), None)
-
-        # custom value
-        dec_2 = AKSCreateDecorator(
-            self.cmd,
-            self.client,
-            self.models,
-            {
-                "vnet_subnet_id": "test_vnet_subnet_id",
-                "enable_addons": "monitoring,virtual-node,ingress-appgw",
-                "workspace_resource_id": "test_workspace_resource_id",
-                "aci_subnet_name": "test_aci_subnet_name",
-                "appgw_name": "test_appgw_name",
-                "appgw_subnet_cidr": None,
-                "appgw_id": None,
-                "appgw_subnet_id": None,
-                "appgw_watch_namespace": None,
-                "enable_sgxquotehelper": False,
-            },
-        )
-        mc_2 = self.models.ManagedCluster(location="test_location")
-        with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_container_insights_for_monitoring",
-            return_value=None,
-        ):
-            dec_mc_2 = dec_2.set_up_addon_profiles(mc_2)
-
-        addon_profiles_2 = {
-            CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
-                enabled=True,
-                config={
-                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id"
-                },
-            ),
-            CONST_VIRTUAL_NODE_ADDON_NAME
-            + dec_2.context.get_virtual_node_addon_os_type(): self.models.ManagedClusterAddonProfile(
-                enabled=True,
-                config={CONST_VIRTUAL_NODE_SUBNET_NAME: "test_aci_subnet_name"},
-            ),
-            CONST_INGRESS_APPGW_ADDON_NAME: self.models.ManagedClusterAddonProfile(
-                enabled=True,
-                config={
-                    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME: "test_appgw_name"
-                },
-            ),
-        }
-        ground_truth_mc_2 = self.models.ManagedCluster(
-            location="test_location", addon_profiles=addon_profiles_2
-        )
-        self.assertEqual(dec_mc_2, ground_truth_mc_2)
-        self.assertEqual(dec_2.context.get_intermediate("monitoring"), True)
-        self.assertEqual(dec_2.context.get_intermediate("enable_virtual_node"), True)
-        self.assertEqual(dec_2.context.get_intermediate("ingress_appgw_addon_enabled"), True)
-
-        # custom value
-        dec_3 = AKSCreateDecorator(
-            self.cmd,
-            self.client,
-            self.models,
-            {
-                "enable_addons": "test_enable_addons",
-                "workspace_resource_id": None,
-                "aci_subnet_name": None,
-                "appgw_name": None,
-                "appgw_subnet_cidr": None,
-                "appgw_id": None,
-                "appgw_subnet_id": None,
-                "appgw_watch_namespace": None,
-                "enable_sgxquotehelper": False,
-            },
-        )
-        mc_3 = self.models.ManagedCluster(location="test_location")
-        with self.assertRaises(InvalidArgumentValueError):
-            dec_3.set_up_addon_profiles(mc_3)
-
-        # custom value
-        dec_4 = AKSCreateDecorator(
-            self.cmd,
-            self.client,
-            self.models,
-            {
-                "enable_addons": "",
-                "workspace_resource_id": "test_workspace_resource_id",
-                "aci_subnet_name": None,
-                "appgw_name": None,
-                "appgw_subnet_cidr": None,
-                "appgw_id": None,
-                "appgw_subnet_id": None,
-                "appgw_watch_namespace": None,
-                "enable_sgxquotehelper": False,
-            },
-        )
-        mc_4 = self.models.ManagedCluster(location="test_location")
-        with self.assertRaises(RequiredArgumentMissingError):
-            dec_4.set_up_addon_profiles(mc_4)
-
     def test_set_up_aad_profile(self):
         # default value in `aks_create`
         dec_1 = AKSCreateDecorator(
@@ -2995,8 +2902,15 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
-        profile = Mock(get_login_credentials=Mock(return_value=(None, None, "test_aad_tenant_id")))
-        with patch("azure.cli.command_modules.acs.decorator.Profile", return_value=profile):
+        profile = Mock(
+            get_login_credentials=Mock(
+                return_value=(None, None, "test_aad_tenant_id")
+            )
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=profile,
+        ):
             dec_mc_3 = dec_3.set_up_aad_profile(mc_3)
 
         aad_profile_3 = self.models.ManagedClusterAADProfile(
