@@ -1895,64 +1895,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
 
-    # def test_get_aad_server_app_id(self):
-    #     # default
-    #     ctx_1 = AKSCreateContext(
-    #         self.cmd,
-    #         {
-    #             "aad_server_app_id": None,
-    #         },
-    #     )
-    #     self.assertEqual(ctx_1.get_aad_server_app_id(), None)
-    #     aad_profile_1 = self.models.ManagedClusterAADProfile(
-    #         server_app_id="test_aad_server_app_id",
-    #     )
-    #     mc = self.models.ManagedCluster(
-    #         location="test_location", aad_profile=aad_profile_1
-    #     )
-    #     ctx_1.attach_mc(mc)
-    #     self.assertEqual(ctx_1.get_aad_server_app_id(), "test_aad_server_app_id")
-
-    #     # invalid parameter
-    #     ctx_2 = AKSCreateContext(
-    #         self.cmd,
-    #         {
-    #             "enable_aad": True,
-    #             "aad_server_app_id": "test_aad_server_app_id",
-    #         },
-    #     )
-    #     with self.assertRaises(MutuallyExclusiveArgumentError):
-    #         ctx_2.get_aad_server_app_id(enable_validation=True)
-
-    # def test_get_aad_server_app_secret(self):
-    #     # default
-    #     ctx_1 = AKSCreateContext(
-    #         self.cmd,
-    #         {
-    #             "aad_server_app_secret": None,
-    #         },
-    #     )
-    #     self.assertEqual(ctx_1.get_aad_server_app_secret(), None)
-    #     aad_profile_1 = self.models.ManagedClusterAADProfile(
-    #         server_app_secret="test_aad_server_app_secret",
-    #     )
-    #     mc = self.models.ManagedCluster(
-    #         location="test_location", aad_profile=aad_profile_1
-    #     )
-    #     ctx_1.attach_mc(mc)
-    #     self.assertEqual(ctx_1.get_aad_server_app_secret(), "test_aad_server_app_secret")
-
-    #     # invalid parameter
-    #     ctx_2 = AKSCreateContext(
-    #         self.cmd,
-    #         {
-    #             "enable_aad": True,
-    #             "aad_server_app_secret": "test_aad_server_app_secret",
-    #         },
-    #     )
-    #     with self.assertRaises(MutuallyExclusiveArgumentError):
-    #         ctx_2.get_aad_server_app_secret(enable_validation=True)
-
     def test_get_aad_tenant_id(self):
         # default
         ctx_1 = AKSCreateContext(
