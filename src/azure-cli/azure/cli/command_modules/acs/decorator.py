@@ -1151,6 +1151,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return node_osdisk_type
 
+    # pylint: disable=too-many-branches
     def get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count(
         self,
     ) -> Tuple[int, bool, Union[int, None], Union[int, None]]:
@@ -2136,8 +2137,8 @@ class AKSCreateContext:
         return enable_addons
 
     # pylint: disable=unused-argument
-    def get_workspace_resource_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
-        """Dynamically obtain the value of workspace_resource_id according to the context.
+    def _get_workspace_resource_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of workspace_resource_id according to the context.
 
         When both workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
         "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
@@ -2184,6 +2185,18 @@ class AKSCreateContext:
 
         # this parameter does not need validation
         return workspace_resource_id
+
+    def get_workspace_resource_id(self) -> Union[str, None]:
+        """Dynamically obtain the value of workspace_resource_id according to the context.
+
+        When both workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
+        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        subscription_id and resource_group_name.
+
+        :return: string or None
+        """
+
+        return self._get_workspace_resource_id()
 
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
@@ -2793,7 +2806,7 @@ class AKSCreateDecorator:
             self.context.set_intermediate("monitoring", True, overwrite_exists=True)
             addons.remove('monitoring')
         # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
-        elif self.context.get_workspace_resource_id(read_only=True):
+        elif self.context._get_workspace_resource_id(read_only=True):
             raise RequiredArgumentMissingError(
                 '"--workspace-resource-id" requires "--enable-addons monitoring".')
         if 'azure-policy' in addons:

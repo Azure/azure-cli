@@ -1522,7 +1522,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "workspace_resource_id": None,
             },
         )
-        self.assertEqual(ctx_1.get_workspace_resource_id(read_only=True), None)
+        self.assertEqual(ctx_1._get_workspace_resource_id(read_only=True), None)
         addon_profiles_1 = {
             CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
@@ -2378,15 +2378,15 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.models,
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
-                "enable_addons": "monitoring,virtual-node,ingress-appgw",
+                "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom",
                 "workspace_resource_id": "test_workspace_resource_id",
                 "aci_subnet_name": "test_aci_subnet_name",
                 "appgw_name": "test_appgw_name",
-                "appgw_subnet_cidr": None,
-                "appgw_id": None,
-                "appgw_subnet_id": None,
-                "appgw_watch_namespace": None,
-                "enable_sgxquotehelper": False,
+                "appgw_subnet_cidr": "test_appgw_subnet_cidr",
+                "appgw_id": "test_appgw_id",
+                "appgw_subnet_id": "test_appgw_subnet_id",
+                "appgw_watch_namespace": "test_appgw_watch_namespace",
+                "enable_sgxquotehelper": True,
             },
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
@@ -2397,6 +2397,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             dec_mc_2 = dec_2.set_up_addon_profiles(mc_2)
 
         addon_profiles_2 = {
+            CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+            ),
             CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={
@@ -2408,11 +2411,25 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={CONST_VIRTUAL_NODE_SUBNET_NAME: "test_aci_subnet_name"},
             ),
+            CONST_KUBE_DASHBOARD_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+            ),
+            CONST_AZURE_POLICY_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+            ),
             CONST_INGRESS_APPGW_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={
-                    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME: "test_appgw_name"
+                    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME: "test_appgw_name",
+                    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID: "test_appgw_id",
+                    CONST_INGRESS_APPGW_SUBNET_ID: "test_appgw_subnet_id",
+                    CONST_INGRESS_APPGW_SUBNET_CIDR: "test_appgw_subnet_cidr",
+                    CONST_INGRESS_APPGW_WATCH_NAMESPACE: "test_appgw_watch_namespace",
                 },
+            ),
+            CONST_CONFCOM_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "true"},
             ),
         }
         ground_truth_mc_2 = self.models.ManagedCluster(
