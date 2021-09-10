@@ -1034,13 +1034,13 @@ examples:
           --name testlinkedservice --file @path/linkedservice.json
 """
 
-helps['synapse linked-service set'] = """
+helps['synapse linked-service update'] = """
 type: command
-short-summary: Set an exist linked service.
+short-summary: Update an exist linked service.
 examples:
-  - name: Set an exist linked service.
+  - name: Update an exist linked service.
     text: |-
-        az synapse linked-service set --workspace-name testsynapseworkspace \\
+        az synapse linked-service update --workspace-name testsynapseworkspace \\
           --name testlinkedservice --file @path/linkedservice.json
 """
 
@@ -1088,13 +1088,13 @@ examples:
           --name testdataset --file @path/dataset.json
 """
 
-helps['synapse dataset set'] = """
+helps['synapse dataset update'] = """
 type: command
-short-summary: Set an exist dataset.
+short-summary: Update an exist dataset.
 examples:
-  - name: Set an exist dataset.
+  - name: Update an exist dataset.
     text: |-
-        az synapse dataset set --workspace-name testsynapseworkspace \\
+        az synapse dataset update --workspace-name testsynapseworkspace \\
           --name testdataset --file @path/dataset.json
 """
 
@@ -1142,13 +1142,13 @@ examples:
           --name testpipeline --file @path/pipeline.json
 """
 
-helps['synapse pipeline set'] = """
+helps['synapse pipeline update'] = """
 type: command
-short-summary: Set an exist pipeline.
+short-summary: Update an exist pipeline.
 examples:
-  - name: Set an exist pipeline.
+  - name: Update an exist pipeline.
     text: |-
-        az synapse pipeline set --workspace-name testsynapseworkspace \\
+        az synapse pipeline update --workspace-name testsynapseworkspace \\
           --name testpipeline --file @path/pipeline.json
 """
 
@@ -1258,13 +1258,13 @@ examples:
           --name testtrigger --file @path/trigger.json
 """
 
-helps['synapse trigger set'] = """
+helps['synapse trigger update'] = """
 type: command
-short-summary: Set an exist trigger.
+short-summary: Update an exist trigger.
 examples:
-  - name: Set an exist trigger.
+  - name: Update an exist trigger.
     text: |-
-        az synapse trigger set --workspace-name testsynapseworkspace \\
+        az synapse trigger update --workspace-name testsynapseworkspace \\
           --name testtrigger --file @path/trigger.json
 """
 
@@ -1364,6 +1364,16 @@ examples:
   - name: Rerun single trigger instance by runId.
     text: |-
         az synapse trigger-run rerun --workspace-name testsynapseworkspace \\
+          --name testtrigger --run-id 08586024068106001417583731803CU31
+"""
+
+helps['synapse trigger-run cancel'] = """
+type: command
+short-summary: Cancel a single trigger instance by runId.
+examples:
+  - name: Cancel a single trigger instance by runId.
+    text: |-
+        az synapse trigger-run cancel --workspace-name testsynapseworkspace \\
           --name testtrigger --run-id 08586024068106001417583731803CU31
 """
 

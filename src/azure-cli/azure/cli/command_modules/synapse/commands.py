@@ -410,7 +410,7 @@ def load_command_table(self, _):
     with self.command_group('synapse linked-service', synapse_linked_service_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_linked_service', supports_no_wait=True)
-        g.custom_command('set', 'create_or_update_linked_service', supports_no_wait=True)
+        g.custom_command('update', 'create_or_update_linked_service', supports_no_wait=True)
         g.custom_command('list', 'list_linked_service')
         g.custom_show_command('show', 'get_linked_service')
         g.custom_command('delete', 'delete_linked_service', confirmation=True, supports_no_wait=True)
@@ -419,7 +419,7 @@ def load_command_table(self, _):
     with self.command_group('synapse dataset', synapse_dataset_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_dataset', supports_no_wait=True)
-        g.custom_command('set', 'create_or_update_dataset', supports_no_wait=True)
+        g.custom_command('update', 'create_or_update_dataset', supports_no_wait=True)
         g.custom_command('list', 'list_datasets')
         g.custom_show_command('show', 'get_dataset')
         g.custom_command('delete', 'delete_dataset', confirmation=True, supports_no_wait=True)
@@ -428,7 +428,7 @@ def load_command_table(self, _):
     with self.command_group('synapse pipeline', synapse_pipeline_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_pipeline', supports_no_wait=True)
-        g.custom_command('set', 'create_or_update_pipeline', supports_no_wait=True)
+        g.custom_command('update', 'create_or_update_pipeline', supports_no_wait=True)
         g.custom_command('list', 'list_pipelines')
         g.custom_show_command('show', 'get_pipeline')
         g.custom_command('delete', 'delete_pipeline', confirmation=True, supports_no_wait=True)
@@ -449,7 +449,7 @@ def load_command_table(self, _):
     with self.command_group('synapse trigger', synapse_trigger_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_trigger', supports_no_wait=True)
-        g.custom_command('set', 'create_or_update_trigger', supports_no_wait=True)
+        g.custom_command('update', 'create_or_update_trigger', supports_no_wait=True)
         g.custom_command('list', 'list_triggers')
         g.custom_show_command('show', 'get_trigger')
         g.custom_command('delete', 'delete_trigger', confirmation=True, supports_no_wait=True)
@@ -464,6 +464,7 @@ def load_command_table(self, _):
     with self.command_group('synapse trigger-run', synapse_trigger_run_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('rerun', 'rerun_trigger')
+        g.custom_command('cancel', 'cancel_trigger')
         g.custom_command('query-by-workspace', 'query_trigger_runs_by_workspace')
 
     # Data Plane Commands --Artifacts data flow operations
