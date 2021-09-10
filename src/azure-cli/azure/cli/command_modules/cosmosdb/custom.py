@@ -221,11 +221,23 @@ def _create_database_account(client,
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
     system_assigned_identity = None
+    SYSTEM_ID = '[system]'
+    enable_system = False
     if assign_identity is not None:
         if assign_identity == [] or (len(assign_identity) == 1 and assign_identity[0] == '[system]'):
+            enable_system = True
             system_assigned_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
         else:
-            raise InvalidArgumentValueError("Only '[system]' is supported right now for command '--assign-identity'.")
+            set_user_identities = {}
+            for x in assign_identity:
+                if x != SYSTEM_ID:
+                    set_user_identities[x] = UserAssignedIdentitiesValue()
+                else:
+                    enable_system = True
+            if enable_system:
+                system_assigned_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned_user_assigned.value, identities=set_user_identities)
+            else:
+                system_assigned_identity = ManagedServiceIdentity(type=ResourceIdentityType.user_assigned.value, identities=set_user_identities)
 
     api_properties = {}
     if kind == DatabaseAccountKind.mongo_db.value:
@@ -1424,17 +1436,23 @@ def cli_cosmosdb_identity_show(client, resource_group_name, account_name):
     return cosmos_db_account.identity
 
 
-def cli_cosmosdb_identity_assign(client,
+def cli_cosmosdb_identity_assign(cmd, client,
                                  resource_group_name,
                                  account_name,
                                  identities=None):
     """ Update the identities associated with a Cosmos DB account """
 
     existing = client.get(resource_group_name, account_name)
+    #UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    
+    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
+    
 
     SYSTEM_ID = '[system]'
-    enable_system = SYSTEM_ID in identities or identities is None
-    new_user_identities = [x for x in identities if x != SYSTEM_ID]
+    enable_system = identities is None or SYSTEM_ID in identities
+    new_user_identities = []
+    if identities is not None:
+        new_user_identities = [x for x in identities if x != SYSTEM_ID]
 
     if existing.identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
         identity_types = ResourceIdentityType.system_assigned_user_assigned
@@ -1449,13 +1467,14 @@ def cli_cosmosdb_identity_assign(client,
     else:
         identity_types = ResourceIdentityType.system_assigned
 
-    if identity_types == ResourceIdentityType.system_assigned:
+    if identity_types in [ResourceIdentityType.system_assigned, ResourceIdentityType.none]:
         set_identity = ManagedServiceIdentity(type=identity_types.value)
     else:
-        set_identity = ManagedServiceIdentity(
-            type=identity_types.value,
-            user_identities=new_user_identities + (existing.identity.user_assigned_identities or [])
-        )
+        set_user_identities = existing.identity.user_assigned_identities or []
+        for identity in new_user_identities:
+                set_user_identities[identity] = UserAssignedIdentitiesValue()
+
+        set_identity = ManagedServiceIdentity(type=identity_types.value,user_identities=set_user_identities)
 
     params = DatabaseAccountUpdateParameters(identity=set_identity)
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
@@ -1473,12 +1492,15 @@ def cli_cosmosdb_identity_remove(client,
 
     SYSTEM_ID = '[system]'
     remove_system_assigned_identity = False
-    if SYSTEM_ID in identities:
+    if not identities:
+        remove_system_assigned_identity = True
+    elif SYSTEM_ID in identities:
         remove_system_assigned_identity = True
         identities.remove(SYSTEM_ID)
+
     if existing.identity is None:
         return None
-    identities_to_remove = []
+    identities_remaining = []
     if identities:
         existing_identities = {x.lower() for x in list((existing.identity.user_assigned_identities or {}).keys())}
         identities_to_remove = {x.lower() for x in identities}
@@ -1500,7 +1522,11 @@ def cli_cosmosdb_identity_remove(client,
     else:
         set_type = ResourceIdentityType.none
 
-    params = DatabaseAccountUpdateParameters(identity=ManagedServiceIdentity(type=set_type, user_assigned_identities=identities_remaining))
+    set_user_identities = []
+    for identity in identities_remaining:
+            set_user_identities[identity] = UserAssignedIdentitiesValue()
+        
+    params = DatabaseAccountUpdateParameters(identity=ManagedServiceIdentity(type=set_type, user_assigned_identities=set_user_identities))
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
