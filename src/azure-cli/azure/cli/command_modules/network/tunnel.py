@@ -74,7 +74,6 @@ class TunnelServer:
 
     def _get_auth_token(self):
         profile = Profile(cli_ctx=self.cli_ctx)
-        user = profile.get_current_account_user()
         # Generate an Azure token with the VSTS resource app id
         auth_token, _, _ = profile.get_raw_token()
         content = {
