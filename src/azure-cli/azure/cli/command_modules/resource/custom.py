@@ -2143,14 +2143,17 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     # ds.location = "eastus"
 
     # print(rcf.deployment_stacks.begin_create_or_update_at_subscription(name, ds))
+    if not deployment_scope:
+        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
+
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     
-    t_spec, t_uri = None, None
+    t_spec, t_uri, t_file = None, None, None
     p_uri = None
 
     if template_file:
         if path.exists(template_file):
-            t_uri = template_file
+            t_file = template_file
         else:
             raise CLIError("Please enter a valid file path")
     elif template_spec:
@@ -2169,6 +2172,8 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, update_behavior = update_behavior, deployment_scope = deployment_scope)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
+    print(deployment_stack_model)
+
     if t_spec:
         deployment_stacks_template_link.id = t_spec
         deployment_stack_model.template_link = deployment_stacks_template_link
@@ -2177,12 +2182,12 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
         deployment_stacks_template_link.id = t_uri
         deployment_stack_model.template_link = deployment_stacks_template_link
     else:
-        deployment_stack_model.template = json.load(open(template_file))
-    
-    deployment_stack_model.deployment_scope = "/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321"
+        deployment_stack_model.template = json.load(open(t_file))
 
-    
-    print(rcf.deployment_stacks.begin_create_or_update_at_subscription(name, deployment_stack_model))
+    # print(rcf.deployment_stacks._create_or_update_at_subscription_initial(name, deployment_stack_model))
+    # check = rcf.deployment_stacks.begin_create_or_update_at_subscription(name, deployment_stack_model)
+    # print(check)
+    return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_subscription,name, deployment_stack_model)
 
 
 
