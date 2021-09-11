@@ -62,7 +62,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
                          NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
-                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
+                         APP_TYPE)
 from ._github_oauth import (get_github_access_token)
 
 logger = get_logger(__name__)
@@ -594,7 +595,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
 
 def show_webapp(cmd, resource_group_name, name, slot=None):
-    return _show_app(cmd, resource_group_name, name, "Webapp", slot)
+    return _show_app(cmd, resource_group_name, name, APP_TYPE.WEBAPP, slot)
 
 
 # for generic updater
@@ -689,7 +690,7 @@ def get_functionapp(cmd, resource_group_name, name, slot=None):
 
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
-    return _show_app(cmd, resource_group_name, name, "Functionapp", slot)
+    return _show_app(cmd, resource_group_name, name, APP_TYPE.FUNCTIONAPP, slot)
 
 
 def list_webapp(cmd, resource_group_name=None):
@@ -715,31 +716,30 @@ def list_function_app(cmd, resource_group_name=None):
                        _list_app(cmd.cli_ctx, resource_group_name)))
 
 
-def _show_app(cmd, resource_group_name, name, kind, slot=None):
+def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
         raise ResourceNotFoundError("Unable to find {} '{}', in RG '{}'.".format(
-                                    kind, name, resource_group_name))
+                                    cmd_app_type, name, resource_group_name))
 
-    external_kind = _kind_to_external_kind(app.kind) if app else None
-    if external_kind != kind:
+    app_type = _kind_to_app_type(app.kind) if app else None
+    if app_type != cmd_app_type:
         raise ResourceNotFoundError(
-            "Unable to find {} '{}', in RG '{}'".format(kind, name, resource_group_name),
-            "Use 'az {} show' to show {}s".format(external_kind.lower(), external_kind))
+            "Unable to find {} '{}', in RG '{}'".format(cmd_app_type.value, name, resource_group_name),
+            "Use 'az {} show' to show {}s".format(app_type.value, app_type.value))
 
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     _rename_server_farm_props(app)
     _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
-    print("ASFDALFH")
     return app
 
 
-def _kind_to_external_kind(kind):
+def _kind_to_app_type(kind):
     if "workflow" in kind:
-        return "Logicapp"
+        return APP_TYPE.LOGICAPP
     if "function" in kind:
-        return "Functionapp"
-    return "Webapp"
+        return APP_TYPE.FUNCTIONAPP
+    return APP_TYPE.WEBAPP
 
 
 def _list_app(cli_ctx, resource_group_name=None):
