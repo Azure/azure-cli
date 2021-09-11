@@ -141,36 +141,36 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2021-04-01',
-        ResourceType.MGMT_NETWORK: '2021-02-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2021-07-01', {
+        ResourceType.MGMT_STORAGE: '2019-06-01',
+        ResourceType.MGMT_NETWORK: '2018-11-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2020-12-01',
-            'disk_encryption_sets': '2020-12-01',
+            'disks': '2019-07-01',
+            'disk_encryption_sets': '2019-07-01',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2020-12-01',
-            'galleries': '2020-09-30',
-            'gallery_images': '2020-09-30',
-            'gallery_image_versions': '2020-09-30',
-            'shared_galleries': '2020-09-30',
-            'virtual_machine_scale_sets': '2021-04-01',
+            'snapshots': '2019-07-01',
+            'galleries': '2019-12-01',
+            'gallery_images': '2019-12-01',
+            'gallery_image_versions': '2019-12-01',
+            'virtual_machine_scale_sets': '2020-06-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2020-09-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2021-04-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2019-10-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
-        ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: '2021-04-01-preview',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
+        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
+        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01',
-            'role_definitions': '2018-01-01-preview',
-            'provider_operations_metadata': '2018-01-01-preview'
+            'policy_assignments': '2016-12-01',
+            'policy_definitions': '2016-12-01'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2021-06-01-preview', {
+
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2019-05-01', {
             'agent_pools': '2019-06-01-preview',
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',

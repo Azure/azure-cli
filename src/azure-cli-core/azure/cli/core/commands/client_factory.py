@@ -67,6 +67,8 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
     else:
         # Get the non-versioned client
         client_type = client_or_resource_type
+    if api_version is None:
+        api_version = '2019-10-01'
     client, _ = _get_mgmt_service_client(cli_ctx, client_type, subscription_id=subscription_id,
                                          api_version=api_version, sdk_profile=sdk_profile,
                                          aux_subscriptions=aux_subscriptions,
