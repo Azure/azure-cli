@@ -73,6 +73,13 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                          container, local_file, blob_name, blob_type)
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('exists', True))
+
+        # upload without specifying name
+        self.storage_cmd('storage blob upload -c {} -f "{}" --type {}', account_info,
+                         container, local_file, blob_type)
+        self.storage_cmd('storage blob exists -n {} -c {}', account_info, local_file.split('/')[-1].split('\\')[-1], container) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
         self.storage_cmd('storage blob list -c {} -otable --num-results 1', account_info, container)
 
         show_result = self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name,
