@@ -38,7 +38,6 @@ from azure.cli.command_modules.acs.custom import (
     _get_rg_location,
     _get_user_assigned_identity,
     create_load_balancer_profile,
-    get_subscription_id,
     set_load_balancer_sku,
     subnet_role_assignment_exists,
 )
@@ -52,6 +51,7 @@ from azure.cli.core.azclierror import (
     RequiredArgumentMissingError,
 )
 from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import truncate_text
@@ -345,11 +345,30 @@ class AKSCreateContext:
     def remove_intermediate(self, variable_name: str) -> None:
         """Remove the value of an intermediate by its name.
 
-        No exception will be raised if the intermediate does not exist,
+        No exception will be raised if the intermediate does not exist.
 
         :return: None
         """
         self.intermediates.pop(variable_name, None)
+
+    def get_subscription_id(self):
+        """Helper function to obtain the value of subscription_id.
+
+        Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
+
+        If no corresponding intermediate exists, method "get_subscription_id" of class "Profile" will be called, which
+        depends on "az login" in advance, the returned subscription_id will be stored as an intermediate.
+
+        :return: string
+        """
+        subscription_id = self.get_intermediate("subscription_id", None)
+        if not subscription_id:
+            subscription_id = self.cmd.cli_ctx.data.get('subscription_id')
+            if not subscription_id:
+                subscription_id = Profile(cli_ctx=self.cmd.cli_ctx).get_subscription_id()
+                self.cmd.cli_ctx.data['subscription_id'] = subscription_id
+            self.set_intermediate("subscription_id", subscription_id, overwrite_exists=True)
+        return subscription_id
 
     def get_resource_group_name(self) -> str:
         """Obtain the value of resource_group_name.
@@ -383,6 +402,51 @@ class AKSCreateContext:
         # this parameter does not need validation
         return name
 
+    # pylint: disable=unused-argument
+    def _get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of location according to the context.
+
+        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        to get the location of the provided resource group, which internally used ResourceManagementClient to send
+        the request.
+
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        location = self.raw_param.get("location")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        read_from_mc = False
+        if self.mc and self.mc.location is not None:
+            location = self.mc.location
+            read_from_mc = True
+
+        # skip dynamic completion & validation if option read_only is specified
+        if read_only:
+            return location
+
+        # dynamic completion
+        if not read_from_mc and location is None:
+            location = _get_rg_location(
+                self.cmd.cli_ctx, self.get_resource_group_name()
+            )
+
+        # this parameter does not need validation
+        return location
+
+    def get_location(self) -> Union[str, None]:
+        """Dynamically obtain the value of location according to the context.
+
+        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        to get the location of the provided resource group, which internally used ResourceManagementClient to send
+        the request.
+
+        :return: string or None
+        """
+
+        return self._get_location()
+
     def get_ssh_key_value_and_no_ssh_key(self) -> Tuple[str, bool]:
         """Obtain the value of ssh_key_value and no_ssh_key.
 
@@ -396,7 +460,7 @@ class AKSCreateContext:
         Otherwise, create a key pair there and return the public key.
 
         This function will verify the parameters by default. It will verify the validity of ssh_key_value. If parameter
-        no_ssh_key is set to True, verification will be skipped. Otherwise, a InvalidArgumentValueError will be raised
+        no_ssh_key is set to True, verification will be skipped. Otherwise, an InvalidArgumentValueError will be raised
         when the value of ssh_key_value is invalid.
 
         :return: a tuple containing two elements: ssh_key_value of string type and no_ssh_key of bool type
@@ -473,7 +537,7 @@ class AKSCreateContext:
         dns_name_prefix = self.raw_param.get("dns_name_prefix")
         # try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if self.mc and self.mc.dns_prefix:
+        if self.mc and self.mc.dns_prefix is not None:
             dns_name_prefix = self.mc.dns_prefix
             read_from_mc = True
 
@@ -492,7 +556,7 @@ class AKSCreateContext:
         if dynamic_completion:
             name = self.get_name()
             resource_group_name = self.get_resource_group_name()
-            subscription_id = self.get_intermediate("subscription_id")
+            subscription_id = self.get_subscription_id()
             # Use subscription id to provide uniqueness and prevent DNS name clashes
             name_part = re.sub('[^A-Za-z0-9-]', '', name)[0:10]
             if not name_part[0].isalpha():
@@ -500,6 +564,7 @@ class AKSCreateContext:
             resource_group_part = re.sub(
                 '[^A-Za-z0-9-]', '', resource_group_name)[0:16]
             dns_name_prefix = '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
+
         # validation
         if enable_validation:
             if dns_name_prefix and self._get_fqdn_subdomain(enable_validation=False):
@@ -522,51 +587,6 @@ class AKSCreateContext:
 
         return self._get_dns_name_prefix(enable_validation=True)
 
-    # pylint: disable=unused-argument
-    def _get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
-        """Internal function to dynamically obtain the value of location according to the context.
-
-        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
-        to get the location of the provided resource group, which internally used ResourceManagementClient to send
-        the request.
-
-        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
-
-        :return: string or None
-        """
-        # read the original value passed by the command
-        location = self.raw_param.get("location")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        read_from_mc = False
-        if self.mc and self.mc.location:
-            location = self.mc.location
-            read_from_mc = True
-
-        # skip dynamic completion & validation if option read_only is specified
-        if read_only:
-            return location
-
-        # dynamic completion
-        if not read_from_mc and location is None:
-            location = _get_rg_location(
-                self.cmd.cli_ctx, self.get_resource_group_name()
-            )
-
-        # this parameter does not need validation
-        return location
-
-    def get_location(self) -> Union[str, None]:
-        """Dynamically obtain the value of location according to the context.
-
-        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
-        to get the location of the provided resource group, which internally used ResourceManagementClient to send
-        the request.
-
-        :return: string or None
-        """
-
-        return self._get_location()
-
     def get_kubernetes_version(self) -> str:
         """Obtain the value of kubernetes_version.
 
@@ -575,7 +595,7 @@ class AKSCreateContext:
         # read the original value passed by the command
         kubernetes_version = self.raw_param.get("kubernetes_version")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.kubernetes_version:
+        if self.mc and self.mc.kubernetes_version is not None:
             kubernetes_version = self.mc.kubernetes_version
 
         # this parameter does not need dynamic completion
@@ -791,7 +811,7 @@ class AKSCreateContext:
         return vnet_subnet_id
 
     def get_ppg(self) -> Union[str, None]:
-        """Obtain the value of ppg(proximity_placement_group_id).
+        """Obtain the value of ppg (proximity_placement_group_id).
 
         :return: string or None
         """
@@ -1063,77 +1083,40 @@ class AKSCreateContext:
         :return: a tuple containing four elements: node_count of int type, enable_cluster_autoscaler of bool type,
         min_count of int type or None and max_count of int type or None
         """
-        # node_count
-        # read the original value passed by the command
-        raw_value = self.raw_param.get("node_count")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
+        # get agent pool profile from `mc`
+        agent_pool_profile = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
-            if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.count
 
-        # set default value
-        if value_obtained_from_mc is not None:
-            node_count = value_obtained_from_mc
-        else:
-            node_count = raw_value
+        # node_count
+        # read the original value passed by the command
+        node_count = self.raw_param.get("node_count")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if agent_pool_profile and agent_pool_profile.count is not None:
+            node_count = agent_pool_profile.count
 
         # enable_cluster_autoscaler
         # read the original value passed by the command
-        raw_value = self.raw_param.get("enable_cluster_autoscaler")
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.agent_pool_profiles:
-            agent_pool_profile = safe_list_get(
-                self.mc.agent_pool_profiles, 0, None
-            )
-            if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.enable_auto_scaling
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            enable_cluster_autoscaler = value_obtained_from_mc
-        else:
-            enable_cluster_autoscaler = raw_value
+        if agent_pool_profile and agent_pool_profile.enable_auto_scaling is not None:
+            enable_cluster_autoscaler = agent_pool_profile.enable_auto_scaling
 
         # min_count
         # read the original value passed by the command
-        raw_value = self.raw_param.get("min_count")
+        min_count = self.raw_param.get("min_count")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.agent_pool_profiles:
-            agent_pool_profile = safe_list_get(
-                self.mc.agent_pool_profiles, 0, None
-            )
-            if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.min_count
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            min_count = value_obtained_from_mc
-        else:
-            min_count = raw_value
+        if agent_pool_profile and agent_pool_profile.min_count is not None:
+            min_count = agent_pool_profile.min_count
 
         # max_count
         # read the original value passed by the command
-        raw_value = self.raw_param.get("max_count")
+        max_count = self.raw_param.get("max_count")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.agent_pool_profiles:
-            agent_pool_profile = safe_list_get(
-                self.mc.agent_pool_profiles, 0, None
-            )
-            if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.max_count
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            max_count = value_obtained_from_mc
-        else:
-            max_count = raw_value
+        if agent_pool_profile and agent_pool_profile.max_count is not None:
+            max_count = agent_pool_profile.max_count
 
         # these parameters do not need dynamic completion
 
@@ -1171,7 +1154,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.linux_profile and
-            self.mc.linux_profile.admin_username
+            self.mc.linux_profile.admin_username is not None
         ):
             admin_username = self.mc.linux_profile.admin_username
 
@@ -1204,7 +1187,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.windows_profile and
-            self.mc.windows_profile.admin_username
+            self.mc.windows_profile.admin_username is not None
         ):
             windows_admin_username = self.mc.windows_profile.admin_username
             username_read_from_mc = True
@@ -1217,7 +1200,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.windows_profile and
-            self.mc.windows_profile.admin_password
+            self.mc.windows_profile.admin_password is not None
         ):
             windows_admin_password = self.mc.windows_profile.admin_password
             password_read_from_mc = True
@@ -1335,7 +1318,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.service_principal_profile and
-            self.mc.service_principal_profile.client_id
+            self.mc.service_principal_profile.client_id is not None
         ):
             service_principal = self.mc.service_principal_profile.client_id
             sp_read_from_mc = True
@@ -1348,7 +1331,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.service_principal_profile and
-            self.mc.service_principal_profile.secret
+            self.mc.service_principal_profile.secret is not None
         ):
             client_secret = self.mc.service_principal_profile.secret
             secret_read_from_mc = True
@@ -1384,9 +1367,7 @@ class AKSCreateContext:
                 cli_ctx=self.cmd.cli_ctx,
                 service_principal=service_principal,
                 client_secret=client_secret,
-                subscription_id=self.get_intermediate(
-                    "subscription_id", None
-                ),
+                subscription_id=self.get_subscription_id(),
                 dns_name_prefix=self._get_dns_name_prefix(enable_validation=False),
                 fqdn_subdomain=self._get_fqdn_subdomain(enable_validation=False),
                 location=self.get_location(),
@@ -1458,7 +1439,7 @@ class AKSCreateContext:
 
         # validation
         if enable_validation:
-            if not enable_managed_identity and self.get_assign_identity():
+            if not enable_managed_identity and self._get_assign_identity(enable_validation=False):
                 raise RequiredArgumentMissingError(
                     "--assign-identity can only be specified when --enable-managed-identity is specified"
                 )
@@ -1494,6 +1475,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return skip_subnet_role_assignment
 
+    # pylint: disable=unused-argument
     def _get_assign_identity(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         """Internal function to obtain the value of assign_identity.
 
@@ -1544,7 +1526,7 @@ class AKSCreateContext:
         return self._get_assign_identity(enable_validation=True)
 
     def get_identity_by_msi_client(self, assigned_identity: str) -> Identity:
-        """Obtain the identity object by msi client.
+        """Helper function to obtain the identity object by msi client.
 
         Note: This is a wrapper of the external function "_get_user_assigned_identity", and the return result of this
         function will not be directly decorated into the `mc` object.
@@ -1558,7 +1540,7 @@ class AKSCreateContext:
         return _get_user_assigned_identity(self.cmd.cli_ctx, assigned_identity)
 
     def get_user_assigned_identity_client_id(self) -> str:
-        """Obtain the client_id of user assigned identity.
+        """Helper function to obtain the client_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
 
@@ -1574,7 +1556,7 @@ class AKSCreateContext:
         return self.get_identity_by_msi_client(assigned_identity).client_id
 
     def get_user_assigned_identity_object_id(self) -> str:
-        """Obtain the principal_id of user assigned identity.
+        """Helper function to obtain the principal_id of user assigned identity.
 
         Note: This is not a parameter of aks_create, and it will not be decorated into the `mc` object.
 
@@ -1669,7 +1651,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.network_profile and
-            self.mc.network_profile.load_balancer_sku
+            self.mc.network_profile.load_balancer_sku is not None
         ):
             load_balancer_sku = safe_lower(
                 self.mc.network_profile.load_balancer_sku
@@ -1718,7 +1700,7 @@ class AKSCreateContext:
         :return: string or None
         """
 
-        return self._get_load_balancer_sku(enable_validation=True)
+        return safe_lower(self._get_load_balancer_sku(enable_validation=True))
 
     def get_load_balancer_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of load_balancer_managed_outbound_ip_count.
@@ -1737,7 +1719,7 @@ class AKSCreateContext:
             self.mc.network_profile and
             self.mc.network_profile.load_balancer_profile and
             self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
+            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count is not None
         ):
             load_balancer_managed_outbound_ip_count = (
                 self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
@@ -1764,7 +1746,7 @@ class AKSCreateContext:
             self.mc.network_profile and
             self.mc.network_profile.load_balancer_profile and
             self.mc.network_profile.load_balancer_profile.outbound_i_ps and
-            self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
+            self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps is not None
         ):
             load_balancer_outbound_ips = (
                 self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
@@ -1789,7 +1771,7 @@ class AKSCreateContext:
             self.mc.network_profile and
             self.mc.network_profile.load_balancer_profile and
             self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes and
-            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
+            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes is not None
         ):
             load_balancer_outbound_ip_prefixes = (
                 self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
@@ -1815,7 +1797,7 @@ class AKSCreateContext:
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
+            self.mc.network_profile.load_balancer_profile.allocated_outbound_ports is not None
         ):
             load_balancer_outbound_ports = (
                 self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
@@ -1841,7 +1823,7 @@ class AKSCreateContext:
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
+            self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes is not None
         ):
             load_balancer_idle_timeout = (
                 self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
@@ -1885,7 +1867,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.network_profile and
-            self.mc.network_profile.outbound_type
+            self.mc.network_profile.outbound_type is not None
         ):
             outbound_type = self.mc.network_profile.outbound_type
             read_from_mc = True
@@ -1977,7 +1959,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.network_profile and
-            self.mc.network_profile.network_plugin
+            self.mc.network_profile.network_plugin is not None
         ):
             network_plugin = self.mc.network_profile.network_plugin
 
@@ -2057,60 +2039,45 @@ class AKSCreateContext:
         dns_service_ip of string type or None, docker_bridge_address of string type or None, network_policy of
         string type or None.
         """
+        # get network profile from `mc`
+        network_profile = None
+        if self.mc:
+            network_profile = self.mc.network_profile
+
         # pod_cidr
         # read the original value passed by the command
         pod_cidr = self.raw_param.get("pod_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.pod_cidr
-        ):
-            pod_cidr = self.mc.network_profile.pod_cidr
+        if network_profile and network_profile.pod_cidr is not None:
+            pod_cidr = network_profile.pod_cidr
 
         # service_cidr
         # read the original value passed by the command
         service_cidr = self.raw_param.get("service_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.service_cidr
-        ):
-            service_cidr = self.mc.network_profile.service_cidr
+        if network_profile and network_profile.service_cidr is not None:
+            service_cidr = network_profile.service_cidr
 
         # dns_service_ip
         # read the original value passed by the command
         dns_service_ip = self.raw_param.get("dns_service_ip")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.dns_service_ip
-        ):
-            dns_service_ip = self.mc.network_profile.dns_service_ip
+        if network_profile and network_profile.dns_service_ip is not None:
+            dns_service_ip = network_profile.dns_service_ip
 
         # docker_bridge_address
         # read the original value passed by the command
         docker_bridge_address = self.raw_param.get("docker_bridge_address")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.docker_bridge_cidr
-        ):
-            docker_bridge_address = self.mc.network_profile.docker_bridge_cidr
+        if network_profile and network_profile.docker_bridge_cidr is not None:
+            docker_bridge_address = network_profile.docker_bridge_cidr
 
         # network_policy
         # read the original value passed by the command
         network_policy = self.raw_param.get("network_policy")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.network_policy
-        ):
-            network_policy = self.mc.network_profile.network_policy
+        if network_profile and network_profile.network_policy is not None:
+            network_policy = network_profile.network_policy
 
         # these parameters do not need dynamic completion
 
@@ -2134,10 +2101,76 @@ class AKSCreateContext:
                 )
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
 
+    # pylint: disable=unused-argument
+    def _get_enable_addons(self, enable_validation: bool = False, **kwargs) -> List[str]:
+        """Internal function to obtain the value of enable_addons.
+
+        Note: enable_addons will not be directly decorated into the `mc` object.
+        Note: Some of the external parameters involved in the validation are not verified in their own getters.
+
+        This function supports the option of enable_validation. When enabled, it will check whether the provided addons
+        have duplicate or invalid values, and raise an InvalidArgumentValueError if found.
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
+
+        :return: empty list or list of strings
+        """
+        # read the original value passed by the command
+        enable_addons = self.raw_param.get("enable_addons")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        read_from_mc = False
+        if self.mc and self.mc.addon_profiles is not None:
+            enable_addons = list(self.mc.addon_profiles.keys())
+            read_from_mc = True
+
+        # normalize
+        if not read_from_mc:
+            enable_addons = enable_addons.split(',') if enable_addons else []
+
+        # validation
+        if enable_validation:
+            # check duplicate addons
+            duplicate_addons_set = {
+                x for x in enable_addons if enable_addons.count(x) >= 2
+            }
+            if len(duplicate_addons_set) != 0:
+                raise InvalidArgumentValueError(
+                    "Duplicate addon{} '{}' found in option --enable-addons.".format(
+                        "s" if len(duplicate_addons_set) > 1 else "",
+                        ",".join(duplicate_addons_set),
+                    )
+                )
+
+            # check unrecognized addons
+            enable_addons_set = set(enable_addons)
+            invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
+            if len(invalid_addons_set) != 0:
+                raise InvalidArgumentValueError(
+                    "'{}' {} not recognized by the --enable-addons argument.".format(
+                        ",".join(invalid_addons_set),
+                        "are" if len(invalid_addons_set) > 1 else "is",
+                    )
+                )
+
+            # check monitoring/workspace_resource_id
+            workspace_resource_id = self._get_workspace_resource_id(read_only=True)
+            if "monitoring" not in enable_addons and workspace_resource_id:
+                raise RequiredArgumentMissingError(
+                    '"--workspace-resource-id" requires "--enable-addons monitoring".')
+
+            # check virtual node/aci_subnet_name/vnet_subnet_id
+            # Note: The external parameters involved in the validation are not verified in their own getters.
+            aci_subnet_name = self.get_aci_subnet_name()
+            vnet_subnet_id = self.get_vnet_subnet_id()
+            if "virtual-node" in enable_addons and not (aci_subnet_name and vnet_subnet_id):
+                raise RequiredArgumentMissingError(
+                    '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
+        return enable_addons
+
     def get_enable_addons(self) -> List[str]:
         """Obtain the value of enable_addons.
 
-        Note: enable_addons will not be decorated into the `mc` object.
+        Note: enable_addons will not be directly decorated into the `mc` object.
         Note: Some of the external parameters involved in the validation are not verified in their own getters.
 
         This function will verify the parameters by default. It will check whether the provided addons have duplicate or
@@ -2147,50 +2180,8 @@ class AKSCreateContext:
 
         :return: empty list or list of strings
         """
-        # read the original value passed by the command
-        enable_addons = self.raw_param.get("enable_addons")
 
-        # normalize
-        enable_addons = enable_addons.split(',') if enable_addons else []
-
-        # validation
-        # check duplicate addons
-        duplicate_addons_set = {
-            x for x in enable_addons if enable_addons.count(x) >= 2
-        }
-        if len(duplicate_addons_set) != 0:
-            raise InvalidArgumentValueError(
-                "Duplicate addon{} '{}' found in option --enable-addons.".format(
-                    "s" if len(duplicate_addons_set) > 1 else "",
-                    ",".join(duplicate_addons_set),
-                )
-            )
-
-        # check unrecognized addons
-        enable_addons_set = set(enable_addons)
-        invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
-        if len(invalid_addons_set) != 0:
-            raise InvalidArgumentValueError(
-                "'{}' {} not recognized by the --enable-addons argument.".format(
-                    ",".join(invalid_addons_set),
-                    "are" if len(invalid_addons_set) > 1 else "is",
-                )
-            )
-
-        # check monitoring/workspace_resource_id
-        workspace_resource_id = self._get_workspace_resource_id(read_only=True)
-        if "monitoring" not in enable_addons and workspace_resource_id:
-            raise RequiredArgumentMissingError(
-                '"--workspace-resource-id" requires "--enable-addons monitoring".')
-
-        # check virtual node/aci_subnet_name/vnet_subnet_id
-        # Note: The external parameters involved in the validation are not verified in their own getters.
-        aci_subnet_name = self.get_aci_subnet_name()
-        vnet_subnet_id = self.get_vnet_subnet_id()
-        if "virtual-node" in enable_addons and not (aci_subnet_name and vnet_subnet_id):
-            raise RequiredArgumentMissingError(
-                '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
-        return enable_addons
+        return self._get_enable_addons(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_workspace_resource_id(
@@ -2218,7 +2209,7 @@ class AKSCreateContext:
             CONST_MONITORING_ADDON_NAME in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
                 CONST_MONITORING_ADDON_NAME
-            ).config.get(CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID)
+            ).config.get(CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID) is not None
         ):
             workspace_resource_id = self.mc.addon_profiles.get(
                 CONST_MONITORING_ADDON_NAME
@@ -2236,7 +2227,7 @@ class AKSCreateContext:
                 workspace_resource_id = (
                     _ensure_default_log_analytics_workspace_for_monitoring(
                         self.cmd,
-                        self.intermediates.get("subscription_id", None),
+                        self.get_subscription_id(),
                         self.get_resource_group_name(),
                     )
                 )
@@ -2245,7 +2236,7 @@ class AKSCreateContext:
 
         # validation
         if enable_validation:
-            enable_addons = self.get_enable_addons()
+            enable_addons = self._get_enable_addons(enable_validation=False)
             if workspace_resource_id and "monitoring" not in enable_addons:
                 raise RequiredArgumentMissingError(
                     '"--workspace-resource-id" requires "--enable-addons monitoring".')
@@ -2267,7 +2258,7 @@ class AKSCreateContext:
 
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
-        """Obtain the os_type of virtual node addon.
+        """Helper function to obtain the os_type of virtual node addon.
 
         Note: This is not a parameter of aks_create.
 
@@ -2292,7 +2283,7 @@ class AKSCreateContext:
             self.mc.addon_profiles.get(
                 CONST_VIRTUAL_NODE_ADDON_NAME +
                 self.get_virtual_node_addon_os_type()
-            ).config.get(CONST_VIRTUAL_NODE_SUBNET_NAME)
+            ).config.get(CONST_VIRTUAL_NODE_SUBNET_NAME) is not None
         ):
             aci_subnet_name = self.mc.addon_profiles.get(
                 CONST_VIRTUAL_NODE_ADDON_NAME +
@@ -2317,7 +2308,7 @@ class AKSCreateContext:
             CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
-            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME)
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME) is not None
         ):
             appgw_name = self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
@@ -2341,7 +2332,7 @@ class AKSCreateContext:
             CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
-            ).config.get(CONST_INGRESS_APPGW_SUBNET_CIDR)
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_CIDR) is not None
         ):
             appgw_subnet_cidr = self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
@@ -2365,7 +2356,7 @@ class AKSCreateContext:
             CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
-            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID)
+            ).config.get(CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID) is not None
         ):
             appgw_id = self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
@@ -2389,7 +2380,7 @@ class AKSCreateContext:
             CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
-            ).config.get(CONST_INGRESS_APPGW_SUBNET_ID)
+            ).config.get(CONST_INGRESS_APPGW_SUBNET_ID) is not None
         ):
             appgw_subnet_id = self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
@@ -2413,7 +2404,7 @@ class AKSCreateContext:
             CONST_INGRESS_APPGW_ADDON_NAME in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
-            ).config.get(CONST_INGRESS_APPGW_WATCH_NAMESPACE)
+            ).config.get(CONST_INGRESS_APPGW_WATCH_NAMESPACE) is not None
         ):
             appgw_watch_namespace = self.mc.addon_profiles.get(
                 CONST_INGRESS_APPGW_ADDON_NAME
@@ -2435,12 +2426,13 @@ class AKSCreateContext:
             self.mc and
             self.mc.addon_profiles and
             CONST_CONFCOM_ADDON_NAME in self.mc.addon_profiles and
-            CONST_ACC_SGX_QUOTE_HELPER_ENABLED in
-            self.mc.addon_profiles.get(CONST_CONFCOM_ADDON_NAME).config
+            self.mc.addon_profiles.get(
+                CONST_CONFCOM_ADDON_NAME
+            ).config.get(CONST_ACC_SGX_QUOTE_HELPER_ENABLED) is not None
         ):
             enable_sgxquotehelper = self.mc.addon_profiles.get(
                 CONST_CONFCOM_ADDON_NAME
-            ).config.get(CONST_ACC_SGX_QUOTE_HELPER_ENABLED)
+            ).config.get(CONST_ACC_SGX_QUOTE_HELPER_ENABLED) == "true"
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -2521,35 +2513,28 @@ class AKSCreateContext:
         :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
         or None and aad_server_app_secret of string type or None.
         """
+        # get aad profile from `mc`
+        aad_profile = None
+        if self.mc:
+            aad_profile = self.mc.aad_profile
+
         # read the original value passed by the command
         aad_client_app_id = self.raw_param.get("aad_client_app_id")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.client_app_id
-        ):
-            aad_client_app_id = self.mc.aad_profile.client_app_id
+        if aad_profile and aad_profile.client_app_id:
+            aad_client_app_id = aad_profile.client_app_id
 
         # read the original value passed by the command
         aad_server_app_id = self.raw_param.get("aad_server_app_id")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.server_app_id
-        ):
-            aad_server_app_id = self.mc.aad_profile.server_app_id
+        if aad_profile and aad_profile.server_app_id:
+            aad_server_app_id = aad_profile.server_app_id
 
         # read the original value passed by the command
         aad_server_app_secret = self.raw_param.get("aad_server_app_secret")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.server_app_secret
-        ):
-            aad_server_app_secret = self.mc.aad_profile.server_app_secret
+        if aad_profile and aad_profile.server_app_secret:
+            aad_server_app_secret = aad_profile.server_app_secret
 
         # these parameters do not need dynamic completion
 
@@ -2589,7 +2574,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.aad_profile and
-            self.mc.aad_profile.tenant_id
+            self.mc.aad_profile.tenant_id is not None
         ):
             aad_tenant_id = self.mc.aad_profile.tenant_id
             read_from_mc = True
@@ -2644,6 +2629,7 @@ class AKSCreateContext:
             aad_admin_group_object_ids = self.mc.aad_profile.admin_group_object_i_ds
             read_from_mc = True
 
+        # keep None as None, but empty string ("") to empty list ([])
         if not read_from_mc and aad_admin_group_object_ids is not None:
             aad_admin_group_object_ids = aad_admin_group_object_ids.split(',') if aad_admin_group_object_ids else []
 
@@ -2813,7 +2799,7 @@ class AKSCreateContext:
         # read the original value passed by the command
         fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.fqdn_subdomain:
+        if self.mc and self.mc.fqdn_subdomain is not None:
             fqdn_subdomain = self.mc.fqdn_subdomain
 
         # this parameter does not need dynamic completion
@@ -2952,7 +2938,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.api_server_access_profile and
-            self.mc.api_server_access_profile.private_dns_zone
+            self.mc.api_server_access_profile.private_dns_zone is not None
         ):
             private_dns_zone = self.mc.api_server_access_profile.private_dns_zone
 
@@ -2991,7 +2977,7 @@ class AKSCreateContext:
             self.mc and
             self.mc.identity_profile and
             self.mc.identity_profile.get("kubeletidentity", None) and
-            getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
+            getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id") is not None
         ):
             assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
 
@@ -3015,7 +3001,7 @@ class AKSCreateContext:
         if (
             self.mc and
             self.mc.auto_upgrade_profile and
-            self.mc.auto_upgrade_profile.upgrade_channel
+            self.mc.auto_upgrade_profile.upgrade_channel is not None
         ):
             auto_upgrade_channel = self.mc.auto_upgrade_profile.upgrade_channel
 
@@ -3055,19 +3041,11 @@ class AKSCreateDecorator:
     def init_mc(self) -> ManagedCluster:
         """Initialize the ManagedCluster object with required parameter location and attach it to internal context.
 
-        The function "get_subscription_id" will be called, which depends on "az login" in advance, the returned
-        subscription_id will be stored as an intermediate.
         When location is not assigned, function "_get_rg_location" will be called to get the location of the provided
         resource group, which internally used ResourceManagementClient to send the request.
 
         :return: the ManagedCluster object
         """
-        # get subscription id and store as intermediate
-        subscription_id = get_subscription_id(self.cmd.cli_ctx)
-        self.context.set_intermediate(
-            "subscription_id", subscription_id, overwrite_exists=True
-        )
-
         # initialize the `ManagedCluster` object with mandatory parameters (i.e. location)
         mc = self.models.ManagedCluster(location=self.context.get_location())
 
@@ -3313,9 +3291,8 @@ class AKSCreateDecorator:
                     self.cmd,
                     client_id=service_principal_profile.client_id,
                     acr_name_or_id=attach_acr,
-                    subscription_id=self.context.get_intermediate(
-                        "subscription_id"
-                    ),
+                    # not actually used
+                    subscription_id=self.context.get_subscription_id(),
                 )
 
     def set_up_network_profile(self, mc: ManagedCluster) -> ManagedCluster:

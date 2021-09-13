@@ -270,14 +270,14 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "test_mc_ssh_key_value",
             )
 
-        # invalid key with validation
+        # invalid key
         ctx_2 = AKSCreateContext(
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": False}
         )
-        with self.assertRaises(CLIError):
+        with self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_ssh_key_value_and_no_ssh_key()
 
-        # invalid key & valid parameter with validation
+        # invalid key
         ctx_3 = AKSCreateContext(
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": True}
         )
@@ -1748,7 +1748,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             location="test_location", addon_profiles=addon_profiles_1
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_enable_sgxquotehelper(), "true")
+        self.assertEqual(ctx_1.get_enable_sgxquotehelper(), True)
 
     def test_get_enable_aad(self):
         # default
@@ -2673,6 +2673,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         mc_3.service_principal_profile = service_principal_profile_3
         dec_3.context.attach_mc(mc_3)
+        dec_3.context.set_intermediate("subscription_id", "test_subscription_id")
         registry = Mock(id="test_registry_id")
         with patch(
             "azure.cli.command_modules.acs.custom.get_resource_by_name",
