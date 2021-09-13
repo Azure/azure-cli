@@ -1517,7 +1517,7 @@ helps['network application-gateway client-cert update'] = """
 type: command
 short-summary: Update trusted client certificate of the application gateway.
 examples:
-  - name: Add trusted client certificate for an existing application gateway.
+  - name: Update trusted client certificate for an existing application gateway.
     text: az network application-gateway client-cert update --gateway-name MyAppGateway -g MyResourceGroup --name MyCert --data Cert.cer
 """
 
@@ -1533,7 +1533,7 @@ helps['network application-gateway client-cert show'] = """
 type: command
 short-summary: Show an existing trusted client certificate of the application gateway.
 examples:
-  - name: Remove a trusted client certificate for an existing application gateway.
+  - name: Show a trusted client certificate for an existing application gateway.
     text: az network application-gateway client-cert show --gateway-name MyAppGateway -g MyResourceGroup --name MyCert
 """
 
@@ -1562,7 +1562,7 @@ helps['network application-gateway ssl-profile update'] = """
 type: command
 short-summary: Update ssl profiles of the application gateway.
 examples:
-  - name: Add ssl profile for an existing application gateway.
+  - name: Update ssl profile for an existing application gateway.
     text: az network application-gateway ssl-profile update --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --client-auth-configuration False
 """
 
@@ -1578,7 +1578,7 @@ helps['network application-gateway ssl-profile show'] = """
 type: command
 short-summary: Show an existing ssl profiles of the application gateway.
 examples:
-  - name: Remove ssl profile for an existing application gateway.
+  - name: Show ssl profile for an existing application gateway.
     text: az network application-gateway ssl-profile show --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
 """
 
