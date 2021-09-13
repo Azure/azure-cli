@@ -2130,19 +2130,6 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = N
     raise CLIError("Please enter the (stack name and resource group) or stack resource id")
 
 def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
-    # if not deployment_scope:
-    #     deployment_scope = "subscription"
-    # rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-
-    # ds = rcf.deployment_stacks.models.DeploymentStack()
-    # ds.template = json.load(open(template_file))
-    # print(ds)
-    # ds.description = "harshpateltest1"
-    # ds.deployment_scope = "/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321"
-    # ds.update_behavior = "Detach"
-    # ds.location = "eastus"
-
-    # print(rcf.deployment_stacks.begin_create_or_update_at_subscription(name, ds))
     if not deployment_scope:
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
 
@@ -2184,33 +2171,64 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     else:
         deployment_stack_model.template = json.load(open(t_file))
 
-    # print(rcf.deployment_stacks._create_or_update_at_subscription_initial(name, deployment_stack_model))
-    # check = rcf.deployment_stacks.begin_create_or_update_at_subscription(name, deployment_stack_model)
-    # print(check)
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_subscription,name, deployment_stack_model)
 
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
+    if not deployment_scope:
+        #fix this
+        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + resource_group
 
-
-
-
-    #  ds.template = json.load(open(template_file))
-    # print(ds)
-    # ds.description = "harshpateltest1"
-    # ds.deployment_scope = "/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321"
-    # ds.update_behavior = "Detach"
-    # ds.location = "eastus"
-
-    # print(rcf.deployment_stacks.begin_create_or_update_at_subscription(name, ds))
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     
+    t_spec, t_uri, t_file = None, None, None
+    parameters, p_uri = None, None
 
+    if template_file:
+        if path.exists(template_file):
+            t_file = template_file
+        else:
+            raise CLIError("Please enter a valid file path")
+    elif template_spec:
+        t_spec = template_spec
+    elif template_uri:
+        t_uri = template_uri
+    else:
+        # we assume this will end the code
+        raise CLIError("Please enter one of the following: template file, template spec, or template url")
     
+    if param_file:
+        if path.exists(param_file):
+            parameters = json.load(open(param_file))
+            print(parameters)
+    elif param_uri:
+        p_uri = param_uri
     
+    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, update_behavior = update_behavior, deployment_scope = deployment_scope)
+    deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
+
+    print(deployment_stack_model)
+
+    if t_spec:
+        deployment_stacks_template_link.id = t_spec
+        deployment_stack_model.template_link = deployment_stacks_template_link
+    elif t_uri:
+        #need to validate
+        deployment_stacks_template_link.uri = t_uri
+        deployment_stack_model.template_link = deployment_stacks_template_link
+    else:
+        deployment_stack_model.template = json.load(open(t_file))
+
+    #new code start
+    #need to validate uri
+    if p_uri:
+        parameters_link = rcf.deployment_stacks.models.DeploymentStacksParametersLink(uri = param_uri)
+        deployment_stack_model.parameters_link = parameters_link
+    elif parameters:
+        deployment_stack_model.parameters = parameters
 
 
-
-
+    return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_resource_group,resource_group, name, deployment_stack_model)
     
-
 
 
 def show_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=None, snapshot=None):
@@ -2221,6 +2239,8 @@ def show_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=No
     if name and stack_name:
         return rcf.deployment_stack_snapshots.get_at_subscription(stack_name, name)
     raise CLIError("Please enter the (snapshot name and stack name) or snapshot resource id")
+
+
     
 def show_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_name=None, resource_group=None, snapshot=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)

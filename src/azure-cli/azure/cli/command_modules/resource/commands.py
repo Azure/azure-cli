@@ -346,6 +346,7 @@ def load_command_table(self, _):
         g.custom_command('sub-delete', 'delete_deployment_stack_at_subscription')
         g.custom_command('group-delete', 'delete_deployment_stack_at_resource_group')
         g.custom_command('sub-create', 'create_deployment_stack_at_subscription')
+        g.custom_command('group-create', 'create_deployment_stack_at_resource_group')
     
     with self.command_group('stacks snapshot', resource_deploymentstacks_snapshots_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
         g.custom_command('sub-show', 'show_deployment_stack_snapshot_at_subscription')
