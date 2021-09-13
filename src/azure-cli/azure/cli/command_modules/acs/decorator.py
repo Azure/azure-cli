@@ -42,6 +42,7 @@ from azure.cli.command_modules.acs.custom import (
     subnet_role_assignment_exists,
 )
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
     CLIInternalError,
     InvalidArgumentValueError,
@@ -2106,7 +2107,7 @@ class AKSCreateContext:
                 )
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
 
-    def get_enable_addons(self) -> Union[List[str], None]:
+    def get_enable_addons(self) -> List[str]:
         """Obtain the value of enable_addons.
 
         Note: enable_addons will not be decorated into the `mc` object.
@@ -2117,7 +2118,7 @@ class AKSCreateContext:
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
-        :return: empty list or list of strings, or None
+        :return: empty list or list of strings
         """
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
@@ -2407,9 +2408,8 @@ class AKSCreateContext:
             self.mc and
             self.mc.addon_profiles and
             CONST_CONFCOM_ADDON_NAME in self.mc.addon_profiles and
-            self.mc.addon_profiles.get(
-                CONST_CONFCOM_ADDON_NAME
-            ).config.get(CONST_ACC_SGX_QUOTE_HELPER_ENABLED)
+            CONST_ACC_SGX_QUOTE_HELPER_ENABLED in
+            self.mc.addon_profiles.get(CONST_CONFCOM_ADDON_NAME).config
         ):
             enable_sgxquotehelper = self.mc.addon_profiles.get(
                 CONST_CONFCOM_ADDON_NAME
@@ -2418,6 +2418,281 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return enable_sgxquotehelper
+
+    # pylint: disable=unused-argument
+    def _get_enable_aad(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of enable_aad.
+
+        This function supports the option of enable_validation. When enabled, if the value of enable_aad is True and
+        any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
+        MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
+        enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_aad = self.raw_param.get("enable_aad")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.aad_profile
+        ):
+            enable_aad = bool(self.mc.aad_profile.managed)
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            (
+                aad_client_app_id,
+                aad_server_app_id,
+                aad_server_app_secret,
+            ) = (
+                self.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
+            )
+            if enable_aad:
+                if any(
+                    [
+                        aad_client_app_id,
+                        aad_server_app_id,
+                        aad_server_app_secret,
+                    ]
+                ):
+                    raise MutuallyExclusiveArgumentError(
+                        "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
+                        "--aad-server-app-secret"
+                    )
+            if not enable_aad and self._get_enable_azure_rbac(enable_validation=False):
+                raise RequiredArgumentMissingError(
+                    "--enable-azure-rbac can only be used together with --enable-aad"
+                )
+        return enable_aad
+
+    def get_enable_aad(self) -> bool:
+        """Obtain the value of enable_aad.
+
+        This function will verify the parameter by default. If the value of enable_aad is True and any of
+        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
+        will be raised. If the value of enable_aad is False and the value of enable_azure_rbac is True,
+        a RequiredArgumentMissingError will be raised.
+
+        :return: bool
+        """
+
+        return self._get_enable_aad(enable_validation=True)
+
+    def get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+        self,
+    ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
+        """Obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
+
+        This function will verify the parameters by default. If the value of enable_aad is True and any of
+        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
+        will be raised.
+
+        :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
+        or None and aad_server_app_secret of string type or None.
+        """
+        # read the original value passed by the command
+        aad_client_app_id = self.raw_param.get("aad_client_app_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.aad_profile and
+            self.mc.aad_profile.client_app_id
+        ):
+            aad_client_app_id = self.mc.aad_profile.client_app_id
+
+        # read the original value passed by the command
+        aad_server_app_id = self.raw_param.get("aad_server_app_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.aad_profile and
+            self.mc.aad_profile.server_app_id
+        ):
+            aad_server_app_id = self.mc.aad_profile.server_app_id
+
+        # read the original value passed by the command
+        aad_server_app_secret = self.raw_param.get("aad_server_app_secret")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.aad_profile and
+            self.mc.aad_profile.server_app_secret
+        ):
+            aad_server_app_secret = self.mc.aad_profile.server_app_secret
+
+        # these parameters do not need dynamic completion
+
+        # validation
+        enable_aad = self._get_enable_aad(enable_validation=False)
+        if enable_aad:
+            if any(
+                [
+                    aad_client_app_id,
+                    aad_server_app_id,
+                    aad_server_app_secret,
+                ]
+            ):
+                raise MutuallyExclusiveArgumentError(
+                    "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
+                    "--aad-server-app-secret"
+                )
+        return aad_client_app_id, aad_server_app_id, aad_server_app_secret
+
+    # pylint: disable=unused-argument
+    def _get_aad_tenant_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of aad_server_app_secret according to the context.
+
+        When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
+        aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
+        "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
+        get the tenant of the deployment subscription.
+
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        aad_tenant_id = self.raw_param.get("aad_tenant_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        read_from_mc = False
+        if (
+            self.mc and
+            self.mc.aad_profile and
+            self.mc.aad_profile.tenant_id
+        ):
+            aad_tenant_id = self.mc.aad_profile.tenant_id
+            read_from_mc = True
+
+        # skip dynamic completion & validation if option read_only is specified
+        if read_only:
+            return aad_tenant_id
+
+        # dynamic completion
+        if not read_from_mc and not self._get_enable_aad(
+            enable_validation=False
+        ):
+            if aad_tenant_id is None and any(
+                self.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
+            ):
+                profile = Profile(cli_ctx=self.cmd.cli_ctx)
+                _, _, aad_tenant_id = profile.get_login_credentials()
+
+        # this parameter does not need validation
+        return aad_tenant_id
+
+    def get_aad_tenant_id(self) -> Union[str, None]:
+        """Dynamically obtain the value of aad_server_app_secret according to the context.
+
+        When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
+        aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
+        "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
+        get the tenant of the deployment subscription.
+
+        :return: string or None
+        """
+
+        return self._get_aad_tenant_id()
+
+    def get_aad_admin_group_object_ids(self) -> Union[str, List[str], None]:
+        """Obtain the value of aad_admin_group_object_ids.
+
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
+
+        :return: empty list or list of strings, or None
+        """
+        # read the original value passed by the command
+        aad_admin_group_object_ids = self.raw_param.get("aad_admin_group_object_ids")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        read_from_mc = False
+        if (
+            self.mc and
+            self.mc.aad_profile and
+            self.mc.aad_profile.admin_group_object_i_ds
+        ):
+            aad_admin_group_object_ids = self.mc.aad_profile.admin_group_object_i_ds
+            read_from_mc = True
+
+        if not read_from_mc and aad_admin_group_object_ids is not None:
+            aad_admin_group_object_ids = aad_admin_group_object_ids.split(',') if aad_admin_group_object_ids else []
+
+        # this parameter does not need validation
+        return aad_admin_group_object_ids
+
+    def get_disable_rbac(self) -> bool:
+        """Obtain the value of disable_rbac.
+
+        This function will verify the parameter by default. If the values of disable_rbac and enable_azure_rbac are
+        both True, a MutuallyExclusiveArgumentError will be raised.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_rbac = self.raw_param.get("disable_rbac")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.enable_rbac is not None
+        ):
+            disable_rbac = not self.mc.enable_rbac
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if disable_rbac and self._get_enable_azure_rbac(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                "--enable-azure-rbac cannot be used together with --disable-rbac"
+            )
+        return disable_rbac
+
+    # pylint: disable=unused-argument
+    def _get_enable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of enable_azure_rbac.
+
+        This function supports the option of enable_validation. When enabled, if the values of disable_rbac and
+        enable_azure_rbac are both True, a MutuallyExclusiveArgumentError will be raised. If the value of enable_aad
+        is False and the value of enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_azure_rbac = self.raw_param.get("enable_azure_rbac")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.aad_profile
+        ):
+            enable_azure_rbac = bool(self.mc.aad_profile.enable_azure_rbac)
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            if enable_azure_rbac and self.get_disable_rbac():
+                raise MutuallyExclusiveArgumentError(
+                    "--enable-azure-rbac cannot be used together with --disable-rbac"
+                )
+            if enable_azure_rbac and not self._get_enable_aad(enable_validation=False):
+                raise RequiredArgumentMissingError(
+                    "--enable-azure-rbac can only be used together with --enable-aad"
+                )
+        return enable_azure_rbac
+
+    # pylint: disable=unused-argument
+    def get_enable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Obtain the value of enable_azure_rbac.
+
+        This function will verify the parameter by default. If the values of disable_rbac and enable_azure_rbac are
+        both True, a MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value
+        of enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
+
+        :return: bool
+        """
+
+        return self._get_enable_azure_rbac(enable_validation=True)
 
 
 class AKSCreateDecorator:
@@ -2880,6 +3155,44 @@ class AKSCreateDecorator:
         mc.addon_profiles = addon_profiles
         return mc
 
+    def set_up_aad_profile(self, mc) -> ManagedCluster:
+        """Set up aad profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+        aad_profile = None
+        enable_aad = self.context.get_enable_aad()
+        if enable_aad:
+            aad_profile = self.models.ManagedClusterAADProfile(
+                managed=True,
+                enable_azure_rbac=self.context.get_enable_azure_rbac(),
+                # ids -> i_ds due to track 2 naming issue
+                admin_group_object_i_ds=self.context.get_aad_admin_group_object_ids(),
+                tenant_id=self.context.get_aad_tenant_id()
+            )
+        else:
+            (
+                aad_client_app_id,
+                aad_server_app_id,
+                aad_server_app_secret,
+            ) = (
+                self.context.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
+            )
+            aad_tenant_id = self.context.get_aad_tenant_id()
+            if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
+                aad_profile = self.models.ManagedClusterAADProfile(
+                    client_app_id=aad_client_app_id,
+                    server_app_id=aad_server_app_id,
+                    server_app_secret=aad_server_app_secret,
+                    tenant_id=aad_tenant_id
+                )
+        mc.aad_profile = aad_profile
+        return mc
+
     def construct_default_mc(self) -> ManagedCluster:
         """The overall control function used to construct the default ManagedCluster object.
 
@@ -2909,6 +3222,8 @@ class AKSCreateDecorator:
         mc = self.set_up_network_profile(mc)
         # set up addon profiles
         mc = self.set_up_addon_profiles(mc)
+        # set up aad profile
+        mc = self.set_up_aad_profile(mc)
 
         # TODO: set up other profiles
         return mc
