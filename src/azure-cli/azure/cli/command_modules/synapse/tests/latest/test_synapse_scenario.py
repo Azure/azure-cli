@@ -1631,7 +1631,6 @@ class SynapseScenarioTests(ScenarioTest):
         key = self.cmd(
             'az synapse integration-runtime list-auth-key --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}').get_output_in_json()
         assert key['authKey1'] is not None
-        assert key['authKey2'] is not None
 
         # regenerate self-hosted integration runtime key
         key = self.cmd(
