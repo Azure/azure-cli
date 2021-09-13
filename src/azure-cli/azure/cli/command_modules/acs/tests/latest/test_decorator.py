@@ -988,7 +988,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1 = AKSCreateContext(
             self.cmd,
             {
-                "assign_identity": "/subscriptions/1234/resourcegroups/test_rg/providers/microsoft.managedidentity/userassignedidentities/5678"
+                "assign_identity": "/subscriptions/1234/resourcegroups/test_rg/providers/microsoft.managedidentity/userassignedidentities/5678",
+                "enable_managed_identity": True,
             },
         )
         identity_obj = Mock(principal_id="8765-4321")
