@@ -16,3 +16,13 @@ class SecurityCenterSettingsTests(ScenarioTest):
         assert len(settings) >= 0
 
         self.cmd('az security setting show -n MCAS').get_output_in_json()
+
+    def test_security_settings_update(self):
+        setting = self.cmd('az security setting update -n Sentinel --is-enabled true' ).get_output_in_json()
+        is_enabled = setting['enabled']
+        assert is_enabled == True
+
+        setting = self.cmd('az security setting update -n Sentinel --is-enabled false' ).get_output_in_json()
+        is_enabled = setting['enabled']
+        assert is_enabled == False
+        
