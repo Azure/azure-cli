@@ -1808,6 +1808,225 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_enable_sgxquotehelper(), "true")
 
+    def test_get_enable_aad(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_aad": False,
+            },
+        )
+        self.assertEqual(ctx_1.get_enable_aad(), False)
+        aad_profile_1 = self.models.ManagedClusterAADProfile(
+            managed=True,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", aad_profile=aad_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_aad(), True)
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_aad": True,
+                "aad_client_app_id": "test_aad_client_app_id",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_enable_aad()
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_aad": False,
+                "enable_azure_rbac": True,
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_3.get_enable_aad()
+
+    def test_get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+        self,
+    ):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "aad_client_app_id": None,
+                "aad_server_app_id": None,
+                "aad_server_app_secret": None,
+            },
+        )
+        self.assertEqual(
+            ctx_1.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(),
+            (None, None, None),
+        )
+        aad_profile_1 = self.models.ManagedClusterAADProfile(
+            client_app_id="test_aad_client_app_id",
+            server_app_id="test_aad_server_app_id",
+            server_app_secret="test_aad_server_app_secret",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", aad_profile=aad_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(),
+            (
+                "test_aad_client_app_id",
+                "test_aad_server_app_id",
+                "test_aad_server_app_secret",
+            ),
+        )
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_aad": True,
+                "aad_client_app_id": "test_aad_client_app_id",
+                "aad_server_app_id": "test_aad_server_app_id",
+                "aad_server_app_secret": "test_aad_server_app_secret",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
+
+    def test_get_aad_tenant_id(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "aad_tenant_id": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_aad_tenant_id(), None)
+        aad_profile_1 = self.models.ManagedClusterAADProfile(
+            tenant_id="test_aad_tenant_id",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", aad_profile=aad_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_aad_tenant_id(), "test_aad_tenant_id")
+
+        # dynamic completion
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_aad": False,
+                "aad_client_app_id": "test_aad_client_app_id",
+            },
+        )
+        profile = Mock(
+            get_login_credentials=Mock(
+                return_value=(None, None, "test_aad_tenant_id")
+            )
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=profile,
+        ):
+            self.assertEqual(ctx_2.get_aad_tenant_id(), "test_aad_tenant_id")
+
+    def test_get_aad_admin_group_object_ids(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "aad_admin_group_object_ids": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_aad_admin_group_object_ids(), None)
+        aad_profile_1 = self.models.ManagedClusterAADProfile(
+            admin_group_object_i_ds="test_aad_admin_group_object_ids",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", aad_profile=aad_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_aad_admin_group_object_ids(),
+            "test_aad_admin_group_object_ids",
+        )
+
+        # custom value
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "aad_admin_group_object_ids": "test_value_1,test_value_2",
+            },
+        )
+        self.assertEqual(
+            ctx_2.get_aad_admin_group_object_ids(),
+            ["test_value_1", "test_value_2"],
+        )
+
+    def test_get_disable_rbac(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "disable_rbac": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_disable_rbac(), None)
+        mc = self.models.ManagedCluster(
+            location="test_location", enable_rbac=False
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_disable_rbac(), True)
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "disable_rbac": True,
+                "enable_azure_rbac": True,
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_disable_rbac()
+
+    def test_get_enable_azure_rbac(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_azure_rbac": False,
+            },
+        )
+        self.assertEqual(ctx_1.get_enable_azure_rbac(), False)
+        aad_profile_1 = self.models.ManagedClusterAADProfile(
+            managed=True,
+            enable_azure_rbac=True,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", aad_profile=aad_profile_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_azure_rbac(), True)
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {},
+        )
+        aad_profile_2 = self.models.ManagedClusterAADProfile(
+            enable_azure_rbac=True,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            enable_rbac=False,
+            aad_profile=aad_profile_2,
+        )
+        ctx_2.attach_mc(mc_2)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_enable_azure_rbac()
+
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -2553,3 +2772,114 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         mc_5 = self.models.ManagedCluster(location="test_location")
         with self.assertRaises(RequiredArgumentMissingError):
             dec_5.set_up_addon_profiles(mc_5)
+
+    def test_set_up_aad_profile(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "enable_aad": False,
+                "aad_client_app_id": None,
+                "aad_server_app_id": None,
+                "aad_server_app_secret": None,
+                "aad_tenant_id": None,
+                "aad_admin_group_object_ids": None,
+                "enable_azure_rbac": False,
+                "disable_rbac": None,
+            },
+        )
+
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_aad_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "enable_aad": True,
+                "aad_client_app_id": None,
+                "aad_server_app_id": None,
+                "aad_server_app_secret": None,
+                "aad_tenant_id": None,
+                "aad_admin_group_object_ids": "test_value_1test_value_2",
+                "enable_azure_rbac": True,
+                "disable_rbac": None,
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_aad_profile(mc_2)
+
+        aad_profile_2 = self.models.ManagedClusterAADProfile(
+            managed=True,
+            enable_azure_rbac=True,
+            admin_group_object_i_ds=["test_value_1test_value_2"],
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location", aad_profile=aad_profile_2
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # custom value
+        dec_3 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "enable_aad": False,
+                "aad_client_app_id": "test_aad_client_app_id",
+                "aad_server_app_id": None,
+                "aad_server_app_secret": None,
+                "aad_tenant_id": None,
+                "aad_admin_group_object_ids": None,
+                "enable_azure_rbac": False,
+                "disable_rbac": None,
+            },
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        profile = Mock(
+            get_login_credentials=Mock(
+                return_value=(None, None, "test_aad_tenant_id")
+            )
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=profile,
+        ):
+            dec_mc_3 = dec_3.set_up_aad_profile(mc_3)
+
+        aad_profile_3 = self.models.ManagedClusterAADProfile(
+            client_app_id="test_aad_client_app_id",
+            tenant_id="test_aad_tenant_id",
+        )
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location", aad_profile=aad_profile_3
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        # custom value
+        dec_4 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "enable_aad": True,
+                "aad_client_app_id": None,
+                "aad_server_app_id": None,
+                "aad_server_app_secret": None,
+                "aad_tenant_id": None,
+                "aad_admin_group_object_ids": None,
+                "enable_azure_rbac": True,
+                "disable_rbac": True,
+            },
+        )
+        mc_4 = self.models.ManagedCluster(location="test_location")
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_4.set_up_aad_profile(mc_4)
