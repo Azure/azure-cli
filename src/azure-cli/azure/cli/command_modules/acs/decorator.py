@@ -2986,8 +2986,17 @@ class AKSCreateContext:
         """
         # read the original value passed by the command
         assign_kubelet_identity = self.raw_param.get("assign_kubelet_identity")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.identity_profile and
+            self.mc.identity_profile.get("kubeletidentity", None) and
+            getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
+        ):
+            assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
 
         # this parameter does not need dynamic completion
+
         # validation
         if assign_kubelet_identity and not self._get_assign_identity(enable_validation=False):
             raise RequiredArgumentMissingError(

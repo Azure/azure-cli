@@ -2188,6 +2188,65 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 ctx_3.get_private_dns_zone(), CONST_PRIVATE_DNS_ZONE_SYSTEM
             )
 
+    def test_get_assign_kubelet_identity(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "assign_identity": "test_assign_identity",
+                "assign_kubelet_identity": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_assign_kubelet_identity(), None)
+        identity_profile = {
+            "kubeletidentity": self.models.UserAssignedIdentity(
+                resource_id="test_assign_kubelet_identity",
+            )
+        }
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            identity_profile=identity_profile,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_assign_kubelet_identity(), "test_assign_kubelet_identity"
+        )
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "assign_identity": None,
+                "assign_kubelet_identity": "test_assign_kubelet_identity",
+            },
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            self.assertEqual(
+                ctx_2.get_assign_kubelet_identity(),
+                "test_assign_kubelet_identity",
+            )
+
+    def test_get_auto_upgrade_channel(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "auto_upgrade_channel": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_auto_upgrade_channel(), None)
+        auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile(
+            upgrade_channel="test_auto_upgrade_channel"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            auto_upgrade_profile=auto_upgrade_profile,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_auto_upgrade_channel(), "test_auto_upgrade_channel"
+        )
+
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -3158,3 +3217,189 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         mc_5 = self.models.ManagedCluster(location="test_location")
         with self.assertRaises(InvalidArgumentValueError):
             dec_5.set_up_api_server_access_profile(mc_5)
+
+    def test_set_up_identity(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "enable_managed_identity": False,
+                "assign_identity": None,
+            },
+        )
+
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_identity(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "enable_managed_identity": True,
+                "assign_identity": None,
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_identity(mc_2)
+
+        identity_2 = self.models.ManagedClusterIdentity(
+            type="SystemAssigned",
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            identity=identity_2,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # custom value
+        dec_3 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "enable_managed_identity": True,
+                "assign_identity": "test_assign_identity",
+            },
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_mc_3 = dec_3.set_up_identity(mc_3)
+
+        user_assigned_identity_3 = {
+            "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        identity_3 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity_3,
+        )
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            identity=identity_3,
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        # invalid value
+        dec_4 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "enable_managed_identity": False,
+                "assign_identity": "test_assign_identity",
+            },
+        )
+        mc_4 = self.models.ManagedCluster(location="test_location")
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_4.set_up_identity(mc_4)
+
+    def test_set_up_identity_profile(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "assign_identity": None,
+                "assign_kubelet_identity": None,
+            },
+        )
+
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_identity_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        identity_obj_1 = Mock(
+            client_id="test_assign_kubelet_identity_client_id",
+            principal_id="test_assign_kubelet_identity_object_id",
+        )
+        identity_obj_2 = Mock(
+            client_id="test_assign_identity_client_id",
+            principal_id="test_assign_identity_object_id",
+        )
+        mock_ensure_method = Mock()
+        with patch(
+            "azure.cli.command_modules.acs.decorator.AKSCreateContext.get_identity_by_msi_client",
+            side_effect=[identity_obj_1, identity_obj_2],
+        ), patch(
+            "azure.cli.command_modules.acs.decorator._ensure_cluster_identity_permission_on_kubelet_identity"
+        ) as mock_ensure_method:
+            dec_2 = AKSCreateDecorator(
+                self.cmd,
+                self.client,
+                self.models,
+                {
+                    "enable_managed_identity": True,
+                    "assign_identity": "test_assign_identity",
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                },
+            )
+            mc_2 = self.models.ManagedCluster(location="test_location")
+            dec_mc_2 = dec_2.set_up_identity_profile(mc_2)
+
+            identity_profile_2 = {
+                "kubeletidentity": self.models.UserAssignedIdentity(
+                    resource_id="test_assign_kubelet_identity",
+                    client_id="test_assign_kubelet_identity_client_id",
+                    object_id="test_assign_kubelet_identity_object_id",
+                )
+            }
+            ground_truth_mc_2 = self.models.ManagedCluster(
+                location="test_location",
+                identity_profile=identity_profile_2,
+            )
+            self.assertEqual(dec_mc_2, ground_truth_mc_2)
+            mock_ensure_method.assert_called_once_with(
+                self.cmd,
+                "test_assign_identity_object_id",
+                "test_assign_kubelet_identity",
+            )
+
+    def test_set_up_auto_upgrade_profile(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "auto_upgrade_channel": None,
+            },
+        )
+
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_auto_upgrade_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "auto_upgrade_channel": "test_auto_upgrade_channel",
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_auto_upgrade_profile(mc_2)
+
+        auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile(
+            upgrade_channel="test_auto_upgrade_channel",
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            auto_upgrade_profile=auto_upgrade_profile,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
