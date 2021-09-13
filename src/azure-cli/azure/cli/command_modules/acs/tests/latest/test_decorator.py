@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
+from re import T
 import unittest
 from unittest.mock import Mock, patch
 
@@ -22,6 +23,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
 )
@@ -447,17 +449,15 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSCreateContext(
             self.cmd,
-            {
-                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges"
-            },
+            {"api_server_authorized_ip_ranges": None},
         )
         self.assertEqual(
             ctx_1.get_api_server_authorized_ip_ranges(),
-            "test_api_server_authorized_ip_ranges",
+            [],
         )
         api_server_access_profile = (
             self.models.ManagedClusterAPIServerAccessProfile(
-                authorized_ip_ranges="test_mc_api_server_authorized_ip_ranges"
+                authorized_ip_ranges=["test_mc_api_server_authorized_ip_ranges"]
             )
         )
         mc = self.models.ManagedCluster(
@@ -467,7 +467,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(
             ctx_1.get_api_server_authorized_ip_ranges(),
-            "test_mc_api_server_authorized_ip_ranges",
+            ["test_mc_api_server_authorized_ip_ranges"],
         )
 
         # valid parameter with validation
@@ -475,13 +475,35 @@ class AKSCreateContextTestCase(unittest.TestCase):
             self.cmd,
             {
                 "load_balancer_sku": "standard",
-                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+                "api_server_authorized_ip_ranges": "test_ip_range_1 , test_ip_range_2",
             },
         )
         self.assertEqual(
             ctx_2.get_api_server_authorized_ip_ranges(),
-            "test_api_server_authorized_ip_ranges",
+            ["test_ip_range_1", "test_ip_range_2"],
         )
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_sku": "basic",
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_api_server_authorized_ip_ranges()
+
+        # invalid parameter
+        ctx_4 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": True,
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_4.get_api_server_authorized_ip_ranges()
 
     def test_get_fqdn_subdomain(self):
         # default
@@ -2027,6 +2049,144 @@ class AKSCreateContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_enable_azure_rbac()
 
+    def test_get_enable_private_cluster(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": False,
+            },
+        )
+        self.assertEqual(ctx_1.get_enable_private_cluster(), False)
+        api_server_access_profile = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+            )
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_private_cluster(), True)
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": True,
+                "load_balancer_sku": "basic",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_enable_private_cluster()
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": True,
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_enable_private_cluster()
+
+        # invalid parameter
+        ctx_4 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": False,
+                "disable_public_fqdn": True,
+            },
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_4.get_enable_private_cluster()
+
+        # invalid parameter
+        ctx_5 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": False,
+                "private_dns_zone": "system",
+            },
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_5.get_enable_private_cluster()
+
+    def test_get_disable_public_fqdn(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "disable_public_fqdn": False,
+            },
+        )
+        self.assertEqual(ctx_1.get_disable_public_fqdn(), False)
+        api_server_access_profile = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster_public_fqdn=False,
+            )
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile,
+        )
+        ctx_1.attach_mc(mc)
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_1.get_disable_public_fqdn(), True)
+
+    def test_get_private_dns_zone(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "private_dns_zone": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_private_dns_zone(), None)
+        api_server_access_profile = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                private_dns_zone="test_private_dns_zone",
+            )
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile,
+        )
+        ctx_1.attach_mc(mc)
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(
+                ctx_1.get_private_dns_zone(), "test_private_dns_zone"
+            )
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": True,
+                "private_dns_zone": "test_private_dns_zone",
+            },
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(
+                ctx_2.get_private_dns_zone(), "test_private_dns_zone"
+            )
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": True,
+                "private_dns_zone": CONST_PRIVATE_DNS_ZONE_SYSTEM,
+                "fqdn_subdomain": "test_fqdn_subdomain",
+            },
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(
+                ctx_3.get_private_dns_zone(), CONST_PRIVATE_DNS_ZONE_SYSTEM
+            )
+
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -2883,3 +3043,117 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         mc_4 = self.models.ManagedCluster(location="test_location")
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_4.set_up_aad_profile(mc_4)
+
+    def test_set_up_api_server_access_profile(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "api_server_authorized_ip_ranges": None,
+                "enable_private_cluster": False,
+                "disable_public_fqdn": False,
+                "private_dns_zone": None,
+                "fqdn_subdomain": None,
+            },
+        )
+
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_api_server_access_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "api_server_authorized_ip_ranges": "test_ip_1, test_ip_2",
+                "enable_private_cluster": False,
+                "disable_public_fqdn": False,
+                "private_dns_zone": None,
+                "fqdn_subdomain": None,
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_api_server_access_profile(mc_2)
+
+        api_server_access_profile_2 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                authorized_ip_ranges=["test_ip_1", "test_ip_2"],
+                enable_private_cluster=False,
+            )
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_2,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # custom value
+        dec_3 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "api_server_authorized_ip_ranges": None,
+                "enable_private_cluster": True,
+                "disable_public_fqdn": True,
+                "private_dns_zone": None,
+                "fqdn_subdomain": "test_fqdn_subdomain",
+            },
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_mc_3 = dec_3.set_up_api_server_access_profile(mc_3)
+
+        api_server_access_profile_3 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                authorized_ip_ranges=[],
+                enable_private_cluster=True,
+                enable_private_cluster_public_fqdn=False,
+            )
+        )
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_3,
+            fqdn_subdomain="test_fqdn_subdomain",
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        # invalid value
+        dec_4 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+                "enable_private_cluster": True,
+                "disable_public_fqdn": False,
+                "private_dns_zone": None,
+                "fqdn_subdomain": None,
+            },
+        )
+        mc_4 = self.models.ManagedCluster(location="test_location")
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_4.set_up_api_server_access_profile(mc_4)
+
+        # invalid value
+        dec_5 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "api_server_authorized_ip_ranges": None,
+                "enable_private_cluster": True,
+                "disable_public_fqdn": False,
+                "private_dns_zone": CONST_PRIVATE_DNS_ZONE_SYSTEM,
+                "fqdn_subdomain": "test_fqdn_subdomain",
+            },
+        )
+        mc_5 = self.models.ManagedCluster(location="test_location")
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_5.set_up_api_server_access_profile(mc_5)

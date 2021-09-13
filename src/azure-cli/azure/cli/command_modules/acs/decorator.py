@@ -471,7 +471,7 @@ class AKSCreateContext:
 
         dynamic_completion = False
         # check whether the parameter meet the conditions of dynamic completion
-        if not dns_name_prefix and not self.get_fqdn_subdomain():
+        if not dns_name_prefix and not self._get_fqdn_subdomain(enable_validation=False):
             dynamic_completion = True
         # disable dynamic completion if the value is read from `mc`
         dynamic_completion = dynamic_completion and not read_from_mc
@@ -486,7 +486,7 @@ class AKSCreateContext:
 
         # validation
         if enable_validation:
-            if dns_name_prefix and self.get_fqdn_subdomain():
+            if dns_name_prefix and self._get_fqdn_subdomain(enable_validation=False):
                 raise MutuallyExclusiveArgumentError(
                     "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
                 )
@@ -625,181 +625,6 @@ class AKSCreateContext:
 
         # this parameter does not need validation
         return self._get_vm_set_type()
-
-    # pylint: disable=unused-argument
-    def _get_load_balancer_sku(
-        self, enable_validation: bool = False, read_only: bool = False, **kwargs
-    ) -> Union[str, None]:
-        """Internal function to dynamically obtain the value of load_balancer_sku according to the context.
-
-        Note: When returning a string, it will always be lowercase.
-
-        When load_balancer_sku is not assigned, dynamic completion will be triggerd. Function "set_load_balancer_sku"
-        will be called and the corresponding load balancer sku will be returned according to the value of
-        kubernetes_version.
-
-        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
-        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
-        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
-
-        :return: string or None
-        """
-        # read the original value passed by the command
-        load_balancer_sku = safe_lower(self.raw_param.get("load_balancer_sku"))
-        # try to read the property value corresponding to the parameter from the `mc` object
-        read_from_mc = False
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_sku
-        ):
-            load_balancer_sku = safe_lower(
-                self.mc.network_profile.load_balancer_sku
-            )
-            read_from_mc = True
-
-        # skip dynamic completion & validation if option read_only is specified
-        if read_only:
-            return load_balancer_sku
-
-        # dynamic completion
-        if not read_from_mc and load_balancer_sku is None:
-            load_balancer_sku = safe_lower(
-                set_load_balancer_sku(
-                    sku=load_balancer_sku,
-                    kubernetes_version=self.get_kubernetes_version(),
-                )
-            )
-
-        # validation
-        if enable_validation:
-            if load_balancer_sku == "basic":
-                if self.get_api_server_authorized_ip_ranges():
-                    raise MutuallyExclusiveArgumentError(
-                        "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-                    )
-                if self.get_enable_private_cluster():
-                    raise MutuallyExclusiveArgumentError(
-                        "Please use standard load balancer for private cluster"
-                    )
-
-        return load_balancer_sku
-
-    def get_load_balancer_sku(self) -> Union[str, None]:
-        """Dynamically obtain the value of load_balancer_sku according to the context.
-
-        Note: When returning a string, it will always be lowercase.
-
-        When load_balancer_sku is not assigned, dynamic completion will be triggerd. Function "set_load_balancer_sku"
-        will be called and the corresponding load balancer sku will be returned according to the value of
-        kubernetes_version.
-
-        This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic" when
-        api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
-
-        :return: string or None
-        """
-
-        return self._get_load_balancer_sku(enable_validation=True)
-
-    def get_api_server_authorized_ip_ranges(self) -> List[str]:
-        """Obtain the value of api_server_authorized_ip_ranges.
-
-        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
-        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
-        This function will normalize the parameter by default. It will split the string into a list with "," as the
-        delimiter.
-
-        :return: empty list or list of strings
-        """
-        # read the original value passed by the command
-        api_server_authorized_ip_ranges = self.raw_param.get(
-            "api_server_authorized_ip_ranges"
-        )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.api_server_access_profile and
-            self.mc.api_server_access_profile.authorized_ip_ranges is not None
-        ):
-            api_server_authorized_ip_ranges = (
-                self.mc.api_server_access_profile.authorized_ip_ranges
-            )
-
-        # normalize
-        api_server_authorized_ip_ranges = [
-            x.strip()
-            for x in (
-                api_server_authorized_ip_ranges.split(",")
-                if api_server_authorized_ip_ranges
-                else []
-            )
-        ]
-
-        # validation
-        if api_server_authorized_ip_ranges:
-            if self._get_load_balancer_sku(enable_validation=False) == "basic":
-                raise MutuallyExclusiveArgumentError(
-                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-                )
-            if self._get_enable_private_cluster(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    "--api-server-authorized-ip-ranges is not supported for private cluster"
-                )
-        return api_server_authorized_ip_ranges
-
-    # pylint: disable=unused-argument
-    def _get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
-        """Internal function to obtain the value of fqdn_subdomain.
-
-        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
-        are assigend, if so, raise the MutuallyExclusiveArgumentError. It will also check when both private_dns_zone
-        and fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an
-        InvalidArgumentValueError; Otherwise if the value of private_dns_zone is not a valid resource ID, raise an
-        InvalidArgumentValueError.
-
-        :return: string or None
-        """
-        # read the original value passed by the command
-        fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.fqdn_subdomain:
-            fqdn_subdomain = self.mc.fqdn_subdomain
-
-        # this parameter does not need dynamic completion
-
-        # validation
-        if enable_validation:
-            if fqdn_subdomain:
-                if self._get_dns_name_prefix(read_only=True):
-                    raise MutuallyExclusiveArgumentError(
-                        "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
-                    )
-                private_dns_zone = self.get_private_dns_zone()
-                if private_dns_zone:
-                    if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
-                        if not is_valid_resource_id(private_dns_zone):
-                            raise InvalidArgumentValueError(
-                                private_dns_zone + " is not a valid Azure resource ID."
-                            )
-                    raise InvalidArgumentValueError(
-                        "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
-                    )
-        return fqdn_subdomain
-
-    def get_fqdn_subdomain(self) -> Union[str, None]:
-        """Obtain the value of fqdn_subdomain.
-
-        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
-        are assigend, if so, raise the MutuallyExclusiveArgumentError. It will also check when both private_dns_zone
-        and fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an
-        InvalidArgumentValueError; Otherwise if the value of private_dns_zone is not a valid resource ID, raise an
-        InvalidArgumentValueError.
-
-        :return: string or None
-        """
-
-        return self._get_fqdn_subdomain(enable_validation=True)
 
     def get_nodepool_name(self) -> str:
         """Dynamically obtain the value of nodepool_name according to the context.
@@ -1538,7 +1363,7 @@ class AKSCreateContext:
                     "subscription_id", None
                 ),
                 dns_name_prefix=self._get_dns_name_prefix(enable_validation=False),
-                fqdn_subdomain=self.get_fqdn_subdomain(),
+                fqdn_subdomain=self._get_fqdn_subdomain(enable_validation=False),
                 location=self.get_location(),
                 name=self.get_name(),
             )
@@ -1738,6 +1563,82 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return no_wait
+
+    # pylint: disable=unused-argument
+    def _get_load_balancer_sku(
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
+    ) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of load_balancer_sku according to the context.
+
+        Note: When returning a string, it will always be lowercase.
+
+        When load_balancer_sku is not assigned, dynamic completion will be triggerd. Function "set_load_balancer_sku"
+        will be called and the corresponding load balancer sku will be returned according to the value of
+        kubernetes_version.
+
+        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
+        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        load_balancer_sku = safe_lower(self.raw_param.get("load_balancer_sku"))
+        # try to read the property value corresponding to the parameter from the `mc` object
+        read_from_mc = False
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.load_balancer_sku
+        ):
+            load_balancer_sku = safe_lower(
+                self.mc.network_profile.load_balancer_sku
+            )
+            read_from_mc = True
+
+        # skip dynamic completion & validation if option read_only is specified
+        if read_only:
+            return load_balancer_sku
+
+        # dynamic completion
+        if not read_from_mc and load_balancer_sku is None:
+            load_balancer_sku = safe_lower(
+                set_load_balancer_sku(
+                    sku=load_balancer_sku,
+                    kubernetes_version=self.get_kubernetes_version(),
+                )
+            )
+
+        # validation
+        if enable_validation:
+            if load_balancer_sku == "basic":
+                if self.get_api_server_authorized_ip_ranges():
+                    raise MutuallyExclusiveArgumentError(
+                        "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+                    )
+                if self.get_enable_private_cluster():
+                    raise MutuallyExclusiveArgumentError(
+                        "Please use standard load balancer for private cluster"
+                    )
+
+        return load_balancer_sku
+
+    def get_load_balancer_sku(self) -> Union[str, None]:
+        """Dynamically obtain the value of load_balancer_sku according to the context.
+
+        Note: When returning a string, it will always be lowercase.
+
+        When load_balancer_sku is not assigned, dynamic completion will be triggerd. Function "set_load_balancer_sku"
+        will be called and the corresponding load balancer sku will be returned according to the value of
+        kubernetes_version.
+
+        This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic" when
+        api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+
+        :return: string or None
+        """
+
+        return self._get_load_balancer_sku(enable_validation=True)
 
     def get_load_balancer_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of load_balancer_managed_outbound_ip_count.
@@ -2739,6 +2640,108 @@ class AKSCreateContext:
 
         return self._get_enable_azure_rbac(enable_validation=True)
 
+    def get_api_server_authorized_ip_ranges(self) -> List[str]:
+        """Obtain the value of api_server_authorized_ip_ranges.
+
+        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
+        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
+
+        :return: empty list or list of strings
+        """
+        # read the original value passed by the command
+        api_server_authorized_ip_ranges = self.raw_param.get(
+            "api_server_authorized_ip_ranges"
+        )
+        # try to read the property value corresponding to the parameter from the `mc` object
+        read_from_mc = False
+        if (
+            self.mc and
+            self.mc.api_server_access_profile and
+            self.mc.api_server_access_profile.authorized_ip_ranges is not None
+        ):
+            api_server_authorized_ip_ranges = (
+                self.mc.api_server_access_profile.authorized_ip_ranges
+            )
+            read_from_mc = True
+
+        # normalize
+        if not read_from_mc:
+            api_server_authorized_ip_ranges = [
+                x.strip()
+                for x in (
+                    api_server_authorized_ip_ranges.split(",")
+                    if api_server_authorized_ip_ranges
+                    else []
+                )
+            ]
+
+        # validation
+        if api_server_authorized_ip_ranges:
+            if self._get_load_balancer_sku(enable_validation=False) == "basic":
+                raise MutuallyExclusiveArgumentError(
+                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+                )
+            if self._get_enable_private_cluster(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "--api-server-authorized-ip-ranges is not supported for private cluster"
+                )
+        return api_server_authorized_ip_ranges
+
+    # pylint: disable=unused-argument
+    def _get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to obtain the value of fqdn_subdomain.
+
+        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
+        are assigend, if so, raise the MutuallyExclusiveArgumentError. It will also check when both private_dns_zone
+        and fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an
+        InvalidArgumentValueError; Otherwise if the value of private_dns_zone is not a valid resource ID, raise an
+        InvalidArgumentValueError.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.fqdn_subdomain:
+            fqdn_subdomain = self.mc.fqdn_subdomain
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            if fqdn_subdomain:
+                if self._get_dns_name_prefix(read_only=True):
+                    raise MutuallyExclusiveArgumentError(
+                        "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
+                    )
+                private_dns_zone = self.get_private_dns_zone()
+                if private_dns_zone:
+                    if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
+                        if not is_valid_resource_id(private_dns_zone):
+                            raise InvalidArgumentValueError(
+                                private_dns_zone + " is not a valid Azure resource ID."
+                            )
+                    raise InvalidArgumentValueError(
+                        "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
+                    )
+        return fqdn_subdomain
+
+    def get_fqdn_subdomain(self) -> Union[str, None]:
+        """Obtain the value of fqdn_subdomain.
+
+        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
+        are assigend, if so, raise the MutuallyExclusiveArgumentError. It will also check when both private_dns_zone
+        and fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an
+        InvalidArgumentValueError; Otherwise if the value of private_dns_zone is not a valid resource ID, raise an
+        InvalidArgumentValueError.
+
+        :return: string or None
+        """
+
+        return self._get_fqdn_subdomain(enable_validation=True)
+
     # pylint: disable=unused-argument
     def _get_enable_private_cluster(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of enable_private_cluster.
@@ -2856,7 +2859,7 @@ class AKSCreateContext:
                         private_dns_zone + " is not a valid Azure resource ID."
                     )
             else:
-                if self.get_fqdn_subdomain():
+                if self._get_fqdn_subdomain(enable_validation=False):
                     raise InvalidArgumentValueError(
                         "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
                     )
@@ -3363,7 +3366,7 @@ class AKSCreateDecorator:
         return mc
 
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
-        """Set up api server access profile for the ManagedCluster object.
+        """Set up api server access profile and fqdn subdomain for the ManagedCluster object.
 
         :return: the ManagedCluster object
         """
@@ -3384,8 +3387,10 @@ class AKSCreateDecorator:
                 enable_private_cluster_public_fqdn=False if disable_public_fqdn else None,
                 private_dns_zone=private_dns_zone
             )
-
         mc.api_server_access_profile = api_server_access_profile
+
+        fqdn_subdomain = self.context.get_fqdn_subdomain()
+        mc.fqdn_subdomain = fqdn_subdomain
         return mc
 
     def construct_default_mc(self) -> ManagedCluster:
