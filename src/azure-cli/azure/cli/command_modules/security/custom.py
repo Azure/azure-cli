@@ -15,7 +15,10 @@ from azure.mgmt.security.models import (SecurityContact,
                                         WorkspaceSetting,
                                         AdvancedThreatProtectionSetting,
                                         RuleResultsInput,
-                                        RulesResultsInput)
+                                        RulesResultsInput,
+                                        Setting,
+                                        AlertSyncSettings,
+                                        DataExportSettings)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from msrestazure.tools import resource_id
@@ -58,9 +61,9 @@ def list_security_alerts(client, resource_group_name=None, location=None):
         client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
-            return client.list_resource_group_level_alerts_by_region(resource_group_name)
+            return client.list_resource_group_level_by_region(resource_group_name)
 
-        return client.list_subscription_level_alerts_by_region()
+        return client.list_subscription_level_by_region()
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -73,9 +76,9 @@ def get_security_alert(client, location, resource_name, resource_group_name=None
     client._config.asc_location = location  # pylint: disable=protected-access
 
     if resource_group_name:
-        return client.get_resource_group_level_alerts(resource_name, resource_group_name)
+        return client.get_resource_group_level(resource_name, resource_group_name)
 
-    return client.get_subscription_level_alert(resource_name)
+    return client.get_subscription_level(resource_name)
 
 
 def update_security_alert(client, location, resource_name, status, resource_group_name=None):
@@ -84,16 +87,16 @@ def update_security_alert(client, location, resource_name, status, resource_grou
 
     if resource_group_name:
         if status == "Dismiss":
-            client.update_resource_group_level_alert_state_to_dismiss(resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_dismiss(resource_name, resource_group_name)
         if status == "Activate":
-            client.update_resource_group_level_alert_state_to_reactivate(resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_activate(resource_name, resource_group_name)
         if status == "Resolve":
             client.update_resource_group_level_state_to_resolve(resource_name, resource_group_name)
     else:
         if status == "Dismiss":
-            client.update_subscription_level_alert_state_to_dismiss(resource_name)
+            client.update_subscription_level_state_to_dismiss(resource_name)
         if status == "Activate":
-            client.update_subscription_level_alert_state_to_reactivate(resource_name)
+            client.update_subscription_level_state_to_activate(resource_name)
         if status == "Resolve":
             client.update_subscription_level_state_to_resolve(resource_name)
 
@@ -111,6 +114,19 @@ def list_security_settings(client):
 def get_security_setting(client, resource_name):
 
     return client.get(resource_name)
+
+
+def update_security_setting(client, resource_name, is_enabled):
+
+    if resource_name == "Sentinel":
+        setting = AlertSyncSettings()
+    elif resource_name in ('MCAS', 'WDATP', 'WDATP_EXCLUDE_LINUX_PUBLIC_PREVIEW'):
+        setting = DataExportSettings()
+    else:
+        setting = Setting()
+
+    setting.enabled = is_enabled
+    return client.update(resource_name, setting)
 
 
 # --------------------------------------------------------------------------------------------
