@@ -1807,7 +1807,7 @@ class AKSCreateContext:
             self.mc.network_profile and
             self.mc.network_profile.outbound_type
         ):
-            outbound_type = (self.mc.network_profile.outbound_type)
+            outbound_type = self.mc.network_profile.outbound_type
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
@@ -2382,9 +2382,10 @@ class AKSCreateContext:
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
-            self.mc.aad_profile
+            self.mc.aad_profile and
+            self.mc.aad_profile.managed is not None
         ):
-            enable_aad = bool(self.mc.aad_profile.managed)
+            enable_aad = self.mc.aad_profile.managed
 
         # this parameter does not need dynamic completion
 
@@ -2610,9 +2611,10 @@ class AKSCreateContext:
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
-            self.mc.aad_profile
+            self.mc.aad_profile and
+            self.mc.aad_profile.enable_azure_rbac is not None
         ):
-            enable_azure_rbac = bool(self.mc.aad_profile.enable_azure_rbac)
+            enable_azure_rbac = self.mc.aad_profile.enable_azure_rbac
 
         # this parameter does not need dynamic completion
 
@@ -2758,9 +2760,10 @@ class AKSCreateContext:
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
-            self.mc.api_server_access_profile
+            self.mc.api_server_access_profile and
+            self.mc.api_server_access_profile.enable_private_cluster is not None
         ):
-            enable_private_cluster = bool(self.mc.api_server_access_profile.enable_private_cluster)
+            enable_private_cluster = self.mc.api_server_access_profile.enable_private_cluster
 
         # this parameter does not need dynamic completion
 
@@ -2812,9 +2815,10 @@ class AKSCreateContext:
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
-            self.mc.api_server_access_profile
+            self.mc.api_server_access_profile and
+            self.mc.api_server_access_profile.enable_private_cluster_public_fqdn is not None
         ):
-            disable_public_fqdn = self.mc.api_server_access_profile.enable_private_cluster_public_fqdn is False
+            disable_public_fqdn = not self.mc.api_server_access_profile.enable_private_cluster_public_fqdn
 
         # this parameter does not need dynamic completion
 
@@ -3424,7 +3428,7 @@ class AKSCreateDecorator:
         mc = self.set_up_addon_profiles(mc)
         # set up aad profile
         mc = self.set_up_aad_profile(mc)
-        # set up api server access profile
+        # set up api server access profile and fqdn subdomain
         mc = self.set_up_api_server_access_profile(mc)
 
         # TODO: set up other profiles

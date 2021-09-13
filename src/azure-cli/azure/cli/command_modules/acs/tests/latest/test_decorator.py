@@ -391,141 +391,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_2.attach_mc(mc)
         self.assertEqual(ctx_2.get_vm_set_type(), "test_mc_vm_set_type")
 
-    def test_get_load_balancer_sku(self):
-        # default & dynamic completion
-        ctx_1 = AKSCreateContext(
-            self.cmd,
-            {"load_balancer_sku": None, "kubernetes_version": ""},
-        )
-        self.assertEqual(ctx_1._get_load_balancer_sku(read_only=True), None)
-        self.assertEqual(ctx_1.get_load_balancer_sku(), "standard")
-        network_profile = self.models.ContainerServiceNetworkProfile(
-            load_balancer_sku="test_mc_load_balancer_SKU"
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", network_profile=network_profile
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_load_balancer_sku(), "test_mc_load_balancer_sku"
-        )
-
-        # custom value & dynamic completion
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {"load_balancer_sku": None, "kubernetes_version": "1.12.0"},
-        )
-        self.assertEqual(ctx_2.get_load_balancer_sku(), "basic")
-        network_profile = self.models.ContainerServiceNetworkProfile(
-            load_balancer_sku="test_mc_load_balancer_sku"
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", network_profile=network_profile
-        )
-        ctx_2.attach_mc(mc)
-        self.assertEqual(
-            ctx_2.get_load_balancer_sku(), "test_mc_load_balancer_sku"
-        )
-
-        # invalid parameter with validation
-        ctx_3 = AKSCreateContext(
-            self.cmd,
-            {
-                "load_balancer_sku": "basic",
-                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
-            },
-        )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_3.get_load_balancer_sku()
-
-        # custom value (lower case)
-        ctx_4 = AKSCreateContext(
-            self.cmd,
-            {"load_balancer_sku": "STANDARD"},
-        )
-        self.assertEqual(ctx_4.get_load_balancer_sku(), "standard")
-
-    def test_get_api_server_authorized_ip_ranges(self):
-        # default
-        ctx_1 = AKSCreateContext(
-            self.cmd,
-            {"api_server_authorized_ip_ranges": None},
-        )
-        self.assertEqual(
-            ctx_1.get_api_server_authorized_ip_ranges(),
-            [],
-        )
-        api_server_access_profile = (
-            self.models.ManagedClusterAPIServerAccessProfile(
-                authorized_ip_ranges=["test_mc_api_server_authorized_ip_ranges"]
-            )
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            api_server_access_profile=api_server_access_profile,
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_api_server_authorized_ip_ranges(),
-            ["test_mc_api_server_authorized_ip_ranges"],
-        )
-
-        # valid parameter with validation
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {
-                "load_balancer_sku": "standard",
-                "api_server_authorized_ip_ranges": "test_ip_range_1 , test_ip_range_2",
-            },
-        )
-        self.assertEqual(
-            ctx_2.get_api_server_authorized_ip_ranges(),
-            ["test_ip_range_1", "test_ip_range_2"],
-        )
-
-        # invalid parameter
-        ctx_3 = AKSCreateContext(
-            self.cmd,
-            {
-                "load_balancer_sku": "basic",
-                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
-            },
-        )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_3.get_api_server_authorized_ip_ranges()
-
-        # invalid parameter
-        ctx_4 = AKSCreateContext(
-            self.cmd,
-            {
-                "enable_private_cluster": True,
-                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
-            },
-        )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_4.get_api_server_authorized_ip_ranges()
-
-    def test_get_fqdn_subdomain(self):
-        # default
-        ctx_1 = AKSCreateContext(self.cmd, {"fqdn_subdomain": None})
-        self.assertEqual(ctx_1.get_fqdn_subdomain(), None)
-        mc = self.models.ManagedCluster(
-            location="test_location", fqdn_subdomain="test_mc_fqdn_subdomain"
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_fqdn_subdomain(), "test_mc_fqdn_subdomain")
-
-        # invalid parameter with validation
-        ctx_2 = AKSCreateContext(
-            self.cmd,
-            {
-                "dns_name_prefix": "test_dns_name_prefix",
-                "fqdn_subdomain": "test_fqdn_subdomain",
-            },
-        )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_fqdn_subdomain()
-
     def test_get_nodepool_name(self):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"nodepool_name": "nodepool1"})
@@ -1179,6 +1044,60 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"no_wait": False})
         self.assertEqual(ctx_1.get_no_wait(), False)
+
+    def test_get_load_balancer_sku(self):
+        # default & dynamic completion
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {"load_balancer_sku": None, "kubernetes_version": ""},
+        )
+        self.assertEqual(ctx_1._get_load_balancer_sku(read_only=True), None)
+        self.assertEqual(ctx_1.get_load_balancer_sku(), "standard")
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            load_balancer_sku="test_mc_load_balancer_SKU"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_load_balancer_sku(), "test_mc_load_balancer_sku"
+        )
+
+        # custom value & dynamic completion
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {"load_balancer_sku": None, "kubernetes_version": "1.12.0"},
+        )
+        self.assertEqual(ctx_2.get_load_balancer_sku(), "basic")
+        network_profile = self.models.ContainerServiceNetworkProfile(
+            load_balancer_sku="test_mc_load_balancer_sku"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(
+            ctx_2.get_load_balancer_sku(), "test_mc_load_balancer_sku"
+        )
+
+        # invalid parameter with validation
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_sku": "basic",
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_load_balancer_sku()
+
+        # custom value (lower case)
+        ctx_4 = AKSCreateContext(
+            self.cmd,
+            {"load_balancer_sku": "STANDARD"},
+        )
+        self.assertEqual(ctx_4.get_load_balancer_sku(), "standard")
 
     def test_get_load_balancer_managed_outbound_ip_count(self):
         # default
@@ -2048,6 +1967,87 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_2.attach_mc(mc_2)
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_enable_azure_rbac()
+
+    def test_get_api_server_authorized_ip_ranges(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {"api_server_authorized_ip_ranges": None},
+        )
+        self.assertEqual(
+            ctx_1.get_api_server_authorized_ip_ranges(),
+            [],
+        )
+        api_server_access_profile = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                authorized_ip_ranges=["test_mc_api_server_authorized_ip_ranges"]
+            )
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_api_server_authorized_ip_ranges(),
+            ["test_mc_api_server_authorized_ip_ranges"],
+        )
+
+        # valid parameter with validation
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_sku": "standard",
+                "api_server_authorized_ip_ranges": "test_ip_range_1 , test_ip_range_2",
+            },
+        )
+        self.assertEqual(
+            ctx_2.get_api_server_authorized_ip_ranges(),
+            ["test_ip_range_1", "test_ip_range_2"],
+        )
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_sku": "basic",
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_api_server_authorized_ip_ranges()
+
+        # invalid parameter
+        ctx_4 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": True,
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_4.get_api_server_authorized_ip_ranges()
+
+    def test_get_fqdn_subdomain(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"fqdn_subdomain": None})
+        self.assertEqual(ctx_1.get_fqdn_subdomain(), None)
+        mc = self.models.ManagedCluster(
+            location="test_location", fqdn_subdomain="test_mc_fqdn_subdomain"
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_fqdn_subdomain(), "test_mc_fqdn_subdomain")
+
+        # invalid parameter with validation
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "dns_name_prefix": "test_dns_name_prefix",
+                "fqdn_subdomain": "test_fqdn_subdomain",
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_fqdn_subdomain()
 
     def test_get_enable_private_cluster(self):
         # default
