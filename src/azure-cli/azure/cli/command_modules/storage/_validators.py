@@ -833,6 +833,20 @@ def validate_container_public_access(cmd, namespace):
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
 
 
+def validate_container_nfsv3_squash(cmd, namespace):
+    t_root_squash = cmd.get_models('RootSquashType', resource_type=ResourceType.MGMT_STORAGE)
+    if namespace.root_squash and namespace.root_squash == t_root_squash.NO_ROOT_SQUASH:
+        namespace.enable_nfs_v3_root_squash = False
+        namespace.enable_nfs_v3_all_squash = False
+    elif namespace.root_squash and namespace.root_squash == t_root_squash.ROOT_SQUASH:
+        namespace.enable_nfs_v3_root_squash = True
+        namespace.enable_nfs_v3_all_squash = False
+    elif namespace.root_squash and namespace.root_squash == t_root_squash.ALL_SQUASH:
+        namespace.enable_nfs_v3_all_squash = True
+
+    del namespace.root_squash
+
+
 def validate_fs_public_access(cmd, namespace):
     from .sdkutil import get_fs_access_type
 
