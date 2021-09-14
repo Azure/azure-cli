@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements, line-too-long, too-many-branches
-from os import name
 from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.mgmt.synapse.models import TransparentDataEncryptionStatus, SecurityAlertPolicyState, BlobAuditingPolicyState
@@ -35,7 +34,7 @@ definition_file_arg_type = CLIArgumentType(options_list=['--file'], completer=Fi
                                            type=shell_safe_json_parse,
                                            help='Properties may be supplied from a JSON file using the `@{path}` syntax or a JSON string.')
 progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
-                                    action='store_true', validator=add_progress_callback)
+                                action='store_true', validator=add_progress_callback)
 time_format_help = 'Time should be in following format: "YYYY-MM-DDTHH:MM:SS".'
 
 storage_arg_group = "Storage"
@@ -823,20 +822,20 @@ def load_arguments(self, _):
     # synapse artifacts library
     with self.argument_context('synapse workspace-package') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
-    
+        c.ignore('progress_callback')
+
     for scope in ['show', 'delete']:
         with self.argument_context('synapse workspace-package ' + scope) as c:
             c.argument('package_name', arg_type=name_type, options_list=['--package-name', '--package', '--name', '-n'], help='The workspace package name.')
-    
+
     with self.argument_context('synapse workspace-package upload') as c:
         c.argument('package', options_list=('--package', '--file', '-f'), type=file_type, completer=FilesCompleter(),
-                    help='Specifies a local file path for a file to upload as workspace package.')
+                   help='Specifies a local file path for a file to upload as workspace package.')
         c.extra('no_progress', progress_type)
 
     with self.argument_context('synapse workspace-package upload-batch') as c:
         c.argument('source', options_list=('--source', '-s'), help='The directory where the files to be uploaded are located.')
         c.extra('no_progress', progress_type)
-
 
     # synapse integration runtime
     with self.argument_context('synapse integration-runtime') as c:

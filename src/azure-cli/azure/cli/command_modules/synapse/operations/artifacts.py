@@ -366,7 +366,7 @@ def upload_workspace_package(cmd, workspace_name, package, progress_callback=Non
     # Check if the package already exists
     if test_workspace_package(client, package_name):
         raise CLIError("A workspace package with name '{0}' already exists.".format(
-                package_name))
+                       package_name))
 
     # Create package
     client.begin_create(package_name).result()
@@ -386,7 +386,8 @@ def upload_workspace_package(cmd, workspace_name, package, progress_callback=Non
 
             client.append(package_name, data)
             index += len(data)
-            progress_callback(index, package_size)
+            if progress_callback is not None:
+                progress_callback(index, package_size)
     # Call Flush API as a completion signal
     client.begin_flush(package_name).result()
 
@@ -404,19 +405,19 @@ def workspace_package_upload_batch(cmd, workspace_name, source, progress_callbac
         for f in files:
             full_path = os.path.join(root, f)
             source_files.append(full_path)
-    
+
     for index, source_file in enumerate(source_files):
         # add package name and number to progress message
         if progress_callback:
             progress_callback.message = '{}/{}: "{}"'.format(
                 index + 1, len(source_files), os.path.basename(source_file))
-        
+
         results.append(upload_workspace_package(cmd, workspace_name, source_file, progress_callback))
 
     # end progress hook
     if progress_callback:
         progress_callback.hook.end()
-    
+
     return results
 
 

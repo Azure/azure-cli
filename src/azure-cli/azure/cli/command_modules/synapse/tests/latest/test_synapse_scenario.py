@@ -1246,7 +1246,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace()
+        self._create_workspace_eastus()
         # create firewall rule
         self.cmd(
             'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
@@ -1293,7 +1293,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'dataset'})
 
         # create a workspace
-        self._create_workspace()
+        self._create_workspace_eastus()
         # create firewall rule
         self.cmd(
             'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
@@ -1407,7 +1407,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'trigger',
             'event-trigger': 'EventTrigger',
             'tumbling-window-trigger': 'TumblingWindowTrigger',
-            'run-id': '08586024051698130326966471413CU40',
+            'run-id': '08585700206218758559786000276CU61',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'trigger.json')
         })
 
@@ -1529,7 +1529,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace()
+        self._create_workspace_eastus()
 
         # create firewall rule
         self.cmd(
@@ -1584,6 +1584,54 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook delete --workspace-name {workspace} --name {name} -y')
         self.cmd(
             'az synapse notebook show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    def test_workspace_package(self):
+        self.kwargs.update({
+            'name': 'wordcount.jar',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'wordcount.jar')
+        })
+
+        # create a workspace
+        self._create_workspace_eastus()
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+        import time
+        time.sleep(20)
+
+        # upload workspace package
+        self.cmd(
+            'az synapse workspace-package upload --workspace-name {workspace} --package "{file}"',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get workspace package
+        self.cmd(
+            'az synapse workspace-package show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list workspace package
+        self.cmd(
+            'az synapse workspace-package list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/libraries')
+            ])
+
+        # delete workspace package
+        self.cmd(
+            'az synapse workspace-package delete --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse workspace-package show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
     @record_only()

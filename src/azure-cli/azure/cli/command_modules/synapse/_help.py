@@ -1574,7 +1574,7 @@ examples:
   - name: Uploads a local workspace package file to an Azure Synapse workspace.
     text: |-
         az synapse workspace-package upload --workspace-name testsynapseworkspace \\
-          --package C:\package.jar
+          --package C:/package.jar
 """
 
 helps['synapse workspace-package upload-batch'] = """
@@ -1584,7 +1584,7 @@ examples:
   - name: Uploads workspace package files from a local directory to an Azure Synapse workspace.
     text: |-
         az synapse workspace-package upload-batch --workspace-name testsynapseworkspace \\
-          --source C:\package
+          --source C:/package
 """
 
 helps['synapse workspace-package show'] = """
