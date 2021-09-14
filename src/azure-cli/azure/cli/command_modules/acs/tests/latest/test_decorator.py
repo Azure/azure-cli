@@ -233,8 +233,13 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_1.remove_intermediate("subscription_id")
         self.assertEqual(ctx_1.get_intermediate("subscription_id"), None)
-        mock_profile = Mock(get_subscription_id=Mock(return_value="test_subscription_id"))
-        with patch("azure.cli.command_modules.acs.decorator.Profile", return_value=mock_profile):
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="test_subscription_id")
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ):
             self.assertEqual(
                 ctx_1.get_subscription_id(),
                 "test_subscription_id",
@@ -1959,7 +1964,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_enable_rbac(), None)
         mc = self.models.ManagedCluster(
-            location="test_location", enable_rbac=True,
+            location="test_location",
+            enable_rbac=True,
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_enable_rbac(), True)
@@ -2298,13 +2304,28 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         self.client = MockClient()
 
     def test_init_mc(self):
-        dec_1 = AKSCreateDecorator(
-            self.cmd, self.client, self.models, {"location": "test_location"}
-        )
-        dec_mc = dec_1.init_mc()
-        ground_truth_mc = self.models.ManagedCluster(location="test_location")
-        self.assertEqual(dec_mc, ground_truth_mc)
-        self.assertEqual(dec_mc, dec_1.context.mc)
+        with patch(
+            "azure.cli.command_modules.acs.decorator.AKSCreateContext.get_subscription_id",
+            return_value="1234-5678-9012",
+        ):
+            dec_1 = AKSCreateDecorator(
+                self.cmd,
+                self.client,
+                self.models,
+                {
+                    "name": "test_cluster",
+                    "resource_group_name": "test_rg_name",
+                    "location": "test_location",
+                },
+            )
+            dec_mc = dec_1.init_mc()
+            ground_truth_mc = self.models.ManagedCluster(
+                location="test_location",
+                dns_prefix="testcluste-testrgname-1234-5",
+                enable_rbac=True,
+            )
+            self.assertEqual(dec_mc, ground_truth_mc)
+            self.assertEqual(dec_mc, dec_1.context.mc)
 
     def test_set_up_agent_pool_profiles(self):
         # default value in `aks_create`
@@ -2711,7 +2732,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         mc_3.service_principal_profile = service_principal_profile_3
         dec_3.context.attach_mc(mc_3)
-        dec_3.context.set_intermediate("subscription_id", "test_subscription_id")
+        dec_3.context.set_intermediate(
+            "subscription_id", "test_subscription_id"
+        )
         registry = Mock(id="test_registry_id")
         with patch(
             "azure.cli.command_modules.acs.custom.get_resource_by_name",

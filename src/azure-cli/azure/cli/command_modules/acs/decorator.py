@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import time
 from distutils.version import StrictVersion
 from typing import Any, Dict, List, Tuple, TypeVar, Union
 
@@ -37,6 +38,7 @@ from azure.cli.command_modules.acs.custom import (
     _ensure_default_log_analytics_workspace_for_monitoring,
     _get_rg_location,
     _get_user_assigned_identity,
+    _put_managed_cluster_ensuring_permission,
     create_load_balancer_profile,
     set_load_balancer_sku,
     subnet_role_assignment_exists,
@@ -56,6 +58,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import truncate_text
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
+from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id
 
 logger = get_logger(__name__)
@@ -708,7 +711,7 @@ class AKSCreateContext:
     def get_nodepool_tags(self) -> Union[Dict[str, str], None]:
         """Obtain the value of nodepool_tags.
 
-        :return: Dictionary or None
+        :return: dictionary or None
         """
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_tags")
@@ -734,7 +737,7 @@ class AKSCreateContext:
     def get_nodepool_labels(self) -> Union[Dict[str, str], None]:
         """Obtain the value of nodepool_labels.
 
-        :return: Dictionary or None
+        :return: dictionary or None
         """
         # read the original value passed by the command
         raw_value = self.raw_param.get("nodepool_labels")
@@ -1042,7 +1045,7 @@ class AKSCreateContext:
         return node_osdisk_size
 
     def get_node_osdisk_type(self) -> Union[str, None]:
-        """Obtain the value of node_osdisk_size.
+        """Obtain the value of node_osdisk_type.
 
         :return: string or None
         """
@@ -1374,6 +1377,7 @@ class AKSCreateContext:
             )
             service_principal = principal_obj.get("service_principal")
             client_secret = principal_obj.get("client_secret")
+            self.set_intermediate("aad_session_key", principal_obj.get("aad_session_key"), overwrite_exists=True)
 
         # these parameters do not need validation
         return service_principal, client_secret
@@ -3029,6 +3033,98 @@ class AKSCreateContext:
         # this parameter does not need validation
         return auto_upgrade_channel
 
+    def get_node_osdisk_diskencryptionset_id(self) -> Union[str, None]:
+        """Obtain the value of node_osdisk_diskencryptionset_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        node_osdisk_diskencryptionset_id = self.raw_param.get("node_osdisk_diskencryptionset_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.disk_encryption_set_id is not None
+        ):
+            node_osdisk_diskencryptionset_id = self.mc.disk_encryption_set_id
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_osdisk_diskencryptionset_id
+
+    def get_cluster_autoscaler_profile(self) -> Union[Dict[str, str], None]:
+        """Obtain the value of cluster_autoscaler_profile.
+
+        :return: dictionary or None
+        """
+        # read the original value passed by the command
+        cluster_autoscaler_profile = self.raw_param.get("cluster_autoscaler_profile")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.auto_scaler_profile is not None
+        ):
+            cluster_autoscaler_profile = self.mc.auto_scaler_profile
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return cluster_autoscaler_profile
+
+    def get_uptime_sla(self) -> bool:
+        """Obtain the value of uptime_sla.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        uptime_sla = self.raw_param.get("uptime_sla")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.sku and
+            self.mc.sku.tier is not None
+        ):
+            uptime_sla = self.mc.sku.tier == "Paid"
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return uptime_sla
+
+    def get_tags(self) -> Union[Dict[str, str], None]:
+        """Obtain the value of tags.
+
+        :return: dictionary or None
+        """
+        # read the original value passed by the command
+        tags = self.raw_param.get("tags")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.tags is not None
+        ):
+            tags = self.mc.tags
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return tags
+
+    def get_edge_zone(self) -> Union[str, None]:
+        """Obtain the value of edge_zone.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        edge_zone = self.raw_param.get("edge_zone")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.extended_location and
+            self.mc.extended_location.name is not None
+        ):
+            edge_zone = self.mc.extended_location.name
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return edge_zone
+
 
 class AKSCreateDecorator:
     def __init__(
@@ -3059,15 +3155,23 @@ class AKSCreateDecorator:
         self.resource_type = resource_type
 
     def init_mc(self) -> ManagedCluster:
-        """Initialize the ManagedCluster object with required parameter location and attach it to internal context.
+        """Initialize a ManagedCluster object with several parameters and attach it to internal context.
 
         When location is not assigned, function "_get_rg_location" will be called to get the location of the provided
         resource group, which internally used ResourceManagementClient to send the request.
 
         :return: the ManagedCluster object
         """
-        # initialize the `ManagedCluster` object with mandatory parameters (i.e. location)
-        mc = self.models.ManagedCluster(location=self.context.get_location())
+        # Initialize a ManagedCluster object with mandatory parameter location and optional parameters tags, dns_prefix,
+        # kubernetes_version, disable_rbac and node_osdisk_diskencryptionset_id.
+        mc = self.models.ManagedCluster(
+            location=self.context.get_location(),
+            tags=self.context.get_tags(),
+            dns_prefix=self.context.get_dns_name_prefix(),
+            kubernetes_version=self.context.get_kubernetes_version(),
+            enable_rbac=not self.context.get_disable_rbac(),
+            disk_encryption_set_id=self.context.get_node_osdisk_diskencryptionset_id(),
+        )
 
         # attach mc to AKSCreateContext
         self.context.attach_mc(mc)
@@ -3633,11 +3737,67 @@ class AKSCreateDecorator:
         mc.auto_upgrade_profile = auto_upgrade_profile
         return mc
 
+    def set_up_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up autoscaler profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        cluster_autoscaler_profile = self.context.get_cluster_autoscaler_profile()
+        mc.auto_scaler_profile = cluster_autoscaler_profile
+        return mc
+
+    def set_up_sku(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up sku (uptime sla) for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        if self.context.get_uptime_sla():
+            mc.sku = self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Paid"
+            )
+        return mc
+
+    def set_up_extended_location(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up extended location (edge zone) for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        edge_zone = self.context.get_edge_zone()
+        if edge_zone:
+            mc.extended_location = self.models.ExtendedLocation(
+                name=edge_zone,
+                type=self.models.ExtendedLocationTypes.EDGE_ZONE
+            )
+        return mc
+
+    def build_custom_headers(self, mc: ManagedCluster) -> None:
+        # Add AAD session key to header.
+        # If principal_obj is None, we will not add this header, this can happen
+        # when the cluster enables managed identity. In this case, the header is useless
+        # and that's OK to not add this header
+        custom_headers = None
+        if mc.service_principal_profile:
+            custom_headers = {'Ocp-Aad-Session-Key': self.context.get_intermediate("aad_session_key")}
+        self.context.set_intermediate("custom_headers", custom_headers, overwrite_exists=True)
+
     def construct_default_mc(self) -> ManagedCluster:
         """The overall control function used to construct the default ManagedCluster object.
-
-        Note: To reduce the risk of regression introduced by refactoring, this function is not complete
-        and is being implemented gradually.
 
         The complete ManagedCluster object will later be passed as a parameter to the underlying SDK
         (mgmt-containerservice) to send the actual request.
@@ -3672,6 +3832,41 @@ class AKSCreateDecorator:
         mc = self.set_up_identity_profile(mc)
         # set up auto upgrade profile
         mc = self.set_up_auto_upgrade_profile(mc)
-
-        # TODO: set up other profiles
+        # set up auto scaler profile
+        mc = self.set_up_auto_scaler_profile(mc)
+        # set up sku
+        mc = self.set_up_sku(mc)
+        # set up extended location
+        mc = self.set_up_extended_location(mc)
         return mc
+
+    def create_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        # Due to SPN replication latency, we do a few retries here
+        max_retry = 30
+        retry_exception = Exception(None)
+        for _ in range(0, max_retry):
+            try:
+                created_cluster = _put_managed_cluster_ensuring_permission(
+                    self.cmd,
+                    self.client,
+                    self.context.get_subscription_id(),
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
+                    mc,
+                    self.context.get_intermediate("monitoring"),
+                    self.context.get_intermediate("ingress_appgw_addon_enabled"),
+                    self.context.get_intermediate("enable_virtual_node"),
+                    self.context.get_intermediate("need_post_creation_vnet_permission_granting"),
+                    self.context.get_vnet_subnet_id(),
+                    self.context.get_enable_managed_identity(),
+                    self.context.get_attach_acr(),
+                    self.context.get_intermediate("custom_headers"),
+                    self.context.get_no_wait())
+                return created_cluster
+            except CloudError as ex:
+                retry_exception = ex
+                if 'not found in Active Directory tenant' in ex.message:
+                    time.sleep(3)
+                else:
+                    raise ex
+        raise retry_exception
