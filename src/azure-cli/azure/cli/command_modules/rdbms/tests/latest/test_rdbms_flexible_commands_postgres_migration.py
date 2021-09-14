@@ -2,7 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import os
 import time
+import pathlib
 import getopt
 import uuid
 import sys
@@ -53,8 +55,8 @@ class MigrationScenarioTest(ScenarioTest):
 
         target_resource_group_name = "raganesa-t-m-pg-1"
         target_server_name = "raganesa-t-m-pg-1-vnet"
-        properties_filepath = "migrationVNet.json"
-
+        properties_filepath = os.path.join(pathlib.Path(__file__).parent.resolve(), "migrationVNet.json")
+        
         # test check migration name availability -success
         result = self.cmd('{} flexible-server migration check-name-availability --subscription {} --resource-group {} --name {} --migration-name {} '
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
