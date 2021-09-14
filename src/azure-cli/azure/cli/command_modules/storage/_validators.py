@@ -1853,4 +1853,3 @@ def validate_policy(namespace):
 def validate_blob_name_for_upload(namespace):
     if not namespace.blob_name:
         namespace.blob_name = namespace.file_path.split('/')[-1].split('\\')[-1]
-
