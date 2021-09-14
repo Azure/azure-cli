@@ -1825,7 +1825,7 @@ class AKSCreateContext:
                 # Should not enable read_only for get_load_balancer_sku, since its default value is None, and it has
                 # not been decorated into the mc object at this time, only the value after dynamic completion is
                 # meaningful here.
-                if self._get_load_balancer_sku(enable_validation=False) == "basic":
+                if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
                     raise InvalidArgumentValueError(
                         "userDefinedRouting doesn't support basic load balancer sku"
                     )
@@ -2681,7 +2681,7 @@ class AKSCreateContext:
 
         # validation
         if api_server_authorized_ip_ranges:
-            if self._get_load_balancer_sku(enable_validation=False) == "basic":
+            if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
                 raise MutuallyExclusiveArgumentError(
                     "--api-server-authorized-ip-ranges can only be used with standard load balancer"
                 )
@@ -2770,7 +2770,7 @@ class AKSCreateContext:
         # validation
         if enable_validation:
             if enable_private_cluster:
-                if self._get_load_balancer_sku(enable_validation=False) == "basic":
+                if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
                     raise MutuallyExclusiveArgumentError(
                         "Please use standard load balancer for private cluster"
                     )
@@ -3194,7 +3194,7 @@ class AKSCreateDecorator:
         )
 
         # verify load balancer sku
-        load_balancer_sku = self.context.get_load_balancer_sku()
+        load_balancer_sku = safe_lower(self.context.get_load_balancer_sku())
 
         # verify network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
         network_plugin = self.context.get_network_plugin()
