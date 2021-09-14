@@ -1,33 +1,39 @@
 interactions:
 - request:
-    body: null
+    body: '{"kind": "AlertSyncSettings", "properties": {"enabled": true}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - security setting list
+      - security setting update
       Connection:
       - keep-alive
+      Content-Length:
+      - '62'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --is-enabled
       User-Agent:
       - AZURECLI/2.28.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.7.7 (Windows-10-10.0.14393-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings?api-version=2021-07-01
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/Sentinel?api-version=2021-07-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/MCAS","name":"MCAS","type":"Microsoft.Security/settings","kind":"DataExportSettings","properties":{"enabled":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/WDATP","name":"WDATP","type":"Microsoft.Security/settings","kind":"DataExportSettings","properties":{"enabled":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/WDATP_EXCLUDE_LINUX_PUBLIC_PREVIEW","name":"WDATP_EXCLUDE_LINUX_PUBLIC_PREVIEW","type":"Microsoft.Security/settings","kind":"DataExportSettings","properties":{"enabled":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/Sentinel","name":"Sentinel","type":"Microsoft.Security/settings","kind":"AlertSyncSettings","properties":{"enabled":false}}]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/Sentinel","name":"Sentinel","type":"Microsoft.Security/settings","kind":"AlertSyncSettings","properties":{"enabled":true}}'
     headers:
       api-supported-versions:
       - '1.0'
       cache-control:
       - no-cache
       content-length:
-      - '933'
+      - '219'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Sep 2021 14:56:22 GMT
+      - Mon, 13 Sep 2021 17:20:18 GMT
       expires:
       - '-1'
       pragma:
@@ -43,41 +49,45 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '749'
+      - '249'
     status:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"kind": "AlertSyncSettings", "properties": {"enabled": false}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - security setting show
+      - security setting update
       Connection:
       - keep-alive
+      Content-Length:
+      - '63'
+      Content-Type:
+      - application/json
       ParameterSetName:
-      - -n
+      - -n --is-enabled
       User-Agent:
       - AZURECLI/2.28.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.7.7 (Windows-10-10.0.14393-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/MCAS?api-version=2021-07-01
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/Sentinel?api-version=2021-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/MCAS","name":"MCAS","type":"Microsoft.Security/settings","kind":"DataExportSettings","properties":{"enabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/settings/Sentinel","name":"Sentinel","type":"Microsoft.Security/settings","kind":"AlertSyncSettings","properties":{"enabled":false}}'
     headers:
       api-supported-versions:
       - '1.0'
       cache-control:
       - no-cache
       content-length:
-      - '212'
+      - '220'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Sep 2021 14:56:23 GMT
+      - Mon, 13 Sep 2021 17:20:20 GMT
       expires:
       - '-1'
       pragma:
@@ -93,7 +103,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '748'
+      - '249'
     status:
       code: 200
       message: OK
