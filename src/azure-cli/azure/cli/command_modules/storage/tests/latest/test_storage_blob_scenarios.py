@@ -64,6 +64,13 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         blob_name = self.create_random_name(prefix='blob', length=24)
         account_info = self.get_account_info(group, account)
 
+        # create file for uploading without --name
+        local_file_without_name = self.create_temp_file(file_size_kb)
+        blob_name_for_substitution = self.create_random_name(prefix='blob', length=24)
+        old_file_name = local_file_without_name.split('/')[-1].split('\\')[-1]
+        new_file_name_with_path = local_file_without_name.replace(old_file_name, blob_name_for_substitution)
+        os.rename(local_file_without_name, new_file_name_with_path)
+
         container = self.create_container(account_info)
 
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
@@ -76,8 +83,9 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         # upload without specifying name
         self.storage_cmd('storage blob upload -c {} -f "{}" --type {}', account_info,
-                         container, local_file, blob_type)
-        self.storage_cmd('storage blob exists -n {} -c {}', account_info, local_file.split('/')[-1].split('\\')[-1], container) \
+                         container, new_file_name_with_path, blob_type)
+        os.rename(new_file_name_with_path, local_file_without_name)
+        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name_for_substitution, container) \
             .assert_with_checks(JMESPathCheck('exists', True))
 
         self.storage_cmd('storage blob list -c {} -otable --num-results 1', account_info, container)
