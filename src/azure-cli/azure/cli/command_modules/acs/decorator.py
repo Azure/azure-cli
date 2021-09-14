@@ -29,6 +29,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
+    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     DecoratorMode,
 )
 from azure.cli.command_modules.acs.custom import (
@@ -3859,6 +3860,10 @@ class AKSCreateDecorator:
                 addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
             addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
             addons.remove('confcom')
+        if 'open-service-mesh' in addons:
+            addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
+            addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
+            addons.remove('open-service-mesh')
         mc.addon_profiles = addon_profiles
         return mc
 
