@@ -17,8 +17,8 @@ import sys
 import uuid
 import base64
 
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from urllib.request import urlopen
+from urllib.parse import urlparse
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -936,7 +936,7 @@ def _build_preflight_error_message(preflight_error):
 
 
 def _prepare_template_uri_with_query_string(template_uri, input_query_string):
-    from six.moves.urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit  # pylint: disable=import-error
+    from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit
 
     try:
         scheme, netloc, path, query_string, fragment = urlsplit(template_uri)  # pylint: disable=unused-variable

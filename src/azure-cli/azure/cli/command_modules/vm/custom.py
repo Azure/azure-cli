@@ -22,7 +22,7 @@ except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
 # the urlopen is imported for automation purpose
-from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
+from urllib.request import urlopen
 
 from knack.log import get_logger
 from knack.util import CLIError

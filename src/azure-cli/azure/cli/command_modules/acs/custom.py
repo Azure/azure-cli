@@ -29,8 +29,8 @@ import webbrowser
 import zipfile
 from distutils.version import StrictVersion
 from math import isnan
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from six.moves.urllib.error import URLError  # pylint: disable=import-error
+from urllib.request import urlopen
+from urllib.error import URLError
 
 # pylint: disable=import-error
 import yaml

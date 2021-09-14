@@ -21,7 +21,7 @@ import uuid
 from functools import reduce
 from nacl import encoding, public
 
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
+from urllib.request import urlopen
 import OpenSSL.crypto
 from fabric import Connection
 

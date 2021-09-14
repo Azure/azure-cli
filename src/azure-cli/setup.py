@@ -116,12 +116,11 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==19.0.0',
-    # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=1.0.0',
     'azure-mgmt-servicebus~=6.0.0',
-    'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
+    'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=1.0.0b1',
     'azure-mgmt-sql~=3.0.1',
@@ -133,8 +132,8 @@ DEPENDENCIES = [
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.6.0',
-    'azure-synapse-spark~=0.2.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
+    'azure-synapse-spark~=0.2.0',
     'fabric~=2.4',
     'javaproperties==0.5.1',
     'jsondiff==1.2.0',
@@ -144,6 +143,7 @@ DEPENDENCIES = [
     'pytz==2019.1',
     'scp~=0.13.2',
     'semver==2.13.0',
+    'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12'
