@@ -16,13 +16,7 @@ import os
 
 import requests
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
-
-# the urlopen is imported for automation purpose
-from urllib.request import urlopen
+from urllib.parse import urlparse
 
 from knack.log import get_logger
 from knack.util import CLIError
