@@ -55,8 +55,9 @@ class MigrationScenarioTest(ScenarioTest):
 
         target_resource_group_name = "raganesa-t-m-pg-1"
         target_server_name = "raganesa-t-m-pg-1-vnet"
-        properties_filepath = os.path.join(pathlib.Path(__file__).parent.resolve(), "migrationVNet.json")
-        
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        properties_filepath = os.path.join(curr_dir, 'migrationVNet.json').replace('\\', '\\\\')
+         
         # test check migration name availability -success
         result = self.cmd('{} flexible-server migration check-name-availability --subscription {} --resource-group {} --name {} --migration-name {} '
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
