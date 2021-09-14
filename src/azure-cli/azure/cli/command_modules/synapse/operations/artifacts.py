@@ -38,7 +38,7 @@ def create_or_update_linked_service(cmd, workspace_name, linked_service_name, de
 
 def delete_linked_service(cmd, workspace_name, linked_service_name, no_wait=False):
     client = cf_synapse_linked_service(cmd.cli_ctx, workspace_name)
-    return sdk_no_wait(no_wait, client.begin_delete_linked_service, linked_service_name)
+    return sdk_no_wait(no_wait, client.begin_delete_linked_service, linked_service_name, polling=True)
 
 
 # Dataset
