@@ -224,6 +224,23 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.remove_intermediate("test-intermediate")
         self.assertEqual(ctx_1.get_intermediate("test-intermediate"), None)
 
+    def test_get_subscription_id(self):
+        ctx_1 = AKSCreateContext(self.cmd, {})
+        ctx_1.set_intermediate("subscription_id", "test_subscription_id")
+        self.assertEqual(
+            ctx_1.get_subscription_id(),
+            "test_subscription_id",
+        )
+        ctx_1.remove_intermediate("subscription_id")
+        self.assertEqual(ctx_1.get_intermediate("subscription_id"), None)
+        mock_profile = Mock(get_subscription_id=Mock(return_value="test_subscription_id"))
+        with patch("azure.cli.command_modules.acs.decorator.Profile", return_value=mock_profile):
+            self.assertEqual(
+                ctx_1.get_subscription_id(),
+                "test_subscription_id",
+            )
+            mock_profile.get_subscription_id.assert_called_once()
+
     def test_get_resource_group_name(self):
         # default
         ctx_1 = AKSCreateContext(
@@ -2284,11 +2301,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd, self.client, self.models, {"location": "test_location"}
         )
-        with patch(
-            "azure.cli.command_modules.acs.decorator.get_subscription_id",
-            return_value="test_sub_id",
-        ):
-            dec_mc = dec_1.init_mc()
+        dec_mc = dec_1.init_mc()
         ground_truth_mc = self.models.ManagedCluster(location="test_location")
         self.assertEqual(dec_mc, ground_truth_mc)
         self.assertEqual(dec_mc, dec_1.context.mc)
