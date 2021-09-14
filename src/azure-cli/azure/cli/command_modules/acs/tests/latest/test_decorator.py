@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-from re import T
 import unittest
 from unittest.mock import Mock, patch
 
@@ -1932,6 +1931,32 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_disable_rbac()
+
+    def test_get_enable_rbac(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_rbac": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_enable_rbac(), None)
+        mc = self.models.ManagedCluster(
+            location="test_location", enable_rbac=True,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_rbac(), True)
+
+        # invalid parameter
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_rbac": True,
+                "disable_rbac": True,
+            },
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_enable_rbac()
 
     def test_get_enable_azure_rbac(self):
         # default

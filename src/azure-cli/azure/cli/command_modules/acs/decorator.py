@@ -1486,16 +1486,23 @@ class AKSCreateContext:
         :return: string or None
         """
         # read the original value passed by the command
-        assign_identity = self.raw_param.get("assign_identity")
+        raw_value = self.raw_param.get("assign_identity")
         # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
         if (
             self.mc and
             self.mc.identity and
-            self.mc.identity.user_assigned_identities
+            self.mc.identity.user_assigned_identities is not None
         ):
-            assign_identity = safe_list_get(
+            value_obtained_from_mc = safe_list_get(
                 list(self.mc.identity.user_assigned_identities.keys()), 0, None
             )
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            assign_identity = value_obtained_from_mc
+        else:
+            assign_identity = raw_value
 
         # this parameter does not need dynamic completion
 
@@ -2521,19 +2528,19 @@ class AKSCreateContext:
         # read the original value passed by the command
         aad_client_app_id = self.raw_param.get("aad_client_app_id")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if aad_profile and aad_profile.client_app_id:
+        if aad_profile and aad_profile.client_app_id is not None:
             aad_client_app_id = aad_profile.client_app_id
 
         # read the original value passed by the command
         aad_server_app_id = self.raw_param.get("aad_server_app_id")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if aad_profile and aad_profile.server_app_id:
+        if aad_profile and aad_profile.server_app_id is not None:
             aad_server_app_id = aad_profile.server_app_id
 
         # read the original value passed by the command
         aad_server_app_secret = self.raw_param.get("aad_server_app_secret")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if aad_profile and aad_profile.server_app_secret:
+        if aad_profile and aad_profile.server_app_secret is not None:
             aad_server_app_secret = aad_profile.server_app_secret
 
         # these parameters do not need dynamic completion
@@ -2636,14 +2643,15 @@ class AKSCreateContext:
         # this parameter does not need validation
         return aad_admin_group_object_ids
 
-    def get_disable_rbac(self) -> bool:
-        """Obtain the value of disable_rbac.
+    # pylint: disable=unused-argument
+    def _get_disable_rbac(self, enable_validation: bool = False, **kwargs) -> Union[bool, None]:
+        """Internal function to obtain the value of disable_rbac.
 
-        This function will verify the parameter by default. If the values of disable_rbac and enable_azure_rbac are
-        both True, a MutuallyExclusiveArgumentError will be raised. Besides, if the values of enable_rbac and
-        disable_rbac are both True, a MutuallyExclusiveArgumentError will be raised.
+        This function supports the option of enable_validation. When enabled, if the values of disable_rbac and
+        enable_azure_rbac are both True, a MutuallyExclusiveArgumentError will be raised. Besides, if the values of
+        enable_rbac and disable_rbac are both True, a MutuallyExclusiveArgumentError will be raised.
 
-        :return: bool
+        :return: bool or None
         """
         # read the original value passed by the command
         disable_rbac = self.raw_param.get("disable_rbac")
@@ -2657,21 +2665,34 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if disable_rbac and self._get_enable_azure_rbac(enable_validation=False):
-            raise MutuallyExclusiveArgumentError(
-                "--enable-azure-rbac cannot be used together with --disable-rbac"
-            )
-        if disable_rbac and self.get_enable_rbac():
-            raise MutuallyExclusiveArgumentError("specify either '--disable-rbac' or '--enable-rbac', not both.")
+        if enable_validation:
+            if disable_rbac and self._get_enable_azure_rbac(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "--enable-azure-rbac cannot be used together with --disable-rbac"
+                )
+            if disable_rbac and self.get_enable_rbac():
+                raise MutuallyExclusiveArgumentError("specify either '--disable-rbac' or '--enable-rbac', not both.")
         return disable_rbac
 
-    def get_enable_rbac(self) -> bool:
+    def get_disable_rbac(self) -> Union[bool, None]:
+        """Obtain the value of disable_rbac.
+
+        This function will verify the parameter by default. If the values of disable_rbac and enable_azure_rbac are
+        both True, a MutuallyExclusiveArgumentError will be raised. Besides, if the values of enable_rbac and
+        disable_rbac are both True, a MutuallyExclusiveArgumentError will be raised.
+
+        :return: bool or None
+        """
+
+        return self._get_disable_rbac(enable_validation=True)
+
+    def get_enable_rbac(self) -> Union[bool, None]:
         """Obtain the value of enable_rbac.
 
         This function will verify the parameter by default. If the values of enable_rbac and disable_rbac are both True,
         a MutuallyExclusiveArgumentError will be raised.
 
-        :return: bool
+        :return: bool or None
         """
         # read the original value passed by the command
         enable_rbac = self.raw_param.get("enable_rbac")
@@ -2685,7 +2706,7 @@ class AKSCreateContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if enable_rbac and self.get_disable_rbac():
+        if enable_rbac and self._get_disable_rbac(enable_validation=False):
             raise MutuallyExclusiveArgumentError("specify either '--disable-rbac' or '--enable-rbac', not both.")
         return enable_rbac
 
@@ -2713,7 +2734,7 @@ class AKSCreateContext:
 
         # validation
         if enable_validation:
-            if enable_azure_rbac and self.get_disable_rbac():
+            if enable_azure_rbac and self._get_disable_rbac(enable_validation=False):
                 raise MutuallyExclusiveArgumentError(
                     "--enable-azure-rbac cannot be used together with --disable-rbac"
                 )
@@ -3606,10 +3627,11 @@ class AKSCreateDecorator:
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
 
+        auto_upgrade_profile = None
         auto_upgrade_channel = self.context.get_auto_upgrade_channel()
         if auto_upgrade_channel:
             auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile(upgrade_channel=auto_upgrade_channel)
-            mc.auto_upgrade_profile = auto_upgrade_profile
+        mc.auto_upgrade_profile = auto_upgrade_profile
         return mc
 
     def construct_default_mc(self) -> ManagedCluster:
