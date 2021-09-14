@@ -3,14 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements, line-too-long, too-many-branches
+from os import name
 from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.mgmt.synapse.models import TransparentDataEncryptionStatus, SecurityAlertPolicyState, BlobAuditingPolicyState
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, \
-    get_resource_name_completion_list, get_location_type
+    get_resource_name_completion_list, get_location_type, file_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import get_json_object, shell_safe_json_parse
-from ._validators import validate_storage_account, validate_statement_language
+from ._validators import validate_storage_account, validate_statement_language, add_progress_callback
 from ._completers import get_role_definition_name_completion_list
 from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnectionClientType, PrincipalType, \
     SqlPoolConnectionClientAuthenticationType, ItemType
@@ -33,6 +34,8 @@ role_arg_type = CLIArgumentType(help='The role name/id that is assigned to the p
 definition_file_arg_type = CLIArgumentType(options_list=['--file'], completer=FilesCompleter(),
                                            type=shell_safe_json_parse,
                                            help='Properties may be supplied from a JSON file using the `@{path}` syntax or a JSON string.')
+progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
+                                    action='store_true', validator=add_progress_callback)
 time_format_help = 'Time should be in following format: "YYYY-MM-DDTHH:MM:SS".'
 
 storage_arg_group = "Storage"
@@ -816,6 +819,24 @@ def load_arguments(self, _):
     with self.argument_context('synapse notebook delete') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('notebook_name', arg_type=name_type, help='The notebook name.')
+
+    # synapse artifacts library
+    with self.argument_context('synapse workspace-package') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+    
+    for scope in ['show', 'delete']:
+        with self.argument_context('synapse workspace-package ' + scope) as c:
+            c.argument('package_name', arg_type=name_type, options_list=['--package-name', '--package', '--name', '-n'], help='The workspace package name.')
+    
+    with self.argument_context('synapse workspace-package upload') as c:
+        c.argument('package', options_list=('--package', '--file', '-f'), type=file_type, completer=FilesCompleter(),
+                    help='Specifies a local file path for a file to upload as workspace package.')
+        c.extra('no_progress', progress_type)
+
+    with self.argument_context('synapse workspace-package upload-batch') as c:
+        c.argument('source', options_list=('--source', '-s'), help='The directory where the files to be uploaded are located.')
+        c.extra('no_progress', progress_type)
+
 
     # synapse integration runtime
     with self.argument_context('synapse integration-runtime') as c:
