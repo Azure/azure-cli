@@ -85,7 +85,9 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_name=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
+    print("properties passed-----",properties)
     properties_filepath = os.path.join(os.path.abspath(os.getcwd()), properties)
+    print("FILEPATH-------?>",properties_filepath)
     if not os.path.exists(properties_filepath):
         raise FileOperationError("Properties file does not exist in the given location")
     with open(properties_filepath, "r") as f:
