@@ -2139,7 +2139,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     
     t_spec, t_uri, t_file = None, None, None
-    p_uri = None
+    p_uri, parameters = None, None
 
     if template_file:
         if path.exists(template_file):
@@ -2155,7 +2155,9 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
         raise CLIError("Please enter one of the following: template file, template spec, or template url")
     
     if param_file:
-        pass
+        if path.exists(param_file):
+            parameters = json.load(open(param_file))
+            print(parameters)
     elif param_uri:
         p_uri = param_uri
     
@@ -2169,10 +2171,16 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
         deployment_stack_model.template_link = deployment_stacks_template_link
     elif t_uri:
         #need to validate
-        deployment_stacks_template_link.id = t_uri
+        deployment_stacks_template_link.uri = t_uri
         deployment_stack_model.template_link = deployment_stacks_template_link
     else:
         deployment_stack_model.template = json.load(open(t_file))
+    
+    if p_uri:
+        parameters_link = rcf.deployment_stacks.models.DeploymentStacksParametersLink(uri = param_uri)
+        deployment_stack_model.parameters_link = parameters_link
+    elif parameters:
+        deployment_stack_model.parameters = parameters
 
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_subscription,name, deployment_stack_model)
 
