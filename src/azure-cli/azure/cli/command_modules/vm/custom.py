@@ -17,6 +17,8 @@ import os
 import requests
 
 from urllib.parse import urlparse
+# the urlopen is imported for automation purpose
+from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
 from knack.log import get_logger
 from knack.util import CLIError
