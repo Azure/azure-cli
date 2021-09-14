@@ -1658,6 +1658,11 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
         print(output)
+        test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
+        if test_hook_data:
+            test_configs = test_hook_data.get("configs", None)
+            if test_configs and test_configs.get("returnOutput", False):
+                return output
     else:
         raise AzureInternalError("Failed to check the ACR.")
 
@@ -1774,8 +1779,8 @@ def _aks_browse(
     test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
     if test_hook_data:
         test_configs = test_hook_data.get("configs", None)
-        if test_configs and test_configs.get("enableTimeout", None):
-            timeout = test_configs.get("timeoutInterval", 10)
+        if test_configs and test_configs.get("enableTimeout", False):
+            timeout = test_configs.get("timeoutInterval", None)
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(dashboardURL)
