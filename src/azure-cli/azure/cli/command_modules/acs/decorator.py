@@ -51,7 +51,6 @@ from azure.cli.core.azclierror import (
     RequiredArgumentMissingError,
 )
 from azure.cli.core.commands import AzCliCommand
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import truncate_text
