@@ -4108,6 +4108,48 @@ def list_capacity_reservation(client, resource_group_name, capacity_reservation_
 
 
 # region Restore point collection
+def restore_point_show(client,
+                       resource_group_name,
+                       restore_point_collection_name,
+                       restore_point_name):
+    return client.get(resource_group_name=resource_group_name,
+                      restore_point_collection_name=restore_point_collection_name,
+                      restore_point_name=restore_point_name)
+
+
+def restore_point_create(client,
+                         resource_group_name,
+                         restore_point_collection_name,
+                         restore_point_name,
+                         exclude_disks=None,
+                         no_wait=False):
+    parameters = {}
+    if exclude_disks is not None:
+        parameters['exclude_disks'] = []
+        for disk in exclude_disks:
+            parameters['exclude_disks'].append({'id': disk})
+    return sdk_no_wait(no_wait,
+                       client.begin_create,
+                       resource_group_name=resource_group_name,
+                       restore_point_collection_name=restore_point_collection_name,
+                       restore_point_name=restore_point_name,
+                       parameters=parameters)
+
+
+def restore_point_delete(client,
+                         resource_group_name,
+                         restore_point_name,
+                         restore_point_collection_name,
+                         no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_delete,
+                       resource_group_name=resource_group_name,
+                       restore_point_collection_name=restore_point_collection_name,
+                       restore_point_name=restore_point_name)
+# endRegion
+
+
+# region Restore point collection
 def restore_point_collection_list(client,
                                   resource_group_name):
     return client.list(resource_group_name=resource_group_name)
@@ -4125,17 +4167,15 @@ def restore_point_collection_create(client,
                                     resource_group_name,
                                     restore_point_collection_name,
                                     location,
-                                    tags=None,
-                                    id_=None):
+                                    source_id,
+                                    tags=None):
     parameters = {}
+    properties = {}
     parameters['location'] = location
     if tags is not None:
         parameters['tags'] = tags
-    parameters['source'] = {}
-    if id_ is not None:
-        parameters['source']['id'] = id_
-    if len(parameters['source']) == 0:
-        del parameters['source']
+    properties['source'] = {'id': source_id}
+    parameters['properties'] = properties
     return client.create_or_update(resource_group_name=resource_group_name,
                                    restore_point_collection_name=restore_point_collection_name,
                                    parameters=parameters)
@@ -4144,16 +4184,10 @@ def restore_point_collection_create(client,
 def restore_point_collection_update(client,
                                     resource_group_name,
                                     restore_point_collection_name,
-                                    tags=None,
-                                    id_=None):
+                                    tags=None):
     parameters = {}
     if tags is not None:
         parameters['tags'] = tags
-    parameters['source'] = {}
-    if id_ is not None:
-        parameters['source']['id'] = id_
-    if len(parameters['source']) == 0:
-        del parameters['source']
     return client.update(resource_group_name=resource_group_name,
                          restore_point_collection_name=restore_point_collection_name,
                          parameters=parameters)

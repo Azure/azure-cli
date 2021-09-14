@@ -18,7 +18,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_gallery_sharing_profile, cf_shared_gallery_image,
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
-                                                          cf_restore_point_collection)
+                                                          cf_restore_point, cf_restore_point_collection)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -211,7 +211,12 @@ def load_command_table(self, _):
         client_factory=cf_capacity_reservations
     )
 
-    res_restore_point_collection = CliCommandType(
+    restore_point = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.#RestorePointsOperations.{}',
+        client_factory=cf_restore_point
+    )
+
+    restore_point_collection = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.#RestorePointCollectionsOperations.{}',
         client_factory=cf_restore_point_collection
     )
@@ -590,7 +595,13 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_capacity_reservation')
         g.custom_command('list', 'list_capacity_reservation')
 
-    with self.command_group('restore-point collections', res_restore_point_collection, min_api='2021-07-01',
+    with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
+        g.custom_show_command('show', 'restore_point_show')
+        g.custom_command('create', 'restore_point_create', supports_no_wait=True)
+        g.custom_command('delete', 'restore_point_delete', supports_no_wait=True, confirmation=True)
+        g.custom_wait_command('wait', 'restore_point_show')
+
+    with self.command_group('restore-point collection', restore_point_collection, min_api='2021-03-01',
                             client_factory=cf_restore_point_collection) as g:
         g.custom_command('list', 'restore_point_collection_list')
         g.custom_show_command('show', 'restore_point_collection_show')
