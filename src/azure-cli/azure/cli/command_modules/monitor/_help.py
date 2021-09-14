@@ -894,35 +894,35 @@ examples:
         --logs '[
            {
              "category": "Security",
-             "enabled": true,
+             "enabled": true
            },
            {
              "category": "Administrative",
-             "enabled": true,
+             "enabled": true
            },
            {
              "category": "ServiceHealth",
-             "enabled": true,
+             "enabled": true
            },
            {
              "category": "Alert",
-             "enabled": true,
+             "enabled": true
            },
            {
              "category": "Recommendation",
-             "enabled": true,
+             "enabled": true
            },
            {
              "category": "Policy",
-             "enabled": true,
+             "enabled": true
            },
            {
              "category": "Autoscale",
-             "enabled": true,
+             "enabled": true
            },
            {
              "category": "ResourceHealth",
-             "enabled": true,
+             "enabled": true
            }
            ]'
 """
