@@ -365,11 +365,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         mysql_high_availability_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled']),
+            arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled', 'Enabled']),
             options_list=['--high-availability'],
             help='Enable (ZoneRedundant or SameZone) or disable high availability feature. '
                  'Default value is Disabled. High availability can only be set during flexible server create time. '
-                 'Allowed values: ZoneRedundant, SameZone, Disabled'
+                 'Allowed values: ZoneRedundant, SameZone, Disabled, Enabled'
         )
 
         private_dns_zone_arguments_arg_type = CLIArgumentType(

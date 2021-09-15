@@ -126,8 +126,6 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
     sku_info, single_az, _ = get_mysql_list_skus_info(db_context.cmd, location)
-    _mysql_high_availability_validator(high_availability, standby_availability_zone, zone, tier,
-                                       single_az, auto_grow, instance)
     _network_arg_validator(subnet, public_access)
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -135,6 +133,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_retention_validator(backup_retention, sku_info, tier)
     _mysql_storage_validator(storage_gb, sku_info, tier, instance)
     _mysql_sku_name_validator(sku_name, sku_info, tier, instance)
+    _mysql_high_availability_validator(high_availability, standby_availability_zone, zone, tier,
+                                       single_az, auto_grow, instance)
     _mysql_version_validator(version, sku_info, tier, instance)
     _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
 
@@ -174,9 +174,9 @@ def _mysql_sku_name_validator(sku_name, sku_info, tier, instance):
     if sku_name:
         skus = get_mysql_skus(sku_info, tier)
         if sku_name not in skus:
-            error_msg = 'Incorrect value for --sku-name. ' +\
-                        'The SKU name does not match {} tier. Specify --tier if you did not. '.format(tier)
-            raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
+            raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
+                           'Specify --tier if you did not. Or CLI will set Burstable as the default tier. '
+                           'Allowed values : {}'.format(tier, skus))
 
 
 def _mysql_version_validator(version, sku_info, tier, instance):
@@ -230,13 +230,13 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            version=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     sku_info, single_az = get_postgres_list_skus_info(db_context.cmd, location)
-    _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
     _pg_storage_validator(storage_gb, sku_info, tier, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
+    _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, sku_info, tier, instance)
 
 
@@ -267,9 +267,9 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
     if sku_name:
         skus = get_postgres_skus(sku_info, tier)
         if sku_name not in skus:
-            error_msg = 'Incorrect value for --sku-name. ' +\
-                        'The SKU name does not match {} tier. Specify --tier if you did not. '.format(tier)
-            raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
+            raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
+                           'Specify --tier if you did not. Or CLI will set GeneralPurpose as the default tier. '
+                           'Allowed values : {}'.format(tier, skus))
 
 
 def _pg_version_validator(version, sku_info, tier, instance):

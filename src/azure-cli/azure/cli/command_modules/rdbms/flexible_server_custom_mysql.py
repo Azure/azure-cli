@@ -50,7 +50,10 @@ def flexible_server_create(cmd, client,
         cf_availability=cf_mysql_check_resource_availability, cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations, logging_name='MySQL', command_group='mysql', server_client=client,
         location=location)
 
+    # Process parameters
     server_name = server_name.lower()
+    if high_availability and high_availability.lower() == 'enabled':
+        high_availability = 'ZoneRedundant'
 
     mysql_arguments_validator(db_context,
                               server_name=server_name,
@@ -228,6 +231,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability, logging_name='MySQL', command_group='mysql', server_client=client,
         location=instance.location)
+
+    if high_availability and high_availability.lower() == 'enabled':
+        high_availability = 'ZoneRedundant'
 
     mysql_arguments_validator(db_context,
                               location=location,
