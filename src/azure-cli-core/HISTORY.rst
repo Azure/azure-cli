@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.28.1
+++++++
+* No changes
+
 2.28.0
 ++++++
 * Conditional Access: Show `--scope` for `az login` message when failed to refresh the access token (#17738)
