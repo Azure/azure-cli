@@ -11,7 +11,7 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     tags_type, get_location_type,
-    get_enum_type,
+    get_enum_type, file_type,
     resource_group_name_type,
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
@@ -20,6 +20,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 
 from .randomname.generate import generate_username
 from ._flexible_server_util import get_current_time
+from argcomplete.completers import FilesCompleter
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-locals
@@ -585,8 +586,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type,
                            help='Migration target server name.')
                 if scope == "create":
-                    c.argument('properties', options_list=['--properties', '-b'],
-                               help='Request properties. Use double or no quotes to pass in filepath as argument. Relative path is also supported')
+                    c.argument('properties', type=file_type, completer=FilesCompleter(), options_list=['--properties', '-b'],
+                               help='Request properties. Use double or no quotes to pass in filepath as argument.')
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
                 elif scope == "show":
