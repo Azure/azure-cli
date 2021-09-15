@@ -110,6 +110,11 @@ class AKSCreateModels:
     ):
         self.__cmd = cmd
         self.resource_type = resource_type
+        self.ManagedCluster = self.__cmd.get_models(
+            "ManagedCluster",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
         self.ManagedClusterWindowsProfile = self.__cmd.get_models(
             "ManagedClusterWindowsProfile",
             resource_type=self.resource_type,
@@ -170,27 +175,12 @@ class AKSCreateModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.ManagedCluster = self.__cmd.get_models(
-            "ManagedCluster",
-            resource_type=self.resource_type,
-            operation_group="managed_clusters",
-        )
         self.ManagedServiceIdentityUserAssignedIdentitiesValue = (
             self.__cmd.get_models(
                 "ManagedServiceIdentityUserAssignedIdentitiesValue",
                 resource_type=self.resource_type,
                 operation_group="managed_clusters",
             )
-        )
-        self.ExtendedLocation = self.__cmd.get_models(
-            "ExtendedLocation",
-            resource_type=self.resource_type,
-            operation_group="managed_clusters",
-        )
-        self.ExtendedLocationTypes = self.__cmd.get_models(
-            "ExtendedLocationTypes",
-            resource_type=self.resource_type,
-            operation_group="managed_clusters",
         )
         self.ManagedClusterAddonProfile = self.__cmd.get_models(
             "ManagedClusterAddonProfile",
@@ -199,6 +189,16 @@ class AKSCreateModels:
         )
         self.ManagedClusterAPIServerAccessProfile = self.__cmd.get_models(
             "ManagedClusterAPIServerAccessProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ExtendedLocation = self.__cmd.get_models(
+            "ExtendedLocation",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.ExtendedLocationTypes = self.__cmd.get_models(
+            "ExtendedLocationTypes",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
@@ -644,9 +644,12 @@ class AKSCreateContext:
             kubernetes_version = self.get_kubernetes_version()
             if not vm_set_type:
                 if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.12.9"):
-                    print("Setting vm_set_type to availabilityset as it is \
-                    not specified and kubernetes version({}) less than 1.12.9 only supports \
-                    availabilityset\n".format(kubernetes_version))
+                    print(
+                        "Setting vm_set_type to availabilityset as it is not specified and kubernetes version({}) "
+                        "less than 1.12.9 only supports availabilityset\n".format(
+                            kubernetes_version
+                        )
+                    )
                     vm_set_type = "AvailabilitySet"
             if not vm_set_type:
                 vm_set_type = "VirtualMachineScaleSets"
@@ -2842,9 +2845,10 @@ class AKSCreateContext:
                             raise InvalidArgumentValueError(
                                 private_dns_zone + " is not a valid Azure resource ID."
                             )
-                    raise InvalidArgumentValueError(
-                        "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
-                    )
+                    else:
+                        raise InvalidArgumentValueError(
+                            "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
+                        )
         return fqdn_subdomain
 
     def get_fqdn_subdomain(self) -> Union[str, None]:
@@ -3838,6 +3842,8 @@ class AKSCreateDecorator:
         mc = self.set_up_sku(mc)
         # set up extended location
         mc = self.set_up_extended_location(mc)
+        # build custom header
+        self.build_custom_headers(mc)
         return mc
 
     def create_mc(self, mc: ManagedCluster) -> ManagedCluster:

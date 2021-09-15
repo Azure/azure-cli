@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
+from re import T
 import unittest
 from unittest.mock import Mock, patch
 
@@ -30,6 +31,8 @@ from azure.cli.command_modules.acs.decorator import (
     AKSCreateContext,
     AKSCreateDecorator,
     AKSCreateModels,
+    safe_list_get,
+    safe_lower,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockCLI,
@@ -40,10 +43,26 @@ from azure.cli.core.azclierror import (
     CLIInternalError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
+    NoTTYError,
     RequiredArgumentMissingError,
 )
 from azure.cli.core.profiles import ResourceType
+from knack.prompting import NoTTYException
 from knack.util import CLIError
+
+
+class DecoratorFunctionsTestCase(unittest.TestCase):
+    def test_safe_list_get(self):
+        list_1 = [1, 2, 3]
+        self.assertEqual(safe_list_get(list_1, 0), 1)
+        self.assertEqual(safe_list_get(list_1, 10), None)
+
+        tuple_1 = (1, 2, 3)
+        self.assertEqual(safe_list_get(tuple_1, 0), None)
+
+    def test_safe_lower(self):
+        self.assertEqual(safe_lower(None), None)
+        self.assertEqual(safe_lower("ABC"), "abc")
 
 
 class AKSCreateModelsTestCase(unittest.TestCase):
@@ -66,6 +85,9 @@ class AKSCreateModelsTestCase(unittest.TestCase):
         )
         module = importlib.import_module(module_name)
 
+        self.assertEqual(
+            models.ManagedCluster, getattr(module, "ManagedCluster")
+        )
         self.assertEqual(
             models.ManagedClusterWindowsProfile,
             getattr(module, "ManagedClusterWindowsProfile"),
@@ -117,14 +139,19 @@ class AKSCreateModelsTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            models.ManagedCluster, getattr(module, "ManagedCluster")
-        )
-        self.assertEqual(
             models.ManagedServiceIdentityUserAssignedIdentitiesValue,
             getattr(
                 module,
                 "ManagedServiceIdentityUserAssignedIdentitiesValue",
             ),
+        )
+        self.assertEqual(
+            models.ManagedClusterAddonProfile,
+            getattr(module, "ManagedClusterAddonProfile"),
+        )
+        self.assertEqual(
+            models.ManagedClusterAPIServerAccessProfile,
+            getattr(module, "ManagedClusterAPIServerAccessProfile"),
         )
         self.assertEqual(
             models.ExtendedLocation, getattr(module, "ExtendedLocation")
@@ -133,7 +160,6 @@ class AKSCreateModelsTestCase(unittest.TestCase):
             models.ExtendedLocationTypes,
             getattr(module, "ExtendedLocationTypes"),
         )
-        # not directly used
         self.assertEqual(
             models.ManagedClusterAPIServerAccessProfile,
             getattr(module, "ManagedClusterAPIServerAccessProfile"),
@@ -177,11 +203,18 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.cmd = MockCmd(self.cli_ctx)
         self.models = AKSCreateModels(self.cmd)
 
+    def test__init__(self):
+        with self.assertRaises(CLIInternalError):
+            AKSCreateContext(self.cmd, [])
+
     def test_attach_mc(self):
         ctx_1 = AKSCreateContext(self.cmd, {})
         mc = self.models.ManagedCluster(location="test_location")
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.mc.location, "test_location")
+        self.assertEqual(ctx_1.mc, mc)
+        # fail on attach again
+        with self.assertRaises(CLIInternalError):
+            ctx_1.attach_mc(mc)
 
     def test_get_intermediate(self):
         ctx_1 = AKSCreateContext(self.cmd, {})
@@ -258,6 +291,19 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1 = AKSCreateContext(self.cmd, {"name": "test_name"})
         self.assertEqual(ctx_1.get_name(), "test_name")
 
+    def test_get_location(self):
+        # default & dynamic completion
+        ctx_1 = AKSCreateContext(self.cmd, {"location": None})
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            return_value="test_location",
+        ):
+            self.assertEqual(ctx_1._get_location(read_only=True), None)
+            self.assertEqual(ctx_1.get_location(), "test_location")
+        mc = self.models.ManagedCluster(location="test_mc_location")
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_location(), "test_mc_location")
+
     def test_get_ssh_key_value_and_no_ssh_key(self):
         import paramiko
 
@@ -285,20 +331,22 @@ class AKSCreateContextTestCase(unittest.TestCase):
             location="test_location", linux_profile=linux_profile
         )
         ctx_1.attach_mc(mc)
-        with self.assertRaises(CLIError):
+        # fail on invalid key
+        with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(
                 ctx_1.get_ssh_key_value_and_no_ssh_key(),
                 "test_mc_ssh_key_value",
             )
 
-        # invalid key
+        # custom value
         ctx_2 = AKSCreateContext(
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": False}
         )
+        # fail on invalid key
         with self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_ssh_key_value_and_no_ssh_key()
 
-        # invalid key
+        # custom value
         ctx_3 = AKSCreateContext(
             self.cmd, {"ssh_key_value": "fake-key", "no_ssh_key": True}
         )
@@ -319,6 +367,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             location="test_location", linux_profile=linux_profile_3
         )
         ctx_3.attach_mc(mc_3)
+        # fail on inconsistent state
         with self.assertRaises(CLIInternalError):
             self.assertEqual(
                 ctx_3.get_ssh_key_value_and_no_ssh_key(),
@@ -332,13 +381,14 @@ class AKSCreateContextTestCase(unittest.TestCase):
             {
                 "dns_name_prefix": None,
                 "fqdn_subdomain": None,
-                "name": "test_name",
+                "name": "1234_test_name",
                 "resource_group_name": "test_rg_name",
             },
         )
         ctx_1.set_intermediate("subscription_id", "1234-5678")
+        self.assertEqual(ctx_1._get_dns_name_prefix(read_only=True), None)
         self.assertEqual(
-            ctx_1.get_dns_name_prefix(), "testname-testrgname-1234-5"
+            ctx_1.get_dns_name_prefix(), "a1234testn-testrgname-1234-5"
         )
         mc = self.models.ManagedCluster(
             location="test_location", dns_prefix="test_mc_dns_name_prefix"
@@ -346,7 +396,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_dns_name_prefix(), "test_mc_dns_name_prefix")
 
-        # invalid parameter with validation
+        # custom value
         ctx_2 = AKSCreateContext(
             self.cmd,
             {
@@ -354,20 +404,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
         )
+        # fail on mutually exclusive arguments
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_dns_name_prefix()
-
-    def test_get_location(self):
-        # default & dynamic completion
-        ctx_1 = AKSCreateContext(self.cmd, {"location": None})
-        with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
-            return_value="test_location",
-        ):
-            self.assertEqual(ctx_1.get_location(), "test_location")
-        mc = self.models.ManagedCluster(location="test_mc_location")
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_location(), "test_mc_location")
 
     def test_get_kubernetes_version(self):
         # default
@@ -387,6 +426,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1 = AKSCreateContext(
             self.cmd, {"vm_set_type": None, "kubernetes_version": ""}
         )
+        self.assertEqual(ctx_1._get_vm_set_type(read_only=True), None)
         self.assertEqual(ctx_1.get_vm_set_type(), "VirtualMachineScaleSets")
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
             name="test_ap_name", type="test_mc_vm_set_type"
@@ -411,6 +451,13 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_2.attach_mc(mc)
         self.assertEqual(ctx_2.get_vm_set_type(), "test_mc_vm_set_type")
+
+        # custom value & dynamic completion
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {"vm_set_type": None, "kubernetes_version": "1.12.8"},
+        )
+        self.assertEqual(ctx_3.get_vm_set_type(), "AvailabilitySet")
 
     def test_get_nodepool_name(self):
         # default
@@ -664,7 +711,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             (5, True, 1, 10),
         )
 
-        # invalid parameter with validation
+        # custom value
         ctx_2 = AKSCreateContext(
             self.cmd,
             {
@@ -674,10 +721,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "max_count": None,
             },
         )
+        # fail on min_count/max_count not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_2.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
 
-        # invalid parameter with validation
+        # custom value
         ctx_3 = AKSCreateContext(
             self.cmd,
             {
@@ -687,10 +735,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "max_count": 1,
             },
         )
+        # fail on min_count > max_count
         with self.assertRaises(InvalidArgumentValueError):
             ctx_3.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
 
-        # invalid parameter with validation
+        # custom value
         ctx_4 = AKSCreateContext(
             self.cmd,
             {
@@ -700,10 +749,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "max_count": 10,
             },
         )
+        # fail on node_count < min_count
         with self.assertRaises(InvalidArgumentValueError):
             ctx_4.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
 
-        # invalid parameter with validation
+        # custom value
         ctx_5 = AKSCreateContext(
             self.cmd,
             {
@@ -713,6 +763,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "max_count": None,
             },
         )
+        # fail on enable_cluster_autoscaler not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_5.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
 
@@ -744,16 +795,17 @@ class AKSCreateContextTestCase(unittest.TestCase):
         windows_profile = self.models.ManagedClusterWindowsProfile(
             # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
             admin_username="test_mc_win_admin",
-            admin_password="test_mc_win_admin_password",
         )
         mc = self.models.ManagedCluster(
             location="test_location", windows_profile=windows_profile
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_windows_admin_username_and_password(),
-            ("test_mc_win_admin", "test_mc_win_admin_password"),
-        )
+        # fail on inconsistent state
+        with self.assertRaises(CLIInternalError):
+            self.assertEqual(
+                ctx_1.get_windows_admin_username_and_password(),
+                ("test_mc_win_admin", "test_mc_win_admin_password"),
+            )
 
         # dynamic completion
         ctx_2 = AKSCreateContext(
@@ -763,10 +815,20 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "windows_admin_password": "test_win_admin_pd",
             },
         )
+        # fail on no tty
+        with patch(
+            "knack.prompting.verify_is_a_tty",
+            side_effect=NoTTYException,
+        ), self.assertRaises(NoTTYError):
+            ctx_2.get_windows_admin_username_and_password()
         with patch(
             "azure.cli.command_modules.acs.decorator.prompt",
             return_value="test_win_admin_name",
         ):
+            self.assertEqual(
+                ctx_2._get_windows_admin_username_and_password(read_only=True),
+                (None, "test_win_admin_pd"),
+            )
             self.assertEqual(
                 ctx_2.get_windows_admin_username_and_password(),
                 ("test_win_admin_name", "test_win_admin_pd"),
@@ -793,6 +855,12 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "windows_admin_password": None,
             },
         )
+        # fail on no tty
+        with patch(
+            "knack.prompting.verify_is_a_tty",
+            side_effect=NoTTYException,
+        ), self.assertRaises(NoTTYError):
+            ctx_3.get_windows_admin_username_and_password()
         with patch(
             "azure.cli.command_modules.acs.decorator.prompt_pass",
             return_value="test_win_admin_pd",
@@ -801,19 +869,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 ctx_3.get_windows_admin_username_and_password(),
                 ("test_win_admin_name", "test_win_admin_pd"),
             )
-        windows_profile = self.models.ManagedClusterWindowsProfile(
-            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
-            admin_username="test_mc_win_admin_name",
-            admin_password="test_mc_win_admin_pd",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", windows_profile=windows_profile
-        )
-        ctx_3.attach_mc(mc)
-        self.assertEqual(
-            ctx_3.get_windows_admin_username_and_password(),
-            ("test_mc_win_admin_name", "test_mc_win_admin_pd"),
-        )
 
     def test_get_enable_ahub(self):
         # default
@@ -905,7 +960,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
         service_principal_profile = (
             self.models.ManagedClusterServicePrincipalProfile(
                 client_id="test_mc_service_principal",
-                secret="test_mc_client_secret",
             )
         )
         mc = self.models.ManagedCluster(
@@ -913,10 +967,12 @@ class AKSCreateContextTestCase(unittest.TestCase):
             service_principal_profile=service_principal_profile,
         )
         ctx_3.attach_mc(mc)
-        self.assertEqual(
-            ctx_3.get_service_principal_and_client_secret(),
-            ("test_mc_service_principal", "test_mc_client_secret"),
-        )
+        # fail on inconsistent state
+        with self.assertRaises(CLIInternalError):
+            self.assertEqual(
+                ctx_3.get_service_principal_and_client_secret(),
+                ("test_mc_service_principal", "test_mc_client_secret"),
+            )
 
         # dynamic completion
         ctx_4 = AKSCreateContext(
@@ -939,6 +995,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
             return_value=None,
         ):
+            # fail on client_secret not specified
             with self.assertRaises(CLIError):
                 ctx_4.get_service_principal_and_client_secret()
 
@@ -964,27 +1021,26 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_2 = AKSCreateContext(
             self.cmd,
             {
-                "name": "test_name",
-                "resource_group_name": "test_rg_name",
                 "enable_managed_identity": True,
                 "service_principal": "test_service_principal",
                 "client_secret": "test_client_secret",
             },
         )
-        ctx_2.set_intermediate(
-            "subscription_id", "1234-5678", overwrite_exists=True
+        self.assertEqual(
+            ctx_2.get_enable_managed_identity(), False
         )
-        with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
-            return_value="test_location",
-        ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
-            return_value=None,
-        ):
-            self.assertEqual(
-                ctx_2.get_service_principal_and_client_secret(),
-                ("test_service_principal", "test_client_secret"),
-            )
+
+        # custom value
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_managed_identity": False,
+                "assign_identity": "test_assign_identity",
+            }
+        )
+        # fail on enable_managed_identity not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_3.get_enable_managed_identity()
 
     def test_get_skip_subnet_role_assignment(self):
         # default
@@ -997,14 +1053,44 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"assign_identity": None})
         self.assertEqual(ctx_1.get_assign_identity(), None)
+        user_assigned_identity = {
+            "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        identity = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", identity=identity
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_assign_identity(), "test_assign_identity")
 
-    def test_get_user_assigned_identity_client_id(self):
-        # invalid parameter
-        ctx_1 = AKSCreateContext(self.cmd, {"assign_identity": None})
+        # custom value
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_managed_identity": False,
+                "assign_identity": "test_assign_identity",
+            },
+        )
+        # fail on enable_managed_identity not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_1.get_user_assigned_identity_client_id()
+            ctx_2.get_assign_identity()
 
-    def test_get_user_assigned_identity_object_id(self):
+        # custom value
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "assign_identity": None,
+                "assign_kubelet_identity": "test_assign_kubelet_identity",
+            },
+        )
+        # fail on assign_identity not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_3.get_assign_identity()
+
+    def test_get_identity_by_msi_client(self):
         # custom value
         ctx_1 = AKSCreateContext(
             self.cmd,
@@ -1013,7 +1099,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "enable_managed_identity": True,
             },
         )
-        identity_obj = Mock(principal_id="8765-4321")
+        identity_obj = Mock(client_id="1234-5678", principal_id="8765-4321")
         msi_client = Mock(
             user_assigned_identities=Mock(get=Mock(return_value=identity_obj))
         )
@@ -1021,13 +1107,63 @@ class AKSCreateContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.custom.get_msi_client",
             return_value=msi_client,
         ) as get_msi_client:
-            self.assertEqual(
-                ctx_1.get_user_assigned_identity_object_id(), "8765-4321"
+            identity = ctx_1.get_identity_by_msi_client(ctx_1.get_assign_identity())
+            self.assertEqual(identity.client_id, "1234-5678")
+            self.assertEqual(identity.principal_id, "8765-4321")
+            get_msi_client.assert_called_once_with(self.cmd.cli_ctx, "1234")
+            msi_client.user_assigned_identities.get.assert_called_once_with(
+                resource_group_name="test_rg", resource_name="5678"
             )
-        get_msi_client.assert_called_once_with(self.cmd.cli_ctx, "1234")
-        msi_client.user_assigned_identities.get.assert_called_once_with(
-            resource_group_name="test_rg", resource_name="5678"
+
+    def test_get_user_assigned_identity_client_id(self):
+        # fail on assign_identity not provided
+        ctx_1 = AKSCreateContext(self.cmd, {"assign_identity": None})
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_1.get_user_assigned_identity_client_id()
+
+        # custom value
+        identity_obj = Mock(
+            client_id="test_client_id",
         )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.AKSCreateContext.get_identity_by_msi_client",
+            return_value=identity_obj,
+        ):
+            ctx_2 = AKSCreateContext(
+                self.cmd,
+                {
+                    "assign_identity": "test_assign_identity",
+                    "enable_managed_identity": True,
+                },
+            )
+            self.assertEqual(
+                ctx_2.get_user_assigned_identity_client_id(), "test_client_id"
+            )
+
+    def test_get_user_assigned_identity_object_id(self):
+        # fail on assign_identity not provided
+        ctx_1 = AKSCreateContext(self.cmd, {"assign_identity": None})
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_1.get_user_assigned_identity_object_id()
+
+        # custom value
+        identity_obj = Mock(
+            principal_id="test_principal_id",
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.AKSCreateContext.get_identity_by_msi_client",
+            return_value=identity_obj,
+        ):
+            ctx_2 = AKSCreateContext(
+                self.cmd,
+                {
+                    "assign_identity": "test_assign_identity",
+                    "enable_managed_identity": True,
+                },
+            )
+            self.assertEqual(
+                ctx_2.get_user_assigned_identity_object_id(), "test_principal_id"
+            )
 
     def test_get_yes(self):
         # default
@@ -2087,7 +2223,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_fqdn_subdomain(), "test_mc_fqdn_subdomain")
 
-        # invalid parameter with validation
+        # custom value
         ctx_2 = AKSCreateContext(
             self.cmd,
             {
@@ -2095,8 +2231,35 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
         )
+        # fail on mutually exclusive arguments
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_fqdn_subdomain()
+
+        # custom value
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": True,
+                "fqdn_subdomain": "test_fqdn_subdomain",
+                "private_dns_zone": "system",
+            },
+        )
+        # fail on fqdn_subdomain specified and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_SYSTEM 
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_3.get_fqdn_subdomain()
+
+        # custom value
+        ctx_4 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_private_cluster": True,
+                "fqdn_subdomain": "test_fqdn_subdomain",
+                "private_dns_zone": "test_private_dns_zone",
+            },
+        )
+        # fail on invalid private_dns_zone
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_4.get_fqdn_subdomain()
 
     def test_get_enable_private_cluster(self):
         # default

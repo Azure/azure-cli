@@ -2084,6 +2084,17 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
+    raw_parameters = locals()
+    from .decorator import AKSCreateModels, AKSCreateDecorator
+    models = AKSCreateModels(cmd, ResourceType.MGMT_CONTAINERSERVICE)
+    aks_create_decorator = AKSCreateDecorator(
+        cmd=cmd,
+        client=client,
+        models=models,
+        raw_parameters=raw_parameters,
+    )
+    mc = aks_create_decorator.construct_default_mc()
+    return aks_create_decorator.create_mc(mc)
     auto_upgrade_profile = None
     ManagedClusterWindowsProfile = cmd.get_models('ManagedClusterWindowsProfile',
                                                   resource_type=ResourceType.MGMT_CONTAINERSERVICE,
