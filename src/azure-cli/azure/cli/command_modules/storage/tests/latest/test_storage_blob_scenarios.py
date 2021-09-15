@@ -67,7 +67,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         # create file for uploading without --name
         local_file_without_name = self.create_temp_file(file_size_kb)
         blob_name_for_substitution = self.create_random_name(prefix='blob', length=24)
-        old_file_name = local_file_without_name.split('/')[-1].split('\\')[-1]
+        old_file_name = os.path.basename(local_file_without_name)
         new_file_name_with_path = local_file_without_name.replace(old_file_name, blob_name_for_substitution)
         os.rename(local_file_without_name, new_file_name_with_path)
 
