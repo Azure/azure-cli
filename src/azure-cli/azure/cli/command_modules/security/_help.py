@@ -462,7 +462,7 @@ short-summary: Shows a security setting.
 examples:
   - name: Get a security setting.
     text: >
-        az security setting show -n "MCAS"
+        az security setting show --setting-name "MCAS"
 """
 
 helps['security setting update'] = """
@@ -471,7 +471,7 @@ short-summary: Updates a security setting.
 examples:
   - name: Update a security setting.
     text: >
-        az security setting update -n "Sentinel" --is_enabled true
+        az security setting update --setting-name "Sentinel" --enabled true
 """
 
 helps['security task'] = """

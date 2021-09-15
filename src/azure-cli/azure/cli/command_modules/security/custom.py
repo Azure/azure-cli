@@ -19,6 +19,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         Setting,
                                         AlertSyncSettings,
                                         DataExportSettings)
+from azure.mgmt.security.models._security_center_enums import Enum69
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from msrestazure.tools import resource_id
@@ -111,22 +112,22 @@ def list_security_settings(client):
     return client.list()
 
 
-def get_security_setting(client, resource_name):
+def get_security_setting(client, setting_name):
 
-    return client.get(resource_name)
+    return client.get(setting_name)
 
 
-def update_security_setting(client, resource_name, is_enabled):
+def update_security_setting(client, setting_name, enabled):
 
-    if resource_name == "Sentinel":
+    if setting_name == Enum69.SENTINEL:
         setting = AlertSyncSettings()
-    elif resource_name in ('MCAS', 'WDATP', 'WDATP_EXCLUDE_LINUX_PUBLIC_PREVIEW'):
+    elif setting_name in (Enum69.MCAS, Enum69.WDATP, Enum69.WDATP_EXCLUDE_LINUX_PUBLIC_PREVIEW):
         setting = DataExportSettings()
     else:
         setting = Setting()
 
-    setting.enabled = is_enabled
-    return client.update(resource_name, setting)
+    setting.enabled = enabled
+    return client.update(setting_name, setting)
 
 
 # --------------------------------------------------------------------------------------------

@@ -8,7 +8,9 @@
 # pylint: disable=too-many-locals
 
 from azure.cli.core.commands.parameters import (get_three_state_flag,
+                                                get_enum_type,
                                                 resource_group_name_type)
+from azure.mgmt.security.models._security_center_enums import Enum69
 from knack.arguments import CLIArgumentType
 from ._validators import (validate_alert_status,
                           validate_auto_provisioning_toggle,
@@ -344,4 +346,5 @@ def load_arguments(self, _):
 
     for scope in ['setting']:
         with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('is_enabled', help='Enable or disable the setting status.', arg_type=get_three_state_flag())
+            c.argument('setting_name', help='The name of the setting', arg_type=get_enum_type(Enum69))
+            c.argument('enabled', help='Enable or disable the setting status.', arg_type=get_three_state_flag())
