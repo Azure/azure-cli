@@ -1170,6 +1170,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1 = AKSCreateContext(self.cmd, {"yes": False})
         self.assertEqual(ctx_1.get_yes(), False)
 
+    # TODO: check tests
     def test_get_attach_acr(self):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"attach_acr": None})
@@ -2244,7 +2245,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "private_dns_zone": "system",
             },
         )
-        # fail on fqdn_subdomain specified and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_SYSTEM 
+        # fail on fqdn_subdomain specified and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_SYSTEM
         with self.assertRaises(InvalidArgumentValueError):
             ctx_3.get_fqdn_subdomain()
 
@@ -2456,6 +2457,104 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(
             ctx_1.get_auto_upgrade_channel(), "test_auto_upgrade_channel"
+        )
+
+    def test_get_node_osdisk_diskencryptionset_id(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "node_osdisk_diskencryptionset_id": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_node_osdisk_diskencryptionset_id(), None)
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            disk_encryption_set_id="test_node_osdisk_diskencryptionset_id",
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_node_osdisk_diskencryptionset_id(), "test_node_osdisk_diskencryptionset_id"
+        )
+
+    def test_get_cluster_autoscaler_profile(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "cluster_autoscaler_profile": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_cluster_autoscaler_profile(), None)
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            auto_scaler_profile="test_cluster_autoscaler_profile",
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_cluster_autoscaler_profile(), "test_cluster_autoscaler_profile"
+        )
+
+    def test_get_uptime_sla(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "uptime_sla": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_uptime_sla(), None)
+        sku = self.models.ManagedClusterSKU(
+            name="Basic",
+            tier="Paid",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            sku=sku,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_uptime_sla(), True
+        )
+
+    def test_get_tags(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "tags": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_tags(), None)
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            tags={},
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_tags(), {}
+        )
+
+    def test_get_edge_zone(self):
+        # default
+        ctx_1 = AKSCreateContext(
+            self.cmd,
+            {
+                "tags": None,
+            },
+        )
+        self.assertEqual(ctx_1.get_edge_zone(), None)
+        extended_location = self.models.ExtendedLocation(
+            name="test_edge_zone",
+            type=self.models.ExtendedLocationTypes.EDGE_ZONE
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            extended_location=extended_location,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_edge_zone(), "test_edge_zone"
         )
 
 
@@ -3628,3 +3727,162 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             auto_upgrade_profile=auto_upgrade_profile,
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+    def test_set_up_auto_scaler_profile(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "cluster_autoscaler_profile": None,
+            },
+        )
+
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_auto_scaler_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "cluster_autoscaler_profile": "test_cluster_autoscaler_profile",
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_auto_scaler_profile(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            auto_scaler_profile="test_cluster_autoscaler_profile",
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+    def test_set_up_sku(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "uptime_sla": False,
+            },
+        )
+
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_sku(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "uptime_sla": True,
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_sku(mc_2)
+        sku = self.models.ManagedClusterSKU(
+            name="Basic",
+            tier="Paid",
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            sku=sku,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+    def test_set_up_extended_location(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "edge_zone": None,
+            },
+        )
+
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_mc_1 = dec_1.set_up_extended_location(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "edge_zone": "test_edge_zone",
+            },
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_mc_2 = dec_2.set_up_extended_location(mc_2)
+        extended_location = self.models.ExtendedLocation(
+            name="test_edge_zone",
+            type=self.models.ExtendedLocationTypes.EDGE_ZONE
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            extended_location=extended_location,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+    def test_build_custom_headers(self):
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "service_principal": None,
+                "client_secret": None,
+            },
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.build_custom_headers(mc_1)
+        self.assertEqual(
+            dec_1.context.get_intermediate(
+                "custom_headers"
+            ),
+            None,
+        )
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "name": "test_name",
+                "resource_group_name": "test_rg_name",
+                "location": "test_location",
+                "service_principal": "test_service_principal",
+                "client_secret": "test_client_secret",
+            },
+        )
+        dec_2.context.set_intermediate("subscription_id", "1234-5678")
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        with patch("azure.cli.command_modules.acs.custom.get_graph_rbac_management_client"):
+            mc_2 = dec_2.set_up_service_principal_profile(mc_2)
+        dec_2.build_custom_headers(mc_2)
+        self.assertEqual(dec_2.context.get_intermediate("custom_headers"), {'Ocp-Aad-Session-Key': None})
+
+    def test_construct_default_mc(self):
+        pass
+
+    def test_create_mc(self):
+        pass
