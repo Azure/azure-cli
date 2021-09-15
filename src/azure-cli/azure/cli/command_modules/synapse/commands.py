@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.commands import CliCommandType
-from ._validators import validate_audit_policy_arguments
 
 
 # pylint: disable=line-too-long, too-many-statements, too-many-locals
@@ -270,9 +269,8 @@ def load_command_table(self, _):
                             custom_command_type=get_custom_sdk('sqlpoolblobauditingpolicy',
                                                                cf_synapse_client_sqlpool_blob_auditing_policies_factory),
                             client_factory=cf_synapse_client_sqlpool_blob_auditing_policies_factory) as g:
-        g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='sqlpool_blob_auditing_policy_update',
-                                 validator=validate_audit_policy_arguments)
+        g.custom_show_command('show', 'sqlpool_audit_policy_show')
+        g.generic_update_command('update', custom_func_name='sqlpool_blob_auditing_policy_update')
 
     # Management Plane Commands --Sql Ad-Admin
     with self.command_group('synapse sql ad-admin', command_type=synapse_workspace_aad_admin_sdk,
@@ -292,9 +290,9 @@ def load_command_table(self, _):
                             custom_command_type=get_custom_sdk('sqlpoolblobauditingpolicy',
                                                                cf_synapse_client_sqlserver_blob_auditing_policies_factory),
                             client_factory=cf_synapse_client_sqlserver_blob_auditing_policies_factory) as g:
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'workspace_audit_policy_show')
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='sqlserver_blob_auditing_policy_update',
-                                 supports_no_wait=True, validator=validate_audit_policy_arguments)
+                                 supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --FirewallRule

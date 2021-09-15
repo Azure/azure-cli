@@ -98,10 +98,10 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 # pylint: disable=too-many-instance-attributes
 class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage', hns=False,
+    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage', hns=False, length=24,
                  parameter_name='storage_account', resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
-        super(StorageAccountPreparer, self).__init__(name_prefix, 24)
+        super(StorageAccountPreparer, self).__init__(name_prefix, length)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku

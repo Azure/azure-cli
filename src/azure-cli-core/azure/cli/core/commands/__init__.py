@@ -875,7 +875,11 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.poller_done_interval_ms = poller_done_interval_ms
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
-        self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
+
+        self.progress_bar = None
+        disable_progress_bar = self.cli_ctx.config.getboolean('core', 'disable_progress_bar', False)
+        if not disable_progress_bar and not cli_ctx.only_show_errors:
+            self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -943,12 +947,13 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                             if update:
                                 logger.info(result)
 
-    def __call__(self, poller):
+    def __call__(self, poller):  # pylint: disable=too-many-statements
         from msrest.exceptions import ClientException
         from azure.core.exceptions import HttpResponseError
 
         correlation_message = ''
-        self.progress_bar.begin()
+        if self.progress_bar:
+            self.progress_bar.begin()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
@@ -976,10 +981,12 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
-                self.progress_bar.update_progress()
+                if self.progress_bar:
+                    self.progress_bar.update_progress()
                 self._delay()
             except KeyboardInterrupt:
-                self.progress_bar.stop()
+                if self.progress_bar:
+                    self.progress_bar.stop()
                 logger.error('Long-running operation wait cancelled.  %s', correlation_message)
                 raise
 
@@ -987,7 +994,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             result = poller.result()
         except (ClientException, HttpResponseError) as exception:
             from azure.cli.core.commands.arm import handle_long_running_operation_exception
-            self.progress_bar.stop()
+            if self.progress_bar:
+                self.progress_bar.stop()
             if getattr(exception, 'status_code', None) == 404 and \
                ('delete' in self.cli_ctx.data['command'] or 'purge' in self.cli_ctx.data['command']):
                 logger.debug('Service returned 404 on the long-running delete or purge operation. CLI treats it as '
@@ -998,7 +1006,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             else:
                 raise exception
         finally:
-            self.progress_bar.end()
+            if self.progress_bar:
+                self.progress_bar.end()
             if poll_flag:
                 telemetry.poll_end()
 
