@@ -86,7 +86,8 @@ DEFAULT_INDEXING_POLICY = """{
 
 
 # pylint: disable=too-many-locals
-def cli_cosmosdb_create(cmd, client,
+def cli_cosmosdb_create(cmd,
+                        client,
                         resource_group_name,
                         account_name,
                         locations=None,
@@ -133,7 +134,8 @@ def cli_cosmosdb_create(cmd, client,
         restore_timestamp_utc = _convert_to_utc_timestamp(
             restore_timestamp).isoformat()
 
-    return _create_database_account(client=client,
+    return _create_database_account(cmd=cmd,
+                                    client=client,
                                     resource_group_name=resource_group_name,
                                     account_name=account_name,
                                     locations=locations,
