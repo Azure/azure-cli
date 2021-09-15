@@ -1019,6 +1019,9 @@ def load_arguments(self, _):
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
                    min_api='2020-09-30', is_experimental=True,
                    help='This property allows you to specify the permission of sharing gallery.')
+        c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_experimental=True,
+                   help='Enables soft-deletion for resources in this gallery,'
+                        ' allowing them to be recovered within retention time.')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
