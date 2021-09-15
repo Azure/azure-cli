@@ -1955,7 +1955,8 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
     @StorageAccountPreparer(name_prefix="testams")
     @AllowLargeResponse()
     def test_private_endpoint_connection_media_service(self, resource_group, storage_account):
-        storage_account = self.cmd('storage account show -n {account}'.format(account=storage_account)).get_output_in_json()
+        storage_account_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.format(
+            self.get_subscription_id(), resource_group, storage_account)
 
         self.kwargs.update({
             'rg': resource_group,
@@ -1964,7 +1965,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
             'resource': self.create_random_name('clitestams', 24),
             'type': 'Microsoft.Media/mediaservices',
             'extra_create': '--storage-account {storage_account} -l eastus'.format(
-                storage_account=storage_account['id'])
+                storage_account=storage_account_id)
         })
 
         _test_private_endpoint(self, approve=False, rejected=False)
