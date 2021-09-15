@@ -133,7 +133,7 @@ def fetch_tier(paged_recovery_points):
         isInstantRecoverable = False
         isHardenedRP = False
         isArchived = False
-
+        
         if rp.properties.recovery_point_tier_details is None:
             continue
 

@@ -20,7 +20,7 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
     AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
     RecoveryPointRehydrationInfo, AzureWorkloadSAPHanaRestoreWithRehydrateRequest, \
-    AzureWorkloadSQLRestoreWithRehydrateRequest
+    AzureWorkloadSQLRestoreWithRehydrateRequest, CrossRegionRestoreRequest
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type
@@ -112,8 +112,8 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     if container_name is None or not cust_help.is_native_name(container_name):
         filter_string = cust_help.get_filter_string({'backupManagementType': "AzureWorkload"})
         # refresh containers and try to get the protectable container object again
-        refresh_result = client.refresh(vault_name, resource_group_name, fabric_name,
-                                        filter=filter_string, raw=True)
+        refresh_result = client.refresh(vault_name, resource_group_name, fabric_name, filter=filter_string,
+                                cls=cust_help.get_pipeline_response)
         cust_help.track_refresh_operation(cmd.cli_ctx, refresh_result, vault_name, resource_group_name)
         container_name = _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id)
 
@@ -129,7 +129,8 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger register and wait for completion
-    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param, raw=True)
+    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param,
+                             cls=cust_help.get_pipeline_response)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -164,7 +165,8 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                                         source_resource_id=source_resource_id)
     param = ProtectionContainerResource(properties=properties)
     # Trigger register and wait for completion
-    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param, raw=True)
+    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param,
+                             cls=cust_help.get_pipeline_response)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -177,7 +179,8 @@ def unregister_wl_container(cmd, client, vault_name, resource_group_name, contai
             """)
 
     # Trigger unregister and wait for completion
-    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name, raw=True)
+    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name,
+                               cls=cust_help.get_pipeline_response)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -203,7 +206,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
 
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, param, raw=True)
+                                     container_uri, item_uri, param, cls=cust_help.get_pipeline_response)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -361,14 +364,11 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, 
     # Get recovery points
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
     paged_recovery_points = cust_help.get_list_from_paged_response(recovery_points)
-
     common.fetch_tier(paged_recovery_points)
-
     if use_secondary_region:
         paged_recovery_points = [item for item in paged_recovery_points if item.properties.recovery_point_tier_details
                                  is None or (item.properties.recovery_point_tier_details is not None and
                                              item.tier_type != 'VaultArchive')]
-
     recovery_point_list = common.check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move)
     recovery_point_list = common.filter_rp_based_on_tier(recovery_point_list, tier)
     return recovery_point_list
@@ -386,9 +386,11 @@ def move_wl_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_
     parameters = MoveRPAcrossTiersRequest(source_tier_type=common.tier_type_map[source_tier],
                                           target_tier_type=common.tier_type_map[destination_tier])
 
-    result = _backup_client_factory(cmd.cli_ctx).move_recovery_point(vault_name, resource_group_name, fabric_name,
-                                                                     container_uri, item_uri, rp_name, parameters,
-                                                                     raw=True, polling=False).result()
+    result = _backup_client_factory(cmd.cli_ctx).begin_move_recovery_point(vault_name, resource_group_name,
+                                                                           fabric_name, container_uri, item_uri,
+                                                                           rp_name, parameters,
+                                                                           cls=cust_help.get_pipeline_response,
+                                                                           polling=False).result()
 
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
@@ -416,7 +418,7 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
 
     # Trigger enable protection and wait for completion
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_name, item_name, param, raw=True)
+                                     container_name, item_name, param, cls=cust_help.get_pipeline_response)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -457,7 +459,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
 
     # Trigger backup and wait for completion
     result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
-                            item_uri, param, raw=True)
+                            item_uri, param, cls=cust_help.get_pipeline_response)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -474,7 +476,8 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
             """)
 
     if delete_backup_data:
-        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri, raw=True)
+        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                               cls=cust_help.get_pipeline_response)
         return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     properties = _get_protected_item_instance(backup_item_type)
@@ -484,7 +487,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
 
     # Trigger disable protection and wait for completion
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, param, raw=True)
+                                     container_uri, item_uri, param, cls=cust_help.get_pipeline_response)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -506,7 +509,7 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
     param = ProtectedItemResource(properties=properties)
 
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, param, raw=True)
+                                     container_uri, item_uri, param, cls=cust_help.get_pipeline_response)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -670,13 +673,16 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
                                                       item_uri, recovery_point_id, aad_result).properties
         crr_client = cross_region_restore_cf(cmd.cli_ctx)
         trigger_restore_properties.region = azure_region
-        result = crr_client.trigger(azure_region, crr_access_token, trigger_restore_properties, raw=True,
-                                    polling=False).result()
+        trigger_crr_request = CrossRegionRestoreRequest(cross_region_restore_access_details=crr_access_token,
+                                                        restore_request=trigger_restore_properties)
+        result = crr_client.begin_trigger(azure_region, trigger_crr_request, cls=cust_help.get_pipeline_response,
+                                          polling=False).result()
         return cust_help.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
 
     # Trigger restore and wait for completion
-    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
-                            item_uri, recovery_point_id, trigger_restore_request, raw=True, polling=False).result()
+    result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                                  recovery_point_id, trigger_restore_request, cls=cust_help.get_pipeline_response,
+                                  polling=False).result()
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
