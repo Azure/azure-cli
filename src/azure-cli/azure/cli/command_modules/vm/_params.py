@@ -1055,6 +1055,7 @@ def load_arguments(self, _):
         c.argument('data_vhds_uris', nargs='+', help='Source VHD URIs (space-delimited) of data disks')
         c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
         c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
+        c.argument('replication_mode', min_api='2021-07-01', arg_type=get_enum_type(['Full', 'Shallow']), help='Optional parameter which specifies the mode to be used for replication. This property is not updatable.')
 
     with self.argument_context('sig image-version list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
