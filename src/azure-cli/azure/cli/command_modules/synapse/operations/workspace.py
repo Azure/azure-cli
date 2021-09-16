@@ -6,7 +6,7 @@
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIdentity, \
     DataLakeStorageAccountDetails, WorkspaceKeyDetails, CustomerManagedKeyDetails, EncryptionDetails, ManagedVirtualNetworkSettings, \
-    ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity, IpFirewallRuleInfo, Key, ManagedIdentitySqlControlSettingsModel, WorkspaceRepositoryConfiguration    
+    ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity, IpFirewallRuleInfo, Key, ManagedIdentitySqlControlSettingsModel, WorkspaceRepositoryConfiguration
 from azure.mgmt.cdn.models import CheckNameAvailabilityInput
 
 
@@ -16,9 +16,10 @@ def list_workspaces(cmd, client, resource_group_name=None):
         resource_group_name=resource_group_name) if resource_group_name else client.list()
 
 
+# pylint: disable=too-many-locals
 def create_workspace(cmd, client, resource_group_name, workspace_name, storage_account, file_system,
                      sql_admin_login_user, sql_admin_login_password, location=None, key_name="default", key_identifier=None, enable_managed_virtual_network=None,
-                     allowed_aad_tenant_ids=None, prevent_data_exfiltration=None, tags=None, Repo_type=None, host_name=None, account_name=None,
+                     allowed_aad_tenant_ids=None, prevent_data_exfiltration=None, tags=None, repo_type=None, host_name=None, account_name=None,
                      collaboration_branch=None, repository_name=None, root_folder='/', project_name=None, tenant_id=None, no_wait=False):
     identity_type = "SystemAssigned"
     identity = ManagedIdentity(type=identity_type)
@@ -43,17 +44,23 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
         else:
             managed_virtual_network_settings = ManagedVirtualNetworkSettings(prevent_data_exfiltration=False)
 
-    if Repo_type:
-        if Repo_type == 'WorkspaceVSTSConfiguration' and tenant_id is None:
+    if repo_type:
+        if repo_type == 'WorkspaceVSTSConfiguration' and tenant_id is None:
             from ..util import get_tenant_id
             tenant_id = get_tenant_id()
-        if Repo_type == 'WorkspaceVSTSConfiguration' and project_name is None:
+        if repo_type == 'WorkspaceVSTSConfiguration' and project_name is None:
             from azure.cli.core.azclierror import RequiredArgumentMissingError
             err_msg = 'project_name argument is missing'
             recommendation = 'provide a project name by --project-name'
             raise RequiredArgumentMissingError(err_msg, recommendation)
-        Workspace_Repository_Configuration = WorkspaceRepositoryConfiguration(type=Repo_type, host_name=host_name, account_name=account_name,
-        project_name=project_name, repository_name=repository_name, collaboration_branch=collaboration_branch, root_folder=root_folder, tenant_id = tenant_id)
+        Workspace_Repository_Configuration = WorkspaceRepositoryConfiguration(type=repo_type,
+                                                                              host_name=host_name,
+                                                                              account_name=account_name,
+                                                                              project_name=project_name,
+                                                                              repository_name=repository_name,
+                                                                              collaboration_branch=collaboration_branch,
+                                                                              root_folder=root_folder,
+                                                                              tenant_id=tenant_id)
 
     workspace_info = Workspace(
         identity=identity,
@@ -65,14 +72,15 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
         managed_virtual_network_settings=managed_virtual_network_settings,
         encryption=encryption,
         tags=tags,
-        workspace_repository_configuration = Workspace_Repository_Configuration
+        workspace_repository_configuration=Workspace_Repository_Configuration
     )
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, workspace_info)
 
 
+# pylint: disable=too-many-locals
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
-                     allowed_aad_tenant_ids=None, tags=None, key_name=None, Repo_type=None, host_name=None, account_name=None,
-                     collaboration_branch=None, repository_name=None, root_folder='/', project_name=None, tenant_id=None, no_wait=False):
+                     allowed_aad_tenant_ids=None, tags=None, key_name=None, repo_type=None, host_name=None, account_name=None,
+                     collaboration_branch=None, repository_name=None, root_folder=None, project_name=None, tenant_id=None, no_wait=False):
     encryption = None
     tenant_ids_list = None
 
@@ -85,17 +93,24 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
     else:
         tenant_ids_list = allowed_aad_tenant_ids
 
-    if Repo_type:
-        if Repo_type == 'WorkspaceVSTSConfiguration' and tenant_id is None:
+    if repo_type:
+        root_folder = '/'
+        if repo_type == 'WorkspaceVSTSConfiguration' and tenant_id is None:
             from ..util import get_tenant_id
             tenant_id = get_tenant_id()
-        if Repo_type == 'WorkspaceVSTSConfiguration' and project_name is None:
+        if repo_type == 'WorkspaceVSTSConfiguration' and project_name is None:
             from azure.cli.core.azclierror import RequiredArgumentMissingError
             err_msg = 'project_name argument is missing'
             recommendation = 'provide a project name by --project-name'
             raise RequiredArgumentMissingError(err_msg, recommendation)
-        Workspace_Repository_Configuration = WorkspaceRepositoryConfiguration(type=Repo_type, host_name=host_name, account_name=account_name,
-        project_name=project_name, repository_name=repository_name, collaboration_branch=collaboration_branch, root_folder=root_folder, tenant_id = tenant_id)
+        Workspace_Repository_Configuration = WorkspaceRepositoryConfiguration(type=repo_type,
+                                                                              host_name=host_name,
+                                                                              account_name=account_name,
+                                                                              project_name=project_name,
+                                                                              repository_name=repository_name,
+                                                                              collaboration_branch=collaboration_branch,
+                                                                              root_folder=root_folder,
+                                                                              tenant_id=tenant_id)
 
     updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=tenant_ids_list) if allowed_aad_tenant_ids is not None else None
     workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings, workspace_repository_configuration=Workspace_Repository_Configuration)
