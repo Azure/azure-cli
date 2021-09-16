@@ -14,7 +14,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class SynapseScenarioTests(ScenarioTest):
-    location = "eastus2euap"
+    location = "eastus"
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
@@ -479,7 +479,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace_eastus()
+        self._create_workspace()
 
         self.kwargs['storage-endpoint'] = self._get_storage_endpoint(self.kwargs['storage-account'], self.kwargs['rg'])
         self.kwargs['storage-key'] = self._get_storage_key(self.kwargs['storage-account'], self.kwargs['rg'])
@@ -645,7 +645,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace_eastus()
+        self._create_workspace()
 
         # create sql pool
         sql_pool = self.cmd(
@@ -1188,54 +1188,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ])
 
-    def _create_workspace_eastus(self, *additional_create_params):
-        self.kwargs.update({
-            'workspace': self.create_random_name(prefix='clitest', length=16),
-            'location': 'eastus',
-            'file-system': 'testfilesystem',
-            'login-user': 'cliuser1',
-            'login-password': self.create_random_name(prefix='Pswd1', length=16)
-        })
-
-        # Create adlsgen2
-        self._create_storage_account_eastus()
-
-        # Wait some time to improve robustness
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(60)
-
-        # create synapse workspace
-        self.cmd(
-            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
-            '--file-system {file-system} --sql-admin-login-user {login-user} '
-            '--sql-admin-login-password {login-password}'
-            ' --location {location} ' + ' '.join(additional_create_params), checks=[
-                self.check('name', self.kwargs['workspace']),
-                self.check('type', 'Microsoft.Synapse/workspaces'),
-                self.check('provisioningState', 'Succeeded')
-            ])
-
-    def _create_storage_account_eastus(self):
-        self.kwargs.update({
-            'location': 'eastus',
-            'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
-        })
-
-        # Wait some time to improve robustness
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(60)
-
-        # create storage account
-        self.cmd(
-            'az storage account create --name {storage-account} --resource-group {rg} --enable-hierarchical-namespace true --location {location}',
-            checks=[
-                self.check('name', self.kwargs['storage-account']),
-                self.check('type', 'Microsoft.Storage/storageAccounts'),
-                self.check('provisioningState', 'Succeeded')
-            ])
-
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
@@ -1246,7 +1198,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace_eastus()
+        self._create_workspace()
         # create firewall rule
         self.cmd(
             'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
@@ -1293,7 +1245,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'dataset'})
 
         # create a workspace
-        self._create_workspace_eastus()
+        self._create_workspace()
         # create firewall rule
         self.cmd(
             'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
@@ -1529,7 +1481,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace_eastus()
+        self._create_workspace()
 
         # create firewall rule
         self.cmd(
@@ -1595,7 +1547,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace_eastus()
+        self._create_workspace()
         # create firewall rule
         self.cmd(
             'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '

@@ -173,6 +173,11 @@ def load_arguments(self, _):
                    help='The library requirements file.')
         c.argument('force', arg_type=get_three_state_flag(), help='The flag of force operation.')
 
+        # Custom Libraries
+        c.argument('package_action', arg_group='Custom Libraries', arg_type=get_enum_type(['Add', 'Remove']),
+                   help='Package action must be specified when you add or remove a workspace package from a Apache Spark pool.')
+        c.argument('package', arg_group='Custom Libraries', nargs='+', help='List of workspace packages name.')
+
     # synapse sql pool
     with self.argument_context('synapse sql pool') as c:
         c.argument('workspace_name', id_part='name', help='The workspace name.')

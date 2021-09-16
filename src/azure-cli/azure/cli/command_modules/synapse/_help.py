@@ -144,6 +144,10 @@ examples:
     text: |-
         az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
         --enable-auto-scale --min-node-count 3 --max-node-count 100
+  - name: Update the Spark pool's custom libraries.
+    text: |-
+        az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --package-action Add --package package1.jar package2.jar
 """
 
 helps['synapse spark pool delete'] = """
