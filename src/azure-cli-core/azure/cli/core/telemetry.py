@@ -17,10 +17,10 @@ from functools import wraps
 
 import azure.cli.core.decorators as decorators
 
-PRODUCT_NAME = 'azurecli'
+PRODUCT_NAME = 'msgraph-cli'
 TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
-DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
+DEFAULT_INSTRUMENTATION_KEY = '0a35c907-e5f4-4b28-9b67-333addc1cf7e'
 CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
 # Put a config section or key (section.name) in the allowed set to allow recording the config
 # values in the section or for the key with 'az config set'
