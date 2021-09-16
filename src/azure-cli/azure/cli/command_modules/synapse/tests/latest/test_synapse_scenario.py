@@ -1723,6 +1723,11 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> 93fc2591d (add cmd for spark job definition)
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
@@ -1762,3 +1767,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
             expect_failure=True)
+<<<<<<< HEAD
+=======
+>>>>>>> afedea1af (add cmd for spark job definition)
+>>>>>>> 93fc2591d (add cmd for spark job definition)
