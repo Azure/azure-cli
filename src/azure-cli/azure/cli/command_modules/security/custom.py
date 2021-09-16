@@ -16,7 +16,6 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AdvancedThreatProtectionSetting,
                                         RuleResultsInput,
                                         RulesResultsInput,
-                                        Setting,
                                         AlertSyncSettings,
                                         DataExportSettings)
 from azure.mgmt.security.models._security_center_enums import Enum69
@@ -121,10 +120,8 @@ def update_security_setting(client, setting_name, enabled):
 
     if setting_name == Enum69.SENTINEL:
         setting = AlertSyncSettings()
-    elif setting_name in (Enum69.MCAS, Enum69.WDATP, Enum69.WDATP_EXCLUDE_LINUX_PUBLIC_PREVIEW):
-        setting = DataExportSettings()
     else:
-        setting = Setting()
+        setting = DataExportSettings()
 
     setting.enabled = enabled
     return client.update(setting_name, setting)

@@ -346,5 +346,5 @@ def load_arguments(self, _):
 
     for scope in ['setting']:
         with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('setting_name', help='The name of the setting', arg_type=get_enum_type(Enum69))
+            c.argument('setting_name', options_list=['--name', '-n'], help='The name of the setting', arg_type=get_enum_type(Enum69))
             c.argument('enabled', help='Enable or disable the setting status.', arg_type=get_three_state_flag())
