@@ -1723,6 +1723,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
+<<<<<<< HEAD
 
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
@@ -1730,10 +1731,23 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'name': 'SparkAutoCreate1',
             'spark-pool': 'testpool',
+=======
+<<<<<<< HEAD
+=======
+
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    def test_spark_job_definition(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspacepe',
+            'name': 'SparkAutoCreate1',
+            'spark-pool': 'testzes0730',
+>>>>>>> 93fc2591d (add cmd for spark job definition)
             'spark-version': '2.4',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
         })
 
+<<<<<<< HEAD
         # create a workspace
         self._create_workspace()
 
@@ -1754,6 +1768,8 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ]).get_output_in_json()
 
+=======
+>>>>>>> 93fc2591d (add cmd for spark job definition)
         # create a spark job definition
         self.cmd(
             'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" ',
@@ -1768,6 +1784,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', self.kwargs['name'])
             ])
 
+<<<<<<< HEAD
         # Update a spark job definition
         self.cmd(
             'az synapse spark-job-definition update --workspace-name {workspace} --name {name} --file @"{file}" ',
@@ -1775,6 +1792,8 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', self.kwargs['name'])
             ])
 
+=======
+>>>>>>> 93fc2591d (add cmd for spark job definition)
         # List spark job definitions
         self.cmd(
             'az synapse spark-job-definition list --workspace-name {workspace}',
@@ -1788,3 +1807,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
             expect_failure=True)
+<<<<<<< HEAD
+=======
+>>>>>>> afedea1af (add cmd for spark job definition)
+>>>>>>> 93fc2591d (add cmd for spark job definition)

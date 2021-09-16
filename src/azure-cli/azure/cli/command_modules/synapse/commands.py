@@ -523,7 +523,10 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_spark_job_definition', supports_no_wait=True)
         g.custom_command('create', 'create_or_update_spark_job_definition', supports_no_wait=True)
         g.custom_wait_command('wait', 'get_spark_job_definition')
+<<<<<<< HEAD
         g.custom_command('update', 'create_or_update_spark_job_definition', supports_no_wait=True)
 
+=======
+>>>>>>> 93fc2591d (add cmd for spark job definition)
     with self.command_group('synapse', is_preview=True):
         pass
