@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-from re import T
+import requests
 import unittest
 from unittest.mock import Mock, patch
 
@@ -49,6 +49,7 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.profiles import ResourceType
 from knack.prompting import NoTTYException
 from knack.util import CLIError
+from msrestazure.azure_exceptions import CloudError
 
 
 class DecoratorFunctionsTestCase(unittest.TestCase):
@@ -4156,4 +4157,26 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_create_mc(self):
-        pass
+        # default value in `aks_create`
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1 = AKSCreateDecorator(self.cmd, self.client, self.models, {})
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.create_mc(None)
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="test_subscription_id")
+        )
+        resp = requests.Response()
+        resp.status_code = 500
+        err = CloudError(resp)
+        err.message = "not found in Active Directory tenant"
+        with self.assertRaises(CloudError), patch(
+            "time.sleep",
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator._put_managed_cluster_ensuring_permission",
+            side_effect=err,
+        ):
+            dec_1.create_mc(mc_1)
