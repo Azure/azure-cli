@@ -337,8 +337,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
         c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']), min_api='2021-06-01',
-                   help='Enable or disable public network access to Storage Account. '
-                        'Value is optional but if passed in, must be `Enabled` or `Disabled`.')
+                   help='Enable or disable public network access to the storage account. '
+                        'Possible values include: `Enabled` or `Disabled`.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -403,8 +403,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']), min_api='2021-06-01',
-                   help='Enable or disable public network access to Storage Account. '
-                        'Value is optional but if passed in, must be `Enabled` or `Disabled`.')
+                   help='Enable or disable public network access to the storage account. '
+                        'Possible values include: `Enabled` or `Disabled`.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
