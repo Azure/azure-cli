@@ -49,27 +49,24 @@ def create_random_resource_name(prefix='azure', length=15):
 
 
 def generate_missing_parameters(cmd, location, resource_group_name, server_name, db_engine):
-    # if location is not passed as a parameter or is missing from local context
-    if location is None and resource_group_name is None:
-        if db_engine == 'postgres':
-            location = DEFAULT_LOCATION_PG
-        else:
-            location = DEFAULT_LOCATION_MySQL
-    elif location is None and resource_group_name is not None:
-        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
-        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
-        location = resource_group.location
-
     # If resource group is there in local context, check for its existence.
-    resource_group_exists = True
     if resource_group_name is not None:
         logger.warning('Checking the existence of the resource group \'%s\'...', resource_group_name)
         resource_group_exists = _check_resource_group_existence(cmd, resource_group_name)
         logger.warning('Resource group \'%s\' exists ? : %s ', resource_group_name, resource_group_exists)
+    else:
+        resource_group_exists = False
 
-    # If resource group is not passed as a param or is not in local context or the rg in the local context has been deleted
-    if not resource_group_exists or resource_group_name is None:
+    # set location to be same as RG's if not specified
+    if not resource_group_exists:
+        if not location:
+            location = DEFAULT_LOCATION_PG if db_engine == 'postgres' else DEFAULT_LOCATION_MySQL
         resource_group_name = _create_resource_group(cmd, location, resource_group_name)
+    else:
+        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
+        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
+        if not location:
+            location = resource_group.location
 
     # If servername is not passed, always create a new server - even if it is stored in the local context
     if server_name is None:
