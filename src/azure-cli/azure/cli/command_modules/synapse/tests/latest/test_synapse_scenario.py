@@ -18,7 +18,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspaces(self, resource_group, storage_account):
         # create a workspace
         self._create_workspace()
@@ -59,7 +59,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_managed_virtual_network_workspace(self):
         # test workspace with managed virtual network
         self._create_workspace("--enable-managed-virtual-network")
@@ -72,12 +72,10 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_pool(self):
         self.kwargs.update({
             'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
             'spark-pool': self.create_random_name(prefix='testpool', length=15),
             'spark-version': '2.4'
         })
@@ -232,7 +230,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -704,7 +702,7 @@ class SynapseScenarioTests(ScenarioTest):
                  self.check('retentionDays', self.kwargs['retention-days']),
                  self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
-        ## create log analytics workspace
+        # create log analytics workspace
         self.kwargs['log_analytics_workspace_id']= self.cmd('az monitor log-analytics workspace create --resource-group {rg} '
                                               '--workspace-name {log_analytics_workspace_name}',
                                               checks=[
@@ -843,11 +841,9 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_ip_firewall_rules(self, resource_group, storage_account):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
             'ruleName': self.create_random_name(prefix='rule', length=8),
             'startIpAddress': "0.0.0.0",
             'endIpAddress': "255.255.255.255",
@@ -1150,7 +1146,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # Create adlsgen2
-        # self._create_storage_account()
+        self._create_storage_account()
 
         # Wait some time to improve robustness
         if self.is_live or self.in_recording:
@@ -1190,7 +1186,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_linked_service(self):
         self.kwargs.update({
             'name': 'linkedservice',
@@ -1239,7 +1235,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_dataset(self):
         self.kwargs.update({
             'name': 'dataset'})
@@ -1470,7 +1466,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_notebook(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
