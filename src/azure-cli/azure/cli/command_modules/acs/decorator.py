@@ -2828,7 +2828,8 @@ class AKSCreateContext:
         # read the original value passed by the command
         fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.fqdn_subdomain is not None:
+        # ManagedCluster in api version v2020.09.01 has no fqdn_subdomain attribute
+        if self.mc and getattr(self.mc, "fqdn_subdomain") is not None:
             fqdn_subdomain = self.mc.fqdn_subdomain
 
         # this parameter does not need dynamic completion
