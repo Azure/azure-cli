@@ -1723,3 +1723,45 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
+<<<<<<< HEAD
+=======
+
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    def test_spark_job_definition(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspacepe',
+            'name': 'SparkAutoCreate1',
+            'spark-pool': 'testzes0730',
+            'spark-version': '2.4',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
+        })
+
+        # create a spark job definition
+        self.cmd(
+            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" ',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # Get a spark job definition
+        self.cmd(
+            'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # List spark job definitions
+        self.cmd(
+            'az synapse spark-job-definition list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/sparkjobdefinitions')
+            ])
+
+        # delete a spark job definition
+        self.cmd(
+            'az synapse spark-job-definition delete --workspace-name {workspace} --name {name}')
+        self.cmd(
+            'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+>>>>>>> afedea1af (add cmd for spark job definition)
