@@ -309,7 +309,6 @@ class AKSCreateContextTestCase(unittest.TestCase):
 
         key = paramiko.RSAKey.generate(2048)
         public_key = "{} {}".format(key.get_name(), key.get_base64())
-
         # default
         ctx_1 = AKSCreateContext(
             self.cmd, {"ssh_key_value": public_key, "no_ssh_key": False}
@@ -1026,9 +1025,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "client_secret": "test_client_secret",
             },
         )
-        self.assertEqual(
-            ctx_2.get_enable_managed_identity(), False
-        )
+        self.assertEqual(ctx_2.get_enable_managed_identity(), False)
 
         # custom value
         ctx_3 = AKSCreateContext(
@@ -1036,7 +1033,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             {
                 "enable_managed_identity": False,
                 "assign_identity": "test_assign_identity",
-            }
+            },
         )
         # fail on enable_managed_identity not specified
         with self.assertRaises(RequiredArgumentMissingError):
@@ -1057,8 +1054,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
         }
         identity = self.models.ManagedClusterIdentity(
-            type="UserAssigned",
-            user_assigned_identities=user_assigned_identity
+            type="UserAssigned", user_assigned_identities=user_assigned_identity
         )
         mc = self.models.ManagedCluster(
             location="test_location", identity=identity
@@ -1107,7 +1103,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.custom.get_msi_client",
             return_value=msi_client,
         ) as get_msi_client:
-            identity = ctx_1.get_identity_by_msi_client(ctx_1.get_assign_identity())
+            identity = ctx_1.get_identity_by_msi_client(
+                ctx_1.get_assign_identity()
+            )
             self.assertEqual(identity.client_id, "1234-5678")
             self.assertEqual(identity.principal_id, "8765-4321")
             get_msi_client.assert_called_once_with(self.cmd.cli_ctx, "1234")
@@ -1162,7 +1160,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 },
             )
             self.assertEqual(
-                ctx_2.get_user_assigned_identity_object_id(), "test_principal_id"
+                ctx_2.get_user_assigned_identity_object_id(),
+                "test_principal_id",
             )
 
     def test_get_yes(self):
@@ -1413,6 +1412,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "outbound_type": None,
             },
         )
+        self.assertEqual(ctx_1._get_outbound_type(read_only=True), None)
         self.assertEqual(ctx_1.get_outbound_type(), "loadBalancer")
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
             outbound_type="test_outbound_type"
@@ -2003,6 +2003,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "aad_tenant_id": None,
             },
         )
+        self.assertEqual(ctx_1._get_aad_tenant_id(read_only=True), None)
         self.assertEqual(ctx_1.get_aad_tenant_id(), None)
         aad_profile_1 = self.models.ManagedClusterAADProfile(
             tenant_id="test_aad_tenant_id",
@@ -2474,7 +2475,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(
-            ctx_1.get_node_osdisk_diskencryptionset_id(), "test_node_osdisk_diskencryptionset_id"
+            ctx_1.get_node_osdisk_diskencryptionset_id(),
+            "test_node_osdisk_diskencryptionset_id",
         )
 
     def test_get_cluster_autoscaler_profile(self):
@@ -2492,7 +2494,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(
-            ctx_1.get_cluster_autoscaler_profile(), "test_cluster_autoscaler_profile"
+            ctx_1.get_cluster_autoscaler_profile(),
+            "test_cluster_autoscaler_profile",
         )
 
     def test_get_uptime_sla(self):
@@ -2513,9 +2516,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             sku=sku,
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_uptime_sla(), True
-        )
+        self.assertEqual(ctx_1.get_uptime_sla(), True)
 
     def test_get_tags(self):
         # default
@@ -2531,9 +2532,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             tags={},
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_tags(), {}
-        )
+        self.assertEqual(ctx_1.get_tags(), {})
 
     def test_get_edge_zone(self):
         # default
@@ -2546,16 +2545,14 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_edge_zone(), None)
         extended_location = self.models.ExtendedLocation(
             name="test_edge_zone",
-            type=self.models.ExtendedLocationTypes.EDGE_ZONE
+            type=self.models.ExtendedLocationTypes.EDGE_ZONE,
         )
         mc = self.models.ManagedCluster(
             location="test_location",
             extended_location=extended_location,
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_edge_zone(), "test_edge_zone"
-        )
+        self.assertEqual(ctx_1.get_edge_zone(), "test_edge_zone")
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
@@ -2566,9 +2563,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         self.client = MockClient()
 
     def test_init_mc(self):
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="1234-5678-9012")
+        )
         with patch(
-            "azure.cli.command_modules.acs.decorator.AKSCreateContext.get_subscription_id",
-            return_value="1234-5678-9012",
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
         ):
             dec_1 = AKSCreateDecorator(
                 self.cmd,
@@ -2617,6 +2617,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_agent_pool_profiles(None)
         dec_mc_1 = dec_1.set_up_agent_pool_profiles(mc_1)
         agent_pool_profile_1 = self.models.ManagedClusterAgentPoolProfile(
             # Must be 12 chars or less before ACS RP adds to it
@@ -2709,11 +2712,11 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
     def test_set_up_linux_profile(self):
-        # default value in `aks_create`
         import paramiko
 
         key = paramiko.RSAKey.generate(2048)
         public_key = "{} {}".format(key.get_name(), key.get_base64())
+        # default value in `aks_create`
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
@@ -2725,6 +2728,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_linux_profile(None)
         dec_mc_1 = dec_1.set_up_linux_profile(mc_1)
 
         ssh_config_1 = self.models.ContainerServiceSshConfiguration(
@@ -2770,6 +2776,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_windows_profile(None)
         dec_mc_1 = dec_1.set_up_windows_profile(mc_1)
 
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
@@ -2818,6 +2827,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_service_principal_profile(None)
         dec_mc_1 = dec_1.set_up_service_principal_profile(mc_1)
 
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
@@ -2872,6 +2884,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.process_add_role_assignment_for_vnet_subnet(None)
         dec_1.process_add_role_assignment_for_vnet_subnet(mc_1)
         self.assertEqual(
             dec_1.context.get_intermediate(
@@ -2914,16 +2929,44 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "skip_subnet_role_assignment": False,
                 "assign_identity": None,
+                "yes": False,
             },
         )
-        service_principal_profile_3 = (
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        with patch(
+            "azure.cli.command_modules.acs.decorator.subnet_role_assignment_exists",
+            return_value=False,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.prompt_y_n",
+            return_value=False,
+        ):
+            dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
+        self.assertEqual(
+            dec_3.context.get_intermediate(
+                "need_post_creation_vnet_permission_granting"
+            ),
+            None,
+        )
+
+        # custom value
+        dec_4 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "vnet_subnet_id": "test_vnet_subnet_id",
+                "skip_subnet_role_assignment": False,
+                "assign_identity": None,
+            },
+        )
+        service_principal_profile_4 = (
             self.models.ManagedClusterServicePrincipalProfile(
                 client_id="test_service_principal", secret="test_client_secret"
             )
         )
-        mc_3 = self.models.ManagedCluster(
+        mc_4 = self.models.ManagedCluster(
             location="test_location",
-            service_principal_profile=service_principal_profile_3,
+            service_principal_profile=service_principal_profile_4,
         )
         with patch(
             "azure.cli.command_modules.acs.decorator.subnet_role_assignment_exists",
@@ -2932,7 +2975,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator._add_role_assignment",
             return_value=True,
         ) as add_role_assignment:
-            dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
+            dec_4.process_add_role_assignment_for_vnet_subnet(mc_4)
         add_role_assignment.assert_called_once_with(
             self.cmd,
             "Network Contributor",
@@ -2940,11 +2983,54 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             scope="test_vnet_subnet_id",
         )
         self.assertEqual(
-            dec_3.context.get_intermediate(
+            dec_4.context.get_intermediate(
                 "need_post_creation_vnet_permission_granting"
             ),
             False,
         )
+
+        # custom value
+        identity_obj = Mock(
+            client_id="test_client_id",
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.AKSCreateContext.get_identity_by_msi_client",
+            return_value=identity_obj,
+        ):
+            dec_5 = AKSCreateDecorator(
+                self.cmd,
+                self.client,
+                self.models,
+                {
+                    "enable_managed_identity": True,
+                    "vnet_subnet_id": "test_vnet_subnet_id",
+                    "skip_subnet_role_assignment": False,
+                    "assign_identity": "test_assign_identity",
+                },
+            )
+            mc_5 = self.models.ManagedCluster(
+                location="test_location",
+            )
+            with patch(
+                "azure.cli.command_modules.acs.decorator.subnet_role_assignment_exists",
+                return_value=False,
+            ), patch(
+                "azure.cli.command_modules.acs.decorator._add_role_assignment",
+                return_value=False,
+            ) as add_role_assignment:
+                dec_5.process_add_role_assignment_for_vnet_subnet(mc_5)
+            add_role_assignment.assert_called_once_with(
+                self.cmd,
+                "Network Contributor",
+                "test_client_id",
+                scope="test_vnet_subnet_id",
+            )
+            self.assertEqual(
+                dec_5.context.get_intermediate(
+                    "need_post_creation_vnet_permission_granting"
+                ),
+                False,
+            )
 
     def test_process_attach_acr(self):
         # default value in `aks_create`
@@ -2957,6 +3043,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.process_attach_acr(None)
         dec_1.process_attach_acr(mc_1)
 
         # custom value
@@ -3033,6 +3122,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_network_profile(None)
         dec_mc_1 = dec_1.set_up_network_profile(mc_1)
 
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
@@ -3168,6 +3260,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_addon_profiles(None)
         dec_mc_1 = dec_1.set_up_addon_profiles(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location", addon_profiles={}
@@ -3336,6 +3431,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_aad_profile(None)
         dec_mc_1 = dec_1.set_up_aad_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -3444,6 +3542,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_api_server_access_profile(None)
         dec_mc_1 = dec_1.set_up_api_server_access_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -3469,7 +3570,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         api_server_access_profile_2 = (
             self.models.ManagedClusterAPIServerAccessProfile(
                 authorized_ip_ranges=["test_ip_1", "test_ip_2"],
-                enable_private_cluster=False,
+                enable_private_cluster=None,
             )
         )
         ground_truth_mc_2 = self.models.ManagedCluster(
@@ -3555,6 +3656,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_identity(None)
         dec_mc_1 = dec_1.set_up_identity(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -3636,6 +3740,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_identity_profile(None)
         dec_mc_1 = dec_1.set_up_identity_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -3701,6 +3808,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_auto_upgrade_profile(None)
         dec_mc_1 = dec_1.set_up_auto_upgrade_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -3740,6 +3850,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_auto_scaler_profile(None)
         dec_mc_1 = dec_1.set_up_auto_scaler_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -3775,6 +3888,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_sku(None)
         dec_mc_1 = dec_1.set_up_sku(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -3814,6 +3930,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_extended_location(None)
         dec_mc_1 = dec_1.set_up_extended_location(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -3833,7 +3952,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_2 = dec_2.set_up_extended_location(mc_2)
         extended_location = self.models.ExtendedLocation(
             name="test_edge_zone",
-            type=self.models.ExtendedLocationTypes.EDGE_ZONE
+            type=self.models.ExtendedLocationTypes.EDGE_ZONE,
         )
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -3853,11 +3972,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.build_custom_headers(None)
         dec_1.build_custom_headers(mc_1)
         self.assertEqual(
-            dec_1.context.get_intermediate(
-                "custom_headers"
-            ),
+            dec_1.context.get_intermediate("custom_headers"),
             None,
         )
 
@@ -3876,13 +3996,164 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         dec_2.context.set_intermediate("subscription_id", "1234-5678")
         mc_2 = self.models.ManagedCluster(location="test_location")
-        with patch("azure.cli.command_modules.acs.custom.get_graph_rbac_management_client"):
+        with patch(
+            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client"
+        ):
             mc_2 = dec_2.set_up_service_principal_profile(mc_2)
         dec_2.build_custom_headers(mc_2)
-        self.assertEqual(dec_2.context.get_intermediate("custom_headers"), {'Ocp-Aad-Session-Key': None})
+        self.assertEqual(
+            dec_2.context.get_intermediate("custom_headers"),
+            {"Ocp-Aad-Session-Key": None},
+        )
 
-    def test_construct_default_mc(self):
-        pass
+    def test_construct_default_mc_profile(self):
+        import paramiko
+
+        key = paramiko.RSAKey.generate(2048)
+        public_key = "{} {}".format(key.get_name(), key.get_base64())
+        # default value in `aks_create`
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "ssh_key_value": public_key,
+                "dns_name_prefix": None,
+                "location": None,
+                "admin_username": "azureuser",
+                "windows_admin_username": None,
+                "windows_admin_password": None,
+                "enable_ahub": False,
+                "kubernetes_version": "",
+                "node_vm_size": "Standard_DS2_v2",
+                "node_osdisk_type": None,
+                "node_osdisk_size": 0,
+                "node_osdisk_diskencryptionset_id": None,
+                "node_count": 3,
+                "nodepool_name": "nodepool1",
+                "nodepool_tags": None,
+                "nodepool_labels": None,
+                "service_principal": None,
+                "client_secret": None,
+                "no_ssh_key": False,
+                "disable_rbac": None,
+                "enable_rbac": None,
+                "vm_set_type": None,
+                "skip_subnet_role_assignment": False,
+                "os_sku": None,
+                "enable_cluster_autoscaler": False,
+                "cluster_autoscaler_profile": None,
+                "network_plugin": None,
+                "network_policy": None,
+                "uptime_sla": False,
+                "pod_cidr": None,
+                "service_cidr": None,
+                "dns_service_ip": None,
+                "docker_bridge_address": None,
+                "load_balancer_sku": None,
+                "load_balancer_managed_outbound_ip_count": None,
+                "load_balancer_outbound_ips": None,
+                "load_balancer_outbound_ip_prefixes": None,
+                "load_balancer_outbound_ports": None,
+                "load_balancer_idle_timeout": None,
+                "outbound_type": None,
+                "auto_upgrade_channel": None,
+                "enable_addons": None,
+                "workspace_resource_id": None,
+                "vnet_subnet_id": None,
+                "ppg": None,
+                "max_pods": 0,
+                "min_count": None,
+                "max_count": None,
+                "aad_client_app_id": None,
+                "aad_server_app_id": None,
+                "aad_server_app_secret": None,
+                "aad_tenant_id": None,
+                "tags": None,
+                "zones": None,
+                "enable_node_public_ip": False,
+                "node_public_ip_prefix_id": None,
+                "generate_ssh_keys": False,
+                "api_server_authorized_ip_ranges": None,
+                "enable_private_cluster": False,
+                "private_dns_zone": None,
+                "fqdn_subdomain": None,
+                "disable_public_fqdn": False,
+                "enable_managed_identity": True,
+                "assign_identity": None,
+                "attach_acr": None,
+                "enable_aad": False,
+                "aad_admin_group_object_ids": None,
+                "aci_subnet_name": None,
+                "appgw_name": None,
+                "appgw_subnet_cidr": None,
+                "appgw_id": None,
+                "appgw_subnet_id": None,
+                "appgw_watch_namespace": None,
+                "enable_sgxquotehelper": False,
+                "enable_encryption_at_host": False,
+                "assign_kubelet_identity": None,
+                "enable_ultra_ssd": False,
+                "edge_zone": None,
+                "no_wait": False,
+                "yes": False,
+                "enable_azure_rbac": False,
+            },
+        )
+
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="1234-5678-9012")
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            return_value="test_location",
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ):
+            dec_mc_1 = dec_1.construct_default_mc_profile()
+
+        agent_pool_profile_1 = self.models.ManagedClusterAgentPoolProfile(
+            # Must be 12 chars or less before ACS RP adds to it
+            name="nodepool1",
+            # tags=None,
+            # node_labels=None,
+            count=3,
+            vm_size="Standard_DS2_v2",
+            os_type="Linux",
+            enable_node_public_ip=False,
+            enable_encryption_at_host=False,
+            enable_ultra_ssd=False,
+            type="VirtualMachineScaleSets",
+            mode="System",
+            enable_auto_scaling=False,
+        )
+        ssh_config_1 = self.models.ContainerServiceSshConfiguration(
+            public_keys=[
+                self.models.ContainerServiceSshPublicKey(key_data=public_key)
+            ]
+        )
+        linux_profile_1 = self.models.ContainerServiceLinuxProfile(
+            admin_username="azureuser", ssh=ssh_config_1
+        )
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_sku="standard",
+        )
+        identity_1 = self.models.ManagedClusterIdentity(type="SystemAssigned")
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            dns_prefix="testname-testrgname-1234-5",
+            kubernetes_version="",
+            addon_profiles={},
+            enable_rbac=True,
+            agent_pool_profiles=[agent_pool_profile_1],
+            linux_profile=linux_profile_1,
+            network_profile=network_profile_1,
+            identity=identity_1,
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_create_mc(self):
         pass

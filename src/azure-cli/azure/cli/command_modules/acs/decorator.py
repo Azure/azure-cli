@@ -1301,6 +1301,8 @@ class AKSCreateContext:
         """Internal function to dynamically obtain the values of service_principal and client_secret according to the
         context.
 
+        This function will store an intermediate aad_session_key.
+
         When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
         completion will not be triggered. For other cases, dynamic completion will be triggered.
         When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
@@ -3320,14 +3322,14 @@ class AKSCreateDecorator:
     def process_add_role_assignment_for_vnet_subnet(self, mc: ManagedCluster) -> None:
         """Add role assignment for vent subnet.
 
+        This function will store an intermediate need_post_creation_vnet_permission_granting.
+
         The function "subnet_role_assignment_exists" will be called to verify if the role assignment already exists for
         the subnet, which internally used AuthorizationManagementClient to send the request.
         The wrapper function "get_identity_by_msi_client" will be called by "get_user_assigned_identity_client_id" to
         get the identity object, which internally use ManagedServiceIdentityClient to send the request.
         The function "_add_role_assignment" will be called to add role assignment for the subnet, which internally used
         AuthorizationManagementClient to send the request.
-
-        This function will store an intermediate need_post_creation_vnet_permission_granting.
 
         :return: None
         """
@@ -3387,8 +3389,7 @@ class AKSCreateDecorator:
                     scope=scope,
                 ):
                     logger.warning(
-                        "Could not create a role assignment for subnet. "
-                        "Are you an Owner on this subscription?"
+                        "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
                     )
         # store need_post_creation_vnet_permission_granting as an intermediate
         self.context.set_intermediate(
@@ -3511,6 +3512,9 @@ class AKSCreateDecorator:
     # pylint: disable=too-many-statements
     def set_up_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up addon profiles for the ManagedCluster object.
+
+        This function will store following intermediates: monitoring, enable_virtual_node and
+        ingress_appgw_addon_enabled.
 
         The function "_ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
         the Container Insights solution to the Log Analytics workspace.
@@ -3651,7 +3655,7 @@ class AKSCreateDecorator:
         if api_server_authorized_ip_ranges or enable_private_cluster:
             api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile(
                 authorized_ip_ranges=api_server_authorized_ip_ranges,
-                enable_private_cluster=enable_private_cluster,
+                enable_private_cluster=True if enable_private_cluster else None,
                 enable_private_cluster_public_fqdn=False if disable_public_fqdn else None,
                 private_dns_zone=private_dns_zone
             )
@@ -3791,19 +3795,29 @@ class AKSCreateDecorator:
         return mc
 
     def build_custom_headers(self, mc: ManagedCluster) -> None:
+        """Build a dictionary contains custom headers.
+
+        This function will store an intermediate custom_headers.
+
+        :return: None
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
         # Add AAD session key to header.
-        # If principal_obj is None, we will not add this header, this can happen
-        # when the cluster enables managed identity. In this case, the header is useless
-        # and that's OK to not add this header
+        # If principal_obj is None, we will not add this header, this can happen when the cluster enables managed
+        # identity. In this case, the header is useless and that's OK to not add this header.
         custom_headers = None
         if mc.service_principal_profile:
             custom_headers = {'Ocp-Aad-Session-Key': self.context.get_intermediate("aad_session_key")}
         self.context.set_intermediate("custom_headers", custom_headers, overwrite_exists=True)
 
-    def construct_default_mc(self) -> ManagedCluster:
-        """The overall control function used to construct the default ManagedCluster object.
+    def construct_default_mc_profile(self) -> ManagedCluster:
+        """The overall controller used to construct the default ManagedCluster profile.
 
-        The complete ManagedCluster object will later be passed as a parameter to the underlying SDK
+        The completely constructed ManagedCluster object will later be passed as a parameter to the underlying SDK
         (mgmt-containerservice) to send the actual request.
 
         :return: the ManagedCluster object
@@ -3847,6 +3861,19 @@ class AKSCreateDecorator:
         return mc
 
     def create_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        """Send request to create a real managed cluster.
+
+        The function "_put_managed_cluster_ensuring_permission" will be called to use the ContainerServiceClient to
+        send a reqeust to create a real managed cluster, and also add necessary role assignments for some optional
+        components.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
         # Due to SPN replication latency, we do a few retries here
         max_retry = 30
         retry_exception = Exception(None)
