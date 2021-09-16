@@ -58,6 +58,7 @@ from ._bicep import (
     get_bicep_available_release_tags,
     validate_bicep_target_scope
 )
+from ._deployment_stack import DeploymentStack
 
 logger = get_logger(__name__)
 
@@ -2087,9 +2088,10 @@ def show_deployment_stack_at_subscription(cmd, name=None, stack=None):
     if name or stack:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
         if name:
+            # return DeploymentStack(rcf.deployment_stacks.get_at_subscription(name))
             return rcf.deployment_stacks.get_at_subscription(name)
-        return rcf.deployment_stacks.get_at_subscription(stack.split('/')[-1])
-    raise CLIError("Please enter the stack name or stack resource id")
+        return DeploymentStack(rcf.deployment_stacks.get_at_subscription(stack.split('/')[-1]))
+    raise CLIError("Please enter the stack name or stack resource id.")
 
 
 def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, stack=None):
@@ -2104,6 +2106,7 @@ def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None,
 
 def list_deployment_stack_at_subscription(cmd):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    # check = DeploymentStack(rcf.deployment_stacks.list_at_subscription())
     return rcf.deployment_stacks.list_at_subscription()
 
 
@@ -2285,7 +2288,7 @@ def list_deployment_stack_snapshot_at_resource_group(cmd, name=None, resource_gr
 def delete_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=None, snapshot=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if snapshot:
-        snapshot_arr = snapshot.split('/')        
+        snapshot_arr = snapshot.split('/')
         return rcf.deployment_stack_snapshots.delete_at_subscription(snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name:
         return rcf.deployment_stack_snapshots.delete_at_subscription(stack_name, name)
