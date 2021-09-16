@@ -11,7 +11,7 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     tags_type, get_location_type,
-    get_enum_type,
+    get_enum_type, file_type,
     resource_group_name_type,
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
@@ -20,6 +20,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 
 from .randomname.generate import generate_username
 from ._flexible_server_util import get_current_time
+from argcomplete.completers import FilesCompleter
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-locals
@@ -577,7 +578,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
     def handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type):
-        for scope in ['create', 'show', 'list', 'update', 'delete']:
+        for scope in ['create', 'show', 'list', 'update', 'delete', 'check-name-availability']:
             argument_context_string = '{} flexible-server migration {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type,
@@ -585,9 +586,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type,
                            help='Migration target server name.')
                 if scope == "create":
-                    c.argument('properties', options_list=['--properties', '-b'],
-                               help='Request properties. Use @{file} to load from a file. For quoting issues in different terminals, '
-                               'see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
+                    c.argument('properties', type=file_type, completer=FilesCompleter(), options_list=['--properties', '-b'],
+                               help='Request properties. Use double or no quotes to pass in filepath as argument.')
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
                 elif scope == "show":
@@ -609,10 +609,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Allow the migration workflow to overwrite the DB on the target.')
                     c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
                                help='Cut-over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
+                    c.argument('start_data_migration', options_list=['--start-data-migration'], action='store_true', required=False,
+                               help='Reschedule the data migration to start right now.')
                 elif scope == "delete":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
                     c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
+                elif scope == "check-name-availability":
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')
