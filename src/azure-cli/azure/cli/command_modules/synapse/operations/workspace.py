@@ -45,6 +45,10 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
             managed_virtual_network_settings = ManagedVirtualNetworkSettings(prevent_data_exfiltration=False)
 
     if repository_type:
+        if repository_type == 'AzureDevOpsGit':
+            repository_type = 'WorkspaceVSTSConfiguration'
+        else:
+            repository_type = 'WorkspaceGitHubConfiguration'
         if repository_type == 'WorkspaceVSTSConfiguration' and tenant_id is None:
             from ..util import get_tenant_id
             tenant_id = get_tenant_id()
@@ -95,6 +99,10 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
         tenant_ids_list = allowed_aad_tenant_ids
 
     if repository_type:
+        if repository_type == 'AzureDevOpsGit':
+            repository_type = 'WorkspaceVSTSConfiguration'
+        else:
+            repository_type = 'WorkspaceGitHubConfiguration'
         if repository_type == 'WorkspaceVSTSConfiguration' and tenant_id is None:
             from ..util import get_tenant_id
             tenant_id = get_tenant_id()
