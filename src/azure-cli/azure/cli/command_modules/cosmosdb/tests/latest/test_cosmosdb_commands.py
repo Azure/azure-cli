@@ -1401,6 +1401,12 @@ class CosmosDBTests(ScenarioTest):
         assert cmk_account["defaultIdentity"] == 'FirstPartyIdentity'
         assert cmk_account["identity"]['type'] == 'SystemAssigned'
 
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "None"
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned"
+
         identity_principal_id = identity_output["principalId"]
         self.kwargs.update({
             'identity_principal_id': identity_principal_id
