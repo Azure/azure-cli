@@ -233,17 +233,17 @@ def _create_database_account(client,
             set_user_identities = {}
             for x in assign_identity:
                 if x != SYSTEM_ID:
-                    set_user_identities[x] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
+                    set_user_identities[x] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
                 else:
                     enable_system = True
             if enable_system:
                 system_assigned_identity = ManagedServiceIdentity(
-                    type = ResourceIdentityType.system_assigned_user_assigned.value,
+                    type=ResourceIdentityType.system_assigned_user_assigned.value,
                     user_assigned_identities=set_user_identities
                 )
             else:
                 system_assigned_identity = ManagedServiceIdentity(
-                    type = ResourceIdentityType.user_assigned.value,
+                    type=ResourceIdentityType.user_assigned.value,
                     user_assigned_identities=set_user_identities
                 )
 
@@ -1531,12 +1531,12 @@ def cli_cosmosdb_identity_remove(client,
     else:
         set_type = ResourceIdentityType.none
 
-    for identity in identities_remaining:
-        set_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
-    if set_type == ResourceIdentityType.system_assigned or set_type == ResourceIdentityType.none:
+    if set_type in (ResourceIdentityType.system_assigned, ResourceIdentityType.none):
         set_user_identities = None
     else:
         set_user_identities = {}
+        for identity in identities_remaining:
+            set_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
         for removed_identity in identities_to_remove:
             set_user_identities[removed_identity] = None
 
