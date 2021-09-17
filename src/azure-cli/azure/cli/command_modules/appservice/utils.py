@@ -5,7 +5,13 @@
 
 import time
 from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.cli.core.azclierror import (RequiredArgumentMissingError)
+
+from ._client_factory import web_client_factory
+
+logger = get_logger(__name__)
 
 
 def str2bool(v):
@@ -84,3 +90,36 @@ def raise_missing_token_suggestion():
                                        "If you need to create a Github Personal Access Token, "
                                        "please run with the '--login-with-github' flag or follow "
                                        "the steps found at the following link:\n{0}".format(pat_documentation))
+
+
+def _get_location_from_resource_group(cli_ctx, resource_group_name):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    group = client.resource_groups.get(resource_group_name)
+    return group.location
+
+
+def _list_app(cli_ctx, resource_group_name=None):
+    client = web_client_factory(cli_ctx)
+    if resource_group_name:
+        result = list(client.web_apps.list_by_resource_group(resource_group_name))
+    else:
+        result = list(client.web_apps.list())
+    for webapp in result:
+        _rename_server_farm_props(webapp)
+    return result
+
+
+def _rename_server_farm_props(webapp):
+    # Should be renamed in SDK in a future release
+    setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)
+    del webapp.server_farm_id
+    return webapp
+
+
+def _get_location_from_webapp(client, resource_group_name, webapp):
+    webapp = client.web_apps.get(resource_group_name, webapp)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist".format(webapp))
+    return webapp.location
