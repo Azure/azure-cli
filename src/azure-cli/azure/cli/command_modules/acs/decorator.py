@@ -1947,6 +1947,13 @@ class AKSCreateContext:
         When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
 
+        This function will verify the parameter by default. If the value of outbound_type is
+        CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, the following checks will be performed. If load_balancer_sku is set
+        to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not assigned,
+        a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
+        load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
+        will be raised.
+
         This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
         parameters, the value in load_balancer_profile will be used for validation.
 
@@ -1964,7 +1971,7 @@ class AKSCreateContext:
         Note: SDK provides default value "kubenet" for network_plugin.
 
         This function supports the option of enable_validation. When enabled, in case network_plugin is assigned, if
-        pod_cidr is assigned and the value of network_plugin is azure, a MutuallyExclusiveArgumentError will be
+        pod_cidr is assigned and the value of network_plugin is azure, an InvalidArgumentValueError will be
         raised; otherwise, if any of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address or network_policy
         is assigned, a RequiredArgumentMissingError will be raised.
 
@@ -1995,7 +2002,7 @@ class AKSCreateContext:
             )
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr:
-                    raise MutuallyExclusiveArgumentError(
+                    raise InvalidArgumentValueError(
                         "Please use kubenet as the network plugin type when pod_cidr is specified"
                     )
             else:
@@ -2016,10 +2023,10 @@ class AKSCreateContext:
 
         Note: SDK provides default value "kubenet" for network_plugin.
 
-        This function will verify the parameter by default. When enabled, in case network_plugin is assigned, if
-        pod_cidr is assigned and the value of network_plugin is azure, a MutuallyExclusiveArgumentError will be
-        raised; otherwise, if any of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address or network_policy
-        is assigned, a RequiredArgumentMissingError will be raised.
+        This function will verify the parameter by default. In case network_plugin is assigned, if pod_cidr is assigned
+        and the value of network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise, if any of
+        pod_cidr, service_cidr, dns_service_ip, docker_bridge_address or network_policy is assigned, a
+        RequiredArgumentMissingError will be raised.
 
         :return: string or None
         """
@@ -2048,7 +2055,7 @@ class AKSCreateContext:
         {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
 
         This function will verify the parameters by default. If pod_cidr is assigned and the value of network_plugin
-        is azure, a MutuallyExclusiveArgumentError will be raised; otherwise, if any of pod_cidr, service_cidr,
+        is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr, service_cidr,
         dns_service_ip, docker_bridge_address or network_policy is assigned, a RequiredArgumentMissingError will be
         raised.
 
@@ -2102,7 +2109,7 @@ class AKSCreateContext:
         network_plugin = self._get_network_plugin(enable_validation=False)
         if network_plugin:
             if network_plugin == "azure" and pod_cidr:
-                raise MutuallyExclusiveArgumentError(
+                raise InvalidArgumentValueError(
                     "Please use kubenet as the network plugin type when pod_cidr is specified"
                 )
         else:
@@ -2122,11 +2129,14 @@ class AKSCreateContext:
     def _get_enable_addons(self, enable_validation: bool = False, **kwargs) -> List[str]:
         """Internal function to obtain the value of enable_addons.
 
-        Note: enable_addons will not be directly decorated into the `mc` object.
+        Note: enable_addons will not be directly decorated into the `mc` object and we do not support to fetch it from
+        `mc`.
         Note: Some of the external parameters involved in the validation are not verified in their own getters.
 
         This function supports the option of enable_validation. When enabled, it will check whether the provided addons
-        have duplicate or invalid values, and raise an InvalidArgumentValueError if found.
+        have duplicate or invalid values, and raise an InvalidArgumentValueError if found. Besides, if monitoring is
+        specified in enable_addons but workspace_resource_id is not assigned, or virtual-node is specified but
+        aci_subnet_name or vnet_subnet_id is not, a RequiredArgumentMissingError will be raised.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
@@ -2134,15 +2144,9 @@ class AKSCreateContext:
         """
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        read_from_mc = False
-        if self.mc and self.mc.addon_profiles is not None:
-            enable_addons = list(self.mc.addon_profiles.keys())
-            read_from_mc = True
 
         # normalize
-        if not read_from_mc:
-            enable_addons = enable_addons.split(',') if enable_addons else []
+        enable_addons = enable_addons.split(',') if enable_addons else []
 
         # validation
         if enable_validation:
@@ -2187,11 +2191,14 @@ class AKSCreateContext:
     def get_enable_addons(self) -> List[str]:
         """Obtain the value of enable_addons.
 
-        Note: enable_addons will not be directly decorated into the `mc` object.
+        Note: enable_addons will not be directly decorated into the `mc` object and we do not support to fetch it from
+        `mc`.
         Note: Some of the external parameters involved in the validation are not verified in their own getters.
 
         This function will verify the parameters by default. It will check whether the provided addons have duplicate or
-        invalid values, and raise an InvalidArgumentValueError if found.
+        invalid values, and raise an InvalidArgumentValueError if found. Besides, if monitoring is specified in
+        enable_addons but workspace_resource_id is not assigned, or virtual-node is specified but aci_subnet_name or
+        vnet_subnet_id is not, a RequiredArgumentMissingError will be raised.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 

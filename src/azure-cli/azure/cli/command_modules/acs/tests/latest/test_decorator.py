@@ -1446,6 +1446,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "load_balancer_sku": "basic",
             },
         )
+        # fail on invalid load_balancer_sku (basic) when outbound_type is CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
         with self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_outbound_type()
 
@@ -1456,6 +1457,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
             },
         )
+        # fail on vnet_subnet_id not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_3.get_outbound_type()
 
@@ -1468,6 +1470,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "load_balancer_managed_outbound_ip_count": 10,
             },
         )
+        # fail on mutually exclusive outbound_type and managed_outbound_ip_count/outbound_ips/outbound_ip_prefixes of
+        # load balancer
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_4.get_outbound_type()
 
@@ -1492,6 +1496,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 ]
             )
         )
+        # fail on mutually exclusive outbound_type and managed_outbound_ip_count/outbound_ips/outbound_ip_prefixes of
+        # load balancer
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_5.get_outbound_type(
                 load_balancer_profile=load_balancer_profile,
@@ -1523,7 +1529,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "pod_cidr": "test_pod_cidr",
             },
         )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
+        # fail on invalid network_plugin (azure) when pod_cidr is specified
+        with self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_network_plugin()
 
         # invalid parameter
@@ -1533,6 +1540,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "pod_cidr": "test_pod_cidr",
             },
         )
+        # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_3.get_network_plugin()
 
@@ -1584,7 +1592,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "pod_cidr": "test_pod_cidr",
             },
         )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
+        # fail on invalid network_plugin (azure) when pod_cidr is specified
+        with self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
 
         # invalid parameter
@@ -1594,6 +1603,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "pod_cidr": "test_pod_cidr",
             },
         )
+        # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_3.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
 
@@ -1607,6 +1617,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "network_policy": "test_network_policy",
             },
         )
+        # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_4.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
 
@@ -1639,6 +1650,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "enable_addons": "test_addon_1,test_addon_2",
             },
         )
+        # fail on invalid enable_addons
         with self.assertRaises(InvalidArgumentValueError):
             ctx_3.get_enable_addons()
 
@@ -1649,6 +1661,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "enable_addons": "test_addon_1,test_addon_2,test_addon_1,test_addon_2",
             },
         )
+        # fail on invalid/duplicate enable_addons
         with self.assertRaises(InvalidArgumentValueError):
             ctx_4.get_enable_addons()
 
@@ -1660,6 +1673,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "enable_addons": "",
             },
         )
+        # fail on enable_addons (monitoring) not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_5.get_enable_addons()
 
@@ -1670,6 +1684,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "enable_addons": "virtual-node",
             },
         )
+        # fail on aci_subnet_name/vnet_subnet_id not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_6.get_enable_addons()
 
@@ -1694,6 +1709,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             location="test_location", addon_profiles=addon_profiles_1
         )
         ctx_1.attach_mc(mc)
+        # fail on enable_addons (monitoring) not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_1.get_workspace_resource_id()
 
@@ -1949,6 +1965,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "aad_client_app_id": "test_aad_client_app_id",
             },
         )
+        # fail on mutually exclusive enable_aad and aad_client_app_id/aad_server_app_id/aad_server_app_secret
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_enable_aad()
 
@@ -1960,6 +1977,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "enable_azure_rbac": True,
             },
         )
+        # fail on enable_aad not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_3.get_enable_aad()
 
@@ -2007,6 +2025,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "aad_server_app_secret": "test_aad_server_app_secret",
             },
         )
+        # fail on mutually exclusive enable_aad and aad_client_app_id/aad_server_app_id/aad_server_app_secret
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
 
@@ -2104,8 +2123,21 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "enable_azure_rbac": True,
             },
         )
+        # fail on mutually exclusive disable_rbac and enable_azure_rbac
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_disable_rbac()
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "disable_rbac": True,
+                "enable_rbac": True,
+            },
+        )
+        # fail on mutually exclusive disable_rbac and enable_rbac
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_disable_rbac()
 
     def test_get_enable_rbac(self):
         # default
@@ -2131,6 +2163,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "disable_rbac": True,
             },
         )
+        # fail on mutually exclusive disable_rbac and enable_rbac
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_enable_rbac()
 
@@ -2167,8 +2200,21 @@ class AKSCreateContextTestCase(unittest.TestCase):
             aad_profile=aad_profile_2,
         )
         ctx_2.attach_mc(mc_2)
+        # fail on mutually exclusive enable_azure_rbac and disable_rbac
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_enable_azure_rbac()
+
+        # invalid parameter
+        ctx_3 = AKSCreateContext(
+            self.cmd,
+            {
+                "enable_azure_rbac": True,
+                "enable_aad": False,
+            },
+        )
+        # fail on enable_aad not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_3.get_enable_azure_rbac()
 
     def test_get_api_server_authorized_ip_ranges(self):
         # default
