@@ -109,8 +109,11 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     container_name = _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id)
 
     if container_name is None or not cust_help.is_native_name(container_name):
+        filter_string = cust_help.get_filter_string({'backupManagementType': "AzureWorkload"})
         # refresh containers and try to get the protectable container object again
-        client.refresh(vault_name, resource_group_name, fabric_name)
+        refresh_result = client.refresh(vault_name, resource_group_name, fabric_name,
+                                        filter=filter_string, raw=True)
+        cust_help.track_refresh_operation(cmd.cli_ctx, refresh_result, vault_name, resource_group_name)
         container_name = _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id)
 
         if container_name is None or not cust_help.is_native_name(container_name):
