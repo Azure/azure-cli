@@ -2101,7 +2101,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     # send request to create a real managed cluster
     return aks_create_decorator.create_mc(mc)
 
-    # deprecated
+    # [Deprecated]
+    # pylint: disable=unreachable
     auto_upgrade_profile = None
     ManagedClusterWindowsProfile = cmd.get_models('ManagedClusterWindowsProfile',
                                                   resource_type=ResourceType.MGMT_CONTAINERSERVICE,

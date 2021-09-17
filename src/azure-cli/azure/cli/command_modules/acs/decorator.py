@@ -2845,8 +2845,13 @@ class AKSCreateContext:
         # read the original value passed by the command
         fqdn_subdomain = self.raw_param.get("fqdn_subdomain")
         # try to read the property value corresponding to the parameter from the `mc` object
-        # ManagedCluster in api version v2020.09.01 has no fqdn_subdomain attribute
-        if self.mc and getattr(self.mc, "fqdn_subdomain") is not None:
+        # Backward Compatibility: We also support api version v2020.11.01 in profile 2020-09-01-hybrid and there is
+        # no such attribute.
+        if (
+            self.mc and
+            hasattr(self.mc, "fqdn_subdomain") and
+            self.mc.fqdn_subdomain is not None
+        ):
             fqdn_subdomain = self.mc.fqdn_subdomain
 
         # this parameter does not need dynamic completion
@@ -3138,8 +3143,11 @@ class AKSCreateContext:
         # read the original value passed by the command
         edge_zone = self.raw_param.get("edge_zone")
         # try to read the property value corresponding to the parameter from the `mc` object
+        # Backward Compatibility: We also support api version v2020.11.01 in profile 2020-09-01-hybrid and there is
+        # no such attribute.
         if (
             self.mc and
+            hasattr(self.mc, "extended_location") and
             self.mc.extended_location and
             self.mc.extended_location.name is not None
         ):
