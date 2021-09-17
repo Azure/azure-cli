@@ -205,6 +205,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
         self.models = AKSCreateModels(self.cmd)
 
     def test__init__(self):
+        # fail on not passing dictionary-like parameters
         with self.assertRaises(CLIInternalError):
             AKSCreateContext(self.cmd, [])
 
@@ -1115,8 +1116,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
             )
 
     def test_get_user_assigned_identity_client_id(self):
-        # fail on assign_identity not provided
         ctx_1 = AKSCreateContext(self.cmd, {"assign_identity": None})
+        # fail on assign_identity not provided
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_1.get_user_assigned_identity_client_id()
 
@@ -1140,8 +1141,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
             )
 
     def test_get_user_assigned_identity_object_id(self):
-        # fail on assign_identity not provided
         ctx_1 = AKSCreateContext(self.cmd, {"assign_identity": None})
+        # fail on assign_identity not provided
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_1.get_user_assigned_identity_object_id()
 
@@ -1202,7 +1203,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             },
         )
         # fail on service_principal/client_secret not specified
-        with self.assertRaises(CLIInternalError):
+        with self.assertRaises(RequiredArgumentMissingError):
             ctx_3.get_attach_acr()
 
     def test_get_load_balancer_sku(self):
@@ -2274,6 +2275,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
             },
         )
+        # fail on mutually exclusive enable_private_cluster and api_server_authorized_ip_ranges
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_4.get_api_server_authorized_ip_ranges()
 
@@ -2321,7 +2323,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "private_dns_zone": "test_private_dns_zone",
             },
         )
-        # fail on invalid private_dns_zone
+        # fail on invalid private_dns_zone when fqdn_subdomain is specified
         with self.assertRaises(InvalidArgumentValueError):
             ctx_4.get_fqdn_subdomain()
 
@@ -2366,6 +2368,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
             },
         )
+        # fail on mutially exclusive enable_private_cluster and api_server_authorized_ip_ranges
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_3.get_enable_private_cluster()
 
@@ -2377,6 +2380,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "disable_public_fqdn": True,
             },
         )
+        # fail on disable_public_fqdn specified when enable_private_cluster is not specified
         with self.assertRaises(InvalidArgumentValueError):
             ctx_4.get_enable_private_cluster()
 
@@ -2388,6 +2392,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "private_dns_zone": "system",
             },
         )
+        # fail on private_dns_zone specified when enable_private_cluster is not specified
         with self.assertRaises(InvalidArgumentValueError):
             ctx_5.get_enable_private_cluster()
 
@@ -2410,6 +2415,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             api_server_access_profile=api_server_access_profile,
         )
         ctx_1.attach_mc(mc)
+        # fail on disable_public_fqdn specified when enable_private_cluster is not specified
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(ctx_1.get_disable_public_fqdn(), True)
 
@@ -2432,6 +2438,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             api_server_access_profile=api_server_access_profile,
         )
         ctx_1.attach_mc(mc)
+        # fail on private_dns_zone specified when enable_private_cluster is not specified
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(
                 ctx_1.get_private_dns_zone(), "test_private_dns_zone"
@@ -2445,6 +2452,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "private_dns_zone": "test_private_dns_zone",
             },
         )
+        # fail on invalid private_dns_zone
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(
                 ctx_2.get_private_dns_zone(), "test_private_dns_zone"
@@ -2459,6 +2467,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
         )
+        # fail on invalid private_dns_zone when fqdn_subdomain is specified
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(
                 ctx_3.get_private_dns_zone(), CONST_PRIVATE_DNS_ZONE_SYSTEM
@@ -2496,6 +2505,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "assign_kubelet_identity": "test_assign_kubelet_identity",
             },
         )
+        # fail on assign_identity not specified
         with self.assertRaises(RequiredArgumentMissingError):
             self.assertEqual(
                 ctx_2.get_assign_kubelet_identity(),
@@ -3123,6 +3133,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
+        # fail on mutually exclusive attach_acr, enable_managed_identity and no_wait
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_2.process_attach_acr(mc_2)
 
@@ -3137,7 +3148,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
-        with self.assertRaises(CLIInternalError):
+        # fail on service_principal/client_secret not specified
+        with self.assertRaises(RequiredArgumentMissingError):
             dec_3.process_attach_acr(mc_3)
         service_principal_profile_3 = (
             self.models.ManagedClusterServicePrincipalProfile(
@@ -3430,6 +3442,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
+        # fail on invalid enable_addons
         with self.assertRaises(InvalidArgumentValueError):
             dec_3.set_up_addon_profiles(mc_3)
 
@@ -3451,6 +3464,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_4 = self.models.ManagedCluster(location="test_location")
+        # fail on enable_addons (monitoring) not specified
         with self.assertRaises(RequiredArgumentMissingError):
             dec_4.set_up_addon_profiles(mc_4)
 
@@ -3472,6 +3486,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_5 = self.models.ManagedCluster(location="test_location")
+        # fail on aci_subnet_name/vnet_subnet_id not specified
         with self.assertRaises(RequiredArgumentMissingError):
             dec_5.set_up_addon_profiles(mc_5)
 
@@ -3586,6 +3601,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_4 = self.models.ManagedCluster(location="test_location")
+        # fail on mutually exclusive enable_azure_rbac and disable_rbac
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_4.set_up_aad_profile(mc_4)
 
@@ -3686,6 +3702,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_4 = self.models.ManagedCluster(location="test_location")
+        # fail on mutually exclusive enable_private_cluster and api_server_authorized_ip_ranges
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_4.set_up_api_server_access_profile(mc_4)
 
@@ -3703,6 +3720,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_5 = self.models.ManagedCluster(location="test_location")
+        # fail on invalid private_dns_zone when fqdn_subdomain is specified
         with self.assertRaises(InvalidArgumentValueError):
             dec_5.set_up_api_server_access_profile(mc_5)
 
@@ -3787,6 +3805,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         mc_4 = self.models.ManagedCluster(location="test_location")
+        # fail on enable_managed_identity not specified
         with self.assertRaises(RequiredArgumentMissingError):
             dec_4.set_up_identity(mc_4)
 
@@ -4232,6 +4251,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         resp.status_code = 500
         err = CloudError(resp)
         err.message = "not found in Active Directory tenant"
+        # fail on mock CloudError
         with self.assertRaises(CloudError), patch(
             "time.sleep",
         ), patch(

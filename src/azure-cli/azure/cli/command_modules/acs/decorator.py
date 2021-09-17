@@ -70,6 +70,10 @@ ManagedCluster = TypeVar("ManagedCluster")
 ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
 ResourceReference = TypeVar("ResourceReference")
 
+# TODO
+# remove model loading for cluster_autoscaler_profile in _validators
+# add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
+
 
 def safe_list_get(li: List, idx: int, default: Any = None) -> Any:
     """Get an element from a list without raising IndexError.
@@ -1619,6 +1623,10 @@ class AKSCreateContext:
 
         Note: attach_acr will not be decorated into the `mc` object.
 
+        This function will verify the parameter by default. When attach_acr is assigned, if both enable_managed_identity
+        and no_wait are assigned, a MutuallyExclusiveArgumentError will be raised; if service_principal is not assigned,
+        raise a RequiredArgumentMissingError.
+
         :return: string
         """
         # read the original value passed by the command
@@ -1636,7 +1644,7 @@ class AKSCreateContext:
             # newly added check, check whether client_id exists before creating role assignment
             service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
             if not service_principal:
-                raise CLIInternalError(
+                raise RequiredArgumentMissingError(
                     "No service principal provided to create the acrpull role assignment for acr."
                 )
         return attach_acr
@@ -1942,7 +1950,7 @@ class AKSCreateContext:
     ) -> Union[str, None]:
         """Dynamically obtain the value of outbound_type according to the context.
 
-        Note: The parameters involved in the validation are not verified in their own getters.
+        Note: All the external parameters involved in the validation are not verified in their own getters.
 
         When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
