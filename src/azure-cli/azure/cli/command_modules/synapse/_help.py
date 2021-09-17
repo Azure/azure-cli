@@ -43,7 +43,7 @@ examples:
         az synapse workspace create --name testworkspace --resource-group rg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
-          --repo-type WorkspaceVSTSConfiguration --account-name testuser --project-name testprj \\
+          --repository-type WorkspaceVSTSConfiguration --account-name testuser --project-name testprj \\
           --repository-name testrepo --collaboration-branch main
 """
 

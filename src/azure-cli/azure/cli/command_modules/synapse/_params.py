@@ -80,19 +80,20 @@ def load_arguments(self, _):
 
     for scope in ['create', 'update']:
         with self.argument_context('synapse workspace ' + scope) as c:
+            repository_arg_group = 'Git Configuration'
             c.argument('sql_admin_login_password', options_list=['--sql-admin-login-password', '-p'],
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
             c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. Use ""(\'""\' in PowerShell) to disable all allowed tenant ids.")
             c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
-            c.argument('repo_type', arg_type=get_enum_type(['WorkspaceVSTSConfiguration', 'WorkspaceGitHubConfiguration']), help='The repository configuration type.')
-            c.argument('host_name', help='If using github Enterprise Server, provide sever URL like https://github.mydomain.com.Do not use this option with GitHub Enterprise Cloud.')
-            c.argument('account_name', help='GitHub account name used for the repository or Azure devops organization name')
-            c.argument('collaboration_branch', help='The branch name where you will collaborate with others and from which you will publish.')
-            c.argument('repository_name', help='The name of the repository to which you are connecting.')
-            c.argument('root_folder', help='The name of the folder to the location of your Azure synapse JSON resources are imported. Default is /')
-            c.argument('project_name', help='The project name to which you are connecting.')
-            c.argument('tenant_id', help='The tenant id used to connect Azure devops')
+            c.argument('repository_type', arg_group=repository_arg_group, arg_type=get_enum_type(['WorkspaceVSTSConfiguration', 'WorkspaceGitHubConfiguration']), help='The repository configuration type.')
+            c.argument('host_name', arg_group=repository_arg_group, help='If using github Enterprise Server, provide sever URL like https://github.mydomain.com.Do not use this option with GitHub Enterprise Cloud.')
+            c.argument('account_name', arg_group=repository_arg_group, help='GitHub account name used for the repository or Azure devops organization name')
+            c.argument('collaboration_branch', arg_group=repository_arg_group, help='The branch name where you will collaborate with others and from which you will publish.')
+            c.argument('repository_name', arg_group=repository_arg_group, help='The name of the repository to which you are connecting.')
+            c.argument('root_folder', arg_group=repository_arg_group, help='The name of the folder to the location of your Azure synapse JSON resources are imported. Default is /')
+            c.argument('project_name', arg_group=repository_arg_group, help='The project name to which you are connecting.')
+            c.argument('tenant_id', arg_group=repository_arg_group, help='The tenant id used to connect Azure devops')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
