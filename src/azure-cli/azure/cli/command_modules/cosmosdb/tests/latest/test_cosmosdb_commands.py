@@ -1408,6 +1408,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --object-id {identity_principal_id} --key-permissions get unwrapKey wrapKey')
         
         # System assigned identity tests
+        cmk_account = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={location} failoverPriority=0 --assign-identity [system] --default-identity FirstPartyIdentity').get_output_in_json()
         cmk_account = self.cmd('az cosmosdb update -n {acc} -g {rg} --default-identity SystemAssignedIdentity').get_output_in_json()
         assert cmk_account["defaultIdentity"] == 'SystemAssignedIdentity'
 
@@ -1426,12 +1427,12 @@ class CosmosDBTests(ScenarioTest):
 
         identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {0}', user_identity1["id"]).get_output_in_json()
         assert identity_output["type"] == "SystemAssigned,UserAssigned"
-        assert identity_output["user_identities"][0] == user_identity1["id"]
+        assert identity_output["user_identities"][0][0] == user_identity1["id"]
         assert len(identity_output["user_identities"]) == 1
 
         identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {0}', user_identity2["id"]).get_output_in_json()
         assert identity_output["type"] == "SystemAssigned,UserAssigned"
-        assert identity_output["user_identities"][1] == user_identity2["id"]
+        assert identity_output["user_identities"][1][0] == user_identity2["id"]
         assert len(identity_output["user_identities"]) == 2
 
         identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg}').get_output_in_json()
@@ -1440,17 +1441,16 @@ class CosmosDBTests(ScenarioTest):
 
         identity_output = self.cmd('az cosmosdb identity remove {0} -n {acc} -g {rg}', user_identity2["id"]).get_output_in_json()
         assert identity_output["type"] == "UserAssigned"
-        assert identity_output["user_identities"][0] == user_identity1["id"]
+        assert identity_output["user_identities"][0][0] == user_identity1["id"]
         assert len(identity_output["user_identities"]) == 1
 
         identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {0}', user_identity2["id"]).get_output_in_json()
         assert identity_output["type"] == "UserAssigned"
-        assert identity_output["user_identities"][1] == user_identity2["id"]
+        assert identity_output["user_identities"][1][0] == user_identity2["id"]
         assert len(identity_output["user_identities"]) == 2
 
         identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {0} {1}', user_identity1["id"], user_identity2["id"]).get_output_in_json()
         assert identity_output["type"] == "None"
-        assert len(identity_output["user_identities"]) == 0
 
         identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {0} {1} [system]', user_identity1["id"], user_identity2["id"]).get_output_in_json()
         assert identity_output["type"] == "SystemAssigned,UserAssigned"
@@ -1462,14 +1462,20 @@ class CosmosDBTests(ScenarioTest):
         
         identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {0}', user_identity1["id"]).get_output_in_json()
         assert identity_output["type"] == "SystemAssigned"
-        assert len(identity_output["user_identities"]) == 0
         
         identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {0} {1} [system]', user_identity1["id"], user_identity2["id"]).get_output_in_json()
         assert identity_output["type"] == "SystemAssigned,UserAssigned"
         assert len(identity_output["user_identities"]) == 2
         identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {0} {1} [system]', user_identity1["id"], user_identity2["id"]).get_output_in_json()
         assert identity_output["type"] == "None"
-        assert len(identity_output["user_identities"]) == 0
+
+        # Default identity tests
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg}').get_output_in_json()
+        identity_output = self.cmd('az cosmosdb update -n {acc} -g {rg} --default-identity SystemAssignedIdentity').get_output_in_json()
+        assert identity_output["defaultIdentity"] == 'SystemAssignedIdentity'
+
+        identity_output = self.cmd('az cosmosdb update -n {acc} -g {rg} --default-identity UserAssignedIdentity={0}', user_identity1["id"]).get_output_in_json()
+        assert identity_output["defaultIdentity"] == "UserAssignedIdentity=" + user_identity1["id"]
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_role')
     def test_cosmosdb_sql_role(self, resource_group):
