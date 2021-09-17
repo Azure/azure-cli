@@ -507,7 +507,7 @@ def validate_key_id(entity_type):
         from azure.keyvault.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
-        name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
+        name = getattr(ns, pure_entity_type + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
         if not vault:
             vault = getattr(ns, 'hsm_name', None)
@@ -523,13 +523,9 @@ def validate_key_id(entity_type):
 
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
             setattr(ns, pure_entity_type + '_name', ident.name)
-            setattr(ns, 'name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
-            if ident.version:
-                if hasattr(ns, pure_entity_type + '_version'):
-                    setattr(ns, pure_entity_type + '_version', ident.version)
-                elif hasattr(ns, 'version'):
-                    setattr(ns, 'version', ident.version)
+            if ident.version and hasattr(ns, pure_entity_type + '_version'):
+                setattr(ns, pure_entity_type + '_version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
                            '--name/-n NAME [--version VERSION]')

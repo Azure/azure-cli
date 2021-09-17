@@ -157,10 +157,6 @@ def load_command_table(self, _):
                            transform=multi_transformers(
                                keep_max_results,
                                extract_subresource_name(id_parameter='kid')))
-        # g.keyvault_custom('create', 'create_key',
-        #                   doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
-        # g.keyvault_command('set-attributes', 'update_key')
-        # g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
         g.keyvault_command('delete', 'delete_key')
         g.keyvault_command('purge', 'purge_deleted_key')
@@ -169,7 +165,6 @@ def load_command_table(self, _):
                           doc_string_source=data_entity.operations_docs_tmpl.format('backup_key'))
         g.keyvault_custom('restore', 'restore_key', supports_no_wait=True,
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
-        # g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
         g.keyvault_command('encrypt', 'encrypt', is_preview=True)
