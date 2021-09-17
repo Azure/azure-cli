@@ -1600,6 +1600,20 @@ class AKSCreateContext:
         # this parameter does not need validation
         return yes
 
+    def get_no_wait(self) -> bool:
+        """Obtain the value of no_wait.
+
+        Note: no_wait will not be decorated into the `mc` object.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        no_wait = self.raw_param.get("no_wait")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return no_wait
+
     def get_attach_acr(self) -> Union[str, None]:
         """Obtain the value of attach_acr.
 
@@ -1627,20 +1641,6 @@ class AKSCreateContext:
                 )
         return attach_acr
 
-    def get_no_wait(self) -> bool:
-        """Obtain the value of no_wait.
-
-        Note: no_wait will not be decorated into the `mc` object.
-
-        :return: bool
-        """
-        # read the original value passed by the command
-        no_wait = self.raw_param.get("no_wait")
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return no_wait
-
     # pylint: disable=unused-argument
     def _get_load_balancer_sku(
         self, enable_validation: bool = False, read_only: bool = False, **kwargs
@@ -1654,7 +1654,8 @@ class AKSCreateContext:
         kubernetes_version.
 
         This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
-        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+        to "basic", if so, when api_server_authorized_ip_ranges is assigned or enable_private_cluster is specified,
+        raise an InvalidArgumentValueError.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
         :return: string or None
@@ -1690,11 +1691,11 @@ class AKSCreateContext:
         if enable_validation:
             if load_balancer_sku == "basic":
                 if self.get_api_server_authorized_ip_ranges():
-                    raise MutuallyExclusiveArgumentError(
+                    raise InvalidArgumentValueError(
                         "--api-server-authorized-ip-ranges can only be used with standard load balancer"
                     )
                 if self.get_enable_private_cluster():
-                    raise MutuallyExclusiveArgumentError(
+                    raise InvalidArgumentValueError(
                         "Please use standard load balancer for private cluster"
                     )
 
@@ -1709,8 +1710,9 @@ class AKSCreateContext:
         will be called and the corresponding load balancer sku will be returned according to the value of
         kubernetes_version.
 
-        This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic" when
-        api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+        This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic", if so,
+        when api_server_authorized_ip_ranges is assigned or enable_private_cluster is specified,
+        raise an InvalidArgumentValueError.
 
         :return: string or None
         """
@@ -2768,7 +2770,7 @@ class AKSCreateContext:
         """Obtain the value of api_server_authorized_ip_ranges.
 
         This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
-        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the MutuallyExclusiveArgumentError.
+        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the InvalidArgumentValueError.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
@@ -2804,7 +2806,7 @@ class AKSCreateContext:
         # validation
         if api_server_authorized_ip_ranges:
             if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
-                raise MutuallyExclusiveArgumentError(
+                raise InvalidArgumentValueError(
                     "--api-server-authorized-ip-ranges can only be used with standard load balancer"
                 )
             if self._get_enable_private_cluster(enable_validation=False):
@@ -2872,10 +2874,10 @@ class AKSCreateContext:
     def _get_enable_private_cluster(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of enable_private_cluster.
 
-        This function supports the option of enable_validation. When enabled, if enable_private_cluster is specified
-        and load_balancer_sku is basic or api_server_authorized_ip_ranges is assigned, raise a
-        MutuallyExclusiveArgumentError; Otherwise when enable_private_cluster is not specified and disable_public_fqdn
-        or private_dns_zone is assigned, raise an InvalidArgumentValueError.
+        This function supports the option of enable_validation. When enabled and enable_private_cluster is specified,
+        if load_balancer_sku equals to basic, raise an InvalidArgumentValueError; if api_server_authorized_ip_ranges
+        is assigned, raise an MutuallyExclusiveArgumentError; Otherwise when enable_private_cluster is not specified
+        and disable_public_fqdn or private_dns_zone is assigned, raise an InvalidArgumentValueError.
 
         :return: bool
         """
@@ -2895,7 +2897,7 @@ class AKSCreateContext:
         if enable_validation:
             if enable_private_cluster:
                 if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
-                    raise MutuallyExclusiveArgumentError(
+                    raise InvalidArgumentValueError(
                         "Please use standard load balancer for private cluster"
                     )
                 if self.get_api_server_authorized_ip_ranges():
@@ -2916,10 +2918,10 @@ class AKSCreateContext:
     def get_enable_private_cluster(self) -> bool:
         """Obtain the value of enable_private_cluster.
 
-        This function will verify the parameter by default. If enable_private_cluster is specified and load_balancer_sku
-        is basic or api_server_authorized_ip_ranges is assigned, raise a MutuallyExclusiveArgumentError; Otherwise when
-        enable_private_cluster is not specified and disable_public_fqdn or private_dns_zone is assigned, raise an
-        InvalidArgumentValueError.
+        This function will verify the parameter by default. When enable_private_cluster is specified, if
+        load_balancer_sku equals to basic, raise an InvalidArgumentValueError; if api_server_authorized_ip_ranges
+        is assigned, raise an MutuallyExclusiveArgumentError; Otherwise when enable_private_cluster is not specified
+        and disable_public_fqdn or private_dns_zone is assigned, raise an InvalidArgumentValueError.
 
         :return: bool
         """

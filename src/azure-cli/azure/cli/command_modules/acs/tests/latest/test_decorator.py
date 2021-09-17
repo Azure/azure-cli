@@ -404,7 +404,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
         )
-        # fail on mutually exclusive arguments
+        # fail on mutually exclusive dns_name_prefix and fqdn_subdomain
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_dns_name_prefix()
 
@@ -1170,7 +1170,11 @@ class AKSCreateContextTestCase(unittest.TestCase):
         ctx_1 = AKSCreateContext(self.cmd, {"yes": False})
         self.assertEqual(ctx_1.get_yes(), False)
 
-    # TODO: check tests
+    def test_get_no_wait(self):
+        # default
+        ctx_1 = AKSCreateContext(self.cmd, {"no_wait": False})
+        self.assertEqual(ctx_1.get_no_wait(), False)
+
     def test_get_attach_acr(self):
         # default
         ctx_1 = AKSCreateContext(self.cmd, {"attach_acr": None})
@@ -1185,6 +1189,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "no_wait": True,
             },
         )
+        # fail on mutually exclusive enable_managed_identity and no_wait
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_attach_acr()
 
@@ -1196,13 +1201,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "enable_managed_identity": False,
             },
         )
+        # fail on service_principal/client_secret not specified
         with self.assertRaises(CLIInternalError):
             ctx_3.get_attach_acr()
-
-    def test_get_no_wait(self):
-        # default
-        ctx_1 = AKSCreateContext(self.cmd, {"no_wait": False})
-        self.assertEqual(ctx_1.get_no_wait(), False)
 
     def test_get_load_balancer_sku(self):
         # default & dynamic completion
@@ -1248,15 +1249,28 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
             },
         )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
+        # fail on invalid load_balancer_sku (basic) when api_server_authorized_ip_ranges is assigned
+        with self.assertRaises(InvalidArgumentValueError):
             ctx_3.get_load_balancer_sku()
 
-        # custom value (lower case)
+        # invalid parameter with validation
         ctx_4 = AKSCreateContext(
+            self.cmd,
+            {
+                "load_balancer_sku": "basic",
+                "enable_private_cluster": True,
+            },
+        )
+        # fail on invalid load_balancer_sku (basic) when enable_private_cluster is specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_4.get_load_balancer_sku()
+
+        # custom value (lower case)
+        ctx_5 = AKSCreateContext(
             self.cmd,
             {"load_balancer_sku": "STANDARD"},
         )
-        self.assertEqual(ctx_4.get_load_balancer_sku(), "standard")
+        self.assertEqual(ctx_5.get_load_balancer_sku(), "standard")
 
     def test_get_load_balancer_managed_outbound_ip_count(self):
         # default
@@ -2202,7 +2216,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
             },
         )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
+        # fail on invalid load_balancer_sku (basic) when api_server_authorized_ip_ranges is assigned
+        with self.assertRaises(InvalidArgumentValueError):
             ctx_3.get_api_server_authorized_ip_ranges()
 
         # invalid parameter
@@ -2234,7 +2249,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
         )
-        # fail on mutually exclusive arguments
+        # fail on mutually exclusive dns_name_prefix and fqdn_subdomain
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_fqdn_subdomain()
 
@@ -2293,7 +2308,8 @@ class AKSCreateContextTestCase(unittest.TestCase):
                 "load_balancer_sku": "basic",
             },
         )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
+        # fail on invalid load_balancer_sku (basic) when enable_private_cluster is specified
+        with self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_enable_private_cluster()
 
         # invalid parameter
