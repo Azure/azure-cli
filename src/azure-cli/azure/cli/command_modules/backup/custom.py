@@ -1396,7 +1396,7 @@ def _track_register_operation(cli_ctx, result, vault_name, resource_group, conta
                                                                fabric_name, container_name,
                                                                operation_id, raw=True)
     while result.response.status_code == 202:
-        time.sleep(1)
+        time.sleep(5)
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
                                                                    operation_id, raw=True)
@@ -1408,7 +1408,7 @@ def _track_backup_operation(cli_ctx, resource_group, result, vault_name):
     operation_id = _get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
     operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
-        time.sleep(1)
+        time.sleep(5)
         operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     return operation_status
 
@@ -1430,7 +1430,7 @@ def _track_backup_crr_operation(cli_ctx, result, azure_region):
     operation_id = _get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
     operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
-        time.sleep(1)
+        time.sleep(5)
         operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
     return operation_status
 
@@ -1442,7 +1442,7 @@ def _track_refresh_operation(cli_ctx, result, vault_name, resource_group):
     result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                        fabric_name, operation_id, raw=True)
     while result.response.status_code == 202:
-        time.sleep(1)
+        time.sleep(5)
         result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                            fabric_name, operation_id, raw=True)
 
