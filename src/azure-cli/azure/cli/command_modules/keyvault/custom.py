@@ -213,6 +213,8 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
 
     assert hsm_name
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    logger.warning('This command will soft delete the resource, and you will still be billed until it is purged. '
+                   'For more information, go to https://aka.ms/doc/KeyVaultMHSMSoftDelete')
     return sdk_no_wait(
         no_wait, hsm_client.begin_delete,
         resource_group_name=resource_group_name,

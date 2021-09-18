@@ -5,6 +5,7 @@
 
 import os
 import time
+import uuid
 import unittest
 
 from azure.cli.testsdk import (
@@ -1955,7 +1956,8 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
     @StorageAccountPreparer(name_prefix="testams")
     @AllowLargeResponse()
     def test_private_endpoint_connection_media_service(self, resource_group, storage_account):
-        storage_account = self.cmd('storage account show -n {account}'.format(account=storage_account)).get_output_in_json()
+        storage_account_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.format(
+            self.get_subscription_id(), resource_group, storage_account)
 
         self.kwargs.update({
             'rg': resource_group,
@@ -1964,7 +1966,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
             'resource': self.create_random_name('clitestams', 24),
             'type': 'Microsoft.Media/mediaservices',
             'extra_create': '--storage-account {storage_account} -l eastus'.format(
-                storage_account=storage_account['id'])
+                storage_account=storage_account_id)
         })
 
         _test_private_endpoint(self, approve=False, rejected=False)
@@ -2124,6 +2126,67 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
     def test_private_endpoint_connection_powerbi_ignoreReject(self, resource_group):
         self._test_private_endpoint_connection_scenario_powerbi(resource_group, 'myPowerBIResource', 'Microsoft.PowerBI/privateLinkServicesForPowerBI', False)
 
+class NetworkPrivateLinkBotServiceScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_abs_private_endpoint', random_name_length=40)
+    def test_abs_privatendpoint_with_default(self, resource_group):
+        self.kwargs.update({
+            'vnet_name': self.create_random_name('testabsvnet', 20),
+            'subnet_name': self.create_random_name('testabssubnet', 20),
+            'bot_name': self.create_random_name('testbot', 20),
+            'app_id': str(uuid.uuid4()),
+            'endpoint_name': self.create_random_name('bot_pename', 20),
+            'endpoint_conn_name': self.create_random_name('priv_endpointconn', 25),
+            'second_endpoint_name': self.create_random_name('bot_penametoo', 20),
+            'second_endpoint_conn_name': self.create_random_name('bot_endpointconntoo', 25),
+            'desc': 'descriptionMsg'
+        })
+
+        # Create subnet with disabled endpoint network policies
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
+
+        result = self.cmd('bot create -g {rg} -n {bot_name} -k registration --appid {app_id}').get_output_in_json()
+        self.kwargs['bot_id'] = result['id']
+
+        # Add an endpoint that gets auto approved
+        result = self.cmd('network private-endpoint create -g {rg} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} --private-connection-resource-id {bot_id} '
+        '--connection-name {endpoint_conn_name} --group-id bot').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
+
+        # Add an endpoint and approve it
+        result = self.cmd('network private-endpoint create -g {rg} -n {second_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} --private-connection-resource-id {bot_id} '
+        '--connection-name {second_endpoint_conn_name} --group-id bot --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['second_endpoint_name'].lower() in result['name'].lower())
+
+        self.cmd('network private-endpoint-connection approve -g {rg} -n {second_endpoint_name} --resource-name {bot_name} --type Microsoft.BotService/botServices --description {desc}',
+        checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{desc}')
+        ])
+
+        # Reject previous approved endpoint
+        self.cmd('network private-endpoint-connection reject -g {rg} -n {second_endpoint_name} --resource-name {bot_name} --type Microsoft.BotService/botServices --description {desc}',
+        checks= [
+            self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{desc}')
+        ])
+
+        # List endpoints
+        self.cmd('network private-endpoint-connection list -g {rg} --name {bot_name} --type Microsoft.BotService/botServices', checks=[
+            self.check('length(@)', '2')
+        ])
+        # Remove endpoints
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {bot_name} -n {second_endpoint_name} --type Microsoft.BotService/botServices -y')
+        time.sleep(30)
+        self.cmd('network private-endpoint-connection list -g {rg} --name {bot_name} --type Microsoft.BotService/botServices', checks=[
+            self.check('length(@)', '1')
+        ])
+        # Show endpoint
+        self.cmd('az network private-endpoint-connection show -g {rg} --type Microsoft.BotService/botServices --resource-name {bot_name} -n {endpoint_name}', checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', 'Auto-Approved')
+        ])
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {bot_name} -n {endpoint_name} --type Microsoft.BotService/botServices -y')
 
 if __name__ == '__main__':
     unittest.main()
