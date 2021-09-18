@@ -1385,7 +1385,7 @@ helps['network application-gateway waf-policy managed-rule'] = """
 type: group
 short-summary: >
     Manage managed rules of a waf-policy.
-    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/afds/afds-overview
+    Visit: https://docs.microsoft.com/azure/web-application-firewall/afds/afds-overview
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set'] = """
@@ -1397,7 +1397,7 @@ helps['network application-gateway waf-policy managed-rule rule-set add'] = """
 type: command
 short-summary: >
   Add managed rule set to the WAF policy managed rules. For rule set and rules, please visit:
-  https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  https://docs.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 examples:
   - name: Disable an attack protection rule
     text: |
@@ -1413,7 +1413,7 @@ type: command
 short-summary: >
   Manage rules of a WAF policy.
   If --group-name and --rules are provided, override existing rules. If --group-name is provided, clear all rules under a certain rule group. If neither of them are provided, update rule set and clear all rules under itself.
-  For rule set and rules, please visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  For rule set and rules, please visit: https://docs.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 examples:
   - name: Override rules under rule group EQUEST-921-PROTOCOL-ATTACK
     text: |
@@ -3985,7 +3985,7 @@ type: command
 short-summary: List all service tags which are below to different resources
 long-summary: >
     A service tag represents a group of IP address prefixes to help minimize complexity for security rule creation.
-    To learn more about list-service-tags, visit https://docs.microsoft.com/en-us/azure/virtual-network/security-overview#service-tags. \\
+    To learn more about list-service-tags, visit https://docs.microsoft.com/azure/virtual-network/security-overview#service-tags. \\
     Note that the location parameter is used as a reference for version (not as a filter based on location).
     For example, even if you specify --location eastus2 you will get the list of service tags with prefix details across all regions but limited to the cloud that your subscription belongs to (i.e. Public, US government, China or Germany).
 examples:
