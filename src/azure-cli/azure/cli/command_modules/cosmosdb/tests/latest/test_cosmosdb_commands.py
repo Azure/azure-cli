@@ -1377,7 +1377,7 @@ class CosmosDBTests(ScenarioTest):
         assert cmk_output["keyVaultKeyUri"] == key_uri
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_managed_service_identity')
-    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
     def test_cosmosdb_managed_service_identity(self, resource_group, key_vault):
         key_name = self.create_random_name(prefix='cli', length=15)
         key_uri = "https://{}.vault.azure.net/keys/{}".format(key_vault, key_name)
@@ -1672,6 +1672,55 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
 
         time.sleep(300)
+
+        self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
+        self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
+            self.check('restoreParameters.restoreMode', 'PointInTime'),
+            self.check('restoreParameters.restoreSource', restorable_database_account['id']),
+            self.check('restoreParameters.restoreTimestampInUtc', restore_ts_string)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_deleted_account_restore', parameter_name_for_location='location')
+    @AllowLargeResponse(size_kb=9999)
+    def test_cosmosdb_deleted_account_restore(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': self.create_random_name(prefix='cli', length=15),
+            'col': col,
+            'loc': location
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'ins_id': account['instanceId']
+        })
+
+        restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
+
+        import dateutil
+        import time
+        from datetime import timedelta
+
+        # Get correct restore ts
+        account_creation_time = restorable_database_account['creationTime']
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
+        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+
+        restore_ts_string = restore_ts.isoformat()
+        self.kwargs.update({
+            'rts': restore_ts_string
+        })
+
+        # Create content in account and triggering restore
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+
+        time.sleep(300)
+        self.cmd('az cosmosdb delete -n {acc} -g {rg} --yes')
 
         self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
         self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[

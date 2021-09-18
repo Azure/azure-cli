@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "powerbi_resource_name": {
+      "defaultValue": "myPowerBIResource",
+       "type": "String"
+    },
+    "tenant_object_id": {
+      "defaultValue": null,
+       "type": "String"
+    }
+  },
+  "resources": [
+      {
+          "type":"Microsoft.PowerBI/privateLinkServicesForPowerBI",
+          "apiVersion": "2020-06-01",
+          "name" : "[parameters('powerbi_resource_name')]",
+          "location": "global",
+          "properties" : 
+          {
+               "tenantId": "[parameters('tenant_object_id')]"
+          }
+      }
+  ]
+}

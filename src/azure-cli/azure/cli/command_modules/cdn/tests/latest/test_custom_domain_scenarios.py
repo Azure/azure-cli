@@ -218,7 +218,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         # Create a TLS cert to use for BYOC.
         cert_name = self.create_random_name(prefix='cert', length=20)
-        self.byoc_create_keyvault_cert(resource_group, key_vault, cert_name)
+        self.byoc_create_keyvault_cert(key_vault, cert_name)
         # Get and parse the latest version for the certificate.
         versions = self.byoc_get_keyvault_cert_versions(key_vault, cert_name).get_output_in_json()
         version = versions[0]['id'].split('/')[-1]
@@ -273,7 +273,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         # Create a TLS cert to use for BYOC.
         cert_name = self.create_random_name(prefix='cert', length=20)
-        self.byoc_create_keyvault_cert(resource_group, key_vault, cert_name)
+        self.byoc_create_keyvault_cert(key_vault, cert_name)
 
         # Enable custom HTTPS with the custom certificate.
         checks = [JMESPathCheck('name', custom_domain_name),

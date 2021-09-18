@@ -8,7 +8,7 @@ import unittest
 
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest,
-                               record_only)
+                               record_only, KeyVaultPreparer)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -330,7 +330,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         name3 = self.create_random_name(prefix='cli', length=24)
         name4 = self.create_random_name(prefix='cli', length=24)
         self.cmd('az storage account create -n {} -g {}'.format(name1, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', None)])
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
         self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_0'.format(name2, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
@@ -346,16 +346,16 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(name_prefix='tls')
     def test_storage_update_with_min_tls(self, storage_account, resource_group):
         self.cmd('az storage account show -n {} -g {}'.format(storage_account, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', None)])
-
-        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_1'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_1')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_2'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
+
+        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_routing')
@@ -697,13 +697,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
-    def test_customer_managed_key(self, resource_group, storage_account):
-        self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': self.create_random_name('clitest', 24)}
+    @KeyVaultPreparer(location='southcentralus')
+    def test_customer_managed_key(self, resource_group, storage_account, key_vault):
+        self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': key_vault}
 
-        self.kwargs['vid'] = self.cmd('az keyvault create -n {vt} -g {rg} '
-                                      '-otsv --query id').output.rstrip('\n')
-        self.kwargs['vtn'] = self.cmd('az keyvault show -n {vt} -g {rg} '
-                                      '-otsv --query properties.vaultUri').output.strip('\n')
+        keyvault_result = self.cmd('az keyvault show -n {vt} -g {rg}').get_output_in_json()
+        self.kwargs['vid'] = keyvault_result['id']
+        self.kwargs['vtn'] = keyvault_result['properties']['vaultUri']
+
         self.kwargs['ver'] = self.cmd("az keyvault key create -n testkey -p software --vault-name {vt} "
                                       "-otsv --query 'key.kid'").output.rsplit('/', 1)[1].rstrip('\n')
         self.kwargs['oid'] = self.cmd("az storage account update -n {sa} -g {rg} --assign-identity "
@@ -765,14 +766,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
 
     @ResourceGroupPreparer(location='eastus2euap')
-    def test_user_assigned_identity(self, resource_group):
+    @KeyVaultPreparer(location='eastus2euap')
+    def test_user_assigned_identity(self, resource_group, key_vault):
         self.kwargs = {
             'rg': resource_group,
             'sa1': self.create_random_name(prefix='sa1', length=24),
             'sa2': self.create_random_name(prefix='sa2', length=24),
             'sa3': self.create_random_name(prefix='sa3', length=24),
             'identity': self.create_random_name(prefix='id', length=24),
-            'vt': self.create_random_name('clitest', 24)
+            'vt': key_vault
         }
         # Prepare managed identity
         identity = self.cmd('az identity create -n {identity} -g {rg}').get_output_in_json()
@@ -780,7 +782,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs['oid'] = identity['principalId']
 
         # Prepare key vault
-        keyvault = self.cmd('az keyvault create -n {vt} -g {rg} ').get_output_in_json()
+        keyvault = self.cmd('az keyvault show -n {vt} -g {rg} ').get_output_in_json()
         self.kwargs['vid'] = keyvault['id']
         self.kwargs['vtn'] = keyvault['properties']['vaultUri']
 
@@ -1107,10 +1109,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         policy_file = os.path.join(curr_dir, 'mgmt_policy.json').replace('\\', '\\\\')
 
         self.kwargs = {'rg': resource_group, 'sa': storage_account, 'policy': policy_file}
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
         self.cmd('storage account management-policy create --account-name {sa} -g {rg} --policy @"{policy}"',
                  checks=[JMESPathCheck('policy.rules[0].name', 'olcmtest'),
                          JMESPathCheck('policy.rules[0].enabled', True),
-                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToCool.daysAfterModificationGreaterThan', 30),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToCool.daysAfterLastAccessTimeGreaterThan', 30),
                          JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToArchive.daysAfterModificationGreaterThan', 90),
                          JMESPathCheck('policy.rules[0].definition.actions.baseBlob.delete.daysAfterModificationGreaterThan', 1000),
                          JMESPathCheck('policy.rules[0].definition.actions.snapshot.tierToCool.daysAfterCreationGreaterThan', 30),
@@ -1587,6 +1592,29 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage account blob-service-properties show -n {sa} -g {rg}',
                  checks=[self.check('defaultServiceVersion', '2018-11-09')])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
+    @StorageAccountPreparer(location="eastus2", kind="StorageV2")
+    def test_storage_account_update_last_access(self):
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
+        result = self.cmd(
+            'storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['name'], "AccessTimeTracking")
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['trackingGranularityInDays'], 1)
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['blobType'][0], "blockBlob")
+
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy'], None)
+
+        result = self.cmd('storage account blob-service-properties update --enable-last-access-tracking -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
+        result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
 
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):

@@ -30,7 +30,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
     cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
-    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections)
+    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -444,12 +444,23 @@ def load_command_table(self, _):
         min_api='2020-05-01'
     )
 
+    network_custom_ip_prefix_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
+        client_factory=cf_custom_ip_prefixes,
+        min_api='2020-06-01'
+    )
+
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
 
     network_load_balancers_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_load_balancers,
         min_api='2020-08-01'
+    )
+
+    network_nic_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_network_interfaces
     )
 
     # endregion
@@ -672,11 +683,16 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_trusted_client_certificate')
         g.custom_command('remove', 'remove_trusted_client_certificate')
         g.custom_command('list', 'list_trusted_client_certificate')
+        g.custom_show_command('show', 'show_trusted_client_certificate')
+        g.custom_command('update', 'update_trusted_client_certificate')
 
     with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
         g.custom_command('add', 'add_ssl_profile')
         g.custom_command('remove', 'remove_ssl_profile')
         g.custom_command('list', 'list_ssl_profile')
+        g.custom_show_command('show', 'show_ssl_profile')
+        g.custom_command('update', 'update_ssl_profile')
+
     # endregion
 
     # region ApplicationSecurityGroups
@@ -819,6 +835,8 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='update_express_route_port_link',
                                  supports_no_wait=True,
+                                 child_collection_prop_name='links',
+                                 child_arg_name='link_name',
                                  min_api='2019-08-01')
 
     with self.command_group('network express-route port location', network_er_port_locations_sdk) as g:
@@ -897,7 +915,8 @@ def load_command_table(self, _):
         g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
                                  getter_name='lb_get',
                                  getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
+                                 setter_name='update_lb_frontend_ip_configuration_setter',
+                                 setter_type=network_load_balancers_custom,
                                  custom_func_name='set_lb_frontend_ip_configuration',
                                  validator=process_lb_frontend_ip_namespace)
 
@@ -1051,7 +1070,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_nic_ip_config')
         g.generic_update_command('update',
                                  child_collection_prop_name='ip_configurations', child_arg_name='ip_config_name',
-                                 setter_name='begin_create_or_update',
+                                 setter_name='update_nic_ip_config_setter',
+                                 setter_type=network_nic_custom,
                                  custom_func_name='set_nic_ip_config')
         g.command('list', list_network_resource_property(resource, subresource), command_type=network_util)
         g.show_command('show', get_network_resource_property_entry(resource, subresource), command_type=network_util)
@@ -1197,6 +1217,16 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)
         g.custom_show_command('show', 'show_nw_troubleshooting_result', validator=process_nw_troubleshooting_show_namespace)
     # endregion
+
+    # region CustomIpPrefix
+    with self.command_group('network custom-ip prefix', network_custom_ip_prefix_sdk, client_factory=cf_custom_ip_prefixes, is_preview=True, min_api='2020-06-01') as g:
+        g.custom_command('create', 'create_custom_ip_prefix', supports_no_wait=True)
+        g.command('delete', 'begin_delete')
+        g.custom_command('list', 'list_custom_ip_prefixes')
+        g.show_command('show')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix', supports_no_wait=True)
+        g.wait_command('wait')
+    # endRegion
 
     # region PublicIPAddresses
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
@@ -1346,6 +1376,7 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
         g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
         g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
@@ -1355,6 +1386,7 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
         g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
         g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
+        g.wait_command('wait')
 
     # with self.command_group
 
@@ -1380,6 +1412,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
         g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
         g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
+        g.wait_command('wait')
     # endregion
 
     # region VirtualNetworkGatewayConnections
@@ -1408,6 +1441,7 @@ def load_command_table(self, _):
     with self.command_group('network vpn-connection packet-capture', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections, is_preview=True, min_api='2019-07-01') as g:
         g.custom_command('start', 'start_vpn_conn_package_capture', supports_no_wait=True)
         g.custom_command('stop', 'stop_vpn_conn_package_capture', supports_no_wait=True)
+        g.wait_command('wait')
 
     # endregion
 
@@ -1476,6 +1510,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_bastion_host')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
+        g.custom_command('ssh', 'ssh_bastion_host')
+        g.custom_command('rdp', 'rdp_bastion_host')
+        g.custom_command('tunnel', 'create_bastion_tunnel')
         g.command('delete', 'begin_delete')
     # endregion
 

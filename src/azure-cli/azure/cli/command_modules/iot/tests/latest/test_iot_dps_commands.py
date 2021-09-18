@@ -95,6 +95,7 @@ class IoTDpsTest(ScenarioTest):
 
         # Test DPS Certificate Lifecycle
         cert_name = self.create_random_name('certificate', 20)
+        cert_name_verified = self.create_random_name(prefix='verified-certificate-', length=48)
 
         # Set up cert file for test
         verification_file = "verify.cer"
@@ -103,15 +104,27 @@ class IoTDpsTest(ScenarioTest):
         max_int = 9223372036854775807
         _create_test_cert(cert_file, key_file, self.create_random_name(prefix='TESTCERT', length=24), 3, random.randint(0, max_int))
 
-        # Create certificate
+        # Create certificates
         self.cmd('az iot dps certificate create --dps-name {} -g {} --name {} -p {}'.format(dps_name, group_name, cert_name, cert_file),
                  checks=[
                      self.check('name', cert_name),
                      self.check('properties.isVerified', False)
         ])
 
+        etag_verified = self.cmd('az iot dps certificate create --dps-name {} -g {} --name {} -p {} --verified'.format(dps_name, group_name, cert_name_verified, cert_file),
+                                 checks=[
+                                    self.check('name', cert_name_verified),
+                                    self.check('properties.isVerified', True)
+        ]).get_output_in_json()['etag']
+
         # List certificates
-        self.cmd('az iot dps certificate list --dps-name {} -g {}'.format(dps_name, group_name))
+        self.cmd('az iot dps certificate list --dps-name {} -g {}'.format(dps_name, group_name),
+                 checks=[
+                     self.check('length(value)', 2),
+                     self.check('value[0].name', cert_name_verified),
+                     self.check('value[0].properties.isVerified', True),
+                     self.check('value[1].name', cert_name),
+                     self.check('value[1].properties.isVerified', False)])
 
         # Get certificate
         etag = self.cmd('az iot dps certificate show --dps-name {} -g {} --name {}'.format(dps_name, group_name, cert_name), checks=[
@@ -146,8 +159,9 @@ class IoTDpsTest(ScenarioTest):
                             self.check('properties.isVerified', True)
         ]).get_output_in_json()['etag']
 
-        # Delete certificate
+        # Delete certificates
         self.cmd('az iot dps certificate delete --dps-name {} -g {} --name {} --etag {}'.format(dps_name, group_name, cert_name, etag))
+        self.cmd('az iot dps certificate delete --dps-name {} -g {} --name {} --etag {}'.format(dps_name, group_name, cert_name_verified, etag_verified))
 
         _delete_test_cert(cert_file, key_file, verification_file)
 

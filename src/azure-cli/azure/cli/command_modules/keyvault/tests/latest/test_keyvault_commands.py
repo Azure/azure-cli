@@ -11,6 +11,7 @@ import time
 import unittest
 from datetime import datetime, timedelta
 from dateutil import tz
+from ipaddress import ip_network
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure_devtools.scenario_tests import RecordingProcessor
@@ -238,6 +239,10 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
         self.kwargs['hsm_pec_name'] = self.kwargs['hsm_pec_id'].split('/')[-1]
         self.cmd('keyvault private-endpoint-connection show --hsm-name {hsm} --name {hsm_pec_name}',
                  checks=self.check('name', '{hsm_pec_name}'))
+
+        # List private endpoint connections
+        self.cmd('keyvault private-endpoint-connection list --hsm-name {hsm}',
+                 checks=[self.check('length(@)', 1), self.check('[0].id', '{hsm_pec_id}')])
 
         # Test approval/rejection
         self.kwargs.update({
@@ -1863,7 +1868,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
         policy3_path = os.path.join(TEST_DIR, 'policy3.json')
-        cert_secret_path = os.path.join(TEST_DIR, 'cert_secret')
+        cert_secret_path = os.path.join(TEST_DIR, 'cert_secret.der')
         self.kwargs.update({
             'policy_path': policy_path,
             'policy2_path': policy2_path,
@@ -1889,10 +1894,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
             with open(policy3_path, "w") as f:
                 f.write(json.dumps(policy))
 
-        if not os.path.exists(cert_secret_path) or self.is_live:
-            if os.path.exists(cert_secret_path):
-                os.remove(cert_secret_path)
-            self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
+        self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
 
         self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy3_path}"',
                  checks=[
@@ -1901,6 +1903,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
                                 policy['secretProperties']['contentType'])
                  ])
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
+        if os.path.exists(cert_secret_path):
+            os.remove(cert_secret_path)
 
         # list certificates
         self.cmd('keyvault certificate list --vault-name {kv}',
@@ -2337,7 +2341,8 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             'ip': '1.2.3.4/32',
             'ip2': '2.3.4.0/24',
             'ip3': '3.4.5.0/24',
-            'ip4': '4.5.0.0/16'
+            'ip4': '4.5.0.0/16',
+            'ip5': '1.2.3.4'
         })
 
         subnet = self._create_subnet().get_output_in_json()
@@ -2458,6 +2463,12 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             self.check('properties.networkAcls.ipRules[0].value', '{ip}')
         ])
 
+        # Add ip without CIDR format to make sure there is no duplication
+        self.cmd('keyvault network-rule add --ip-address {ip5} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 1),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')
+        ])
+
         # list network-rule for ip-address
         self.cmd('keyvault network-rule list --name {kv} --resource-group {rg}', checks=[
             self.check('ipRules[0].value', '{ip}')])
@@ -2465,6 +2476,21 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
         # remove network-rule for ip-address
         self.cmd('keyvault network-rule remove --ip-address {ip} --name {kv} --resource-group {rg}', checks=[
             self.check('length(properties.networkAcls.ipRules)', 0)])
+
+        # Add multiple ip addresses
+        self.cmd('keyvault network-rule add --ip-address {ip} {ip2} {ip3} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 3)
+        ])
+
+        # Add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('keyvault network-rule add --ip-address {ip} {ip5} --name {kv} --resource-group {rg}')
+
+        # Add multiple ip addresses with some overlaps with the server
+        self.cmd('keyvault network-rule add --ip-address {ip4} {ip5} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 4)
+        ])
 
 
 if __name__ == '__main__':

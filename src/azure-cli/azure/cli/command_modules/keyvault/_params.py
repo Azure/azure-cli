@@ -23,7 +23,7 @@ from azure.cli.command_modules.keyvault._validators import (
     get_vault_base_url_type, get_hsm_base_url_type, validate_key_import_type,
     validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
-    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
+    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet, validate_ip_address,
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
@@ -238,6 +238,9 @@ def load_arguments(self, _):
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
+    with self.argument_context('keyvault network-rule add', min_api='2018-02-14') as c:
+        c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 [ip2]...', validator=validate_ip_address)
+
     for item in ['approve', 'reject', 'delete', 'show', 'wait']:
         with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
             c.extra('connection_id', options_list=['--id'], required=False,
@@ -252,6 +255,9 @@ def load_arguments(self, _):
             c.argument('hsm_name', mgmt_plane_hsm_name_type, min_api='2021-04-01-preview',
                        help='Name of the HSM. Required if --id is not specified.'
                             '(--hsm-name and --vault-name are mutually exclusive, please specify just one of them)')
+
+    with self.argument_context('keyvault private-endpoint-connection list') as c:
+        c.argument("hsm_name", hsm_name_type)
 
     with self.argument_context('keyvault private-link-resource', min_api='2018-02-14', max_api='2020-04-01-preview') as c:
         c.argument('vault_name', vault_name_type, required=True)
@@ -361,9 +367,9 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
-                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeytype')
+                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/createkey/createkey#jsonwebkeytype')
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
-                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
+                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import') as c:
         c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,

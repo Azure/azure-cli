@@ -16,6 +16,8 @@ from azure.cli.command_modules.keyvault._transformers import (
     multi_transformers, transform_key_decryption_output, keep_max_results,
     transform_key_output)
 
+from azure.cli.command_modules.keyvault._format import transform_secret_list
+
 from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
     validate_private_endpoint_connection_id, validate_role_assignment_args)
@@ -115,6 +117,7 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection',
                          validator=validate_private_endpoint_connection_id, supports_no_wait=True)
+        g.custom_command('list', 'list_private_endpoint_connection')
         g.custom_show_command('show', 'show_private_endpoint_connection',
                               validator=validate_private_endpoint_connection_id)
         g.custom_wait_command('wait', 'show_private_endpoint_connection',
@@ -182,7 +185,8 @@ def load_command_table(self, _):
                            transform=multi_transformers(
                                filter_out_managed_resources,
                                keep_max_results,
-                               extract_subresource_name()))
+                               extract_subresource_name()),
+                           table_transformer=transform_secret_list)
         g.keyvault_command('list-versions', 'get_secret_versions',
                            transform=multi_transformers(
                                keep_max_results,
@@ -202,7 +206,7 @@ def load_command_table(self, _):
                                    'will be moved to the soft deleted state. You will not be able to create a secret '
                                    'with the same name within this key vault until the secret has been purged from the '
                                    'soft-deleted state. Please see the following documentation for additional guidance.'
-                                   '\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'))
+                                   '\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_secret')
         g.keyvault_command('recover', 'recover_deleted_secret', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_secret')
@@ -238,7 +242,7 @@ def load_command_table(self, _):
                                    'create a certificate with the same name within this key vault until the '
                                    'certificate has been purged from the soft-deleted state. Please see the following '
                                    'documentation for additional guidance.\n'
-                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
+                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
                            transform=extract_subresource_name())
         g.keyvault_command('purge', 'purge_deleted_certificate')
         g.keyvault_command('recover', 'recover_deleted_certificate', transform=extract_subresource_name())
