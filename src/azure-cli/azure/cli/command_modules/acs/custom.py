@@ -2252,7 +2252,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                    'azure-cli will grant Network Contributor role to the '
                    'system assigned identity after the cluster is created, and '
                    'the role assignment will take some time to take effect, see '
-                   'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, '
+                   'https://docs.microsoft.com/azure/aks/use-managed-identity, '
                    'proceed to create cluster with system assigned identity?')
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
