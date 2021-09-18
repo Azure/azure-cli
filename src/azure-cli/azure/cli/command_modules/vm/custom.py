@@ -3447,13 +3447,16 @@ def list_image_galleries(cmd, resource_group_name=None):
 
 
 # from azure.mgmt.compute.models import Gallery, SharingProfile
-def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None, **kwargs):
+def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
+                           soft_delete=None, **kwargs):
     if permissions:
         if gallery.sharing_profile is None:
             SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
             gallery.sharing_profile = SharingProfile(permissions=permissions)
         else:
             gallery.sharing_profile.permissions = permissions
+    if soft_delete is not None:
+        gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
 
     client = _compute_client_factory(cmd.cli_ctx)
 
