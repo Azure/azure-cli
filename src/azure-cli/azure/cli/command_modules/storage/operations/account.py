@@ -60,7 +60,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
-                           enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow'):  # pylint: disable=unused-argument
+                           enable_nfs_v3=None, subnet=None, vnet_name=None, enable_vlw=None,
+                           immutability_period_since_creation_in_days=None, immutability_policy_state=None,
+                           allow_protected_append_writes=None, action='Allow'):  # pylint: disable=unused-argument
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -217,6 +219,21 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if enable_nfs_v3 is not None:
         params.enable_nfs_v3 = enable_nfs_v3
 
+    if enable_vlw is not None:
+        ImmutableStorageAccount = cmd.get_models('ImmutableStorageAccount')
+        AccountImmutabilityPolicyProperties = cmd.get_models('AccountImmutabilityPolicyProperties')
+        immutability_policy = None
+
+        if immutability_period_since_creation_in_days is not None:
+            immutability_policy = AccountImmutabilityPolicyProperties(
+                immutability_period_since_creation_in_days = immutability_period_since_creation_in_days,
+                state = immutability_policy_state,
+                allow_protected_append_writes = allow_protected_append_writes
+            )
+
+        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=enable_vlw,
+                                                                        immutability_policy = immutability_policy)
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -295,7 +312,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
-                           allow_cross_tenant_replication=None, default_share_permission=None):
+                           allow_cross_tenant_replication=None, default_share_permission=None,
+                           immutability_period_since_creation_in_days=None, immutability_policy_state=None,
+                           allow_protected_append_writes=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -475,6 +494,19 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
+
+    if any([immutability_period_since_creation_in_days, immutability_policy_state, allow_protected_append_writes]):
+        ImmutableStorageAccount = cmd.get_models('ImmutableStorageAccount')
+        AccountImmutabilityPolicyProperties = cmd.get_models('AccountImmutabilityPolicyProperties')
+        immutability_policy = None
+        immutability_policy = AccountImmutabilityPolicyProperties(
+            immutability_period_since_creation_in_days=immutability_period_since_creation_in_days if immutability_period_since_creation_in_days else params.immutable_storage_with_versioning.immutability_policy.immutability_period_since_creation_in_days, # pylint: disable=line-too-long
+            state=immutability_policy_state if immutability_policy_state else params.immutable_storage_with_versioning.immutability_policy.immutability_policy_state, # pylint: disable=line-too-long
+            allow_protected_append_writes=allow_protected_append_writes if allow_protected_append_writes else params.immutable_storage_with_versioning.immutability_policy.allow_protected_append_writes # pylint: disable=line-too-long
+        )
+
+        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=True,
+                                                                           immutability_policy=immutability_policy)
 
     return params
 

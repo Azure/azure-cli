@@ -21,7 +21,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
-                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet)
+                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
+                          validate_immutability_arguments)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
@@ -219,6 +220,37 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     action_type = CLIArgumentType(
         help='The action of virtual network rule. Possible value is Allow.'
     )
+
+    enable_vlw_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), min_api='2021-06-01',
+        help='The account level immutability property. The property is immutable and can only be set to true '
+             'at the account creation time. When set to true, it enables object level immutability for all '
+             'the containers in the account by default.'
+    )
+
+    immutability_period_since_creation_in_days_type = CLIArgumentType(
+        options_list=['--immutability-period-in-days', '--immutability-period'], min_api='2021-06-01',
+        help='The immutability period for the blobs in the container since the policy creation, in days.',
+    )
+
+    immutability_policy_state_type = CLIArgumentType(
+        arg_type=get_enum_type(["Unlocked", "Locked", "Disabled"]),
+        options_list = '--immutability-state', min_api = '2021-06-01',
+        help = 'Defines the mode of the policy. Disabled state disables the policy, '
+        'Unlocked state allows increase and decrease of immutability retention time '
+        'and also allows toggling allow-protected-append-writes property, '
+        'Locked state only allows the increase of the immutability retention time. '
+        'A policy can only be created in a Disabled or Unlocked state and can be toggled between the '
+        'two states. Only a policy in an Unlocked state can transition to a Locked state which cannot '
+        'be reverted.')
+
+    allow_protected_append_writes_type = CLIArgumentType(
+        arg_type = get_three_state_flag(), min_api = '2021-06-01',
+        help = 'This property can only be changed for unlocked time-based retention policies. '
+        'When enabled, new blocks can be written to an append blob while maintaining immutability '
+        'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
+        'modified or deleted. This property cannot be changed with ExtendImmutabilityPolicy API.')
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -336,6 +368,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
+        c.argument('enable_vlw', arg_type=enable_vlw_type, validator=validate_immutability_arguments)
+        c.argument('immutability_period_since_creation_in_days',arg_type=immutability_period_since_creation_in_days_type,
+                   validator=validate_immutability_arguments)
+        c.argument('immutability_policy_state', arg_type=immutability_policy_state_type,
+                   validator=validate_immutability_arguments)
+        c.argument('allow_protected_append_writes', arg_type=allow_protected_append_writes_type,
+                   validator=validate_immutability_arguments)
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -399,6 +438,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
+        c.argument('immutability_period_since_creation_in_days',arg_type=immutability_period_since_creation_in_days_type)
+        c.argument('immutability_policy_state', arg_type=immutability_policy_state_type)
+        c.argument('allow_protected_append_writes', arg_type=allow_protected_append_writes_type)
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
