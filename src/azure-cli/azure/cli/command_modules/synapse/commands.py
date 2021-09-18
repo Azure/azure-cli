@@ -312,6 +312,7 @@ def load_command_table(self, _):
                             client_factory=cf_synapse_client_integrationruntimes_factory) as g:
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
+        g.custom_command('create', 'create', deprecate_info=g.deprecate(redirect='managed create， self-hosted create'), supports_no_wait=True)
         g.custom_command('managed create', 'Managed_Create', supports_no_wait=True)
         g.custom_command('self-hosted create', 'Selfhosted_Create', supports_no_wait=True)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
@@ -408,6 +409,7 @@ def load_command_table(self, _):
     with self.command_group('synapse linked-service', synapse_linked_service_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_linked_service', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_linked_service', deprecate_info=g.deprecate(redirect='update'), supports_no_wait=True)
         g.custom_command('update', 'create_or_update_linked_service', supports_no_wait=True)
         g.custom_command('list', 'list_linked_service')
         g.custom_show_command('show', 'get_linked_service')
@@ -417,6 +419,7 @@ def load_command_table(self, _):
     with self.command_group('synapse dataset', synapse_dataset_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_dataset', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_dataset', deprecate_info=g.deprecate(redirect='update'), supports_no_wait=True)
         g.custom_command('update', 'create_or_update_dataset', supports_no_wait=True)
         g.custom_command('list', 'list_datasets')
         g.custom_show_command('show', 'get_dataset')
@@ -426,6 +429,7 @@ def load_command_table(self, _):
     with self.command_group('synapse pipeline', synapse_pipeline_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_pipeline', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_pipeline', deprecate_info=g.deprecate(redirect='update'), supports_no_wait=True)
         g.custom_command('update', 'create_or_update_pipeline', supports_no_wait=True)
         g.custom_command('list', 'list_pipelines')
         g.custom_show_command('show', 'get_pipeline')
@@ -447,6 +451,7 @@ def load_command_table(self, _):
     with self.command_group('synapse trigger', synapse_trigger_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_trigger', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_trigger', deprecate_info=g.deprecate(redirect='update'), supports_no_wait=True)
         g.custom_command('update', 'create_or_update_trigger', supports_no_wait=True)
         g.custom_command('list', 'list_triggers')
         g.custom_show_command('show', 'get_trigger')

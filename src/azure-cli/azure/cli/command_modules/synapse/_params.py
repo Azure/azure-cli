@@ -616,7 +616,7 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     # synapse artifacts linked-service
-    for scope in ['create', 'update']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse linked-service ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('linked_service_name', arg_type=name_type, help='The linked service name.')
@@ -634,7 +634,7 @@ def load_arguments(self, _):
         c.argument('linked_service_name', arg_type=name_type, help='The linked service name.')
 
     # synapse artifacts dataset
-    for scope in ['create', 'update']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse dataset ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('dataset_name', arg_type=name_type, help='The dataset name.')
@@ -652,7 +652,7 @@ def load_arguments(self, _):
         c.argument('dataset_name', arg_type=name_type, help='The dataset name.')
 
     # synapse artifacts pipeline
-    for scope in ['create', 'update']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse pipeline ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('pipeline_name', arg_type=name_type, help='The pipeline name.')
@@ -717,7 +717,7 @@ def load_arguments(self, _):
         c.argument('order_by', action=AddOrderBy, nargs='*', help='List of OrderBy option.')
 
     # synapse artifacts trigger
-    for scope in ['create', 'update']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse trigger ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
@@ -838,9 +838,21 @@ def load_arguments(self, _):
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part=None)
 
-    for scope in ['show', 'managed create', 'self-hosted create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status', 'start', 'stop']:
+    for scope in ['show', 'create', 'managed create', 'self-hosted create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status', 'start', 'stop']:
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
+
+    with self.argument_context('synapse integration-runtime create') as c:
+        c.argument('integration_runtime_type', options_list=['--type'], arg_type=get_enum_type(['Managed', 'SelfHosted']), help='The integration runtime type.')
+        c.argument('description', help='The integration runtime description.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
+        # Managed
+        c.argument('location', arg_group='Managed', help='The integration runtime location.')
+        c.argument('compute_type', arg_group='Managed', arg_type=get_enum_type(['General', 'MemoryOptimized', 'ComputeOptimized']),
+                   help='Compute type of the data flow cluster which will execute data flow job.')
+        c.argument('core_count', arg_group='Managed', help='Core count of the data flow cluster which will execute data flow job.')
+        c.argument('time_to_live', arg_group='Managed', help='Time to live (in minutes) setting of the data flow cluster which will execute data flow job.')
 
     with self.argument_context('synapse integration-runtime managed create') as c:
         c.argument('description', help='The integration runtime description.')
@@ -854,8 +866,6 @@ def load_arguments(self, _):
 
     with self.argument_context('synapse integration-runtime self-hosted create') as c:
         c.argument('description', help='The integration runtime description.')
-        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
-                   'which it should match existing entity or can be * for unconditional update.')
         c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
                    'which it should match existing entity or can be * for unconditional update.')
 

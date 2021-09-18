@@ -1102,6 +1102,16 @@ examples:
           --name testlinkedservice --file @path/linkedservice.json
 """
 
+helps['synapse linked-service set'] = """
+type: command
+short-summary: Update an exist linked service.
+examples:
+  - name: Update an exist linked service.
+    text: |-
+        az synapse linked-service set --workspace-name testsynapseworkspace \\
+          --name testlinkedservice --file @path/linkedservice.json
+"""
+
 helps['synapse linked-service show'] = """
 type: command
 short-summary: Get a linked service.
@@ -1156,6 +1166,16 @@ examples:
           --name testdataset --file @path/dataset.json
 """
 
+helps['synapse dataset set'] = """
+type: command
+short-summary: Update an exist dataset.
+examples:
+  - name: Update an exist dataset.
+    text: |-
+        az synapse dataset set --workspace-name testsynapseworkspace \\
+          --name testdataset --file @path/dataset.json
+"""
+
 helps['synapse dataset show'] = """
 type: command
 short-summary: Get a dataset.
@@ -1207,6 +1227,16 @@ examples:
   - name: Update an exist pipeline.
     text: |-
         az synapse pipeline update --workspace-name testsynapseworkspace \\
+          --name testpipeline --file @path/pipeline.json
+"""
+
+helps['synapse pipeline set'] = """
+type: command
+short-summary: Update an exist pipeline.
+examples:
+  - name: Update an exist pipeline.
+    text: |-
+        az synapse pipeline set --workspace-name testsynapseworkspace \\
           --name testpipeline --file @path/pipeline.json
 """
 
@@ -1323,6 +1353,16 @@ examples:
   - name: Update an exist trigger.
     text: |-
         az synapse trigger update --workspace-name testsynapseworkspace \\
+          --name testtrigger --file @path/trigger.json
+"""
+
+helps['synapse trigger set'] = """
+type: command
+short-summary: Update an exist trigger.
+examples:
+  - name: Update an exist trigger.
+    text: |-
+        az synapse trigger set --workspace-name testsynapseworkspace \\
           --name testtrigger --file @path/trigger.json
 """
 
@@ -1611,6 +1651,16 @@ examples:
     text: |-
         az synapse integration-runtime self-hosted create --workspace-name testsynapseworkspace --resource-group rg \\
           --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime create'] = """
+type: command
+short-summary: Create an integration runtime.
+examples:
+  - name: Create an integration runtime.
+    text: |-
+        az synapse integration-runtime create --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime --type Managed
 """
 
 helps['synapse integration-runtime update'] = """
