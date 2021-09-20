@@ -30,7 +30,7 @@ from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueEr
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.arm import raise_subdivision_deployment_error
+from azure.cli.core.commands.arm import raise_subdivision_deployment_error, resource_exists
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
 
@@ -2090,7 +2090,7 @@ def show_deployment_stack_at_subscription(cmd, name=None, stack=None):
         if name:
             # return DeploymentStack(rcf.deployment_stacks.get_at_subscription(name))
             return rcf.deployment_stacks.get_at_subscription(name)
-        return DeploymentStack(rcf.deployment_stacks.get_at_subscription(stack.split('/')[-1]))
+        return rcf.deployment_stacks.get_at_subscription(stack.split('/')[-1])
     raise CLIError("Please enter the stack name or stack resource id.")
 
 
@@ -2106,7 +2106,6 @@ def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None,
 
 def list_deployment_stack_at_subscription(cmd):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    # check = DeploymentStack(rcf.deployment_stacks.list_at_subscription())
     return rcf.deployment_stacks.list_at_subscription()
 
 
@@ -2136,10 +2135,13 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = N
     raise CLIError("Please enter the (stack name and resource group) or stack resource id")
 
 def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
     if not deployment_scope:
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
-
-    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    else:
+        #Verify this get with Gokul
+        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + deployment_scope
     
     t_spec, t_uri, t_file = None, None, None
     p_uri, parameters = None, None
@@ -2162,8 +2164,10 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
             parameters = json.load(open(param_file))
             print(parameters)
     elif param_uri:
-        p_uri = param_uri
+        #confirm with someone about this
+        p_uri = "'" + param_uri + "'"
     
+    #need to add debug setting
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, update_behavior = update_behavior, deployment_scope = deployment_scope)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
