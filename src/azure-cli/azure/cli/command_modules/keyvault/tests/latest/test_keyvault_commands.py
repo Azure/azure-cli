@@ -11,6 +11,7 @@ import time
 import unittest
 from datetime import datetime, timedelta
 from dateutil import tz
+from ipaddress import ip_network
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure_devtools.scenario_tests import RecordingProcessor
@@ -2340,7 +2341,8 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             'ip': '1.2.3.4/32',
             'ip2': '2.3.4.0/24',
             'ip3': '3.4.5.0/24',
-            'ip4': '4.5.0.0/16'
+            'ip4': '4.5.0.0/16',
+            'ip5': '1.2.3.4'
         })
 
         subnet = self._create_subnet().get_output_in_json()
@@ -2461,6 +2463,12 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             self.check('properties.networkAcls.ipRules[0].value', '{ip}')
         ])
 
+        # Add ip without CIDR format to make sure there is no duplication
+        self.cmd('keyvault network-rule add --ip-address {ip5} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 1),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')
+        ])
+
         # list network-rule for ip-address
         self.cmd('keyvault network-rule list --name {kv} --resource-group {rg}', checks=[
             self.check('ipRules[0].value', '{ip}')])
@@ -2468,6 +2476,21 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
         # remove network-rule for ip-address
         self.cmd('keyvault network-rule remove --ip-address {ip} --name {kv} --resource-group {rg}', checks=[
             self.check('length(properties.networkAcls.ipRules)', 0)])
+
+        # Add multiple ip addresses
+        self.cmd('keyvault network-rule add --ip-address {ip} {ip2} {ip3} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 3)
+        ])
+
+        # Add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('keyvault network-rule add --ip-address {ip} {ip5} --name {kv} --resource-group {rg}')
+
+        # Add multiple ip addresses with some overlaps with the server
+        self.cmd('keyvault network-rule add --ip-address {ip4} {ip5} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 4)
+        ])
 
 
 if __name__ == '__main__':

@@ -9,6 +9,7 @@ import binascii
 from datetime import datetime
 import re
 import sys
+from ipaddress import ip_network
 
 from enum import Enum
 from knack.deprecation import Deprecated
@@ -16,7 +17,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -438,6 +439,23 @@ def validate_subnet(cmd, namespace):
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
 
+def validate_ip_address(namespace):
+    # if there are overlapping ip ranges, throw an exception
+    ip_address = namespace.ip_address
+
+    if not ip_address:
+        return
+
+    ip_address_networks = [ip_network(ip) for ip in ip_address]
+    for idx, ip_address_network in enumerate(ip_address_networks):
+        for idx2, ip_address_network2 in enumerate(ip_address_networks):
+            if idx == idx2:
+                continue
+            if ip_address_network.overlaps(ip_address_network2):
+                raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} "
+                                                f"provided are overlapping: --ip_address ip1 [ip2]...")
+
+
 def validate_role_assignment_args(ns):
     if not any([ns.role_assignment_name, ns.scope, ns.assignee, ns.assignee_object_id, ns.role, ns.ids]):
         raise RequiredArgumentMissingError(
@@ -475,14 +493,14 @@ def _show_vault_only_deprecate_message(ns):
                        'Warning! If you have soft-delete protection enabled on this key vault, you will '
                        'not be able to reuse this key vault name until the key vault has been purged from '
                        'the soft deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
+                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
         'keyvault key delete':
             Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
                        'Warning! If you have soft-delete protection enabled on this key vault, this key '
                        'will be moved to the soft deleted state. You will not be able to create a key with '
                        'the same name within this key vault until the key has been purged from the '
                        'soft-deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview')
+                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview')
     }
     cmds = ['keyvault delete', 'keyvault key delete']
     for cmd in cmds:

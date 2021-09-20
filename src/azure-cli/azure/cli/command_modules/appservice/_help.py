@@ -965,7 +965,7 @@ short-summary: Manage web apps.
 
 helps['webapp auth'] = """
 type: group
-short-summary: Manage webapp authentication and authorization
+short-summary: Manage webapp authentication and authorization. To use v2 auth commands, run "az extension add --name authV2" to add the authV2 CLI extension.
 """
 
 helps['webapp auth show'] = """
@@ -1473,12 +1473,12 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using '|' delimiter.
+  - name: Create a web app with a Java 11 runtime using '|' delimiter.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|8"
-  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using ':' delimiter.
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|11"
+  - name: Create a web app with a Java 11 runtime using ':' delimiter.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:8"
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|10.14" --deployment-local-git
@@ -2036,12 +2036,12 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using '|' delimiter
+  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter
     text: >
-        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|8"
-  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using ':' delimiter
+        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|11"
+  - name: Create a web app with a specified name and a Java 11 runtime using ':' delimiter
     text: >
-        az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:8"
+        az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
     text: >
         az webapp up -l locationName
@@ -2055,7 +2055,7 @@ examples:
 
 helps['webapp update'] = """
 type: command
-short-summary: Update a web app.
+short-summary: Update an existing web app.
 examples:
   - name: Update the tags of a web app.
     text: >

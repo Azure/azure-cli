@@ -1377,7 +1377,7 @@ class CosmosDBTests(ScenarioTest):
         assert cmk_output["keyVaultKeyUri"] == key_uri
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_managed_service_identity')
-    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
     def test_cosmosdb_managed_service_identity(self, resource_group, key_vault):
         key_name = self.create_random_name(prefix='cli', length=15)
         key_uri = "https://{}.vault.azure.net/keys/{}".format(key_vault, key_name)

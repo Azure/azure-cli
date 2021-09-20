@@ -54,7 +54,14 @@ from .tunnel import TunnelServer
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
-from .utils import _normalize_sku, get_sku_name, retryable_method, raise_missing_token_suggestion
+from .utils import (_normalize_sku,
+                    get_sku_name,
+                    retryable_method,
+                    raise_missing_token_suggestion,
+                    _get_location_from_resource_group,
+                    _list_app,
+                    _rename_server_farm_props,
+                    _get_location_from_webapp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -436,7 +443,10 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     if res.status_code == 409:
         raise CLIError("There may be an ongoing deployment or your app setting has WEBSITE_RUN_FROM_PACKAGE. "
                        "Please track your deployment in {} and ensure the WEBSITE_RUN_FROM_PACKAGE app setting "
-                       "is removed.".format(deployment_status_url))
+                       "is removed. Use 'az webapp config appsettings list --name MyWebapp --resource-group "
+                       "MyResourceGroup --subscription MySubscription' to list app settings and 'az webapp "
+                       "config appsettings delete --name MyWebApp --resource-group MyResourceGroup "
+                       "--setting-names <setting-names> to delete them.".format(deployment_status_url))
 
     # check the status of async deployment
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
@@ -960,13 +970,6 @@ def list_runtimes_hardcoded(linux=False):
     if linux:
         return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['linux']]
     return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['windows']]
-
-
-def _rename_server_farm_props(webapp):
-    # Should be renamed in SDK in a future release
-    setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)
-    del webapp.server_farm_id
-    return webapp
 
 
 def delete_function_app(cmd, resource_group_name, name, slot=None):
@@ -1924,19 +1927,6 @@ def _parse_frequency(cmd, frequency):
         raise CLIError('Frequency must be positive')
 
     return frequency_num, frequency_unit
-
-
-def _get_location_from_resource_group(cli_ctx, resource_group_name):
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-    group = client.resource_groups.get(resource_group_name)
-    return group.location
-
-
-def _get_location_from_webapp(client, resource_group_name, webapp):
-    webapp = client.web_apps.get(resource_group_name, webapp)
-    if not webapp:
-        raise CLIError("'{}' app doesn't exist".format(webapp))
-    return webapp.location
 
 
 def _get_deleted_apps_locations(cli_ctx):
@@ -3777,7 +3767,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         app_details = get_app_details(cmd, name)
         if app_details is None:
             raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that the app "
-                           "is a part of the current subscription".format(name))
+                           "is a part of the current subscription if updating an existing app. If creating "
+                           "a new app, app names must be globally unique. Please try a more unique name or "
+                           "leave unspecified to receive a randomly generated name.".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
             raise CLIError("The webapp '{}' exists in ResourceGroup '{}' and does not "
@@ -3802,7 +3794,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         if current_os.lower() != os_name.lower():
             raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
                            "'{}'. Please create a new app "
-                           "to continue this operation.".format(name, current_os, src_dir, os_name))
+                           "to continue this operation. For more information on default behaviors, "
+                           "see https://docs.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
+                           .format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
         # Get site config to check the runtime version
@@ -4240,7 +4234,8 @@ def _make_onedeploy_request(params):
 
     # check if there's an ongoing process
     if response.status_code == 409:
-        raise CLIError("Another deployment is in progress. You can track the ongoing deployment at {}"
+        raise CLIError("Another deployment is in progress. Please wait until that process is complete before "
+                       "starting a new deployment. You can track the ongoing deployment at {}"
                        .format(deployment_status_url))
 
     # check if an error occured during deployment
@@ -4373,11 +4368,11 @@ def _validate_asp_sku(app_service_environment, sku):
     if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
         if not app_service_environment:
             raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
             raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):

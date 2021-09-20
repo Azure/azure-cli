@@ -292,7 +292,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
         (Style.ACTION, "--resource-group"),
         (Style.PRIMARY, " MyResourceGroup\n"),
         (Style.SECONDARY, "Create a storage account. For more detail, see "),
-        (Style.HYPERLINK, "https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?"
+        (Style.HYPERLINK, "https://docs.microsoft.com/azure/storage/common/storage-account-create?"
                           "tabs=azure-cli#create-a-storage-account-1"),
         (Style.SECONDARY, "\n"),
     ]
