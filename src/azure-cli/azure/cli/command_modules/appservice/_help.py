@@ -1257,7 +1257,7 @@ examples:
         az webapp config set -g MyResourceGroup -n MyUniqueApp --always-on true
   - name: set configuration through a JSON file called params.json
     text: >
-        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "@.\params.json"
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "@.\\params.json"
 
 """
 
