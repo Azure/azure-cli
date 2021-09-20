@@ -1255,15 +1255,9 @@ examples:
   - name: turn on "alwaysOn"
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --always-on true
-  - name: for non-PowerShell users, turn on "alwaysOn" through a json with content '{"alwaysOn", true}'
+  - name: set configuration through a JSON file called params.json
     text: >
-        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations '{"alwaysOn": true}'
-  - name: for PowerShell users, turn on "alwaysOn" through a json with content '{"alwaysOn", true}' (note the backslashes escaping the double quotes)
-    text: >
-        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations '{\\"alwaysOn\\": true}'
-  - name: for PowerShell users, set configuration through a JSON file (specified by file path) called params.json which is located in the current working directory
-    text: >
-        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "@.\\params.json"
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "@.\params.json"
 
 """
 
