@@ -2006,6 +2006,58 @@ class DeploymentScriptsTest(ScenarioTest):
         self.cmd('deployment-scripts list',
                  checks=self.check("length([?name=='{deployment_script_name}'])", 0))
 
+class DeploymentStacksTest(ScenarioTest):
+    #do we need location below
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks',location='westus2')
+    def test_show_deployment_stack_subscription(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-get-deployment-stack-subscription', 60)
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'update-behavior': "detach",
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\')
+        })
+
+        # create deployment stack
+        new_resource = self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}"').get_output_in_json()
+        self.kwargs['deployment_stack_id'] = new_resource['id']
+
+        show_by_name = self.cmd('az stacks sub show --name {name}')
+        self.assertTrue(show_by_name is not None)
+
+        show_by_id = self.cmd('az stacks sub show --stack {deployment_stack_id}')
+        self.assertTrue(show_by_id is not None)
+
+        # clean up
+        self.cmd('stacks sub delete --name {name}')
+    
+    @AllowLargeResponse(4096)
+    def test_list_deployment_stack_subscription(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-list-deployment-stack-subscription', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'update-behavior': "detach",
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\')
+        })
+
+        new_resource =  self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}"').get_output_in_json()
+
+        list_with_no_parameters = self.cmd('stacks sub list')
+
+        assert(len(list_with_no_parameters) > 0)
+        self.assertTrue(list_with_no_parameters.name.contains('{name}'))
+
+        # clean up
+        self.cmd('stacks sub delete --name {name}')
+
+        
+
+        
+
 
 class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
 
