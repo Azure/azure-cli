@@ -617,7 +617,7 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
 
         terminalsize = os.get_terminal_size()
         terminal_size = ContainerExecRequestTerminalSize(rows=terminalsize.lines, cols=terminalsize.columns)
-        exec_request = ContainerExecRequest(command=exec_command, terminal_size = terminal_size)
+        exec_request = ContainerExecRequest(command=exec_command, terminal_size=terminal_size)
 
         execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_request)
 
