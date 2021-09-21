@@ -3761,7 +3761,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
                            "'{}'. Please create a new app "
                            "to continue this operation. For more information on default behaviors, "
-                           "see https://docs.microsoft.com/en-us/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
+                           "see https://docs.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
                            .format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
@@ -4334,11 +4334,11 @@ def _validate_asp_sku(app_service_environment, sku):
     if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
         if not app_service_environment:
             raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
             raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
