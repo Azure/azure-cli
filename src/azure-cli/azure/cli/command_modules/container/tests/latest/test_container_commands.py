@@ -117,6 +117,36 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              '[0].containers[0].resources.requests.cpu', cpu),
                          self.check('[0].containers[0].resources.requests.memoryInGb', memory)])
 
+        # Test logs
+        self.cmd('container logs -g {rg} -n {container_group_name}')
+
+        # Test exec
+        self.cmd('container exec -g {rg} -n {container_group_name} --exec-command \"ls\"')
+
+        # Test delete
+        self.cmd('container delete -g {rg} -n {container_group_name} -y',
+            checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('ipAddress.dnsNameLabel',
+                                    '{container_group_name}'),
+                         self.check('ipAddress.fqdn', '{fqdn}'),
+                         self.exists('ipAddress.ip'),
+                         self.exists('ipAddress.ports'),
+                         self.check('ipAddress.ports[0].port', '{port1}'),
+                         self.check('ipAddress.ports[1].port', '{port2}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('volumes'),
+                         self.check('volumes[0].secret', {})])
+
     # Test create container using managed identities.
     @ResourceGroupPreparer()
     def test_container_create_with_msi(self, resource_group, resource_group_location):

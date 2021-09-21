@@ -615,7 +615,10 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
         if container_name is None:
             container_name = container_group.containers[0].name
 
-        terminalsize = os.get_terminal_size()
+        try:
+            terminalsize = os.get_terminal_size()
+        except OSError:
+            terminalsize = os.terminal_size((80, 24))
         terminal_size = ContainerExecRequestTerminalSize(rows=terminalsize.lines, cols=terminalsize.columns)
         exec_request = ContainerExecRequest(command=exec_command, terminal_size=terminal_size)
 
