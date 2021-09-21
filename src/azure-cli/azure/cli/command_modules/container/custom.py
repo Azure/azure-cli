@@ -32,7 +32,7 @@ from knack.prompting import prompt_pass, prompt, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
-                                                 ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
+                                                 ResourceRequirements, Volume, VolumeMount, ContainerExecRequest, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
@@ -63,7 +63,7 @@ def get_container(client, resource_group_name, name):
 
 def delete_container(client, resource_group_name, name, **kwargs):
     """Delete a container group. """
-    return client.delete(resource_group_name, name)
+    return client.begin_delete(resource_group_name, name)
 
 
 # pylint: disable=too-many-statements
@@ -617,8 +617,9 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
 
         terminalsize = os.get_terminal_size()
         terminal_size = ContainerExecRequestTerminalSize(rows=terminalsize.lines, cols=terminalsize.columns)
+        exec_request = ContainerExecRequest(command=exec_command, terminal_size = terminal_size)
 
-        execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_command, terminal_size)
+        execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_request)
 
         if platform.system() is WINDOWS_NAME:
             _start_exec_pipe_windows(execContainerResponse.web_socket_uri, execContainerResponse.password)
