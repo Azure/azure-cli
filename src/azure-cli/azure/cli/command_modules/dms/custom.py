@@ -12,6 +12,7 @@ from knack.util import CLIError
 from azure.mgmt.datamigration.models import (DataMigrationService,
                                              NameAvailabilityRequest,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties,
+                                             MigrateMySqlAzureDbForMySqlOfflineTaskProperties,
                                              MigrateSqlServerSqlDbTaskProperties,
                                              MigrateSyncCompleteCommandInput,
                                              MigrateSyncCompleteCommandProperties,
@@ -24,7 +25,8 @@ from azure.mgmt.datamigration.models import (DataMigrationService,
 from azure.cli.core.util import sdk_no_wait, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.dms._client_factory import dms_cf_projects
 from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sqldb_offline_input,
-                                                           get_migrate_postgresql_to_azuredbforpostgresql_sync_input)
+                                                           get_migrate_postgresql_to_azuredbforpostgresql_sync_input,
+                                                           get_migrate_mysql_to_azuredbformysql_offline_input)
 
 
 # region Service
@@ -156,11 +158,13 @@ def create_task(cmd,
                 source_connection_json,
                 target_connection_json,
                 database_options_json,
+                optional_agent_settings,
+                make_source_server_read_only,
                 task_type="",
                 enable_schema_validation=False,
                 enable_data_integrity_validation=False,
                 enable_query_analysis_validation=False):
-
+                
     # Get source and target platform abd set inputs to lowercase
     source_platform, target_platform = get_project_platforms(cmd,
                                                              project_name=project_name,
@@ -178,12 +182,13 @@ source-platform and target-platform is not appropriate. \n\
 Please refer to the help file 'az dms project task create -h' \
 for the supported scenarios.")
 
-    source_connection_info, target_connection_info, database_options_json = \
+    source_connection_info, target_connection_info, database_options_json, optional_agent_settings = \
         transform_json_inputs(source_connection_json,
                               source_platform,
                               target_connection_json,
                               target_platform,
-                              database_options_json)
+                              database_options_json,
+                              optional_agent_settings)
 
     task_properties = get_task_migration_properties(database_options_json,
                                                     source_platform,
@@ -191,6 +196,8 @@ for the supported scenarios.")
                                                     task_type,
                                                     source_connection_info,
                                                     target_connection_info,
+                                                    optional_agent_settings,
+                                                    make_source_server_read_only,
                                                     enable_schema_validation,
                                                     enable_data_integrity_validation,
                                                     enable_query_analysis_validation)
@@ -275,7 +282,8 @@ def core_handles_scenario(
         task_type=""):
     # Add scenarios here after migrating them to the core from the extension.
     CoreScenarioTypes = [ScenarioType.sql_sqldb_offline,
-                         ScenarioType.postgres_azurepostgres_online]
+                         ScenarioType.postgres_azurepostgres_online,
+                         ScenarioType.mysql_azuremysql_offline]
     return get_scenario_type(source_platform, target_platform, task_type) in CoreScenarioTypes
 
 
@@ -284,7 +292,8 @@ def transform_json_inputs(
         source_platform,
         target_connection_json,
         target_platform,
-        database_options_json):
+        database_options_json,
+        optional_agent_settings):
     # Source connection info
     source_connection_json = get_file_or_parse_json(source_connection_json, "source-connection-json")
     source_connection_info = create_connection(source_connection_json, "Source Database ", source_platform)
@@ -296,7 +305,10 @@ def transform_json_inputs(
     # Database options
     database_options_json = get_file_or_parse_json(database_options_json, "database-options-json")
 
-    return (source_connection_info, target_connection_info, database_options_json)
+    # optional_agent_settings
+    optional_agent_settings = get_file_or_parse_json(optional_agent_settings, "optional_agent_settings")
+
+    return (source_connection_info, target_connection_info, database_options_json, optional_agent_settings)
 
 
 def get_file_or_parse_json(value, value_type):
@@ -363,6 +375,8 @@ def get_task_migration_properties(
         task_type,
         source_connection_info,
         target_connection_info,
+        optional_agent_settings,
+        make_source_server_read_only,
         enable_schema_validation,
         enable_data_integrity_validation,
         enable_query_analysis_validation):
@@ -370,6 +384,9 @@ def get_task_migration_properties(
     if st == ScenarioType.sql_sqldb_offline:
         TaskProperties = MigrateSqlServerSqlDbTaskProperties
         GetInput = get_migrate_sql_to_sqldb_offline_input
+    elif st == ScenarioType.mysql_azuremysql_offline:
+        TaskProperties = MigrateMySqlAzureDbForMySqlOfflineTaskProperties
+        GetInput = get_migrate_mysql_to_azuredbformysql_offline_input
     elif st == ScenarioType.postgres_azurepostgres_online:
         TaskProperties = MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties
         GetInput = get_migrate_postgresql_to_azuredbforpostgresql_sync_input
@@ -382,6 +399,8 @@ def get_task_migration_properties(
                                database_options_json,
                                source_connection_info,
                                target_connection_info,
+                               optional_agent_settings,
+                               make_source_server_read_only,
                                enable_schema_validation,
                                enable_data_integrity_validation,
                                enable_query_analysis_validation)
@@ -393,6 +412,8 @@ def get_task_properties(scenario_type,
                         options_json,
                         source_connection_info,
                         target_connection_info,
+                        optional_agent_settings,
+                        make_source_server_read_only,
                         enable_schema_validation,
                         enable_data_integrity_validation,
                         enable_query_analysis_validation):
@@ -406,6 +427,13 @@ def get_task_properties(scenario_type,
             enable_schema_validation,
             enable_data_integrity_validation,
             enable_query_analysis_validation)
+    elif scenario_type == ScenarioType.mysql_azuremysql_offline:
+        task_input = input_func(
+            options_json,
+            source_connection_info,
+            target_connection_info,
+            optional_agent_settings,
+            make_source_server_read_only)
     else:
         task_input = input_func(
             options_json,
@@ -424,6 +452,9 @@ def get_scenario_type(source_platform, target_platform, task_type=""):
     elif source_platform == "mysql" and target_platform == "azuredbformysql":
         scenario_type = ScenarioType.mysql_azuremysql_online if not task_type or "online" in task_type else \
             ScenarioType.unknown
+    elif source_platform == "mysql" and target_platform == "azuredbformysql":
+        scenario_type = ScenarioType.mysql_azuremysql_offline if not task_type or "offline" in task_type else \
+            ScenarioType.unknown
     elif source_platform == "postgresql" and target_platform == "azuredbforpostgresql":
         scenario_type = ScenarioType.postgres_azurepostgres_online if not task_type or "online" in task_type else \
             ScenarioType.unknown
@@ -434,7 +465,6 @@ def get_scenario_type(source_platform, target_platform, task_type=""):
 
 
 class ScenarioType(Enum):
-
     unknown = 0
     # SQL to SQLDB
     sql_sqldb_offline = 1
@@ -442,5 +472,7 @@ class ScenarioType(Enum):
     mysql_azuremysql_online = 21
     # PostgresSQL to Azure for PostgreSQL
     postgres_azurepostgres_online = 31
+    # MySQL to Azure for MySQL Offline
+    mysql_azuremysql_offline = 41
 
 # endregion

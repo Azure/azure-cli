@@ -8,7 +8,9 @@ from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigrationValidationOptions,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncTaskInput,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseInput,
-                                             MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseTableInput)
+                                             MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseTableInput,
+                                             MigrateMySqlAzureDbForMySqlOfflineTaskInput,
+                                             MigrateMySqlAzureDbForMySqlOfflineDatabaseInput)
 
 
 def get_migrate_sql_to_sqldb_offline_input(database_options_json,
@@ -57,3 +59,24 @@ def get_migrate_postgresql_to_azuredbforpostgresql_sync_input(database_options_j
     return MigratePostgreSqlAzureDbForPostgreSqlSyncTaskInput(source_connection_info=source_connection_info,
                                                               target_connection_info=target_connection_info,
                                                               selected_databases=database_options)
+
+
+def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
+                                                       source_connection_info,
+                                                       target_connection_info,
+                                                       optional_agent_settings,
+                                                       make_source_server_read_only):
+    database_options = []
+
+    for d in database_options_json:
+        database_options.append(
+            MigrateMySqlAzureDbForMySqlOfflineDatabaseInput(
+                name=d.get('name', None),
+                target_database_name=d.get('target_database_name', None),
+                table_map=d.get('table_map', None)))
+
+    return MigrateMySqlAzureDbForMySqlOfflineTaskInput(source_connection_info=source_connection_info,
+                                                       target_connection_info=target_connection_info,
+                                                       selected_databases=database_options,
+                                                       optional_agent_settings=optional_agent_settings,
+                                                       make_source_server_read_only=make_source_server_read_only)

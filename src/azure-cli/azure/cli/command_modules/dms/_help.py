@@ -108,16 +108,17 @@ long-summary: |
     -) source -> target
     1) SQL -> SQLDB
     2) PostgreSQL -> AzureDbForPostgreSQL
+    3) MySQL -> AzureDbForMySQL
 
 parameters:
   - name: --source-platform
     type: string
     short-summary: >
-        The type of server for the source database. The supported types are: SQL, PostgreSQL.
+        The type of server for the source database. The supported types are: SQL, PostgreSQL, MySQL.
   - name: --target-platform
     type: string
     short-summary: >
-        The type of service for the target database. The supported types are: SQLDB, AzureDbForPostgreSQL.
+        The type of service for the target database. The supported types are: SQLDB, AzureDbForPostgreSQL, AzureDbForMySQL.
 examples:
   - name: Create a SQL to SQLDB project for a DMS instance.
     text: >
@@ -125,6 +126,9 @@ examples:
   - name: Create a PostgreSql to AzureDbForPostgreSql project for a DMS instance.
     text: >
         az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags tagName1=tagValue1 tagWithNoValue
+  - name: Create a MySQL to AzureDbForMySQL project for a DMS instance.
+    text: >
+        az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySQL --tags tagName1=tagValue1 tagWithNoValue
 """
 
 helps['dms project delete'] = """
@@ -187,11 +191,12 @@ long-summary: |
     -) source -> target :: task type
     1) SQL -> SQLDB :: OfflineMigration
     2) PostgreSQL -> AzureDbForPostgreSql :: OnlineMigration
+    3) MySQL -> AzureDbForMySQL :: OfflineMigration
 parameters:
   - name: --task-type
     type: string
     short-summary: >
-        The type of data movement the task will support. The supported types are: OnlineMigration, OfflineMigration. If not provided, will default to OfflineMigration for SQL and OnlineMigration for PostgreSQL.
+        The type of data movement the task will support. The supported types are: OnlineMigration, OfflineMigration. If not provided, will default to OfflineMigration for SQL, MySQL and OnlineMigration for PostgreSQL.
   - name: --database-options-json
     type: string
     short-summary: >
@@ -244,6 +249,39 @@ parameters:
                 },
                 ...n
             ]
+        
+        For MySQL, the format of the database options JSON object.
+            [
+                {
+                    "name": "source database",
+                    "target_database_name": "target database",
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "migrationSetting": {
+                        "setting1": "value1",
+                        ...n
+                    },
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "sourceSetting": {
+                        "setting1": "value1",
+                        ...n
+                    },
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "targetSetting": {
+                        "setting1": "value1",
+                        ...n
+                    },
+                    // Optional parameter to list tables that you want included in the migration.
+                    "selectedTables": [
+                        "schemaName1.tableName1",
+                        ...n
+                    ]
+                },
+                ...n
+            ]
+            
   - name: --source-connection-json
     type: string
     short-summary: >
@@ -268,6 +306,14 @@ parameters:
             "port": 5432,                // if this is missing, it will default to 5432
             "encryptConnection": true,      // highly recommended to leave as true
             "trustServerCertificate": false  // highly recommended to leave as false
+        }
+        
+      The format of the connection JSON object for MySQL connections.
+        {
+            "userName": "user name",    // if this is missing or null, you will be prompted
+            "password": null,           // if this is missing or null (highly recommended) you will be prompted
+            "serverName": "server name",
+            "port": 3306                // if this is missing, it will default to 3306
         }
   - name: --target-connection-json
     type: string
