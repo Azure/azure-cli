@@ -512,6 +512,9 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
 
         self.cmd('container attach -g {rg} -n {container_group_name}')
 
+    # test is live only because repo test environment does not have a stdin file pointer
+    # ie. "UnsupportedOperation("redirected stdin is pseudofile, has no fileno()")"
+    @live_only()
     @ResourceGroupPreparer()
     def test_container_exec(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)
