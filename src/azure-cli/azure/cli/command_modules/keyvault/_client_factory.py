@@ -250,7 +250,7 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
 def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
     version = str(get_client_api_version(cli_ctx, resource_type))
     profile = Profile(cli_ctx=cli_ctx)
-    credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
+    credential, _, _ = profile.get_login_credentials()
     vault_url = \
         command_args.get('hsm_name', None) or \
         command_args.get('vault_base_url', None) or \
