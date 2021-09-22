@@ -120,9 +120,6 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         # Test logs
         self.cmd('container logs -g {rg} -n {container_group_name}')
 
-        # Test exec
-        self.cmd('container exec -g {rg} -n {container_group_name} --exec-command \"ls\"')
-
         # Test delete
         self.cmd('container delete -g {rg} -n {container_group_name} -y',
             checks=[self.check('name', '{container_group_name}'),
@@ -513,6 +510,46 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check(
                              'containers[0].resources.requests.memoryInGb', memory)])
 
-        time.sleep(10)
-
         self.cmd('container attach -g {rg} -n {container_group_name}')
+
+    @ResourceGroupPreparer()
+    def test_container_exec(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        cpu = 1
+        memory = 1
+        command = '"/bin/sh -c \'echo hello; sleep 15; done\'"'
+        restart_policy = 'Never'
+
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'cpu': cpu,
+            'memory': memory,
+            'command': command,
+            'restart_policy': restart_policy,
+        })
+
+        # Test create
+        self.cmd('container create -g {rg} -n {container_group_name} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --cpu {cpu} --memory {memory} '
+                 '--command-line {command} --restart-policy {restart_policy} ',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test exec
+        self.cmd('container exec -g {rg} -n {container_group_name} --exec-command \"ls\"')
