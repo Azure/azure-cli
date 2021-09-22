@@ -1,0 +1,143 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --enable-vlw --immutability-period --immutability-state --allow-protected-append-writes
+      User-Agent:
+      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_storage_account000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001","name":"cli_storage_account000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2021-09-22T09:03:53Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 22 Sep 2021 09:03:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Standard_RAGRS"}, "kind": "StorageV2", "location": "centraluseuap",
+      "properties": {"encryption": {"services": {"blob": {}}, "keySource": "Microsoft.Storage"},
+      "immutableStorageWithVersioning": {"enabled": true, "immutabilityPolicy": {"immutabilityPeriodSinceCreationInDays":
+      10, "state": "Disabled", "allowProtectedAppendWrites": true}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '356'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --enable-vlw --immutability-period --immutability-state --allow-protected-append-writes
+      User-Agent:
+      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa1000002?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Wed, 22 Sep 2021 09:04:06 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/centraluseuap/asyncoperations/e8855bf0-b937-4539-b5f0-b64664645e19?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --enable-vlw --immutability-period --immutability-state --allow-protected-append-writes
+      User-Agent:
+      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/centraluseuap/asyncoperations/e8855bf0-b937-4539-b5f0-b64664645e19?monitor=true&api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa1000002","name":"sa1000002","type":"Microsoft.Storage/storageAccounts","location":"centraluseuap","tags":{},"properties":{"immutableStorageWithVersioning":{"enabled":true,"immutabilityPolicy":{"immutabilityPeriodSinceCreationInDays":10,"state":"Disabled","allowProtectedAppendWrites":true}},"keyCreationTime":{"key1":"2021-09-22T09:04:04.6666073Z","key2":"2021-09-22T09:04:04.6666073Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-22T09:04:04.6822236Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-22T09:04:04.6822236Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-22T09:04:04.6040944Z","primaryEndpoints":{"dfs":"https://sa1000002.dfs.core.windows.net/","web":"https://sa1000002.z2.web.core.windows.net/","blob":"https://sa1000002.blob.core.windows.net/","queue":"https://sa1000002.queue.core.windows.net/","table":"https://sa1000002.table.core.windows.net/","file":"https://sa1000002.file.core.windows.net/"},"primaryLocation":"centraluseuap","statusOfPrimary":"available","secondaryLocation":"eastus2euap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://sa1000002-secondary.dfs.core.windows.net/","web":"https://sa1000002-secondary.z2.web.core.windows.net/","blob":"https://sa1000002-secondary.blob.core.windows.net/","queue":"https://sa1000002-secondary.queue.core.windows.net/","table":"https://sa1000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2196'
+      content-type:
+      - application/json
+      date:
+      - Wed, 22 Sep 2021 09:04:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

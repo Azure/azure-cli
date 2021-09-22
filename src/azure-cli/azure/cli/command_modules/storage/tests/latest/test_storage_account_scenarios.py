@@ -505,6 +505,24 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  '--subnet {subnet} --default-action Deny --hns --sku Standard_LRS ',
                  checks=[JMESPathCheck('enableNfsV3', True)])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(location='centraluseuap', name_prefix='cli_storage_account')
+    def test_storage_account_with_vlw(self, resource_group):
+        self.kwargs = {
+            'name1': self.create_random_name(prefix='sa1', length=24),
+            'name2': self.create_random_name(prefix='sa2', length=24),
+            'name3': self.create_random_name(prefix='sa3', length=24),
+            'rg': resource_group
+        }
+
+        result = self.cmd('storage account create -n {name1} -g {rg} --enable-vlw --immutability-period 10 '
+                 '--immutability-state Disabled --allow-protected-append-writes').get_output_in_json()
+        self.assertIn('immutableStorageWithVersioning', result)
+        self.assertEqual(result['immutableStorageWithVersioning']['enabled'], True)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['allowProtectedAppendWrites'], True)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['immutabilityPeriodSinceCreationInDays'], 10)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['state'], 'Disabled')
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
