@@ -1392,7 +1392,7 @@ examples:
           --account-name MyStorageAccount \\
           --share-name  <<name of file share in the storage account >> \\
           --access-key <<storage account access key>> \\
-          --mount-path <<mount path used by the web app to read\write content>>
+          --mount-path <<mount path used by the web app to read/write content>>
 """
 
 helps['webapp config storage-account delete'] = """
