@@ -2007,8 +2007,6 @@ class DeploymentScriptsTest(ScenarioTest):
                  checks=self.check("length([?name=='{deployment_script_name}'])", 0))
 
 class DeploymentStacksTest(ScenarioTest):
-    #do we need location below
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks',location='westus2')
     def test_show_deployment_stack_subscription(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-get-deployment-stack-subscription', 60)
@@ -2047,16 +2045,98 @@ class DeploymentStacksTest(ScenarioTest):
         new_resource =  self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}"').get_output_in_json()
 
         list_with_no_parameters = self.cmd('stacks sub list')
-
-        assert(len(list_with_no_parameters) > 0)
-        self.assertTrue(list_with_no_parameters.name.contains('{name}'))
+        self.cmd('stacks sub list --query "[?name == \'{}\']"'.format(deployment_stack_name), checks=[
+            self.check('[0].name', '{name}'),
+        ])
 
         # clean up
         self.cmd('stacks sub delete --name {name}')
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    def test_create_deployment_stack_resource_group(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-create-deployment-stack-resource-group', 60)
+        template_spec_name = self.create_random_name('cli-test-template-spec', 60)
 
-        
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'resource-group': resource_group,
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+            'template-spec-name': template_spec_name,
+            'template-spec-version': "v1",
+        })
 
-        
+        # create templete spec
+        basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location {location} --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
+        template_spec_id = basic_template_spec['id']
+
+        self.kwargs.update({'template-spec-id': template_spec_id})
+
+        # create deployment stack with template file and parameter file
+        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # cleanup
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+
+        #create deployment stack with template spec and parameter file
+        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-spec "{template-spec-id}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # cleanup 
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    def test_show_deployment_stack_resource_group(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-show-deployment-stack-resource-group', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'resource-group': resource_group,
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+        })
+
+        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        deployment_stack_id = created_deployment_stack['id']
+
+        self.kwargs.update({'deployment-stack-id': deployment_stack_id})
+
+        # show stack with stack name
+        self.cmd('stacks group show --name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
+
+        # show stack with stack id
+        self.cmd('stacks group show --stack {deployment-stack-id}', checks=self.check('name', '{name}'))
+
+        # cleanup 
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    def test_list_deployment_stack_resource_group(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-list-deployment-stack-resource-group', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'resource-group': resource_group,
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+        })
+
+        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+
+        # list stacks in rg
+        list_deployment_stacks_rg = self.cmd('stacks group list --resource-group {resource-group}').get_output_in_json()
+
+        self.assertTrue(len(list_deployment_stacks_rg) > 0)
+        self.assertTrue(list_deployment_stacks_rg[0]['name'], '{name}')
+
 
 
 class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):

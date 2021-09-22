@@ -2083,57 +2083,6 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-
-def show_deployment_stack_at_subscription(cmd, name=None, stack=None):
-    if name or stack:
-        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-        if name:
-            # return DeploymentStack(rcf.deployment_stacks.get_at_subscription(name))
-            return rcf.deployment_stacks.get_at_subscription(name)
-        return rcf.deployment_stacks.get_at_subscription(stack.split('/')[-1])
-    raise CLIError("Please enter the stack name or stack resource id.")
-
-
-def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, stack=None):
-    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    if name and resource_group:
-        return rcf.deployment_stacks.get_at_resource_group(resource_group, name)
-    if stack:
-        stack_arr = stack.split('/')
-        return rcf.deployment_stacks.get_at_resource_group(stack_arr[4], stack_arr[-1])
-    raise CLIError("Please enter the (stack name and resource group) or stack resource id")
-
-
-def list_deployment_stack_at_subscription(cmd):
-    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    return rcf.deployment_stacks.list_at_subscription()
-
-
-def list_deployment_stack_at_resource_group(cmd, resource_group):
-    if resource_group:
-        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-        return rcf.deployment_stacks.list_at_resource_group(resource_group)
-    raise CLIError("Please enter the resource group")
-
-
-def delete_deployment_stack_at_subscription(cmd, name=None, stack=None):
-    if name or stack:
-        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-        if name:
-            return rcf.deployment_stacks.begin_delete_at_subscription(name)
-        return rcf.deployment_stacks.begin_delete_at_subscription(stack.split('/')[-1])
-    raise CLIError("Please enter the stack name or stack resource id")
-
-
-def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = None, stack=None):
-    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    if name and resource_group:
-        return rcf.deployment_stacks.begin_delete_at_resource_group(resource_group, name)
-    if stack:
-        stack_arr = stack.split('/')
-        return rcf.deployment_stacks.begin_delete_at_resource_group(stack_arr[4], stack_arr[-1])
-    raise CLIError("Please enter the (stack name and resource group) or stack resource id")
-
 def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2191,6 +2140,33 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
 
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_subscription,name, deployment_stack_model)
 
+
+def show_deployment_stack_at_subscription(cmd, name=None, stack=None):
+    if name or stack:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        if name:
+            # return DeploymentStack(rcf.deployment_stacks.get_at_subscription(name))
+            return rcf.deployment_stacks.get_at_subscription(name)
+        return rcf.deployment_stacks.get_at_subscription(stack.split('/')[-1])
+    raise CLIError("Please enter the stack name or stack resource id.")
+
+
+def list_deployment_stack_at_subscription(cmd):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    rcf.deployment_stacks.list_at_subscription()
+    
+    return rcf.deployment_stacks.list_at_subscription()
+
+
+def delete_deployment_stack_at_subscription(cmd, name=None, stack=None):
+    if name or stack:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        if name:
+            return rcf.deployment_stacks.begin_delete_at_subscription(name)
+        return rcf.deployment_stacks.begin_delete_at_subscription(stack.split('/')[-1])
+    raise CLIError("Please enter the stack name or stack resource id")
+
+
 def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
     if not deployment_scope:
         #fix this
@@ -2246,7 +2222,33 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
 
 
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_resource_group,resource_group, name, deployment_stack_model)
-    
+
+
+def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, stack=None):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    if name and resource_group:
+        return rcf.deployment_stacks.get_at_resource_group(resource_group, name)
+    if stack:
+        stack_arr = stack.split('/')
+        return rcf.deployment_stacks.get_at_resource_group(stack_arr[4], stack_arr[-1])
+    raise CLIError("Please enter the (stack name and resource group) or stack resource id")
+
+
+def list_deployment_stack_at_resource_group(cmd, resource_group):
+    if resource_group:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        return rcf.deployment_stacks.list_at_resource_group(resource_group)
+    raise CLIError("Please enter the resource group")
+
+
+def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = None, stack=None):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    if name and resource_group:
+        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name)
+    if stack:
+        stack_arr = stack.split('/')
+        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group,stack_arr[4], stack_arr[-1])
+    raise CLIError("Please enter the (stack name and resource group) or stack resource id")
 
 
 def show_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=None, snapshot=None):
@@ -2257,9 +2259,8 @@ def show_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=No
     if name and stack_name:
         return rcf.deployment_stack_snapshots.get_at_subscription(stack_name, name)
     raise CLIError("Please enter the (snapshot name and stack name) or snapshot resource id")
+ 
 
-
-    
 def show_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_name=None, resource_group=None, snapshot=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if snapshot:
@@ -2293,9 +2294,9 @@ def delete_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if snapshot:
         snapshot_arr = snapshot.split('/')
-        return rcf.deployment_stack_snapshots.delete_at_subscription(snapshot_arr[-3], snapshot_arr[-1])
+        return sdk_no_wait(False, rcf.deployment_stack_snapshots.delete_at_subscription, snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name:
-        return rcf.deployment_stack_snapshots.delete_at_subscription(stack_name, name)
+        return sdk_no_wait(False, rcf.deployment_stack_snapshots.delete_at_subscription, stack_name, name)
     raise CLIError("Please enter the (snapshot name and stack name) or snapshot resource id")
 
 
