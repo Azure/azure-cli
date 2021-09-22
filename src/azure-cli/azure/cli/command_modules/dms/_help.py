@@ -264,7 +264,7 @@ parameters:
                     // Used for manipulating the underlying migration engine.
                     // Only provide if instructed to do so or if you really know what you are doing.
                     "sourceSetting": {
-                        "setting1": "value1",
+                        "make_source_server_read_only": "true",
                         ...n
                     },
                     // Used for manipulating the underlying migration engine.
@@ -272,6 +272,32 @@ parameters:
                     "targetSetting": {
                         "setting1": "value1",
                         ...n
+                    },
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "optional_agent_settings": {
+                        // Optional setting that configures the maximum number of parallel reads on tables located on the source database.
+                        "DesiredRangesCount": "4",
+                        // Optional setting that configures that size of the largest batch that will be committed to the target server.
+                        "MaxBatchSizeKb": "4096",
+                        // Optional setting that configures the minimum number of rows in each batch written to the target.
+                        "MinBatchRows": null,
+                        // Optional setting that configures the number of databases that will be prepared for migration in parallel.
+                        "PrepareDatabaseForBulkImportTaskCount": null,
+                        // Optional setting that configures the number of tables that will be prepared for migration in parallel.
+                        "PrepareTableForBulkImportTaskCount": null,
+                        // Optional setting that configures the number of threads available to read ranges on the source.
+                        "QueryTableDataRangeTaskCount": "8",
+                        // Optional setting that configures the number of threads available to write batches to the target.
+                        "WriteDataRangeBatchTaskCount": "12",
+                        // Optional setting that configures how much memory will be used to cache batches in memory before reads on the source are throttled.
+                        "MaxBatchCacheSizeMb": null,
+                        // Optional setting that configures the amount of available memory at which point reads on the source will be throttled.
+                        "ThrottleQueryTableDataRangeTaskAtAvailableMemoryMb": null,
+                        // Optional setting that configures the number of batches cached in memory that will trigger read throttling on the source.
+                        "ThrottleQueryTableDataRangeTaskAtBatchCount": 36,
+                        // Optional setting that configures the delay between updates of result objects in Azure Table Storage.
+                        "DelayProgressUpdatesInStorageInterval": "00:00:30",
                     },
                     // Optional parameter to list tables that you want included in the migration.
                     "selectedTables": [

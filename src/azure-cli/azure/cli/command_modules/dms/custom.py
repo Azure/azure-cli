@@ -158,8 +158,6 @@ def create_task(cmd,
                 source_connection_json,
                 target_connection_json,
                 database_options_json,
-                optional_agent_settings,
-                make_source_server_read_only,
                 task_type="",
                 enable_schema_validation=False,
                 enable_data_integrity_validation=False,
@@ -182,13 +180,12 @@ source-platform and target-platform is not appropriate. \n\
 Please refer to the help file 'az dms project task create -h' \
 for the supported scenarios.")
 
-    source_connection_info, target_connection_info, database_options_json, optional_agent_settings = \
+    source_connection_info, target_connection_info, database_options_json = \
         transform_json_inputs(source_connection_json,
                               source_platform,
                               target_connection_json,
                               target_platform,
-                              database_options_json,
-                              optional_agent_settings)
+                              database_options_json)
 
     task_properties = get_task_migration_properties(database_options_json,
                                                     source_platform,
@@ -196,8 +193,6 @@ for the supported scenarios.")
                                                     task_type,
                                                     source_connection_info,
                                                     target_connection_info,
-                                                    optional_agent_settings,
-                                                    make_source_server_read_only,
                                                     enable_schema_validation,
                                                     enable_data_integrity_validation,
                                                     enable_query_analysis_validation)
@@ -292,8 +287,7 @@ def transform_json_inputs(
         source_platform,
         target_connection_json,
         target_platform,
-        database_options_json,
-        optional_agent_settings):
+        database_options_json):
     # Source connection info
     source_connection_json = get_file_or_parse_json(source_connection_json, "source-connection-json")
     source_connection_info = create_connection(source_connection_json, "Source Database ", source_platform)
@@ -305,10 +299,7 @@ def transform_json_inputs(
     # Database options
     database_options_json = get_file_or_parse_json(database_options_json, "database-options-json")
 
-    # optional_agent_settings
-    optional_agent_settings = get_file_or_parse_json(optional_agent_settings, "optional_agent_settings")
-
-    return (source_connection_info, target_connection_info, database_options_json, optional_agent_settings)
+    return (source_connection_info, target_connection_info, database_options_json)
 
 
 def get_file_or_parse_json(value, value_type):
@@ -375,8 +366,6 @@ def get_task_migration_properties(
         task_type,
         source_connection_info,
         target_connection_info,
-        optional_agent_settings,
-        make_source_server_read_only,
         enable_schema_validation,
         enable_data_integrity_validation,
         enable_query_analysis_validation):
@@ -399,8 +388,6 @@ def get_task_migration_properties(
                                database_options_json,
                                source_connection_info,
                                target_connection_info,
-                               optional_agent_settings,
-                               make_source_server_read_only,
                                enable_schema_validation,
                                enable_data_integrity_validation,
                                enable_query_analysis_validation)
@@ -412,8 +399,6 @@ def get_task_properties(scenario_type,
                         options_json,
                         source_connection_info,
                         target_connection_info,
-                        optional_agent_settings,
-                        make_source_server_read_only,
                         enable_schema_validation,
                         enable_data_integrity_validation,
                         enable_query_analysis_validation):
@@ -431,9 +416,7 @@ def get_task_properties(scenario_type,
         task_input = input_func(
             options_json,
             source_connection_info,
-            target_connection_info,
-            optional_agent_settings,
-            make_source_server_read_only)
+            target_connection_info)
     else:
         task_input = input_func(
             options_json,

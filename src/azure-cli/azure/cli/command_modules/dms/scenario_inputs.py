@@ -63,10 +63,10 @@ def get_migrate_postgresql_to_azuredbforpostgresql_sync_input(database_options_j
 
 def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
                                                        source_connection_info,
-                                                       target_connection_info,
-                                                       optional_agent_settings,
-                                                       make_source_server_read_only):
+                                                       target_connection_info):
     database_options = []
+    optional_agent_settings = []
+
 
     for d in database_options_json:
         database_options.append(
@@ -74,6 +74,13 @@ def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
                 name=d.get('name', None),
                 target_database_name=d.get('target_database_name', None),
                 table_map=d.get('table_map', None)))
+
+    if isinstance(database_options_json, dict):
+        optional_agent_settings = database_options_json.get('optional_agent_settings', None)
+        source_setting = database_options_json.get('sourceSetting', None)
+        if source_setting is not None and isinstance(source_setting, dict):
+            make_source_server_read_only = source_setting.get('make_source_server_read_only', None)
+
 
     return MigrateMySqlAzureDbForMySqlOfflineTaskInput(source_connection_info=source_connection_info,
                                                        target_connection_info=target_connection_info,
