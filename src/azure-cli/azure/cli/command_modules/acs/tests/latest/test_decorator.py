@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
+from re import T
 import requests
 import unittest
 from unittest.mock import Mock, patch
@@ -31,6 +32,7 @@ from azure.cli.command_modules.acs.decorator import (
     AKSCreateContext,
     AKSCreateDecorator,
     AKSCreateModels,
+    validate_counts_in_autoscaler,
     safe_list_get,
     safe_lower,
 )
@@ -40,6 +42,7 @@ from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockCmd,
 )
 from azure.cli.core.azclierror import (
+    ArgumentUsageError,
     CLIInternalError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
@@ -64,6 +67,29 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
     def test_safe_lower(self):
         self.assertEqual(safe_lower(None), None)
         self.assertEqual(safe_lower("ABC"), "abc")
+
+    def test_validate_counts_in_autoscaler(self):
+        # default
+        validate_counts_in_autoscaler(3, False, None, None)
+
+        # custom value
+        validate_counts_in_autoscaler(5, True, 1, 10)
+
+        # fail on min_count/max_count not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            validate_counts_in_autoscaler(5, True, None, None)
+
+        # fail on min_count > max_count
+        with self.assertRaises(InvalidArgumentValueError):
+            validate_counts_in_autoscaler(5, True, 3, 1)
+
+        # fail on node_count < min_count
+        with self.assertRaises(InvalidArgumentValueError):
+            validate_counts_in_autoscaler(5, True, 7, 10)
+
+        # fail on enable_cluster_autoscaler not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            validate_counts_in_autoscaler(5, False, 3, None)
 
 
 class AKSCreateModelsTestCase(unittest.TestCase):
@@ -712,61 +738,119 @@ class AKSCreateContextTestCase(unittest.TestCase):
             (5, True, 1, 10),
         )
 
-        # custom value
-        ctx_2 = AKSCreateContext(
+    def test_get_update_enable_cluster_autoscaler_and_min_max_count(self):
+        # default
+        ctx_1 = AKSCreateContext(
             self.cmd,
             {
-                "node_count": 5,
-                "enable_cluster_autoscaler": True,
+                "update_cluster_autoscaler": False,
+                "enable_cluster_autoscaler": False,
                 "min_count": None,
                 "max_count": None,
             },
         )
-        # fail on min_count/max_count not specified
-        with self.assertRaises(RequiredArgumentMissingError):
-            ctx_2.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name",
+            count=3,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_update_enable_cluster_autoscaler_and_min_max_count(),
+            (False, False, None, None),
+        )
+
+        # custom value
+        ctx_2 = AKSCreateContext(
+            self.cmd,
+            {
+                "update_cluster_autoscaler": True,
+                "enable_cluster_autoscaler": False,
+                "min_count": None,
+                "max_count": None,
+            },
+        )
+        agent_pool_profile_2 = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name",
+            count=3,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile_2, agent_pool_profile_2]
+        )
+        ctx_2.attach_mc(mc_2)
+        # fail on multi-agent pool
+        with self.assertRaises(ArgumentUsageError):
+            ctx_2.get_update_enable_cluster_autoscaler_and_min_max_count()
 
         # custom value
         ctx_3 = AKSCreateContext(
             self.cmd,
             {
-                "node_count": 5,
+                "update_cluster_autoscaler": True,
                 "enable_cluster_autoscaler": True,
-                "min_count": 3,
-                "max_count": 1,
+                "min_count": None,
+                "max_count": None,
             },
         )
-        # fail on min_count > max_count
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_3.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
+        agent_pool_profile_3 = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name",
+            count=3,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile_3]
+        )
+        ctx_3.attach_mc(mc_3)
+        # fail on mutually exclusive update_cluster_autoscaler and enable_cluster_autoscaler
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_update_enable_cluster_autoscaler_and_min_max_count()
 
         # custom value
         ctx_4 = AKSCreateContext(
             self.cmd,
             {
-                "node_count": 5,
+                "update_cluster_autoscaler": False,
                 "enable_cluster_autoscaler": True,
-                "min_count": 7,
-                "max_count": 10,
+                "min_count": 1,
+                "max_count": 5,
             },
         )
-        # fail on node_count < min_count
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_4.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
+        agent_pool_profile_4 = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name",
+            count=3,
+            enable_auto_scaling=True,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile_4]
+        )
+        ctx_4.attach_mc(mc_4)
+        # fail on cluster autoscaler already enabled
+        with self.assertRaises(SystemExit):
+            ctx_4.get_update_enable_cluster_autoscaler_and_min_max_count()
 
         # custom value
         ctx_5 = AKSCreateContext(
             self.cmd,
             {
-                "node_count": 5,
+                "update_cluster_autoscaler": True,
                 "enable_cluster_autoscaler": False,
-                "min_count": 3,
-                "max_count": None,
+                "min_count": 1,
+                "max_count": 5,
             },
         )
-        # fail on enable_cluster_autoscaler not specified
-        with self.assertRaises(RequiredArgumentMissingError):
-            ctx_5.get_node_count_and_enable_cluster_autoscaler_and_min_count_and_max_count()
+        agent_pool_profile_5 = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name",
+            count=3,
+            enable_auto_scaling=False,
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile_5]
+        )
+        ctx_5.attach_mc(mc_5)
+        # fail on cluster autoscaler not enabled
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_5.get_update_enable_cluster_autoscaler_and_min_max_count()
 
     def test_get_admin_username(self):
         # default
