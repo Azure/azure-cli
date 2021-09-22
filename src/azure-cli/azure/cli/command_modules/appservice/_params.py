@@ -461,15 +461,15 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('webapp config storage-account') as c:
-        c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
+        c.argument('custom_id', options_list=['--custom-id', '-i'], help='name of the share configured within the web app')
         c.argument('storage_type', options_list=['--storage-type', '-t'], help='storage type',
                    arg_type=get_enum_type(AzureStorageType))
         c.argument('account_name', options_list=['--account-name', '-a'], help='storage account name')
         c.argument('share_name', options_list=['--share-name', '--sn'],
-                   help='share name (Azure Files) or container name (Azure Blob Storage)')
+                   help='name of the file share as given in the storage account')
         c.argument('access_key', options_list=['--access-key', '-k'], help='storage account access key')
         c.argument('mount_path', options_list=['--mount-path', '-m'],
-                   help='path to mount storage volume within web app')
+                   help='the path which the web app uses to read-write data ex: /share1 or /share2')
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
     with self.argument_context('webapp config storage-account add') as c:

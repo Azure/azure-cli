@@ -1387,12 +1387,12 @@ examples:
   - name: Add a connection to the Azure Files file share called MyShare in the storage account named MyStorageAccount.
     text: >
         az webapp config storage-account add -g MyResourceGroup -n MyUniqueApp \\
-          --custom-id CustomId \\
+          --custom-id <<name of BYOS share used by the web app>> \\
           --storage-type AzureFiles \\
           --account-name MyStorageAccount \\
-          --share-name MyShare \\
-          --access-key MyAccessKey \\
-          --mount-path /path/to/mount
+          --share-name  <<name of file share in the storage account >> \\
+          --access-key <<storage account access key>> \\
+          --mount-path <<mount path used by the web app to read\write content>>
 """
 
 helps['webapp config storage-account delete'] = """
