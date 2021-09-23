@@ -85,7 +85,7 @@ long-summary: >
     Sharing) rules.
 parameters:
   - name: --enable-change-feed
-    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
+    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://docs.microsoft.com/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
   - name: --enable-delete-retention
     short-summary: 'Indicate whether delete retention policy is enabled for the blob service.'
   - name: --delete-retention-days
@@ -194,7 +194,7 @@ short-summary: Failover request can be triggered for a storage account in case o
 long-summary: |
     The failover occurs from the storage account's primary cluster to secondary cluster for (RA-)GRS/GZRS accounts. The secondary
     cluster will become primary after failover. For more information, please refer to
-    https://docs.microsoft.com/en-us/azure/storage/common/storage-disaster-recovery-guidance.
+    https://docs.microsoft.com/azure/storage/common/storage-disaster-recovery-guidance.
 examples:
   - name: Failover a storage account.
     text: |
@@ -259,6 +259,15 @@ examples:
     text: az storage account file-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g MyResourceGroup
   - name: Disable soft delete policy for file service.
     text: az storage account file-service-properties update --enable-delete-retention false -n mystorageaccount -g MyResourceGroup
+  - name: Enable SMB Multichannel setting for file service.
+    text: az storage account file-service-properties update --enable-smb-multichannel -n mystorageaccount -g MyResourceGroup
+  - name: Disable SMB Multichannel setting for file service.
+    text: az storage account file-service-properties update --enable-smb-multichannel false -n mystorageaccount -g MyResourceGroup
+  - name: Set secured SMB setting for file service.
+    text: >
+        az storage account file-service-properties update --versions SMB2.1;SMB3.0;SMB3.1.1
+        --auth-methods NTLMv2;Kerberos --kerb-ticket-encryption RC4-HMAC;AES-256
+        --channel-encryption AES-CCM-128;AES-GCM-128;AES-GCM-256 -n mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account keys'] = """
@@ -624,6 +633,29 @@ examples:
     text: |
         az storage account update --default-action Allow --name MyStorageAccount --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['storage account hns-migration'] = """
+type: group
+short-summary: Manage storage account migration to enable hierarchical namespace.
+"""
+
+helps['storage account hns-migration start'] = """
+type: command
+short-summary: Validate/Begin migrating a storage account to enable hierarchical namespace.
+examples:
+  - name: Validate migrating a storage account to enable hierarchical namespace.
+    text: az storage account hns-migration start --type validation --name mystorageaccount --resource-group myresourcegroup
+  - name: Begin migrating a storage account to enable hierarchical namespace.
+    text: az storage account hns-migration start --type upgrade --name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account hns-migration stop'] = """
+type: command
+short-summary: Stop the enabling hierarchical namespace migration of a storage account.
+examples:
+  - name: Stop the enabling hierarchical namespace migration of a storage account.
+    text: az storage account hns-migration stop --name mystorageaccount --resource-group myresourcegroup
 """
 
 helps['storage blob'] = """
@@ -1179,6 +1211,18 @@ examples:
     text: az storage container-rm list --storage-account myaccount --include-deleted
 """
 
+helps['storage container-rm migrate-vlw'] = """
+type: command
+short-summary: Migrate a blob container from container level WORM to object level immutability enabled container.
+examples:
+  - name: Migrate a blob container from container level WORM to object level immutability enabled container.
+    text: az storage container-rm migrate-vlw -n mycontainer --storage-account myaccount -g myresourcegroup
+  - name: Migrate a blob container from container level WORM to object level immutability enabled container without waiting.
+    text: |
+        az storage container-rm migrate-vlw -n mycontainer --storage-account myaccount -g myresourcegroup --no-wait
+        az storage container-rm show -n mycontainer --storage-account myaccount -g myresourcegroup  --query immutableStorageWithVersioning.migrationState
+"""
+
 helps['storage container-rm show'] = """
 type: command
 short-summary: Show the properties for a specified container.
@@ -1325,6 +1369,11 @@ examples:
 helps['storage container list'] = """
 type: command
 short-summary: List containers in a storage account.
+examples:
+  - name: List containers in a storage account.
+    text: az storage container list
+  - name: List soft deleted containers in a storage account.
+    text: az storage container list --include-deleted
 """
 
 helps['storage container metadata'] = """
@@ -1335,6 +1384,15 @@ short-summary: Manage container metadata.
 helps['storage container policy'] = """
 type: group
 short-summary: Manage container stored access policies.
+"""
+
+helps['storage container restore'] = """
+type: command
+short-summary: Restore soft-deleted container.
+long-summary:  Operation will only be successful if used within the specified number of days set in the delete retention policy.
+examples:
+  - name: Restore soft-deleted container.
+    text: az storage container restore -n deletedcontainer --deleted-version deletedversion
 """
 
 helps['storage copy'] = """
@@ -1814,7 +1872,7 @@ parameters:
         For example, the following ACL grants read, write, and execute rights to the file owner an
         john.doe@contoso, the read right to the owning group, and nothing to everyone else:
         "user::rwx,user:john.doe@contoso:rwx,group::r--,other::---,mask::rwx".
-        For more information, please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control.
+        For more information, please refer to https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.
     - name: --permissions
       short-summary: >
         Invalid in conjunction with acl. POSIX access permissions for the file owner, the file owning group, and others.
@@ -1824,12 +1882,12 @@ parameters:
       short-summary: >
         The owning user of the file or directory. The user Azure Active Directory object ID or user principal name to
         set as the owner. For more information, please refer to
-        https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
+        https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
     - name: --group
       short-summary: >
         The owning group of the file or directory. The group Azure Active Directory object ID or user principal name to
         set as the owning group. For more information, please refer to
-        https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
+        https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
 examples:
     - name: Set the access control list of a path.
       text: az storage fs access set --acl "user::rwx,group::r--,other::---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
@@ -1895,6 +1953,16 @@ short-summary: Check for the existence of a file system in ADLS Gen2 account.
 examples:
     - name: Check for the existence of a file system in ADLS Gen2 account.
       text: az storage fs exists -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs generate-sas'] = """
+type: command
+short-summary: Generate a SAS token for file system in ADLS Gen2 account.
+examples:
+  - name: Generate a sas token for file system and use it to upload files.
+    text: |
+        end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage fs generate-sas -n myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
 """
 
 helps['storage fs list'] = """

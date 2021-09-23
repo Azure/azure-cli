@@ -4,10 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 

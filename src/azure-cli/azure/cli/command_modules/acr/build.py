@@ -97,7 +97,11 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
-    DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties')
+    DockerBuildRequest, PlatformProperties = cmd.get_models(
+        'DockerBuildRequest',
+        'PlatformProperties',
+        operation_group='runs')
+
     docker_build_request = DockerBuildRequest(
         agent_pool_name=agent_pool_name,
         image_names=image_names,
@@ -119,7 +123,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         log_template=log_template
     )
 
-    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
+    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.begin_schedule_run(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         run_request=docker_build_request))
@@ -136,7 +140,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, no_format, True)
 
 
 def _warn_unsupported_image_name(image_names):

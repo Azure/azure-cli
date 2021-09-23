@@ -8,7 +8,7 @@ from azure.cli.core.util import sdk_no_wait
 from knack.util import CLIError
 from knack.log import get_logger
 
-from .utils import normalize_sku_for_staticapp
+from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion
 
 logger = get_logger(__name__)
 
@@ -195,7 +195,7 @@ def create_staticsites(cmd, resource_group_name, name, location,
                        app_location='.', api_location='.', output_location='.github/workflows',
                        tags=None, no_wait=False, sku='Free', login_with_github=False):
     if not token and not login_with_github:
-        _raise_missing_token_suggestion()
+        raise_missing_token_suggestion()
     elif not token:
         from ._github_oauth import get_github_access_token
         scopes = ["admin:repo_hook", "repo", "workflow"]
@@ -276,14 +276,6 @@ def _parse_pair(pair, delimiter):
     return pair[:index], pair[1 + index:]
 
 
-def _raise_missing_token_suggestion():
-    pat_documentation = "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"
-    raise CLIError("GitHub access token is required to authenticate to your repositories. "
-                   "If you need to create a Github Personal Access Token, "
-                   "please run with the '--login-with-github' flag or follow "
-                   "the steps found at the following link:\n{0}".format(pat_documentation))
-
-
 def _get_staticsite_location(client, static_site_name, resource_group_name):
     static_sites = client.list()
     for static_site in static_sites:
@@ -354,3 +346,24 @@ def _find_user_id_and_authentication_provider(client, resource_group_name, name,
         raise CLIError("user details and authentication provider was not found.")
 
     return user_id, authentication_provider
+
+
+def list_staticsite_secrets(cmd, name, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return client.list_static_site_secrets(resource_group_name=resource_group_name, name=name)
+
+
+def reset_staticsite_api_key(cmd, name, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    existing_staticsite = show_staticsite(cmd, name, resource_group_name)
+    ResetPropertiesEnvelope = cmd.get_models('StaticSiteResetPropertiesARMResource')
+    reset_envelope = ResetPropertiesEnvelope(repository_token=existing_staticsite.repository_token)
+    return client.reset_static_site_api_key(resource_group_name=resource_group_name,
+                                            name=name,
+                                            reset_properties_envelope=reset_envelope)

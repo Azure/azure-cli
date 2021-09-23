@@ -126,6 +126,10 @@ class IgnoreRule:  # pylint: disable=too-few-public-methods
         if rule.startswith('!'):
             self.ignore = False
             rule = rule[1:]  # remove !
+            # load path without leading slash in linux and windows
+            # environments (interferes with dockerignore file)
+            if rule.startswith('/'):
+                rule = rule[1:]  # remove beginning '/'
 
         self.pattern = "^"
         tokens = rule.split('/')

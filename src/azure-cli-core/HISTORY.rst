@@ -3,6 +3,34 @@
 Release History
 ===============
 
+2.28.1
+++++++
+* No changes
+
+2.28.0
+++++++
+* Conditional Access: Show `--scope` for `az login` message when failed to refresh the access token (#17738)
+
+2.27.2
+++++++
+* No changes
+
+2.27.1
+++++++
+* No changes
+
+2.27.0
+++++++
+* Minor fixes
+
+2.26.1
+++++++
+* No changes
+
+2.26.0
+++++++
+* Minor fixes
+
 2.25.0
 ++++++
 * Fix #18360 and #18262: Write to stderr issue (#18414)

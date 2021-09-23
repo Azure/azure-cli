@@ -10,7 +10,7 @@ import platform
 import tempfile
 import time
 import unittest
-import mock
+from unittest import mock
 import uuid
 
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
@@ -19,7 +19,8 @@ from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer, JMESPathCheck, StringContainCheck)
+    StorageAccountPreparer, JMESPathCheck, StringContainCheck, VirtualNetworkPreparer, KeyVaultPreparer)
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -72,6 +73,11 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
         result = self.cmd('vm image list -p Canonical -f UbuntuServer -o tsv --all').output
         assert result.index('16.04') >= 0
+
+    @AllowLargeResponse()
+    def test_vm_images_list_thru_services_edge_zone(self):
+        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
+        assert result.index('7.7') >= 0
 
 
 class VMOpenPortTest(ScenarioTest):
@@ -175,6 +181,18 @@ class VMImageListOffersScenarioTest(ScenarioTest):
         self.assertFalse([i for i in result if i['location'].lower() != self.kwargs['loc']])
 
 
+    def test_vm_image_list_offers_edge_zone(self):
+        self.kwargs.update({
+            'loc': 'westus',
+            'pub': 'OpenLogic',
+            'edge_zone': 'microsoftlosangeles1'
+        })
+
+        result = self.cmd('vm image list-offers --location {loc} --publisher {pub} --edge-zone {edge_zone}').get_output_in_json()
+        self.assertTrue(len(result) > 0)
+        self.assertTrue([i for i in result if i['extendedLocation']['name'] == self.kwargs['edge_zone']])
+        self.assertFalse([i for i in result if i['location'].lower() != self.kwargs['loc']])
+
 class VMImageListPublishersScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
@@ -186,6 +204,19 @@ class VMImageListPublishersScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?location == '{loc}']) == length(@)", True),
         ])
+
+    @AllowLargeResponse()
+    def test_vm_image_list_publishers_edge_zone(self):
+        self.kwargs.update({
+            'loc': 'westus',
+            'edge_zone': 'microsoftlosangeles1'
+        })
+
+        result = self.cmd('vm image list-publishers --location {loc} --edge-zone {edge_zone}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?location == '{loc}']) == length(@)", True),
+        ]).get_output_in_json()
+        self.assertTrue([i for i in result if i['extendedLocation']['name'] == self.kwargs['edge_zone']])
 
 
 class VMImageListSkusScenarioTest(ScenarioTest):
@@ -200,6 +231,23 @@ class VMImageListSkusScenarioTest(ScenarioTest):
 
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
+
+
+    def test_vm_image_list_skus_edge_zone(self):
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'pub': 'OpenLogic',
+            'offer': 'CentOs',
+            'edge_zone': 'microsoftlosangeles1'
+        })
+
+        result = self.cmd('vm image list-skus --location {loc} --edge-zone {edge_zone} --offer {offer} --publisher {pub} --edge-zone {edge_zone}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?location == '{loc}']) == length(@)", True),
+        ]).get_output_in_json()
+        self.assertTrue(len(result) > 0)
+        self.assertTrue([i for i in result if i['extendedLocation']['name'] == self.kwargs['edge_zone']])
 
 
 class VMImageShowScenarioTest(ScenarioTest):
@@ -221,6 +269,26 @@ class VMImageShowScenarioTest(ScenarioTest):
             self.check("contains(id, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/{sku}/Versions/{ver}')", True)
         ])
 
+
+    def test_vm_image_show_edge_zone(self):
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'pub': 'OpenLogic',
+            'offer': 'CentOs',
+            'sku': '7.7',
+            'edge_zone': 'microsoftlosangeles1',
+            'ver': '7.7.2021020400'
+        })
+
+        self.cmd('vm image show --offer {offer} --publisher {pub} --sku {sku} --version {ver} -l {loc} --edge-zone {edge_zone}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('location', '{loc}'),
+            self.check('name', '{ver}'),
+            self.check("contains(id, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/{sku}/Versions/{ver}')", True),
+            self.check('extendedLocation.name', '{edge_zone}'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
 
 class VMGeneralizeScenarioTest(ScenarioTest):
 
@@ -1059,6 +1127,11 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l westus --resource-type disks').get_output_in_json()
         self.assertTrue(result and len(result) == len([x for x in result if x['resourceType'] == 'disks']))
 
+    @AllowLargeResponse(size_kb=99999)
+    def test_list_compute_skus_partially_unavailable(self):
+        result = self.cmd('vm list-skus -l eastus --query "[?name==\'Standard_M64m\']"').get_output_in_json()
+        self.assertTrue(result and result[0]["restrictions"] and result[0]["restrictions"][0]["reasonCode"] == 'NotAvailableForSubscription')
+
 
 class VMExtensionScenarioTest(ScenarioTest):
 
@@ -1509,6 +1582,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
 
 class VMMonitorTestUpdateWindows(ScenarioTest):
 
+    @AllowLargeResponse()
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_windows', location='eastus')
     def test_vm_update_with_workspace_windows(self, resource_group):
@@ -1583,6 +1657,7 @@ class VMBootDiagnostics(ScenarioTest):
             self.exists('consoleScreenshotBlobUri'),
             self.exists('serialConsoleLogBlobUri')
         ])
+        self.cmd('vm boot-diagnostics get-boot-log -g {rg} -n {vm}')
 
         self.cmd('vm boot-diagnostics enable -g {rg} -n {vm} --storage {sa}')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
@@ -1590,8 +1665,6 @@ class VMBootDiagnostics(ScenarioTest):
             self.check('diagnosticsProfile.bootDiagnostics.storageUri', '{storage_uri}')
         ])
 
-        # will uncomment after #302 gets addressed
-        # self.cmd('vm boot-diagnostics get-boot-log -g {rg} -n {vm}')
         self.cmd('vm boot-diagnostics disable -g {rg} -n {vm}')
         self.cmd('vm show -g {rg} -n {vm}',
                  checks=self.check('diagnosticsProfile.bootDiagnostics.enabled', False))
@@ -2681,7 +2754,9 @@ class ApplicationSecurityGroup(ScenarioTest):
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
-    def test_vm_create_linux_secrets(self, resource_group, resource_group_location):
+    @KeyVaultPreparer(name_prefix='vmlinuxkv', name_len=20, key='vault',
+                      additional_params='--enabled-for-deployment true --enabled-for-template-deployment true')
+    def test_vm_create_linux_secrets(self, resource_group, resource_group_location, key_vault):
 
         self.kwargs.update({
             'admin': 'ubuntu',
@@ -2690,17 +2765,14 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             'auth': 'ssh',
             'ssh_key': TEST_SSH_KEY_PUB,
             'vm': 'vm-name',
-            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': self.create_random_name('vmlinuxkv', 20)
+            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}])
         })
 
         message = 'Secret is missing vaultCertificates array or it is empty at index 0'
         with self.assertRaisesRegexp(CLIError, message):
             self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
-        vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
-
-        time.sleep(60)
+        vault_out = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()
 
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
         self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
@@ -2717,15 +2789,16 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         ])
 
     @ResourceGroupPreparer()
-    def test_vm_create_windows_secrets(self, resource_group, resource_group_location):
+    @KeyVaultPreparer(name_prefix='vmkeyvault', name_len=20, key='vault',
+                      additional_params='--enabled-for-deployment true --enabled-for-template-deployment true')
+    def test_vm_create_windows_secrets(self, resource_group, resource_group_location, key_vault):
 
         self.kwargs.update({
             'admin': 'windowsUser',
             'loc': 'westus',
             'image': 'Win2012R2Datacenter',
             'vm': 'vm-name',
-            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}]),
-            'vault': self.create_random_name('vmkeyvault', 20)
+            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}])
         })
 
         message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
@@ -2733,10 +2806,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         with self.assertRaisesRegexp(CLIError, message):
             self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
-        vault_out = self.cmd(
-            'keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
-
-        time.sleep(60)
+        vault_out = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()
 
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
         self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
@@ -2757,20 +2827,18 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
+    @KeyVaultPreparer(name_prefix='vmsslinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment true --enabled-for-template-deployment true')
     @AllowLargeResponse()
-    def test_vmss_create_linux_secrets(self, resource_group):
+    def test_vmss_create_linux_secrets(self, resource_group, key_vault):
         self.kwargs.update({
             'loc': 'westus',
             'vmss': 'vmss1-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': self.create_random_name('vmsslinuxkv', 20),
             'secret': 'mysecret',
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
-
-        time.sleep(60)
+        vault_out = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()
 
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
         self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
@@ -2950,6 +3018,26 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
         time.sleep(180)
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss3}', checks=[self.check('length(@)', len(self.kwargs['instance_ids']) - 1)])
         self.cmd('vmss get-instance-view --resource-group {rg} --name {vmss3} --instance-id {id}', expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_spot_restore')
+    def test_spot_restore_policy(self, resource_group):
+        self.kwargs.update({
+            'loc': 'NorthEurope',
+            'spot_vmss_name': 'vmss-spot1',
+            'enabled_1': 'True',
+            'enabled_2': 'False',
+            'restore_timeout1': 'PT1H',
+            'restore_timeout2': 'PT2H'
+
+        })
+        self.cmd('vmss create -g {rg} -n {spot_vmss_name} --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group True --enable-spot-restore {enabled_1} --spot-restore-timeout {restore_timeout1}', checks=[
+            self.check('vmss.spotRestorePolicy.enabled', True),
+            self.check('vmss.spotRestorePolicy.restoreTimeout', '{restore_timeout1}')
+        ])
+        self.cmd('vmss update -g {rg} -n {spot_vmss_name} --enable-spot-restore {enabled_2} --spot-restore-timeout {restore_timeout2}', checks=[
+            self.check('spotRestorePolicy.enabled', False),
+            self.check('spotRestorePolicy.restoreTimeout', '{restore_timeout2}')
+        ])
 
 
 class VMSSCustomDataScenarioTest(ScenarioTest):
@@ -3609,13 +3697,11 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
 class VMDiskEncryptionTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption', location='westus')
-    def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location):
+    @KeyVaultPreparer(name_prefix='vault', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption true')
+    def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
-            'vault': self.create_random_name('vault', 20),
             'vmss': 'vmss1'
         })
-        self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
-        time.sleep(60)  # to avoid 504(too many requests) on a newly created vault
         self.cmd('vmss create -g {rg} -n {vmss} --image win2016datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!')
         self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault}')
         self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
@@ -3633,13 +3719,12 @@ class VMDiskEncryptionTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='westus')
-    def test_vm_disk_encryption_e2e(self, resource_group, resource_group_location):
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
+                      additional_params='--enabled-for-disk-encryption true')
+    def test_vm_disk_encryption_e2e(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
-            'vault': self.create_random_name('vault', 10),
             'vm': 'vm1'
         })
-        self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
-        time.sleep(60)  # to avoid 504(too many requests) on a newly created vault
         self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault}')
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
@@ -3660,6 +3745,7 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.securityProfile.encryptionAtHost', True)
         ])
+        self.cmd('vmss update -g {rg} -n {vmss} --set tags.rule=test')
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
@@ -3805,15 +3891,14 @@ class VMCreateWithExistingNic(ScenarioTest):
 class VMSecretTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
-    def test_vm_secret_e2e_test(self, resource_group, resource_group_location):
+    @KeyVaultPreparer(name_prefix='vmsecretkv', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption true --enabled-for-deployment true')
+    def test_vm_secret_e2e_test(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
-            'vault': self.create_random_name('vmsecretkv', 20),
             'cert': 'vm-secrt-cert',
             'loc': resource_group_location
         })
 
-        vault_result = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-disk-encryption true --enabled-for-deployment true').get_output_in_json()
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
 
         self.cmd('vm create -g {rg} -n {vm} --image rhel --generate-ssh-keys --admin-username rheladmin --nsg-rule NONE')
@@ -3822,7 +3907,6 @@ class VMSecretTest(ScenarioTest):
         self.cmd('keyvault certificate create --vault-name {vault} -n {cert} -p @"{policy_path}"')
         secret_result = self.cmd('vm secret add -g {rg} -n {vm} --keyvault {vault} --certificate {cert}', checks=[
             self.check('length([])', 1),
-            self.check('[0].sourceVault.id', vault_result['id']),
             self.check('length([0].vaultCertificates)', 1),
         ]).get_output_in_json()
         self.assertTrue('https://{vault}.vault.azure.net/secrets/{cert}/'.format(**self.kwargs) in secret_result[0]['vaultCertificates'][0]['certificateUrl'])
@@ -3875,8 +3959,109 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus')
+    def test_shared_gallery(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'gallery': self.create_random_name('gellery', 16),
+            'image': 'image1',
+            'version': '1.1.2',
+            'captured': 'managedImage1',
+            'location': resource_group_location,
+            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',  # share the gallery to tester's subscription, so the tester can get shared galleries
+            'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
+            'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac'
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions private')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1 '
+                 '--generate-ssh-key --nsg-rule NONE')
+        self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts '
+                 '"echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+                 '--gallery-image-version {version} --managed-image {captured} --replica-count 1')
+
+        # Test shared gallery
+        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups')
+        res = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Groups')
+        ]).get_output_in_json()
+
+        self.kwargs['unique_name'] = res['identifier']['uniqueName']
+
+        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
+        self.cmd('sig share add --gallery-name {gallery} -g {rg} --subscription-ids {subId} {sharedSubId} --tenant-ids {tenantId}')
+        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.groups[0].ids[0]', self.kwargs['subId']),
+            self.check('sharingProfile.groups[0].ids[1]', self.kwargs['sharedSubId']),
+            self.check('sharingProfile.groups[0].type', 'Subscriptions'),
+            self.check('sharingProfile.groups[1].ids[0]', self.kwargs['tenantId']),
+            self.check('sharingProfile.groups[1].type', 'AADTenants')
+        ])
+
+        self.cmd('sig share remove --gallery-name {gallery} -g {rg} --subscription-ids {sharedSubId} --tenant-ids {tenantId}')
+        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.groups[0].ids[0]', self.kwargs['subId']),
+            self.check('length(sharingProfile.groups)', 1),
+        ])
+
+        # Check result by shared user
+        self.cmd('sig list-shared --location {location}', checks=[
+            self.check('[0].location', '{location}'),
+            self.check('[0].name', '{unique_name}'),
+            self.check('[0].uniqueId', '/SharedGalleries/{unique_name}')
+        ])
+
+        self.cmd('sig show-shared --location {location} --gallery-unique-name {unique_name}', checks=[
+            self.check('location', '{location}'),
+            self.check('name', '{unique_name}'),
+            self.check('uniqueId', '/SharedGalleries/{unique_name}')
+        ])
+
+        self.cmd('sig image-definition list-shared --gallery-unique-name {unique_name} --location {location}', checks=[
+            self.check('[0].location', '{location}'),
+            self.check('[0].name', '{image}'),
+            self.check('[0].uniqueId', '/SharedGalleries/{unique_name}/Images/{image}')
+        ])
+
+        self.cmd('sig image-definition show-shared --gallery-image-definition {image} '
+                 '--gallery-unique-name {unique_name} --location {location}', checks=[
+            self.check('location', '{location}'),
+            self.check('name', '{image}'),
+            self.check('uniqueId', '/SharedGalleries/{unique_name}/Images/{image}')
+        ])
+
+        self.cmd('sig image-version list-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} '
+                 '--location {location}', checks=[
+            self.check('[0].location', '{location}'),
+            self.check('[0].name', '{version}'),
+            self.check('[0].uniqueId', '/SharedGalleries/{unique_name}/Images/{image}/Versions/{version}')
+        ])
+
+        self.cmd('sig image-version show-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} '
+                 '--location {location} --gallery-image-version {version}', checks=[
+            self.check('location', '{location}'),
+            self.check('name', '{version}'),
+            self.check('uniqueId', '/SharedGalleries/{unique_name}/Images/{image}/Versions/{version}')
+        ])
+
+        # gallery permissions must be reset, or the resource group can't be deleted
+        self.cmd('sig share reset --gallery-name {gallery} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
+
     @ResourceGroupPreparer(location='eastus2')
-    def test_gallery_e2e(self, resource_group, resource_group_location):
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true --enable-soft-delete true')
+    def test_gallery_e2e(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
             'vm2': 'vmFromImage',
@@ -3888,7 +4073,6 @@ class VMGalleryImage(ScenarioTest):
             'image_id': 'TBD',
             'location': resource_group_location,
             'location2': 'westus2',
-            'vault': self.create_random_name(prefix='vault-', length=20),
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
         })
@@ -3930,7 +4114,7 @@ class VMGalleryImage(ScenarioTest):
                  ])
 
         # Create disk encryption set
-        vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
         self.kwargs.update({
             'vault_id': vault_id,
@@ -3972,14 +4156,11 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
-    @unittest.skip('Service failed')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
-    @StorageAccountPreparer()
-    def test_gallery_image_version_vhd(self, resource_group, storage_account, storage_account_info):
+    def test_gallery_image_version_vhd(self, resource_group):
         self.kwargs.update({
-            'gallery': self.create_random_name(prefix='gallery_', length=20),
-            'account_key': storage_account_info[1]
+            'gallery': self.create_random_name(prefix='gallery_', length=20)
         })
 
         self.cmd('vm create -g {rg} -n vm1 --image centos --use-unmanaged-disk --nsg-rule NONE --generate-ssh-key')
@@ -3990,29 +4171,22 @@ class VMGalleryImage(ScenarioTest):
             'stac': storage_account_os
         })
 
-        local_file_1 = self.create_temp_file(1024 * 1024)
-        local_file_2 = self.create_temp_file(1024 * 1024)
-
-        self.cmd('storage container create -n container1 --account-name {sa} --account-key {account_key} --public-access container')
-        self.cmd('storage blob upload -c container1 --account-name {} -f "{}" -n file1.vhd --type page'.format(storage_account, local_file_1))
-        self.cmd('storage blob upload -c container1 --account-name {} -f "{}" -n file2.vhd --type page'.format(storage_account, local_file_2))
-
-        vhd1_uri = 'https://{}.blob.core.windows.net/container1/file1.vhd'.format(storage_account)
-        vhd2_uri = 'https://{}.blob.core.windows.net/container1/file2.vhd'.format(storage_account)
-        self.kwargs.update({
-            'vhd1': vhd1_uri,
-            'vhd2': vhd2_uri
-        })
-
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --gallery-image-version 1.0.0 --os-vhd-uri {vhd} --os-vhd-storage-account {stac} --data-vhds-uris {vhd1} {vhd2} --data-vhds-luns 0 1 --data-vhds-storage-accounts {sa} {sa} --replica-count 1', checks=[
-            self.check('storageProfile.osDiskImage.source.uri', vhd_uri),
-            self.check('storageProfile.dataDiskImages[0].source.uri', vhd1_uri),
-            self.check('storageProfile.dataDiskImages[1].source.uri', vhd2_uri),
-            self.check('storageProfile.dataDiskImages[0].lun', 0),
-            self.check('storageProfile.dataDiskImages[1].lun', 1),
-        ])
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10')
+        self.cmd('disk create -g {rg} -n d2 --size-gb 10')
+        s1_id = self.cmd('snapshot create -g {rg} -n s1 --source d1').get_output_in_json()['id']
+        s2_id = self.cmd('snapshot create -g {rg} -n s2 --source d2').get_output_in_json()['id']
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 '
+                 '--gallery-image-version 1.0.0 --os-snapshot s1 --data-snapshot-luns 0 --data-snapshots s2 '
+                 '--data-vhds-luns 1 --data-vhds-sa {stac} --data-vhds-uris {vhd}',
+                 checks=[
+                     self.check('storageProfile.osDiskImage.source.id', s1_id),
+                     self.check('storageProfile.dataDiskImages[0].source.id', s2_id),
+                     self.check('storageProfile.dataDiskImages[0].lun', 0),
+                     self.check('storageProfile.dataDiskImages[1].source.uri', vhd_uri),
+                     self.check('storageProfile.dataDiskImages[1].lun', 1)])
 
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
     def test_gallery_specialized(self, resource_group):
@@ -4074,22 +4248,23 @@ class VMGalleryImage(ScenarioTest):
 
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2')
-    def test_sig_image_version_cross_tenant(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_sig_image_version_cross_tenant(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_image_version_', 40),
+            'rg': resource_group,
+            'another_rg': another_resource_group,
             'vm': self.create_random_name('cli_test_image_version_', 40),
             'image_name': self.create_random_name('cli_test_image_version_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
             'sig_name': self.create_random_name('cli_test_image_version_', 40),
             'image_definition_name': self.create_random_name('cli_test_image_version_', 40),
             'version': '0.1.0'
         })
 
         # Prepare image in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
         self.cmd(
@@ -4111,7 +4286,67 @@ class VMGalleryImage(ScenarioTest):
             'sig image-version create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --gallery-image-version {version} --managed-image {image_id} --replica-count 1',
             checks=self.check('name', self.kwargs['version']))
 
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
+
+    @ResourceGroupPreparer(location='eastus')
+    def test_create_vm_with_shared_gallery_image(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm', 16),
+            'vm_with_shared_gallery': self.create_random_name('vm_sg', 16),
+            'vm_with_shared_gallery_version': self.create_random_name('vm_sgv', 16),
+            'vm_with_shared_gallery_version2': self.create_random_name('vm_sgv2', 16),
+            'vmss_with_shared_gallery_version': self.create_random_name('vmss', 16),
+            'gallery': self.create_random_name('gellery', 16),
+            'image': self.create_random_name('image', 16),
+            'version': '1.1.2',
+            'captured': 'managedImage1',
+            'location': resource_group_location,
+            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',  # share the gallery to tester's subscription, so the tester can get shared galleries
+            'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --nsg-rule None')
+        if self.is_live:
+            time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
+        self.kwargs['unique_name'] = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions').get_output_in_json()['identifier']['uniqueName']
+
+        self.cmd('sig share add --gallery-name {gallery} -g {rg} --subscription-ids {subId} --tenant-ids {tenantId}')
+
+        self.kwargs['shared_gallery_image_version'] = self.cmd('sig image-version show-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location} --gallery-image-version {version}').get_output_in_json()['uniqueId']
+
+        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None')
+
+        self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version2} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None --os-type linux')
+
+        self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
+            self.check('storageProfile.osDisk.osType', 'Linux'),
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} --generate-ssh-keys --upgrade-policy-mode automatic --admin-username clitest1 ')
+
+        self.cmd('vmss show -g {rg} -n {vmss_with_shared_gallery_version}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
+        ])
+
+        # gallery permissions must be reset, or the resource group can't be deleted
+        self.cmd('sig share reset --gallery-name {gallery} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
 
 
 # endregion
@@ -4501,10 +4736,10 @@ class VMImageTermsTest(ScenarioTest):
 class DiskEncryptionSetTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='westcentralus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westcentralus', additional_params='--enable-purge-protection')
     @AllowLargeResponse(size_kb=99999)
-    def test_disk_encryption_set(self, resource_group):
+    def test_disk_encryption_set(self, resource_group, key_vault):
         self.kwargs.update({
-            'vault': self.create_random_name(prefix='vault-', length=20),
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
             'des2': self.create_random_name(prefix='des2-', length=20),
@@ -4515,7 +4750,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'vmss': self.create_random_name(prefix='vmss-', length=20),
         })
 
-        vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
         self.kwargs.update({
             'vault_id': vault_id,
@@ -4589,24 +4824,22 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
+    @KeyVaultPreparer(name_prefix='vault1-', name_len=20, key='vault1', parameter_name='key_vault1', location='westcentralus', additional_params='--enable-purge-protection')
+    @KeyVaultPreparer(name_prefix='vault2-', name_len=20, key='vault2', parameter_name='key_vault2', location='westcentralus', additional_params='--enable-purge-protection')
     @AllowLargeResponse(size_kb=99999)
-    def test_disk_encryption_set_update(self, resource_group):
+    def test_disk_encryption_set_update(self, resource_group, key_vault1, key_vault2):
 
         self.kwargs.update({
-            'vault1': self.create_random_name(prefix='vault1-', length=20),
             'key1': self.create_random_name(prefix='key1-', length=20),
-            'vault2': self.create_random_name(prefix='vault2-', length=20),
             'key2': self.create_random_name(prefix='key2-', length=20),
             'des': self.create_random_name(prefix='des-', length=20)
         })
 
-        vault1_id = self.cmd('keyvault create -g {rg} -n {vault1} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
         kid1 = self.cmd('keyvault key create -n {key1} --vault {vault1} --protection software').get_output_in_json()['key']['kid']
-        vault2_id = self.cmd('keyvault create -g {rg} -n {vault2} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        vault2_id = self.cmd('keyvault show -g {rg} -n {vault2}').get_output_in_json()['id']
         kid2 = self.cmd('keyvault key create -n {key2} --vault {vault2} --protection software').get_output_in_json()['key']['kid']
 
         self.kwargs.update({
-            'vault1_id': vault1_id,
             'kid1': kid1,
             'vault2_id': vault2_id,
             'kid2': kid2
@@ -4635,16 +4868,16 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_disk_update_', location='westcentralus')
+    @KeyVaultPreparer(name_prefix='vault3-', name_len=20, key='vault', location='westcentralus', additional_params='--enable-purge-protection')
     @AllowLargeResponse(size_kb=99999)
-    def test_disk_encryption_set_disk_update(self, resource_group):
+    def test_disk_encryption_set_disk_update(self, resource_group, key_vault):
         self.kwargs.update({
-            'vault': self.create_random_name(prefix='vault3-', length=20),
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
             'disk': self.create_random_name(prefix='disk-', length=20),
         })
 
-        vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
         self.kwargs.update({
             'vault_id': vault_id,
@@ -4680,10 +4913,10 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_snapshot_', location='westcentralus')
+    @KeyVaultPreparer(name_prefix='vault4-', name_len=20, key='vault', location='westcentralus', additional_params='--enable-purge-protection')
     @AllowLargeResponse(size_kb=99999)
-    def test_disk_encryption_set_snapshot(self, resource_group):
+    def test_disk_encryption_set_snapshot(self, resource_group, key_vault):
         self.kwargs.update({
-            'vault': self.create_random_name(prefix='vault4-', length=20),
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
             'des2': self.create_random_name(prefix='des2-', length=20),
@@ -4691,7 +4924,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'snapshot2': self.create_random_name(prefix='snapshot2-', length=20),
         })
 
-        vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
         self.kwargs.update({
             'vault_id': vault_id,
@@ -5090,6 +5323,7 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
             'vm': 'vm1'
         })
         self.cmd('vm create -g {rg} -n {vm} --image centos --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password')
+
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --time 1730 --email "foo@bar.com" --webhook "https://example.com/"', checks=[
             self.check('name', 'shutdown-computevm-{vm}'),
             self.check('taskType', 'ComputeVmShutdownTask'),
@@ -5099,13 +5333,23 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
             self.check('notificationSettings.webhookUrl', 'https://example.com/'),
             self.check('notificationSettings.emailRecipient', 'foo@bar.com')
         ])
+
+        self.cmd('vm auto-shutdown -g {rg} -n {vm} --time 1730 --email "foo2@bar.com" ', checks=[
+            self.check('name', 'shutdown-computevm-{vm}'),
+            self.check('taskType', 'ComputeVmShutdownTask'),
+            self.check('status', 'Enabled'),
+            self.check('dailyRecurrence.time', '1730'),
+            self.check('notificationSettings.status', 'Enabled'),
+            self.check('notificationSettings.emailRecipient', 'foo2@bar.com')
+        ])
+
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --off')
 
 
 class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='westus')
-    def test_vmss_orchestration_mode(self, resource_group):
+    def test_vmss_simple_orchestration_mode(self, resource_group):
         self.kwargs.update({
             'ppg': 'ppg1',
             'vmss': 'vmss1',
@@ -5114,7 +5358,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
         self.cmd('ppg create -g {rg} -n {ppg}')
         self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
-                 '--ppg {ppg} --platform-fault-domain-count 3 --generate-ssh-keys',
+                 '--ppg {ppg} --platform-fault-domain-count 3 ',
                  checks=[
                      self.check('vmss.singlePlacementGroup', False),
                      self.check('vmss.platformFaultDomainCount', 3)
@@ -5125,26 +5369,161 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('platformFaultDomain', 0)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='eastus2euap')
+    @VirtualNetworkPreparer(location='eastus2euap', parameter_name='virtual_network')
+    def test_vmss_complex_orchestration_mode(self, resource_group, virtual_network):
+
+        self.kwargs.update({
+            'vmss0': self.create_random_name(prefix='vmss0', length=10),
+            'vmss1': self.create_random_name(prefix='vmss1', length=10),
+            'vnet_name': virtual_network,
+            'vmss2': self.create_random_name(prefix='vmss2', length=10),
+            'vmss3': self.create_random_name(prefix='vmss3', length=10),
+            'vmss4': self.create_random_name(prefix='vmss4', length=10),
+            'vmss5': self.create_random_name(prefix='vmss5', length=10),
+            'ssh_key': TEST_SSH_KEY_PUB
+        })
+
+        # test without authentication info
+        self.cmd('vmss create -n {vmss0} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss ')
+
+        self.cmd('vmss show -g {rg} -n {vmss0}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with password
+        self.cmd('vmss create -g {rg} -n {vmss1} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --admin-username testvmss '
+                 '--admin-password This!s@Terr!bleP@ssw0rd --computer-name-prefix testvmss --image debian '
+                 '--vnet-name {vnet_name} --subnet default --network-api-version 2020-11-01')
+
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux'),
+        ])
+
+        # test with ssh
+        self.cmd('vmss create -n {vmss2} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --generate-ssh-keys ')
+
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with ssh path
+        self.cmd('vmss create -n {vmss3} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --generate-ssh-keys ')
+
+        self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with ssh value
+        self.cmd('vmss create -n {vmss4} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --ssh-key-value \'{ssh_key}\' ')
+
+        self.cmd('vmss show -g {rg} -n {vmss4}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+        # test with authentication type
+        self.cmd('vmss create -n {vmss5} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --authentication-type ssh ')
+
+        self.cmd('vmss show -g {rg} -n {vmss5}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2')
-    def test_vm_cross_tenant_update(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_vm_cross_tenant_update(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_vm_cross_tenant_', 40),
+            'rg': resource_group,
+            'another_rg': another_resource_group,
             'another_vm': self.create_random_name('cli_test_vm_cross_tenant_', 40),
             'image_name': self.create_random_name('cli_test_vm_cross_tenant_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
             'vm': self.create_random_name('cli_test_vm_cross_tenant_', 40)
         })
 
         # Prepare sig in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
-            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-keys --subscription {aux_sub}')
         self.cmd(
             'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
         time.sleep(70)
@@ -5162,20 +5541,21 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
             self.check('tags.tagName', 'tagValue')
         ])
 
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
-
 
 class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2')
-    def test_vmss_cross_tenant_update(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_vmss_cross_tenant_update(self, resource_group, another_resource_group):
         self.kwargs.update({
             'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_vmss_update_', 40),
+            'rg': resource_group,
+            'another_rg': another_resource_group,
             'vm': self.create_random_name('cli_test_vmss_update_', 40),
             'image_name': self.create_random_name('cli_test_vmss_update_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
             'sig_name': self.create_random_name('cli_test_vmss_update_', 40),
             'image_definition_name_1': self.create_random_name('cli_test_vmss_update_', 40),
             'image_definition_name_2': self.create_random_name('cli_test_vmss_update_', 40),
@@ -5184,8 +5564,6 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
         })
 
         # Prepare sig in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
         self.cmd(
@@ -5230,8 +5608,6 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
             self.check('name', self.kwargs['vmss']),
             self.check('virtualMachineProfile.storageProfile.imageReference.id', self.kwargs['image_2_id'])
         ])
-
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
 
         # Test vmss can be update even if the image reference is not available
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[
@@ -5386,16 +5762,48 @@ class VMCreateCountScenarioTest(ScenarioTest):
 class ExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extended_location_')
     def test_vm_extended_location(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image ubuntults --nsg-rule None --generate-ssh-keys --edge-zone microsoftlosangeles1')
+        self.cmd('vm create -g {rg} -n vm --image ubuntults --nsg-rule None --generate-ssh-keys '
+                 '--edge-zone microsoftlosangeles1 --public-ip-sku Standard')
         self.cmd('vm show -g {rg} -n vm', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network vnet show -g {rg} -n vmVNET', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network nic show -g {rg} -n vmVMNic', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network public-ip show -n vmPublicIP -g {rg}', checks=[
             self.check('extendedLocation.name', 'microsoftlosangeles1'),
             self.check('extendedLocation.type', 'EdgeZone')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extended_location_')
     def test_vmss_extended_location(self, resource_group):
-        self.cmd('vmss create -g {rg} -n vmss --image ubuntults --generate-ssh-keys --edge-zone microsoftlosangeles1')
+        self.cmd('vmss create -g {rg} -n vmss --image ubuntults --generate-ssh-keys '
+                 '--edge-zone microsoftlosangeles1 --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n vmss', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network vnet show -g {rg} -n vmssVNET', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network lb show -g {rg} -n vmssLB', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+        self.cmd('network public-ip show -n vmssLBPublicIP -g {rg}', checks=[
             self.check('extendedLocation.name', 'microsoftlosangeles1'),
             self.check('extendedLocation.type', 'EdgeZone')
         ])
@@ -5431,6 +5839,175 @@ class DiskZRSScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n d1 --image ubuntults --zone 1 --attach-data-disks d1 --generate-ssh-keys --nsg-rule None')
         # ZRS disks cannot be pinned with a zone
         self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku StandardSSD_ZRS --zone 1', expect_failure=True)
+
+
+class CapacityReservationScenarioTest(ScenarioTest):
+
+    # Due to the bug in service, the resources generated by the test cannot be deleted normally.
+    # The public IP generated by this test will cause the ICM with serv 2. Therefore, disable this test for now
+    @unittest.skip('Service bug')
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_', location='centraluseuap')
+    def test_capacity_reservation(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'reservation_group': self.create_random_name('cli_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_reservation_name_', 40),
+            'reservation_group2': self.create_random_name('cli_reservation_group2_', 40),
+            'reservation_name2': self.create_random_name('cli_reservation_name2_', 40),
+            'sku': 'Standard_DS1_v2',
+            'vm': self.create_random_name('vm', 10),
+            'vmss': self.create_random_name('vmss', 10),
+            'username': 'ubuntu',
+            'auth': 'ssh',
+            'image': 'UbuntuLTS',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.kwargs['reservation_group_id1'] = self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --tags key=val --zones 1 2', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val'})
+        ]).get_output_in_json()['id']
+
+        self.cmd('capacity reservation group update -n {reservation_group} -g {rg} --tags key=val key1=val1', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('tags', {'key': 'val', 'key1': 'val1'})
+        ])
+
+        self.cmd('capacity reservation group show -n {reservation_group} -g {rg}', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val', 'key1': 'val1'})
+        ])
+
+        self.cmd('capacity reservation group list -g {rg} --query "[?name==\'{reservation_group}\']" ', checks=[
+            self.check('[0].name', '{reservation_group}'),
+            self.check('[0].zones', ['1', '2']),
+            self.check('[0].tags', {'key': 'val', 'key1': 'val1'})
+        ])
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} --sku {sku} --capacity 5 --zone 1 --tags key=val', checks=[
+            self.check('name', '{reservation_name}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 5),
+            self.check('zones', ['1']),
+            self.check('tags', {'key': 'val'}),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('capacity reservation update -c {reservation_group} -n {reservation_name} -g {rg} --capacity 3 --tags key=val key1=val1', checks=[
+            self.check('name', '{reservation_name}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 3),
+            self.check('tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} --instance-view', checks=[
+            self.check('name', '{reservation_name}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 3),
+            self.check('tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('zones', ['1']),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded')
+        ])
+
+        self.cmd('capacity reservation list -c {reservation_group} -g {rg} --query "[?name==\'{reservation_name}\']" ', checks=[
+            self.check('[0].name', '{reservation_name}'),
+            self.check('[0].sku.name', '{sku}'),
+            self.check('[0].sku.capacity', 3),
+            self.check('[0].tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('[0].zones', ['1']),
+            self.check('[0].provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('capacity reservation group show -n {reservation_group} -g {rg} --instance-view', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('instanceView.capacityReservations[0].name', '{reservation_name}')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {username} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --nsg-rule None --capacity-reservation-group {reservation_group} --zone 1 ')
+
+        self.kwargs['vm_id'] = self.cmd('vm show -g {rg} -n {vm} ', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('capacityReservation.capacityReservationGroup.id', '{reservation_group_id1}', case_sensitive=False),
+        ]).get_output_in_json()['id']
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image {image} --admin-username deploy --ssh-key-value "{ssh_key}" --capacity-reservation-group {reservation_group} --zone 1 ', checks=[
+            self.check('vmss.provisioningState', 'Succeeded'),
+            self.check('vmss.virtualMachineProfile.capacityReservation.capacityReservationGroup.id', '{reservation_group_id1}', case_sensitive=False),
+        ])
+
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss} ', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.capacityReservation.capacityReservationGroup.id', '{reservation_group_id1}', case_sensitive=False),
+        ]).get_output_in_json()['id']
+
+        vm_associated = self.cmd('capacity reservation group list -g {rg} --query "[?name==\'{reservation_group}\']" --vm-instance --vmss-instance', checks=[
+            self.check('[0].name', '{reservation_group}'),
+            self.check('[0].zones', ['1', '2']),
+            self.check('[0].tags', {'key': 'val', 'key1': 'val1'})
+        ]).get_output_in_json()[0]['virtualMachinesAssociated']
+
+        vm_associated_list = [i['id'].lower() for i in vm_associated]
+        self.assertTrue(self.kwargs['vm_id'].lower() in vm_associated_list)
+        contains_vmss_id = False
+        for id in vm_associated_list:
+            if self.kwargs['vmss_id'].lower() in id:
+                contains_vmss_id = True
+                break
+        self.assertTrue(contains_vmss_id)
+
+        self.kwargs['reservation_group_id2'] = self.cmd('capacity reservation group create -n {reservation_group2} -g {rg} --tags key=val --zones 1 2', checks=[
+            self.check('name', '{reservation_group2}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val'})
+        ]).get_output_in_json()['id']
+
+        self.cmd('capacity reservation create -c {reservation_group2} -n {reservation_name2} -g {rg} --sku {sku} --capacity 5 --zone 1 --tags key=val', checks=[
+            self.check('name', '{reservation_name2}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 5),
+            self.check('zones', ['1']),
+            self.check('tags', {'key': 'val'}),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # Updating capacity reservation group requires the VM(s) to be deallocated.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+
+        self.cmd('vm update -g {rg} -n {vm} --capacity-reservation-group {reservation_group2}')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('capacityReservation.capacityReservationGroup.id', '{reservation_group_id2}', case_sensitive=False),
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --capacity-reservation-group {reservation_group2}')
+
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.capacityReservation.capacityReservationGroup.id', '{reservation_group_id2}', case_sensitive=False),
+        ])
+
+        # Updating capacity reservation group requires the VM(s) to be deallocated.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+
+        # Before delete the capacity reservation that has been associated with VM/VMSS, we need to disassociate the capacity reservation group first
+        self.cmd('vm update -g {rg} -n {vm} --capacity-reservation-group None')
+
+        self.cmd('vmss update -g {rg} -n {vmss} --capacity-reservation-group None')
+
+        self.cmd('capacity reservation delete -c {reservation_group} -n {reservation_name} -g {rg} --yes')
+        self.cmd('capacity reservation delete -c {reservation_group2} -n {reservation_name2} -g {rg} --yes')
+
+        self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
+        self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
 
 if __name__ == '__main__':

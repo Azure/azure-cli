@@ -625,7 +625,7 @@ examples:
         az deployment group create --resource-group testrg --name rollout01 \\
             --template-file azuredeploy.json  --parameters @params.json \\
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
-  - name: Create a deployment at subscription scope from a template-spec
+  - name: Create a deployment at resource group scope from a template-spec
     text: >
         az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
@@ -1124,6 +1124,35 @@ examples:
     text: az feature unregister --namespace Microsoft.Compute --name GalleryPreview
 """
 
+helps['feature registration'] = """
+type: group
+short-summary: Manage resource provider feature registrations.
+"""
+
+helps['feature registration list'] = """
+type: command
+short-summary: List feature registrations.
+examples:
+  - name: List feature registrations
+    text: az feature registration list
+"""
+
+helps['feature registration create'] = """
+type: command
+short-summary: Create a feature registration.
+examples:
+  - name: create the "Shared Image Gallery" feature
+    text: az feature registration create --namespace Microsoft.Compute --name GalleryPreview
+"""
+
+helps['feature registration delete'] = """
+type: command
+short-summary: Delete a feature registration.
+examples:
+  - name: delete the "Shared Image Gallery" feature
+    text: az feature registration delete --namespace Microsoft.Compute --name GalleryPreview
+"""
+
 helps['group'] = """
 type: group
 short-summary: Manage resource groups and template deployments.
@@ -1321,9 +1350,13 @@ short-summary: Manage Azure locks.
 helps['lock create'] = """
 type: command
 short-summary: Create a lock.
-long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource.'
+long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource. \
+                For how to add locks at different levels, please refer to the following examples.'
 examples:
   - name: Create a read-only subscription level lock.
+    text: >
+        az lock create --name lockName --lock-type ReadOnly
+  - name: Create a read-only resource group level lock.
     text: >
         az lock create --name lockName --resource-group group --lock-type ReadOnly
   - name: Create a read-only resource level lock on a vnet resource.
@@ -1339,10 +1372,18 @@ examples:
 helps['lock delete'] = """
 type: command
 short-summary: Delete a lock.
+long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource. \
+                For how to delete locks at different levels, please refer to the following examples.'
 examples:
-  - name: Delete a resource group-level lock
+  - name: Delete a subscription level lock
+    text: >
+        az lock delete --name lockName
+  - name: Delete a resource group level lock
     text: >
         az lock delete --name lockName --resource-group group
+  - name: Delete a resource level lock
+    text: >
+        az lock delete --name lockName --resource-group group --resource resourceName --resource-type resourceType
 """
 
 helps['lock list'] = """
@@ -1893,6 +1934,16 @@ examples:
         az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
 """
 
+helps['provider permission'] = """
+type: group
+short-summary: Manage permissions for a provider.
+"""
+
+helps['provider permission list'] = """
+type: command
+short-summary: List permissions from a provider.
+"""
+
 helps['provider operation'] = """
 type: group
 short-summary: Get provider operations metadatas.
@@ -1966,6 +2017,13 @@ examples:
   - name: Create a resource by using the latest api-version whether this version is a preview version.
     text: >
         az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile --latest-include-preview
+  - name: Create a site extension to a web app
+    text: |
+        az resource create -g myRG --api-version "2018-02-01" \\
+            --name "{sitename+slot}/siteextensions/Contrast.NetCore.Azure.SiteExtension"  \\
+                --resource-type Microsoft.Web/sites/siteextensions --is-full-object \\
+                    --properties "{ \\"id\\": \\"Contrast.NetCore.Azure.SiteExtension\\", \\
+                        \\"location\\": \\"West US\\", \\"version\\": \\"1.9.0\\" }"
 """
 
 helps['resource delete'] = """
@@ -2253,6 +2311,7 @@ long-summary: >
     The az tag create command with an id creates or updates the entire set of tags on a resource, resource group or subscription.
     This operation allows adding or replacing the entire set of tags on the specified resource, resource group or subscription.
     The specified entity can have a maximum of 50 tags.
+    Please note: 'tag create' acts like a 'tag init' hence tags created with this command are the only ones being present after execution.
 parameters:
   - name: --name -n
     short-summary: The name of the tag to create.
@@ -2445,6 +2504,11 @@ examples:
     text: az bicep install
   - name: Install a specific version of Bicep CLI.
     text: az bicep install --version v0.2.212
+"""
+
+helps['bicep uninstall'] = """
+type: command
+short-summary: Uninstall Bicep CLI.
 """
 
 helps['bicep upgrade'] = """

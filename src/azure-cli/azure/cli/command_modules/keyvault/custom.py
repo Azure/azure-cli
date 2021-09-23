@@ -14,6 +14,7 @@ import struct
 import sys
 import time
 import uuid
+from ipaddress import ip_network
 
 from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients, is_azure_stack_profile
 from azure.cli.command_modules.keyvault._validators import _construct_vnet, secret_text_encoding_values
@@ -212,6 +213,8 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
 
     assert hsm_name
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    logger.warning('This command will soft delete the resource, and you will still be billed until it is purged. '
+                   'For more information, go to https://aka.ms/doc/KeyVaultMHSMSoftDelete')
     return sdk_no_wait(
         no_wait, hsm_client.begin_delete,
         resource_group_name=resource_group_name,
@@ -644,6 +647,15 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                  no_self_perms=None,
                  tags=None,
                  no_wait=False):
+    from azure.core.exceptions import HttpResponseError
+    try:
+        vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+        if vault:
+            raise InvalidArgumentValueError('The specified vault: {} already exists'.format(vault_name))
+    except HttpResponseError:
+        # if client.get raise exception, we can take it as no existing vault found
+        # just continue the normal creation process
+        pass
     from azure.cli.core._profile import Profile
     from azure.graphrbac import GraphRbacManagementClient
 
@@ -961,6 +973,10 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
     vault.properties.network_acls = vault.properties.network_acls or _create_network_rule_set(cmd)
     rules = vault.properties.network_acls
 
+    if not subnet and not ip_address:
+        logger.warning('No subnet or ip address supplied.')
+
+    to_update = False
     if subnet:
         rules.virtual_network_rules = rules.virtual_network_rules or []
 
@@ -972,17 +988,28 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                 break
         if to_modify:
             rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
+            to_update = True
 
     if ip_address:
         rules.ip_rules = rules.ip_rules or []
         # if the rule already exists, don't add again
-        to_modify = True
-        for x in rules.ip_rules:
-            if x.value == ip_address:
-                to_modify = False
-                break
-        if to_modify:
-            rules.ip_rules.append(IPRule(value=ip_address))
+        for ip in ip_address:
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.value)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.value)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IPRule(value=ip))
+                to_update = True
+
+    # if we didn't modify the network rules just return the vault as is
+    if not to_update:
+        return vault
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
                                 resource_type=ResourceType.MGMT_KEYVAULT,
@@ -1086,19 +1113,17 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
 
 
 # region KeyVault Key
-def create_key(cmd, client, key_name=None, vault_base_url=None,
-               hsm_name=None, protection=None, identifier=None,  # pylint: disable=unused-argument
+def create_key(client, key_name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, kty=None, curve=None):
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
 
-    return client.create_key(vault_base_url=vault_base_url,
-                             key_name=key_name,
-                             kty=kty,
-                             key_size=key_size,
-                             key_ops=key_ops,
-                             key_attributes=key_attrs,
+    return client.create_key(name=key_name,
+                             key_type=kty,
+                             size=key_size,
+                             key_operations=key_ops,
+                             enabled=not disabled,
+                             not_before=not_before,
+                             expires_on=expires,
                              tags=tags,
                              curve=curve)
 
@@ -1206,17 +1231,13 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disable=too-many-locals
-               hsm_name=None, identifier=None,  # pylint: disable=unused-argument
+def import_key(cmd, client, key_name=None,  # pylint: disable=too-many-locals
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
                byok_string=None, kty='RSA', curve=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
-
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    JsonWebKey = cmd.loader.get_sdk('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
 
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
@@ -1257,7 +1278,10 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         key_obj.t = byok_data
         key_obj.crv = curve
 
-    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+    return client.import_key(name=key_name, key=key_obj,
+                             hardware_protected=(protection == 'hsm'),
+                             enabled=not disabled, tags=tags,
+                             not_before=not_before, expires_on=expires)
 
 
 def _bytes_to_int(b):
@@ -1577,7 +1601,7 @@ def import_certificate(cmd, client, vault_base_url, certificate_name, certificat
 
 
 def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
-                         identifier=None, encoding='PEM', certificate_version=''):   # pylint: disable=unused-argument
+                         identifier=None, encoding='PEM', certificate_version=''):  # pylint: disable=unused-argument
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -1844,6 +1868,11 @@ def delete_private_endpoint_connection(cmd, client, resource_group_name, private
                                    private_endpoint_connection_name)
 
 
+def list_private_endpoint_connection(cmd, client, resource_group_name, hsm_name):
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, None, hsm_name)
+    return pec_client.list_by_resource(resource_group_name, hsm_name)
+
+
 def show_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
                                      vault_name=None, hsm_name=None):
     pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
@@ -1928,9 +1957,10 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     return ret
 
 
+# pylint: disable=unused-argument
 def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                            role_assignment_name=None, assignee=None,
-                           assignee_principal_type=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
+                           assignee_principal_type=None, hsm_name=None, identifier=None):
     """ Create a new role assignment for a user, group, or service principal. """
     from azure.cli.command_modules.role.custom import _resolve_object_id
 
@@ -1970,8 +2000,9 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
     )
 
 
+# pylint: disable=unused-argument
 def delete_role_assignment(cmd, client, role_assignment_name=None, scope=None, assignee=None, role=None,
-                           assignee_object_id=None, ids=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
+                           assignee_object_id=None, ids=None, hsm_name=None, identifier=None):
     """ Delete a role assignment. """
     query_scope = scope
     if query_scope is None:
@@ -2167,7 +2198,8 @@ def _get_role_definition_name(role_definition_name, role_id):
     return role_definition_name
 
 
-def delete_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+# pylint: disable=unused-argument
+def delete_role_definition(client, hsm_name, role_definition_name=None, role_id=None):
     # Get role definition name
     role_definition_name = _get_role_definition_name(role_definition_name, role_id)
 

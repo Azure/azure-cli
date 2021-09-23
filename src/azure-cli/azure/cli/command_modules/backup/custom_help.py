@@ -159,7 +159,7 @@ def track_backup_operation(cli_ctx, resource_group, result, vault_name):
     operation_id = get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
     operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
-        time.sleep(1)
+        time.sleep(5)
         operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     return operation_status
 
@@ -172,7 +172,7 @@ def track_refresh_operation(cli_ctx, result, vault_name, resource_group):
                                                                        fabric_name, operation_id,
                                                                        raw=True)
     while result.response.status_code == 202:
-        time.sleep(1)
+        time.sleep(5)
         result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                            fabric_name, operation_id,
                                                                            raw=True)
@@ -186,7 +186,7 @@ def track_register_operation(cli_ctx, result, vault_name, resource_group, contai
                                                                fabric_name, container_name,
                                                                operation_id, raw=True)
     while result.response.status_code == 202:
-        time.sleep(1)
+        time.sleep(5)
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
                                                                    operation_id, raw=True)
@@ -200,7 +200,7 @@ def track_inquiry_operation(cli_ctx, result, vault_name, resource_group, contain
                                                                fabric_name, container_name,
                                                                operation_id, raw=True)
     while result.response.status_code == 202:
-        time.sleep(1)
+        time.sleep(5)
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
                                                                    operation_id, raw=True)
@@ -336,7 +336,7 @@ def is_json(content):
 
 
 def get_protection_container_uri_from_id(arm_id):
-    m = re.search('(?<=protectionContainers/)[^/]+', arm_id)
+    m = re.search('(?<=/protectionContainers/)[^/]+', arm_id)
     return m.group(0)
 
 
@@ -356,7 +356,7 @@ def get_vm_name_from_vm_id(arm_id):
 
 
 def get_resource_group_from_id(arm_id):
-    m = re.search('(?<=resourceGroups/)[^/]+', arm_id)
+    m = re.search('(?<=/resourceGroups/)[^/]+', arm_id)
     return m.group(0)
 
 
@@ -366,7 +366,7 @@ def get_operation_id_from_header(header):
 
 
 def get_vault_from_arm_id(arm_id):
-    m = re.search('(?<=vaults/)[^/]+', arm_id)
+    m = re.search('(?<=/vaults/)[^/]+', arm_id)
     return m.group(0)
 
 

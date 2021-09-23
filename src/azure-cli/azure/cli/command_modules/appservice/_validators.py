@@ -219,6 +219,9 @@ def _validate_service_tag_format(cmd, namespace):
         name = namespace.name
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
         service_tag_full_list = network_client.service_tags.list(webapp.location).values
+        if service_tag_full_list is None:
+            logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
+            return
         for tag in input_tags:
             valid_tag = False
             for tag_full_list in service_tag_full_list:
@@ -241,3 +244,9 @@ def _validate_service_tag_existence(cmd, namespace):
         if rule.ip_address and rule.ip_address.lower() == input_tag_value.lower():
             raise ArgumentUsageError('Service Tag: ' + namespace.service_tag + ' already exists. '
                                      'Cannot add duplicate Service Tag values.')
+
+
+def validate_public_cloud(cmd):
+    from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+    if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
+        raise CLIError('This command is not yet supported on soveriegn clouds.')

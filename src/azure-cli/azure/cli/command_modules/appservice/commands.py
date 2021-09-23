@@ -110,6 +110,8 @@ def load_command_table(self, _):
 
     appservice_domains = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_domains#{}')
 
+    logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
@@ -156,10 +158,10 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_connection_strings')
 
     with self.command_group('webapp config storage-account') as g:
-        g.custom_command('list', 'get_azure_storage_accounts', exception_handler=empty_on_404, is_preview=True)
-        g.custom_command('add', 'add_azure_storage_account', is_preview=True)
-        g.custom_command('update', 'update_azure_storage_account', is_preview=True)
-        g.custom_command('delete', 'delete_azure_storage_accounts', is_preview=True)
+        g.custom_command('list', 'get_azure_storage_accounts', exception_handler=empty_on_404)
+        g.custom_command('add', 'add_azure_storage_account')
+        g.custom_command('update', 'update_azure_storage_account')
+        g.custom_command('delete', 'delete_azure_storage_accounts')
 
     with self.command_group('webapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
@@ -247,6 +249,10 @@ def load_command_table(self, _):
         g.custom_command('config', 'enable_cd')
         g.custom_command('show-cd-url', 'show_container_cd_url')
 
+    with self.command_group('webapp deployment github-actions', is_preview=True) as g:
+        g.custom_command('add', 'add_github_actions')
+        g.custom_command('remove', 'remove_github_actions')
+
     with self.command_group('webapp auth') as g:
         g.custom_show_command('show', 'get_auth_settings')
         g.custom_command('update', 'update_auth_settings')
@@ -283,7 +289,7 @@ def load_command_table(self, _):
                          exception_handler=ex_handler_factory(creating_plan=True))
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'show_plan')
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_app_service_plan',
                                  setter_arg_name='app_service_plan', supports_no_wait=True,
                                  exception_handler=ex_handler_factory())
@@ -307,8 +313,8 @@ def load_command_table(self, _):
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
-        g.generic_update_command('update', setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
-                                 custom_func_name='update_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
+        g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
+                                 custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk)
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs')
@@ -425,7 +431,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_domain')
         g.custom_command('show-terms', 'show_domain_purchase_terms')
 
-    with self.command_group('staticwebapp', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsites')
         g.custom_show_command('show', 'show_staticsite')
         g.custom_command('create', 'create_staticsites', supports_no_wait=True)
@@ -434,22 +440,34 @@ def load_command_table(self, _):
         g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
         g.custom_command('update', 'update_staticsite', supports_no_wait=True)
 
-    with self.command_group('staticwebapp environment', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp environment', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_environments')
         g.custom_show_command('show', 'show_staticsite_environment')
         g.custom_command('functions', 'list_staticsite_functions')
 
-    with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_domains')
         g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_function_app_settings')
         g.custom_command('set', 'set_staticsite_function_app_settings')
         g.custom_command('delete', 'delete_staticsite_function_app_settings')
 
-    with self.command_group('staticwebapp users', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp users', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_users')
         g.custom_command('invite', 'invite_staticsite_users')
         g.custom_command('update', 'update_staticsite_users')
+
+    with self.command_group('staticwebapp secrets', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('list', 'list_staticsite_secrets')
+        g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
+
+    with self.command_group('logicapp') as g:
+        g.custom_command('delete', 'delete_function_app', confirmation=True)
+
+    with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
+        g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_logicapp', table_transformer=transform_web_output)

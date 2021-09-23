@@ -14,7 +14,7 @@ from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
-    cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
+    cf_resource_groups, cf_providers, cf_features, cf_feature_registrations, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links,
     cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions, cf_resource_templatespecs)
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out
@@ -79,6 +79,12 @@ def load_command_table(self, _):
     resource_feature_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.features.operations#FeaturesOperations.{}',
         client_factory=cf_features,
+        resource_type=ResourceType.MGMT_RESOURCE_FEATURES
+    )
+
+    resource_feature_registration_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.features.operations#SubscriptionFeatureRegistrationsOperations.{}',
+        client_factory=cf_feature_registrations,
         resource_type=ResourceType.MGMT_RESOURCE_FEATURES
     )
 
@@ -221,6 +227,7 @@ def load_command_table(self, _):
         g.custom_command('register', 'register_provider')
         g.custom_command('unregister', 'unregister_provider')
         g.custom_command('operation list', 'list_provider_operations')
+        g.custom_command('permission list', 'list_provider_permissions')
         g.custom_show_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
@@ -231,6 +238,14 @@ def load_command_table(self, _):
         g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('register', 'register_feature')
         g.custom_command('unregister', 'unregister_feature')
+
+    with self.command_group('feature registration', resource_feature_registration_sdk, client_factory=cf_feature_registrations, resource_type=PROFILE_TYPE,
+                            min_api='2021-07-01') as g:
+        feature_table_transform = '{Name:name, RegistrationState:properties.state}'
+        g.custom_command('list', 'list_feature_registrations', table_transformer='[].' + feature_table_transform)
+        g.show_command('show', 'get', table_transformer=feature_table_transform)
+        g.custom_command('create', 'create_feature_registration')
+        g.custom_command('delete ', 'delete_feature_registration', confirmation=True)
 
     # Tag commands
     with self.command_group('tag', resource_tag_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
@@ -303,7 +318,7 @@ def load_command_table(self, _):
         g.custom_command('show-log', 'get_deployment_script_logs')
         g.custom_command('delete', 'delete_deployment_script', confirmation=True)
 
-    with self.command_group('ts', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, is_preview=True, min_api='2019-06-01-preview') as g:
+    with self.command_group('ts', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, min_api='2019-06-01-preview') as g:
         g.custom_command('create', 'create_template_spec', validator=process_ts_create_or_update_namespace)
         g.custom_command('update', 'update_template_spec', validator=process_ts_create_or_update_namespace, confirmation=True)
         g.custom_command('export', 'export_template_spec', validator=_validate_template_spec_out)
@@ -454,6 +469,7 @@ def load_command_table(self, _):
 
     with self.command_group('bicep') as g:
         g.custom_command('install', 'install_bicep_cli')
+        g.custom_command('uninstall', 'uninstall_bicep_cli')
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')

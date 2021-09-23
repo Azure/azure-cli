@@ -11,7 +11,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
-                          validate_included_datasets_validator, validate_custom_domain,
+                          validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
                           validate_container_public_access,
                           validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
@@ -21,7 +21,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
-                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator)
+                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
@@ -137,12 +137,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='When creating a file or directory and the parent folder does not have a default ACL, the umask restricts '
              'the permissions of the file or directory to be created. The resulting permission is given by p & ^u, '
              'where p is the permission and u is the umask. For more information, please refer to '
-             'https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#umask.')
+             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
     permissions_type = CLIArgumentType(
         help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
              'granted read, write, or execute permission. The sticky bit is also supported. Both symbolic (rwxrw-rw-) '
              'and 4-digit octal notation (e.g. 0766) are supported. For more information, please refer to https://'
-             'docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+             'docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
 
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
@@ -191,11 +191,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Allow or disallow cross AAD tenant object replication. The default interpretation is true for this '
         'property.')
 
+    t_share_permission = self.get_models('DefaultSharePermission', resource_type=ResourceType.MGMT_STORAGE)
+
     default_share_permission_type = CLIArgumentType(
         options_list=['--default-share-permission', '-d'],
-        arg_type=get_enum_type(['None', 'StorageFileDataSmbShareContributor',
-                                'StorageFileDataSmbShareElevatedContributor',
-                                'StorageFileDataSmbShareReader']),
+        arg_type=get_enum_type(t_share_permission),
         min_api='2020-08-01-preview',
         arg_group='Azure Files Identity Based Authentication',
         help='Default share permission for users using Kerberos authentication if RBAC role is not assigned.')
@@ -216,6 +216,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         min_api='2019-02-02',
         help='Indicate the priority with which to rehydrate an archived blob.')
 
+    action_type = CLIArgumentType(
+        help='The action of virtual network rule. Possible value is Allow.'
+    )
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -234,7 +237,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys', 'failover']:  # pylint: disable=line-too-long
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys', 'failover', 'hns-migration']:  # pylint: disable=line-too-long
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
             c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -249,8 +252,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account blob-inventory-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account Blob Inventory Policy, string in JSON format or json file path. See more '
-                   'details in https://review.docs.microsoft.com/en-us/azure/storage/blobs/blob-inventory#'
-                   'inventory-policy.')
+                   'details in https://docs.microsoft.com/azure/storage/blobs/blob-inventory#inventory-policy.')
 
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'],
@@ -332,6 +334,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
+        c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
+                   help='NFS 3.0 protocol support enabled if sets to true.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -424,6 +428,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Bypass traffic for space-separated uses.')
             c.argument('default_action', arg_type=get_enum_type(t_default_action),
                        help='Default action to apply when no rule matches.')
+            c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+            c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
+            c.argument('action', action_type)
 
     with self.argument_context('storage account show-connection-string') as c:
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
@@ -489,12 +496,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
-        from ._validators import validate_subnet
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
-        c.argument('action', help='The action of virtual network rule.')
+        c.argument('action', action_type)
         c.argument('resource_id', help='The resource id to add in network rule.', arg_group='Resource Access Rule',
                    min_api='2020-08-01-preview')
         c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
@@ -546,6 +552,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    type=get_api_version_type(), min_api='2018-07-01',
                    help="Indicate the default version to use for requests to the Blob service if an incoming request's "
                         "version is not specified.")
+        c.argument('enable_last_access_tracking', arg_type=get_three_state_flag(), min_api='2019-06-01',
+                   options_list=['--enable-last-access-tracking', '-t'],
+                   help='When set to true last access time based tracking policy is enabled.')
 
     with self.argument_context('storage account file-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -563,8 +572,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Indicate the number of days that the deleted item should be retained. The minimum specified '
                    'value can be 1 and the maximum value can be 365.')
         c.argument('enable_smb_multichannel', options_list=['--enable-smb-multichannel', '--mc'],
-                   arg_type=get_three_state_flag(), min_api='2020-08-01-preview',
+                   arg_type=get_three_state_flag(), min_api='2020-08-01-preview', arg_group='SMB Setting',
                    help='Set SMB Multichannel setting for file service. Applies to Premium FileStorage only.')
+        c.argument('versions', arg_group='SMB Setting', min_api='2020-08-01-preview',
+                   help="SMB protocol versions supported by server. Valid values are SMB2.1, SMB3.0, "
+                        "SMB3.1.1. Should be passed as a string with delimiter ';'.")
+        c.argument('authentication_methods', options_list='--auth-methods', arg_group='SMB Setting',
+                   min_api='2020-08-01-preview',
+                   help="SMB authentication methods supported by server. Valid values are NTLMv2, Kerberos. "
+                        "Should be passed as a string with delimiter ';'.")
+        c.argument('kerberos_ticket_encryption', options_list=['--kerb-ticket-encryption', '-k'],
+                   arg_group='SMB Setting', min_api='2020-08-01-preview',
+                   help="Kerberos ticket encryption supported by server. Valid values are RC4-HMAC, AES-256. "
+                        "Should be passed as a string with delimiter ';'.")
+        c.argument('channel_encryption', arg_group='SMB Setting', min_api='2020-08-01-preview',
+                   help="SMB channel encryption supported by server. Valid values are AES-128-CCM, AES-128-GCM, "
+                        "AES-256-GCM. Should be passed as a string with delimiter ';' ")
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
@@ -640,6 +663,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination_container', options_list=['--destination-container', '-d'],
                    help='The destination storage container name.')
         c.argument('rule_id', rule_id_type)
+
+    with self.argument_context('storage account hns-migration start') as c:
+        c.argument('request_type', options_list=['--type', '--request-type'],
+                   arg_type=get_enum_type(['validation', 'upgrade']), validator=validate_hns_migration_type,
+                   help='Start a validation request for migration or start a migration request')
 
     for item in ['show', 'off']:
         with self.argument_context('storage logging {}'.format(item)) as c:
@@ -954,7 +982,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of blob at the destination.')
         c.argument('preserve_s2s_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
                    help='Preserve access tier during service to service copy. '
-                   'Please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-storage-tiers '
+                   'Please refer to https://docs.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
                    'to ensure destination storage account support setting access tier. In the cases that setting '
                    'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
                    'access tier. (Default true)')
@@ -966,6 +994,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('content_type', arg_group='Additional Flags', help="Specify content type of the file. ")
         c.argument('follow_symlinks', arg_group='Additional Flags', action='store_true',
                    help='Follow symbolic links when uploading from local file system.')
+        c.argument('cap_mbps', arg_group='Additional Flags', help="Caps the transfer rate, in megabits per second. "
+                   "Moment-by-moment throughput might vary slightly from the cap. "
+                   "If this option is set to zero, or it is omitted, the throughput isn't capped. ")
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
@@ -1236,6 +1267,27 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_duration', type=int)
         c.argument('lease_break_period', type=int)
 
+    with self.argument_context('storage container list', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        c.extra('timeout', timeout_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('num_results', arg_type=num_results_type)
+        c.argument('prefix',
+                   help='Filter the results to return only blobs whose name begins with the specified prefix.')
+        c.argument('include_metadata', arg_type=get_three_state_flag(),
+                   help='Specify that container metadata to be returned in the response.')
+        c.argument('show_next_marker', action='store_true', is_preview=True,
+                   help='Show nextMarker in result when specified.')
+        c.argument('include_deleted', arg_type=get_three_state_flag(), min_api='2020-02-10',
+                   help='Specify that deleted containers to be returned in the response. This is for container restore '
+                   'enabled account. The default value is `False`')
+
+    with self.argument_context('storage container restore') as c:
+        c.argument('deleted_container_name', options_list=['--name', '-n'],
+                   help='Specify the name of the deleted container to restore.')
+        c.argument('deleted_container_version', options_list=['--deleted-version'],
+                   help='Specify the version of the deleted container to restore.')
+        c.extra('timeout', timeout_type)
+
     with self.argument_context('storage container-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
         from .sdkutil import get_container_access_type_names
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), id_part='child_name_2')
@@ -1248,10 +1300,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
+        c.argument('enable_vlw', arg_type=get_three_state_flag(), min_api='2021-01-01', is_preview=True,
+                   help='The object level immutability property of the container. The property is immutable and can '
+                   'only be set to true at the container creation time. Existing containers must undergo a migration '
+                   'process.')
 
     for item in ['create', 'update']:
         with self.argument_context('storage container-rm {}'.format(item),
                                    resource_type=ResourceType.MGMT_STORAGE) as c:
+            from ._validators import validate_container_nfsv3_squash
+            t_root_squash = self.get_models('RootSquashType', resource_type=ResourceType.MGMT_STORAGE)
             c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
                        arg_group='Encryption Policy', min_api='2019-06-01',
                        help='Default the container to use specified encryption scope for all writes.')
@@ -1259,6 +1317,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        options_list=['--deny-encryption-scope-override', '--deny-override'],
                        arg_type=get_three_state_flag(), arg_group='Encryption Policy', min_api='2019-06-01',
                        help='Block override of encryption scope from the container default.')
+            c.extra('root_squash', arg_type=get_enum_type(t_root_squash), min_api='2021-06-01',
+                    help='Enable NFSv3 squash on blob container.', validator=validate_container_nfsv3_squash)
+            c.ignore('enable_nfs_v3_root_squash')
+            c.ignore('enable_nfs_v3_all_squash')
 
     with self.argument_context('storage container-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
@@ -1636,7 +1698,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     for item in ['create', 'show', 'delete', 'exists', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['--name', '-n'],
-                    help="File system name.", required=True)
+                    help="File system name (i.e. container name).", required=True)
             c.extra('timeout', timeout_type)
 
     with self.argument_context('storage fs create') as c:
@@ -1644,6 +1706,34 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_access', arg_type=get_enum_type(get_fs_access_type_names()),
                    validator=validate_fs_public_access,
                    help="Specify whether data in the file system may be accessed publicly and the level of access.")
+
+    with self.argument_context('storage fs generate-sas') as c:
+        t_file_system_permissions = self.get_sdk('_models#FileSystemSasPermissions',
+                                                 resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_sas_arguments()
+        c.argument('file_system', options_list=['--name', '-n'], help="File system name (i.e. container name).")
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy.')
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format(get_permission_help_string(t_file_system_permissions)),
+                   validator=get_permission_validator(t_file_system_permissions))
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+                                         'using this shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
+                                               'using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+                                        'using this shared access signature.')
+        c.argument('as_user', min_api='2018-11-09', action='store_true',
+                   validator=as_user_validator,
+                   help="Indicates that this command return the SAS signed with the user delegation key. "
+                        "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.ignore('sas_token')
+        c.argument('full_uri', action='store_true',
+                   help='Indicate that this command return the full blob URI and the shared access signature token.')
 
     with self.argument_context('storage fs list') as c:
         c.argument('include_metadata', arg_type=get_three_state_flag(),
@@ -1653,7 +1743,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'show', 'delete', 'exists', 'move', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs directory {}'.format(item)) as c:
-            c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+            c.extra('file_system_name', options_list=['-f', '--file-system'],
+                    help="File system name (i.e. container name).", required=True)
             c.extra('directory_path', options_list=['--name', '-n'],
                     help="The name of directory.", required=True)
             c.extra('timeout', timeout_type)
@@ -1663,7 +1754,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('umask', umask_type)
 
     with self.argument_context('storage fs directory list') as c:
-        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+        c.extra('file_system_name', options_list=['-f', '--file-system'],
+                help="File system name (i.e. container name).", required=True)
         c.argument('recursive', arg_type=get_three_state_flag(), default=True,
                    help='Look into sub-directories recursively when set to true.')
         c.argument('path', help="Filter the results to return only paths under the specified path.")
@@ -1702,7 +1794,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('source')
 
     with self.argument_context('storage fs file list') as c:
-        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+        c.extra('file_system_name', options_list=['-f', '--file-system'],
+                help="File system name (i.e. container name).", required=True)
         c.argument('recursive', arg_type=get_three_state_flag(), default=True,
                    help='Look into sub-directories recursively when set to true.')
         c.argument('exclude_dir', action='store_true',
@@ -1722,7 +1815,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                  'metadata show']:
         with self.argument_context('storage fs file {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['-f', '--file-system'],
-                    help='File system name.', required=True)
+                    help='File system name (i.e. container name).', required=True)
             c.extra('path', options_list=['-p', '--path'], help="The file path in a file system.",
                     required=True)
             c.extra('timeout', timeout_type)
@@ -1748,7 +1841,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
         c.register_content_settings_argument(t_file_content_settings, update=False)
         c.extra('file_system_name', options_list=['-f', '--file-system'],
-                help='File system name.', required=True)
+                help='File system name (i.e. container name).', required=True)
         c.extra('path', options_list=['-p', '--path'], required=True,
                 help="The original file path users want to move in a file system.")
         c.argument('new_name', options_list=['--new-path'],
@@ -1779,7 +1872,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         with self.argument_context('storage fs access {}'.format(item)) as c:
             from ._validators import validate_access_control
             c.extra('file_system_name', options_list=['-f', '--file-system'],
-                    help='File system name.', required=True)
+                    help='File system name (i.e. container name).', required=True)
             c.extra('directory_path', options_list=['-p', '--path'],
                     help='The path to a file or directory in the specified file system.', required=True)
             c.argument('permissions', validator=validate_access_control)
@@ -1791,7 +1884,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('acl', help='The value is a comma-separated list of access control entries. Each access control '
                        'entry (ACE) consists of a scope, a type, a user or group identifier, and permissions in the '
                        'format "[scope:][type]:[id]:[permissions]".  For more information, please refer to '
-                       'https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control.')
+                       'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.')
             c.extra('continuation',
                     help='Optional continuation token that can be used to resume previously stopped operation.')
             c.extra('batch_size', type=int, help='Optional. If data set size exceeds batch size then operation will '

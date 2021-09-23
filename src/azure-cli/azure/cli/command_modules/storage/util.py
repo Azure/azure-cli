@@ -5,6 +5,8 @@
 
 
 import os
+from azure.cli.core.profiles import ResourceType
+from datetime import datetime
 
 
 def collect_blobs(blob_service, container, pattern=None):
@@ -104,7 +106,7 @@ def glob_files_remotely(cmd, client, share_name, pattern, snapshot=None):
 
 
 def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -116,8 +118,20 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
     return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
 
 
+def create_short_lived_blob_sas_v2(cmd, account_name, account_key, container, blob):
+    from datetime import timedelta
+
+    t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
+                           resource_type=ResourceType.DATA_STORAGE_BLOB)
+
+    t_blob_permissions = cmd.get_models('_models#BlobSasPermissions', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = t_sas(account_name, account_key)
+    return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
+
+
 def create_short_lived_file_sas(cmd, account_name, account_key, share, directory_name, file_name):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -133,7 +147,7 @@ def create_short_lived_file_sas(cmd, account_name, account_key, share, directory
 
 
 def create_short_lived_container_sas(cmd, account_name, account_key, container):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -146,7 +160,7 @@ def create_short_lived_container_sas(cmd, account_name, account_key, container):
 
 
 def create_short_lived_share_sas(cmd, account_name, account_key, share):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -225,10 +239,21 @@ def check_precondition_success(func):
             return True, func(*args, **kwargs)
         except AzureHttpError as ex:
             # Precondition failed error
-            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/412
+            # https://developer.mozilla.org/docs/Web/HTTP/Status/412
             # Not modified error
-            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304
+            # https://developer.mozilla.org/docs/Web/HTTP/Status/304
             if ex.status_code not in [304, 412]:
                 raise
             return False, None
     return wrapper
+
+
+def get_datetime_from_string(dt_str):
+    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
+                             '%Y-%m-%dT%HZ', '%Y-%m-%d']
+    for form in accepted_date_formats:
+        try:
+            return datetime.strptime(dt_str, form)
+        except ValueError:
+            continue
+    raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))

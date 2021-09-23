@@ -83,6 +83,9 @@ def load_arguments(self, _):
 
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
+        c.argument('content_types_to_compress', nargs='+',
+                   help='List of content types on which compression applies. The value should be a valid MIME type.')
+
     with self.argument_context('cdn endpoint set') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
 
@@ -95,7 +98,7 @@ def load_arguments(self, _):
     # Custom Domain #
 
     with self.argument_context('cdn custom-domain') as c:
-        c.argument('custom_domain_name', name_arg_type, id_part=None, help='Name of the custom domain.')
+        c.argument('custom_domain_name', name_arg_type, id_part=None, help='Resource name of the custom domain.')
 
     with self.argument_context('cdn custom-domain create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)
@@ -103,7 +106,7 @@ def load_arguments(self, _):
     with self.argument_context('cdn custom-domain enable-https') as c:
         c.argument('profile_name', id_part=None, help='Name of the parent profile.')
         c.argument('endpoint_name', help='Name of the parent endpoint.')
-        c.argument('custom_domain_name', name_arg_type, help='Name of the custom domain.')
+        c.argument('custom_domain_name', name_arg_type, help='Resource name of the custom domain.')
         c.argument('min_tls_version',
                    help='The minimum TLS version required for the custom domain.',
                    arg_type=get_enum_type(['none', '1.0', '1.2']))
@@ -443,7 +446,7 @@ def load_arguments(self, _):
     # AFD Secret #
     with self.argument_context('afd secret') as c:
         c.argument('profile_name', help=profile_name_help, id_part='name')
-        c.argument('secret_name', secret_name_arg_type, id_part="child_name_1", help='Name of the custom domain.')
+        c.argument('secret_name', secret_name_arg_type, id_part="child_name_1", help='Name of the secret.')
         c.argument('use_latest_version', arg_type=get_three_state_flag(),
                    help="Whether to use the latest version for the certificate.")
         c.argument('secret_source', help='ID of the Azure key vault certificate.')
@@ -560,3 +563,5 @@ def configure_rule_parameters(c):
                help='If True, the remaining path after the source \
                pattern will be appended to the new destination path.')
     c.argument('index', type=int, help='The index of the condition/action')
+    c.argument('origin_group', arg_group="Action",
+               help='Name or ID of the OriginGroup that would override the default OriginGroup')

@@ -90,6 +90,11 @@ examples:
         az security atp storage update --resource-group MyResourceGroup --storage-account MyStorageAccount --is-enabled false
 """
 
+helps['security va'] = """
+type: group
+short-summary: View Vulnerability Assessment.
+"""
+
 helps['security va sql'] = """
 type: group
 short-summary: View Sql Vulnerability Assessment scan results and manage baseline.
@@ -458,6 +463,15 @@ examples:
   - name: Get a security setting.
     text: >
         az security setting show -n "MCAS"
+"""
+
+helps['security setting update'] = """
+type: command
+short-summary: Updates a security setting.
+examples:
+  - name: Update a security setting.
+    text: >
+        az security setting update -n "Sentinel" --enabled true
 """
 
 helps['security task'] = """
