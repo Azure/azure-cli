@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import sys
 import time
 from distutils.version import StrictVersion
 from typing import Any, Dict, List, Tuple, TypeVar, Union
@@ -1253,7 +1254,7 @@ class AKSCreateContext:
                 'Please run "az aks --update-cluster-autoscaler" '
                 "if you want to update min-count or max-count."
             )
-            exit(0)
+            sys.exit(0)
 
         if update_cluster_autoscaler and not agent_pool_profile.enable_auto_scaling:
             raise InvalidArgumentValueError(
@@ -1266,7 +1267,7 @@ class AKSCreateContext:
             logger.warning(
                 "Cluster autoscaler is already disabled for this node pool."
             )
-            exit(0)
+            sys.exit(0)
 
         return update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler, min_count, max_count
 
@@ -4194,7 +4195,7 @@ class AKSUpdateDecorator:
         self.__record_is_updated(is_updated)
         return mc
 
-    def update_default_mc_profile(self):
+    def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
         Note: To reduce the risk of regression introduced by refactoring, this function is not complete and is being
@@ -4212,7 +4213,7 @@ class AKSUpdateDecorator:
 
         return mc
 
-    def update_mc(self):
+    def update_mc(self) -> ManagedCluster:
         """Send request to update the existing managed cluster.
 
         Note: To reduce the risk of regression introduced by refactoring, this function is not complete and is being
@@ -4226,5 +4227,3 @@ class AKSUpdateDecorator:
         """
         # check is_updated
         self.__check_is_updated()
-
-        pass
