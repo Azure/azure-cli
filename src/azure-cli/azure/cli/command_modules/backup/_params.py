@@ -140,7 +140,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup container list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
-        c.argument('backup_management_type', backup_management_type)
+        c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list containers in secondary region.')
 
     with self.argument_context('backup container unregister') as c:
@@ -369,6 +369,7 @@ def load_arguments(self, _):
         c.argument('recovery_config', options_list=['--recovery-config'], help="""Specify the recovery configuration of a backed up item. The configuration object can be obtained from 'backup recoveryconfig show' command.""")
         c.argument('rehydration_duration', type=int, help='Set the maximum time, in days (between 10-30, both inclusive) for which the recovery point stays in hydrated state.')
         c.argument('rehydration_priority', rehyd_priority_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to restore from a recoverypoint in secondary region.')
 
     # Recoveryconfig
     with self.argument_context('backup recoveryconfig show') as c:
@@ -386,6 +387,8 @@ def load_arguments(self, _):
         c.argument('from_full_rp_name', from_full_rp_type)
         c.argument('filepath', filepath_type)
         c.argument('backup_management_type', backup_management_type)
+        c.argument('target_resource_group', options_list=['--target-resource-group'], help="""Specify the resource group of target item for Cross Region Restore. Default value will be same as --resource-group if not specified.""")
+        c.argument('target_vault_name', options_list=['--target-vault-name'], help="""Specify the vault name of target item for Cross Region Restore. Default value will be same as --vault-name if not specified.""")
 
     # Job
     with self.argument_context('backup job') as c:
@@ -403,7 +406,7 @@ def load_arguments(self, _):
         c.argument('operation', arg_type=get_enum_type(['Backup', 'ConfigureBackup', 'DeleteBackupData', 'DisableBackup', 'Restore']), help='User initiated operation.')
         c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
         c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
-        c.argument('backup_management_type', backup_management_type)
+        c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
 
     with self.argument_context('backup job wait') as c:

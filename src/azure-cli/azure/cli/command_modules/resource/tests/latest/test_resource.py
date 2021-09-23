@@ -17,6 +17,7 @@ from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
 
@@ -2156,6 +2157,21 @@ class FeatureScenarioTest(ScenarioTest):
             self.check_pattern('properties.state', 'Unregistering|Unregistered')
         ])
 
+    @AllowLargeResponse(8192)
+    def test_feature_registration_list(self):
+        self.cmd('feature registration list', checks=self.check("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1))
+
+        self.cmd('feature registration show --provider-namespace Microsoft.Network -n AllowLBPreview')
+    
+    @AllowLargeResponse(8192)
+    def test_feature_registration_create(self):
+        self.cmd('feature registration create --namespace Microsoft.Network --name AllowLBPreview', checks=[
+            self.check_pattern('properties.state', 'Registering|Registered')
+        ])
+
+    @AllowLargeResponse(8192)
+    def test_feature_registration_delete(self):
+        self.cmd('feature registration delete --namespace Microsoft.Network --name AllowLBPreview --yes')
 
 class PolicyScenarioTest(ScenarioTest):
 
@@ -3361,7 +3377,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
     @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus',
-                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
     def test_group_deployment_cross_tenant(self, resource_group, another_resource_group):
         # Prepare Network Interface
         self.kwargs.update({
@@ -3388,9 +3404,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
+            'aux_sub': AUX_SUBSCRIPTION,
             'rg': another_resource_group,
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_tenant': AUX_TENANT
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
@@ -3485,7 +3501,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_group_cross_tenant', location='eastus')
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_group_cross_tenant', location='eastus',
-                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
     def test_deployment_group_cross_tenant(self, resource_group, another_resource_group):
         # Prepare Network Interface
         self.kwargs.update({
@@ -3512,9 +3528,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
+            'aux_sub': AUX_SUBSCRIPTION,
             'rg': another_resource_group,
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_tenant': AUX_TENANT
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))

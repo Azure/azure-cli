@@ -58,7 +58,8 @@ def extend_immutability_policy(cmd, client, container_name, account_name, if_mat
 
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
                         metadata=None, public_access=None, fail_on_exist=False,
-                        default_encryption_scope=None, deny_encryption_scope_override=None, enable_vlw=None):
+                        default_encryption_scope=None, deny_encryption_scope_override=None, enable_vlw=None,
+                        enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None):
     if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
                                              account_name=account_name, container_name=container_name):
         raise CLIError('The specified container already exists.')
@@ -68,7 +69,9 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
         blob_container = BlobContainer(public_access=public_access,
                                        default_encryption_scope=default_encryption_scope,
                                        deny_encryption_scope_override=deny_encryption_scope_override,
-                                       metadata=metadata)
+                                       metadata=metadata,
+                                       enable_nfs_v3_all_squash=enable_nfs_v3_all_squash,
+                                       enable_nfs_v3_root_squash=enable_nfs_v3_root_squash)
         if enable_vlw is not None:
             ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
                                                             resource_type=ResourceType.MGMT_STORAGE)
@@ -80,7 +83,8 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
 
 
 def update_container_rm(cmd, instance, metadata=None, public_access=None,
-                        default_encryption_scope=None, deny_encryption_scope_override=None):
+                        default_encryption_scope=None, deny_encryption_scope_override=None,
+                        enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None):
     BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
     blob_container = BlobContainer(
         metadata=metadata if metadata is not None else instance.metadata,
@@ -89,6 +93,10 @@ def update_container_rm(cmd, instance, metadata=None, public_access=None,
         if default_encryption_scope is not None else instance.default_encryption_scope,
         deny_encryption_scope_override=deny_encryption_scope_override
         if deny_encryption_scope_override is not None else instance.deny_encryption_scope_override,
+        enable_nfs_v3_all_squash=enable_nfs_v3_all_squash
+        if enable_nfs_v3_all_squash is not None else instance.enable_nfs_v3_all_squash,
+        enable_nfs_v3_root_squash=enable_nfs_v3_root_squash
+        if enable_nfs_v3_root_squash is not None else instance.enable_nfs_v3_root_squash
     )
     return blob_container
 

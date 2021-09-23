@@ -286,12 +286,15 @@ def _urlretrieve(url):
 
 # pylint: disable=redefined-outer-name
 def _remove_comments_from_json(template, preserve_order=True, file_path=None):
-    from jsmin import jsmin
+    from ._json_handler import json_min
 
     # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
-    # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
+    # It will affect the subsequent multi-line processing logic, so remove those comments in advance here.
+    # Related issue: https://github.com/Azure/azure-cli/issues/11995, the sample is in the additional context of it.
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
-    minified = jsmin(template)
+
+    # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
+    minified = json_min(template)
     try:
         return shell_safe_json_parse(minified, preserve_order, strict=False)  # use strict=False to allow multiline strings
     except CLIError:
@@ -403,7 +406,6 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
     def on_request(self, request):
         http_request = request.http_request
-        logger.info(http_request.data)
         if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
             template = http_request.data["properties"]["template"]
             if not isinstance(template, JsonCTemplate):
@@ -2212,6 +2214,20 @@ def unregister_feature(client, resource_provider_namespace, feature_name):
     logger.warning("Once the feature '%s' is unregistered, invoking 'az provider register -n %s' is required "
                    "to get the change propagated", feature_name, resource_provider_namespace)
     return client.unregister(resource_provider_namespace, feature_name)
+
+
+def list_feature_registrations(client, resource_provider_namespace=None):
+    if resource_provider_namespace:
+        return client.list_by_subscription(provider_namespace=resource_provider_namespace)
+    return client.list_all_by_subscription()
+
+
+def create_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.create_or_update(resource_provider_namespace, feature_name, {})
+
+
+def delete_feature_registration(client, resource_provider_namespace, feature_name):
+    return client.delete(resource_provider_namespace, feature_name)
 
 
 # pylint: disable=inconsistent-return-statements,too-many-locals

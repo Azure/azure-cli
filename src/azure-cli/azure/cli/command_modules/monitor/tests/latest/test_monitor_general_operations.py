@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION
 from unittest import mock
 import unittest
 from msrestazure.tools import resource_id
@@ -198,7 +199,7 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
     # @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone',
-                           parameter_name='another_resource_group', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
     def test_monitor_clone_storage_metric_alerts_across_subs_scenario(self, resource_group, another_resource_group):
         self.kwargs.update({
             'alert': 'alert1',
@@ -206,7 +207,7 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
             'sa2': self.create_random_name('sa', 24),
             'ag1': 'ag1',
             'rg': resource_group,
-            'ext_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
+            'ext_sub': AUX_SUBSCRIPTION,
             'ext_rg': another_resource_group,
         })
 

@@ -27,12 +27,15 @@ class PackingContext():  # pylint: disable=too-few-public-methods
 
 # pylint: disable=redefined-outer-name
 def process_template(template, preserve_order=True, file_path=None):
-    from jsmin import jsmin
+    from ._json_handler import json_min
 
     # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
-    # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
+    # It will affect the subsequent multi-line processing logic, so remove those comments in advance here.
+    # Related issue: https://github.com/Azure/azure-cli/issues/11995, the sample is in the additional context of it.
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
-    minified = jsmin(template)
+
+    # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
+    minified = json_min(template)
 
     # Remove extra spaces, compress multiline string(s)
     result = re.sub(r'\s\s+', ' ', minified, flags=re.DOTALL)
@@ -108,11 +111,15 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
             # an artifact elsewhere, we'll do so here...
 
             as_relative_path = _absolute_to_relative_path(getattr(context, 'RootTemplateDirectory'), abs_local_path)
+            duplicateFile = False
             for prev_added_artifact in getattr(context, 'Artifact'):
                 prev_added_artifact = os.path.join(getattr(context, 'RootTemplateDirectory'),
                                                    getattr(prev_added_artifact, 'path'))
                 if os.path.samefile(prev_added_artifact, abs_local_path):
+                    duplicateFile = True
                     continue
+            if duplicateFile:
+                continue
             _pack_artifacts(cmd, abs_local_path, context)
             LinkedTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
                                              'LinkedTemplateArtifact', mod='models')

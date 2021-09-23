@@ -625,7 +625,7 @@ examples:
         az deployment group create --resource-group testrg --name rollout01 \\
             --template-file azuredeploy.json  --parameters @params.json \\
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
-  - name: Create a deployment at subscription scope from a template-spec
+  - name: Create a deployment at resource group scope from a template-spec
     text: >
         az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
@@ -1122,6 +1122,35 @@ short-summary: unregister a preview feature.
 examples:
   - name: unregister the "Shared Image Gallery" feature
     text: az feature unregister --namespace Microsoft.Compute --name GalleryPreview
+"""
+
+helps['feature registration'] = """
+type: group
+short-summary: Manage resource provider feature registrations.
+"""
+
+helps['feature registration list'] = """
+type: command
+short-summary: List feature registrations.
+examples:
+  - name: List feature registrations
+    text: az feature registration list
+"""
+
+helps['feature registration create'] = """
+type: command
+short-summary: Create a feature registration.
+examples:
+  - name: create the "Shared Image Gallery" feature
+    text: az feature registration create --namespace Microsoft.Compute --name GalleryPreview
+"""
+
+helps['feature registration delete'] = """
+type: command
+short-summary: Delete a feature registration.
+examples:
+  - name: delete the "Shared Image Gallery" feature
+    text: az feature registration delete --namespace Microsoft.Compute --name GalleryPreview
 """
 
 helps['group'] = """
@@ -2282,6 +2311,7 @@ long-summary: >
     The az tag create command with an id creates or updates the entire set of tags on a resource, resource group or subscription.
     This operation allows adding or replacing the entire set of tags on the specified resource, resource group or subscription.
     The specified entity can have a maximum of 50 tags.
+    Please note: 'tag create' acts like a 'tag init' hence tags created with this command are the only ones being present after execution.
 parameters:
   - name: --name -n
     short-summary: The name of the tag to create.

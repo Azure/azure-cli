@@ -20,11 +20,13 @@ from ._utils import (
     remove_timer_trigger,
     get_task_id_from_task_name,
     prepare_source_location,
+    get_task_details_by_name
 )
 from ._stream_utils import stream_logs
 from ._constants import (
     ACR_NULL_CONTEXT,
     ACR_TASK_QUICKTASK,
+    ACR_RUN_DEFAULT_TIMEOUT_IN_SEC
 )
 
 logger = get_logger(__name__)
@@ -34,7 +36,6 @@ TASK_NOT_SUPPORTED = 'Task is only supported for managed registries.'
 DEFAULT_TOKEN_TYPE = 'PAT'
 IDENTITY_LOCAL_ID = '[system]'
 IDENTITY_GLOBAL_REMOVE = '[all]'
-DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 DEFAULT_CPU = 2
 ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
                            '.ps', '.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
@@ -53,7 +54,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     status='Enabled',
                     platform=None,
                     cpu=DEFAULT_CPU,
-                    timeout=DEFAULT_TIMEOUT_IN_SEC,
+                    timeout=ACR_RUN_DEFAULT_TIMEOUT_IN_SEC,
                     values=None,
                     source_trigger_name='defaultSourceTriggerName',
                     commit_trigger_enabled=True,
@@ -877,6 +878,11 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
     task_id = get_task_id_from_task_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
     context_path = prepare_source_location(cmd, context_path, client_registries, registry_name, resource_group_name)
 
+    timeout = None
+    task_details = get_task_details_by_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
+    if task_details:
+        timeout = task_details.timeout
+
     override_task_step_properties = OverrideTaskStepProperties(
         context_path=context_path,
         file=file,
@@ -909,7 +915,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, True)
 
 
 def acr_task_show_run(cmd,
@@ -984,19 +990,19 @@ def acr_task_logs(cmd,
 
     if not run_id:
         # show logs for the last run
-        paged_runs = acr_task_list_runs(cmd,
-                                        client,
-                                        registry_name,
-                                        top=1,
-                                        task_name=task_name,
-                                        image=image)
-        try:
-            run_id = paged_runs.get(0)[0].run_id
+        paged_runs = list(acr_task_list_runs(cmd,
+                                             client,
+                                             registry_name,
+                                             top=1,
+                                             task_name=task_name,
+                                             image=image))
+        if len(paged_runs) > 0:
+            run_id = paged_runs[0].run_id
             logger.warning(_get_list_runs_message(base_message="Showing logs of the last created run",
                                                   task_name=task_name,
                                                   image=image))
             logger.warning("Run ID: %s", run_id)
-        except (AttributeError, KeyError, TypeError, IndexError):
+        else:
             raise CLIError(_get_list_runs_message(base_message="Could not find the last created run",
                                                   task_name=task_name,
                                                   image=image))

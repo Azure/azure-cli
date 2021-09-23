@@ -162,7 +162,7 @@ def load_arguments(self, _):
         c.argument('gallery_image_reference', help='ID of the shared galley image version from which to create a disk')
         c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
-        c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/en-us/pricing/details/managed-disks/. Does not apply to Ultra disks.')
+        c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/pricing/details/managed-disks/. Does not apply to Ultra disks.')
         c.argument('edge_zone', edge_zone_type)
         c.argument('security_type', choices=['TrustedLaunch'], help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
@@ -222,7 +222,7 @@ def load_arguments(self, _):
         ib_cutput_type = CLIArgumentType(arg_group="Output")
 
         c.argument('build_timeout', type=int, help="The Maximum duration to wait while building the image template, in minutes. Default is 60.")
-        c.argument('image_template', help='Local path or URL to an image template file. When using --image-template, all other parameters are ignored except -g and -n. Reference: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-json')
+        c.argument('image_template', help='Local path or URL to an image template file. When using --image-template, all other parameters are ignored except -g and -n. Reference: https://docs.microsoft.com/azure/virtual-machines/linux/image-builder-json')
         c.argument('identity', nargs='+', help='List of user assigned identities (name or ID, space delimited) of the image template.')
 
         # VM profile
@@ -467,19 +467,30 @@ def load_arguments(self, _):
         c.argument('vm_name', arg_type=existing_vm_name, id_part=None)
 
     with self.argument_context('vm image') as c:
-        c.argument('publisher_name', options_list=['--publisher', '-p'])
+        c.argument('publisher_name', options_list=['--publisher', '-p'], help='image publisher')
         c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
         c.argument('plan', help='image billing plan')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('version', help="image sku's version")
-        c.argument('urn', help="URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted")
+        c.argument('urn', help="URN, in format of 'publisher:offer:sku:version' or 'publisher:offer:sku:edge_zone:version'. If specified, other argument values can be omitted")
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
+        c.argument('edge_zone', edge_zone_type)
+
+    with self.argument_context('vm image list-offers') as c:
+        c.argument('edge_zone', edge_zone_type)
+
+    with self.argument_context('vm image list-skus') as c:
+        c.argument('edge_zone', edge_zone_type)
+
+    with self.argument_context('vm image list-publishers') as c:
+        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image show') as c:
         c.argument('skus', options_list=['--sku', '-s'])
+        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image terms') as c:
         c.argument('urn', help='URN, in the format of \'publisher:offer:sku:version\'. If specified, other argument values can be omitted')
@@ -540,7 +551,7 @@ def load_arguments(self, _):
                    help="Replace the host automatically if a failure occurs")
         c.argument('license_type', arg_type=get_enum_type(DedicatedHostLicenseTypes),
                    help="The software license type that will be applied to the VMs deployed on the dedicated host.")
-        c.argument('sku', help="SKU of the dedicated host. Available SKUs: https://azure.microsoft.com/en-us/pricing/details/virtual-machines/dedicated-host/")
+        c.argument('sku', help="SKU of the dedicated host. Available SKUs: https://azure.microsoft.com/pricing/details/virtual-machines/dedicated-host/")
 
     with self.argument_context('vm host list') as c:
         c.argument('host_group_name', id_part=None)
@@ -615,6 +626,8 @@ def load_arguments(self, _):
                    help="Specify the Microsoft.Network API version used when creating networking resources in the Network "
                         "Interface Configurations for Virtual Machine Scale Set with orchestration mode 'Flexible'. Possible "
                         "value is 2020-11-01.")
+        c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01', help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
+        c.argument('spot_restore_timeout', min_api='2021-04-01', help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -645,6 +658,10 @@ def load_arguments(self, _):
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
+        c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01',
+                   help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
+        c.argument('spot_restore_timeout', min_api='2021-04-01',
+                   help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
@@ -766,7 +783,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
-            c.argument('admin_username', help='Username for the VM. Default value is current username of OS. If the default value is system reserved, then default value will be set to azureuser. Please refer to https://docs.microsoft.com/en-us/rest/api/compute/virtualmachines/createorupdate#osprofile to get a full list of reserved values.')
+            c.argument('admin_username', help='Username for the VM. Default value is current username of OS. If the default value is system reserved, then default value will be set to azureuser. Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachines/createorupdate#osprofile to get a full list of reserved values.')
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', options_list=['--ssh-key-values'], completer=FilesCompleter(), type=file_type, nargs='+')
             c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key. If the file already exists, the specified key(s) are appended to the file. Destination path for SSH public keys is currently limited to its default value "/home/username/.ssh/authorized_keys" due to a known issue in Linux provisioning agent.')
@@ -910,6 +927,9 @@ def load_arguments(self, _):
                        help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
             c.argument('max_price', min_api='2019-03-01', type=float, is_preview=True,
                        help='The maximum price (in US Dollars) you are willing to pay for a Spot VM/VMSS. -1 indicates that the Spot VM/VMSS should not be evicted for price reasons')
+            c.argument('capacity_reservation_group', options_list=['--capacity-reservation-group', '--crg'],
+                       help='The ID or name of the capacity reservation group that is used to allocate. Pass in "None" to disassociate the capacity reservation group. Please note that if you want to delete a VM/VMSS that has been associated with capacity reservation group, you need to disassociate the capacity reservation group first.',
+                       min_api='2021-04-01', is_preview=True)
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', help=license_msg, arg_type=get_enum_type(
@@ -1142,3 +1162,35 @@ def load_arguments(self, _):
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
     # endRegion
+
+    with self.argument_context('capacity reservation group') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-n'],
+                   help='The name of the capacity reservation group.')
+        c.argument('tags', tags_type)
+
+    with self.argument_context('capacity reservation group create') as c:
+        c.argument('zones', zones_type, help='Availability Zones to use for this capacity reservation group. If not provided, the group supports only regional resources in the region. If provided, enforces each capacity reservation in the group to be in one of the zones.')
+
+    with self.argument_context('capacity reservation group show') as c:
+        c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve the list of instance views of the capacity reservations under the capacity reservation group which is a snapshot of the runtime properties of a capacity reservation that is managed by the platform and can change outside of control plane operations.')
+
+    with self.argument_context('capacity reservation group list') as c:
+        c.argument('vm_instance', action='store_true', help='Retrieve the Virtual Machine Instance which are associated to capacity reservation group in the response.')
+        c.argument('vmss_instance', action='store_true', help='Retrieve the ScaleSet VM Instance which are associated to capacity reservation group in the response.')
+
+    with self.argument_context('capacity reservation') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-c'],
+                   help='The name of the capacity reservation group.')
+        c.argument('capacity_reservation_name', options_list=['--capacity-reservation-name', '-n'],
+                   help='The name of the capacity reservation.')
+        c.argument('capacity', type=int, help='Specify the number of virtual machines in the scale set.')
+        c.argument('tags', tags_type)
+
+    with self.argument_context('capacity reservation create') as c:
+        c.argument('zone', zone_type, help='Availability Zone to use for this capacity reservation. The zone has to be single value and also should be part for the list of zones specified during the capacity reservation group creation. If not provided, the reservation supports only non-zonal deployments. If provided, enforces VM/VMSS using this capacity reservation to be in same zone.')
+        c.argument('sku_name', options_list=['--sku', '-s'], required=True, help='The SKU of the resource for which capacity needs be reserved. Currently VM Skus with the capability called "CapacityReservationSupported" set to true are supported. Refer to List Microsoft.Compute SKUs in a region (https://docs.microsoft.com/rest/api/compute/resourceskus/list) for supported values.')
+
+    with self.argument_context('capacity reservation show') as c:
+        c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve a snapshot of the runtime properties of the capacity reservation that is managed by the platform and can change outside of control plane operations.')

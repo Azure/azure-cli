@@ -1385,7 +1385,7 @@ helps['network application-gateway waf-policy managed-rule'] = """
 type: group
 short-summary: >
     Manage managed rules of a waf-policy.
-    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/afds/afds-overview
+    Visit: https://docs.microsoft.com/azure/web-application-firewall/afds/afds-overview
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set'] = """
@@ -1397,7 +1397,7 @@ helps['network application-gateway waf-policy managed-rule rule-set add'] = """
 type: command
 short-summary: >
   Add managed rule set to the WAF policy managed rules. For rule set and rules, please visit:
-  https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  https://docs.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 examples:
   - name: Disable an attack protection rule
     text: |
@@ -1413,7 +1413,7 @@ type: command
 short-summary: >
   Manage rules of a WAF policy.
   If --group-name and --rules are provided, override existing rules. If --group-name is provided, clear all rules under a certain rule group. If neither of them are provided, update rule set and clear all rules under itself.
-  For rule set and rules, please visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  For rule set and rules, please visit: https://docs.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 examples:
   - name: Override rules under rule group EQUEST-921-PROTOCOL-ATTACK
     text: |
@@ -1455,7 +1455,7 @@ short-summary: Add an OWASP CRS exclusion rule to the WAF policy managed rules.
 
 helps['network application-gateway waf-policy managed-rule exclusion remove'] = """
 type: command
-short-summary: List all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
+short-summary: Remove all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
 """
 
 helps['network application-gateway waf-policy managed-rule exclusion list'] = """
@@ -1513,12 +1513,28 @@ examples:
     text: az network application-gateway client-cert add --gateway-name MyAppGateway -g MyResourceGroup --name MyCert --data Cert.cer
 """
 
+helps['network application-gateway client-cert update'] = """
+type: command
+short-summary: Update trusted client certificate of the application gateway.
+examples:
+  - name: Update trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert update --gateway-name MyAppGateway -g MyResourceGroup --name MyCert --data Cert.cer
+"""
+
 helps['network application-gateway client-cert remove'] = """
 type: command
 short-summary: Remove an existing trusted client certificate of the application gateway.
 examples:
   - name: Remove a trusted client certificate for an existing application gateway.
     text: az network application-gateway client-cert remove --gateway-name MyAppGateway -g MyResourceGroup --name MyCert
+"""
+
+helps['network application-gateway client-cert show'] = """
+type: command
+short-summary: Show an existing trusted client certificate of the application gateway.
+examples:
+  - name: Show a trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert show --gateway-name MyAppGateway -g MyResourceGroup --name MyCert
 """
 
 helps['network application-gateway client-cert list'] = """
@@ -1542,12 +1558,28 @@ examples:
     text: az network application-gateway ssl-profile add --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
 """
 
+helps['network application-gateway ssl-profile update'] = """
+type: command
+short-summary: Update ssl profiles of the application gateway.
+examples:
+  - name: Update ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile update --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --client-auth-configuration False
+"""
+
 helps['network application-gateway ssl-profile remove'] = """
 type: command
 short-summary: Remove an existing ssl profiles of the application gateway.
 examples:
   - name: Remove ssl profile for an existing application gateway.
     text: az network application-gateway ssl-profile remove --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
+"""
+
+helps['network application-gateway ssl-profile show'] = """
+type: command
+short-summary: Show an existing ssl profiles of the application gateway.
+examples:
+  - name: Show ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile show --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
 """
 
 helps['network application-gateway ssl-profile list'] = """
@@ -3953,7 +3985,7 @@ type: command
 short-summary: List all service tags which are below to different resources
 long-summary: >
     A service tag represents a group of IP address prefixes to help minimize complexity for security rule creation.
-    To learn more about list-service-tags, visit https://docs.microsoft.com/en-us/azure/virtual-network/security-overview#service-tags. \\
+    To learn more about list-service-tags, visit https://docs.microsoft.com/azure/virtual-network/security-overview#service-tags. \\
     Note that the location parameter is used as a reference for version (not as a filter based on location).
     For example, even if you specify --location eastus2 you will get the list of service tags with prefix details across all regions but limited to the cloud that your subscription belongs to (i.e. Public, US government, China or Germany).
 examples:
@@ -4321,7 +4353,7 @@ examples:
   - name: Create a "Deny" rule over TCP for a specific IP address range with the lowest priority.
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096 \\
-            --source-address-prefixes 208.130.28/24 --source-port-ranges 80 \\
+            --source-address-prefixes 208.130.28.0/24 --source-port-ranges 80 \\
             --destination-address-prefixes '*' --destination-port-ranges 80 8080 --access Deny \\
             --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
   - name: Create a security rule using service tags. For more details visit https://aka.ms/servicetags
@@ -4699,6 +4731,66 @@ examples:
     text: |
         az network profile show --name MyNetworkProfile --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['network custom-ip'] = """
+type: group
+short-summary: Manage custom IP
+"""
+
+helps['network custom-ip prefix'] = """
+type: group
+short-summary: Manage custom IP prefix resources.
+"""
+
+helps['network custom-ip prefix create'] = """
+type: command
+short-summary: Create a custom IP prefix resource.
+examples:
+  - name: Create a custom IP prefix resource.
+    text: |
+        az network custom-ip prefix create --location westus2 --name MyCustomIpPrefix --resource-group MyResourceGroup
+"""
+
+helps['network custom-ip prefix wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the custom ip prefix is met.
+examples:
+  - name: Wait for custom ip prefix to return as created.
+    text: |
+        az network custom-ip prefix wait --name MyCustomIpPrefix --resource-group MyResourceGroup --created
+"""
+
+helps['network custom-ip prefix delete'] = """
+type: command
+short-summary: Delete a custom IP prefix resource.
+examples:
+  - name: Delete a custom IP prefix resource.
+    text: |
+        az network custom-ip prefix delete --name MyCustomIpPrefix --resource-group MyResourceGroup
+"""
+
+helps['network custom-ip prefix list'] = """
+type: command
+short-summary: List custom IP prefix resources.
+"""
+
+helps['network custom-ip prefix show'] = """
+type: command
+short-summary: Get the details of a custom IP prefix resource.
+examples:
+  - name: Get the details of a custom IP prefix resource.
+    text: |
+        az network custom-ip prefix show --name MyCustomIpPrefix --resource-group MyResourceGroup --subscription MySubscription
+"""
+
+helps['network custom-ip prefix update'] = """
+type: command
+short-summary: Update a custom IP prefix resource.
+examples:
+  - name: Update a custom IP prefix resource.
+    text: |
+        az network custom-ip prefix update --name MyCustomIpPrefix --resource-group MyResourceGroup --tags foo=doo
 """
 
 helps['network public-ip'] = """
@@ -5743,6 +5835,11 @@ type: group
 short-summary: Manage packet capture on a virtual network gateway.
 """
 
+helps['network vnet-gateway packet-capture wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vnet gateway packet capture is met.
+"""
+
 helps['network vnet-gateway packet-capture start'] = """
 type: command
 short-summary: Start packet capture on a virtual network gateway.
@@ -5799,6 +5896,11 @@ examples:
 helps['network vnet-gateway vpn-client ipsec-policy'] = """
 type: group
 short-summary: Manage the VPN client connection ipsec-policy for P2S client connection of the virtual network gateway.
+"""
+
+helps['network vnet-gateway vpn-client ipsec-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vnet gateway vpn client ipsec policy is met.
 """
 
 helps['network vnet-gateway vpn-client ipsec-policy show'] = """
@@ -5870,6 +5972,11 @@ examples:
 helps['network vnet-gateway nat-rule'] = """
 type: group
 short-summary: Manage nat rule in a virtual network gateway
+"""
+
+helps['network vnet-gateway nat-rule wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vnet gateway nat rule is met.
 """
 
 helps['network vnet-gateway nat-rule add'] = """
@@ -6076,6 +6183,11 @@ examples:
 helps['network vpn-connection packet-capture'] = """
 type: group
 short-summary: Manage packet capture on a VPN connection.
+"""
+
+helps['network vpn-connection packet-capture wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vpn connection packet capture is met.
 """
 
 helps['network vpn-connection packet-capture start'] = """
@@ -7042,6 +7154,39 @@ examples:
     text: |
         az network bastion show --name MyBastionHost --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['network bastion ssh'] = """
+type: command
+short-summary: SSH to a virtual machine using Tunneling from Azure Bastion.
+examples:
+  - name: SSH to virtual machine using Azure Bastion using password.
+    text: |
+        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type password --username xyz
+  - name: SSH to virtual machine using Azure Bastion using ssh key file.
+    text: |
+        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type ssh-key-file --username xyz --ssh-key C:/filepath/sshkey.pem
+  - name: SSH to virtual machine using Azure Bastion using AAD.
+    text: |
+        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type AAD
+"""
+
+helps['network bastion rdp'] = """
+type: command
+short-summary: RDP to target Virtual Machine using Tunneling from Azure Bastion.
+examples:
+  - name: RDP to virtual machine using Azure Bastion.
+    text: |
+        az network bastion rdp --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId
+"""
+
+helps['network bastion tunnel'] = """
+type: command
+short-summary: Show a Azure bastion host machine.
+examples:
+  - name: Show a Azure bastion host machine.
+    text: |
+        az network bastion tunnel --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --resource-port 111 --port 222
 """
 
 helps['network security-partner-provider'] = """
