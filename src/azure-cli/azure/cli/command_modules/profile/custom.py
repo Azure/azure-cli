@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -105,7 +107,7 @@ def account_clear(cmd):
 # pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
           identity=False, use_device_code=False, use_cert_sn_issuer=None, environment=False,
-          scopes=None, claims_challenge=None):
+          scopes=None, federated_token=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -120,10 +122,6 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
 
-    if claims_challenge:
-        from azure.cli.core.auth.util import decode_claims
-        claims_challenge = decode_claims(claims_challenge)
-
     interactive = False
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -136,13 +134,17 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not password:
+        if not (password or federated_token):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
     else:
         interactive = True
+
+    if service_principal:
+        from azure.cli.core.auth.identity import ServicePrincipalAuth
+        password = ServicePrincipalAuth.build_credential(password, federated_token, use_cert_sn_issuer)
 
     subscriptions = profile.login(
         interactive,
@@ -153,8 +155,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         scopes=scopes,
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
-        use_cert_sn_issuer=use_cert_sn_issuer,
-        claims_challenge=claims_challenge)
+        use_cert_sn_issuer=use_cert_sn_issuer)
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)

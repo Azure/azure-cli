@@ -143,7 +143,14 @@ class Profile:
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
               **kwargs):
-
+        """
+        For service principal credential, specify `password` as a dict like below. Only one key can exist:
+            {
+                'secret': 'my_secret',
+                'certificate': '/path/to/cert.pem',
+                'federated_token': 'my_token'
+            }
+        """
         if not scopes:
             scopes = self._arm_scope
 

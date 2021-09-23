@@ -16,12 +16,13 @@ from .util import aad_error_handler, check_result
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
-_SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
-_SERVICE_PRINCIPAL_TENANT = 'servicePrincipalTenant'
-_ACCESS_TOKEN = 'accessToken'
-_SERVICE_PRINCIPAL_SECRET = 'secret'
-_SERVICE_PRINCIPAL_CERT_FILE = 'certificateFile'
-_SERVICE_PRINCIPAL_CERT_THUMBPRINT = 'thumbprint'
+# Service principal entry properties
+_CLIENT_ID = 'client_id'
+_TENANT_ID = 'tenant_id'
+_SECRET = 'secret'
+_CERTIFICATE = 'certificate'
+_FEDERATED_TOKEN = 'federated_token'
+_USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 
 logger = get_logger(__name__)
 
@@ -142,9 +143,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         result = self.msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
         return check_result(result)
 
-    def login_with_service_principal(self, client_id, secret_or_certificate, use_cert_sn_issuer=None, scopes=None):
-        sp_auth = ServicePrincipalAuth(self.tenant_id, client_id,
-                                       secret_or_certificate, use_cert_sn_issuer=use_cert_sn_issuer)
+    def login_with_service_principal(self, client_id, credential, scopes=None):
+        sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
         cred = ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
         result = cred.acquire_token_for_client(scopes)
         check_result(result)
@@ -185,8 +185,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):  # pylint: disable=unused-argument
         entry = self._msal_secret_store.load_credential(client_id, self.tenant_id)
-        # TODO: support use_cert_sn_issuer in CertificateCredential
-        sp_auth = ServicePrincipalAuth.build_from_entry(entry)
+        sp_auth = ServicePrincipalAuth(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
 
     def get_managed_identity_credential(self, client_id=None):
@@ -203,53 +202,56 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             fd.write(cache.serialize())
 
 
-class ServicePrincipalAuth:   # pylint: disable=too-few-public-methods
+class ServicePrincipalAuth:
 
-    def __init__(self, tenant_id, client_id, password_arg_value, use_cert_sn_issuer=None):
-        if not password_arg_value:
-            raise CLIError('missing secret or certificate in order to '
-                           'authenticate through a service principal')
+    def __init__(self, entry):
+        self.__dict__.update(entry)
 
-        self.client_id = client_id
-        self.tenant_id = tenant_id
-
-        if os.path.isfile(password_arg_value):
-            certificate_file = password_arg_value
+        if _CERTIFICATE in entry:
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
-            self.certificate_file = certificate_file
             self.public_certificate = None
             try:
-                with open(certificate_file, 'r') as file_reader:
-                    self.cert_file_string = file_reader.read()
-                    cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
+                with open(self.certificate, 'r') as file_reader:
+                    self.certificate_string = file_reader.read()
+                    cert = load_certificate(FILETYPE_PEM, self.certificate_string)
                     self.thumbprint = cert.digest("sha1").decode().replace(':', '')
-                    if use_cert_sn_issuer:
+                    if entry.get(_USE_CERT_SN_ISSUER):
                         # low-tech but safe parsing based on
                         # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
-                        match = re.search(r'-+BEGIN CERTIFICATE.+-+(?P<public>[^-]+)-+END CERTIFICATE.+-+',
-                                          self.cert_file_string, re.I)
-                        self.public_certificate = match.group('public').strip()
+                        match = re.search(r'-----BEGIN CERTIFICATE-----(?P<cert_value>[^-]+)-----END CERTIFICATE-----',
+                                          self.certificate_string, re.I)
+                        self.public_certificate = match.group()
             except (UnicodeDecodeError, Error) as ex:
                 raise CLIError('Invalid certificate, please use a valid PEM file. Error detail: {}'.format(ex))
-        else:
-            self.secret = password_arg_value
 
     @classmethod
-    def build_from_entry(cls, entry):
-        return ServicePrincipalAuth(entry.get(_SERVICE_PRINCIPAL_TENANT),
-                                    entry.get(_SERVICE_PRINCIPAL_ID),
-                                    entry.get(_SERVICE_PRINCIPAL_SECRET) or entry.get(_SERVICE_PRINCIPAL_CERT_FILE))
+    def build_from_credential(cls, tenant_id, client_id, credential):
+        entry = {
+            _CLIENT_ID: client_id,
+            _TENANT_ID: tenant_id
+        }
+        entry.update(credential)
+        return ServicePrincipalAuth(entry)
+
+    @classmethod
+    def build_credential(cls, secret_or_certificate=None, federated_token=None, use_cert_sn_issuer=None):
+        """Build credential from user input.
+        """
+        entry = {}
+        if secret_or_certificate:
+            if os.path.isfile(secret_or_certificate):
+                entry[_CERTIFICATE] = secret_or_certificate
+                if use_cert_sn_issuer:
+                    entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
+            else:
+                entry[_SECRET] = secret_or_certificate
+        elif federated_token:
+            entry[_FEDERATED_TOKEN] = federated_token
+        return entry
 
     def get_entry_to_persist(self):
-        entry = {
-            _SERVICE_PRINCIPAL_ID: self.client_id,
-            _SERVICE_PRINCIPAL_TENANT: self.tenant_id,
-        }
-        if hasattr(self, 'secret'):
-            entry[_SERVICE_PRINCIPAL_SECRET] = self.secret
-        else:
-            entry[_SERVICE_PRINCIPAL_CERT_FILE] = self.certificate_file
-        return entry
+        persisted_keys = [_CLIENT_ID, _TENANT_ID, _SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _FEDERATED_TOKEN]
+        return {k: v for k, v in self.__dict__.items() if k in persisted_keys}
 
 
 class ServicePrincipalStore:
@@ -264,18 +266,18 @@ class ServicePrincipalStore:
 
     def load_credential(self, sp_id, tenant):
         self._load_persistence()
-        matched = [x for x in self._entries if sp_id == x[_SERVICE_PRINCIPAL_ID]]
+        matched = [x for x in self._entries if sp_id == x[_CLIENT_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
                            "Please run `az login` for this service principal."
                            .format(sp_id))
-        matched_with_tenant = [x for x in matched if tenant == x[_SERVICE_PRINCIPAL_TENANT]]
+        matched_with_tenant = [x for x in matched if tenant == x[_TENANT_ID]]
         if matched_with_tenant:
             cred = matched_with_tenant[0]
         else:
             logger.warning("Could not retrieve credential from local cache for service principal %s under tenant %s. "
                            "Trying credential under tenant %s, assuming that is an app credential.",
-                           sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
+                           sp_id, tenant, matched[0][_TENANT_ID])
             cred = matched[0]
 
         return cred
@@ -285,8 +287,8 @@ class ServicePrincipalStore:
 
         self._entries = [
             x for x in self._entries
-            if not (sp_entry[_SERVICE_PRINCIPAL_ID] == x[_SERVICE_PRINCIPAL_ID] and
-                    sp_entry[_SERVICE_PRINCIPAL_TENANT] == x[_SERVICE_PRINCIPAL_TENANT])]
+            if not (sp_entry[_CLIENT_ID] == x[_CLIENT_ID] and
+                    sp_entry[_TENANT_ID] == x[_TENANT_ID])]
 
         self._entries.append(sp_entry)
         self._save_persistence()
@@ -297,7 +299,7 @@ class ServicePrincipalStore:
 
         # clear service principal creds
         matched = [x for x in self._entries
-                   if x[_SERVICE_PRINCIPAL_ID] == sp_id]
+                   if x[_CLIENT_ID] == sp_id]
         if matched:
             state_changed = True
             self._entries = [x for x in self._entries

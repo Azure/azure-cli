@@ -54,11 +54,20 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
 
     def __init__(self, service_principal_auth, **kwargs):
 
-        if hasattr(service_principal_auth, 'secret'):
+        client_credential = None
+        if getattr(service_principal_auth, 'secret', None):
             client_credential = service_principal_auth.secret
-        else:
-            client_credential = {"private_key": service_principal_auth.cert_file_string,
-                                 "thumbprint": service_principal_auth.thumbprint}
+
+        elif getattr(service_principal_auth, 'certificate', None):
+            client_credential = {
+                "private_key": service_principal_auth.certificate_string,
+                "thumbprint": service_principal_auth.thumbprint
+            }
+            if getattr(service_principal_auth, 'public_certificate', None):
+                client_credential['public_certificate'] = service_principal_auth.public_certificate
+
+        elif getattr(service_principal_auth, 'federated_token', None):
+            client_credential = {"client_assertion": service_principal_auth.federated_token}
 
         super().__init__(service_principal_auth.client_id, client_credential=client_credential, **kwargs)
 
