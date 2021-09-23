@@ -133,6 +133,11 @@ class CommandNotFoundError(UserFault):
     pass
 
 
+class CommandUsageError(UserFault):
+    """ Command is used incorrectly or the desired function is provided by other commands. """
+    pass
+
+
 # Argument related error types
 class UnrecognizedArgumentError(UserFault):
     """ Argument is misspelled or not recognized by AzureCLI. """
