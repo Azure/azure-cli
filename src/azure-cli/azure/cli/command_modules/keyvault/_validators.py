@@ -551,6 +551,37 @@ def validate_key_id(entity_type):
     return _validate
 
 
+def validate_keyvault_resource_id(entity_type):
+    def _validate(ns):
+        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+
+        pure_entity_type = entity_type.replace('deleted', '')
+        name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
+        vault = getattr(ns, 'vault_base_url', None)
+        if not vault:
+            vault = getattr(ns, 'hsm_name', None)
+        identifier = getattr(ns, 'identifier', None)
+
+        if identifier:
+            vault_base_url = getattr(ns, 'vault_base_url', None)
+            hsm_name = getattr(ns, 'hsm_name', None)
+            if vault_base_url:
+                raise CLIError('--vault-name and --id are mutually exclusive.')
+            if hsm_name:
+                raise CLIError('--hsm-name and --id are mutually exclusive.')
+
+            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            setattr(ns, 'name', ident.name)
+            setattr(ns, 'vault_base_url', ident.vault)
+            if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
+                setattr(ns, 'version', ident.version)
+        elif not (name and vault):
+            raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
+                           '--name/-n NAME [--version VERSION]')
+
+    return _validate
+
+
 def validate_sas_definition_id(ns):
     from azure.keyvault import StorageSasDefinitionId
     acct_name = getattr(ns, 'storage_account_name', None)
