@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-from re import T
 import requests
 import unittest
 from unittest.mock import Mock, patch
@@ -34,9 +33,9 @@ from azure.cli.command_modules.acs.decorator import (
     AKSCreateDecorator,
     AKSCreateModels,
     AKSUpdateDecorator,
-    validate_counts_in_autoscaler,
     safe_list_get,
     safe_lower,
+    validate_counts_in_autoscaler,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockCLI,
@@ -4454,6 +4453,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             {},
         )
         dec_1._AKSUpdateDecorator__record_is_updated(False)
+        # fail on nothing updated
         with self.assertRaises(RequiredArgumentMissingError):
             dec_1._AKSUpdateDecorator__check_is_updated()
         dec_1._AKSUpdateDecorator__record_is_updated(True)
