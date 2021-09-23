@@ -505,16 +505,17 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  '--subnet {subnet} --default-action Deny --hns --sku Standard_LRS ',
                  checks=[JMESPathCheck('enableNfsV3', True)])
 
+    @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
     @ResourceGroupPreparer(location='centraluseuap', name_prefix='cli_storage_account')
     def test_storage_account_with_vlw(self, resource_group):
         self.kwargs = {
             'name1': self.create_random_name(prefix='sa1', length=24),
             'name2': self.create_random_name(prefix='sa2', length=24),
-            'name3': self.create_random_name(prefix='sa3', length=24),
             'rg': resource_group
         }
 
+        # test success case during create
         result = self.cmd('storage account create -n {name1} -g {rg} --enable-vlw --immutability-period 10 '
                  '--immutability-state Disabled --allow-protected-append-writes').get_output_in_json()
         self.assertIn('immutableStorageWithVersioning', result)
@@ -522,6 +523,49 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['allowProtectedAppendWrites'], True)
         self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['immutabilityPeriodSinceCreationInDays'], 10)
         self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['state'], 'Disabled')
+
+        # test failure cases during create
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-vlw false --immutability-period 10 '
+                              '--immutability-state Disabled --allow-protected-append-writes')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-vlw --immutability-period 10 '
+                              '--immutability-state Disabled')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-vlw --immutability-period 10 '
+                              '--immutability-state Locked --allow-protected-append-writes')
+
+        # test success case during update
+        result = self.cmd('storage account update -n {name1} --immutability-period 15 '
+                          '--immutability-state Unlocked --allow-protected-append-writes false').get_output_in_json()
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['allowProtectedAppendWrites'],
+                         False)
+        self.assertEqual(
+            result['immutableStorageWithVersioning']['immutabilityPolicy']['immutabilityPeriodSinceCreationInDays'], 15)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['state'], 'Unlocked')
+
+        # test failure cases during update
+        self.cmd('storage account create -n {name2} -g {rg} --enable-vlw false')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account update -n {name2} --immutability-period 10 '
+                     '--immutability-state Disabled --allow-protected-append-writes')
+
+        self.cmd('storage account update -n {name1} --immutability-state Disabled')
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account update -n {name1} --immutability-state Locked')
+
+        self.cmd('storage account update -n {name1} --immutability-state UnLocked')
+        self.cmd('storage account update -n {name1} --immutability-state Locked')
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account update -n {name1} --immutability-period 10')
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account update -n {name1} --immutability-state UnLocked')
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account update -n {name1} --allow-protected-append-writes')
 
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))

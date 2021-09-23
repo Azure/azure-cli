@@ -231,7 +231,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                 allow_protected_append_writes = allow_protected_append_writes
             )
             from azure.cli.core.azclierror import InvalidArgumentValueError
-            if immutability_policy == 'Locked':
+            if immutability_policy.state == 'Locked':
                 raise InvalidArgumentValueError(
                     "Incorrect usage: A policy can only be created in a Disabled or Unlocked state.")
 
@@ -519,21 +519,24 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                                                 "--immutability-period --immutability-state "
                                                 "--allow-protected-append-writes")
         else:
+            if existing_policy.state=='Disabled':
+                if immutability_policy_state and immutability_policy_state == 'Locked':
+                    raise InvalidArgumentValueError(
+                        "Incorrect usage: The immutability policy state can only be changed to Locked from Unlocked.")
             if existing_policy.state=='Locked':
                 if immutability_policy_state and immutability_policy_state != 'Locked':
-                    raise InvalidArgumentValueError("Incorrect usage: A policy that is in Locked state cannot be changed to other states.")
+                    raise InvalidArgumentValueError("Incorrect usage: The immutability policy state cannot be changed once Locked.")
 
-                if immutability_period_since_creation_in_days and immutability_period_since_creation_in_days<existing_policy.immutability_period_since_creation_in_days:
+                if immutability_period_since_creation_in_days and int(immutability_period_since_creation_in_days)<int(existing_policy.immutability_period_since_creation_in_days):
                     raise InvalidArgumentValueError("Incorrect usage: Locked state only allows the increase of the immutability retention time. ")
 
-            if allow_protected_append_writes and existing_policy.allow_protected_append_writes != allow_protected_append_writes:
-                if existing_policy.state!='Unlocked':
-                    raise InvalidArgumentValueError("Incorrect usage: allow-protected-append-writes can only be changed for unlocked time-based retention policies.")
+                if allow_protected_append_writes is not None and existing_policy.allow_protected_append_writes != allow_protected_append_writes:
+                    raise InvalidArgumentValueError("Incorrect usage: allow-protected-append-writes cannot be changed for Locked time-based retention policies.")
 
         immutability_policy = AccountImmutabilityPolicyProperties(
             immutability_period_since_creation_in_days=immutability_period_since_creation_in_days or existing_policy.immutability_period_since_creation_in_days,
             state=immutability_policy_state or existing_policy.state,
-            allow_protected_append_writes=allow_protected_append_writes or existing_policy.allow_protected_append_writes
+            allow_protected_append_writes=allow_protected_append_writes if allow_protected_append_writes is not None else existing_policy.allow_protected_append_writes
         )
 
         params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=True,

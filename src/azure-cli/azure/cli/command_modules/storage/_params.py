@@ -246,10 +246,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     allow_protected_append_writes_type = CLIArgumentType(
         arg_type = get_three_state_flag(), min_api = '2021-06-01',
-        help = 'This property can only be changed for unlocked time-based retention policies. '
-        'When enabled, new blocks can be written to an append blob while maintaining immutability '
-        'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
-        'modified or deleted. This property cannot be changed with ExtendImmutabilityPolicy API.')
+        help = 'This property can only be changed for disabled and unlocked time-based retention policies. '
+               'When enabled, new blocks can be written to an append blob while maintaining immutability protection and'
+               ' compliance. Only new blocks can be added and any existing blocks cannot be modified or deleted.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
