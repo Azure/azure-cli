@@ -1858,13 +1858,14 @@ def validate_immutability_arguments(namespace):
             raise InvalidArgumentValueError("Incorrect usage: To enable account level immutability, "
                                             "need to specify all of the following arguments:"
                                             "--immutability-period --immutability-state "
-                                            "--allow-protected-append-writes")
+                                            "--immutability-allow-append")
     if namespace.enable_vlw is not None:
         if not namespace.enable_vlw:
             if any([namespace.immutability_period_since_creation_in_days,
                        namespace.immutability_policy_state, namespace.allow_protected_append_writes is not None]):
-                from azure.cli.core.azclierror import InvalidArgumentValueError
-                raise InvalidArgumentValueError("Incorrect usage: To enable account level immutability, need to specify "
-                                                "--enable_vlw true. Cannot set --enable_vlw to false and specify "
+                raise InvalidArgumentValueError("Incorrect usage: To enable account level immutability, "
+                                                "need to specify --enable_vlw true. "
+                                                "Cannot set --enable_vlw to false and specify "
                                                 "--immutability-period --immutability-state "
-                                                "--allow-protected-append-writes")
+                                                "--immutability-allow-append")
+

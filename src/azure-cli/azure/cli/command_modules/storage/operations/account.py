@@ -517,7 +517,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 raise InvalidArgumentValueError("Incorrect usage: To create the account level immutability policy, "
                                                 "need to specify all of the following arguments:"
                                                 "--immutability-period --immutability-state "
-                                                "--allow-protected-append-writes")
+                                                "--immutability-allow-append")
         else:
             if existing_policy.state=='Disabled':
                 if immutability_policy_state and immutability_policy_state == 'Locked':
@@ -531,7 +531,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                     raise InvalidArgumentValueError("Incorrect usage: Locked state only allows the increase of the immutability retention time. ")
 
                 if allow_protected_append_writes is not None and existing_policy.allow_protected_append_writes != allow_protected_append_writes:
-                    raise InvalidArgumentValueError("Incorrect usage: allow-protected-append-writes cannot be changed for Locked time-based retention policies.")
+                    raise InvalidArgumentValueError("Incorrect usage: allow-protected-append-write cannot be changed for Locked time-based retention policies.")
 
         immutability_policy = AccountImmutabilityPolicyProperties(
             immutability_period_since_creation_in_days=immutability_period_since_creation_in_days or existing_policy.immutability_period_since_creation_in_days,

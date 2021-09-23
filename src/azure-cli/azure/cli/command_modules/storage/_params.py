@@ -238,14 +238,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         options_list = '--immutability-state', min_api = '2021-06-01',
         help = 'Defines the mode of the policy. Disabled state disables the policy, '
         'Unlocked state allows increase and decrease of immutability retention time '
-        'and also allows toggling allow-protected-append-writes property, '
+        'and also allows toggling allow-protected-append-write property, '
         'Locked state only allows the increase of the immutability retention time. '
         'A policy can only be created in a Disabled or Unlocked state and can be toggled between the '
         'two states. Only a policy in an Unlocked state can transition to a Locked state which cannot '
         'be reverted.')
 
     allow_protected_append_writes_type = CLIArgumentType(
-        arg_type = get_three_state_flag(), min_api = '2021-06-01',
+        arg_type = get_three_state_flag(), options_list = ['--immutability-allow-append'], min_api = '2021-06-01',
         help = 'This property can only be changed for disabled and unlocked time-based retention policies. '
                'When enabled, new blocks can be written to an append blob while maintaining immutability protection and'
                ' compliance. Only new blocks can be added and any existing blocks cannot be modified or deleted.')
@@ -368,7 +368,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
         c.argument('enable_vlw', arg_type=enable_vlw_type, validator=validate_immutability_arguments)
-        c.argument('immutability_period_since_creation_in_days',arg_type=immutability_period_since_creation_in_days_type,
+        c.argument('immutability_period_since_creation_in_days',
+                   arg_type=immutability_period_since_creation_in_days_type,
                    validator=validate_immutability_arguments)
         c.argument('immutability_policy_state', arg_type=immutability_policy_state_type,
                    validator=validate_immutability_arguments)
@@ -437,7 +438,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
-        c.argument('immutability_period_since_creation_in_days',arg_type=immutability_period_since_creation_in_days_type)
+        c.argument('immutability_period_since_creation_in_days',
+                   arg_type=immutability_period_since_creation_in_days_type)
         c.argument('immutability_policy_state', arg_type=immutability_policy_state_type)
         c.argument('allow_protected_append_writes', arg_type=allow_protected_append_writes_type)
 
