@@ -2178,3 +2178,30 @@ class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest
 
         self.cmd('storage account blob-inventory-policy delete --account-name {sa} -g {rg} -y')
         self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}', expect_failure=True)
+
+
+class StorageAccountHNSMigrationScenarioTest(StorageScenarioMixin, ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_hns_migrate', location='eastus2')
+    @StorageAccountPreparer(location='eastus2', kind='StorageV2', key='sa1', parameter_name='storage_account1')
+    @StorageAccountPreparer(location='eastus2', kind='StorageV2', key='sa2', parameter_name='storage_account2')
+    def test_storage_account_start_hns_migration(self, resource_group, storage_account1, storage_account2):
+        # test migration validation
+        self.cmd('storage account hns-migration start --request-type validation -n {sa1} -g {rg}')
+        # test migration
+        self.cmd('storage account hns-migration start --request-type upgrade -n {sa1} -g {rg}')
+        # test aborting migration
+        self.cmd('storage account hns-migration start --request-type validation -n {sa2} -g {rg}')
+        self.cmd('storage account hns-migration start --request-type upgrade -n {sa2} -g {rg} --no-wait')
+        retry = 0
+        while True:
+            from azure.core.exceptions import HttpResponseError
+            try:
+                self.cmd('storage account hns-migration stop -n {sa2} -g {rg}')
+                break
+            except HttpResponseError as ex:
+                if retry > 5:
+                    raise ex
+                if ex.reason == 'Hns migration for the account: {} is not found.'.format(storage_account2):
+                    retry += 1
+                    time.sleep(30)
