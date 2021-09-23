@@ -68,6 +68,7 @@ def load_arguments(self, _):
                                              local_context_attribute=LocalContextAttribute(name='logicapp_name',
                                                                                            actions=[LocalContextAction.GET]))
     name_arg_type_dict = {
+        'webapp': webapp_name_arg_type,
         'functionapp': functionapp_name_arg_type,
         'logicapp': logicapp_name_arg_type
     }
@@ -229,6 +230,8 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config appsettings') as c:
             c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
+        with self.argument_context(scope + ' config appsettings list') as c:
+            c.argument('name', arg_type=name_arg_type_dict[scope], id_part=None)
 
     for scope in ['webapp', 'functionapp']:
         with self.argument_context(scope) as c:
@@ -286,10 +289,6 @@ def load_arguments(self, _):
             c.argument('timeout', type=int, options_list=['--timeout', '-t'],
                        help='Configurable timeout in seconds for checking the status of deployment',
                        validator=validate_timeout_value)
-
-        with self.argument_context(scope + ' config appsettings list') as c:
-            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type),
-                       id_part=None)
 
         with self.argument_context(scope + ' config hostname list') as c:
             c.argument('webapp_name', arg_type=webapp_name_arg_type, id_part=None, options_list='--webapp-name')
