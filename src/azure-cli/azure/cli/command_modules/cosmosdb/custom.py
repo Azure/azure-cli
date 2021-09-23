@@ -1543,14 +1543,13 @@ def cli_cosmosdb_identity_remove(client,
     else:
         set_type = ResourceIdentityType.none
 
-    if set_type in (ResourceIdentityType.system_assigned, ResourceIdentityType.none):
+    set_user_identities = {}
+    for identity in identities_remaining:
+        set_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
+    for removed_identity in identities_to_remove:
+        set_user_identities[removed_identity] = None
+    if not set_user_identities:
         set_user_identities = None
-    else:
-        set_user_identities = {}
-        for identity in identities_remaining:
-            set_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
-        for removed_identity in identities_to_remove:
-            set_user_identities[removed_identity] = None
 
     params = DatabaseAccountUpdateParameters(identity=ManagedServiceIdentity(type=set_type, user_assigned_identities=set_user_identities))
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
