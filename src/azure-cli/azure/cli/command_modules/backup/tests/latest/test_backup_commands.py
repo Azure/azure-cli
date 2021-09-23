@@ -70,7 +70,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # Disable Protection with delete data
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --delete-backup-data true --yes')
 
-    @record_only()
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
