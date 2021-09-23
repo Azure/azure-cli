@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.profiles import ResourceType
-from azure.cli.testsdk import ScenarioTest, api_version_constraint, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import (ScenarioTest, api_version_constraint,
+                               ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 
@@ -129,3 +130,32 @@ class StorageContainerRmScenarios(ScenarioTest):
         # 8. Test exists command (the container doesn't exist).
         result = self.cmd('storage container-rm exists --storage-account {sa} -g {rg} -n {container_name}').get_output_in_json()
         self.assertEqual(result['exists'], False)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus")
+    def test_storage_container_squash_scenario(self, resource_group):
+        self.kwargs.update({
+            'sa': self.create_random_name(prefix='account', length=24),
+            'cont': self.create_random_name(prefix='container', length=24),
+            'vnet': self.create_random_name(prefix='vnet', length=10),
+            'subnet': self.create_random_name(prefix='subnet', length=10)
+        })
+        result = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()
+        self.kwargs['subnet_id'] = result['newVNet']['subnets'][0]['id']
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage')
+        self.cmd('storage account create -n {sa} -g {rg} --subnet {subnet_id} '
+                 '--default-action Deny --hns --sku Standard_LRS --enable-nfs-v3 true',
+                 checks=[JMESPathCheck('enableNfsV3', True)])
+
+        self.cmd('storage container-rm create -n {cont} --storage-account {sa} --root-squash RootSquash',
+                 checks=[JMESPathCheck('enableNfsV3AllSquash', False),
+                         JMESPathCheck('enableNfsV3RootSquash', True)])
+
+        self.cmd('storage container-rm update -n {cont} --storage-account {sa} --root-squash AllSquash',
+                 checks=[JMESPathCheck('enableNfsV3AllSquash', True),
+                         JMESPathCheck('enableNfsV3RootSquash', True)])
+
+        self.cmd('storage container-rm update -n {cont} --storage-account {sa} --root-squash NoRootSquash',
+                 checks=[JMESPathCheck('enableNfsV3AllSquash', False),
+                         JMESPathCheck('enableNfsV3RootSquash', False)])
