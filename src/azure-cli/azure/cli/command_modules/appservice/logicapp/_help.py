@@ -50,6 +50,11 @@ examples:
         az logicapp list --query "[?state=='Running']"
 """
 
+helps['logicapp config'] = """
+type: group
+short-summary: Configure a logic app.
+"""
+
 helps['logicapp config appsettings'] = """
 type: group
 short-summary: Configure logic app settings.
