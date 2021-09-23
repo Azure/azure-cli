@@ -4785,6 +4785,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     # live only since execution of `kubectl get pods` in subprocess and cannot be mocked by testsdk
+    @unittest.skip("Unable to create a cluster with version lower than 1.19.0 that meets the test requirements")
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
