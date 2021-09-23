@@ -517,7 +517,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 raise InvalidArgumentValueError("Incorrect usage: To create the account level immutability policy, "
                                                 "need to specify all of the following arguments:"
                                                 "--immutability-period --immutability-state "
-                                                "--immutability-allow-append")
+                                                "--allow-append")
         else:
             if existing_policy.state=='Disabled':
                 if immutability_policy_state and immutability_policy_state == 'Locked':

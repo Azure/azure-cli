@@ -1858,7 +1858,7 @@ def validate_immutability_arguments(namespace):
             raise InvalidArgumentValueError("Incorrect usage: To enable account level immutability, "
                                             "need to specify all of the following arguments:"
                                             "--immutability-period --immutability-state "
-                                            "--immutability-allow-append")
+                                            "--allow-append")
     if namespace.enable_vlw is not None:
         if not namespace.enable_vlw:
             if any([namespace.immutability_period_since_creation_in_days,
@@ -1867,5 +1867,5 @@ def validate_immutability_arguments(namespace):
                                                 "need to specify --enable_vlw true. "
                                                 "Cannot set --enable_vlw to false and specify "
                                                 "--immutability-period --immutability-state "
-                                                "--immutability-allow-append")
+                                                "--allow-append")
 
