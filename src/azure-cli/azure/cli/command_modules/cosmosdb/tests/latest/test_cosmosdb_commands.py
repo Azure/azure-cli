@@ -1427,10 +1427,12 @@ class CosmosDBTests(ScenarioTest):
         user_identity1 = self.cmd('az identity create -n {id1} -g {rg}').get_output_in_json()
         user_identity2 = self.cmd('az identity create -n {id2} -g {rg}').get_output_in_json()
         id1 = user_identity1["id"]
+        id1principal = user_identity1["principalId"]
         id2 = user_identity2["id"]
         self.kwargs.update({
             'id1': id1,
-            'id2': id2
+            'id2': id2,
+            'id1principal': id1principal
         })
 
         identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id1}').get_output_in_json()
@@ -1476,6 +1478,13 @@ class CosmosDBTests(ScenarioTest):
         assert len(identity_output["userAssignedIdentities"]) == 2
         identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
         assert identity_output["type"] == "None"
+        
+        # Default identity tests
+        self.cmd('az keyvault set-policy --name {kv_name} --object-id {id1principal} --key-permissions get unwrapKey wrapKey')
+        default_id_acct = self.cmd('az cosmosdb create -n clitestacct1 -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri} --assign-identity {id1} --default-identity "UserAssignedIdentity={id1}"').get_output_in_json()
+        assert default_id_acct["identity"]["type"] == "UserAssigned"
+        assert list(default_id_acct["identity"]["userAssignedIdentities"])[0] == id1
+        assert default_id_acct["defaultIdentity"] == "UserAssignedIdentity=" + id1
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_role')
     def test_cosmosdb_sql_role(self, resource_group):
