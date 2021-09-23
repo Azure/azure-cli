@@ -241,7 +241,7 @@ class WebappQuickCreateTest(ScenarioTest):
                                                    resource_group_location))
         plan_id = self.cmd('appservice plan create -g {} -n {}'.format(
             resource_group, plan)).get_output_in_json()['id']
-        webapp_name = create_random_name("webapp")
+        webapp_name = self.create_random_name(prefix="webapp", length=24)
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group2, webapp_name, plan_id), checks=[
             JMESPathCheck('name', webapp_name)
         ])
@@ -251,7 +251,7 @@ class WebappQuickCreateTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name="resource_group_two", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_create_names_are_substrings(self, resource_group_one, resource_group_two):
 
-        random_prefix = create_random_name("", 10)
+        random_prefix = self.create_random_name("", 10)
         webapp_name_one = random_prefix + "test-webapp-name-on"
         webapp_name_two = random_prefix + "test-webapp-name-one"
         webapp_name_three = random_prefix + "test-webapp-nam"
