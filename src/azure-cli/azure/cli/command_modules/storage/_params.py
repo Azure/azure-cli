@@ -221,7 +221,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     )
 
     public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
-                               resource_type=ResourceType.MGMT_STORAGE)
+                                              resource_type=ResourceType.MGMT_STORAGE)
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
