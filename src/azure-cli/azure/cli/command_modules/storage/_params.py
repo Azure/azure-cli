@@ -219,6 +219,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     action_type = CLIArgumentType(
         help='The action of virtual network rule. Possible value is Allow.'
     )
+
+    public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
+                               resource_type=ResourceType.MGMT_STORAGE)
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -336,7 +340,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
-        c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']), min_api='2021-06-01',
+        c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
 
@@ -402,7 +406,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
-        c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']), min_api='2021-06-01',
+        c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
 
