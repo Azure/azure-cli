@@ -32,6 +32,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         logicapp_name = self.create_random_name('logic-e2e', 24)
         plan = self.create_random_name('logic-e2e-plan', 24)
         storage = 'logicappplanstorage'
+        zip_file = os.path.join(TEST_DIR, 'sample_la/sample_la.zip')
         plan_id = self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
@@ -56,6 +57,10 @@ class LogicappBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].name', logicapp_name)
         ])
 
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file),
+        checks=[
+            JMESPathCheck('deployer', 'ZipDeploy')
+        ])
         self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
 
         self.cmd('logicapp list -g {}'.format(resource_group),
