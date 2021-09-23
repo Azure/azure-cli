@@ -2137,6 +2137,33 @@ class DeploymentStacksTest(ScenarioTest):
         self.assertTrue(len(list_deployment_stacks_rg) > 0)
         self.assertTrue(list_deployment_stacks_rg[0]['name'], '{name}')
 
+         # cleanup 
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    def test_delete_deployment_stack_resource_group(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-delete-deployment-stack-resource-group', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'resource-group': resource_group,
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+        })
+
+        # create stack
+        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+
+        self.cmd('stacks group show --name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
+
+        # delete stack
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+        
+        #confirm stack is deleted
+        self.cmd('stacks group list --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
 
 
 class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
