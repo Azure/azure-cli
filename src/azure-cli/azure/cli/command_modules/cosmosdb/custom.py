@@ -222,29 +222,29 @@ def _create_database_account(client,
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
-    system_assigned_identity = None
+    managed_service_identity = None
     SYSTEM_ID = '[system]'
     enable_system = False
     if assign_identity is not None:
         if assign_identity == [] or (len(assign_identity) == 1 and assign_identity[0] == '[system]'):
             enable_system = True
-            system_assigned_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
+            managed_service_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
         else:
-            set_user_identities = {}
+            user_identities = {}
             for x in assign_identity:
                 if x != SYSTEM_ID:
-                    set_user_identities[x] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+                    user_identities[x] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
                 else:
                     enable_system = True
             if enable_system:
-                system_assigned_identity = ManagedServiceIdentity(
+                managed_service_identity = ManagedServiceIdentity(
                     type=ResourceIdentityType.system_assigned_user_assigned.value,
-                    user_assigned_identities=set_user_identities
+                    user_assigned_identities=user_identities
                 )
             else:
-                system_assigned_identity = ManagedServiceIdentity(
+                managed_service_identity = ManagedServiceIdentity(
                     type=ResourceIdentityType.user_assigned.value,
-                    user_assigned_identities=set_user_identities
+                    user_assigned_identities=user_identities
                 )
 
     api_properties = {}
@@ -317,7 +317,7 @@ def _create_database_account(client,
         network_acl_bypass=network_acl_bypass,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
         backup_policy=backup_policy,
-        identity=system_assigned_identity,
+        identity=managed_service_identity,
         default_identity=default_identity,
         analytical_storage_configuration=analytical_storage_configuration,
         create_mode=create_mode,
@@ -1458,27 +1458,37 @@ def cli_cosmosdb_identity_assign(client,
     if identities is not None:
         new_user_identities = [x for x in identities if x != SYSTEM_ID]
 
-    if existing.identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
-        identity_types = ResourceIdentityType.system_assigned_user_assigned
-    elif existing.identity and existing.identity.type == ResourceIdentityType.system_assigned and new_user_identities:
-        identity_types = ResourceIdentityType.system_assigned_user_assigned
-    elif existing.identity and existing.identity.type == ResourceIdentityType.user_assigned and enable_system:
-        identity_types = ResourceIdentityType.system_assigned_user_assigned
-    elif new_user_identities and enable_system:
-        identity_types = ResourceIdentityType.system_assigned_user_assigned
-    elif new_user_identities:
-        identity_types = ResourceIdentityType.user_assigned
-    else:
-        identity_types = ResourceIdentityType.system_assigned
+    only_enabling_system = enable_system and len(new_user_identities) == 0
+    system_already_added = existing.identity.type == ResourceIdentityType.system_assigned or existing.identity.type == ResourceIdentityType.system_assigned_user_assigned
+    all_new_users_already_added = new_user_identities and existing.identity and existing.identity.user_assigned_identities and all(x in existing.identity.user_assigned_identities for x in new_user_identities)
+    if only_enabling_system and system_already_added:
+        return existing.identity
+    if (not enable_system) and all_new_users_already_added:
+        return existing.identity
+    if enable_system and system_already_added and all_new_users_already_added:
+        return existing.identity
 
-    if identity_types in [ResourceIdentityType.system_assigned, ResourceIdentityType.none]:
-        set_identity = ManagedServiceIdentity(type=identity_types.value)
+    if existing.identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif existing.identity and existing.identity.type == ResourceIdentityType.system_assigned and new_user_identities:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif existing.identity and existing.identity.type == ResourceIdentityType.user_assigned and enable_system:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif new_user_identities and enable_system:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif new_user_identities:
+        identity_type = ResourceIdentityType.user_assigned
+    else:
+        identity_type = ResourceIdentityType.system_assigned
+
+    if identity_type in [ResourceIdentityType.system_assigned, ResourceIdentityType.none]:
+        set_identity = ManagedServiceIdentity(type=identity_type.value)
     else:
         set_user_identities = existing.identity.user_assigned_identities or {}
         for identity in new_user_identities:
             set_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
 
-        set_identity = ManagedServiceIdentity(type=identity_types.value, user_assigned_identities=set_user_identities)
+        set_identity = ManagedServiceIdentity(type=identity_type.value, user_assigned_identities=set_user_identities)
 
     params = DatabaseAccountUpdateParameters(identity=set_identity)
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
@@ -1503,7 +1513,7 @@ def cli_cosmosdb_identity_remove(client,
         identities.remove(SYSTEM_ID)
 
     if existing.identity is None:
-        return None
+        return ManagedServiceIdentity(type=ResourceIdentityType.none.value)
     if existing.identity.user_assigned_identities:
         existing_identities = existing.identity.user_assigned_identities.keys()
     else:
@@ -1517,6 +1527,8 @@ def cli_cosmosdb_identity_remove(client,
     if non_existing:
         raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), account_name))
     identities_remaining = [x for x in existing_identities if x not in set(identities_to_remove)]
+    if remove_system_assigned_identity and ((not existing.identity) or (existing.identity and existing.identity.type in [ResourceIdentityType.none, ResourceIdentityType.user_assigned])):
+        raise CLIError("System-assigned identity is not associated with '{}'".format(account_name))
 
     if identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
         set_type = ResourceIdentityType.system_assigned_user_assigned
