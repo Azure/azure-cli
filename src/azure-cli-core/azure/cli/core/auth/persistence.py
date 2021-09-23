@@ -19,40 +19,33 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def load_persisted_token_cache(location, fallback_to_plaintext):
-    persistence = build_persistence(location, fallback_to_plaintext)
+def load_persisted_token_cache(location, encrypt):
+    persistence = build_persistence(location, encrypt)
     return PersistedTokenCache(persistence)
 
 
-def load_secret_store(location, fallback_to_plaintext):
-    persistence = build_persistence(location, fallback_to_plaintext)
+def load_secret_store(location, encrypt):
+    persistence = build_persistence(location, encrypt)
     return SecretStore(persistence)
 
 
-def build_persistence(location, fallback_to_plaintext=False):
+def build_persistence(location, encrypt):
     """Build a suitable persistence instance based your current OS"""
-    if sys.platform.startswith('win'):
-        return FilePersistenceWithDataProtection(location)
-    if sys.platform.startswith('darwin'):
-        return KeychainPersistence(location, "my_service_name", "my_account_name")
-    if sys.platform.startswith('linux'):
-        try:
+    if encrypt:
+        location += '.bin'
+        if sys.platform.startswith('win'):
+            return FilePersistenceWithDataProtection(location)
+        if sys.platform.startswith('darwin'):
+            return KeychainPersistence(location, "my_service_name", "my_account_name")
+        if sys.platform.startswith('linux'):
             return LibsecretPersistence(
-                # By using same location as the fall back option below,
-                # this would override the unencrypted data stored by the
-                # fall back option.  It is probably OK, or even desirable
-                # (in order to aggressively wipe out plain-text persisted data),
-                # unless there would frequently be a desktop session and
-                # a remote ssh session being active simultaneously.
                 location,
                 schema_name="my_schema_name",
                 attributes={"my_attr1": "foo", "my_attr2": "bar"}
             )
-        except:  # pylint: disable=bare-except
-            if not fallback_to_plaintext:
-                raise
-            logger.exception("Encryption unavailable. Opting in to plain text.")
-    return FilePersistence(location)
+    else:
+        location += '.json'
+        return FilePersistence(location)
 
 
 class SecretStore:
@@ -62,7 +55,7 @@ class SecretStore:
 
     def save(self, content):
         with CrossPlatLock(self._lock_file):
-            self._persistence.save(json.dumps(content))
+            self._persistence.save(json.dumps(content, indent=4))
 
     def load(self):
         with CrossPlatLock(self._lock_file):

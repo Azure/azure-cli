@@ -5,6 +5,7 @@
 
 import os
 import os.path
+import sys
 from copy import deepcopy
 from enum import Enum
 
@@ -38,7 +39,6 @@ _CLIENT_ID = 'clientId'
 _CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
-_USE_MSAL_TOKEN_CACHE = 'useMsalTokenCache'
 _ENVIRONMENT_NAME = 'environmentName'
 _STATE = 'state'
 _USER_TYPE = 'type'
@@ -123,6 +123,13 @@ class Profile:
         self._authority = self.cli_ctx.cloud.endpoints.active_directory
         self._arm_scope = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
+        if sys.platform.startswith('win32'):
+            token_encryption_fallback = True
+        else:
+            token_encryption_fallback = False
+        Identity.token_encryption = self.cli_ctx.config.getboolean('core', 'token_encryption',
+                                                                   fallback=token_encryption_fallback)
+
     # pylint: disable=too-many-branches,too-many-statements,too-many-locals
     def login(self,
               interactive,
@@ -135,7 +142,6 @@ class Profile:
               use_device_code=False,
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
-              find_subscriptions=True,
               **kwargs):
 
         if not scopes:
@@ -144,10 +150,7 @@ class Profile:
         # For ADFS, auth_tenant is 'adfs'
         # https://github.com/Azure/azure-sdk-for-python/blob/661cd524e88f480c14220ed1f86de06aaff9a977/sdk/identity/azure-identity/CHANGELOG.md#L19
         authority, auth_tenant = _detect_adfs_authority(self.cli_ctx.cloud.endpoints.active_directory, tenant)
-        identity = Identity(authority=authority, tenant_id=auth_tenant,
-                            client_id=client_id,
-                            allow_unencrypted=self.cli_ctx.config
-                            .getboolean('core', 'allow_fallback_to_plaintext', fallback=True))
+        identity = Identity(authority=authority, tenant_id=auth_tenant, client_id=client_id)
 
         user_identity = None
         if interactive:
@@ -320,13 +323,7 @@ class Profile:
         :param aux_subscriptions:
         :param aux_tenants:
         """
-        # Check if the token has been migrated to MSAL by checking "useMsalTokenCache": true
-        # If not yet, do it now.
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
-        use_msal = self._storage.get(_USE_MSAL_TOKEN_CACHE)
-        if not use_msal:
-            self._storage[_USE_MSAL_TOKEN_CACHE] = True
 
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
@@ -505,7 +502,6 @@ class Profile:
 
             set_cloud_subscription(self.cli_ctx, active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
-        self._storage[_USE_MSAL_TOKEN_CACHE] = True
 
     @staticmethod
     def _pick_working_subscription(subscriptions):

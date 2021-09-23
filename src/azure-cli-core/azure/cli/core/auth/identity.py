@@ -40,6 +40,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     CLOUD_SHELL_IDENTITY_UNIQUE_NAME = "unique_name"
 
+    token_encryption = True
+
     def __init__(self, authority=None, tenant_id=None, client_id=None, **kwargs):
         """
 
@@ -53,14 +55,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.msal_authority = "{}/{}".format(self.authority, self.tenant_id)
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
 
-        self._token_cache_file = os.path.join(get_config_dir(), "tokenCache.bin")
-        self._secret_file = os.path.join(get_config_dir(), "secrets.bin")
-        self._fallback_to_plaintext = kwargs.pop('fallback_to_plaintext', True)
+        self._token_cache_file = os.path.join(get_config_dir(), "tokenCache")
+        self._secret_file = os.path.join(get_config_dir(), "secrets")
 
         self._msal_app_instance = None
         # Store for Service principal credential persistence
-        self._msal_secret_store = ServicePrincipalStore(self._secret_file,
-                                                        fallback_to_plaintext=self._fallback_to_plaintext)
+        self._msal_secret_store = ServicePrincipalStore(self._secret_file, self.token_encryption)
         self._msal_app_kwargs = {
             "authority": self.msal_authority,
             "token_cache": self._load_msal_cache()
@@ -96,7 +96,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def _load_msal_cache(self):
         from .persistence import load_persisted_token_cache
         # Store for user token persistence
-        cache = load_persisted_token_cache(self._token_cache_file, self._fallback_to_plaintext)
+        cache = load_persisted_token_cache(self._token_cache_file, self.token_encryption)
         cache._reload_if_necessary()  # pylint: disable=protected-access
         return cache
 
@@ -256,19 +256,18 @@ class ServicePrincipalStore:
     """Caches secrets in MSAL custom secret store for Service Principal authentication.
     """
 
-    def __init__(self, secret_file=None, fallback_to_plaintext=True):
+    def __init__(self, secret_file, encrypt):
         from .persistence import load_secret_store
-        self._secret_store = load_secret_store(secret_file, fallback_to_plaintext)
+        self._secret_store = load_secret_store(secret_file, encrypt)
         self._secret_file = secret_file
-        self._service_principal_creds = []
-        self._fallback_to_plaintext = fallback_to_plaintext
+        self._entries = []
 
     def load_credential(self, sp_id, tenant):
         self._load_persistence()
-        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
+        matched = [x for x in self._entries if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
-                           "Please run 'az login' for this service principal."
+                           "Please run `az login` for this service principal."
                            .format(sp_id))
         matched_with_tenant = [x for x in matched if tenant == x[_SERVICE_PRINCIPAL_TENANT]]
         if matched_with_tenant:
@@ -283,36 +282,26 @@ class ServicePrincipalStore:
 
     def save_credential(self, sp_entry):
         self._load_persistence()
-        matched = [x for x in self._service_principal_creds
-                   if sp_entry[_SERVICE_PRINCIPAL_ID] == x[_SERVICE_PRINCIPAL_ID] and
-                   sp_entry[_SERVICE_PRINCIPAL_TENANT] == x[_SERVICE_PRINCIPAL_TENANT]]
-        state_changed = False
-        if matched:
-            # pylint: disable=line-too-long
-            if (sp_entry.get(_ACCESS_TOKEN, None) != matched[0].get(_ACCESS_TOKEN, None) or
-                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE,
-                                                                                       None)):
-                self._service_principal_creds.remove(matched[0])
-                self._service_principal_creds.append(sp_entry)
-                state_changed = True
-        else:
-            self._service_principal_creds.append(sp_entry)
-            state_changed = True
 
-        if state_changed:
-            self._save_persistence()
+        self._entries = [
+            x for x in self._entries
+            if not (sp_entry[_SERVICE_PRINCIPAL_ID] == x[_SERVICE_PRINCIPAL_ID] and
+                    sp_entry[_SERVICE_PRINCIPAL_TENANT] == x[_SERVICE_PRINCIPAL_TENANT])]
+
+        self._entries.append(sp_entry)
+        self._save_persistence()
 
     def remove_credential(self, sp_id):
         self._load_persistence()
         state_changed = False
 
         # clear service principal creds
-        matched = [x for x in self._service_principal_creds
+        matched = [x for x in self._entries
                    if x[_SERVICE_PRINCIPAL_ID] == sp_id]
         if matched:
             state_changed = True
-            self._service_principal_creds = [x for x in self._service_principal_creds
-                                             if x not in matched]
+            self._entries = [x for x in self._entries
+                             if x not in matched]
 
         if state_changed:
             self._save_persistence()
@@ -324,16 +313,16 @@ class ServicePrincipalStore:
             pass
 
     def _save_persistence(self):
-        self._secret_store.save(self._service_principal_creds)
+        self._secret_store.save(self._entries)
 
     def _load_persistence(self):
-        self._service_principal_creds = self._secret_store.load()
+        self._entries = self._secret_store.load()
 
     def _serialize_secrets(self):
         # ONLY FOR DEBUGGING PURPOSE. DO NOT USE IN PRODUCTION CODE.
         logger.warning("Secrets are serialized as plain text and saved to `msalSecrets.cache.json`.")
         with open(self._secret_file + ".json", "w") as fd:
-            fd.write(json.dumps(self._service_principal_creds, indent=4))
+            fd.write(json.dumps(self._entries, indent=4))
 
 
 def _read_response_templates():

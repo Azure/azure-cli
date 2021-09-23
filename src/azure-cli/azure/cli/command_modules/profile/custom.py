@@ -94,7 +94,7 @@ def set_active_subscription(cmd, subscription):
     profile.set_active_subscription(subscription)
 
 
-def account_clear(cmd, clear_credential=True):
+def account_clear(cmd):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
@@ -104,10 +104,9 @@ def account_clear(cmd, clear_credential=True):
 
 # pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, tenant_access=False, environment=False,
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, environment=False,
           scopes=None, claims_challenge=None):
     """Log in to access Azure subscriptions"""
-    import requests
 
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:
@@ -155,7 +154,6 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
         use_cert_sn_issuer=use_cert_sn_issuer,
-        find_subscriptions=not tenant_access,
         claims_challenge=claims_challenge)
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
