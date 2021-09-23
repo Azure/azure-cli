@@ -49,3 +49,33 @@ examples:
     text: >
         az logicapp list --query "[?state=='Running']"
 """
+
+helps['logicapp config appsettings'] = """
+type: group
+short-summary: Configure logic app settings.
+"""
+
+helps['logicapp config appsettings delete'] = """
+type: command
+short-summary: Delete a logic app's settings.
+examples:
+  - name: Delete a logic app's settings.
+    text: az logicapp config appsettings delete --name MyLogicApp --resource-group MyResourceGroup --setting-names {setting-names}
+"""
+
+helps['logicapp config appsettings list'] = """
+type: command
+short-summary: Show settings for a logic app.
+examples:
+  - name: Show settings for a logic app.
+    text: az logicapp config appsettings list --name MyLogicapp --resource-group MyResourceGroup
+"""
+
+helps['logicapp config appsettings set'] = """
+type: command
+short-summary: Update a logic app's settings.
+examples:
+  - name: Update a logic app's settings.
+    text: |
+        az logicapp config appsettings set --name MyLogicApp --resource-group MyResourceGroup --settings "AzureWebJobsStorage=$storageConnectionString"
+"""

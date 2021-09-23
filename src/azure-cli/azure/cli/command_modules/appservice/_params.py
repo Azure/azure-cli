@@ -226,6 +226,9 @@ def load_arguments(self, _):
             c.argument('deployment_source_branch', options_list=['--deployment-source-branch', '-b'],
                        help='the branch to deploy')
             c.argument('tags', arg_type=tags_type)
+        with self.argument_context(scope + ' config appsettings') as c:
+            c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
+            c.argument('setting_names', nargs='+', help="space-separated app setting names")
 
     for scope in ['webapp', 'functionapp']:
         with self.argument_context(scope) as c:
@@ -243,9 +246,6 @@ def load_arguments(self, _):
                        help='The name of the slot. Default to the productions slot if not specified')
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
-        with self.argument_context(scope + ' config appsettings') as c:
-            c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
-            c.argument('setting_names', nargs='+', help="space-separated app setting names")
         with self.argument_context(scope + ' config ssl import') as c:
             c.argument('key_vault', help='The name or resource ID of the Key Vault')
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')

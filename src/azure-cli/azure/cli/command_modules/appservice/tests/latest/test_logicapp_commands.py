@@ -14,7 +14,7 @@ import datetime
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
-from azure.cli.testsdk.checkers import JMESPathPatternCheck
+from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -54,6 +54,17 @@ class LogicappBasicE2ETest(ScenarioTest):
         checks=[
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].name', logicapp_name)
+        ])
+
+        self.cmd('logicapp config appsettings set -g {} -n {} --settings "MyTestSetting=1"'.format(resource_group, logicapp_name))
+
+        self.cmd('logicapp config appsettings list -g {} -n {}'.format(resource_group, logicapp_name)).assert_with_checks([
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
+            JMESPathCheck("[?name=='MyTestSetting'].value|[0]", '1'),
+        ])
+
+        self.cmd('logicapp config appsettings delete -g {} -n {} --setting-name MyTestSetting'.format(resource_group, logicapp_name)).assert_with_checks([
+            JMESPathCheckNotExists("[?name=='MyTestSetting']")
         ])
 
         self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
