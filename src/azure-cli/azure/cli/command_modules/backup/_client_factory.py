@@ -54,6 +54,14 @@ def backup_storage_configs_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_resource_storage_configs
 
 
+def backup_storage_configs_non_crr_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_resource_storage_configs_non_crr
+
+
+def backup_status_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_status
+
+
 # Protection Client Factories
 def protection_intent_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).protection_intent

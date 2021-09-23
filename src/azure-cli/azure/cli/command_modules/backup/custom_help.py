@@ -20,7 +20,8 @@ from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobS
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
-    backup_operation_statuses_cf, protection_container_operation_results_cf)
+    backup_operation_statuses_cf, protection_container_operation_results_cf,
+    backup_crr_job_details_cf, crr_operation_status_cf)
 from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError
 
 
@@ -126,8 +127,8 @@ def get_target_path(resource_type, path, logical_name, data_directory_paths):
     for filepath in data_directory_paths:
         if filepath.type == resource_type:
             data_directory_path = filepath
-    file_type = path.split('\\')[-1].split('.')[1]
-    file_name = logical_name + '_' + str(int(time.time())) + '.' + file_type
+    file_type = '.' + path.split('\\')[-1].split('.')[1] if len(path.split('\\')[-1].split('.')) > 1 else ""
+    file_name = logical_name + '_' + str(int(time.time())) + file_type
     return data_directory_path.path + file_name
 
 
@@ -161,6 +162,28 @@ def track_backup_operation(cli_ctx, resource_group, result, vault_name):
     while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(5)
         operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
+    return operation_status
+
+
+def track_backup_crr_job(cli_ctx, result, azure_region, resource_id):
+    crr_job_details_client = backup_crr_job_details_cf(cli_ctx)
+
+    operation_status = track_backup_crr_operation(cli_ctx, result, azure_region)
+
+    if operation_status.properties:
+        job_id = operation_status.properties.job_id
+        job_details = crr_job_details_client.get(azure_region, resource_id, job_id)
+        return job_details
+
+
+def track_backup_crr_operation(cli_ctx, result, azure_region):
+    crr_operation_statuses_client = crr_operation_status_cf(cli_ctx)
+
+    operation_id = get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
+    operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
+    while operation_status.status == OperationStatusValues.in_progress.value:
+        time.sleep(5)
+        operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
     return operation_status
 
 
