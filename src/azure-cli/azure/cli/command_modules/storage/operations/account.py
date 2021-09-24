@@ -44,7 +44,7 @@ def generate_sas(client, services, resource_types, permission, expiry, start=Non
                                                    start=start, ip=ip, protocol=protocol)
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
                            encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
@@ -62,7 +62,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, enable_vlw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, action='Allow'):  # pylint: disable=unused-argument
+                           allow_protected_append_writes=None, action='Allow'):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
