@@ -61,10 +61,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         # Prepare HTTP cache.
         if not Identity.http_cache:
-            import atexit
-            import shelve
-            Identity.http_cache = persisted_http_cache = shelve.open(self._http_cache_file)
-            atexit.register(persisted_http_cache.close)
+            Identity.http_cache = self._load_http_cache()
 
         self._msal_app_instance = None
         # Store for Service principal credential persistence
@@ -81,6 +78,13 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         cache = load_persisted_token_cache(self._token_cache_file, self.token_encryption)
         cache._reload_if_necessary()  # pylint: disable=protected-access
         return cache
+
+    def _load_http_cache(self):
+        import atexit
+        import shelve
+        http_cache = persisted_http_cache = shelve.open(self._http_cache_file)
+        atexit.register(persisted_http_cache.close)
+        return http_cache
 
     def _build_persistent_msal_app(self):
         # Initialize _msal_app for logout, token migration which Azure Identity doesn't support
@@ -164,7 +168,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def get_user_credential(self, username):
         return UserCredential(self.client_id, username, **self._msal_app_kwargs)
 
-    def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):  # pylint: disable=unused-argument
+    def get_service_principal_credential(self, client_id):
         entry = self._msal_secret_store.load_credential(client_id, self.tenant_id)
         sp_auth = ServicePrincipalAuth(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)

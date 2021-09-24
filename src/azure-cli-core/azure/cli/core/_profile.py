@@ -604,8 +604,7 @@ class Profile:
 
         # Service Principal
         if user_type == _SERVICE_PRINCIPAL:
-            use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
-            return identity.get_service_principal_credential(username_or_sp_id, use_cert_sn_issuer)
+            return identity.get_service_principal_credential(username_or_sp_id)
 
         raise NotImplementedError
 
