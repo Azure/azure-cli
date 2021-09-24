@@ -121,7 +121,7 @@ def validate_counts_in_autoscaler(
     enable_cluster_autoscaler,
     min_count,
     max_count,
-    mode,
+    decorator_mode,
 ) -> None:
     """Check the validity of serveral count-related parameters in autoscaler.
 
@@ -144,7 +144,7 @@ def validate_counts_in_autoscaler(
             raise InvalidArgumentValueError(
                 "Value of min-count should be less than or equal to value of max-count"
             )
-        if mode == DecoratorMode.CREATE:
+        if decorator_mode == DecoratorMode.CREATE:
             if node_count < min_count or node_count > max_count:
                 raise InvalidArgumentValueError(
                     "node-count is not in the range of min-count and max-count"
@@ -152,7 +152,7 @@ def validate_counts_in_autoscaler(
     else:
         if min_count is not None or max_count is not None:
             option_name = "--enable-cluster-autoscaler"
-            if mode == DecoratorMode.UPDATE:
+            if decorator_mode == DecoratorMode.UPDATE:
                 option_name += " or --update-cluster-autoscaler"
             raise RequiredArgumentMissingError(
                 "min-count and max-count are required for {}, please use the flag".format(
@@ -340,7 +340,7 @@ class AKSCreateContext:
     read_only is set to True when necessary to avoid loop calls, when using the getter function to obtain the value of
     other parameters.
     """
-    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, mode=DecoratorMode.CREATE):
+    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, decorator_mode=DecoratorMode.CREATE):
         self.cmd = cmd
         if not isinstance(raw_parameters, dict):
             raise CLIInternalError(
@@ -349,7 +349,7 @@ class AKSCreateContext:
                 )
             )
         self.raw_param = raw_parameters
-        self.mode = mode
+        self.decorator_mode = decorator_mode
         self.intermediates = dict()
         self.mc = None
 
@@ -1198,7 +1198,7 @@ class AKSCreateContext:
             enable_cluster_autoscaler,
             min_count,
             max_count,
-            mode=DecoratorMode.CREATE,
+            decorator_mode=DecoratorMode.CREATE,
         )
         return node_count, enable_cluster_autoscaler, min_count, max_count
 
@@ -1270,7 +1270,7 @@ class AKSCreateContext:
             enable_cluster_autoscaler or update_cluster_autoscaler,
             min_count,
             max_count,
-            mode=DecoratorMode.UPDATE,
+            decorator_mode=DecoratorMode.UPDATE,
         )
 
         if enable_cluster_autoscaler and agent_pool_profile.enable_auto_scaling:
@@ -2942,7 +2942,7 @@ class AKSCreateContext:
             "api_server_authorized_ip_ranges"
         )
 
-        if self.mode == DecoratorMode.CREATE:
+        if self.decorator_mode == DecoratorMode.CREATE:
             # try to read the property value corresponding to the parameter from the `mc` object
             read_from_mc = False
             if (
@@ -2965,7 +2965,7 @@ class AKSCreateContext:
                         else []
                     )
                 ]
-        elif self.mode == DecoratorMode.UPDATE:
+        elif self.decorator_mode == DecoratorMode.UPDATE:
             # normalize
             if api_server_authorized_ip_ranges is not None:
                 api_server_authorized_ip_ranges = [
@@ -3252,12 +3252,12 @@ class AKSCreateContext:
         # read the original value passed by the command
         cluster_autoscaler_profile = self.raw_param.get("cluster_autoscaler_profile")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mode == DecoratorMode.CREATE:
+        if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.auto_scaler_profile is not None:
                 cluster_autoscaler_profile = self.mc.auto_scaler_profile
 
         # dynamic completion
-        if self.mode == DecoratorMode.UPDATE:
+        if self.decorator_mode == DecoratorMode.UPDATE:
             if cluster_autoscaler_profile and self.mc and self.mc.auto_scaler_profile:
                 # shallow copy should be enough for string-to-string dictionary
                 copy_of_raw_dict = self.mc.auto_scaler_profile.__dict__.copy()
@@ -3352,7 +3352,7 @@ class AKSCreateDecorator:
         self.client = client
         self.models = models
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSCreateContext(cmd, raw_parameters, mode=DecoratorMode.CREATE)
+        self.context = AKSCreateContext(cmd, raw_parameters, decorator_mode=DecoratorMode.CREATE)
         # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
         # containerservice SDK, most models have been passed through the `models` parameter (instantiatied
         # from `AKSCreateModels` (or `PreviewAKSCreateModels` in aks-preview), where resource_type (i.e.,
@@ -4124,7 +4124,7 @@ class AKSUpdateDecorator:
         self.client = client
         self.models = models
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSCreateContext(cmd, raw_parameters, mode=DecoratorMode.UPDATE)
+        self.context = AKSCreateContext(cmd, raw_parameters, decorator_mode=DecoratorMode.UPDATE)
 
     def check_raw_parameters(self):
         """Helper function to check whether any parameters are set.

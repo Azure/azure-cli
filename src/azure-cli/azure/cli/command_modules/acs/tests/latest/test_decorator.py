@@ -2424,7 +2424,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             {
                 "api_server_authorized_ip_ranges": None,
             },
-            mode=DecoratorMode.UPDATE,
+            decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_5.get_api_server_authorized_ip_ranges(), None)
 
@@ -2434,7 +2434,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
             {
                 "api_server_authorized_ip_ranges": "",
             },
-            mode=DecoratorMode.UPDATE,
+            decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_6.get_api_server_authorized_ip_ranges(), [])
 
@@ -2739,7 +2739,7 @@ class AKSCreateContextTestCase(unittest.TestCase):
                     "expander": "least-waste",
                 },
             },
-            mode=DecoratorMode.UPDATE,
+            decorator_mode=DecoratorMode.UPDATE,
         )
         auto_scaler_profile_2 = (
             self.models.ManagedClusterPropertiesAutoScalerProfile(
