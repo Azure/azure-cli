@@ -1869,3 +1869,4 @@ def validate_immutability_arguments(namespace):
                                                 "--immutability-period --immutability-state "
                                                 "--allow-append")
 
+

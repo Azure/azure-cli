@@ -236,7 +236,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                     "Incorrect usage: A policy can only be created in a Disabled or Unlocked state.")
 
         params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=enable_vlw,
-                                                                        immutability_policy = immutability_policy)
+                                                                           immutability_policy=immutability_policy)
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
