@@ -15,6 +15,9 @@ import datetime
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only)
+from azure.cli.testsdk.checkers import JMESPathCheckNotExists
+
+from azure.cli.core.azclierror import ResourceNotFoundError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -75,6 +78,15 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
+        try:
+            self.cmd('functionapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+                JMESPathCheckNotExists('name') # `az functionapp show` should not return webapp
+            ])
+        except ResourceNotFoundError:
+            pass
+        else:
+            self.assertTrue(False, "'az functionap show` did not raise exception for webapp.")
+
         result = self.cmd('webapp deployment source config-local-git -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
         self.assertTrue(result['url'].endswith(webapp_name + '.git'))

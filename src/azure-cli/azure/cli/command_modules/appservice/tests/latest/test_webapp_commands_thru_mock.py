@@ -228,7 +228,7 @@ class TestWebappMocked(unittest.TestCase):
         faked_web = mock.MagicMock()
         site_op_mock.return_value = faked_web
         # action
-        result = show_webapp(mock.MagicMock(), 'myRG', 'myweb', slot=None, app_instance=None)
+        result = show_webapp(mock.MagicMock(), 'myRG', 'myweb', slot=None)
         # assert (we invoke the site op)
         self.assertEqual(faked_web, result)
         self.assertTrue(rename_mock.called)
