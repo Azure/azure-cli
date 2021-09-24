@@ -68,8 +68,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self._msal_secret_store = ServicePrincipalStore(self._secret_file, self.token_encryption)
         self._msal_app_kwargs = {
             "authority": self.msal_authority,
-            "token_cache": self._load_msal_cache(),
-            "http_cache": Identity.http_cache
+            "token_cache": self._load_msal_cache()
         }
 
     def _load_msal_cache(self):
@@ -319,11 +318,11 @@ class ServicePrincipalStore:
 
 def _read_response_templates():
     """Read from success.html and error.html to strings and pass them to MSAL. """
-    success_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages', 'success.html')
+    success_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'success.html')
     with open(success_file) as f:
         success_template = f.read()
 
-    error_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages', 'error.html')
+    error_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'error.html')
     with open(error_file) as f:
         error_template = f.read()
 
