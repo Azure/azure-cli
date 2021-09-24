@@ -104,14 +104,21 @@ def safe_lower(obj: Any) -> Any:
     return obj
 
 
-def validate_counts_in_autoscaler(node_count, enable_cluster_autoscaler, min_count, max_count) -> None:
+def validate_counts_in_autoscaler(
+    node_count,
+    enable_cluster_autoscaler,
+    min_count,
+    max_count,
+    mode,
+) -> None:
     """Check the validity of serveral count-related parameters in autoscaler.
 
-    On the premise that enable_cluster_autoscaler is enabled, it will check whether both min_count and max_count are
-    assigned, if not, raise the RequiredArgumentMissingError; if will also check whether min_count is less than
-    max_count and node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError.
-    If enable_cluster_autoscaler is not enabled, it will check whether any of min_count or max_count is assigned,
-    if so, raise the RequiredArgumentMissingError.
+    On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is enabled,
+    it will check whether both min_count and max_count are  assigned, if not, raise the RequiredArgumentMissingError. If
+    min_count is less than max_count, raise the InvalidArgumentValueError. Only in create mode it will check whether the
+    value of node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
+    enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is not enabled, it will check
+    whether any of min_count or max_count is assigned, if so, raise the RequiredArgumentMissingError.
 
     :return: None
     """
@@ -125,14 +132,20 @@ def validate_counts_in_autoscaler(node_count, enable_cluster_autoscaler, min_cou
             raise InvalidArgumentValueError(
                 "Value of min-count should be less than or equal to value of max-count"
             )
-        if node_count < min_count or node_count > max_count:
-            raise InvalidArgumentValueError(
-                "node-count is not in the range of min-count and max-count"
-            )
+        if mode == DecoratorMode.CREATE:
+            if node_count < min_count or node_count > max_count:
+                raise InvalidArgumentValueError(
+                    "node-count is not in the range of min-count and max-count"
+                )
     else:
         if min_count is not None or max_count is not None:
+            option_name = "--enable-cluster-autoscaler"
+            if mode == DecoratorMode.UPDATE:
+                option_name += " or --update-cluster-autoscaler"
             raise RequiredArgumentMissingError(
-                "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
+                "min-count and max-count are required for {}, please use the flag".format(
+                    option_name
+                )
             )
 
 
@@ -315,7 +328,7 @@ class AKSCreateContext:
     read_only is set to True when necessary to avoid loop calls, when using the getter function to obtain the value of
     other parameters.
     """
-    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, mode: DecoratorMode = DecoratorMode.CREATE):
+    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, mode=DecoratorMode.CREATE):
         self.cmd = cmd
         if not isinstance(raw_parameters, dict):
             raise CLIInternalError(
@@ -1168,7 +1181,13 @@ class AKSCreateContext:
         # these parameters do not need dynamic completion
 
         # validation
-        validate_counts_in_autoscaler(node_count, enable_cluster_autoscaler, min_count, max_count)
+        validate_counts_in_autoscaler(
+            node_count,
+            enable_cluster_autoscaler,
+            min_count,
+            max_count,
+            mode=DecoratorMode.CREATE,
+        )
         return node_count, enable_cluster_autoscaler, min_count, max_count
 
     # pylint: disable=too-many-branches
@@ -1178,10 +1197,9 @@ class AKSCreateContext:
         """Obtain the value of update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler,
         min_count and max_count.
 
-        This function will verify the parameters by default. It will also get the value of node_count from the `mc`
-        object and verify all the parameters through function "validate_counts_in_autoscaler". If both
-        enable_cluster_autoscaler and update_cluster_autoscaler are specified, a MutuallyExclusiveArgumentError will
-        be raised. If enable_cluster_autoscaler or update_cluster_autoscaler is specified and there are multiple
+        This function will verify the parameters through function "validate_counts_in_autoscaler" by default. Besides if
+        both enable_cluster_autoscaler and update_cluster_autoscaler are specified, a MutuallyExclusiveArgumentError
+        will be raised. If enable_cluster_autoscaler or update_cluster_autoscaler is specified and there are multiple
         agent pool profiles, an ArgumentUsageError will be raised. If enable_cluster_autoscaler is specified and
         autoscaler is already enabled in `mc`, it will output warning messages and exit with code 0. If
         update_cluster_autoscaler is specified and autoscaler is not enabled in `mc`, it will raise an
@@ -1198,12 +1216,6 @@ class AKSCreateContext:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
-
-        # node_count
-        node_count = None
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if agent_pool_profile and agent_pool_profile.count is not None:
-            node_count = agent_pool_profile.count
 
         # update_cluster_autoscaler
         # read the original value passed by the command
@@ -1242,10 +1254,11 @@ class AKSCreateContext:
             )
 
         validate_counts_in_autoscaler(
-            node_count,
+            None,
             enable_cluster_autoscaler or update_cluster_autoscaler,
             min_count,
             max_count,
+            mode=DecoratorMode.UPDATE,
         )
 
         if enable_cluster_autoscaler and agent_pool_profile.enable_auto_scaling:
@@ -3314,7 +3327,7 @@ class AKSCreateDecorator:
         self.client = client
         self.models = models
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSCreateContext(cmd, raw_parameters)
+        self.context = AKSCreateContext(cmd, raw_parameters, mode=DecoratorMode.CREATE)
         # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
         # containerservice SDK, most models have been passed through the `models` parameter (instantiatied
         # from `AKSCreateModels` (or `PreviewAKSCreateModels` in aks-preview), where resource_type (i.e.,
@@ -4147,7 +4160,7 @@ class AKSUpdateDecorator:
         """
         mc = self.client.get(self.context.get_resource_group_name(), self.context.get_name())
 
-        # attach mc to AKSCreateModels
+        # attach mc to AKSCreateContext
         self.context.attach_mc(mc)
         return mc
 

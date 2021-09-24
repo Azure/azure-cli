@@ -71,26 +71,30 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
 
     def test_validate_counts_in_autoscaler(self):
         # default
-        validate_counts_in_autoscaler(3, False, None, None)
+        validate_counts_in_autoscaler(3, False, None, None, DecoratorMode.CREATE)
 
         # custom value
-        validate_counts_in_autoscaler(5, True, 1, 10)
+        validate_counts_in_autoscaler(5, True, 1, 10, DecoratorMode.CREATE)
 
         # fail on min_count/max_count not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            validate_counts_in_autoscaler(5, True, None, None)
+            validate_counts_in_autoscaler(5, True, None, None, DecoratorMode.CREATE)
 
         # fail on min_count > max_count
         with self.assertRaises(InvalidArgumentValueError):
-            validate_counts_in_autoscaler(5, True, 3, 1)
+            validate_counts_in_autoscaler(5, True, 3, 1, DecoratorMode.CREATE)
 
-        # fail on node_count < min_count
+        # fail on node_count < min_count in create mode
         with self.assertRaises(InvalidArgumentValueError):
-            validate_counts_in_autoscaler(5, True, 7, 10)
+            validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.CREATE)
+
+        # skip node_count check in update mode
+        validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.UPDATE)
+        validate_counts_in_autoscaler(None, True, 7, 10, DecoratorMode.UPDATE)
 
         # fail on enable_cluster_autoscaler not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            validate_counts_in_autoscaler(5, False, 3, None)
+            validate_counts_in_autoscaler(5, False, 3, None, DecoratorMode.UPDATE)
 
 
 class AKSCreateModelsTestCase(unittest.TestCase):
