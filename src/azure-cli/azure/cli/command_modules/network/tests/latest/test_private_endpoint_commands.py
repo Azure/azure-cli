@@ -2196,7 +2196,7 @@ class NetworkPrivateLinkHDInsightScenarioTest(ScenarioTest):
     def test_private_link_resource_hdinsight(self, resource_group):
         self.kwargs.update({
             'resource_group': resource_group,
-            'cluster_id': '/subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/hdicsharprg8691/providers/Microsoft.HDInsight/clusters/hdisdk-pe7318',
+            'cluster_id': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicsharprg8691/providers/Microsoft.HDInsight/clusters/hdisdk-pe7318',
             'vnet_name': self.create_random_name('hdi-privatelink-vnet', 40),
             'subnet_name': self.create_random_name('hdi-privatelink-subnet', 40),
             'endpoint_name': self.create_random_name('hdi-privatelink-endpoint', 40),
