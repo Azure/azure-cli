@@ -1557,6 +1557,7 @@ def cli_cosmosdb_identity_remove(client,
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
 
+
 def _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import is_valid_resource_id, resource_id
