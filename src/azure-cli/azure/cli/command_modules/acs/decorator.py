@@ -4139,7 +4139,7 @@ class AKSUpdateDecorator:
         excluded_keys = ("cmd", "client", "resource_group_name", "name")
         # check whether the remaining parameters are set
         # the default value None or False (and other empty values, like empty string) will be considered as not set
-        is_changed = any([v for k, v in self.context.raw_param.items() if k not in excluded_keys])
+        is_changed = any(v for k, v in self.context.raw_param.items() if k not in excluded_keys)
 
         # special cases
         # some parameters support the use of empty string or dictionary to update/remove previously set values
@@ -4270,4 +4270,3 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
-        pass
