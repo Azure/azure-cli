@@ -72,7 +72,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_resource_group')
         g.command('namespace list', 'list_namespaces')
         g.wait_command('wait')
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.command('available-region', 'list_available_cluster_region')
         g.generic_update_command('update', getter_name='get', setter_name='update', custom_func_name='cli_cluster_update', custom_func_type=eventhubs_custom)
 
@@ -117,7 +117,7 @@ def load_command_table(self, _):
         g.command('keys list', 'list_keys')
 
 # NetwrokRuleSet Region
-    with self.command_group('eventhubs namespace network-rule', eh_namespace_util, min_api='2017-04-01', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace network-rule', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
         g.show_command('list', 'get_network_rule_set')
         g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)
