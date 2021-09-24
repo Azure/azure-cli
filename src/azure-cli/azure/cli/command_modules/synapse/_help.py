@@ -1971,9 +1971,9 @@ examples:
 
 helps['synapse spark-job-definition delete'] = """
 type: command
-short-summary: delete a spark job definition.
+short-summary: Delete a spark job definition.
 examples:
-  - name: delete a spark job definition.
+  - name: Delete a spark job definition.
     text: |-
         az synapse spark-job-definition delete --workspace-name testsynapseworkspace \\
           --name testsjdname
@@ -1981,15 +1981,15 @@ examples:
 
 helps['synapse spark-job-definition create'] = """
 type: command
-short-summary: create a spark job definition.
+short-summary: Create a spark job definition.
 examples:
-  - name: create a spark job definition.
+  - name: Create a spark job definition.
     text: |-
         az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
           --name testsjdname --file @path/notebook.ipynb/test.json
 """
 
-helps['synapse spark-job-definition wait'] = """
+helps['synapse spark-job-definition show'] = """
 type: command
 short-summary: Get a spark job definition.
 examples:
