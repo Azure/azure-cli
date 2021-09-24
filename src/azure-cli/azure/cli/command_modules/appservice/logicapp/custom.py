@@ -232,6 +232,7 @@ def list_logicapp(cmd, resource_group_name=None):
 def show_logicapp(cmd, resource_group_name, name):
     return _show_app(cmd, resource_group_name, name, cmd_app_type=APP_TYPE.LOGICAPP)
 
+
 def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):
     if runtime_version is None:
         runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]

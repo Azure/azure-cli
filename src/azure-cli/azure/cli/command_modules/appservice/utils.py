@@ -9,8 +9,6 @@ from knack.log import get_logger
 
 from azure.cli.core.azclierror import (RequiredArgumentMissingError)
 
-from ._client_factory import web_client_factory
-
 logger = get_logger(__name__)
 
 
