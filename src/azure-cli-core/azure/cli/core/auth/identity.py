@@ -33,8 +33,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         - service principal
         TODO: - managed identity
     """
-    # Whether token and secrets should be encrypted. Set it to False to disable token encryption.
-    token_encryption = True
+    # Whether token and secrets should be encrypted. Change its value to turn on/off token encryption.
+    token_encryption = False
 
     # HTTP cache for MSAL's tenant discovery, retry-after error cache, etc.
     # It must follow singleton pattern. Otherwise, a new dbm.dumb http_cache can read out-of-sync dat and dir.
@@ -60,8 +60,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self._http_cache_file = os.path.join(config_dir, "httpCache")
 
         # Prepare HTTP cache.
-        if not Identity.http_cache:
-            Identity.http_cache = self._load_http_cache()
+        # if not Identity.http_cache:
+        #     Identity.http_cache = self._load_http_cache()
 
         self._msal_app_instance = None
         # Store for Service principal credential persistence
@@ -220,7 +220,12 @@ class ServicePrincipalAuth:
 
     @classmethod
     def build_credential(cls, secret_or_certificate=None, federated_token=None, use_cert_sn_issuer=None):
-        """Build credential from user input.
+        """Build credential from user input. The credential looks like below, but only one key can exist.
+        {
+            "secret": "xxx",
+            "certificate": "/path/to/cert.pem",
+            "federated_token": "xxx"
+        }
         """
         entry = {}
         if secret_or_certificate:
