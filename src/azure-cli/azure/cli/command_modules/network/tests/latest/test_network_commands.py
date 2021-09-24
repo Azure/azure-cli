@@ -741,6 +741,14 @@ class NetworkAppGatewayTrustedClientCertScenarioTest(ScenarioTest):
         self.cmd('network application-gateway client-cert list -g {rg} --gateway-name {gw}',
                  checks=[self.check('length(@)', 2)])
 
+        self.cmd('network application-gateway client-cert update -g {rg} --gateway-name {gw} '
+                 '--name {cname1} --data "{cert}"')
+
+        cert = self.cmd('network application-gateway client-cert show -g {rg} --gateway-name {gw} --name {cname}').get_output_in_json()
+
+        self.cmd('network application-gateway client-cert show -g {rg} --gateway-name {gw} --name {cname1}',
+                 checks=[self.check('data', cert['data'])])
+
         self.cmd('network application-gateway client-cert remove -g {rg} --gateway-name {gw} --name {cname1}',
                  checks=[self.check('length(trustedClientCertificates)', 1)])
 
@@ -768,6 +776,13 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
                  '--client-auth-configuration True --min-protocol-version TLSv1_0 '
                  '--cipher-suites TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 --policy-type Custom',
                  checks=[self.check('length(sslProfiles)', 2)])
+
+        self.cmd('network application-gateway ssl-profile update -g {rg} --gateway-name {gw} --name {name1} '
+                 '--client-auth-configuration False',
+                 checks=[self.check('sslProfiles[1].clientAuthConfiguration.verifyClientCertIssuerDn', False)])
+
+        self.cmd('network application-gateway ssl-profile show -g {rg} --gateway-name {gw} --name {name1} ',
+                 checks=[self.check('clientAuthConfiguration.verifyClientCertIssuerDn', False)])
 
         self.cmd('network application-gateway ssl-profile list -g {rg} --gateway-name {gw}',
                  checks=[self.check('length(@)', 2)])

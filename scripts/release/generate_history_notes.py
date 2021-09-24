@@ -61,8 +61,9 @@ def get_component_dict():
 def generate_history_notes():
     get_component_dict()
     dev_commits = get_commits()
-    print("Get PRs for {} commits.".format(len(dev_commits)))
+    print("Get PRs for {} commits.".format(len(dev_commits)))
     for commit in dev_commits:
+        print("{} {}".format(commit['sha'], commit['subject']))
         prs = get_prs_for_commit(commit['sha'])
         # parse PR if one commit is mapped to one PR
         if len(prs) == 1:
@@ -169,7 +170,7 @@ def get_prs_for_commit(commit: str):
 
 def process_pr(pr):
     lines = [pr['title']]
-    body = pr['body']
+    body = pr['body'] or ''
     content = ''
     search_result = re.search(r'\*\*History Notes\*\*(.*)---',
                               body,

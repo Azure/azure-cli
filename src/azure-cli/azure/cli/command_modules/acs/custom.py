@@ -1658,6 +1658,11 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
         print(output)
+        test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
+        if test_hook_data:
+            test_configs = test_hook_data.get("configs", None)
+            if test_configs and test_configs.get("returnOutput", False):
+                return output
     else:
         raise AzureInternalError("Failed to check the ACR.")
 
@@ -1774,8 +1779,8 @@ def _aks_browse(
     test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
     if test_hook_data:
         test_configs = test_hook_data.get("configs", None)
-        if test_configs and test_configs.get("enableTimeout", None):
-            timeout = test_configs.get("timeoutInterval", 10)
+        if test_configs and test_configs.get("enableTimeout", False):
+            timeout = test_configs.get("timeoutInterval", None)
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(dashboardURL)
@@ -2247,7 +2252,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                    'azure-cli will grant Network Contributor role to the '
                    'system assigned identity after the cluster is created, and '
                    'the role assignment will take some time to take effect, see '
-                   'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, '
+                   'https://docs.microsoft.com/azure/aks/use-managed-identity, '
                    'proceed to create cluster with system assigned identity?')
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
@@ -2265,13 +2270,16 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 logger.warning('Could not create a role assignment for subnet. '
                                'Are you an Owner on this subscription?')
 
+    from azure.cli.command_modules.acs.decorator import AKSCreateModels
+    # store all the models used by load balancer
+    lb_models = AKSCreateModels(cmd).lb_models
     load_balancer_profile = create_load_balancer_profile(
-        cmd,
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
         load_balancer_outbound_ports,
-        load_balancer_idle_timeout)
+        load_balancer_idle_timeout,
+        models=lb_models)
 
     if attach_acr:
         if enable_managed_identity:
@@ -2958,14 +2966,17 @@ def aks_update(cmd, client, resource_group_name, name,
         )
 
     if update_lb_profile:
+        from azure.cli.command_modules.acs.decorator import AKSCreateModels
+        # store all the models used by load balancer
+        lb_models = AKSCreateModels(cmd).lb_models
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
-            cmd,
             load_balancer_managed_outbound_ip_count,
             load_balancer_outbound_ips,
             load_balancer_outbound_ip_prefixes,
             load_balancer_outbound_ports,
             load_balancer_idle_timeout,
-            instance.network_profile.load_balancer_profile)
+            instance.network_profile.load_balancer_profile,
+            models=lb_models)
 
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
