@@ -9,6 +9,7 @@ from unittest import mock
 import os
 import time
 import tempfile
+from azure_devtools.scenario_tests.utilities import create_random_name
 import requests
 import datetime
 
@@ -183,7 +184,7 @@ class WebappQuickCreateTest(ScenarioTest):
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
-        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
+        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), params={"echo": "Hello world"})
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
 
@@ -243,6 +244,7 @@ class WebappQuickCreateTest(ScenarioTest):
             self.fail(
                 "'Hello world' is not found in the web page. We get instead:" + str(r.content))
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_create_in_different_group(self, resource_group, resource_group_location, resource_group2, resource_group_location2):
@@ -251,17 +253,20 @@ class WebappQuickCreateTest(ScenarioTest):
                                                    resource_group_location))
         plan_id = self.cmd('appservice plan create -g {} -n {}'.format(
             resource_group, plan)).get_output_in_json()['id']
-        self.cmd('webapp create -g {} -n webInOtherRG --plan {}'.format(resource_group2, plan_id), checks=[
-            JMESPathCheck('name', 'webInOtherRG')
+        webapp_name = self.create_random_name(prefix="webapp", length=24)
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group2, webapp_name, plan_id), checks=[
+            JMESPathCheck('name', webapp_name)
         ])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name="resource_group_one", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     @ResourceGroupPreparer(parameter_name="resource_group_two", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_create_names_are_substrings(self, resource_group_one, resource_group_two):
-        webapp_name_one = "test-webapp-name-on"
-        webapp_name_two = "test-webapp-name-one"
-        webapp_name_three = "test-webapp-nam"
+
+        random_prefix = self.create_random_name("", 10)
+        webapp_name_one = random_prefix + "test-webapp-name-on"
+        webapp_name_two = random_prefix + "test-webapp-name-one"
+        webapp_name_three = random_prefix + "test-webapp-nam"
         plan_name_one = "webapp-plan-one"
         plan_name_two = "webapp-plan-two"
         plan_id_one = self.cmd('appservice plan create -g {} -n {}'.format(
