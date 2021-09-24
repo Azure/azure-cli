@@ -2081,6 +2081,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                assign_kubelet_identity=None,
                enable_ultra_ssd=False,
                edge_zone=None,
+               disable_local_accounts=False,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
@@ -2467,7 +2468,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         identity=identity,
         disk_encryption_set_id=node_osdisk_diskencryptionset_id,
         identity_profile=identity_profile,
-        auto_upgrade_profile=auto_upgrade_profile
+        auto_upgrade_profile=auto_upgrade_profile,
+        disable_local_accounts=bool(disable_local_accounts)
     )
 
     if disable_public_fqdn:
@@ -2795,6 +2797,8 @@ def aks_update(cmd, client, resource_group_name, name,
                auto_upgrade_channel=None,
                enable_managed_identity=False,
                assign_identity=None,
+               disable_local_accounts=False,
+               enable_local_accounts=False,
                yes=False,
                no_wait=False,
                enable_public_fqdn=False,
@@ -2843,6 +2847,8 @@ def aks_update(cmd, client, resource_group_name, name,
             not windows_admin_password and
             not enable_managed_identity and
             not assign_identity and
+            not enable_local_accounts and
+            not disable_local_accounts and
             not enable_public_fqdn and
             not disable_public_fqdn):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
@@ -2869,6 +2875,8 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--assign-identity" or '
                        '"--enable-azure-rbac" or '
                        '"--disable-azure-rbac" or '
+                       '"--enable-local-accounts" or '
+                       '"--disable-local-accounts" or '
                        '"--enable-public-fqdn" or '
                        '"--disable-public-fqdn"')
 
@@ -2965,6 +2973,16 @@ def aks_update(cmd, client, resource_group_name, name,
             name="Basic",
             tier="Free"
         )
+
+    if disable_local_accounts and enable_local_accounts:
+        raise CLIError('Cannot specify --disable-local-accounts and --enable-local-accounts '
+                       'at the same time.')
+
+    if disable_local_accounts:
+        instance.disable_local_accounts = True
+
+    if enable_local_accounts:
+        instance.disable_local_accounts = False
 
     if update_lb_profile:
         from azure.cli.command_modules.acs.decorator import AKSCreateModels
