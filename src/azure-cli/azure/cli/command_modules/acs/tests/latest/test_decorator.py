@@ -33,6 +33,7 @@ from azure.cli.command_modules.acs.decorator import (
     AKSCreateDecorator,
     AKSCreateModels,
     AKSUpdateDecorator,
+    format_parameter_name_to_option_name,
     safe_list_get,
     safe_lower,
     validate_counts_in_autoscaler,
@@ -57,6 +58,11 @@ from msrestazure.azure_exceptions import CloudError
 
 
 class DecoratorFunctionsTestCase(unittest.TestCase):
+    def test_format_parameter_name_to_option_name(self):
+        self.assertEqual(
+            format_parameter_name_to_option_name("abc_xyz"), "--abc-xyz"
+        )
+
     def test_safe_list_get(self):
         list_1 = [1, 2, 3]
         self.assertEqual(safe_list_get(list_1, 0), 1)
@@ -71,14 +77,18 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
 
     def test_validate_counts_in_autoscaler(self):
         # default
-        validate_counts_in_autoscaler(3, False, None, None, DecoratorMode.CREATE)
+        validate_counts_in_autoscaler(
+            3, False, None, None, DecoratorMode.CREATE
+        )
 
         # custom value
         validate_counts_in_autoscaler(5, True, 1, 10, DecoratorMode.CREATE)
 
         # fail on min_count/max_count not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            validate_counts_in_autoscaler(5, True, None, None, DecoratorMode.CREATE)
+            validate_counts_in_autoscaler(
+                5, True, None, None, DecoratorMode.CREATE
+            )
 
         # fail on min_count > max_count
         with self.assertRaises(InvalidArgumentValueError):
@@ -94,7 +104,9 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
 
         # fail on enable_cluster_autoscaler not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            validate_counts_in_autoscaler(5, False, 3, None, DecoratorMode.UPDATE)
+            validate_counts_in_autoscaler(
+                5, False, 3, None, DecoratorMode.UPDATE
+            )
 
 
 class AKSCreateModelsTestCase(unittest.TestCase):
@@ -748,7 +760,9 @@ class AKSCreateContextTestCase(unittest.TestCase):
             (5, True, 1, 10),
         )
 
-    def test_get_update_enable_disable_cluster_autoscaler_and_min_max_count(self):
+    def test_get_update_enable_disable_cluster_autoscaler_and_min_max_count(
+        self,
+    ):
         # default
         ctx_1 = AKSCreateContext(
             self.cmd,
@@ -2403,6 +2417,26 @@ class AKSCreateContextTestCase(unittest.TestCase):
         # fail on mutually exclusive enable_private_cluster and api_server_authorized_ip_ranges
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_4.get_api_server_authorized_ip_ranges()
+
+        # default (update mode)
+        ctx_5 = AKSCreateContext(
+            self.cmd,
+            {
+                "api_server_authorized_ip_ranges": None,
+            },
+            mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_5.get_api_server_authorized_ip_ranges(), None)
+
+        # custom value (update mode)
+        ctx_6 = AKSCreateContext(
+            self.cmd,
+            {
+                "api_server_authorized_ip_ranges": "",
+            },
+            mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_6.get_api_server_authorized_ip_ranges(), [])
 
     def test_get_fqdn_subdomain(self):
         # default
@@ -4434,34 +4468,28 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         self.models = AKSCreateModels(self.cmd)
         self.client = MockClient()
 
-    def test_record_is_updated(self):
+    def test_check_raw_parameters(self):
+        # default value in `aks_create`
         dec_1 = AKSUpdateDecorator(
             self.cmd,
             self.client,
             self.models,
             {},
         )
-        self.assertEqual(dec_1.context.intermediates.get("updated", None), None)
-        dec_1._AKSUpdateDecorator__record_is_updated(False)
-        self.assertEqual(
-            dec_1.context.intermediates.get("updated", None), False
-        )
-        dec_1._AKSUpdateDecorator__record_is_updated(True)
-        self.assertEqual(dec_1.context.intermediates.get("updated", None), True)
-
-    def test_check_is_updated(self):
-        dec_1 = AKSUpdateDecorator(
-            self.cmd,
-            self.client,
-            self.models,
-            {},
-        )
-        dec_1._AKSUpdateDecorator__record_is_updated(False)
-        # fail on nothing updated
         with self.assertRaises(RequiredArgumentMissingError):
-            dec_1._AKSUpdateDecorator__check_is_updated()
-        dec_1._AKSUpdateDecorator__record_is_updated(True)
-        dec_1._AKSUpdateDecorator__check_is_updated()
+            dec_1.check_raw_parameters()
+
+        # custom value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "cluster_autoscaler_profile": "",
+                "api_server_authorized_ip_ranges": "",
+            },
+        )
+        dec_2.check_raw_parameters()
 
     def test_fetch_mc(self):
         mock_mc = self.models.ManagedCluster(
@@ -4515,7 +4543,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             ],
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
-        self.assertEqual(dec_1.context.get_intermediate("updated"), False)
 
         # custom value
         dec_2 = AKSUpdateDecorator(
@@ -4543,27 +4570,28 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             agent_pool_profiles=[agent_pool_profile_2],
             auto_scaler_profile=self.models.ManagedClusterPropertiesAutoScalerProfile(
                 scan_interval="10s",
-            )
+            ),
         )
         dec_2.context.attach_mc(mc_2)
         # fail on passing the wrong mc object
         with self.assertRaises(CLIInternalError):
             dec_2.update_auto_scaler_profile(None)
         dec_mc_2 = dec_2.update_auto_scaler_profile(mc_2)
-        ground_truth_agent_pool_profile_2 = self.models.ManagedClusterAgentPoolProfile(
-            name="nodepool1",
-            count=3,
-            enable_auto_scaling=True,
-            min_count=3,
-            max_count=10,
+        ground_truth_agent_pool_profile_2 = (
+            self.models.ManagedClusterAgentPoolProfile(
+                name="nodepool1",
+                count=3,
+                enable_auto_scaling=True,
+                min_count=3,
+                max_count=10,
+            )
         )
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location",
             agent_pool_profiles=[ground_truth_agent_pool_profile_2],
-            auto_scaler_profile={}
+            auto_scaler_profile={},
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
-        self.assertEqual(dec_2.context.get_intermediate("updated"), True)
 
         # custom value
         dec_3 = AKSUpdateDecorator(
@@ -4591,26 +4619,27 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             agent_pool_profiles=[agent_pool_profile_3],
             auto_scaler_profile=self.models.ManagedClusterPropertiesAutoScalerProfile(
                 scan_interval="10s",
-            )
+            ),
         )
         dec_3.context.attach_mc(mc_3)
         dec_mc_3 = dec_3.update_auto_scaler_profile(mc_3)
-        ground_truth_agent_pool_profile_3 = self.models.ManagedClusterAgentPoolProfile(
-            name="nodepool1",
-            count=3,
-            enable_auto_scaling=False,
-            min_count=None,
-            max_count=None,
+        ground_truth_agent_pool_profile_3 = (
+            self.models.ManagedClusterAgentPoolProfile(
+                name="nodepool1",
+                count=3,
+                enable_auto_scaling=False,
+                min_count=None,
+                max_count=None,
+            )
         )
         ground_truth_mc_3 = self.models.ManagedCluster(
             location="test_location",
             agent_pool_profiles=[ground_truth_agent_pool_profile_3],
             auto_scaler_profile=self.models.ManagedClusterPropertiesAutoScalerProfile(
                 scan_interval="10s",
-            )
+            ),
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
-        self.assertEqual(dec_3.context.get_intermediate("updated"), True)
 
     def test_update_default_mc_profile(self):
         pass

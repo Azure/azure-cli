@@ -78,6 +78,18 @@ ResourceReference = TypeVar("ResourceReference")
 # add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
 
 
+def format_parameter_name_to_option_name(parameter_name: str) -> str:
+    """Convert a name in parameter format to option format.
+
+    Underscores ("_") are used to connect the various parts of a parameter name, while hyphens ("-") are used to connect
+    each part of an option name. Besides, the option name starts with double hyphens ("--").
+
+    :return: str
+    """
+    option_name = "--" + parameter_name.replace("_", "-")
+    return option_name
+
+
 def safe_list_get(li: List, idx: int, default: Any = None) -> Any:
     """Get an element from a list without raising IndexError.
 
@@ -303,7 +315,7 @@ class AKSCreateModels:
             operation_group="managed_clusters",
         )
         self.lb_models = lb_models
-        # uncomment the followings to add these models as class attributes
+        # Note: Uncomment the followings to add these models as class attributes.
         # for model_name, model_type in lb_models.items():
         #     setattr(self, model_name, model_type)
 
@@ -2929,28 +2941,41 @@ class AKSCreateContext:
         api_server_authorized_ip_ranges = self.raw_param.get(
             "api_server_authorized_ip_ranges"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        read_from_mc = False
-        if (
-            self.mc and
-            self.mc.api_server_access_profile and
-            self.mc.api_server_access_profile.authorized_ip_ranges is not None
-        ):
-            api_server_authorized_ip_ranges = (
-                self.mc.api_server_access_profile.authorized_ip_ranges
-            )
-            read_from_mc = True
 
-        # normalize
-        if not read_from_mc:
-            api_server_authorized_ip_ranges = [
-                x.strip()
-                for x in (
-                    api_server_authorized_ip_ranges.split(",")
-                    if api_server_authorized_ip_ranges
-                    else []
+        if self.mode == DecoratorMode.CREATE:
+            # try to read the property value corresponding to the parameter from the `mc` object
+            read_from_mc = False
+            if (
+                self.mc and
+                self.mc.api_server_access_profile and
+                self.mc.api_server_access_profile.authorized_ip_ranges is not None
+            ):
+                api_server_authorized_ip_ranges = (
+                    self.mc.api_server_access_profile.authorized_ip_ranges
                 )
-            ]
+                read_from_mc = True
+
+            # normalize
+            if not read_from_mc:
+                api_server_authorized_ip_ranges = [
+                    x.strip()
+                    for x in (
+                        api_server_authorized_ip_ranges.split(",")
+                        if api_server_authorized_ip_ranges
+                        else []
+                    )
+                ]
+        elif self.mode == DecoratorMode.UPDATE:
+            # normalize
+            if api_server_authorized_ip_ranges is not None:
+                api_server_authorized_ip_ranges = [
+                    x.strip()
+                    for x in (
+                        api_server_authorized_ip_ranges.split(",")
+                        if api_server_authorized_ip_ranges
+                        else []
+                    )
+                ]
 
         # validation
         if api_server_authorized_ip_ranges:
@@ -4101,27 +4126,39 @@ class AKSUpdateDecorator:
         # store the context in the process of assemble the ManagedCluster object
         self.context = AKSCreateContext(cmd, raw_parameters, mode=DecoratorMode.UPDATE)
 
-    def __record_is_updated(self, is_updated, intermediate_name="updated") -> None:
-        """Helper function to record an indicator of the update status.
+    def check_raw_parameters(self):
+        """Helper function to check whether any parameters are set.
 
-        This function will record an indicator indicating the status of the update. The indicator is a boolean
-        intermediate value, once updated, it will be set to True. The purpose is to identify whether the `mc` object
-        has been updated.
-
-        :return: None
-        """
-        previous_state = self.context.get_intermediate(intermediate_name, default_value=False)
-        self.context.set_intermediate(intermediate_name, is_updated or previous_state, overwrite_exists=True)
-
-    def __check_is_updated(self, intermediate_name="updated") -> None:
-        """Helper function to check the update status indicator.
-
-        If the value of the indicator is False, it will throw a RequiredArgumentMissingError.
+        If the values of all the parameters are the default values, the command execution will be terminated early and
+        raise a RequiredArgumentMissingError. Neither the request to fetch or update the ManagedCluster object will be
+        sent.
 
         :return: None
         """
-        is_updated = self.context.get_intermediate(intermediate_name, default_value=False)
-        if not is_updated:
+        # exclude some irrelevant or mandatory parameters
+        excluded_keys = ("cmd", "client", "resource_group_name", "name")
+        # check whether the remaining parameters are set
+        # the default value None or False (and other empty values, like empty string) will be considered as not set
+        is_changed = any([v for k, v in self.context.raw_param.items() if k not in excluded_keys])
+
+        # special cases
+        # some parameters support the use of empty string or dictionary to update/remove previously set values
+        is_default = (
+            self.context.get_cluster_autoscaler_profile() is None and
+            self.context.get_api_server_authorized_ip_ranges() is None
+        )
+
+        if not is_changed and is_default:
+            # Note: Uncomment the followings to automatically generate the error message.
+            # option_names = [
+            #     '"{}"'.format(format_parameter_name_to_option_name(x))
+            #     for x in self.context.raw_param.keys()
+            #     if x not in excluded_keys
+            # ]
+            # error_msg = "Please specify one or more of {}.".format(
+            #     " or ".join(option_names)
+            # )
+            # raise RequiredArgumentMissingError(error_msg)
             raise RequiredArgumentMissingError(
                 'Please specify one or more of "--enable-cluster-autoscaler" or '
                 '"--disable-cluster-autoscaler" or '
@@ -4174,8 +4211,6 @@ class AKSUpdateDecorator:
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
 
-        # record whether the `mc` object has been updated
-        is_updated = False
         (
             update_cluster_autoscaler,
             enable_cluster_autoscaler,
@@ -4190,22 +4225,17 @@ class AKSUpdateDecorator:
             mc.agent_pool_profiles[0].enable_auto_scaling = True
             mc.agent_pool_profiles[0].min_count = int(min_count)
             mc.agent_pool_profiles[0].max_count = int(max_count)
-            is_updated = True
 
         if disable_cluster_autoscaler:
             mc.agent_pool_profiles[0].enable_auto_scaling = False
             mc.agent_pool_profiles[0].min_count = None
             mc.agent_pool_profiles[0].max_count = None
-            is_updated = True
 
         cluster_autoscaler_profile = self.context.get_cluster_autoscaler_profile()
         if cluster_autoscaler_profile is not None:
             # update profile (may clear profile with empty dictionary)
             mc.auto_scaler_profile = cluster_autoscaler_profile
-            is_updated = True
 
-        # record is_updated
-        self.__record_is_updated(is_updated)
         return mc
 
     def update_default_mc_profile(self) -> ManagedCluster:
@@ -4219,6 +4249,8 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
+        # check raw parameters
+        self.check_raw_parameters()
         # fetch the ManagedCluster object
         mc = self.fetch_mc()
         # update auto scaler profile
@@ -4238,5 +4270,4 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
-        # check is_updated
-        self.__check_is_updated()
+        pass
