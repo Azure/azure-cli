@@ -281,8 +281,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         backup_retention_arg_type = CLIArgumentType(
             type=int,
             options_list=['--backup-retention'],
-            help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
-            validator=retention_validator
+            help='The number of days a backup is retained. Range of 1 to 35 days. Default is 7 days.'
         )
 
         version_arg_type = CLIArgumentType(
