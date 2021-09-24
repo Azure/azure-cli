@@ -57,8 +57,7 @@ class LogicappBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].name', logicapp_name)
         ])
 
-        self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file),
-        checks=[
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file)).assert_with_checks([
             JMESPathCheck('deployer', 'ZipDeploy')
         ])
         self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
