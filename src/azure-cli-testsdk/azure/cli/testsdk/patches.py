@@ -7,7 +7,6 @@ from azure_devtools.scenario_tests import mock_in_unit_test
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 from .exceptions import CliExecutionError
-from .constants import AUX_SUBSCRIPTION, AUX_TENANT
 
 MOCKED_USER_NAME = 'example@example.com'
 
