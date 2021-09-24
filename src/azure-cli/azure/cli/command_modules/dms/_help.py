@@ -242,10 +242,10 @@ parameters:
                         ...n
                     },
                     // Optional parameter to list tables that you want included in the migration.
-                    "selectedTables": [
-                        "schemaName1.tableName1",
-                        ...n
-                    ]
+                    "table_map": {
+                      "sourceSchema.tableName": "targetSchema.tableName",
+                      "sourceSchema.tableName": "targetSchema.tableName",
+                      "sourceSchema.tableName": "targetSchema.tableName"}
                 },
                 ...n
             ]

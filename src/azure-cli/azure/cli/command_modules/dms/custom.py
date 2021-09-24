@@ -162,7 +162,7 @@ def create_task(cmd,
                 enable_schema_validation=False,
                 enable_data_integrity_validation=False,
                 enable_query_analysis_validation=False):
-                
+
     # Get source and target platform abd set inputs to lowercase
     source_platform, target_platform = get_project_platforms(cmd,
                                                              project_name=project_name,
@@ -198,6 +198,7 @@ for the supported scenarios.")
                                                     enable_query_analysis_validation)
 
     parameters = ProjectTask(properties=task_properties)
+    print("Log " + str(parameters.properties.serialize()))
     return client.create_or_update(group_name=resource_group_name,
                                    service_name=service_name,
                                    project_name=project_name,
@@ -431,9 +432,6 @@ def get_task_properties(scenario_type,
 def get_scenario_type(source_platform, target_platform, task_type=""):
     if source_platform == "sql" and target_platform == "sqldb":
         scenario_type = ScenarioType.sql_sqldb_offline if not task_type or "offline" in task_type else \
-            ScenarioType.unknown
-    elif source_platform == "mysql" and target_platform == "azuredbformysql":
-        scenario_type = ScenarioType.mysql_azuremysql_online if not task_type or "online" in task_type else \
             ScenarioType.unknown
     elif source_platform == "mysql" and target_platform == "azuredbformysql":
         scenario_type = ScenarioType.mysql_azuremysql_offline if not task_type or "offline" in task_type else \
