@@ -1229,6 +1229,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', nargs='+',
                    help='Space-separated tags. Each tag should be 3 to 23 alphanumeric characters and is normalized '
                         'to lower case')
+        c.argument('allow_protected_append_writes_all',
+                   help="When enabled, new blocks can be written to both Append and Block Blobs while maintaining "
+                        "legal hold protection and compliance. Only new blocks can be added and any existing blocks "
+                        "cannot be modified or deleted.")
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
