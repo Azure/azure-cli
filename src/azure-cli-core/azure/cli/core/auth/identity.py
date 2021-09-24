@@ -28,27 +28,25 @@ logger = get_logger(__name__)
 
 
 class Identity:  # pylint: disable=too-many-instance-attributes
-    """Class to interact with Azure Identity.
+    """Class to manage identities:
+        - user
+        - service principal
+        TODO: - managed identity
     """
-    MANAGED_IDENTITY_TENANT_ID = "tenant_id"
-    MANAGED_IDENTITY_CLIENT_ID = "client_id"
-    MANAGED_IDENTITY_OBJECT_ID = "object_id"
-    MANAGED_IDENTITY_RESOURCE_ID = "resource_id"
-    MANAGED_IDENTITY_SYSTEM_ASSIGNED = 'systemAssignedIdentity'
-    MANAGED_IDENTITY_USER_ASSIGNED = 'userAssignedIdentity'
-    MANAGED_IDENTITY_TYPE = 'type'
-    MANAGED_IDENTITY_ID_TYPE = "id_type"
-
-    CLOUD_SHELL_IDENTITY_UNIQUE_NAME = "unique_name"
-
+    # Whether token and secrets should be encrypted. Set it to False to disable token encryption.
     token_encryption = True
 
-    def __init__(self, authority=None, tenant_id=None, client_id=None, **kwargs):
+    # HTTP cache for MSAL's tenant discovery, retry-after error cache, etc.
+    # It must follow singleton pattern. Otherwise, a new dbm.dumb http_cache can read out-of-sync dat and dir.
+    # https://github.com/AzureAD/microsoft-authentication-library-for-python/pull/407
+    http_cache = None
+
+    def __init__(self, authority=None, tenant_id=None, client_id=None):
         """
 
-        :param authority:
-        :param tenant_id:
-        :param client_id::param kwargs:
+        :param authority: AAD endpoint, like https://login.microsoftonline.com/
+        :param tenant_id: Tenant GUID, like 00000000-0000-0000-0000-000000000000
+        :param client_id: Client ID of the CLI application.
         """
         self.authority = authority
         self.tenant_id = tenant_id or "organizations"
@@ -56,43 +54,26 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.msal_authority = "{}/{}".format(self.authority, self.tenant_id)
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
 
-        self._token_cache_file = os.path.join(get_config_dir(), "tokenCache")
-        self._secret_file = os.path.join(get_config_dir(), "secrets")
+        config_dir = get_config_dir()
+        self._token_cache_file = os.path.join(config_dir, "tokenCache")
+        self._secret_file = os.path.join(config_dir, "secrets")
+        self._http_cache_file = os.path.join(config_dir, "httpCache")
+
+        # Prepare HTTP cache.
+        if not Identity.http_cache:
+            import atexit
+            import shelve
+            Identity.http_cache = persisted_http_cache = shelve.open(self._http_cache_file)
+            atexit.register(persisted_http_cache.close)
 
         self._msal_app_instance = None
         # Store for Service principal credential persistence
         self._msal_secret_store = ServicePrincipalStore(self._secret_file, self.token_encryption)
         self._msal_app_kwargs = {
             "authority": self.msal_authority,
-            "token_cache": self._load_msal_cache()
+            "token_cache": self._load_msal_cache(),
+            "http_cache": Identity.http_cache
         }
-
-        # TODO: Allow disabling SSL verification
-        # The underlying requests lib of MSAL has been patched with Azure Core by MsalTransportAdapter
-        # connection_verify will be received by azure.core.configuration.ConnectionConfiguration
-        # However, MSAL defaults verify to True, thus overriding ConnectionConfiguration
-        # Still not work yet
-        from azure.cli.core._debug import change_ssl_cert_verification_track2
-        self._credential_kwargs = {}
-        self._credential_kwargs.update(change_ssl_cert_verification_track2())
-
-        # Turn on NetworkTraceLoggingPolicy to show DEBUG logs.
-        # WARNING: This argument is only for development purpose. It will make credentials be printed to
-        #   - console log, when --debug is specified
-        #   - file log, when logging.enable_log_file is enabled, even without --debug
-        # Credentials include and are not limited to:
-        #   - Authorization code
-        #   - Device code
-        #   - Refresh token
-        #   - Access token
-        #   - Service principal secret
-        #   - Service principal certificate
-        self._credential_kwargs['logging_enable'] = True
-
-        # Make MSAL remove existing accounts on successful login.
-        # self._credential_kwargs['remove_existing_account'] = True
-        # from azure.cli.core._msal_patch import patch_token_cache_add
-        # patch_token_cache_add(self.msal_app.remove_account)
 
     def _load_msal_cache(self):
         from .persistence import load_persisted_token_cache

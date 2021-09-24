@@ -123,10 +123,7 @@ class Profile:
         self._authority = self.cli_ctx.cloud.endpoints.active_directory
         self._arm_scope = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
-        if sys.platform.startswith('win32'):
-            token_encryption_fallback = True
-        else:
-            token_encryption_fallback = False
+        token_encryption_fallback = sys.platform.startswith('win32')
         Identity.token_encryption = self.cli_ctx.config.getboolean('core', 'token_encryption',
                                                                    fallback=token_encryption_fallback)
 
@@ -731,9 +728,7 @@ class SubscriptionFinder:
 
             logger.info("Finding subscriptions under tenant %s", t.tenant_id_name)
 
-            identity = Identity(self.authority, tenant_id,
-                                allow_unencrypted=self.cli_ctx.config
-                                .getboolean('core', 'allow_fallback_to_plaintext', fallback=True))
+            identity = Identity(self.authority, tenant_id)
 
             specific_tenant_credential = identity.get_user_credential(username)
 
