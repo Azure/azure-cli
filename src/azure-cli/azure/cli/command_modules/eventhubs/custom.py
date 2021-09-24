@@ -264,7 +264,7 @@ def cli_eventhubautho_create(client, resource_group_name, namespace_name, event_
     )
 
 
-def cli_eventhub_keys_renew(client, resource_group_name, namespace_name,event_hub_name, name, key_type, key=None):
+def cli_eventhub_keys_renew(client, resource_group_name, namespace_name, event_hub_name, name, key_type, key=None):
     return client.regenerate_keys(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -274,7 +274,7 @@ def cli_eventhub_keys_renew(client, resource_group_name, namespace_name,event_hu
     )
 
 
-#ConsumerGroup region
+# ConsumerGroup region
 def cli_consumergroup_create(client, resource_group_name, namespace_name, event_hub_name, name, user_metadata=None):
     from azure.cli.command_modules.servicebus._utils import accessrights_converter
     return client.create_or_update(
@@ -289,7 +289,7 @@ def cli_consumergroup_create(client, resource_group_name, namespace_name, event_
 def cli_consumergroup_update(cmd, instance, user_metadata=None):
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         if user_metadata:
-            instance.user_metadata=user_metadata
+            instance.user_metadata = user_metadata
 
     return instance
 
@@ -345,15 +345,15 @@ def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, sub
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
-#GeoDR region
+# GeoDR region
 def cli_geodr_name_exists(client, resource_group_name, namespace_name, name):
 
     return client.check_name_availability(resource_group_name, namespace_name, parameters={'name': name})
 
 
-def cli_geodr_create(client, resource_group_name, namespace_name, alias, partner_namespace=None, alternate_name=None ):
+def cli_geodr_create(client, resource_group_name, namespace_name, alias, partner_namespace=None, alternate_name=None):
 
     return client.create_or_update(resource_group_name,
                                    namespace_name,
                                    alias,
-                                   parameters={'partner_namespace':partner_namespace, 'alternate_name':alternate_name})
+                                   parameters={'partner_namespace': partner_namespace, 'alternate_name': alternate_name})

@@ -74,7 +74,7 @@ def load_command_table(self, _):
         g.wait_command('wait')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.command('available-region', 'list_available_cluster_region')
-        g.generic_update_command('update', getter_name='get', setter_name='update', custom_func_name='cli_cluster_update', custom_func_type=eventhubs_custom)
+        g.generic_update_command('update', getter_name='get', setter_name='begin_update', custom_func_name='cli_cluster_update', custom_func_type=eventhubs_custom)
 
 # EventHub Region
     with self.command_group('eventhubs eventhub', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:
