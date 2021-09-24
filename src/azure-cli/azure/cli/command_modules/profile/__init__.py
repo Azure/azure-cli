@@ -78,7 +78,8 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('account get-access-token') as c:
             c.argument('resource_type', get_enum_type(cloud_resource_types), options_list=['--resource-type'], arg_group='', help='Type of well-known resource.')
-            c.argument('scopes', options_list=['--scope'], nargs='*', arg_group='MSAL', help='Space-separated AAD scopes in AAD v2.0.')
+            c.argument('resource', options_list=['--resource'], help='Azure resource endpoints in AAD v1.0.')
+            c.argument('scopes', options_list=['--scope'], nargs='*', help='Space-separated AAD scopes in AAD v2.0. Default to Azure Resource Manager.')
             c.argument('tenant', options_list=['--tenant', '-t'], help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
 
 

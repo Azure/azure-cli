@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -106,8 +104,7 @@ def account_clear(cmd):
 
 # pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, environment=False,
-          scopes=None, federated_token=None):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, federated_token=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -115,8 +112,6 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
-    if any([password, service_principal, username, identity, use_device_code]) and environment:
-        raise CLIError("usage error: '--environment' is not applicable with other arguments")
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:

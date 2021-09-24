@@ -8,12 +8,12 @@ import os
 
 import configparser
 from knack.log import get_logger
-from knack.prompting import prompt, prompt_y_n, prompt_choice_list, prompt_pass, NoTTYException
+from knack.prompting import prompt, prompt_y_n, prompt_choice_list, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core.util import ConfiguredDefaultSetter
 
-from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METHOD_LIST,
+from azure.cli.command_modules.configure._consts import (OUTPUT_LIST,
                                                          MSG_INTRO,
                                                          MSG_CLOSING,
                                                          MSG_GLOBAL_SETTINGS_LOCATION,
@@ -21,7 +21,6 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_HEADING_ENV_VARS,
                                                          MSG_PROMPT_MANAGE_GLOBAL,
                                                          MSG_PROMPT_GLOBAL_OUTPUT,
-                                                         MSG_PROMPT_LOGIN,
                                                          MSG_PROMPT_TELEMETRY,
                                                          MSG_PROMPT_FILE_LOGGING,
                                                          MSG_PROMPT_CACHE_TTL,
