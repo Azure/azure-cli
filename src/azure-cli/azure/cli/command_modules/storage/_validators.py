@@ -1872,10 +1872,17 @@ def validate_policy(namespace):
 
 
 def validate_allow_protected_append_writes_all(namespace):
-    if namespace.allow_protected_append_writes_all is not None and namespace.allow_protected_append_writes is not None:
-        from azure.cli.core.azclierror import InvalidArgumentValueError
-        raise InvalidArgumentValueError("The 'allow-protected-append-writes' and 'allow-protected-append-writes-all' "
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if namespace.allow_protected_append_writes_all and namespace.allow_protected_append_writes:
+        raise InvalidArgumentValueError("usage error: The 'allow-protected-append-writes' "
+                                        "and 'allow-protected-append-writes-all' "
                                         "properties are mutually exclusive. 'allow-protected-append-writes-all' allows "
                                         "new blocks to be written to both Append and Block Blobs, while "
                                         "'allow-protected-append-writes' allows new blocks to be written to "
-                                        "Append Blobs only")
+                                        "Append Blobs only.")
+
+    if namespace.allow_protected_append_writes_all or namespace.allow_protected_append_writes:
+        if not namespace.period:
+            raise InvalidArgumentValueError(
+                "usage error: The 'period' needs to be specified if either 'allow-protected-append-writes' or "
+                "'allow-protected-append-writes-all' is specified.")

@@ -1199,8 +1199,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                           " ExtendImmutabilityPolicy API. The "
                                                           "'allowProtectedAppendWrites' and "
                                                           "'allowProtectedAppendWritesAll' properties are mutually "
-                                                          "exclusive.",
-                    validator=validate_allow_protected_append_writes_all)
+                                                          "exclusive.")
             c.extra('period', type=int, help='The immutability period for the blobs in the container since the policy '
                                              'creation, in days.')
             c.ignore('parameters')
@@ -1229,10 +1228,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', nargs='+',
                    help='Space-separated tags. Each tag should be 3 to 23 alphanumeric characters and is normalized '
                         'to lower case')
-        c.argument('allow_protected_append_writes_all',
-                   help="When enabled, new blocks can be written to both Append and Block Blobs while maintaining "
-                        "legal hold protection and compliance. Only new blocks can be added and any existing blocks "
-                        "cannot be modified or deleted.")
+    for item in ['set', 'clear']:
+        with self.argument_context(f'storage container legal-hold {item}') as c:
+            c.extra('allow_protected_append_writes_all', options_list=['--allow-protected-append-writes-all',
+                                                                       '--w-all'],
+                       arg_type=get_three_state_flag(),
+                       help="When enabled, new blocks can be written to both Append and Block Blobs while maintaining "
+                            "legal hold protection and compliance. Only new blocks can be added and any existing blocks "
+                            "cannot be modified or deleted.")
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
