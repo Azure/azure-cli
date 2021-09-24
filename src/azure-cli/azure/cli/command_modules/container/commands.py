@@ -27,6 +27,6 @@ def load_command_table(self, _):
         g.custom_command('attach', 'attach_to_container')
 
     with self.command_group('container', container_group_sdk) as g:
-        g.command('restart', 'restart', supports_no_wait=True)
+        g.command('restart', 'begin_restart', supports_no_wait=True)
         g.command('stop', 'stop')
-        g.command('start', 'start', supports_no_wait=True)
+        g.command('start', 'begin_start', supports_no_wait=True)

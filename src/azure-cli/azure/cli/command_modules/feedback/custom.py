@@ -370,6 +370,13 @@ def _build_issue_info_tup(command_log_file=None):
     format_dict["cli_version"] = _get_az_version_summary()
     format_dict["python_info"] = "Python {}".format(platform.python_version())
     platform_info = "{} (Cloud Shell)".format(platform.platform()) if in_cloud_console() else platform.platform()
+
+    try:
+        import distro
+        platform_info = '{}, {}'.format(platform_info, distro.name(pretty=True))
+    except ImportError:
+        pass
+
     format_dict["platform"] = platform_info
     format_dict["auto_gen_comment"] = _AUTO_GEN_COMMENT
     from azure.cli.core._environment import _ENV_AZ_INSTALLER

@@ -244,3 +244,9 @@ def _validate_service_tag_existence(cmd, namespace):
         if rule.ip_address and rule.ip_address.lower() == input_tag_value.lower():
             raise ArgumentUsageError('Service Tag: ' + namespace.service_tag + ' already exists. '
                                      'Cannot add duplicate Service Tag values.')
+
+
+def validate_public_cloud(cmd):
+    from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+    if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
+        raise CLIError('This command is not yet supported on soveriegn clouds.')

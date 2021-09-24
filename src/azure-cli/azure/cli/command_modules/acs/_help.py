@@ -225,6 +225,9 @@ parameters:
     short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
     populator-commands:
       - "`az aks get-versions`"
+  - name: --os-sku
+    type: string
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner.
   - name: --ssh-key-value
     type: string
     short-summary: Public key path or key contents to install on node VMs for SSH access. For example, 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'.
@@ -240,7 +243,7 @@ parameters:
           - Disallowed values: "administrator", "admin", "user", "user1", "test", "user2", "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm", "admin2", "aspnet", "backup", "console", "david", "guest", "john", "owner", "root", "server", "sql", "support", "support_388945a0", "sys", "test2", "test3", "user4", "user5".
           - Minimum-length: 1 character
           - Max-length: 20 characters
-      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminusername?view=azure-dotnet
+      Reference: https://docs.microsoft.com/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminusername?view=azure-dotnet
   - name: --windows-admin-password
     type: string
     short-summary: User account password to use on windows node VMs.
@@ -254,7 +257,7 @@ parameters:
             * Has a digit
             * Has a special character (Regex match [\\W_])
           - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
-      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
+      Reference: https://docs.microsoft.com/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
   - name: --enable-ahub
     type: bool
     short-summary: Enable Azure Hybrid User Benefits (AHUB) for Windows VMs.
@@ -312,6 +315,9 @@ parameters:
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
     long-summary: Select between loadBalancer and userDefinedRouting. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
+  - name: --auto-upgrade-channel
+    type: string
+    short-summary: Specify the upgrade channel for autoupgrade.
   - name: --enable-cluster-autoscaler
     type: bool
     short-summary: Enable cluster autoscaler, default value is false.
@@ -502,6 +508,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --assign-identity <control-plane-identity-resource-id> --assign-kubelet-identity <kubelet-identity-resource-id>
   - name: Create a kubernetes cluster in the Edge Zone.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --location <location> --kubernetes-version 1.20.7 --edge-zone <edge-zone-name>
+  - name: Create a kubernetes cluster with a specific OS SKU
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu
 """
 
 helps['aks update'] = """
@@ -549,6 +557,9 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --auto-upgrade-channel
+    type: string
+    short-summary: Specify the upgrade channel for autoupgrade.
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -586,7 +597,7 @@ parameters:
             * Has a digit
             * Has a special character (Regex match [\\W_])
           - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
-      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
+      Reference: https://docs.microsoft.com/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
   - name: --enable-managed-identity
     type: bool
     short-summary: Update current cluster to use managed identity to manage cluster resource group.
@@ -815,6 +826,9 @@ parameters:
   - name: --os-type
     type: string
     short-summary: The OS Type. Linux or Windows.
+  - name: --os-sku
+    type: string
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -858,6 +872,9 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
   - name: Create a nodepool with UltraSSD enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-ultra-ssd
+  - name: Create a nodepool cluster with a specific OS SKU
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku Ubuntu
+
 """
 
 helps['aks nodepool delete'] = """
@@ -943,7 +960,7 @@ parameters:
     short-summary: Only upgrade agent pool's node image.
   - name: --max-surge
     type: string
-    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
 """
 
 helps['aks remove-dev-spaces'] = """

@@ -19,6 +19,8 @@ def register_providers():
     _register_one_provider("Microsoft.Automation/automationAccounts", "2020-01-13-preview", True)
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
     _register_one_provider("Microsoft.Batch/batchAccounts", "2020-03-01", True)
+    _register_one_provider("Microsoft.BotService/botServices", "2021-03-01", True)
+
     # "Microsoft.Cache/redisEnterprise", "2021-03-01", True
     _register_one_provider('Microsoft.CognitiveServices/accounts', '2021-04-30', True)
     _register_one_provider('Microsoft.Compute/diskAccesses', '2020-09-30', True)
@@ -32,6 +34,7 @@ def register_providers():
     _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
     _register_one_provider("Microsoft.EventHub/namespaces", "2018-01-01-preview", True)
+    _register_one_provider("Microsoft.HDInsight/clusters", '2018-06-01-preview', True)
     _register_one_provider("Microsoft.HealthcareApis/services", "2020-03-30", True)
     _register_one_provider('microsoft.insights/privateLinkScopes', '2019-10-17-preview', True)
     _register_one_provider('Microsoft.KeyVault/managedHSMs', '2021-04-01-preview', True)
@@ -41,7 +44,7 @@ def register_providers():
     # "Microsoft.Migrate/migrateProjects", "2020-06-01-preview", False
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
     # "Microsoft.OffAzure/masterSites", "2020-07-07", False
-    # "Microsoft.Purview/accounts", "2020-12-01-preview", True
+    _register_one_provider("Microsoft.Purview/accounts", "2021-07-01", True)
     _register_one_provider('Microsoft.PowerBI/privateLinkServicesForPowerBI', '2020-06-01', False)
     _register_one_provider('Microsoft.Search/searchServices', '2020-08-01', True)
     _register_one_provider("Microsoft.ServiceBus/namespaces", "2018-01-01-preview", True)

@@ -1657,8 +1657,14 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     except subprocess.CalledProcessError as err:
         raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
     if output:
-        return output
-    raise AzureInternalError("Failed to check the ACR.")
+        print(output)
+        test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
+        if test_hook_data:
+            test_configs = test_hook_data.get("configs", None)
+            if test_configs and test_configs.get("returnOutput", False):
+                return output
+    else:
+        raise AzureInternalError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -1773,8 +1779,8 @@ def _aks_browse(
     test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
     if test_hook_data:
         test_configs = test_hook_data.get("configs", None)
-        if test_configs and test_configs.get("enableTimeout", None):
-            timeout = test_configs.get("timeoutInterval", 10)
+        if test_configs and test_configs.get("enableTimeout", False):
+            timeout = test_configs.get("timeoutInterval", None)
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async(dashboardURL)
@@ -2020,6 +2026,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_rbac=None,
                vm_set_type=None,
                skip_subnet_role_assignment=False,
+               os_sku=None,
                enable_cluster_autoscaler=False,
                cluster_autoscaler_profile=None,
                network_plugin=None,
@@ -2036,6 +2043,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
                outbound_type=None,
+               auto_upgrade_channel=None,
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
@@ -2076,6 +2084,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
+    auto_upgrade_profile = None
     ManagedClusterWindowsProfile = cmd.get_models('ManagedClusterWindowsProfile',
                                                   resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                   operation_group='managed_clusters')
@@ -2100,6 +2109,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     ManagedClusterAADProfile = cmd.get_models('ManagedClusterAADProfile',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='managed_clusters')
+    ManagedClusterAutoUpgradeProfile = cmd.get_models('ManagedClusterAutoUpgradeProfile',
+                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                      operation_group='managed_clusters')
     ManagedClusterAgentPoolProfile = cmd.get_models('ManagedClusterAgentPoolProfile',
                                                     resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                     operation_group='managed_clusters')
@@ -2147,6 +2159,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
+        os_sku=os_sku,
         vnet_subnet_id=vnet_subnet_id,
         proximity_placement_group_id=ppg,
         availability_zones=zones,
@@ -2239,7 +2252,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                    'azure-cli will grant Network Contributor role to the '
                    'system assigned identity after the cluster is created, and '
                    'the role assignment will take some time to take effect, see '
-                   'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, '
+                   'https://docs.microsoft.com/azure/aks/use-managed-identity, '
                    'proceed to create cluster with system assigned identity?')
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
@@ -2257,13 +2270,16 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 logger.warning('Could not create a role assignment for subnet. '
                                'Are you an Owner on this subscription?')
 
+    from azure.cli.command_modules.acs.decorator import AKSCreateModels
+    # store all the models used by load balancer
+    lb_models = AKSCreateModels(cmd).lb_models
     load_balancer_profile = create_load_balancer_profile(
-        cmd,
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
         load_balancer_outbound_ports,
-        load_balancer_idle_timeout)
+        load_balancer_idle_timeout,
+        models=lb_models)
 
     if attach_acr:
         if enable_managed_identity:
@@ -2430,6 +2446,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             cluster_identity_object_id,
             assign_kubelet_identity)
 
+    if auto_upgrade_channel is not None:
+        auto_upgrade_profile = ManagedClusterAutoUpgradeProfile(upgrade_channel=auto_upgrade_channel)
+
     mc = ManagedCluster(
         location=location,
         tags=tags,
@@ -2447,7 +2466,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         api_server_access_profile=api_server_access_profile,
         identity=identity,
         disk_encryption_set_id=node_osdisk_diskencryptionset_id,
-        identity_profile=identity_profile
+        identity_profile=identity_profile,
+        auto_upgrade_profile=auto_upgrade_profile
     )
 
     if disable_public_fqdn:
@@ -2658,8 +2678,9 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     # Check if KUBECONFIG environmental variable is set
     # If path is different than default then that means -f/--file is passed
     # in which case we ignore the KUBECONFIG variable
+    # KUBECONFIG can be colon separated. If we find that condition, use the first entry
     if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
-        path = os.environ["KUBECONFIG"]
+        path = os.environ["KUBECONFIG"].split(":")[0]
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
@@ -2771,6 +2792,7 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_ahub=False,
                disable_ahub=False,
                windows_admin_password=None,
+               auto_upgrade_channel=None,
                enable_managed_identity=False,
                assign_identity=None,
                yes=False,
@@ -2785,6 +2807,9 @@ def aks_update(cmd, client, resource_group_name, name,
     ManagedClusterAADProfile = cmd.get_models('ManagedClusterAADProfile',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='managed_clusters')
+    ManagedClusterAutoUpgradeProfile = cmd.get_models('ManagedClusterAutoUpgradeProfile',
+                                                      resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                      operation_group='managed_clusters')
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
@@ -2814,6 +2839,7 @@ def aks_update(cmd, client, resource_group_name, name,
             not update_aad_profile and
             not enable_ahub and
             not disable_ahub and
+            not auto_upgrade_channel and
             not windows_admin_password and
             not enable_managed_identity and
             not assign_identity and
@@ -2828,6 +2854,7 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--load-balancer-outbound-ip-prefixes" or'
                        '"--load-balancer-outbound-ports" or'
                        '"--load-balancer-idle-timeout" or'
+                       '"--auto-upgrade-channel" or '
                        '"--attach-acr" or "--detach-acr" or'
                        '"--uptime-sla" or'
                        '"--no-uptime-sla" or '
@@ -2940,14 +2967,17 @@ def aks_update(cmd, client, resource_group_name, name,
         )
 
     if update_lb_profile:
+        from azure.cli.command_modules.acs.decorator import AKSCreateModels
+        # store all the models used by load balancer
+        lb_models = AKSCreateModels(cmd).lb_models
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
-            cmd,
             load_balancer_managed_outbound_ip_count,
             load_balancer_outbound_ips,
             load_balancer_outbound_ip_prefixes,
             load_balancer_outbound_ports,
             load_balancer_idle_timeout,
-            instance.network_profile.load_balancer_profile)
+            instance.network_profile.load_balancer_profile,
+            models=lb_models)
 
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
@@ -2990,6 +3020,11 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.windows_profile.license_type = 'Windows_Server'
     if disable_ahub:
         instance.windows_profile.license_type = 'None'
+
+    if auto_upgrade_channel is not None:
+        if instance.auto_upgrade_profile is None:
+            instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
+        instance.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
 
     if enable_public_fqdn and disable_public_fqdn:
         raise MutuallyExclusiveArgumentError(
@@ -3986,6 +4021,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       ppg=None,
                       max_pods=0,
                       os_type="Linux",
+                      os_sku=None,
                       min_count=None,
                       max_count=None,
                       enable_cluster_autoscaler=False,
@@ -4040,6 +4076,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
+        os_sku=os_sku,
         vnet_subnet_id=vnet_subnet_id,
         proximity_placement_group_id=ppg,
         agent_pool_type="VirtualMachineScaleSets",
@@ -4115,6 +4152,14 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
             'Conflicting flags. Upgrading the Kubernetes version will also '
             'upgrade node image version. If you only want to upgrade the '
             'node version please use the "--node-image-only" option only.'
+        )
+
+    # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
+    if max_surge and node_image_only:
+        raise MutuallyExclusiveArgumentError(
+            'Conflicting flags. Unable to specify max-surge with node-image-only.'
+            'If you want to use max-surge with a node image upgrade, please first '
+            'update max-surge using "az aks nodepool update --max-surge".'
         )
 
     if node_image_only:

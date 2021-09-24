@@ -18,7 +18,7 @@ helps['postgres flexible-server create'] = """
 type: command
 short-summary: Create a flexible server.
 examples:
-  - name: Create a PostgreSQL flexible server with default params ( resource group, location, servername, username, password ) with VNET enabled by default.
+  - name: Create a PostgreSQL flexible server with default params ( resource group, location, servername, username, password ) with public access enabled by default.
     text: |
         az postgres flexible-server create
 
@@ -186,7 +186,7 @@ type: command
 short-summary: Create a new migration workflow for a flexible server.
 examples:
   - name: Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file.
-    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --properties @"migrationConfig.json"
+    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --properties "migrationConfig.json"
 """
 
 helps['postgres flexible-server migration list'] = """
@@ -219,6 +219,8 @@ examples:
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --overwrite-dbs
   - name: Cutover the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --cutover
+  - name: This command helps in starting the data migration immediately between the source and target. Any migration scheduled for a future date and time will be cancelled.
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --start-data-migration
 """
 
 helps['postgres flexible-server migration delete'] = """
@@ -227,6 +229,14 @@ short-summary: Delete a specific migration.
 examples:
   - name: Cancel/delete the migration workflow. The migration workflows can be canceled/deleted at any point.
     text: az postgres flexible-server migration delete --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+"""
+
+helps['postgres flexible-server migration check-name-availability'] = """
+type: command
+short-summary: Checks if the provided migration-name can be used.
+examples:
+  - name: Check if the migration-name provided is available for your migration workflow.
+    text: az postgres flexible-server migration check-name-availability --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 """
 
 helps['postgres flexible-server parameter'] = """

@@ -34,11 +34,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview.
 
     - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/disks-types
 
 """
 
@@ -732,7 +732,8 @@ examples:
 
 helps['sig image-definition list-shared'] = """
 type: command
-short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant.
+short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant (preview).
+long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: List an image definition in a gallery shared directly to your subscription in the given location.
     text: |
@@ -746,7 +747,8 @@ examples:
 
 helps['sig image-definition show-shared'] = """
 type: command
-short-summary: Get a shared gallery image.
+short-summary: Get a shared gallery image (preview).
+long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: Get an image definition in a gallery shared directly to your subscription or tenant in the given location.
     text: |
@@ -896,7 +898,8 @@ examples:
 
 helps['sig image-version list-shared'] = """
 type: command
-short-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant.
+short-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant (preview).
+long-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: List image versions in a gallery shared directly to your subscription in the given location and image definition.
     text: |
@@ -910,7 +913,8 @@ examples:
 
 helps['sig image-version show-shared'] = """
 type: command
-short-summary: Get an image version in a gallery shared directly to your subscription or tenant.
+short-summary: Get an image version in a gallery shared directly to your subscription or tenant (preview).
+long-summary: Get an image version in a gallery shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: Get an image version in a gallery shared directly to your subscription or tenant in the given location.
     text: |
@@ -966,7 +970,8 @@ examples:
 
 helps['sig list-shared'] = """
 type: command
-short-summary: List all galleries shared directly to your subscription or tenant
+short-summary: List all galleries shared directly to your subscription or tenant (preview).
+long-summary: List all galleries shared directly to your subscription or tenant (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: List galleries shared directly to your subscription in a given location
     text: |
@@ -1031,7 +1036,8 @@ examples:
 
 helps['sig show-shared'] = """
 type: command
-short-summary: Get a gallery that has been shared directly to your subscription or tenant.
+short-summary: Get a gallery that has been shared directly to your subscription or tenant (preview).
+long-summary: Get a gallery that has been shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
 examples:
   - name: Get a gallery that has been shared directly to your subscription or tenant in the given location.
     text: |
@@ -1177,7 +1183,7 @@ examples:
 helps['vm availability-set create'] = """
 type: command
 short-summary: Create an Azure Availability Set.
-long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-manage-availability.'
+long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/availability.'
 examples:
   - name: Create an availability set.
     text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2
@@ -1292,7 +1298,7 @@ examples:
 helps['vm capture'] = """
 type: command
 short-summary: Capture information for a stopped VM.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 parameters:
   - name: --vhd-name-prefix
     type: string
@@ -1370,9 +1376,6 @@ examples:
   - name: Create a VM from the latest version of a gallery image
     text: >
         az vm create -g MyResourceGroup -n MyVm --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage
-  - name: Create a VM from a gallery image shared directly to your subscription or tenant.
-    text: >
-        az vm create -n MyVm -g MyResourceGroup --image /sharedgalleries/theGalleryUniqueName/images/theImage/versions/1.0.0
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
@@ -1418,7 +1421,7 @@ examples:
   - name: Create multiple VMs. In this example, 3 VMs are created. They are MyVm0, MyVm1, MyVm2.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image centos --count 3
-  - name: Create a VM from shared gallery image.
+  - name: Create a VM from shared gallery image (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
 """
@@ -1426,7 +1429,7 @@ examples:
 helps['vm deallocate'] = """
 type: command
 short-summary: Deallocate a VM.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
     text: |
@@ -1556,11 +1559,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview.
 
     - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/disks-types
 
 
 """
@@ -1592,7 +1595,7 @@ type: group
 short-summary: "Manage encryption of VM disks."
 long-summary: |
     For more information, see:
-    https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
+    https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
 """
 
 helps['vm encryption disable'] = """
@@ -1614,7 +1617,7 @@ short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt
 long-summary: |
     Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
     For more information, see:
-    https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview
+    ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
 parameters:
   - name: --aad-client-id
     short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -1792,7 +1795,7 @@ examples:
 helps['vm generalize'] = """
 type: command
 short-summary: Mark a VM as generalized, allowing it to be imaged for multiple deployments.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
     text: |
@@ -2464,11 +2467,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview.
 
     - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/disks-types
 
 
 """
@@ -2605,11 +2608,12 @@ parameters:
   - name: --image
     type: string
     short-summary: >
-        The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
+        The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI. In addition, it also supports shared gallery image.
         Valid URN format: "Publisher:Offer:Sku:Version".
     populator-commands:
       - az vm image list
       - az vm image show
+      - az sig image-version show-shared
   - name: --ssh-key-values
     short-summary: Space-separated list of SSH public keys or public key file paths.
 examples:
@@ -2640,9 +2644,6 @@ examples:
   - name: Create a VMSS from the latest version of a gallery image
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage
-  - name: Create a VMSS from a gallery image shared directly to your subscription or tenant.
-    text: >
-        az vmss create -n MyVmss -g MyResourceGroup --image /sharedgalleries/theGalleryUniqueName/images/theImage/versions/1.0.0
   - name: Create a Debian VM scaleset using Key Vault secrets.
     text: >
         az keyvault certificate create --vault-name vaultname -n cert1 \\
@@ -2672,6 +2673,9 @@ examples:
   - name: Create a VMSS that supports SpotRestore.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup  --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group --enable-spot-restore True --spot-restore-timeout PT1H
+  - name: Create a VMSS from shared gallery image. (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
 """
 
 helps['vmss deallocate'] = """
@@ -2746,7 +2750,7 @@ examples:
 helps['vmss encryption'] = """
 type: group
 short-summary: "Manage encryption of VMSS."
-long-summary: "For more information, see: https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
+long-summary: "For more information, see: ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
 """
 
 helps['vmss encryption disable'] = """
@@ -2761,7 +2765,7 @@ examples:
 helps['vmss encryption enable'] = """
 type: command
 short-summary: "Encrypt a VMSS with managed disks."
-long-summary: "For more information, see: For more information, see: https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
+long-summary: "For more information, see: For more information, see: ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
 examples:
   - name: encrypt a VM scale set using a key vault in the same resource group
     text: >
@@ -3234,4 +3238,139 @@ examples:
     text: |
         az vm monitor metrics list-definitions --name MyIDVirtualMachine --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['capacity reservation'] = """
+type: group
+short-summary: Manage capacity.
+"""
+
+helps['capacity reservation group'] = """
+type: group
+short-summary: Manage capacity reservation group.
+"""
+
+helps['capacity reservation group create'] = """
+type: command
+short-summary: Create capacity reservation group.
+examples:
+  - name: Create a capacity reservation group.
+    text: az capacity reservation group create -n ReservationGroupName -g MyResourceGroup
+  - name: Create a capacity reservation group with specific zones.
+    text: |
+        az capacity reservation group create -n ReservationGroupName -l centraluseuap \\
+            -g MyResourceGroup --tags key=val --zones 1 2
+"""
+
+helps['capacity reservation group update'] = """
+type: command
+short-summary: Update capacity reservation group.
+examples:
+  - name: Update a capacity reservation group.
+    text: az capacity reservation group update -n ReservationGroupName -g MyResourceGroup --tags key=val
+"""
+
+helps['capacity reservation group delete'] = """
+type: command
+short-summary: Delete capacity reservation group.
+examples:
+  - name: Delete a capacity reservation group.
+    text: az capacity reservation group delete -n ReservationGroupName -g MyResourceGroup --yes
+"""
+
+helps['capacity reservation group show'] = """
+type: command
+short-summary: Show capacity reservation group.
+examples:
+  - name: Get a capacity reservation group.
+    text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup
+  - name: Get a capacity reservation group containing the instance views of the capacity reservations under the capacity reservation group
+    text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup --instance-view
+"""
+
+helps['capacity reservation group list'] = """
+type: command
+short-summary: List the capacity reservation groups.
+examples:
+  - name: List the capacity reservation groups.
+    text: az capacity reservation group list -g MyResourceGroup
+  - name: List the capacity reservation groups containing VM instances and VMSS instance which are associated to capacity reservation group
+    text: az capacity reservation group list -g MyResourceGroup --vm-instance --vmss-instance
+"""
+
+helps['capacity'] = """
+type: group
+short-summary: Manage capacity.
+"""
+
+helps['capacity reservation'] = """
+type: group
+short-summary: Manage capacity reservation.
+"""
+
+helps['capacity reservation create'] = """
+type: command
+short-summary: Create capacity reservation.
+examples:
+  - name: Create a capacity reservation.
+    text: |
+        az capacity reservation create -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --sku Standard_A0
+  - name: Create a capacity reservation with specific capacity and zones.
+    text: |
+        az capacity reservation create -c ReservationGroupName -n ReservationName -l centraluseuap \\
+            -g MyResourceGroup  --sku Standard_A1_v2 --capacity 5 \\
+                --zone 1 --tags key=val
+"""
+
+helps['capacity reservation update'] = """
+type: command
+short-summary: Update capacity reservation.
+examples:
+  - name: Update a capacity reservation.
+    text: |
+        az capacity reservation update -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --capacity 5 --tags key=val
+"""
+
+helps['capacity reservation delete'] = """
+type: command
+short-summary: Delete capacity reservation.
+examples:
+  - name: Delete a capacity reservation.
+    text: |
+        az capacity reservation delete -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --yes
+"""
+
+helps['capacity reservation show'] = """
+type: command
+short-summary: Show capacity reservation.
+examples:
+  - name: Get a capacity reservation.
+    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
+  - name: Get a capacity reservation containing the instance views.
+    text: |
+        az capacity reservation show -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --instance-view
+"""
+
+helps['capacity reservation show'] = """
+type: command
+short-summary: Show capacity reservation.
+examples:
+  - name: Get a capacity reservation.
+    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
+  - name: Get a capacity reservation containing the instance views.
+    text: |
+        az capacity reservation show -c ReservationGroupName -n ReservationName \\
+            -g MyResourceGroup --instance-view
+"""
+
+helps['capacity reservation list'] = """
+type: command
+short-summary: List capacity reservation.
+examples:
+  - name: List the capacity reservations.
+    text: az capacity reservation list -c ReservationGroupName -g MyResourceGroup
 """

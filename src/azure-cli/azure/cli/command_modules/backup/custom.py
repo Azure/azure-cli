@@ -22,7 +22,8 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
     JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
-    MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo
+    MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
+    BackupStatusRequest
 
 import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
@@ -36,7 +37,7 @@ from azure.cli.command_modules.backup._client_factory import (
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
     cross_region_restore_cf, backup_crr_job_details_cf, crr_operation_status_cf, backup_crr_jobs_cf,
     backup_protected_items_crr_cf, protection_container_operation_results_cf, _backup_client_factory,
-    recovery_points_recommended_cf, backup_resource_encryption_config_cf)
+    recovery_points_recommended_cf, backup_resource_encryption_config_cf, backup_status_cf)
 
 import azure.cli.command_modules.backup.custom_common as common
 
@@ -508,13 +509,10 @@ def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_nam
                 raise RequiredArgumentMissingError("--vm or --resource-group missing. Please provide the required "
                                                    "arguments.")
             vm_id = virtual_machines_cf(cmd.cli_ctx).get(resource_group_name, vm).id
-    vaults = list_vaults(vaults_cf(cmd.cli_ctx))
-    for vault in vaults:
-        vault_rg = _get_resource_group_from_id(vault.id)
-        items = list_items(cmd, backup_protected_items_cf(cmd.cli_ctx), vault_rg, vault.name)
-        if any(vm_id.lower() == item.properties.virtual_machine_id.lower() for item in items):
-            return vault.id
-    return None
+    vm_name, vm_rg = _get_resource_name_and_rg(resource_group_name, vm_id)
+    vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
+    parameters = BackupStatusRequest(resource_type='VM', resource_id=vm_id)
+    return backup_status_cf(cmd.cli_ctx).get(vm.location, parameters).vault_id
 
 
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name, diskslist=None,
@@ -1396,7 +1394,7 @@ def _track_register_operation(cli_ctx, result, vault_name, resource_group, conta
                                                                fabric_name, container_name,
                                                                operation_id, raw=True)
     while result.response.status_code == 202:
-        time.sleep(1)
+        time.sleep(5)
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
                                                                    operation_id, raw=True)
@@ -1408,7 +1406,7 @@ def _track_backup_operation(cli_ctx, resource_group, result, vault_name):
     operation_id = _get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
     operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
-        time.sleep(1)
+        time.sleep(5)
         operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     return operation_status
 
@@ -1430,7 +1428,7 @@ def _track_backup_crr_operation(cli_ctx, result, azure_region):
     operation_id = _get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
     operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
-        time.sleep(1)
+        time.sleep(5)
         operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
     return operation_status
 
@@ -1442,7 +1440,7 @@ def _track_refresh_operation(cli_ctx, result, vault_name, resource_group):
     result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                        fabric_name, operation_id, raw=True)
     while result.response.status_code == 202:
-        time.sleep(1)
+        time.sleep(5)
         result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                            fabric_name, operation_id, raw=True)
 

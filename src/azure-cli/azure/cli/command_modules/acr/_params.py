@@ -415,7 +415,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
-        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False, default="Registry")
+        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry (read/write mode) or mirror (read-only mode).', required=False, default="Registry")
         c.argument('client_token_list', options_list=['--client-tokens'], nargs='+', help='Specifies the client access to the repositories in the connected registry. It can be in the format [TOKEN_NAME01] [TOKEN_NAME02]...', required=False)
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")

@@ -358,11 +358,20 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             self.kwargs['object_id'] = assignee_object_id
             self.kwargs['principal_type'] = assignee_principal_type
             # test role assignment on subscription level
-            if assignee_principal_type:
-                self.cmd(
-                    'role assignment create --assignee-object-id {object_id} --assignee-principal-type {principal_type} --role Reader -g {rg}')
-            else:
-                self.cmd('role assignment create --assignee-object-id {object_id} --role Reader -g {rg}')
+
+            with mock.patch('azure.graphrbac.operations.ObjectsOperations.get_objects_by_object_ids') \
+                    as get_objects_by_object_ids_mock:
+                if assignee_principal_type:
+                    self.cmd(
+                        'role assignment create --assignee-object-id {object_id} '
+                        '--assignee-principal-type {principal_type} --role Reader -g {rg}')
+                    # Verify no graph call
+                    get_objects_by_object_ids_mock.assert_not_called()
+                else:
+                    self.cmd('role assignment create --assignee-object-id {object_id} --role Reader -g {rg}')
+                    # Verify 1 graph call to resolve principal type
+                    get_objects_by_object_ids_mock.assert_called_once()
+
             self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
             self.cmd('role assignment delete -g {rg}')
             self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))

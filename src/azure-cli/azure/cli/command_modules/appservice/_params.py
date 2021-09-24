@@ -19,7 +19,7 @@ from ._completers import get_hostname_completion_list
 from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
-                          validate_service_tag)
+                          validate_service_tag, validate_public_cloud)
 
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
@@ -63,6 +63,14 @@ def load_arguments(self, _):
                                                 local_context_attribute=LocalContextAttribute(name='functionapp_name',
                                                                                               actions=[
                                                                                                   LocalContextAction.GET]))
+    logicapp_name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME',
+                                             help="name of the logic app.",
+                                             local_context_attribute=LocalContextAttribute(name='logicapp_name',
+                                                                                           actions=[LocalContextAction.GET]))
+    name_arg_type_dict = {
+        'functionapp': functionapp_name_arg_type,
+        'logicapp': logicapp_name_arg_type
+    }
     isolated_sku_arg_type = CLIArgumentType(
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
@@ -205,7 +213,7 @@ def load_arguments(self, _):
     with self.argument_context('webapp webjob triggered list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
-    for scope in ['webapp', 'functionapp']:
+    for scope in ['webapp', 'functionapp', 'logicapp']:
         with self.argument_context(scope + ' create') as c:
             c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
                        help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:tag')
@@ -218,6 +226,9 @@ def load_arguments(self, _):
             c.argument('deployment_source_branch', options_list=['--deployment-source-branch', '-b'],
                        help='the branch to deploy')
             c.argument('tags', arg_type=tags_type)
+
+    for scope in ['webapp', 'functionapp']:
+        with self.argument_context(scope) as c:
             c.argument('assign_identities', nargs='*', options_list=['--assign-identity'],
                        help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
             c.argument('scope', options_list=['--scope'], help="Scope that the system assigned identity can access")
@@ -326,7 +337,7 @@ def load_arguments(self, _):
             c.argument('vnet_route_all_enabled', help="Configure regional VNet integration to route all traffic to the VNet.",
                        arg_type=get_three_state_flag(return_label=True))
             c.argument('generic_configurations', nargs='+',
-                       help='provide site configuration list in a format of either `key=value` pair or `@<json_file>`. PowerShell users should be sure to use escape characters like so: `{\\"key\\": value}`, instead of: `{"key": value}`')
+                       help='Provide site configuration list in a format of either `key=value` pair or `@<json_file>`. To avoid compatibility issues, it is recommended to use a JSON file to provide these configurations. If using a key=value pair, PowerShell and Windows Command Prompt users should be sure to use escape characters like so: {\\"key\\": value}, instead of: `{"key": value}`.')
 
         with self.argument_context(scope + ' config container') as c:
             c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
@@ -618,6 +629,7 @@ def load_arguments(self, _):
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
@@ -677,44 +689,48 @@ def load_arguments(self, _):
         c.argument('skip_delegation_check', help="Skip check if you do not have permission or the VNet is in another subscription.",
                    arg_type=get_three_state_flag(return_label=True))
 
-    with self.argument_context('functionapp') as c:
-        c.ignore('app_instance')
-        c.argument('name', arg_type=functionapp_name_arg_type, id_part='name', help='name of the function app')
-        c.argument('slot', options_list=['--slot', '-s'],
-                   help="the name of the slot. Default to the productions slot if not specified")
+    for scope in ['functionapp', 'logicapp']:
+        app_type = scope[:-3]  # 'function' or 'logic'
+        with self.argument_context(scope) as c:
+            c.ignore('app_instance')
+            c.argument('name', arg_type=name_arg_type_dict[scope], id_part='name', help='name of the {} app'.format(app_type))
+            c.argument('slot', options_list=['--slot', '-s'],
+                       help="the name of the slot. Default to the productions slot if not specified")
+
+        with self.argument_context(scope + ' create') as c:
+            c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
+                       completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                       help="name or resource id of the {} app service plan. Use 'appservice plan create' to get one. If using an App Service plan from a different resource group, the full resource id must be used and not the plan name.".format(scope),
+                       local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
+            c.argument('name', options_list=['--name', '-n'], help='name of the new {} app'.format(app_type),
+                       local_context_attribute=LocalContextAttribute(name=scope + '_name',
+                       actions=[LocalContextAction.SET],
+                       scopes=[scope]))
+            c.argument('storage_account', options_list=['--storage-account', '-s'],
+                       help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group',
+                       local_context_attribute=LocalContextAttribute(name='storage_account_name', actions=[LocalContextAction.GET]))
+            c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
+                       help="Geographic location where {} app will be hosted. Use `az {} list-consumption-locations` to view available locations.".format(app_type, scope))
+            c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
+            c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
+            c.argument('app_insights',
+                       help="Name of the existing App Insights project to be added to the {} app. Must be in the ".format(app_type) +
+                       "same resource group.")
+            c.argument('disable_app_insights', arg_type=get_three_state_flag(return_label=True),
+                       help="Disable creating application insights resource during {} create. No logs will be available.".format(scope))
+            c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-d'], help='The container registry server username.')
+            c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
+                       help='The container registry server password. Required for private registries.')
+            if scope == 'functionapp':
+                c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
+                c.argument('runtime', help='The functions runtime stack.',
+                           arg_type=get_enum_type(functionapp_runtime_strings))
+                c.argument('runtime_version',
+                           help='The version of the functions runtime stack. '
+                           'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_strings))
+
     with self.argument_context('functionapp config hostname') as c:
         c.argument('webapp_name', arg_type=functionapp_name_arg_type, id_part='name')
-    with self.argument_context('functionapp create') as c:
-        c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
-                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name or resource id of the function app service plan. Use 'appservice plan create' to get one. If using an App Service plan from a different resource group, the full resource id must be used and not the plan name.",
-                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('name', options_list=['--name', '-n'], help='name of the new function app',
-                   local_context_attribute=LocalContextAttribute(name='functionapp_name',
-                                                                 actions=[LocalContextAction.SET],
-                                                                 scopes=['functionapp']))
-        c.argument('storage_account', options_list=['--storage-account', '-s'],
-                   help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group',
-                   local_context_attribute=LocalContextAttribute(name='storage_account_name', actions=[LocalContextAction.GET]))
-        c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
-                   help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
-        c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
-        c.argument('runtime', help='The functions runtime stack.',
-                   arg_type=get_enum_type(functionapp_runtime_strings))
-        c.argument('runtime_version',
-                   help='The version of the functions runtime stack. '
-                        'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_strings))
-        c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
-        c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
-        c.argument('app_insights',
-                   help="Name of the existing App Insights project to be added to the Function app. Must be in the "
-                        "same resource group.")
-        c.argument('disable_app_insights', arg_type=get_three_state_flag(return_label=True),
-                   help="Disable creating application insights resource during functionapp create. No logs will be available.")
-        c.argument('docker_registry_server_user', help='The container registry server username.')
-        c.argument('docker_registry_server_password',
-                   help='The container registry server password. Required for private registries.')
-
     # For commands with shared impl between web app and function app and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type)
@@ -722,6 +738,11 @@ def load_arguments(self, _):
         c.argument('name', arg_type=functionapp_name_arg_type, local_context_attribute=None)
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of `<name>=<value>`")
+
+    with self.argument_context('logicapp show') as c:
+        c.argument('name', arg_type=logicapp_name_arg_type)
+    with self.argument_context('logicapp delete') as c:
+        c.argument('name', arg_type=logicapp_name_arg_type, local_context_attribute=None)
 
     with self.argument_context('functionapp plan') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
@@ -970,7 +991,7 @@ def load_arguments(self, _):
     with self.argument_context('appservice domain show-terms') as c:
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
-    with self.argument_context('staticwebapp') as c:
+    with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
         c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
         c.argument('token', options_list=['--token', '-t'],
