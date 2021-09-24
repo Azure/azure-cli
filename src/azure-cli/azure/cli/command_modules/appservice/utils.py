@@ -100,17 +100,6 @@ def _get_location_from_resource_group(cli_ctx, resource_group_name):
     return group.location
 
 
-def _list_app(cli_ctx, resource_group_name=None):
-    client = web_client_factory(cli_ctx)
-    if resource_group_name:
-        result = list(client.web_apps.list_by_resource_group(resource_group_name))
-    else:
-        result = list(client.web_apps.list())
-    for webapp in result:
-        _rename_server_farm_props(webapp)
-    return result
-
-
 def _rename_server_farm_props(webapp):
     # Should be renamed in SDK in a future release
     setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)

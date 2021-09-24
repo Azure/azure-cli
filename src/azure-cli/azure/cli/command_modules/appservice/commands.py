@@ -467,7 +467,7 @@ def load_command_table(self, _):
 
     with self.command_group('logicapp') as g:
         g.custom_command('delete', 'delete_function_app', confirmation=True)
-        g.custom_command('deployment source config-zip', 'enable_zip_deploy_webapp')
+        g.custom_command('deployment source config-zip', 'enable_zip_deploy_functionapp')
 
     with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())

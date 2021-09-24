@@ -59,7 +59,6 @@ from .utils import (_normalize_sku,
                     retryable_method,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
-                    _list_app,
                     _rename_server_farm_props,
                     _get_location_from_webapp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
@@ -605,7 +604,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
 
 def show_webapp(cmd, resource_group_name, name, slot=None):
-    return _show_app(cmd, resource_group_name, name, APP_TYPE.WEBAPP, slot)
+    return _show_app(cmd, resource_group_name, name, cmd_app_type=APP_TYPE.WEBAPP, slot=slot)
 
 
 # for generic updater
@@ -700,7 +699,7 @@ def get_functionapp(cmd, resource_group_name, name, slot=None):
 
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
-    return _show_app(cmd, resource_group_name, name, APP_TYPE.FUNCTIONAPP, slot)
+    return _show_app(cmd, resource_group_name, name, cmd_app_type=APP_TYPE.FUNCTIONAPP, slot=slot)
 
 
 def list_webapp(cmd, resource_group_name=None):
@@ -726,7 +725,16 @@ def list_function_app(cmd, resource_group_name=None):
                        _list_app(cmd.cli_ctx, resource_group_name)))
 
 
-def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
+def _show_app(cmd, resource_group_name, name, cmd_app_type=None, slot=None):
+    if cmd_app_type is None:
+        app_type = cmd.name.split(' ', 1)[0]
+        if app_type == "webapp":
+            cmd_app_type = APP_TYPE.WEBAPP
+        elif app_type == "functionapp":
+            cmd_app_type = APP_TYPE.FUNCTIONAPP
+        elif app_type == "logicapp":
+            cmd_app_type = APP_TYPE.LOGICAPP
+
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
         raise ResourceNotFoundError("Unable to find {} '{}', in RG '{}'.".format(
@@ -1948,7 +1956,7 @@ def _get_local_git_url(cli_ctx, client, resource_group_name, name, slot=None):
 
 def _get_scm_url(cmd, resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
-    webapp = show_webapp(cmd, resource_group_name, name, slot=slot)
+    webapp = _show_app(cmd, resource_group_name, name, slot=slot)
     for host in webapp.host_name_ssl_states or []:
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
