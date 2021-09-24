@@ -1869,4 +1869,3 @@ def validate_immutability_arguments(namespace):
                                                 "Cannot set --enable_vlw to false and specify "
                                                 "--immutability-period --immutability-state "
                                                 "--allow-append")
-
