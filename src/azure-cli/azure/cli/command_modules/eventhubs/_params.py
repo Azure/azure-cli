@@ -30,9 +30,9 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', id_part='name', help='name of Namespace')
 
     with self.argument_context('eventhubs namespace exists') as c:
-        c.argument('namespace_name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
+        c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
-    with self.argument_context('eventhubs namespace') as c:
+    with self.argument_context('eventhubs namespace', min_api='2021-06-01-preview') as c:
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
         c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
@@ -50,17 +50,22 @@ def load_arguments_eh(self, _):
                    help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
         c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Managed Identity is enabled.')
+        c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Event Hubs')
 
-    with self.argument_context('eventhubs namespace create', min_api='2018-01-01-preview') as c:
+    with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='luster ARM ID of the Namespace')
 
-    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2018-01-01-preview') as c:
+    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2021-06-01-preview') as c:
         c.argument('key_source', options_list=['--key-source'], is_preview=True, arg_type=get_enum_type(KeySource),
                    help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
         c.argument('key_name', is_preview=True, help='The name of the KeyVault key.', )
         c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
         c.argument('key_version', is_preview=True,
                    help='The version of the KeyVault key to use.')
+        c.argument('require_infrastructure_encryption', options_list=['--enable-require-infrastructure-encryption'], is_preview=True,
+                   arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
 # Cluster region
     for scope in ['eventhubs cluster', 'eventhubs cluster namespace list']:

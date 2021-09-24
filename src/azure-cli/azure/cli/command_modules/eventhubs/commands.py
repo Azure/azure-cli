@@ -52,16 +52,16 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_namespace_create')
         g.show_command('show', 'get')
         g.custom_command('list', 'cli_namespace_list')
-        g.command('delete', 'delete')
-        g.command('exists', 'check_name_availability')
-        g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=eventhubs_custom)
+        g.command('delete', 'begin_delete')
+        g.custom_command('exists', 'cli_namespace_exists')
+        g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=eventhubs_custom, setter_name='begin_create_or_update')
 
     with self.command_group('eventhubs namespace authorization-rule', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
-        g.command('create', 'create_or_update_authorization_rule')
+        g.custom_command('create', 'cli_namespaceautho_create')
         g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
-        g.command('keys renew', 'regenerate_keys')
+        g.custom_command('keys renew', 'cli_keys_renew')
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_autho_update')
 
@@ -85,30 +85,30 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='cli_eheventhub_update')
 
     with self.command_group('eventhubs eventhub authorization-rule', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:
-        g.command('create', 'create_or_update_authorization_rule')
+        g.custom_command('create', 'cli_eventhubautho_create')
         g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
-        g.command('keys renew', 'regenerate_keys')
+        g.custom_command('keys renew', 'cli_eventhub_keys_renew')
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_autho_update')
 
 # ConsumerGroup Region
     with self.command_group('eventhubs eventhub consumer-group', eh_consumer_groups_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=consumer_groups_mgmt_client_factory) as g:
-        g.command('create', 'create_or_update')
+        g.custom_command('create', 'cli_consumergroup_create')
         g.show_command('show', 'get')
         g.command('list', 'list_by_event_hub')
         g.command('delete', 'delete')
-        g.generic_update_command('update')
+        g.generic_update_command('update', custom_func_name='cli_consumergroup_update', custom_func_type=eventhubs_custom)
 
 # DisasterRecoveryConfigs Region
     with self.command_group('eventhubs georecovery-alias', eh_geodr_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=disaster_recovery_mgmt_client_factory) as g:
-        g.command('set', 'create_or_update')
+        g.custom_command('set', 'cli_geodr_create')
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('break-pair', 'break_pairing')
         g.command('fail-over', 'fail_over')
-        g.command('exists', 'check_name_availability')
+        g.custom_command('exists', 'cli_geodr_name_exists')
         g.command('delete', 'delete')
 
     with self.command_group('eventhubs georecovery-alias authorization-rule', eh_geodr_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=disaster_recovery_mgmt_client_factory) as g:
