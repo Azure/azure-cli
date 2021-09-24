@@ -87,6 +87,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_restore_mgmt(self, resource_group):
+        self._test_flexible_server_restore_mgmt('postgres', resource_group)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_restore_mgmt(self, resource_group):
+        self._test_flexible_server_restore_mgmt('mysql', resource_group)
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
@@ -258,6 +268,118 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                       tier="Burstable",
                                       sku_name="Standard_B1ms")
         self.assertEqual(iops_result, 640)
+
+    def _test_flexible_server_restore_mgmt(self, database_engine, resource_group):
+
+        private_dns_param = 'privateDnsZoneResourceId' if database_engine == 'mysql' else 'privateDnsZoneArmResourceId'
+        if database_engine == 'postgres':
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            location = self.mysql_location
+        
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_diff_vnet = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_diff_vnet_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_public_access = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        source_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
+        source_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
+        new_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
+        new_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
+        new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
+        new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --yes'.format(
+                 database_engine, resource_group, source_server, source_vnet, source_subnet, location))
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
+
+        # Wait until snapshot is created
+        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        earliest_restore_time = result['backup']['earliestRestoreDate']
+        date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
+
+        # if current_time < earliest_restore_time:
+        #     sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time,
+        #                                                                                      date_format)).total_seconds())
+
+        # default vnet resources
+        restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} '
+                                  .format(database_engine, resource_group, target_server_default, source_server)).get_output_in_json()
+
+        self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                             self.get_subscription_id(), resource_group, source_vnet, source_subnet))
+        self.assertEqual(restore_result['network'][private_dns_param],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                             self.get_subscription_id(), resource_group, '{}.private.{}.database.azure.com'.format(source_server, database_engine)))
+        
+        # MYSQL only - vnet to public access
+        if database_engine == 'mysql':
+            restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --public-access Enabled'
+                                  .format(database_engine, resource_group, target_server_public_access, source_server)).get_output_in_json()
+
+            self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
+
+        # to different vnet and private dns zone
+        self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
+                 resource_group, location, new_vnet))
+
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+                          resource_group, new_subnet, new_vnet)).get_output_in_json()
+
+        private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)
+        self.cmd('network private-dns zone create -g {} --name {}'.format(resource_group, private_dns_zone))
+        
+        restore_result = self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --subnet {} --private-dns-zone {}'.format(
+                                  database_engine, resource_group, target_server_diff_vnet, source_server, subnet["id"], private_dns_zone)).get_output_in_json()
+        
+        self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                             self.get_subscription_id(), resource_group, new_vnet, new_subnet))
+
+        self.assertEqual(restore_result['network'][private_dns_param],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                             self.get_subscription_id(), resource_group, private_dns_zone))
+        
+        # public access to vnet
+        if database_engine == 'mysql':
+            self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
+            resource_group, location, new_vnet_2))
+
+            subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+                            resource_group, new_subnet_2, new_vnet_2)).get_output_in_json()
+
+            private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet_2, database_engine)
+            self.cmd('network private-dns zone create -g {} --name {}'.format(resource_group, private_dns_zone))
+            
+            restore_result = self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --subnet {} --private-dns-zone {}'.format(
+                                    database_engine, resource_group, target_server_diff_vnet_2, target_server_public_access, subnet["id"], private_dns_zone)).get_output_in_json()
+            
+            self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
+                            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                                self.get_subscription_id(), resource_group, new_vnet_2, new_subnet_2))
+
+            self.assertEqual(restore_result['network'][private_dns_param],
+                            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                                self.get_subscription_id(), resource_group, private_dns_zone))
+        
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_server), checks=NoneCheck())
+        
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_default), checks=NoneCheck())
+        
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_diff_vnet), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_diff_vnet_2), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_public_access), checks=NoneCheck())
+
+        # sleep(60 * 5)  # wait until associationk links are deleted
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):

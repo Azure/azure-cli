@@ -205,6 +205,9 @@ def flexible_server_restore(cmd, client,
                                                                                   vnet_address_prefix=vnet_address_prefix,
                                                                                   subnet_address_prefix=subnet_address_prefix,
                                                                                   yes=yes)
+        else:
+            parameters.network = source_server_object.network
+
     except Exception as e:
         raise ResourceNotFoundError(e)
 

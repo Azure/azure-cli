@@ -369,7 +369,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--high-availability'],
             help='Enable (ZoneRedundant or SameZone) or disable high availability feature. '
                  'Default value is Disabled. High availability can only be set during flexible server create time. '
-                 'Allowed values: ZoneRedundant, SameZone, Disabled, Enabled'
         )
 
         private_dns_zone_arguments_arg_type = CLIArgumentType(
@@ -385,6 +384,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--restore-time'],
             default=get_current_time(),
             help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
+                 'The default value is set to current time.'
         )
 
         source_server_arg_type = CLIArgumentType(
@@ -443,7 +443,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('yes', arg_type=yes_arg_type)
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
-                           help='Determines the public access. Allowed Values: Enabled, Disabled',)
+                           help='Determines the public access. ')
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
