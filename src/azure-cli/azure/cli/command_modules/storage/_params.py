@@ -21,7 +21,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
-                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet)
+                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
+                          validate_allow_protected_append_writes_all)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
@@ -1187,6 +1188,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                           'and any existing blocks cannot be modified or deleted. '
                                                           'This property cannot be changed with '
                                                           'ExtendImmutabilityPolicy API.')
+            c.extra('allow_protected_append_writes_all', options_list=['--allow-protected-append-writes-all',
+                                                                       '--w-all'],
+                    arg_type=get_three_state_flag(), help="This property can only be changed for unlocked time-based "
+                                                          "retention policies. When enabled, new blocks can be written "
+                                                          "to both 'Append and Block Blobs' while maintaining "
+                                                          "immutability protection and compliance. "
+                                                          "Only new blocks can be added and any existing blocks cannot "
+                                                          "be modified or deleted. This property cannot be changed with"
+                                                          " ExtendImmutabilityPolicy API. The "
+                                                          "'allowProtectedAppendWrites' and "
+                                                          "'allowProtectedAppendWritesAll' properties are mutually "
+                                                          "exclusive.",
+                    validator=validate_allow_protected_append_writes_all)
             c.extra('period', type=int, help='The immutability period for the blobs in the container since the policy '
                                              'creation, in days.')
             c.ignore('parameters')

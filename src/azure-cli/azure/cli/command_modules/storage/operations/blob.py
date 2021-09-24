@@ -38,20 +38,24 @@ def clear_legal_hold(cmd, client, container_name, account_name, tags, resource_g
 
 def create_or_update_immutability_policy(cmd, client, container_name, account_name,
                                          resource_group_name=None, allow_protected_append_writes=None,
+                                         allow_protected_append_writes_all=None,
                                          period=None, if_match=None):
     ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
     immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
-                                             allow_protected_append_writes=allow_protected_append_writes)
+                                             allow_protected_append_writes=allow_protected_append_writes,
+                                             allow_protected_append_writes_all=allow_protected_append_writes_all)
     return client.create_or_update_immutability_policy(resource_group_name, account_name, container_name,
                                                        if_match, immutability_policy)
 
 
 def extend_immutability_policy(cmd, client, container_name, account_name, if_match,
                                resource_group_name=None, allow_protected_append_writes=None,
+                               allow_protected_append_writes_all=None,
                                period=None):
     ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
     immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
-                                             allow_protected_append_writes=allow_protected_append_writes)
+                                             allow_protected_append_writes=allow_protected_append_writes,
+                                             allow_protected_append_writes_all=allow_protected_append_writes_all)
     return client.extend_immutability_policy(resource_group_name, account_name, container_name,
                                              if_match, immutability_policy)
 
