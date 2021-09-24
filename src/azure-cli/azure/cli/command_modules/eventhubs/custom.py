@@ -144,7 +144,7 @@ def cli_cluster_update(cmd, instance, tags=None):
 
 # Namespace Authorization rule:
 def cli_namespaceautho_create(client, resource_group_name, namespace_name, name, rights=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
+    from azure.cli.command_modules.eventhubs._utils import accessrights_converter
     return client.create_or_update_authorization_rule(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -254,7 +254,7 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
 
 # Eventhub Authorizationrule
 def cli_eventhubautho_create(client, resource_group_name, namespace_name, event_hub_name, name, rights=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
+    from azure.cli.command_modules.eventhubs._utils import accessrights_converter
     return client.create_or_update_authorization_rule(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -276,7 +276,6 @@ def cli_eventhub_keys_renew(client, resource_group_name, namespace_name, event_h
 
 # ConsumerGroup region
 def cli_consumergroup_create(client, resource_group_name, namespace_name, event_hub_name, name, user_metadata=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
