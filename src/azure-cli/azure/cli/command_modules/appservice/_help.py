@@ -1390,7 +1390,7 @@ examples:
           --custom-id CustomId \\
           --storage-type AzureFiles \\
           --account-name MyStorageAccount \\
-          --share-name  MyShare \\
+          --share-name MyShare \\
           --access-key MyAccessKey \\
           --mount-path /path/to/mount
 """
