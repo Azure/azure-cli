@@ -1482,15 +1482,15 @@ def cli_cosmosdb_identity_assign(client,
         identity_type = ResourceIdentityType.system_assigned
 
     if identity_type in [ResourceIdentityType.system_assigned, ResourceIdentityType.none]:
-        set_identity = ManagedServiceIdentity(type=identity_type.value)
+        new_identity = ManagedServiceIdentity(type=identity_type.value)
     else:
-        set_user_identities = existing.identity.user_assigned_identities or {}
+        new_assigned_identities = existing.identity.user_assigned_identities or {}
         for identity in new_user_identities:
-            set_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
+            new_assigned_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
 
-        set_identity = ManagedServiceIdentity(type=identity_type.value, user_assigned_identities=set_user_identities)
+        new_identity = ManagedServiceIdentity(type=identity_type.value, user_assigned_identities=new_assigned_identities)
 
-    params = DatabaseAccountUpdateParameters(identity=set_identity)
+    params = DatabaseAccountUpdateParameters(identity=new_identity)
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
@@ -1543,19 +1543,19 @@ def cli_cosmosdb_identity_remove(client,
     else:
         set_type = ResourceIdentityType.none
 
-    set_user_identities = {}
+    new_user_identities = {}
     for identity in identities_remaining:
-        set_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
-    for removed_identity in identities_to_remove:
-        set_user_identities[removed_identity] = None
-    if not set_user_identities:
-        set_user_identities = None
+        new_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
+    if set_type in [ResourceIdentityType.system_assigned_user_assigned, ResourceIdentityType.user_assigned]:
+        for removed_identity in identities_to_remove:
+            new_user_identities[removed_identity] = None
+    if not new_user_identities:
+        new_user_identities = None
 
-    params = DatabaseAccountUpdateParameters(identity=ManagedServiceIdentity(type=set_type, user_assigned_identities=set_user_identities))
+    params = DatabaseAccountUpdateParameters(identity=ManagedServiceIdentity(type=set_type, user_assigned_identities=new_user_identities))
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
-
 
 def _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network):
     from azure.cli.core.commands.client_factory import get_subscription_id
