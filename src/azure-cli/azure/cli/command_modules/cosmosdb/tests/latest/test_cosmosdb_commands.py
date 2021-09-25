@@ -1384,6 +1384,7 @@ class CosmosDBTests(ScenarioTest):
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
+            'acc2': self.create_random_name(prefix='cli', length=15),
             'kv_name': key_vault,
             'key_name': key_name,
             'key_uri': key_uri,
@@ -1481,7 +1482,7 @@ class CosmosDBTests(ScenarioTest):
         
         # Default identity tests
         self.cmd('az keyvault set-policy --name {kv_name} --object-id {id1principal} --key-permissions get unwrapKey wrapKey')
-        default_id_acct = self.cmd('az cosmosdb create -n clitestacct1 -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri} --assign-identity {id1} --default-identity "UserAssignedIdentity={id1}"').get_output_in_json()
+        default_id_acct = self.cmd('az cosmosdb create -n {acc2} -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri} --assign-identity {id1} --default-identity "UserAssignedIdentity={id1}"').get_output_in_json()
         assert default_id_acct["identity"]["type"] == "UserAssigned"
         assert list(default_id_acct["identity"]["userAssignedIdentities"])[0] == id1
         assert default_id_acct["defaultIdentity"] == "UserAssignedIdentity=" + id1
