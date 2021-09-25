@@ -675,7 +675,6 @@ examples:
   - name: Update the properties of a HSM.
     text: |
         az keyvault update-hsm --enable-purge-protection true --hsm-name MyHSM --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['keyvault wait'] = """
