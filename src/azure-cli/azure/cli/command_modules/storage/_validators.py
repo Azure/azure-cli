@@ -1880,9 +1880,3 @@ def validate_allow_protected_append_writes_all(namespace):
                                         "new blocks to be written to both Append and Block Blobs, while "
                                         "'allow-protected-append-writes' allows new blocks to be written to "
                                         "Append Blobs only.")
-
-    if namespace.allow_protected_append_writes_all or namespace.allow_protected_append_writes:
-        if not namespace.period:
-            raise InvalidArgumentValueError(
-                "usage error: The 'period' needs to be specified if either 'allow-protected-append-writes' or "
-                "'allow-protected-append-writes-all' is specified.")
