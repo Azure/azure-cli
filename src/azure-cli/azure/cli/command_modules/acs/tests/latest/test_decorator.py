@@ -4684,7 +4684,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             {"disable_local_accounts": True},
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_1.get_disable_local_accounts(), True)
+        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
 
 
 class AKSUpdateDecoratorTestCase(unittest.TestCase):
