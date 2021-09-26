@@ -7646,7 +7646,7 @@ def list_service_aliases(cmd, location, resource_group_name=None):
 
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
-                        public_ip_address, location=None, subnet='AzureBastionSubnet'):
+                        public_ip_address, location=None, subnet='AzureBastionSubnet', tags=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -7659,7 +7659,8 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                                   public_ip_address=SubResource(id=public_ip_address))
 
     bastion_host = BastionHost(ip_configurations=[ip_configuration],
-                               location=location)
+                               location=location,
+                               tags=tags)
     return client.begin_create_or_update(resource_group_name=resource_group_name,
                                          bastion_host_name=bastion_host_name,
                                          parameters=bastion_host)
