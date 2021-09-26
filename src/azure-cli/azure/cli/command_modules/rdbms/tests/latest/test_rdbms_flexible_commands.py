@@ -499,7 +499,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
+    mysql_location = 'westus2'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -533,13 +533,13 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_sku_name = self.create_random_name('sku_name', RANDOM_VARIABLE_MAX_LENGTH)
         invalid_tier = self.create_random_name('tier', RANDOM_VARIABLE_MAX_LENGTH)
         valid_tier = 'GeneralPurpose'
-        invalid_backup_retention = 1
+        invalid_backup_retention = 40
         ha_value = 'Enabled' if database_engine == 'postgres' else 'ZoneRedundant'
 
         # Create
         if database_engine == 'postgres':
             self.cmd('{} flexible-server create -g {} -n Wrongserver.Name -l {}'.format(
-                    database_engine, resource_group, location, invalid_backup_retention),
+                    database_engine, resource_group, location),
                     expect_failure=True)
 
         self.cmd('{} flexible-server create -g {} -n {} -l {} --tier {}'.format(
@@ -608,7 +608,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_sku_name = self.create_random_name('sku_name', RANDOM_VARIABLE_MAX_LENGTH)
         invalid_tier = self.create_random_name('tier', RANDOM_VARIABLE_MAX_LENGTH)
         valid_tier = 'GeneralPurpose'
-        invalid_backup_retention = 1
+        invalid_backup_retention = 40
         if database_engine == 'postgres':
             version = 12
             storage_size = 128
