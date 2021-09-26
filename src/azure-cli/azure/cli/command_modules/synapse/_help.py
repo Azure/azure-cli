@@ -1573,9 +1573,9 @@ short-summary: Manage Synapse's workspace packages.
 
 helps['synapse workspace-package upload'] = """
 type: command
-short-summary: Uploads a local workspace package file to an Azure Synapse workspace.
+short-summary: Upload a local workspace package file to an Azure Synapse workspace.
 examples:
-  - name: Uploads a local workspace package file to an Azure Synapse workspace.
+  - name: Upload a local workspace package file to an Azure Synapse workspace.
     text: |-
         az synapse workspace-package upload --workspace-name testsynapseworkspace \\
           --package C:/package.jar
@@ -1583,9 +1583,9 @@ examples:
 
 helps['synapse workspace-package upload-batch'] = """
 type: command
-short-summary: Uploads workspace package files from a local directory to an Azure Synapse workspace.
+short-summary: Upload workspace package files from a local directory to an Azure Synapse workspace.
 examples:
-  - name: Uploads workspace package files from a local directory to an Azure Synapse workspace.
+  - name: Upload workspace package files from a local directory to an Azure Synapse workspace.
     text: |-
         az synapse workspace-package upload-batch --workspace-name testsynapseworkspace \\
           --source C:/package

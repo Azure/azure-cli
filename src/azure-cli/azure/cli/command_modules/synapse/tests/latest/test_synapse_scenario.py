@@ -464,6 +464,7 @@ class SynapseScenarioTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_ws_audit_policy_logentry_eventhub(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -628,6 +629,7 @@ class SynapseScenarioTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool_audit_policy_logentry_eventhub(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -1145,14 +1147,6 @@ class SynapseScenarioTests(ScenarioTest):
             'login-password': self.create_random_name(prefix='Pswd1', length=16)
         })
 
-        # Create adlsgen2
-        self._create_storage_account()
-
-        # Wait some time to improve robustness
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(60)
-
         # create synapse workspace
         self.cmd(
             'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
@@ -1161,26 +1155,6 @@ class SynapseScenarioTests(ScenarioTest):
             ' --location {location} ' + ' '.join(additional_create_params), checks=[
                 self.check('name', self.kwargs['workspace']),
                 self.check('type', 'Microsoft.Synapse/workspaces'),
-                self.check('provisioningState', 'Succeeded')
-            ])
-
-    def _create_storage_account(self):
-        self.kwargs.update({
-            'location': self.location,
-            'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
-        })
-
-        # Wait some time to improve robustness
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(60)
-
-        # create storage account
-        self.cmd(
-            'az storage account create --name {storage-account} --resource-group {rg} --enable-hierarchical-namespace true --location {location}',
-            checks=[
-                self.check('name', self.kwargs['storage-account']),
-                self.check('type', 'Microsoft.Storage/storageAccounts'),
                 self.check('provisioningState', 'Succeeded')
             ])
 
@@ -1534,8 +1508,8 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspace_package(self):
         self.kwargs.update({
             'name': 'wordcount.jar',
