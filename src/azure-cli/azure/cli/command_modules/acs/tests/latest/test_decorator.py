@@ -4673,10 +4673,18 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             dec_1.create_mc(mc_1)
 
     def test_get_disable_local_accounts(self):
-        ctx_1 = AKSCreateContext(self.cmd, {"disable_local_accounts": False})
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": False},
+            decorator_mode=DecoratorMode.CREATE,
+        )
         self.assertEqual(ctx_1.get_disable_local_accounts(), False)
-        ctx_2 = AKSCreateContext(self.cmd, {"disable_local_accounts": True})
-        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": True},
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_disable_local_accounts(), True)
 
 
 class AKSUpdateDecoratorTestCase(unittest.TestCase):
