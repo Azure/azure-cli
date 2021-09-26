@@ -508,7 +508,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
     @ResourceGroupPreparer(location='centraluseuap', name_prefix='cli_storage_account')
-    def test_storage_account_with_vlw(self, resource_group):
+    def test_storage_account_with_alw(self, resource_group):
         self.kwargs = {
             'name1': self.create_random_name(prefix='sa1', length=24),
             'name2': self.create_random_name(prefix='sa2', length=24),
@@ -516,7 +516,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         }
 
         # test success case during create
-        result = self.cmd('storage account create -n {name1} -g {rg} --enable-vlw --immutability-period 10 '
+        result = self.cmd('storage account create -n {name1} -g {rg} --enable-alw --immutability-period 10 '
                  '--immutability-state Disabled --allow-append').get_output_in_json()
         self.assertIn('immutableStorageWithVersioning', result)
         self.assertEqual(result['immutableStorageWithVersioning']['enabled'], True)
@@ -526,16 +526,18 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         # test failure cases during create
         from azure.cli.core.azclierror import InvalidArgumentValueError
+        from azure.core.exceptions import HttpResponseError
         with self.assertRaises(InvalidArgumentValueError):
-            self.cmd('storage account create -n {name2} -g {rg} --enable-vlw false --immutability-period 10 '
+            self.cmd('storage account create -n {name2} -g {rg} --enable-alw false --immutability-period 10 '
                               '--immutability-state Disabled --allow-append')
 
-        with self.assertRaises(InvalidArgumentValueError):
-            self.cmd('storage account create -n {name2} -g {rg} --enable-vlw --immutability-period 10 '
-                              '--immutability-state Disabled')
+        # missing required parameter --immutability-state
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-alw --immutability-period 10  --allow-append')
 
-        with self.assertRaises(InvalidArgumentValueError):
-            self.cmd('storage account create -n {name2} -g {rg} --enable-vlw --immutability-period 10 '
+        # cannot have create policy with Locked state
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-alw --immutability-period 10 '
                               '--immutability-state Locked --allow-append')
 
         # test success case during update
@@ -548,23 +550,23 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['state'], 'Unlocked')
 
         # test failure cases during update
-        self.cmd('storage account create -n {name2} -g {rg} --enable-vlw false')
+        self.cmd('storage account create -n {name2} -g {rg} --enable-alw false')
 
-        with self.assertRaises(InvalidArgumentValueError):
+        with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name2} --immutability-period 10 '
                      '--immutability-state Disabled --allow-append')
 
         self.cmd('storage account update -n {name1} --immutability-state Disabled')
-        with self.assertRaises(InvalidArgumentValueError):
+        with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --immutability-state Locked')
 
         self.cmd('storage account update -n {name1} --immutability-state UnLocked')
         self.cmd('storage account update -n {name1} --immutability-state Locked')
-        with self.assertRaises(InvalidArgumentValueError):
+        with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --immutability-period 10')
-        with self.assertRaises(InvalidArgumentValueError):
+        with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --immutability-state UnLocked')
-        with self.assertRaises(InvalidArgumentValueError):
+        with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --allow-append')
 
     def test_show_usage(self):

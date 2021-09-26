@@ -60,9 +60,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
-                           enable_nfs_v3=None, subnet=None, vnet_name=None, enable_vlw=None,
+                           enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, action='Allow'):
+                           allow_protected_append_writes=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -219,7 +219,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if enable_nfs_v3 is not None:
         params.enable_nfs_v3 = enable_nfs_v3
 
-    if enable_vlw is not None:
+    if enable_alw is not None:
         ImmutableStorageAccount = cmd.get_models('ImmutableStorageAccount')
         AccountImmutabilityPolicyProperties = cmd.get_models('AccountImmutabilityPolicyProperties')
         immutability_policy = None
@@ -230,12 +230,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                 state=immutability_policy_state,
                 allow_protected_append_writes=allow_protected_append_writes
             )
-            from azure.cli.core.azclierror import InvalidArgumentValueError
-            if immutability_policy.state == 'Locked':
-                raise InvalidArgumentValueError(
-                    "Incorrect usage: A policy can only be created in a Disabled or Unlocked state.")
 
-        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=enable_vlw,
+        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=enable_alw,
                                                                            immutability_policy=immutability_policy)
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
@@ -505,41 +501,13 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         immutability_policy = None
         from azure.cli.core.azclierror import InvalidArgumentValueError
 
-        if not instance.immutable_storage_with_versioning.enabled:
-            raise InvalidArgumentValueError("Incorrect usage: The account level immutability has been disabled. "
-                                            "The property is immutable and can only be set to true at the account "
-                                            "creation time.")
-
-        existing_policy = instance.immutable_storage_with_versioning.immutability_policy
-
-        if not existing_policy:
-            if not all([immutability_period_since_creation_in_days, immutability_policy_state, allow_protected_append_writes is not None]):
-                raise InvalidArgumentValueError("Incorrect usage: To create the account level immutability policy, "
-                                                "need to specify all of the following arguments:"
-                                                "--immutability-period --immutability-state "
-                                                "--allow-append")
-        else:
-            if existing_policy.state == 'Disabled':
-                if immutability_policy_state and immutability_policy_state == 'Locked':
-                    raise InvalidArgumentValueError(
-                        "Incorrect usage: The immutability policy state can only be changed to Locked from Unlocked.")
-            if existing_policy.state == 'Locked':
-                if immutability_policy_state and immutability_policy_state != 'Locked':
-                    raise InvalidArgumentValueError("Incorrect usage: The immutability policy state cannot be changed once Locked.")
-
-                if immutability_period_since_creation_in_days and int(immutability_period_since_creation_in_days) < int(existing_policy.immutability_period_since_creation_in_days):
-                    raise InvalidArgumentValueError("Incorrect usage: Locked state only allows the increase of the immutability retention time. ")
-
-                if allow_protected_append_writes is not None and existing_policy.allow_protected_append_writes != allow_protected_append_writes:
-                    raise InvalidArgumentValueError("Incorrect usage: allow-protected-append-write cannot be changed for Locked time-based retention policies.")
-
         immutability_policy = AccountImmutabilityPolicyProperties(
-            immutability_period_since_creation_in_days=immutability_period_since_creation_in_days or existing_policy.immutability_period_since_creation_in_days,
-            state=immutability_policy_state or existing_policy.state,
-            allow_protected_append_writes=allow_protected_append_writes if allow_protected_append_writes is not None else existing_policy.allow_protected_append_writes
+            immutability_period_since_creation_in_days=immutability_period_since_creation_in_days,
+            state=immutability_policy_state,
+            allow_protected_append_writes=allow_protected_append_writes
         )
 
-        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=True,
+        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=None,
                                                                            immutability_policy=immutability_policy)
 
     return params

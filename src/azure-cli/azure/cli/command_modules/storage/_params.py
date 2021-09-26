@@ -221,7 +221,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='The action of virtual network rule. Possible value is Allow.'
     )
 
-    enable_vlw_type = CLIArgumentType(
+    enable_alw_type = CLIArgumentType(
         arg_type=get_three_state_flag(), min_api='2021-06-01',
         help='The account level immutability property. The property is immutable and can only be set to true '
              'at the account creation time. When set to true, it enables object level immutability for all '
@@ -367,7 +367,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
-        c.argument('enable_vlw', arg_type=enable_vlw_type, validator=validate_immutability_arguments)
+        c.argument('enable_alw', arg_type=enable_alw_type, validator=validate_immutability_arguments)
         c.argument('immutability_period_since_creation_in_days',
                    arg_type=immutability_period_since_creation_in_days_type,
                    validator=validate_immutability_arguments)
