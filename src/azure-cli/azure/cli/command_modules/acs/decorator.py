@@ -3168,6 +3168,7 @@ class AKSCreateContext:
         # this parameter does not need validation
         return disable_local_accounts
 
+
 class AKSCreateDecorator:
     def __init__(
         self,
@@ -3906,6 +3907,8 @@ class AKSCreateDecorator:
         mc = self.set_up_sku(mc)
         # set up extended location
         mc = self.set_up_extended_location(mc)
+        # set up disable local accounts
+        mc = self.set_up_disable_local_accounts(mc)
         # build custom header
         self.build_custom_headers(mc)
         return mc
