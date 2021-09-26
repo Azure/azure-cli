@@ -53,6 +53,7 @@ def flexible_server_create(cmd, client,
     # Process parameters
     server_name = server_name.lower()
     if high_availability and high_availability.lower() == 'enabled':
+        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
         high_availability = 'ZoneRedundant'
 
     mysql_arguments_validator(db_context,
@@ -236,6 +237,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         location=instance.location)
 
     if high_availability and high_availability.lower() == 'enabled':
+        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
         high_availability = 'ZoneRedundant'
 
     mysql_arguments_validator(db_context,
