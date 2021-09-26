@@ -162,7 +162,7 @@ def validate_counts_in_autoscaler(
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
-class AKSCreateModels:
+class AKSModels:
     """Store the models used in aks_create.
 
     The api version of the class corresponding to a model is determined by resource_type.
@@ -321,7 +321,7 @@ class AKSCreateModels:
 
 
 # pylint: disable=too-many-public-methods
-class AKSCreateContext:
+class AKSContext:
     """Implement getter functions for all parameters in aks_create.
 
     Note: One of the most basic principles is that when parameters are put into a certain profile (and further
@@ -340,7 +340,7 @@ class AKSCreateContext:
     read_only is set to True when necessary to avoid loop calls, when using the getter function to obtain the value of
     other parameters.
     """
-    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, decorator_mode=DecoratorMode.CREATE):
+    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, decorator_mode):
         self.cmd = cmd
         if not isinstance(raw_parameters, dict):
             raise CLIInternalError(
@@ -3336,7 +3336,7 @@ class AKSCreateDecorator:
         self,
         cmd: AzCliCommand,
         client: ContainerServiceClient,
-        models: AKSCreateModels,
+        models: AKSModels,
         raw_parameters: Dict,
         resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
     ):
@@ -3352,10 +3352,10 @@ class AKSCreateDecorator:
         self.client = client
         self.models = models
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSCreateContext(cmd, raw_parameters, decorator_mode=DecoratorMode.CREATE)
+        self.context = AKSContext(cmd, raw_parameters, decorator_mode=DecoratorMode.CREATE)
         # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
         # containerservice SDK, most models have been passed through the `models` parameter (instantiatied
-        # from `AKSCreateModels` (or `PreviewAKSCreateModels` in aks-preview), where resource_type (i.e.,
+        # from `AKSModels` (or `PreviewAKSModels` in aks-preview), where resource_type (i.e.,
         # api version) has been specified).
         self.resource_type = resource_type
 
@@ -3378,7 +3378,7 @@ class AKSCreateDecorator:
             disk_encryption_set_id=self.context.get_node_osdisk_diskencryptionset_id(),
         )
 
-        # attach mc to AKSCreateContext
+        # attach mc to AKSContext
         self.context.attach_mc(mc)
         return mc
 
@@ -4109,7 +4109,7 @@ class AKSUpdateDecorator:
         self,
         cmd: AzCliCommand,
         client: ContainerServiceClient,
-        models: AKSCreateModels,
+        models: AKSModels,
         raw_parameters: Dict,
     ):
         """Internal controller of aks_update.
@@ -4124,7 +4124,7 @@ class AKSUpdateDecorator:
         self.client = client
         self.models = models
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSCreateContext(cmd, raw_parameters, decorator_mode=DecoratorMode.UPDATE)
+        self.context = AKSContext(cmd, raw_parameters, decorator_mode=DecoratorMode.UPDATE)
 
     def check_raw_parameters(self):
         """Helper function to check whether any parameters are set.
@@ -4197,7 +4197,7 @@ class AKSUpdateDecorator:
         """
         mc = self.client.get(self.context.get_resource_group_name(), self.context.get_name())
 
-        # attach mc to AKSCreateContext
+        # attach mc to AKSContext
         self.context.attach_mc(mc)
         return mc
 
