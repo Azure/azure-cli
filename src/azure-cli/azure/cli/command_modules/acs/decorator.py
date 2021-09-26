@@ -3206,7 +3206,7 @@ class AKSCreateDecorator:
         :return: the ManagedCluster object
         """
         # Initialize a ManagedCluster object with mandatory parameter location and optional parameters tags, dns_prefix,
-        # kubernetes_version, disable_rbac and node_osdisk_diskencryptionset_id.
+        # kubernetes_version, disable_rbac, node_osdisk_diskencryptionset_id, disable_local_accounts.
         mc = self.models.ManagedCluster(
             location=self.context.get_location(),
             tags=self.context.get_tags(),
@@ -3214,6 +3214,7 @@ class AKSCreateDecorator:
             kubernetes_version=self.context.get_kubernetes_version(),
             enable_rbac=not self.context.get_disable_rbac(),
             disk_encryption_set_id=self.context.get_node_osdisk_diskencryptionset_id(),
+            disable_local_accounts=self.context.get_disable_local_accounts(),
         )
 
         # attach mc to AKSCreateContext
@@ -3831,20 +3832,6 @@ class AKSCreateDecorator:
             )
         return mc
 
-    def set_up_disable_local_accounts(self, mc: ManagedCluster) -> ManagedCluster:
-        """Set up disable local accounts for the ManagedCluster object.
-
-        :return: the ManagedCluster object
-        """
-        if not isinstance(mc, self.models.ManagedCluster):
-            raise CLIInternalError(
-                "Unexpected mc object with type '{}'.".format(type(mc))
-            )
-
-        disable_local_accounts = self.context.get_disable_local_accounts()
-        mc.disable_local_accounts = disable_local_accounts
-        return mc
-
     def build_custom_headers(self, mc: ManagedCluster) -> None:
         """Build a dictionary contains custom headers.
 
@@ -3907,8 +3894,6 @@ class AKSCreateDecorator:
         mc = self.set_up_sku(mc)
         # set up extended location
         mc = self.set_up_extended_location(mc)
-        # set up disable local accounts
-        mc = self.set_up_disable_local_accounts(mc)
         # build custom header
         self.build_custom_headers(mc)
         return mc

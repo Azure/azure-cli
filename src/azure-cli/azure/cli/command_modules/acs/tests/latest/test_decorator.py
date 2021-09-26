@@ -4264,3 +4264,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             side_effect=err,
         ):
             dec_1.create_mc(mc_1)
+
+    def test_get_disable_local_accounts(self):
+        ctx_1 = AKSCreateContext(self.cmd, {"disable_local_accounts": False})
+        self.assertEqual(ctx_1.get_disable_local_accounts(), False)
+        ctx_2 = AKSCreateContext(self.cmd, {"disable_local_accounts": True})
+        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
