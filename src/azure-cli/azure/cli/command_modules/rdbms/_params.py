@@ -280,7 +280,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         pg_backup_retention_arg_type = CLIArgumentType(
             type=int,
-            default=7,
             options_list=['--backup-retention'],
             help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
             validator=retention_validator
@@ -288,7 +287,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         mysql_backup_retention_arg_type = CLIArgumentType(
             type=int,
-            default=7,
             options_list=['--backup-retention'],
             help='The number of days a backup is retained. Range of 1 to 35 days. Default is 7 days.',
         )
@@ -412,7 +410,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
                 c.argument('version', default='12', arg_type=version_arg_type)
                 c.argument('high_availability', arg_type=pg_high_availability_arg_type, default="Disabled")
-                c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
+                c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -421,7 +419,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
                 c.argument('high_availability', arg_type=mysql_high_availability_arg_type, default="Disabled")
-                c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
+                c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
