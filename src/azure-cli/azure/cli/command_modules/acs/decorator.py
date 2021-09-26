@@ -3157,6 +3157,16 @@ class AKSCreateContext:
         # this parameter does not need validation
         return edge_zone
 
+    def get_disable_local_accounts(self) -> bool:
+        """Obtain the value of disable_local_accounts.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_local_accounts = self.raw_param.get("disable_local_accounts")
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return disable_local_accounts
 
 class AKSCreateDecorator:
     def __init__(
@@ -3818,6 +3828,20 @@ class AKSCreateDecorator:
                 name=edge_zone,
                 type=self.models.ExtendedLocationTypes.EDGE_ZONE
             )
+        return mc
+
+    def set_up_disable_local_accounts(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up disable local accounts for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        disable_local_accounts = self.context.get_disable_local_accounts()
+        mc.disable_local_accounts = disable_local_accounts
         return mc
 
     def build_custom_headers(self, mc: ManagedCluster) -> None:

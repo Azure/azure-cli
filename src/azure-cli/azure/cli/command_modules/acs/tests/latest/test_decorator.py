@@ -4179,6 +4179,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "assign_kubelet_identity": None,
                 "enable_ultra_ssd": False,
                 "edge_zone": None,
+                "disable_local_accounts": False,
                 "no_wait": False,
                 "yes": False,
                 "enable_azure_rbac": False,
@@ -4234,6 +4235,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             linux_profile=linux_profile_1,
             network_profile=network_profile_1,
             identity=identity_1,
+            disable_local_accounts=False,
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
