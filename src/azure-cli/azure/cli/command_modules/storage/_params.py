@@ -224,7 +224,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     immutability_period_since_creation_in_days_type = CLIArgumentType(
         options_list=['--immutability-period-in-days', '--immutability-period'], min_api='2021-06-01',
         help='The immutability period for the blobs in the container since the policy creation, in days.',
-        is_preview = True
+        is_preview=True
     )
 
     account_immutability_policy_state_enum = self.get_sdk(
@@ -461,7 +461,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'When enabled, new blocks can be written to an append blob while maintaining immutability '
                         'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
                         'modified or deleted.',
-                   arg_group='Account Level Immutability',is_preview=True)
+                   arg_group='Account Level Immutability', is_preview=True)
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
