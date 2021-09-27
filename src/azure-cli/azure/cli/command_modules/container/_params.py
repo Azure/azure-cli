@@ -91,6 +91,7 @@ def load_arguments(self, _):
         c.argument('registry_login_server', help='The container image registry login server')
         c.argument('registry_username', help='The username to log in container image registry server')
         c.argument('registry_password', help='The password to log in container image registry server')
+        c.argument('acr_identity', help='The identity with access to the container registry')
 
     with self.argument_context('container create', arg_group='Azure File Volume') as c:
         c.argument('azure_file_volume_share_name', help='The name of the Azure File share to be mounted as a volume')

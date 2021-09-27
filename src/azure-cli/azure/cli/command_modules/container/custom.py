@@ -37,7 +37,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
 from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
-                              cf_log_analytics_workspace_shared_keys, cf_resource, cf_network)
+                              cf_log_analytics_workspace_shared_keys, cf_resource, cf_network, cf_msi)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -107,7 +107,8 @@ def create_container(cmd,
                      assign_identity=None,
                      identity_scope=None,
                      identity_role='Contributor',
-                     no_wait=False):
+                     no_wait=False,
+                     acr_identity=None):
     """Create a container group. """
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
@@ -123,10 +124,13 @@ def create_container(cmd,
 
     container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory)
 
-    image_registry_credentials = _create_image_registry_credentials(registry_login_server=registry_login_server,
+    image_registry_credentials = _create_image_registry_credentials(cmd=cmd,
+                                                                    resource_group_name=resource_group_name,
+                                                                    registry_login_server=registry_login_server,
                                                                     registry_username=registry_username,
                                                                     registry_password=registry_password,
-                                                                    image=image)
+                                                                    image=image,
+                                                                    identity=acr_identity)
 
     command = shlex.split(command_line) if command_line else None
 
@@ -394,8 +398,8 @@ def _create_resource_requirements(cpu, memory):
         return ResourceRequirements(requests=container_resource_requests)
 
 
-def _create_image_registry_credentials(registry_login_server, registry_username, registry_password, image):
-    """Create image registry credentials. """
+def _create_image_registry_credentials(cmd, resource_group_name, registry_login_server, registry_username, registry_password, image, identity):
+    from msrestazure.tools import is_valid_resource_id
     image_registry_credentials = None
     if registry_login_server:
         if not registry_username:
@@ -409,23 +413,33 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
                                                               username=registry_username,
                                                               password=registry_password)]
     elif ACR_SERVER_DELIMITER in image.split("/")[0]:
-        if not registry_username:
-            try:
-                registry_username = prompt(msg='Image registry username: ')
-            except NoTTYException:
-                raise CLIError('Please specify --registry-username in order to use Azure Container Registry.')
-
-        if not registry_password:
-            try:
-                registry_password = prompt_pass(msg='Image registry password: ')
-            except NoTTYException:
-                raise CLIError('Please specify --registry-password in order to use Azure Container Registry.')
-
         acr_server = image.split("/")[0] if image.split("/") else None
-        if acr_server:
-            image_registry_credentials = [ImageRegistryCredential(server=acr_server,
-                                                                  username=registry_username,
-                                                                  password=registry_password)]
+        if identity:
+            if not is_valid_resource_id(identity):
+                msi_client = cf_msi(cmd.cli_ctx)
+                identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
+                                                                   resource_name=identity).id
+            if acr_server:
+                image_registry_credentials = [ImageRegistryCredential(server=acr_server,
+                                                                      username=registry_username,
+                                                                      password=registry_password,
+                                                                      identity=identity)]
+        else:
+            if not registry_username:
+                try:
+                    registry_username = prompt(msg='Image registry username: ')
+                except NoTTYException:
+                    raise CLIError('Please specify --registry-username in order to use Azure Container Registry.')
+
+            if not registry_password:
+                try:
+                    registry_password = prompt_pass(msg='Image registry password: ')
+                except NoTTYException:
+                    raise CLIError('Please specify --registry-password in order to use Azure Container Registry.')
+            if acr_server:
+                image_registry_credentials = [ImageRegistryCredential(server=acr_server,
+                                                                      username=registry_username,
+                                                                      password=registry_password)]
     elif registry_username and registry_password and SERVER_DELIMITER in image.split("/")[0]:
         login_server = image.split("/")[0] if image.split("/") else None
         if login_server:
