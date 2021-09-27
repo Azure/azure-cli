@@ -63,7 +63,7 @@ def load_arguments_eh(self, _):
         c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
         c.argument('key_version', is_preview=True,
                    help='The version of the KeyVault key to use.')
-        c.argument('require_infrastructure_encryption', options_list=['--enable-require-infrastructure-encryption'], is_preview=True,
+        c.argument('require_infrastructure_encryption', options_list=['--require-infra-encryption'], is_preview=True,
                    arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
@@ -95,9 +95,11 @@ def load_arguments_eh(self, _):
 
     for scope in ['eventhubs namespace authorization-rule create', 'eventhubs namespace authorization-rule update', 'eventhubs eventhub authorization-rule create', 'eventhubs eventhub authorization-rule update']:
         with self.argument_context(scope) as c:
+            c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
             c.argument('rights', arg_type=rights_arg_type)
 
     with self.argument_context('eventhubs namespace authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
@@ -128,10 +130,6 @@ def load_arguments_eh(self, _):
             c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of EventHub AuthorizationRule')
             c.argument('event_hub_name', id_part='child_name_1', arg_type=event_hub_name_arg_type, help='Name of EventHub')
 
-    for scope in ['eventhubs eventhub authorization-rule create', 'eventhubs eventhub authorization-rule update']:
-        with self.argument_context(scope) as c:
-            c.argument('rights', arg_type=rights_arg_type)
-
     with self.argument_context('eventhubs eventhub authorization-rule keys renew') as c:
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
@@ -153,6 +151,7 @@ def load_arguments_eh(self, _):
 
     for scope in ['eventhubs eventhub consumer-group create', 'eventhubs eventhub consumer-group update']:
         with self.argument_context(scope) as c:
+            c.argument('name', arg_type=name_type, help='Name of ConsumerGroup')
             c.argument('user_metadata', help='Usermetadata is a placeholder to store user-defined string data with maximum length 1024. e.g. it can be used to store descriptive data, such as list of teams and their contact information also user-defined configuration settings can be stored.')
 
     with self.argument_context('eventhubs eventhub consumer-group list') as c:
@@ -225,4 +224,3 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace private-link-resource',
                                resource_type=ResourceType.MGMT_EVENTHUB) as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-

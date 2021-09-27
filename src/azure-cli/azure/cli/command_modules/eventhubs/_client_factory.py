@@ -36,5 +36,3 @@ def private_endpoint_connections_mgmt_client_factory(cli_ctx, _):
 
 def private_link_mgmt_client_factory(cli_ctx, _):
     return cf_eventhub(cli_ctx).private_link_resources
-
-

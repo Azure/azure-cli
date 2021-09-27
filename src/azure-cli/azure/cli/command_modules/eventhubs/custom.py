@@ -19,7 +19,6 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
-    from azure.cli.core.util import sdk_no_wait
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
         ehparam = EHNamespace()
@@ -121,9 +120,9 @@ def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=
     Cluster = cmd.get_models('Cluster', resource_type=ResourceType.MGMT_EVENTHUB)
     ClusterSku = cmd.get_models('ClusterSku', resource_type=ResourceType.MGMT_EVENTHUB)
 
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2016-06-01-preview'):
         ehparam = Cluster()
-        ehparam.sku = ClusterSku()
+        ehparam.sku = ClusterSku(name='Dedicated')
         ehparam.location = location
         if not capacity:
             ehparam.sku.capacity = 1
@@ -137,7 +136,7 @@ def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=
 
 
 def cli_cluster_update(cmd, instance, tags=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2016-06-01-preview'):
         if tags:
             instance.tags = tags
     return instance
@@ -233,8 +232,7 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
             instance.capture_description.encoding = encodingcapturedescription.avro
             instance.capture_description.enabled = enabled
 
-        if instance.enabled and instance.capture_description:
-            instance.capture_description.enabled = enabled
+        if instance.capture_description:
             if capture_interval_seconds:
                 instance.capture_description.interval_in_seconds = capture_interval_seconds
             if capture_size_limit_bytes:
@@ -365,8 +363,7 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
     from azure.core.exceptions import HttpResponseError
     import time
 
-    PrivateEndpointServiceConnectionStatus, ErrorResponseException = \
-        cmd.get_models('PrivateLinkConnectionStatus', 'ErrorResponseException')
+    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateLinkConnectionStatus')
 
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, namespace_name=namespace_name,
                                              private_endpoint_connection_name=private_endpoint_connection_name)
