@@ -219,12 +219,13 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if enable_nfs_v3 is not None:
         params.enable_nfs_v3 = enable_nfs_v3
 
-    if enable_alw is not None:
+    if enable_alw:
         ImmutableStorageAccount = cmd.get_models('ImmutableStorageAccount')
         AccountImmutabilityPolicyProperties = cmd.get_models('AccountImmutabilityPolicyProperties')
         immutability_policy = None
 
-        if immutability_period_since_creation_in_days is not None:
+        if any([immutability_period_since_creation_in_days, immutability_policy_state,
+                allow_protected_append_writes is not None]):
             immutability_policy = AccountImmutabilityPolicyProperties(
                 immutability_period_since_creation_in_days=immutability_period_since_creation_in_days,
                 state=immutability_policy_state,

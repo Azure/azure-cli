@@ -1852,12 +1852,11 @@ def validate_policy(namespace):
 
 def validate_immutability_arguments(namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    if namespace.enable_alw is not None:
-        if not namespace.enable_alw:
-            if any([namespace.immutability_period_since_creation_in_days,
-                    namespace.immutability_policy_state, namespace.allow_protected_append_writes is not None]):
-                raise InvalidArgumentValueError("Incorrect usage: To enable account level immutability, "
-                                                "need to specify --enable-alw true. "
-                                                "Cannot set --enable_alw to false and specify "
-                                                "--immutability-period --immutability-state "
-                                                "--allow-append")
+    if not namespace.enable_alw:
+        if any([namespace.immutability_period_since_creation_in_days,
+                namespace.immutability_policy_state, namespace.allow_protected_append_writes is not None]):
+            raise InvalidArgumentValueError("Incorrect usage: To enable account level immutability, "
+                                            "need to specify --enable-alw true. "
+                                            "Cannot set --enable_alw to false and specify "
+                                            "--immutability-period --immutability-state "
+                                            "--allow-append")

@@ -233,8 +233,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='The immutability period for the blobs in the container since the policy creation, in days.',
     )
 
+    account_immutability_policy_state_enum = self.get_sdk('models._storage_management_client_enums#AccountImmutabilityPolicyState',
+                               resource_type=ResourceType.MGMT_STORAGE)
     immutability_policy_state_type = CLIArgumentType(
-        arg_type=get_enum_type(["Unlocked", "Locked", "Disabled"]),
+        arg_type=get_enum_type(account_immutability_policy_state_enum),
         options_list='--immutability-state', min_api='2021-06-01',
         help='Defines the mode of the policy. Disabled state disables the policy, '
         'Unlocked state allows increase and decrease of immutability retention time '
