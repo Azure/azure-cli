@@ -22,7 +22,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
-                          validate_immutability_arguments,validate_blob_name_for_upload)
+                          validate_immutability_arguments, validate_blob_name_for_upload)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
@@ -234,7 +234,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     )
 
     account_immutability_policy_state_enum = self.get_sdk('models._storage_management_client_enums#AccountImmutabilityPolicyState',
-                               resource_type=ResourceType.MGMT_STORAGE)
+                                                          resource_type=ResourceType.MGMT_STORAGE)
     immutability_policy_state_type = CLIArgumentType(
         arg_type=get_enum_type(account_immutability_policy_state_enum),
         options_list='--immutability-state', min_api='2021-06-01',
@@ -247,11 +247,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         'be reverted.')
 
     allow_protected_append_writes_type = CLIArgumentType(
-        arg_type=get_three_state_flag(), options_list=['--allow-append'], min_api='2021-06-01',
+        arg_type=get_three_state_flag(), options_list=['--allow-protected-append-writes', '--allow-append', '-w'], min_api='2021-06-01',
         help='This property can only be changed for disabled and unlocked time-based retention policies. '
              'When enabled, new blocks can be written to an append blob while maintaining immutability protection and'
              ' compliance. Only new blocks can be added and any existing blocks cannot be modified or deleted.')
-
 
     public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
                                               resource_type=ResourceType.MGMT_STORAGE)
