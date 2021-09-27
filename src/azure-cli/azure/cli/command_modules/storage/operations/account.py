@@ -60,7 +60,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
-                           enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow'):  # pylint: disable=unused-argument
+                           enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', public_network_access=None):  # pylint: disable=unused-argument
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -217,6 +217,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if enable_nfs_v3 is not None:
         params.enable_nfs_v3 = enable_nfs_v3
 
+    if public_network_access is not None:
+        params.public_network_access = public_network_access
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -295,7 +298,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
-                           allow_cross_tenant_replication=None, default_share_permission=None):
+                           allow_cross_tenant_replication=None, default_share_permission=None,
+                           public_network_access=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -475,6 +479,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
+
+    if public_network_access is not None:
+        params.public_network_access = public_network_access
 
     return params
 
