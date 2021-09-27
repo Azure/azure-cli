@@ -201,3 +201,29 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace network-rule add', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
         c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
         c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
+
+
+# Private end point connection
+    with self.argument_context('eventhubs namespace private-endpoint-connection',
+                               resource_type=ResourceType.MGMT_EVENTHUB) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with the EventHubs Namespace.')
+    for item in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('eventhubs namespace private-endpoint-connection {}'.format(item),
+                                   resource_type=ResourceType.MGMT_EVENTHUB) as c:
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the EventHubs Namespace.')
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the EventHubs Namespace. You can get '
+                         'it using `az eventhubs namespace show`.')
+            c.argument('namespace_name', help='The eventhubs namesapce name.', required=False)
+            c.argument('resource_group_name', help='The resource group name of specified eventhubs namespace.',
+                       required=False)
+            c.argument('description', help='Comments for {} operation.'.format(item))
+
+# Private end point connection
+    with self.argument_context('eventhubs namespace private-link-resource',
+                               resource_type=ResourceType.MGMT_EVENTHUB) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+

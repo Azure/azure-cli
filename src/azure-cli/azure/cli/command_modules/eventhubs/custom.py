@@ -19,6 +19,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
+    from azure.cli.core.util import sdk_no_wait
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
         ehparam = EHNamespace()
@@ -356,3 +357,51 @@ def cli_geodr_create(client, resource_group_name, namespace_name, alias, partner
                                    namespace_name,
                                    alias,
                                    parameters={'partner_namespace': partner_namespace, 'alternate_name': alternate_name})
+
+
+# Private Endpoint
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, namespace_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):
+    from azure.core.exceptions import HttpResponseError
+    import time
+
+    PrivateEndpointServiceConnectionStatus, ErrorResponseException = \
+        cmd.get_models('PrivateLinkConnectionStatus', 'ErrorResponseException')
+
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, namespace_name=namespace_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    old_status = private_endpoint_connection.private_link_service_connection_state.status
+    if old_status != "Approved" or not is_approved:
+        private_endpoint_connection.private_link_service_connection_state.status = PrivateEndpointServiceConnectionStatus.APPROVED\
+            if is_approved else PrivateEndpointServiceConnectionStatus.REJECTED
+        private_endpoint_connection.private_link_service_connection_state.description = description
+        try:
+            private_endpoint_connection = client.create_or_update(resource_group_name=resource_group_name,
+                                                                  namespace_name=namespace_name,
+                                                                  private_endpoint_connection_name=private_endpoint_connection_name,
+                                                                  parameters=private_endpoint_connection)
+        except HttpResponseError as ex:
+            if 'Operation returned an invalid status ''Accepted''' in ex.message:
+                time.sleep(30)
+                private_endpoint_connection = client.get(resource_group_name=resource_group_name,
+                                                         namespace_name=namespace_name,
+                                                         private_endpoint_connection_name=private_endpoint_connection_name)
+    return private_endpoint_connection
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, namespace_name,
+                                        private_endpoint_connection_name, description=None):
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=True,
+        private_endpoint_connection_name=private_endpoint_connection_name, description=description
+    )
+
+
+def reject_private_endpoint_connection(cmd, client, resource_group_name, namespace_name, private_endpoint_connection_name,
+                                       description=None):
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=False,
+        private_endpoint_connection_name=private_endpoint_connection_name, description=description
+    )

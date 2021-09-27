@@ -15,3 +15,5 @@ def accessrights_converter(accessrights):
         accessrights_new.append(AccessRights.listen)
 
     return accessrights_new
+
+MSI_LOCAL_ID = '[system]'
