@@ -144,6 +144,10 @@ examples:
     text: |-
         az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
         --enable-auto-scale --min-node-count 3 --max-node-count 100
+  - name: Update the Spark pool's custom libraries.
+    text: |-
+        az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --package-action Add --package package1.jar package2.jar
 """
 
 helps['synapse spark pool delete'] = """
@@ -1561,6 +1565,59 @@ examples:
     text: |-
         az synapse notebook delete --workspace-name testsynapseworkspace \\
           --name testnotebook
+"""
+helps['synapse workspace-package'] = """
+type: group
+short-summary: Manage Synapse's workspace packages.
+"""
+
+helps['synapse workspace-package upload'] = """
+type: command
+short-summary: Upload a local workspace package file to an Azure Synapse workspace.
+examples:
+  - name: Upload a local workspace package file to an Azure Synapse workspace.
+    text: |-
+        az synapse workspace-package upload --workspace-name testsynapseworkspace \\
+          --package C:/package.jar
+"""
+
+helps['synapse workspace-package upload-batch'] = """
+type: command
+short-summary: Upload workspace package files from a local directory to an Azure Synapse workspace.
+examples:
+  - name: Upload workspace package files from a local directory to an Azure Synapse workspace.
+    text: |-
+        az synapse workspace-package upload-batch --workspace-name testsynapseworkspace \\
+          --source C:/package
+"""
+
+helps['synapse workspace-package show'] = """
+type: command
+short-summary: Get a workspace package.
+examples:
+  - name: Get a workspace package.
+    text: |-
+        az synapse workspace-package show --workspace-name testsynapseworkspace \\
+          --name testpackage.jar
+"""
+
+helps['synapse workspace-package list'] = """
+type: command
+short-summary: List workspace packages.
+examples:
+  - name: List workspace packages.
+    text: |-
+        az synapse workspace-package list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse workspace-package delete'] = """
+type: command
+short-summary: Delete a workspace package.
+examples:
+  - name: Delete a workspace package.
+    text: |-
+        az synapse workspace-package delete --workspace-name testsynapseworkspace \\
+          --name testpackage.jar
 """
 
 helps['synapse integration-runtime'] = """
