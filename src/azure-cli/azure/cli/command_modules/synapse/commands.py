@@ -178,6 +178,10 @@ def load_command_table(self, _):
         operation_tmpl='azure.synapse.artifacts.operations#NotebookOperations.{}',
         client_factory=None)
 
+    synapse_library_sdk = CliCommandType(
+        operation_tmpl='azure.synapse.artifacts.operations#LibraryOperations.{}',
+        client_factory=None)
+
     synapse_managed_private_endpoints_sdk = CliCommandType(
         operations_tmpl='azure.synapse.managedprivateendpoints.operations#ManagedPrivateEndpoints.{}',
         client_factory=None)
@@ -479,6 +483,15 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_notebook')
         g.custom_command('export', 'export_notebook')
         g.custom_command('delete', 'delete_notebook', confirmation=True, supports_no_wait=True)
+
+    # Data Plane Commands --Artifacts library operations
+    with self.command_group('synapse workspace-package', synapse_library_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
+        g.custom_command('upload', 'upload_workspace_package')
+        g.custom_command('upload-batch', 'workspace_package_upload_batch')
+        g.custom_command('list', 'list_workspace_package')
+        g.custom_show_command('show', 'get_workspace_package')
+        g.custom_command('delete', 'delete_workspace_package', confirmation=True, supports_no_wait=True)
 
     # Data Plane Commands --Managed private endpoints operations
     with self.command_group('synapse managed-private-endpoints', synapse_managed_private_endpoints_sdk,
