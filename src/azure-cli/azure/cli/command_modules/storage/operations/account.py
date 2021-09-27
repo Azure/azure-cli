@@ -499,7 +499,6 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         ImmutableStorageAccount = cmd.get_models('ImmutableStorageAccount')
         AccountImmutabilityPolicyProperties = cmd.get_models('AccountImmutabilityPolicyProperties')
         immutability_policy = None
-        from azure.cli.core.azclierror import InvalidArgumentValueError
 
         immutability_policy = AccountImmutabilityPolicyProperties(
             immutability_period_since_creation_in_days=immutability_period_since_creation_in_days,

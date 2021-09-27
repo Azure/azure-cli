@@ -552,20 +552,29 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         # test failure cases during update
         self.cmd('storage account create -n {name2} -g {rg} --enable-alw false')
 
+        # cannot add policy when alw is disabled
         with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name2} --immutability-period 10 '
                      '--immutability-state Disabled --allow-append')
 
         self.cmd('storage account update -n {name1} --immutability-state Disabled')
+
+        # cannot directly change the state to Locked from Disabled
         with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --immutability-state Locked')
 
         self.cmd('storage account update -n {name1} --immutability-state UnLocked')
         self.cmd('storage account update -n {name1} --immutability-state Locked')
+
+        # cannot reduce immutability-period when locked
         with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --immutability-period 10')
+
+        # cannot unlock a locked policy
         with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --immutability-state UnLocked')
+
+        # cannot changed allowProtectedAppendWrites for locked policy
         with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --allow-append')
 

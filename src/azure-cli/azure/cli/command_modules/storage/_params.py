@@ -367,13 +367,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
-        c.argument('enable_alw', arg_type=enable_alw_type, validator=validate_immutability_arguments)
+        c.argument('enable_alw', arg_type=enable_alw_type, arg_group='Account Level Immutability', validator=validate_immutability_arguments)
         c.argument('immutability_period_since_creation_in_days',
                    arg_type=immutability_period_since_creation_in_days_type,
+                   arg_group='Account Level Immutability',
                    validator=validate_immutability_arguments)
         c.argument('immutability_policy_state', arg_type=immutability_policy_state_type,
+                   arg_group='Account Level Immutability',
                    validator=validate_immutability_arguments)
         c.argument('allow_protected_append_writes', arg_type=allow_protected_append_writes_type,
+                   arg_group='Account Level Immutability',
                    validator=validate_immutability_arguments)
 
     with self.argument_context('storage account private-endpoint-connection',
@@ -439,9 +442,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('immutability_period_since_creation_in_days',
-                   arg_type=immutability_period_since_creation_in_days_type)
-        c.argument('immutability_policy_state', arg_type=immutability_policy_state_type)
-        c.argument('allow_protected_append_writes', arg_type=allow_protected_append_writes_type)
+                   arg_type=immutability_period_since_creation_in_days_type,
+                   arg_group='Account Level Immutability')
+        c.argument('immutability_policy_state', arg_type=immutability_policy_state_type,
+                   arg_group='Account Level Immutability')
+        c.argument('allow_protected_append_writes', arg_type=allow_protected_append_writes_type,
+                   arg_group='Account Level Immutability')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
