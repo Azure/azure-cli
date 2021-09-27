@@ -115,6 +115,7 @@ def cli_namespace_exists(client, name):
 
     return client.check_name_availability(parameters={'name': name})
 
+
 # Cluster region
 def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=None, tags=None, capacity=None):
     Cluster = cmd.get_models('Cluster', resource_type=ResourceType.MGMT_EVENTHUB)

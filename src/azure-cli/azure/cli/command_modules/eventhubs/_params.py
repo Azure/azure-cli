@@ -63,7 +63,7 @@ def load_arguments_eh(self, _):
         c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
         c.argument('key_version', is_preview=True,
                    help='The version of the KeyVault key to use.')
-        c.argument('require_infrastructure_encryption', options_list=['--require-infra-encryption'], is_preview=True,
+        c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
                    arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
