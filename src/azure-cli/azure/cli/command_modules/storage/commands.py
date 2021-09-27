@@ -124,6 +124,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         """
         g.command('failover', 'begin_failover', supports_no_wait=True, is_preview=True, min_api='2018-07-01',
                   confirmation=failover_confirmation)
+        g.command('hns-migration start', 'begin_hierarchical_namespace_migration',
+                  supports_no_wait=True, min_api='2021-06-01')
+        g.command('hns-migration stop', 'begin_abort_hierarchical_namespace_migration',
+                  supports_no_wait=True, min_api='2021-06-01')
 
     with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:

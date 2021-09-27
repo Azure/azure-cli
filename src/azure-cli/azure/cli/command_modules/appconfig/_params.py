@@ -77,7 +77,7 @@ def load_arguments(self, _):
                    'If the auth mode is "key", provide connection string or store name and your account access keys will be retrieved for authorization. ' +
                    'If the auth mode is "login", provide the store endpoint or store name and your "az login" credentials will be used for authorization. ' +
                    'You can configure the default auth mode using `az configure --defaults appconfig_auth_mode=<auth_mode>`. ' +
-                   'For more information, see https://docs.microsoft.com/en-us/azure/azure-app-configuration/concept-enable-rbac')
+                   'For more information, see https://docs.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)

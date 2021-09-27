@@ -104,6 +104,13 @@ def validate_bypass(namespace):
         namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
 
 
+def validate_hns_migration_type(namespace):
+    if namespace.request_type and namespace.request_type.lower() == 'validation':
+        namespace.request_type = 'HnsOnValidationRequest'
+    if namespace.request_type and namespace.request_type.lower() == 'upgrade':
+        namespace.request_type = 'HnsOnHydrationRequest'
+
+
 def get_config_value(cmd, section, key, default):
     logger.info("Try to get %s %s value from environment variables or config file.", section, key)
     return cmd.cli_ctx.config.get(section, key, default)
@@ -184,7 +191,7 @@ It is recommended to provide --connection-string, --account-key or --sas-token i
         if 'auth_mode' in cmd.arguments:
             message += """
 You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
-For more information about RBAC roles in storage, visit https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.
+For more information about RBAC roles in storage, visit https://docs.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli.
 """
         logger.warning('%s\nIn addition, setting the corresponding environment variables can avoid inputting '
                        'credentials in your command. Please use --help to get more information about environment '
@@ -831,6 +838,20 @@ def validate_container_public_access(cmd, namespace):
             container = ns.get('container_name')
             lease_id = ns.get('lease_id')
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
+
+
+def validate_container_nfsv3_squash(cmd, namespace):
+    t_root_squash = cmd.get_models('RootSquashType', resource_type=ResourceType.MGMT_STORAGE)
+    if namespace.root_squash and namespace.root_squash == t_root_squash.NO_ROOT_SQUASH:
+        namespace.enable_nfs_v3_root_squash = False
+        namespace.enable_nfs_v3_all_squash = False
+    elif namespace.root_squash and namespace.root_squash == t_root_squash.ROOT_SQUASH:
+        namespace.enable_nfs_v3_root_squash = True
+        namespace.enable_nfs_v3_all_squash = False
+    elif namespace.root_squash and namespace.root_squash == t_root_squash.ALL_SQUASH:
+        namespace.enable_nfs_v3_all_squash = True
+
+    del namespace.root_squash
 
 
 def validate_fs_public_access(cmd, namespace):
@@ -1535,7 +1556,7 @@ def validate_logging_version(namespace):
     if validate_service_type(namespace.services, 'table') and namespace.version and namespace.version != 1.0:
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
-            'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
+            'please refer to https://docs.microsoft.com/rest/api/storageservices/storage-analytics-log-format.')
 
 
 def validate_match_condition(namespace):
