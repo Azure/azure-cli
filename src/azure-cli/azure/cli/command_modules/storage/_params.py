@@ -22,7 +22,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
-                          validate_allow_protected_append_writes_all)
+                          validate_allow_protected_append_writes_all, validate_blob_name_for_upload)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
@@ -220,6 +220,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     action_type = CLIArgumentType(
         help='The action of virtual network rule. Possible value is Allow.'
     )
+
+    public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
+                                              resource_type=ResourceType.MGMT_STORAGE)
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -337,6 +341,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
+        c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
+                   help='Enable or disable public network access to the storage account. '
+                        'Possible values include: `Enabled` or `Disabled`.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -400,6 +407,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
+        c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
+                   help='Enable or disable public network access to the storage account. '
+                        'Possible values include: `Enabled` or `Disabled`.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
@@ -835,6 +845,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=False)
         c.register_blob_arguments()
+        c.extra('blob_name', validator=validate_blob_name_for_upload)
 
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
         c.argument('max_connections', type=int)

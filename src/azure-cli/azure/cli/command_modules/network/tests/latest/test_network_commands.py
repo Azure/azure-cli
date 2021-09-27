@@ -406,12 +406,26 @@ class NetworkCustomIpPrefix(ScenarioTest):
         # Test custom prefix CRUD
         self.cmd('network custom-ip prefix create -g {rg} -n {prefix} --cidr 40.40.40.0/24')
         self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+        # self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state Commissioning')
         self.cmd('network custom-ip prefix list -g {rg}',
                  checks=self.check('length(@)', 1))
         # Delete operation isn't ready.
         # self.cmd('network custom-ip prefix delete -g {rg} -n {prefix}')
         # self.cmd('network custom-ip prefix list -g {rg}',
         #          checks=self.is_empty())
+
+    @record_only()
+    def test_network_custom_ip_prefix_update_state(self):
+        self.kwargs.update({
+            'rg': 'cli_test_custom_ip_prefix',
+            'prefix': 'prefix1'
+        })
+
+        self.cmd('network custom-ip prefix show -g {rg} -n {prefix}',
+                 checks=self.check('commissionedState', 'Provisioned'))
+
+        self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state Commissioning',
+                 checks=self.check('commissionedState', 'Commissioning'))
 
 
 class NetworkPublicIpPrefix(ScenarioTest):

@@ -1880,3 +1880,8 @@ def validate_allow_protected_append_writes_all(namespace):
                                         "new blocks to be written to both Append and Block Blobs, while "
                                         "'allow-protected-append-writes' allows new blocks to be written to "
                                         "Append Blobs only.")
+
+
+def validate_blob_name_for_upload(namespace):
+    if not namespace.blob_name:
+        namespace.blob_name = os.path.basename(namespace.file_path)
