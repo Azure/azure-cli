@@ -46,7 +46,7 @@ def register_providers():
     _register_one_provider("Microsoft.Purview/accounts", "2021-07-01", True)
     _register_one_provider('Microsoft.PowerBI/privateLinkServicesForPowerBI', '2020-06-01', False)
     _register_one_provider('Microsoft.Search/searchServices', '2020-08-01', True)
-    _register_one_provider("Microsoft.ServiceBus/namespaces", "2018-01-01-preview", True)
+    _register_one_provider("Microsoft.ServiceBus/namespaces", "2021-06-01-preview", True)
     _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
     _register_one_provider('Microsoft.Sql/servers', '2018-06-01-preview', True)
     _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', True)

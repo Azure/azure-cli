@@ -233,7 +233,7 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
             instance.capture_description.encoding = encodingcapturedescription.avro
             instance.capture_description.enabled = enabled
 
-        if enabled and instance.capture_description:
+        if instance.enabled and instance.capture_description:
             instance.capture_description.enabled = enabled
             if capture_interval_seconds:
                 instance.capture_description.interval_in_seconds = capture_interval_seconds
