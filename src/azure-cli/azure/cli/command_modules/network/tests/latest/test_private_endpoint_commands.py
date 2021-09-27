@@ -2188,5 +2188,67 @@ class NetworkPrivateLinkBotServiceScenarioTest(ScenarioTest):
         ])
         self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {bot_name} -n {endpoint_name} --type Microsoft.BotService/botServices -y')
 
+
+class NetworkPrivateLinkHDInsightScenarioTest(ScenarioTest):
+
+    @record_only()  # This test need to create hdinsight cluster in advance
+    @ResourceGroupPreparer(name_prefix='test_hdi_private_link', random_name_length=40, location="southcentralus")
+    def test_private_link_resource_hdinsight(self, resource_group):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'cluster_id': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicsharprg8691/providers/Microsoft.HDInsight/clusters/hdisdk-pe7318',
+            'vnet_name': self.create_random_name('hdi-privatelink-vnet', 40),
+            'subnet_name': self.create_random_name('hdi-privatelink-subnet', 40),
+            'endpoint_name': self.create_random_name('hdi-privatelink-endpoint', 40),
+            'endpoint_connection_name': self.create_random_name('hdi-privatelink-endpoint-connection', 40),
+            'approve_description_msg': 'Approved!',
+            'reject_description_msg': 'Rejected!'
+        })
+        # Create hdinsight cluster in advance
+
+        # Create a vnet and subnet for private endpoint connection
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} '
+                 '--disable-private-endpoint-network-policies true')
+
+        # Test list private link resources
+        hdi_private_link_resources = self.cmd(
+            'network private-link-resource list --id {cluster_id}').get_output_in_json()
+
+        self.kwargs['group_id'] = hdi_private_link_resources[0]['properties']['groupId']
+
+        # Create private endpoint with manual request approval
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+            '--private-connection-resource-id {cluster_id} --connection-name {endpoint_connection_name} -'
+            '-group-id {group_id} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in private_endpoint['name'].lower())
+
+        # Test get private endpoint connection
+        private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {cluster_id}', checks=[
+            self.check('@[0].properties.privateLinkServiceConnectionState.status', 'Pending'),
+        ]).get_output_in_json()
+
+        # Test approve private endpoint connection
+        self.kwargs['private-endpoint-connection-id'] = private_endpoint_connections[0]['id']
+        self.cmd(
+            'network private-endpoint-connection approve --id {private-endpoint-connection-id} '
+            '--description {approve_description_msg}', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+
+        # Test reject private endpoint connnection
+        self.cmd('network private-endpoint-connection reject --id {private-endpoint-connection-id}'
+                 ' --description {reject_description_msg}', checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+        ])
+
+        # Test delete private endpoint connection
+        self.cmd('network private-endpoint-connection delete --id {private-endpoint-connection-id} --yes')
+        import time
+        time.sleep(10)
+        self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}', expect_failure=True)
+
+
 if __name__ == '__main__':
     unittest.main()

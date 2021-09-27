@@ -1881,3 +1881,8 @@ def validate_immutability_arguments(namespace):
                                             "Cannot set --enable_alw to false and specify "
                                             "--immutability-period --immutability-state "
                                             "--allow-append")
+
+
+def validate_blob_name_for_upload(namespace):
+    if not namespace.blob_name:
+        namespace.blob_name = os.path.basename(namespace.file_path)

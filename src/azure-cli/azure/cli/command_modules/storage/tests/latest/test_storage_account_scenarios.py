@@ -155,6 +155,38 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertTrue(result['identity']['principalId'])
         self.assertTrue(result['identity']['tenantId'])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_create_storage_account_with_public_network_access(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
+        result = self.cmd(cmd).get_output_in_json()
+
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] is None)
+
+        name = self.create_random_name(prefix='cli', length=24)
+        cmd = 'az storage account create -n {} -g {} --public-network-access Disabled'.format(name, resource_group)
+        result = self.cmd(cmd).get_output_in_json()
+
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_update_storage_account_with_public_network_access(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --public-network-access Enabled'.format(name, resource_group)
+        result = self.cmd(create_cmd).get_output_in_json()
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] == 'Enabled')
+
+        update_cmd = 'az storage account update -n {} -g {} --public-network-access Disabled'.format(name, resource_group)
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):

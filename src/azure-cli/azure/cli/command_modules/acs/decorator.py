@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import sys
 import time
 from distutils.version import StrictVersion
 from typing import Any, Dict, List, Tuple, TypeVar, Union
@@ -28,6 +29,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
+    DecoratorMode,
 )
 from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
@@ -46,6 +48,7 @@ from azure.cli.command_modules.acs.custom import (
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
+    ArgumentUsageError,
     CLIInternalError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
@@ -75,6 +78,18 @@ ResourceReference = TypeVar("ResourceReference")
 # add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
 
 
+def format_parameter_name_to_option_name(parameter_name: str) -> str:
+    """Convert a name in parameter format to option format.
+
+    Underscores ("_") are used to connect the various parts of a parameter name, while hyphens ("-") are used to connect
+    each part of an option name. Besides, the option name starts with double hyphens ("--").
+
+    :return: str
+    """
+    option_name = "--" + parameter_name.replace("_", "-")
+    return option_name
+
+
 def safe_list_get(li: List, idx: int, default: Any = None) -> Any:
     """Get an element from a list without raising IndexError.
 
@@ -101,8 +116,53 @@ def safe_lower(obj: Any) -> Any:
     return obj
 
 
+def validate_counts_in_autoscaler(
+    node_count,
+    enable_cluster_autoscaler,
+    min_count,
+    max_count,
+    decorator_mode,
+) -> None:
+    """Check the validity of serveral count-related parameters in autoscaler.
+
+    On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is enabled,
+    it will check whether both min_count and max_count are  assigned, if not, raise the RequiredArgumentMissingError. If
+    min_count is less than max_count, raise the InvalidArgumentValueError. Only in create mode it will check whether the
+    value of node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
+    enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is not enabled, it will check
+    whether any of min_count or max_count is assigned, if so, raise the RequiredArgumentMissingError.
+
+    :return: None
+    """
+    # validation
+    if enable_cluster_autoscaler:
+        if min_count is None or max_count is None:
+            raise RequiredArgumentMissingError(
+                "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+            )
+        if min_count > max_count:
+            raise InvalidArgumentValueError(
+                "Value of min-count should be less than or equal to value of max-count"
+            )
+        if decorator_mode == DecoratorMode.CREATE:
+            if node_count < min_count or node_count > max_count:
+                raise InvalidArgumentValueError(
+                    "node-count is not in the range of min-count and max-count"
+                )
+    else:
+        if min_count is not None or max_count is not None:
+            option_name = "--enable-cluster-autoscaler"
+            if decorator_mode == DecoratorMode.UPDATE:
+                option_name += " or --update-cluster-autoscaler"
+            raise RequiredArgumentMissingError(
+                "min-count and max-count are required for {}, please use the flag".format(
+                    option_name
+                )
+            )
+
+
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
-class AKSCreateModels:
+class AKSModels:
     """Store the models used in aks_create.
 
     The api version of the class corresponding to a model is determined by resource_type.
@@ -206,6 +266,12 @@ class AKSCreateModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
+        # not directly used
+        self.ManagedClusterPropertiesAutoScalerProfile = self.__cmd.get_models(
+            "ManagedClusterPropertiesAutoScalerProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
         # init load balancer models
         self.init_lb_models()
 
@@ -249,13 +315,13 @@ class AKSCreateModels:
             operation_group="managed_clusters",
         )
         self.lb_models = lb_models
-        # uncomment the followings to add these models as class attributes
+        # Note: Uncomment the followings to add these models as class attributes.
         # for model_name, model_type in lb_models.items():
         #     setattr(self, model_name, model_type)
 
 
 # pylint: disable=too-many-public-methods
-class AKSCreateContext:
+class AKSContext:
     """Implement getter functions for all parameters in aks_create.
 
     Note: One of the most basic principles is that when parameters are put into a certain profile (and further
@@ -274,7 +340,7 @@ class AKSCreateContext:
     read_only is set to True when necessary to avoid loop calls, when using the getter function to obtain the value of
     other parameters.
     """
-    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict):
+    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, decorator_mode):
         self.cmd = cmd
         if not isinstance(raw_parameters, dict):
             raise CLIInternalError(
@@ -283,6 +349,7 @@ class AKSCreateContext:
                 )
             )
         self.raw_param = raw_parameters
+        self.decorator_mode = decorator_mode
         self.intermediates = dict()
         self.mc = None
 
@@ -1083,11 +1150,7 @@ class AKSCreateContext:
     ) -> Tuple[int, bool, Union[int, None], Union[int, None]]:
         """Obtain the value of node_count, enable_cluster_autoscaler, min_count and max_count.
 
-        This function will verify the parameter by default. On the premise that enable_cluster_autoscaler is enabled,
-        it will check whether both min_count and max_count are assigned, if not, raise the RequiredArgumentMissingError;
-        if will also check whether min_count is less than max_count and node_count is between min_count and max_count,
-        if not, raise the InvalidArgumentValueError. If enable_cluster_autoscaler is not enabled, it will check whether
-        any of min_count or max_count is assigned, if so, raise the RequiredArgumentMissingError.
+        This function will verify the parameters through function "validate_counts_in_autoscaler" by default.
 
         :return: a tuple containing four elements: node_count of int type, enable_cluster_autoscaler of bool type,
         min_count of int type or None and max_count of int type or None
@@ -1130,25 +1193,108 @@ class AKSCreateContext:
         # these parameters do not need dynamic completion
 
         # validation
-        if enable_cluster_autoscaler:
-            if min_count is None or max_count is None:
-                raise RequiredArgumentMissingError(
-                    "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-                )
-            if min_count > max_count:
-                raise InvalidArgumentValueError(
-                    "Value of min-count should be less than or equal to value of max-count"
-                )
-            if node_count < min_count or node_count > max_count:
-                raise InvalidArgumentValueError(
-                    "node-count is not in the range of min-count and max-count"
-                )
-        else:
-            if min_count is not None or max_count is not None:
-                raise RequiredArgumentMissingError(
-                    "min-count and max-count are required for --enable-cluster-autoscaler, please use the flag"
-                )
+        validate_counts_in_autoscaler(
+            node_count,
+            enable_cluster_autoscaler,
+            min_count,
+            max_count,
+            decorator_mode=DecoratorMode.CREATE,
+        )
         return node_count, enable_cluster_autoscaler, min_count, max_count
+
+    # pylint: disable=too-many-branches
+    def get_update_enable_disable_cluster_autoscaler_and_min_max_count(
+        self,
+    ) -> Tuple[bool, bool, bool, Union[int, None], Union[int, None]]:
+        """Obtain the value of update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler,
+        min_count and max_count.
+
+        This function will verify the parameters through function "validate_counts_in_autoscaler" by default. Besides if
+        both enable_cluster_autoscaler and update_cluster_autoscaler are specified, a MutuallyExclusiveArgumentError
+        will be raised. If enable_cluster_autoscaler or update_cluster_autoscaler is specified and there are multiple
+        agent pool profiles, an ArgumentUsageError will be raised. If enable_cluster_autoscaler is specified and
+        autoscaler is already enabled in `mc`, it will output warning messages and exit with code 0. If
+        update_cluster_autoscaler is specified and autoscaler is not enabled in `mc`, it will raise an
+        InvalidArgumentValueError. If disable_cluster_autoscaler is specified and autoscaler is not enabled in `mc`,
+        it will output warning messages and exit with code 0.
+
+        :return: a tuple containing four elements: update_cluster_autoscaler of bool type, enable_cluster_autoscaler
+        of bool type, disable_cluster_autoscaler of bool type, min_count of int type or None and max_count of int type
+        or None
+        """
+        # get agent pool profile from `mc`
+        agent_pool_profile = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+
+        # update_cluster_autoscaler
+        # read the original value passed by the command
+        update_cluster_autoscaler = self.raw_param.get("update_cluster_autoscaler")
+
+        # enable_cluster_autoscaler
+        # read the original value passed by the command
+        enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler")
+
+        # disable_cluster_autoscaler
+        # read the original value passed by the command
+        disable_cluster_autoscaler = self.raw_param.get("disable_cluster_autoscaler")
+
+        # min_count
+        # read the original value passed by the command
+        min_count = self.raw_param.get("min_count")
+
+        # max_count
+        # read the original value passed by the command
+        max_count = self.raw_param.get("max_count")
+
+        # these parameters do not need dynamic completion
+
+        # validation
+        # For multi-agent pool, use the az aks nodepool command
+        if (enable_cluster_autoscaler or update_cluster_autoscaler) and len(self.mc.agent_pool_profiles) > 1:
+            raise ArgumentUsageError(
+                'There are more than one node pool in the cluster. Please use "az aks nodepool" command '
+                "to update per node pool auto scaler settings"
+            )
+
+        if enable_cluster_autoscaler + update_cluster_autoscaler + disable_cluster_autoscaler > 1:
+            raise MutuallyExclusiveArgumentError(
+                "Can only specify one of --enable-cluster-autoscaler, --update-cluster-autoscaler and "
+                "--disable-cluster-autoscaler"
+            )
+
+        validate_counts_in_autoscaler(
+            None,
+            enable_cluster_autoscaler or update_cluster_autoscaler,
+            min_count,
+            max_count,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+
+        if enable_cluster_autoscaler and agent_pool_profile.enable_auto_scaling:
+            logger.warning(
+                "Cluster autoscaler is already enabled for this node pool.\n"
+                'Please run "az aks --update-cluster-autoscaler" '
+                "if you want to update min-count or max-count."
+            )
+            sys.exit(0)
+
+        if update_cluster_autoscaler and not agent_pool_profile.enable_auto_scaling:
+            raise InvalidArgumentValueError(
+                "Cluster autoscaler is not enabled for this node pool.\n"
+                'Run "az aks nodepool update --enable-cluster-autoscaler" '
+                "to enable cluster with min-count and max-count."
+            )
+
+        if disable_cluster_autoscaler and not agent_pool_profile.enable_auto_scaling:
+            logger.warning(
+                "Cluster autoscaler is already disabled for this node pool."
+            )
+            sys.exit(0)
+
+        return update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler, min_count, max_count
 
     def get_admin_username(self) -> str:
         """Obtain the value of admin_username.
@@ -2795,28 +2941,41 @@ class AKSCreateContext:
         api_server_authorized_ip_ranges = self.raw_param.get(
             "api_server_authorized_ip_ranges"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        read_from_mc = False
-        if (
-            self.mc and
-            self.mc.api_server_access_profile and
-            self.mc.api_server_access_profile.authorized_ip_ranges is not None
-        ):
-            api_server_authorized_ip_ranges = (
-                self.mc.api_server_access_profile.authorized_ip_ranges
-            )
-            read_from_mc = True
 
-        # normalize
-        if not read_from_mc:
-            api_server_authorized_ip_ranges = [
-                x.strip()
-                for x in (
-                    api_server_authorized_ip_ranges.split(",")
-                    if api_server_authorized_ip_ranges
-                    else []
+        if self.decorator_mode == DecoratorMode.CREATE:
+            # try to read the property value corresponding to the parameter from the `mc` object
+            read_from_mc = False
+            if (
+                self.mc and
+                self.mc.api_server_access_profile and
+                self.mc.api_server_access_profile.authorized_ip_ranges is not None
+            ):
+                api_server_authorized_ip_ranges = (
+                    self.mc.api_server_access_profile.authorized_ip_ranges
                 )
-            ]
+                read_from_mc = True
+
+            # normalize
+            if not read_from_mc:
+                api_server_authorized_ip_ranges = [
+                    x.strip()
+                    for x in (
+                        api_server_authorized_ip_ranges.split(",")
+                        if api_server_authorized_ip_ranges
+                        else []
+                    )
+                ]
+        elif self.decorator_mode == DecoratorMode.UPDATE:
+            # normalize
+            if api_server_authorized_ip_ranges is not None:
+                api_server_authorized_ip_ranges = [
+                    x.strip()
+                    for x in (
+                        api_server_authorized_ip_ranges.split(",")
+                        if api_server_authorized_ip_ranges
+                        else []
+                    )
+                ]
 
         # validation
         if api_server_authorized_ip_ranges:
@@ -3081,20 +3240,34 @@ class AKSCreateContext:
         return node_osdisk_diskencryptionset_id
 
     def get_cluster_autoscaler_profile(self) -> Union[Dict[str, str], None]:
-        """Obtain the value of cluster_autoscaler_profile.
+        """Dynamically obtain the value of cluster_autoscaler_profile according to the context.
+
+        In update mode, when cluster_autoscaler_profile is assigned and auto_scaler_profile in the `mc` object has also
+        been set, dynamic completion will be triggerd. We will first make a copy of the original configuration
+        (extract the dictionary from the ManagedClusterPropertiesAutoScalerProfile object), and then update the copied
+        dictionary with the dictionary of new options.
 
         :return: dictionary or None
         """
         # read the original value passed by the command
         cluster_autoscaler_profile = self.raw_param.get("cluster_autoscaler_profile")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.auto_scaler_profile is not None
-        ):
-            cluster_autoscaler_profile = self.mc.auto_scaler_profile
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.auto_scaler_profile is not None:
+                cluster_autoscaler_profile = self.mc.auto_scaler_profile
 
-        # this parameter does not need dynamic completion
+        # dynamic completion
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if cluster_autoscaler_profile and self.mc and self.mc.auto_scaler_profile:
+                # shallow copy should be enough for string-to-string dictionary
+                copy_of_raw_dict = self.mc.auto_scaler_profile.__dict__.copy()
+                new_options_dict = dict(
+                    (key.replace("-", "_"), value)
+                    for (key, value) in cluster_autoscaler_profile.items()
+                )
+                copy_of_raw_dict.update(new_options_dict)
+                cluster_autoscaler_profile = copy_of_raw_dict
+
         # this parameter does not need validation
         return cluster_autoscaler_profile
 
@@ -3163,7 +3336,7 @@ class AKSCreateDecorator:
         self,
         cmd: AzCliCommand,
         client: ContainerServiceClient,
-        models: AKSCreateModels,
+        models: AKSModels,
         raw_parameters: Dict,
         resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
     ):
@@ -3179,10 +3352,10 @@ class AKSCreateDecorator:
         self.client = client
         self.models = models
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSCreateContext(cmd, raw_parameters)
+        self.context = AKSContext(cmd, raw_parameters, decorator_mode=DecoratorMode.CREATE)
         # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
         # containerservice SDK, most models have been passed through the `models` parameter (instantiatied
-        # from `AKSCreateModels` (or `PreviewAKSCreateModels` in aks-preview), where resource_type (i.e.,
+        # from `AKSModels` (or `PreviewAKSModels` in aks-preview), where resource_type (i.e.,
         # api version) has been specified).
         self.resource_type = resource_type
 
@@ -3205,7 +3378,7 @@ class AKSCreateDecorator:
             disk_encryption_set_id=self.context.get_node_osdisk_diskencryptionset_id(),
         )
 
-        # attach mc to AKSCreateContext
+        # attach mc to AKSContext
         self.context.attach_mc(mc)
         return mc
 
@@ -3929,3 +4102,171 @@ class AKSCreateDecorator:
                 else:
                     raise ex
         raise retry_exception
+
+
+class AKSUpdateDecorator:
+    def __init__(
+        self,
+        cmd: AzCliCommand,
+        client: ContainerServiceClient,
+        models: AKSModels,
+        raw_parameters: Dict,
+    ):
+        """Internal controller of aks_update.
+
+        Break down the all-in-one aks_update function into several relatively independent functions (some of them have
+        a certain order dependency) that only focus on a specific profile or process a specific piece of logic.
+        In addition, an overall control function is provided. By calling the aforementioned independent functions one
+        by one, a complete ManagedCluster object is gradually updated and finally requests are sent to update an
+        existing cluster.
+        """
+        self.cmd = cmd
+        self.client = client
+        self.models = models
+        # store the context in the process of assemble the ManagedCluster object
+        self.context = AKSContext(cmd, raw_parameters, decorator_mode=DecoratorMode.UPDATE)
+
+    def check_raw_parameters(self):
+        """Helper function to check whether any parameters are set.
+
+        If the values of all the parameters are the default values, the command execution will be terminated early and
+        raise a RequiredArgumentMissingError. Neither the request to fetch or update the ManagedCluster object will be
+        sent.
+
+        :return: None
+        """
+        # exclude some irrelevant or mandatory parameters
+        excluded_keys = ("cmd", "client", "resource_group_name", "name")
+        # check whether the remaining parameters are set
+        # the default value None or False (and other empty values, like empty string) will be considered as not set
+        is_changed = any(v for k, v in self.context.raw_param.items() if k not in excluded_keys)
+
+        # special cases
+        # some parameters support the use of empty string or dictionary to update/remove previously set values
+        is_default = (
+            self.context.get_cluster_autoscaler_profile() is None and
+            self.context.get_api_server_authorized_ip_ranges() is None
+        )
+
+        if not is_changed and is_default:
+            # Note: Uncomment the followings to automatically generate the error message.
+            # option_names = [
+            #     '"{}"'.format(format_parameter_name_to_option_name(x))
+            #     for x in self.context.raw_param.keys()
+            #     if x not in excluded_keys
+            # ]
+            # error_msg = "Please specify one or more of {}.".format(
+            #     " or ".join(option_names)
+            # )
+            # raise RequiredArgumentMissingError(error_msg)
+            raise RequiredArgumentMissingError(
+                'Please specify one or more of "--enable-cluster-autoscaler" or '
+                '"--disable-cluster-autoscaler" or '
+                '"--update-cluster-autoscaler" or '
+                '"--cluster-autoscaler-profile" or '
+                '"--load-balancer-managed-outbound-ip-count" or'
+                '"--load-balancer-outbound-ips" or '
+                '"--load-balancer-outbound-ip-prefixes" or'
+                '"--load-balancer-outbound-ports" or'
+                '"--load-balancer-idle-timeout" or'
+                '"--auto-upgrade-channel" or '
+                '"--attach-acr" or "--detach-acr" or'
+                '"--uptime-sla" or'
+                '"--no-uptime-sla" or '
+                '"--api-server-authorized-ip-ranges" or '
+                '"--enable-aad" or '
+                '"--aad-tenant-id" or '
+                '"--aad-admin-group-object-ids" or '
+                '"--enable-ahub" or '
+                '"--disable-ahub" or '
+                '"--windows-admin-password" or '
+                '"--enable-managed-identity" or '
+                '"--assign-identity" or '
+                '"--enable-azure-rbac" or '
+                '"--disable-azure-rbac" or '
+                '"--enable-public-fqdn" or '
+                '"--disable-public-fqdn"'
+            )
+
+    def fetch_mc(self) -> ManagedCluster:
+        """Get the ManagedCluster object currently in use and attach it to internal context.
+
+        Internally send request using ContainerServiceClient and parameters name (cluster) and resource group name.
+
+        :return: the ManagedCluster object
+        """
+        mc = self.client.get(self.context.get_resource_group_name(), self.context.get_name())
+
+        # attach mc to AKSContext
+        self.context.attach_mc(mc)
+        return mc
+
+    def update_auto_scaler_profile(self, mc):
+        """Update autoscaler profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        (
+            update_cluster_autoscaler,
+            enable_cluster_autoscaler,
+            disable_cluster_autoscaler,
+            min_count,
+            max_count,
+        ) = (
+            self.context.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
+        )
+
+        if update_cluster_autoscaler or enable_cluster_autoscaler:
+            mc.agent_pool_profiles[0].enable_auto_scaling = True
+            mc.agent_pool_profiles[0].min_count = int(min_count)
+            mc.agent_pool_profiles[0].max_count = int(max_count)
+
+        if disable_cluster_autoscaler:
+            mc.agent_pool_profiles[0].enable_auto_scaling = False
+            mc.agent_pool_profiles[0].min_count = None
+            mc.agent_pool_profiles[0].max_count = None
+
+        cluster_autoscaler_profile = self.context.get_cluster_autoscaler_profile()
+        if cluster_autoscaler_profile is not None:
+            # update profile (may clear profile with empty dictionary)
+            mc.auto_scaler_profile = cluster_autoscaler_profile
+
+        return mc
+
+    def update_default_mc_profile(self) -> ManagedCluster:
+        """The overall controller used to update the default ManagedCluster profile.
+
+        Note: To reduce the risk of regression introduced by refactoring, this function is not complete and is being
+        implemented gradually.
+
+        The completely updated ManagedCluster object will later be passed as a parameter to the underlying SDK
+        (mgmt-containerservice) to send the actual request.
+
+        :return: the ManagedCluster object
+        """
+        # check raw parameters
+        self.check_raw_parameters()
+        # fetch the ManagedCluster object
+        mc = self.fetch_mc()
+        # update auto scaler profile
+        mc = self.update_auto_scaler_profile(mc)
+
+        return mc
+
+    def update_mc(self) -> ManagedCluster:
+        """Send request to update the existing managed cluster.
+
+        Note: To reduce the risk of regression introduced by refactoring, this function is not complete and is being
+        implemented gradually.
+
+        The function "_put_managed_cluster_ensuring_permission" will be called to use the ContainerServiceClient to
+        send a reqeust to update the existing managed cluster, and also add necessary role assignments for some optional
+        components.
+
+        :return: the ManagedCluster object
+        """

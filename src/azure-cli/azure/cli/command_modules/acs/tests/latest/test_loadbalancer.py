@@ -18,9 +18,9 @@ class TestLoadBalancer(unittest.TestCase):
         outbound_ports = 80
         idle_timeout = 3600
 
-        from azure.cli.command_modules.acs.decorator import AKSCreateModels
+        from azure.cli.command_modules.acs.decorator import AKSModels
         # store all the models used by load balancer
-        lb_models = AKSCreateModels(cmd).lb_models
+        lb_models = AKSModels(cmd).lb_models
         ManagedClusterLoadBalancerProfile = lb_models.get(
             "ManagedClusterLoadBalancerProfile"
         )

@@ -62,7 +62,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None):
+                           allow_protected_append_writes=None, public_network_access=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -235,6 +235,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=enable_alw,
                                                                            immutability_policy=immutability_policy)
 
+    if public_network_access is not None:
+        params.public_network_access = public_network_access
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -315,7 +318,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None):
+                           allow_protected_append_writes=None, public_network_access=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -509,6 +512,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
         params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=None,
                                                                            immutability_policy=immutability_policy)
+
+    if public_network_access is not None:
+        params.public_network_access = public_network_access
 
     return params
 

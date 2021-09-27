@@ -6008,13 +6008,19 @@ def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_n
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, custom_ip_prefix_name, prefix)
 
 
-def update_custom_ip_prefix(instance, signed_message=None, authorization_message=None, tags=None):
+def update_custom_ip_prefix(instance,
+                            signed_message=None,
+                            authorization_message=None,
+                            tags=None,
+                            commissioned_state=None):
     if tags is not None:
         instance.tags = tags
     if signed_message is not None:
         instance.signed_message = signed_message
     if authorization_message is not None:
         instance.authorization_message = authorization_message
+    if commissioned_state is not None:
+        instance.commissioned_state = commissioned_state
     return instance
 # endregion
 
