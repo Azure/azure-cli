@@ -469,32 +469,35 @@ def resume_protection(cmd, client, resource_group_name, vault_name, container_na
 
 
 def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, rehydration_duration=15,
-                     rehydration_priority=None):
+                     rehydration_priority=None, use_secondary_region=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
 
     return custom_wl.restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config,
-                                      rehydration_duration, rehydration_priority)
+                                      rehydration_duration, rehydration_priority, use_secondary_region)
 
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
                          rp_name=None, target_item_name=None, log_point_in_time=None, target_server_type=None,
                          target_server_name=None, workload_type=None, backup_management_type="AzureWorkload",
-                         from_full_rp_name=None, filepath=None, target_container_name=None):
+                         from_full_rp_name=None, filepath=None, target_container_name=None, target_resource_group=None,
+                         target_vault_name=None):
+    target_resource_group = resource_group_name if target_resource_group is None else target_resource_group
+    target_vault_name = vault_name if target_vault_name is None else target_vault_name
+    target_container_name = container_name if target_container_name is None else target_container_name
     target_item = None
     if target_item_name is not None:
         protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
         target_item = show_protectable_instance(
-            cmd, protectable_items_client, resource_group_name, vault_name,
-            target_server_name, target_server_type, workload_type,
-            container_name if target_container_name is None else target_container_name)
+            cmd, protectable_items_client, target_resource_group, target_vault_name,
+            target_server_name, target_server_type, workload_type, target_container_name)
 
     target_container = None
     if target_container_name is not None:
         container_client = backup_protection_containers_cf(cmd.cli_ctx)
-        target_container = common.show_container(cmd, container_client, target_container_name, resource_group_name,
-                                                 vault_name, backup_management_type)
+        target_container = common.show_container(cmd, container_client, target_container_name, target_resource_group,
+                                                 target_vault_name, backup_management_type)
 
         if isinstance(target_container, list):
             raise ValidationError("""
@@ -503,7 +506,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
 
     return custom_wl.show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name,
                                           item_name, rp_name, target_item, target_item_name, log_point_in_time,
-                                          from_full_rp_name, filepath, target_container)
+                                          from_full_rp_name, filepath, target_container, target_resource_group,
+                                          target_vault_name)
 
 
 def undelete_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,
