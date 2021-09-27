@@ -117,6 +117,21 @@ def safe_lower(obj: Any) -> Any:
     return obj
 
 
+def validate_decorator_mode(decorator_mode) -> bool:
+    """Check if decorator_mode is a value of enum type DecoratorMode.
+
+    :return: bool
+    """
+    is_valid_decorator_mode = False
+    try:
+        is_valid_decorator_mode = decorator_mode in DecoratorMode
+    # will raise TypeError in Python >= 3.8
+    except TypeError:
+        pass
+
+    return is_valid_decorator_mode
+
+
 def check_is_msi_cluster(mc: ManagedCluster) -> bool:
     """Check `mc` object to determine whether managed identity is enabled.
 
@@ -354,13 +369,19 @@ class AKSContext:
     other parameters.
     """
     def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, decorator_mode):
-        self.cmd = cmd
         if not isinstance(raw_parameters, dict):
             raise CLIInternalError(
                 "Unexpected raw_parameters object with type '{}'.".format(
                     type(raw_parameters)
                 )
             )
+        if not validate_decorator_mode(decorator_mode):
+            raise CLIInternalError(
+                "Unexpected decorator_mode '{}' with type '{}'.".format(
+                    decorator_mode, type(decorator_mode)
+                )
+            )
+        self.cmd = cmd
         self.raw_param = raw_parameters
         self.decorator_mode = decorator_mode
         self.intermediates = dict()
@@ -1892,8 +1913,8 @@ class AKSContext:
         kubernetes_version.
 
         This function will verify the parameter by default. It will check if load_balancer_sku equals to "basic", if so,
-        when api_server_authorized_ip_ranges is assigned or enable_private_cluster is specified,
-        raise an InvalidArgumentValueError.
+        when api_server_authorized_ip_ranges is assigned or enable_private_cluster is specified, raise an
+        InvalidArgumentValueError.
 
         :return: string or None
         """
@@ -2039,7 +2060,7 @@ class AKSContext:
         load_balancer_profile: ManagedClusterLoadBalancerProfile = None,
         **kwargs
     ) -> Union[str, None]:
-        """Internal functin to dynamically obtain the value of outbound_type according to the context.
+        """Internal function to dynamically obtain the value of outbound_type according to the context.
 
         Note: All the external parameters involved in the validation are not verified in their own getters.
 
@@ -2957,8 +2978,9 @@ class AKSContext:
     def get_api_server_authorized_ip_ranges(self) -> List[str]:
         """Obtain the value of api_server_authorized_ip_ranges.
 
-        This function supports the option of enable_validation. When enabled, it will check if load_balancer_sku equals
-        to "basic" when api_server_authorized_ip_ranges is assigned, if so, raise the InvalidArgumentValueError.
+        This function will verify the parameter by default. When api_server_authorized_ip_ranges is assigned, if
+        load_balancer_sku equals to "basic", raise an InvalidArgumentValueError; if enable_private_cluster is specified,
+        raise a MutuallyExclusiveArgumentError.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
@@ -2968,9 +2990,8 @@ class AKSContext:
         api_server_authorized_ip_ranges = self.raw_param.get(
             "api_server_authorized_ip_ranges"
         )
-
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
-            # try to read the property value corresponding to the parameter from the `mc` object
             read_from_mc = False
             if (
                 self.mc and
@@ -3020,11 +3041,11 @@ class AKSContext:
     def _get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         """Internal function to obtain the value of fqdn_subdomain.
 
-        This function will verify the parameter by default. It will check if both dns_name_prefix and fqdn_subdomain
-        are assigend, if so, raise the MutuallyExclusiveArgumentError. It will also check when both private_dns_zone
-        and fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an
-        InvalidArgumentValueError; Otherwise if the value of private_dns_zone is not a valid resource ID, raise an
-        InvalidArgumentValueError.
+        This function supports the option of enable_validation. When enabled, it will check if both dns_name_prefix and
+        fqdn_subdomain are assigend, if so, raise the MutuallyExclusiveArgumentError. It will also check when both
+        private_dns_zone and fqdn_subdomain are assigned, if the value of private_dns_zone is
+        CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an InvalidArgumentValueError; Otherwise if the value of private_dns_zone
+        is not a valid resource ID, raise an InvalidArgumentValueError.
 
         :return: string or None
         """
@@ -3278,7 +3299,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         cluster_autoscaler_profile = self.raw_param.get("cluster_autoscaler_profile")
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.auto_scaler_profile is not None:
                 cluster_autoscaler_profile = self.mc.auto_scaler_profile
@@ -3301,21 +3322,63 @@ class AKSContext:
     def get_uptime_sla(self) -> bool:
         """Obtain the value of uptime_sla.
 
+        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
+        a MutuallyExclusiveArgumentError.
+
         :return: bool
         """
         # read the original value passed by the command
         uptime_sla = self.raw_param.get("uptime_sla")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.sku and
-            self.mc.sku.tier is not None
-        ):
-            uptime_sla = self.mc.sku.tier == "Paid"
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.sku and
+                self.mc.sku.tier is not None
+            ):
+                uptime_sla = self.mc.sku.tier == "Paid"
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+
+        # validation
+        if uptime_sla and self._get_no_uptime_sla(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
+            )
         return uptime_sla
+
+    # pylint: disable=unused-argument
+    def _get_no_uptime_sla(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of no_uptime_sla.
+
+        This function supports the option of enable_validation. When enabled, if both uptime_sla and no_uptime_sla are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        no_uptime_sla = self.raw_param.get("no_uptime_sla")
+
+        # this parameter does not need dynamic completion
+
+        # validation
+        if enable_validation:
+            if no_uptime_sla and self.get_uptime_sla():
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
+                )
+        return no_uptime_sla
+
+    def get_no_uptime_sla(self) -> bool:
+        """Obtain the value of no_uptime_sla.
+
+        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
+        a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+
+        return self._get_no_uptime_sla(enable_validation=True)
 
     def get_tags(self) -> Union[Dict[str, str], None]:
         """Obtain the value of tags.
@@ -4254,7 +4317,7 @@ class AKSUpdateDecorator:
         self.context.attach_mc(mc)
         return mc
 
-    def update_auto_scaler_profile(self, mc):
+    def update_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update autoscaler profile for the ManagedCluster object.
 
         :return: the ManagedCluster object
@@ -4288,7 +4351,6 @@ class AKSUpdateDecorator:
         if cluster_autoscaler_profile is not None:
             # update profile (may clear profile with empty dictionary)
             mc.auto_scaler_profile = cluster_autoscaler_profile
-
         return mc
 
     def process_attach_detach_acr(self, mc: ManagedCluster) -> None:
@@ -4322,6 +4384,29 @@ class AKSUpdateDecorator:
                             subscription_id=subscription_id,
                             detach=True)
 
+    def update_sku(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update sku (uptime sla) for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        if self.context.get_uptime_sla():
+            mc.sku = self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Paid"
+            )
+
+        if self.context.get_no_uptime_sla():
+            mc.sku = self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Free"
+            )
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -4341,6 +4426,8 @@ class AKSUpdateDecorator:
         mc = self.update_auto_scaler_profile(mc)
         # attach or detach acr (add or delete role assignment for acr)
         self.process_attach_detach_acr(mc)
+        # update sku (uptime sla)
+        mc = self.update_sku(mc)
 
         return mc
 
