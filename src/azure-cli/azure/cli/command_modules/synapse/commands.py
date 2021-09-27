@@ -525,6 +525,7 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'get_spark_job_definition')
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         g.custom_command('update', 'create_or_update_spark_job_definition', supports_no_wait=True)
 
 =======
@@ -532,5 +533,8 @@ def load_command_table(self, _):
 =======
         
 >>>>>>> a46060b12 (refine)
+=======
+
+>>>>>>> 1412e1627 (empty line)
     with self.command_group('synapse', is_preview=True):
         pass
