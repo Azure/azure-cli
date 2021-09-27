@@ -125,12 +125,13 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
     # region EventHub Authorizationrule
-    for scope in ['eventhubs eventhub authorization-rule', 'eventhubs eventhub authorization-rule keys renew']:
+    for scope in ['eventhubs eventhub authorization-rule']:
         with self.argument_context(scope) as c:
             c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of EventHub AuthorizationRule')
             c.argument('event_hub_name', id_part='child_name_1', arg_type=event_hub_name_arg_type, help='Name of EventHub')
 
     with self.argument_context('eventhubs eventhub authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
