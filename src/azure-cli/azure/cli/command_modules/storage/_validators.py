@@ -1869,3 +1869,8 @@ def validate_policy(namespace):
     if namespace.id is not None:
         logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
                        "policy.")
+
+
+def validate_blob_name_for_upload(namespace):
+    if not namespace.blob_name:
+        namespace.blob_name = os.path.basename(namespace.file_path)
