@@ -191,8 +191,8 @@ def flexible_server_restore(cmd, client,
         )
 
         if source_server_object.network.public_network_access == 'Disabled':
+            network = postgresql_flexibleservers.models.Network()
             if subnet is not None or vnet is not None:
-                network = postgresql_flexibleservers.models.Network()
                 subnet_id = prepare_private_network(cmd,
                                                     resource_group_name,
                                                     server_name,
@@ -203,6 +203,10 @@ def flexible_server_restore(cmd, client,
                                                     vnet_address_pref=vnet_address_prefix,
                                                     subnet_address_pref=subnet_address_prefix,
                                                     yes=yes)
+            else:
+                subnet_id = source_server_object.network.delegated_subnet_resource_id
+
+            if private_dns_zone_arguments is not None:
                 private_dns_zone_id = prepare_private_dns_zone(db_context,
                                                                'PostgreSQL',
                                                                resource_group_name,
@@ -211,9 +215,13 @@ def flexible_server_restore(cmd, client,
                                                                subnet_id=subnet_id,
                                                                location=location,
                                                                yes=yes)
-                network.delegated_subnet_resource_id = subnet_id
-                network.private_dns_zone_arm_resource_id = private_dns_zone_id
-                parameters.network = network
+            else:
+                private_dns_zone_id = source_server_object.network.private_dns_zone_arm_resource_id
+
+            network.delegated_subnet_resource_id = subnet_id
+            network.private_dns_zone_arm_resource_id = private_dns_zone_id
+            parameters.network = network
+
     except Exception as e:
         raise ResourceNotFoundError(e)
 

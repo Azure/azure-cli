@@ -14,7 +14,8 @@ import datetime
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
-from azure.cli.testsdk.checkers import JMESPathPatternCheck
+from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
+from azure.cli.core.azclierror import ResourceNotFoundError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -209,6 +210,14 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         ])
         self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group2,
                                                                      functionapp_name2, plan_id, storage_account_id2))
+        try:
+            self.cmd('webapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+                JMESPathCheckNotExists('name') # `az webapp show` should not return functionapp
+            ])
+        except ResourceNotFoundError:
+            pass
+        else:
+            self.assertTrue(False, "'az webapp show` did not raise exception for functionapp.")
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
