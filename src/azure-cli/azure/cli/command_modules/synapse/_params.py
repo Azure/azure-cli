@@ -935,12 +935,15 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     for scope in ['show', 'wait', 'delete']:
         with self.argument_context('synapse spark-job-definition ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('spark_job_definition_name', options_list=['--name', '-n'], help='The spark job definition name')
 =======
     # for scope in ['show', 'create', 'delete']:
+=======
+>>>>>>> a46060b12 (refine)
     for scope in ['show', 'wait', 'delete']:
         with self.argument_context('synapse spark-job-definition ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)

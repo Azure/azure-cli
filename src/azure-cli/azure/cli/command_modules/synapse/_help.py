@@ -2023,6 +2023,7 @@ examples:
           --name testsjdname --file @path/notebook.ipynb/test.json
 """
 
+<<<<<<< HEAD
 helps['synapse spark-job-definition show'] = """
 type: command
 short-summary: Get a spark job definition.
@@ -2034,6 +2035,8 @@ examples:
 >>>>>>> 93fc2591d (add cmd for spark job definition)
 """
 
+=======
+>>>>>>> a46060b12 (refine)
 helps['synapse spark-job-definition wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a spark job definition is met.
