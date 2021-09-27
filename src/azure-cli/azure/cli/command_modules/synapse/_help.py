@@ -1989,16 +1989,6 @@ examples:
           --name testsjdname --file @path/notebook.ipynb/test.json
 """
 
-helps['synapse spark-job-definition show'] = """
-type: command
-short-summary: Get a spark job definition.
-examples:
-  - name: Get a spark job definition.
-    text: |-
-        az synapse spark-job-definition show --workspace-name testsynapseworkspace \\
-          --name testsjdname
-"""
-
 helps['synapse spark-job-definition wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a spark job definition is met.

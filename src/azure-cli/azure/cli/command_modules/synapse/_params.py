@@ -934,7 +934,6 @@ def load_arguments(self, _):
     with self.argument_context('synapse spark-job-definition list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
-    # for scope in ['show', 'create', 'delete']:
     for scope in ['show', 'wait', 'delete']:
         with self.argument_context('synapse spark-job-definition ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)

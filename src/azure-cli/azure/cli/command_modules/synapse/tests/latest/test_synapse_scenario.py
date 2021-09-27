@@ -1724,17 +1724,13 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
 
-    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    #@StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_job_definition(self):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspacepe',
             'name': 'SparkAutoCreate1',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
-            'location': 'eastus',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
         })
 
