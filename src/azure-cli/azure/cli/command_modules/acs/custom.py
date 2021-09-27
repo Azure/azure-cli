@@ -2975,8 +2975,10 @@ def aks_update(cmd, client, resource_group_name, name,
         )
 
     if disable_local_accounts and enable_local_accounts:
-        raise MutuallyExclusiveArgumentError('Cannot specify --disable-local-accounts and --enable-local-accounts '
-                       'at the same time.')
+        raise MutuallyExclusiveArgumentError(
+            'Cannot specify --disable-local-accounts and '
+            '--enable-local-accounts at the same time.'
+        )
 
     if disable_local_accounts:
         instance.disable_local_accounts = True
