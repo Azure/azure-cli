@@ -1724,6 +1724,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
@@ -1734,20 +1735,32 @@ class SynapseScenarioTests(ScenarioTest):
 =======
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> 10320cdf2 (refine)
 
-    @record_only()
+    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    #@StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_job_definition(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspacepe',
             'name': 'SparkAutoCreate1',
+<<<<<<< HEAD
             'spark-pool': 'testzes0730',
 >>>>>>> 93fc2591d (add cmd for spark job definition)
+=======
+            'spark-pool': 'testpool',
+>>>>>>> 10320cdf2 (refine)
             'spark-version': '2.4',
+            'location': 'eastus',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
         })
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 10320cdf2 (refine)
         # create a workspace
         self._create_workspace()
 
@@ -1768,8 +1781,11 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ]).get_output_in_json()
 
+<<<<<<< HEAD
 =======
 >>>>>>> 93fc2591d (add cmd for spark job definition)
+=======
+>>>>>>> 10320cdf2 (refine)
         # create a spark job definition
         self.cmd(
             'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" ',
@@ -1808,6 +1824,9 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> afedea1af (add cmd for spark job definition)
 >>>>>>> 93fc2591d (add cmd for spark job definition)
+=======
+>>>>>>> 10320cdf2 (refine)

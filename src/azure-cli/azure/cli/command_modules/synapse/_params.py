@@ -944,6 +944,7 @@ def load_arguments(self, _):
     for scope in ['show', 'wait', 'delete']:
         with self.argument_context('synapse spark-job-definition ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
+<<<<<<< HEAD
             c.argument('spark_job_definition_name', options_list=['--name'], help='The spark job definition name')
 >>>>>>> 93fc2591d (add cmd for spark job definition)
 
@@ -956,3 +957,11 @@ def load_arguments(self, _):
             c.argument('spark_job_definition_name', options_list=['--name'], help='The spark job definition name')
 >>>>>>> 93fc2591d (add cmd for spark job definition)
             c.argument('definition_file', arg_type=definition_file_arg_type)
+=======
+            c.argument('spark_job_definition_name', options_list=['--name', '-n'], help='The spark job definition name')
+
+    with self.argument_context('synapse spark-job-definition create') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('spark_job_definition_name', options_list=['--name', '-n'], help='The spark job definition name')
+        c.argument('definition_file', arg_type=definition_file_arg_type)
+>>>>>>> 10320cdf2 (refine)
