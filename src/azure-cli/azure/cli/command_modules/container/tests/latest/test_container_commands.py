@@ -320,7 +320,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                      '--subnet {subnet_name} ')
 
         self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name} --subnet {subnet_name}',
-            checks=[])
+            checks=[self.exists('subnetIds[0].id')])
 
 
     # Test export container.
