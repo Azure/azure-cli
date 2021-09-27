@@ -25,7 +25,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_immutability_arguments, validate_blob_name_for_upload)
 
 
-def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
+def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
     from argcomplete.completers import FilesCompleter
     from six import u as unicode_string
 
@@ -225,12 +225,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         arg_type=get_three_state_flag(), min_api='2021-06-01',
         help='The account level immutability property. The property is immutable and can only be set to true '
              'at the account creation time. When set to true, it enables object level immutability for all '
-             'the containers in the account by default.'
+             'the containers in the account by default.',
+        is_preview=True
     )
 
     immutability_period_since_creation_in_days_type = CLIArgumentType(
         options_list=['--immutability-period-in-days', '--immutability-period'], min_api='2021-06-01',
         help='The immutability period for the blobs in the container since the policy creation, in days.',
+        is_preview=True
     )
 
     account_immutability_policy_state_enum = self.get_sdk('models._storage_management_client_enums#AccountImmutabilityPolicyState',
@@ -244,13 +246,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         'Locked state only allows the increase of the immutability retention time. '
         'A policy can only be created in a Disabled or Unlocked state and can be toggled between the '
         'two states. Only a policy in an Unlocked state can transition to a Locked state which cannot '
-        'be reverted.')
+        'be reverted.', is_preview=True)
 
     allow_protected_append_writes_type = CLIArgumentType(
         arg_type=get_three_state_flag(), options_list=['--allow-protected-append-writes', '--allow-append', '-w'], min_api='2021-06-01',
         help='This property can only be changed for disabled and unlocked time-based retention policies. '
              'When enabled, new blocks can be written to an append blob while maintaining immutability protection and'
-             ' compliance. Only new blocks can be added and any existing blocks cannot be modified or deleted.')
+             ' compliance. Only new blocks can be added and any existing blocks cannot be modified or deleted.', is_preview=True)
 
     public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
                                               resource_type=ResourceType.MGMT_STORAGE)
