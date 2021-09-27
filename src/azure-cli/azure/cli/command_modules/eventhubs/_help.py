@@ -593,5 +593,5 @@ short-summary: Get the private link resources that need to be created for a even
 examples:
   - name: Get the private link resources that need to be created for a eventhubs namespace.
     text: |
-        az eventhubs namespace private-link-resource list --namespace-name mynamespace -g MyResourceGroup
+        az eventhubs namespace private-link-resource show --namespace-name mynamespace -g MyResourceGroup
 """

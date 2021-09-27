@@ -93,7 +93,7 @@ def load_command_table(self, _):
                             resource_type=ResourceType.MGMT_EVENTHUB) as g:
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
         g.show_command('show', 'get', is_preview=True, min_api='2021-06-01-preview',
-                  transform=gen_dict_to_list_transform(key="value"))
+                       transform=gen_dict_to_list_transform(key="value"))
 
 # Cluster Region
     with self.command_group('eventhubs cluster', eh_clusters_util, resource_type=ResourceType.MGMT_EVENTHUB,
