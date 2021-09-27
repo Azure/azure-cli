@@ -1562,15 +1562,22 @@ class SynapseScenarioTests(ScenarioTest):
             'rg': 'chayang-test-rg',
             'workspace': 'zes0219test',
             'name': 'integrationruntime',
-            'type': 'Managed',
+            'selfhosted-name': 'selfhostedir',
             'selfhosted-integration-runtime': 'IntegrationRuntime0219selfhosted0507',
-            'node': 'MININT-Q3EGQJ8'})
+            'ssisirname':'testssisir'})
 
-        # create integration runtime
+        # create managed integration runtime
         self.cmd(
-            'az synapse integration-runtime create --resource-group {rg} --workspace-name {workspace} --name {name} --type {type}',
+            'az synapse integration-runtime managed create --resource-group {rg} --workspace-name {workspace} --name {name}',
             checks=[
                 self.check('name', self.kwargs['name'])
+            ])
+
+        # create self-hosted integration runtime
+        self.cmd(
+            'az synapse integration-runtime self-hosted create --resource-group {rg} --workspace-name {workspace} --name {selfhosted-name}',
+            checks=[
+                self.check('name', self.kwargs['selfhosted-name'])
             ])
 
         # get integration runtime
@@ -1602,7 +1609,6 @@ class SynapseScenarioTests(ScenarioTest):
         key = self.cmd(
             'az synapse integration-runtime list-auth-key --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}').get_output_in_json()
         assert key['authKey1'] is not None
-        assert key['authKey2'] is not None
 
         # regenerate self-hosted integration runtime key
         key = self.cmd(
@@ -1618,34 +1624,35 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
 
+        # skip self-hosted integration runtime node test because it need real ir hosted computer 
         # get self-hosted integration runtime node information
-        self.cmd(
-            'az synapse integration-runtime-node show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
-            '--node-name {node}',
-            checks=[
-                self.check('nodeName', self.kwargs['node'])
-            ])
+        #self.cmd(
+        #    'az synapse integration-runtime-node show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+        #    '--node-name {node}',
+        #    checks=[
+        #        self.check('nodeName', self.kwargs['node'])
+        #    ])
 
         # update self-hosted integration runtime node
-        self.cmd(
-            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} \
-            --name {selfhosted-integration-runtime} --node-name {node} --auto-update On --update-delay-offset PT03H',
-            checks=[
-                self.check('nodeName', self.kwargs['node'])
-            ])
+        #self.cmd(
+        #    'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} \
+        #    --name {selfhosted-integration-runtime} --node-name {node} --auto-update On --update-delay-offset PT03H',
+        #    checks=[
+        #        self.check('nodeName', self.kwargs['node'])
+        #    ])
 
         # get self-hosted integration runtime node ip
-        self.cmd(
-            'az synapse integration-runtime-node get-ip-address --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
-            '--node-name {node}')
+        #self.cmd(
+        #    'az synapse integration-runtime-node get-ip-address --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+        #    '--node-name {node}')
 
         # sync credentials among integration runtime nodes
         self.cmd(
             'az synapse integration-runtime sync-credentials --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
 
         # get connection info
-        self.cmd(
-            'az synapse integration-runtime get-connection-info --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+        #self.cmd(
+        #    'az synapse integration-runtime get-connection-info --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
 
         # get status
         self.cmd(
@@ -1653,6 +1660,15 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
+
+        # start/stop ssis integration runtime
+        self.cmd(
+            'az synapse integration-runtime start --resource-group {rg} --workspace-name {workspace} --name {ssisirname}',
+            checks=[
+                self.check('properties.state', 'Started')
+            ])
+        self.cmd(
+            'az synapse integration-runtime stop --resource-group {rg} --workspace-name {workspace} --name {ssisirname} -y')
 
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('az storage account show -g {} -n {}'
