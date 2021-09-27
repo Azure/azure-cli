@@ -2007,6 +2007,41 @@ class DeploymentScriptsTest(ScenarioTest):
                  checks=self.check("length([?name=='{deployment_script_name}'])", 0))
 
 class DeploymentStacksTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    def test_create_deployment_stack_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-create-deployment-stack-subscription', 60)
+        template_spec_name = self.create_random_name('cli-test-template-spec', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+            'template-spec-name': template_spec_name,
+            'template-spec-version': "v1",
+            'resource-group': resource_group
+        })
+
+        # create template spec
+        basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location {location} --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
+        template_spec_id = basic_template_spec['id']
+
+        self.kwargs.update({'template-spec-id': template_spec_id})
+
+        # create deployment stack with template file and parameter file
+        self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # cleanup
+        self.cmd('stacks sub delete --name {name}')
+
+        #create deployment stack with template spec and parameter file
+        self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-spec "{template-spec-id}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # cleanup 
+        self.cmd('stacks sub delete --name {name}')
+
     def test_show_deployment_stack_subscription(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-get-deployment-stack-subscription', 60)
@@ -2014,22 +2049,27 @@ class DeploymentStacksTest(ScenarioTest):
             'name': deployment_stack_name,
             'update-behavior': "detach",
             'location': "westus2",
-            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\')
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+
         })
 
-        # create deployment stack
-        new_resource = self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}"').get_output_in_json()
-        self.kwargs['deployment_stack_id'] = new_resource['id']
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        deployment_stack_id = created_deployment_stack['id']
 
-        show_by_name = self.cmd('az stacks sub show --name {name}')
-        self.assertTrue(show_by_name is not None)
+        self.kwargs.update({'deployment-stack-id': deployment_stack_id})
 
-        show_by_id = self.cmd('az stacks sub show --stack {deployment_stack_id}')
-        self.assertTrue(show_by_id is not None)
+        # show stack with stack name
+        self.cmd('stacks sub show --name {name}', checks=self.check('name', '{name}'))
 
-        # clean up
+        # show stack with stack id
+        self.cmd('stacks sub show --stack {deployment-stack-id}', checks=self.check('name', '{name}'))
+
+        # cleanup 
         self.cmd('stacks sub delete --name {name}')
+        
     
+    #test again
     @AllowLargeResponse(4096)
     def test_list_deployment_stack_subscription(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -2039,18 +2079,49 @@ class DeploymentStacksTest(ScenarioTest):
             'name': deployment_stack_name,
             'update-behavior': "detach",
             'location': "westus2",
-            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\')
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+
         })
 
-        new_resource =  self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}"').get_output_in_json()
+        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
-        list_with_no_parameters = self.cmd('stacks sub list')
-        self.cmd('stacks sub list --query "[?name == \'{}\']"'.format(deployment_stack_name), checks=[
-            self.check('[0].name', '{name}'),
-        ])
+        # list stacks 
+        list_deployment_stacks = self.cmd('stacks sub list').get_output_in_json()
 
-        # clean up
+        print(list_deployment_stacks)
+
+        self.assertTrue(len(list_deployment_stacks) > 0)
+        self.assertTrue(list_deployment_stacks[0]['name'], '{name}')
+
+         # cleanup 
         self.cmd('stacks sub delete --name {name}')
+    
+    @AllowLargeResponse(4096)
+    def test_delete_deployment_stack_subscription(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-delete-deployment-stack-subscription', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+        })
+
+        # create stack
+        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+
+        self.cmd('stacks sub show --name {name}', checks=self.check('name', '{name}'))
+
+        # delete stack
+        self.cmd('stacks sub delete --name {name}')
+        
+        #confirm stack is deleted
+        self.cmd('stacks sub list', checks=self.check("length([?name=='{name}'])", 0))
+
+        #add delete with stack id
     
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
     def test_create_deployment_stack_resource_group(self, resource_group):
@@ -2095,7 +2166,6 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({
             'name': deployment_stack_name,
             'resource-group': resource_group,
-            'location': "westus2",
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'update-behavior': "detach",
