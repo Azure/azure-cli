@@ -2182,6 +2182,10 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
 def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
     return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters)
 
+
+def vm_run_command_set():
+    pass
+
 # endregion
 
 

@@ -750,6 +750,103 @@ def load_arguments(self, _):
         with self.argument_context('{} stop'.format(scope)) as c:
             c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.', min_api='2019-03-01')
 
+        with self.argument_context('{} run-command set'.format(scope)) as c:
+            c.argument('resource_group_name', resource_group_name_type)
+            c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
+            c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
+            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.')
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                       validator=get_default_location_from_resource_group)
+            c.argument('tags', tags_type)
+            c.argument('source', action=AddVirtualmachineruncommandsSource, nargs='+',
+                       help='The source of the run command '
+                            'script.')
+            c.argument('parameters', action=AddVirtualmachineruncommandsParameters, nargs='+',
+                       help='The parameters used '
+                            'by the script.')
+            c.argument('protected_parameters', action=AddProtectedParameters, nargs='+',
+                       help='The parameters used by the '
+                            'script.')
+            c.argument('async_execution', arg_type=get_three_state_flag(),
+                       help='Optional. If set to true, provisioning '
+                            'will complete as soon as the script starts and will not wait for script to complete.')
+            c.argument('run_as_user', type=str,
+                       help='Specifies the user account on the VM when executing the run command.')
+            c.argument('run_as_password', type=str,
+                       help='Specifies the user account password on the VM when executing the '
+                            'run command.')
+            c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
+            c.argument('output_blob_uri', type=str,
+                       help='Specifies the Azure storage blob where script output stream will '
+                            'be uploaded.')
+            c.argument('error_blob_uri', type=str,
+                       help='Specifies the Azure storage blob where script error stream will '
+                            'be uploaded.')
+        with self.argument_context('res virtual-machine-run-command list') as c:
+            c.argument('resource_group_name', resource_group_name_type)
+            c.argument('vm_name', type=str, help='The name of the virtual machine containing the run command.')
+            c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+            c.argument('location', arg_type=get_location_type(self.cli_ctx))
+
+        with self.argument_context('res virtual-machine-run-command show') as c:
+            c.argument('resource_group_name', resource_group_name_type)
+            c.argument('vm_name', type=str, help='The name of the virtual machine containing the run command.',
+                       id_part='name')
+            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.',
+                       id_part='child_name_1')
+            c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+            c.argument('command_id', type=str, help='The command id.', id_part='child_name_1')
+
+        with self.argument_context('res virtual-machine-run-command update') as c:
+            c.argument('resource_group_name', resource_group_name_type)
+            c.argument('vm_name', type=str,
+                       help='The name of the virtual machine where the run command should be updated.', id_part='name')
+            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.',
+                       id_part='child_name_1')
+            c.argument('tags', tags_type)
+            c.argument('source', action=AddVirtualmachineruncommandsSource, nargs='+',
+                       help='The source of the run command '
+                            'script.')
+            c.argument('parameters', action=AddVirtualmachineruncommandsParameters, nargs='+',
+                       help='The parameters used '
+                            'by the script.')
+            c.argument('protected_parameters', action=AddProtectedParameters, nargs='+',
+                       help='The parameters used by the '
+                            'script.')
+            c.argument('async_execution', arg_type=get_three_state_flag(),
+                       help='Optional. If set to true, provisioning '
+                            'will complete as soon as the script starts and will not wait for script to complete.')
+            c.argument('run_as_user', type=str,
+                       help='Specifies the user account on the VM when executing the run command.')
+            c.argument('run_as_password', type=str,
+                       help='Specifies the user account password on the VM when executing the '
+                            'run command.')
+            c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
+            c.argument('output_blob_uri', type=str,
+                       help='Specifies the Azure storage blob where script output stream will '
+                            'be uploaded.')
+            c.argument('error_blob_uri', type=str,
+                       help='Specifies the Azure storage blob where script error stream will '
+                            'be uploaded.')
+
+        with self.argument_context('res virtual-machine-run-command delete') as c:
+            c.argument('resource_group_name', resource_group_name_type)
+            c.argument('vm_name', type=str,
+                       help='The name of the virtual machine where the run command should be deleted.', id_part='name')
+            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.',
+                       id_part='child_name_1')
+
+        with self.argument_context('res virtual-machine-run-command wait') as c:
+            c.argument('resource_group_name', resource_group_name_type)
+            c.argument('vm_name', type=str, help='The name of the virtual machine containing the run command.',
+                       id_part='name')
+            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.',
+                       id_part='child_name_1')
+            c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+            c.argument('command_id', type=str, help='The command id.', id_part='child_name_1')
+
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))

@@ -376,6 +376,7 @@ def load_command_table(self, _):
         g.custom_command('invoke', 'vm_run_command_invoke')
         g.command('list', 'list')
         g.show_command('show', 'get')
+        g.custom_command('set', 'vm_run_command_set')
 
     with self.command_group('vm secret', compute_vm_sdk) as g:
         g.custom_command('format', 'get_vm_format_secret', validator=process_vm_secret_format)
