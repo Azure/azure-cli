@@ -623,7 +623,7 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     # synapse artifacts linked-service
-    for scope in ['create', 'set']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse linked-service ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('linked_service_name', arg_type=name_type, help='The linked service name.')
@@ -641,7 +641,7 @@ def load_arguments(self, _):
         c.argument('linked_service_name', arg_type=name_type, help='The linked service name.')
 
     # synapse artifacts dataset
-    for scope in ['create', 'set']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse dataset ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('dataset_name', arg_type=name_type, help='The dataset name.')
@@ -659,7 +659,7 @@ def load_arguments(self, _):
         c.argument('dataset_name', arg_type=name_type, help='The dataset name.')
 
     # synapse artifacts pipeline
-    for scope in ['create', 'set']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse pipeline ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('pipeline_name', arg_type=name_type, help='The pipeline name.')
@@ -724,7 +724,7 @@ def load_arguments(self, _):
         c.argument('order_by', action=AddOrderBy, nargs='*', help='List of OrderBy option.')
 
     # synapse artifacts trigger
-    for scope in ['create', 'set']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse trigger ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
@@ -761,8 +761,17 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
 
+    with self.argument_context('synapse trigger wait') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
     # synapse artifacts trigger run
     with self.argument_context('synapse trigger-run rerun') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+        c.argument('run_id', help='The trigger run identifier.')
+
+    with self.argument_context('synapse trigger-run cancel') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
         c.argument('run_id', help='The trigger run identifier.')
@@ -854,7 +863,7 @@ def load_arguments(self, _):
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part=None)
 
-    for scope in ['show', 'create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status']:
+    for scope in ['show', 'create', 'managed create', 'self-hosted create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status', 'start', 'stop']:
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
 
@@ -869,6 +878,21 @@ def load_arguments(self, _):
                    help='Compute type of the data flow cluster which will execute data flow job.')
         c.argument('core_count', arg_group='Managed', help='Core count of the data flow cluster which will execute data flow job.')
         c.argument('time_to_live', arg_group='Managed', help='Time to live (in minutes) setting of the data flow cluster which will execute data flow job.')
+
+    with self.argument_context('synapse integration-runtime managed create') as c:
+        c.argument('description', help='The integration runtime description.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
+        c.argument('location', help='The integration runtime location.')
+        c.argument('compute_type', arg_type=get_enum_type(['General', 'MemoryOptimized', 'ComputeOptimized']),
+                   help='Compute type of the data flow cluster which will execute data flow job.')
+        c.argument('core_count', help='Core count of the data flow cluster which will execute data flow job.')
+        c.argument('time_to_live', help='Time to live (in minutes) setting of the data flow cluster which will execute data flow job.')
+
+    with self.argument_context('synapse integration-runtime self-hosted create') as c:
+        c.argument('description', help='The integration runtime description.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
 
     with self.argument_context('synapse integration-runtime update') as c:
         c.argument('auto_update', arg_type=get_enum_type(['On', 'Off']), help='Enable or disable the self-hosted integration runtime auto-update.')

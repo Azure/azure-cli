@@ -178,6 +178,11 @@ def rerun_trigger(cmd, workspace_name, trigger_name, run_id):
     return client.rerun_trigger_instance(trigger_name, run_id)
 
 
+def cancel_trigger(cmd, workspace_name, trigger_name, run_id):
+    client = cf_synapse_trigger_run(cmd.cli_ctx, workspace_name)
+    return client.cancel_trigger_instance(trigger_name, run_id)
+
+
 def query_trigger_runs_by_workspace(cmd, workspace_name, last_updated_after, last_updated_before,
                                     continuation_token=None, filters=None, order_by=None):
     client = cf_synapse_trigger_run(cmd.cli_ctx, workspace_name)
