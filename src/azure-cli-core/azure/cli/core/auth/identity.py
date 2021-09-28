@@ -14,15 +14,12 @@ from knack.util import CLIError
 from .msal_authentication import UserCredential, ServicePrincipalCredential
 from .util import check_result
 
+# Service principal entry properties
+from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION,\
+    _USE_CERT_SN_ISSUER
+
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
-# Service principal entry properties
-_CLIENT_ID = 'client_id'
-_TENANT_ID = 'tenant_id'
-_SECRET = 'secret'
-_CERTIFICATE = 'certificate'
-_CLIENT_ASSERTION = 'client_assertion'
-_USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 
 logger = get_logger(__name__)
 
@@ -220,8 +217,8 @@ class ServicePrincipalAuth:
     @classmethod
     def build_from_credential(cls, tenant_id, client_id, credential):
         entry = {
-            _CLIENT_ID: client_id,
-            _TENANT_ID: tenant_id
+            _TENANT: tenant_id,
+            _CLIENT_ID: client_id
         }
         entry.update(credential)
         return ServicePrincipalAuth(entry)
@@ -242,13 +239,13 @@ class ServicePrincipalAuth:
                 if use_cert_sn_issuer:
                     entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
             else:
-                entry[_SECRET] = secret_or_certificate
+                entry[_CLIENT_SECRET] = secret_or_certificate
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
         return entry
 
     def get_entry_to_persist(self):
-        persisted_keys = [_CLIENT_ID, _TENANT_ID, _SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _CLIENT_ASSERTION]
+        persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _CLIENT_ASSERTION]
         return {k: v for k, v in self.__dict__.items() if k in persisted_keys}
 
 
@@ -269,13 +266,13 @@ class ServicePrincipalStore:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
                            "Please run `az login` for this service principal."
                            .format(sp_id))
-        matched_with_tenant = [x for x in matched if tenant == x[_TENANT_ID]]
+        matched_with_tenant = [x for x in matched if tenant == x[_TENANT]]
         if matched_with_tenant:
             cred = matched_with_tenant[0]
         else:
             logger.warning("Could not retrieve credential from local cache for service principal %s under tenant %s. "
                            "Trying credential under tenant %s, assuming that is an app credential.",
-                           sp_id, tenant, matched[0][_TENANT_ID])
+                           sp_id, tenant, matched[0][_TENANT])
             cred = matched[0]
 
         return cred
@@ -286,7 +283,7 @@ class ServicePrincipalStore:
         self._entries = [
             x for x in self._entries
             if not (sp_entry[_CLIENT_ID] == x[_CLIENT_ID] and
-                    sp_entry[_TENANT_ID] == x[_TENANT_ID])]
+                    sp_entry[_TENANT] == x[_TENANT])]
 
         self._entries.append(sp_entry)
         self._save_persistence()

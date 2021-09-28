@@ -17,6 +17,15 @@ from msal import PublicClientApplication, ConfidentialClientApplication
 
 from .util import check_result
 
+# OAuth 2.0 client credentials flow parameter
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
+_TENANT = 'tenant'
+_CLIENT_ID = 'client_id'
+_CLIENT_SECRET = 'client_secret'
+_CERTIFICATE = 'certificate'
+_CLIENT_ASSERTION = 'client_assertion'
+_USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
+
 logger = get_logger(__name__)
 
 
@@ -55,19 +64,27 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
     def __init__(self, service_principal_auth, **kwargs):
 
         client_credential = None
-        if getattr(service_principal_auth, 'secret', None):
-            client_credential = service_principal_auth.secret
 
-        elif getattr(service_principal_auth, 'certificate', None):
+        # client_secret
+        client_secret = getattr(service_principal_auth, _CLIENT_SECRET, None)
+        if client_secret:
+            client_credential = client_secret
+
+        # certificate
+        certificate = getattr(service_principal_auth, _CERTIFICATE, None)
+        if certificate:
             client_credential = {
-                "private_key": service_principal_auth.certificate_string,
-                "thumbprint": service_principal_auth.thumbprint
+                "private_key": getattr(service_principal_auth, 'certificate_string'),
+                "thumbprint": getattr(service_principal_auth, 'thumbprint')
             }
-            if getattr(service_principal_auth, 'public_certificate', None):
-                client_credential['public_certificate'] = service_principal_auth.public_certificate
+            public_certificate = getattr(service_principal_auth, 'public_certificate', None)
+            if public_certificate:
+                client_credential['public_certificate'] = public_certificate
 
-        elif getattr(service_principal_auth, 'client_assertion', None):
-            client_credential = {"client_assertion": service_principal_auth.client_assertion}
+        # client_assertion
+        client_assertion = getattr(service_principal_auth, _CLIENT_ASSERTION, None)
+        if client_assertion:
+            client_credential = {'client_assertion': client_assertion}
 
         super().__init__(service_principal_auth.client_id, client_credential=client_credential, **kwargs)
 
