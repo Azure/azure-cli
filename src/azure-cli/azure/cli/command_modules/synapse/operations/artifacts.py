@@ -15,10 +15,14 @@ from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
                                cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool,
 <<<<<<< HEAD
+<<<<<<< HEAD
                                cf_synapse_spark_job_definition, cf_synapse_library)
 =======
                                cf_synapse_spark_job_definition)
 >>>>>>> 93fc2591d (add cmd for spark job definition)
+=======
+                               cf_synapse_spark_job_definition, cf_synapse_library)
+>>>>>>> 7f1776b4b (refine code)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
