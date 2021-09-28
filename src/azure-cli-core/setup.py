@@ -47,7 +47,7 @@ DEPENDENCIES = [
     'azure-cli-telemetry==1.0.6.*',
     'azure-core==1.18.0',
     'azure-mgmt-core>=1.2.0,<1.3.0',     # the preview version of azure-mgmt-core is 1.3.0b1, it cannot fit azure-core >=1.14.0
-    'cryptography>=3.2,<3.4',
+    'cryptography',
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack~=0.8.2',

@@ -10,9 +10,11 @@ from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineReso
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
                                             NotebookResource)
 from azure.cli.core.util import sdk_no_wait, CLIError
+from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
-                               cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool)
+                               cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool,
+                               cf_synapse_library)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
@@ -174,6 +176,11 @@ def stop_trigger(cmd, workspace_name, trigger_name, no_wait=False):
 def rerun_trigger(cmd, workspace_name, trigger_name, run_id):
     client = cf_synapse_trigger_run(cmd.cli_ctx, workspace_name)
     return client.rerun_trigger_instance(trigger_name, run_id)
+
+
+def cancel_trigger(cmd, workspace_name, trigger_name, run_id):
+    client = cf_synapse_trigger_run(cmd.cli_ctx, workspace_name)
+    return client.cancel_trigger_instance(trigger_name, run_id)
 
 
 def query_trigger_runs_by_workspace(cmd, workspace_name, last_updated_after, last_updated_before,
@@ -344,3 +351,89 @@ def write_to_file(notebook, path):
 def delete_notebook(cmd, workspace_name, notebook_name, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
     return sdk_no_wait(no_wait, client.begin_delete_notebook, notebook_name, polling=True)
+
+
+# Workspace package
+def list_workspace_package(cmd, workspace_name):
+    client = cf_synapse_library(cmd.cli_ctx, workspace_name)
+    return client.list()
+
+
+def get_workspace_package(cmd, workspace_name, package_name):
+    client = cf_synapse_library(cmd.cli_ctx, workspace_name)
+    return client.get(package_name)
+
+
+def upload_workspace_package(cmd, workspace_name, package, progress_callback=None):
+    client = cf_synapse_library(cmd.cli_ctx, workspace_name)
+    package_name = os.path.basename(package)
+
+    # Check if the package already exists
+    if test_workspace_package(client, package_name):
+        raise CLIError("A workspace package with name '{0}' already exists.".format(
+                       package_name))
+
+    # Create package
+    client.begin_create(package_name).result()
+    # Upload package content
+    package_size = os.path.getsize(package)
+    chunk_size = 4 * 1024 * 1024
+    if progress_callback is not None:
+        progress_callback(0, package_size)
+    with open(package, 'rb') as stream:
+        index = 0
+        while True:
+            read_size = min(chunk_size, package_size - index)
+            data = stream.read(read_size)
+
+            if data == b'':
+                break
+
+            client.append(package_name, data)
+            index += len(data)
+            if progress_callback is not None:
+                progress_callback(index, package_size)
+    # Call Flush API as a completion signal
+    client.begin_flush(package_name).result()
+
+    return client.get(package_name)
+
+
+def workspace_package_upload_batch(cmd, workspace_name, source, progress_callback=None):
+    # Tell progress reporter to reuse the same hook
+    if progress_callback:
+        progress_callback.reuse = True
+
+    source_files = []
+    results = []
+    for root, _, files in os.walk(source):
+        for f in files:
+            full_path = os.path.join(root, f)
+            source_files.append(full_path)
+
+    for index, source_file in enumerate(source_files):
+        # add package name and number to progress message
+        if progress_callback:
+            progress_callback.message = '{}/{}: "{}"'.format(
+                index + 1, len(source_files), os.path.basename(source_file))
+
+        results.append(upload_workspace_package(cmd, workspace_name, source_file, progress_callback))
+
+    # end progress hook
+    if progress_callback:
+        progress_callback.hook.end()
+
+    return results
+
+
+def test_workspace_package(client, package_name):
+    try:
+        client.get(package_name)
+        return True
+    except ResourceNotFoundError:
+        return False
+
+
+def delete_workspace_package(cmd, workspace_name, package_name, no_wait=False):
+    client = cf_synapse_library(cmd.cli_ctx, workspace_name)
+    return sdk_no_wait(no_wait, client.begin_delete, package_name)

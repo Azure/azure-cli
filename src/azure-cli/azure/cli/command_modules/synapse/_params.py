@@ -7,10 +7,10 @@ from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.mgmt.synapse.models import TransparentDataEncryptionStatus, SecurityAlertPolicyState, BlobAuditingPolicyState
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, \
-    get_resource_name_completion_list, get_location_type
+    get_resource_name_completion_list, get_location_type, file_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import get_json_object, shell_safe_json_parse
-from ._validators import validate_storage_account, validate_statement_language
+from ._validators import validate_storage_account, validate_statement_language, add_progress_callback
 from ._completers import get_role_definition_name_completion_list
 from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnectionClientType, PrincipalType, \
     SqlPoolConnectionClientAuthenticationType, ItemType
@@ -33,6 +33,8 @@ role_arg_type = CLIArgumentType(help='The role name/id that is assigned to the p
 definition_file_arg_type = CLIArgumentType(options_list=['--file'], completer=FilesCompleter(),
                                            type=shell_safe_json_parse,
                                            help='Properties may be supplied from a JSON file using the `@{path}` syntax or a JSON string.')
+progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
+                                action='store_true', validator=add_progress_callback)
 time_format_help = 'Time should be in following format: "YYYY-MM-DDTHH:MM:SS".'
 
 storage_arg_group = "Storage"
@@ -170,6 +172,11 @@ def load_arguments(self, _):
         c.argument('library_requirements', arg_group='Environment Configuration',
                    help='The library requirements file.')
         c.argument('force', arg_type=get_three_state_flag(), help='The flag of force operation.')
+
+        # Custom Libraries
+        c.argument('package_action', arg_group='Custom Libraries', arg_type=get_enum_type(['Add', 'Remove']),
+                   help='Package action must be specified when you add or remove a workspace package from a Apache Spark pool.')
+        c.argument('package', arg_group='Custom Libraries', nargs='+', help='List of workspace packages name.')
 
     # synapse sql pool
     with self.argument_context('synapse sql pool') as c:
@@ -616,7 +623,7 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     # synapse artifacts linked-service
-    for scope in ['create', 'set']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse linked-service ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('linked_service_name', arg_type=name_type, help='The linked service name.')
@@ -634,7 +641,7 @@ def load_arguments(self, _):
         c.argument('linked_service_name', arg_type=name_type, help='The linked service name.')
 
     # synapse artifacts dataset
-    for scope in ['create', 'set']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse dataset ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('dataset_name', arg_type=name_type, help='The dataset name.')
@@ -652,7 +659,7 @@ def load_arguments(self, _):
         c.argument('dataset_name', arg_type=name_type, help='The dataset name.')
 
     # synapse artifacts pipeline
-    for scope in ['create', 'set']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse pipeline ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('pipeline_name', arg_type=name_type, help='The pipeline name.')
@@ -717,7 +724,7 @@ def load_arguments(self, _):
         c.argument('order_by', action=AddOrderBy, nargs='*', help='List of OrderBy option.')
 
     # synapse artifacts trigger
-    for scope in ['create', 'set']:
+    for scope in ['create', 'update', 'set']:
         with self.argument_context('synapse trigger ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
@@ -754,8 +761,17 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
 
+    with self.argument_context('synapse trigger wait') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
     # synapse artifacts trigger run
     with self.argument_context('synapse trigger-run rerun') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+        c.argument('run_id', help='The trigger run identifier.')
+
+    with self.argument_context('synapse trigger-run cancel') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
         c.argument('run_id', help='The trigger run identifier.')
@@ -817,6 +833,24 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('notebook_name', arg_type=name_type, help='The notebook name.')
 
+    # synapse artifacts library
+    with self.argument_context('synapse workspace-package') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.ignore('progress_callback')
+
+    for scope in ['show', 'delete']:
+        with self.argument_context('synapse workspace-package ' + scope) as c:
+            c.argument('package_name', arg_type=name_type, options_list=['--package-name', '--package', '--name', '-n'], help='The workspace package name.')
+
+    with self.argument_context('synapse workspace-package upload') as c:
+        c.argument('package', options_list=('--package', '--file', '-f'), type=file_type, completer=FilesCompleter(),
+                   help='Specifies a local file path for a file to upload as workspace package.')
+        c.extra('no_progress', progress_type)
+
+    with self.argument_context('synapse workspace-package upload-batch') as c:
+        c.argument('source', options_list=('--source', '-s'), help='The directory where the files to be uploaded are located.')
+        c.extra('no_progress', progress_type)
+
     # synapse integration runtime
     with self.argument_context('synapse integration-runtime') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
@@ -829,7 +863,7 @@ def load_arguments(self, _):
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part=None)
 
-    for scope in ['show', 'create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status']:
+    for scope in ['show', 'create', 'managed create', 'self-hosted create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status', 'start', 'stop']:
         with self.argument_context('synapse integration-runtime ' + scope) as c:
             c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
 
@@ -844,6 +878,21 @@ def load_arguments(self, _):
                    help='Compute type of the data flow cluster which will execute data flow job.')
         c.argument('core_count', arg_group='Managed', help='Core count of the data flow cluster which will execute data flow job.')
         c.argument('time_to_live', arg_group='Managed', help='Time to live (in minutes) setting of the data flow cluster which will execute data flow job.')
+
+    with self.argument_context('synapse integration-runtime managed create') as c:
+        c.argument('description', help='The integration runtime description.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
+        c.argument('location', help='The integration runtime location.')
+        c.argument('compute_type', arg_type=get_enum_type(['General', 'MemoryOptimized', 'ComputeOptimized']),
+                   help='Compute type of the data flow cluster which will execute data flow job.')
+        c.argument('core_count', help='Core count of the data flow cluster which will execute data flow job.')
+        c.argument('time_to_live', help='Time to live (in minutes) setting of the data flow cluster which will execute data flow job.')
+
+    with self.argument_context('synapse integration-runtime self-hosted create') as c:
+        c.argument('description', help='The integration runtime description.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
 
     with self.argument_context('synapse integration-runtime update') as c:
         c.argument('auto_update', arg_type=get_enum_type(['On', 'Off']), help='Enable or disable the self-hosted integration runtime auto-update.')
