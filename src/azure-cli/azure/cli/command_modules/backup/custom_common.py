@@ -26,15 +26,16 @@ tier_type_map = {'VaultStandard': 'HardenedRP',
                  'VaultArchive': 'ArchivedRP',
                  'Snapshot': 'InstantRP'}
 
+crr_not_supported_bmt = ["azureworkload", "mab"]
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
                    status="Registered", use_secondary_region=None):
     container_type = custom_help.validate_and_extract_container_type(name, backup_management_type)
     if use_secondary_region:
-        if container_type and container_type.lower() == "azurestorage":
+        if container_type and container_type.lower() in crr_not_supported_bmt:
             raise InvalidArgumentValueError(
                 """
-                --use-secondary-region flag is not supported for container of type AzureStorage.
+                --use-secondary-region flag is not supported for this backup management type.
                 Please either remove the flag or query for any other container type.
                 """)
 
@@ -69,10 +70,10 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
               workload_type=None, use_secondary_region=None):
     container_type = custom_help.validate_and_extract_container_type(container_name, backup_management_type)
     if use_secondary_region:
-        if container_type and container_type.lower() == "azurestorage":
+        if container_type and container_type.lower() in crr_not_supported_bmt:
             raise InvalidArgumentValueError(
                 """
-                --use-secondary-region flag is not supported for container of type AzureStorage.
+                --use-secondary-region flag is not supported for this backup management type.
                 Please either remove the flag or query for any other container type.
                 """)
     else:
@@ -99,10 +100,15 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
         'itemType': workload_type})
 
     if use_secondary_region:
-        if container_type and container_type.lower() == "azurestorage":
+        if container_type is None:
+            raise RequiredArgumentMissingError(
+                """
+                Provide --backup-management-type to list protected items in secondary region
+                """)
+        if container_type and container_type.lower() in crr_not_supported_bmt:
             raise InvalidArgumentValueError(
                 """
-                --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
+                --use-secondary-region flag is not supported for the --backup-management-type provided.
                 Please either remove the flag or query for any other backup-management-type.
                 """)
         client = backup_protected_items_crr_cf(cmd.cli_ctx)
@@ -254,10 +260,10 @@ def _get_containers(client, backup_management_type, status, resource_group_name,
     filter_string = custom_help.get_filter_string(filter_dict)
 
     if use_secondary_region:
-        if backup_management_type.lower() == "azurestorage":
+        if backup_management_type.lower() in crr_not_supported_bmt:
             raise InvalidArgumentValueError(
                 """
-                --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
+                --use-secondary-region flag is not supported for the --backup-management-type provided.
                 Please either remove the flag or query for any other backup-management-type.
                 """)
 
