@@ -65,9 +65,9 @@ class TestServicePrincipalAuth(unittest.TestCase):
         cred = ServicePrincipalAuth.build_credential(test_cert_file, use_cert_sn_issuer=True)
         assert cred == {'certificate': test_cert_file, 'use_cert_sn_issuer': True}
 
-        # federated token
-        cred = ServicePrincipalAuth.build_credential(federated_token="test_token")
-        assert cred == {"federated_token": "test_token"}
+        # client assertion
+        cred = ServicePrincipalAuth.build_credential(client_assertion="test_jwt")
+        assert cred == {"client_assertion": "test_jwt"}
 
 
 class TestMsalSecretStore(unittest.TestCase):

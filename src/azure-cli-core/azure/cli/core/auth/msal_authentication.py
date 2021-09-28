@@ -66,8 +66,8 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
             if getattr(service_principal_auth, 'public_certificate', None):
                 client_credential['public_certificate'] = service_principal_auth.public_certificate
 
-        elif getattr(service_principal_auth, 'federated_token', None):
-            client_credential = {"client_assertion": service_principal_auth.federated_token}
+        elif getattr(service_principal_auth, 'client_assertion', None):
+            client_credential = {"client_assertion": service_principal_auth.client_assertion}
 
         super().__init__(service_principal_auth.client_id, client_credential=client_credential, **kwargs)
 

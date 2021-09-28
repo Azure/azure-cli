@@ -21,7 +21,7 @@ _CLIENT_ID = 'client_id'
 _TENANT_ID = 'tenant_id'
 _SECRET = 'secret'
 _CERTIFICATE = 'certificate'
-_FEDERATED_TOKEN = 'federated_token'
+_CLIENT_ASSERTION = 'client_assertion'
 _USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 
 logger = get_logger(__name__)
@@ -130,7 +130,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             {
                 'secret': 'my_secret',
                 'certificate': '/path/to/cert.pem',
-                'federated_token': 'my_token'
+                'client_assertion': 'my_token'
             }
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
@@ -227,12 +227,12 @@ class ServicePrincipalAuth:
         return ServicePrincipalAuth(entry)
 
     @classmethod
-    def build_credential(cls, secret_or_certificate=None, federated_token=None, use_cert_sn_issuer=None):
+    def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             "secret": "xxx",
             "certificate": "/path/to/cert.pem",
-            "federated_token": "xxx"
+            "client_assertion": "xxx"
         }
         """
         entry = {}
@@ -243,12 +243,12 @@ class ServicePrincipalAuth:
                     entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
             else:
                 entry[_SECRET] = secret_or_certificate
-        elif federated_token:
-            entry[_FEDERATED_TOKEN] = federated_token
+        elif client_assertion:
+            entry[_CLIENT_ASSERTION] = client_assertion
         return entry
 
     def get_entry_to_persist(self):
-        persisted_keys = [_CLIENT_ID, _TENANT_ID, _SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _FEDERATED_TOKEN]
+        persisted_keys = [_CLIENT_ID, _TENANT_ID, _SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _CLIENT_ASSERTION]
         return {k: v for k, v in self.__dict__.items() if k in persisted_keys}
 
 

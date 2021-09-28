@@ -105,7 +105,7 @@ def account_clear(cmd):
 
 # pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, federated_token=None):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -130,7 +130,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not (password or federated_token):
+        if not (password or client_assertion):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -140,7 +140,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     if service_principal:
         from azure.cli.core.auth.identity import ServicePrincipalAuth
-        password = ServicePrincipalAuth.build_credential(password, federated_token, use_cert_sn_issuer)
+        password = ServicePrincipalAuth.build_credential(password, client_assertion, use_cert_sn_issuer)
 
     subscriptions = profile.login(
         interactive,

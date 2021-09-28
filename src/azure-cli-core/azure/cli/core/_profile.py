@@ -146,7 +146,7 @@ class Profile:
             {
                 'secret': 'my_secret',
                 'certificate': '/path/to/cert.pem',
-                'federated_token': 'my_token'
+                'client_assertion': 'my_token'
             }
         """
         if not scopes:
