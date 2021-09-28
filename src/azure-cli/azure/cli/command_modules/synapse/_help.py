@@ -2020,7 +2020,7 @@ examples:
   - name: Create a spark job definition.
     text: |-
         az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/notebook.ipynb/test.json
+          --name testsjdname --file @path/test.json
 """
 
 <<<<<<< HEAD
@@ -2046,7 +2046,7 @@ examples:
   - name: Update a spark job definition.
     text: |-
         az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/notebook.ipynb/test.json
+          --name testsjdname --file @path/test.json
 """
 
 >>>>>>> ecba9c9b0 (add spark job definition update cmd)
