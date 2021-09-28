@@ -146,7 +146,7 @@ def load_arguments(self, _):
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list containers in secondary region.')
 
     with self.argument_context('backup container unregister') as c:
-        c.argument('backup_management_type', extended_backup_management_type)
+        c.argument('backup_management_type', backup_management_type)
         c.argument('container_name', container_name_type, id_part='child_name_2')
 
     with self.argument_context('backup container re-register') as c:

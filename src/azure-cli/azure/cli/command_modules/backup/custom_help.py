@@ -123,6 +123,10 @@ def validate_object(obj, error_message):
         raise ResourceNotFoundError(error_message)
 
 
+# def get_pipeline_response(pipeline_response, _0, _1):
+#    return pipeline_response
+
+
 def get_target_path(resource_type, path, logical_name, data_directory_paths):
     for filepath in data_directory_paths:
         if filepath.type == resource_type:
@@ -214,6 +218,20 @@ def track_register_operation(cli_ctx, result, vault_name, resource_group, contai
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
                                                                    operation_id, raw=True)
+
+
+# def track_mab_unregister_operation(cli_ctx, result, vault_name, resource_group, container_name):
+#    protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
+
+#    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
+#    result = protection_container_operation_results_client.get(vault_name, resource_group,
+#                                                               fabric_name, container_name,
+#                                                               operation_id, raw=True)
+#    while result.response.status_code == 202:
+#        time.sleep(5)
+#        result = protection_container_operation_results_client.get(vault_name, resource_group,
+#                                                                   fabric_name, container_name,
+#                                                                   operation_id, raw=True)
 
 
 def track_inquiry_operation(cli_ctx, result, vault_name, resource_group, container_name):
