@@ -92,6 +92,7 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'begin_delete')
+        g.command('list-by-subscription', 'list_by_subscription')
         g.custom_command('create', 'create_account',
                          client_factory=accounts_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
