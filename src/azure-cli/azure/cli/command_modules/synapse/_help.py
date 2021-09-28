@@ -1989,6 +1989,16 @@ examples:
           --name testsjdname --file @path/notebook.ipynb/test.json
 """
 
+helps['synapse spark-job-definition update'] = """
+type: command
+short-summary: Update a spark job definition.
+examples:
+  - name: Update a spark job definition.
+    text: |-
+        az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
+          --name testsjdname --file @path/notebook.ipynb/test.json
+"""
+
 helps['synapse spark-job-definition wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a spark job definition is met.

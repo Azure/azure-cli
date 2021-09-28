@@ -1768,6 +1768,13 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', self.kwargs['name'])
             ])
 
+        # Update a spark job definition
+        self.cmd(
+            'az synapse spark-job-definition update --workspace-name {workspace} --name {name} --file @"{file}" ',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
         # List spark job definitions
         self.cmd(
             'az synapse spark-job-definition list --workspace-name {workspace}',
