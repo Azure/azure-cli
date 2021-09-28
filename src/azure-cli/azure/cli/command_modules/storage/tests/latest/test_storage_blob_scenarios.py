@@ -829,7 +829,7 @@ class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck('name', self.kwargs['container2']),
                      JMESPathCheck('immutableStorageWithVersioning.enabled', None)})
 
-        self.cmd('storage container immutability-policy create -c {container2} --account-name {sa} -w --period 1',
+        self.cmd('storage container immutability-policy create -c {container2} --account-name {sa} -g {rg} -w --period 1',
                  checks={
                      JMESPathCheck('name', self.kwargs['container2']),
                      JMESPathCheck('immutabilityPeriodSinceCreationInDays', 1)})
