@@ -4321,25 +4321,6 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
             cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
 
 
-def create_devops_pipeline(
-        cmd,
-        functionapp_name=None,
-        organization_name=None,
-        project_name=None,
-        repository_name=None,
-        overwrite_yaml=None,
-        allow_force_push=None,
-        github_pat=None,
-        github_repository=None
-):
-    from .azure_devops_build_interactive import AzureDevopsBuildInteractive
-    azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
-                                                                 organization_name, project_name, repository_name,
-                                                                 overwrite_yaml, allow_force_push,
-                                                                 github_pat, github_repository)
-    return azure_devops_build_interactive.interactive_azure_devops_build()
-
-
 def _configure_default_logging(cmd, rg_name, name):
     logger.warning("Configuring default logging for the app, if not already enabled")
     return config_diagnostics(cmd, rg_name, name,
