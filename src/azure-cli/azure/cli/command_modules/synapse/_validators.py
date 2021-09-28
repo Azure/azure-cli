@@ -79,4 +79,3 @@ def add_progress_callback(cmd, namespace):
     if not namespace.no_progress:
         namespace.progress_callback = _update_progress
     del namespace.no_progress
-
