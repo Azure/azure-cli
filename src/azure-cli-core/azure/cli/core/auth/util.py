@@ -101,6 +101,11 @@ def try_scopes_to_resource(scopes):
 
 
 def check_result(result, **kwargs):
+    """
+    1. Check if the MSAL result contains a valid access token.
+    2. If there is error, handle the error and show re-login message.
+    3. For user login, return the username and tenant_id in a dict.
+    """
     from azure.cli.core.azclierror import AuthenticationError
 
     if not result:
@@ -115,7 +120,7 @@ def check_result(result, **kwargs):
         return {
             # AAD returns "preferred_username", ADFS returns "upn"
             'username': idt.get("preferred_username") or idt["upn"],
-            'tenantId': idt['tid']
+            'tenant_id': idt['tid']
         }
 
     return None

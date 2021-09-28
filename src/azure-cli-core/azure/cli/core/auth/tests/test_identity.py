@@ -60,7 +60,10 @@ class TestServicePrincipalAuth(unittest.TestCase):
         current_dir = os.path.dirname(os.path.realpath(__file__))
         test_cert_file = os.path.join(current_dir, 'sp_cert.pem')
         cred = ServicePrincipalAuth.build_credential(test_cert_file)
-        assert cred.get('certificate').endswith('sp_cert.pem')
+        assert cred == {'certificate': test_cert_file}
+
+        cred = ServicePrincipalAuth.build_credential(test_cert_file, use_cert_sn_issuer=True)
+        assert cred == {'certificate': test_cert_file, 'use_cert_sn_issuer': True}
 
         # federated token
         cred = ServicePrincipalAuth.build_credential(federated_token="test_token")
@@ -70,7 +73,7 @@ class TestServicePrincipalAuth(unittest.TestCase):
 class TestMsalSecretStore(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_load_credential(self, load_secret_store_mock):
+    def test_load_entry(self, load_secret_store_mock):
         store = MemoryStore()
         load_secret_store_mock.return_value = store
 
@@ -83,11 +86,11 @@ class TestMsalSecretStore(unittest.TestCase):
         secret_store = ServicePrincipalStore(None, None)
         store._content = [test_sp]
 
-        entry = secret_store.load_credential("myapp", "mytenant")
+        entry = secret_store.load_entry("myapp", "mytenant")
         self.assertEqual(entry['secret'], "test_secret")
 
     @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_save_credential(self, load_secret_store_mock):
+    def test_save_entry(self, load_secret_store_mock):
         store = MemoryStore()
         load_secret_store_mock.return_value = store
 
@@ -98,12 +101,12 @@ class TestMsalSecretStore(unittest.TestCase):
         }
 
         secret_store = ServicePrincipalStore(None, None)
-        secret_store.save_credential(test_sp)
+        secret_store.save_entry(test_sp)
 
         assert store._content == [test_sp]
 
     @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_save_credential_add_new(self, load_secret_store_mock):
+    def test_save_entry_add_new(self, load_secret_store_mock):
         store = MemoryStore()
         load_secret_store_mock.return_value = store
 
@@ -120,42 +123,42 @@ class TestMsalSecretStore(unittest.TestCase):
 
         store._content = [test_sp]
         secret_store = ServicePrincipalStore(None, None)
-        secret_store.save_credential(test_sp2)
+        secret_store.save_entry(test_sp2)
         assert store._content == [test_sp, test_sp2]
 
     @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_save_credential_update_existing(self, load_secret_store_mock):
+    def test_save_entry_update_existing(self, load_secret_store_mock):
         store = MemoryStore()
         load_secret_store_mock.return_value = store
 
         test_sp = {
             "client_id": "myapp",
             "tenant_id": "mytenant",
-            "accessToken": "test_secret"
+            "secret": "test_secret"
         }
 
         store._content = [test_sp]
         new_creds = test_sp.copy()
-        new_creds['accessToken'] = 'test_secret'
+        new_creds['secret'] = 'test_secret'
 
         secret_store = ServicePrincipalStore(None, None)
-        secret_store.save_credential(new_creds)
+        secret_store.save_entry(new_creds)
         assert store._content == [new_creds]
 
     @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_remove_credential(self, load_secret_store_mock):
+    def test_remove_entry(self, load_secret_store_mock):
         store = MemoryStore()
         load_secret_store_mock.return_value = store
 
         test_sp = {
             "client_id": "myapp",
             "tenant_id": "mytenant",
-            "accessToken": "test_secret"
+            "secret": "test_secret"
         }
 
         store._content = [test_sp]
         secret_store = ServicePrincipalStore(None, None)
-        secret_store.remove_credential('myapp')
+        secret_store.remove_entry('myapp')
         assert store._content == []
 
 

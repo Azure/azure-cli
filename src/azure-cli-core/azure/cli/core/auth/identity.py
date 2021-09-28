@@ -12,7 +12,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from .msal_authentication import UserCredential, ServicePrincipalCredential
-from .util import aad_error_handler, check_result
+from .util import check_result
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -31,7 +31,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     """Class to manage identities:
         - user
         - service principal
-        TODO: - managed identity
+        - TODO: managed identity
     """
     # Whether token and secrets should be encrypted. Change its value to turn on/off token encryption.
     token_encryption = False
@@ -125,12 +125,24 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return check_result(result)
 
     def login_with_service_principal(self, client_id, credential, scopes=None):
+        """
+        'credential' is a dict like below. Only one key can exist:
+            {
+                'secret': 'my_secret',
+                'certificate': '/path/to/cert.pem',
+                'federated_token': 'my_token'
+            }
+        """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
+
+        # This cred means SDK credential object
         cred = ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
         result = cred.acquire_token_for_client(scopes)
         check_result(result)
+
+        # Only persist the service principal after a successful login
         entry = sp_auth.get_entry_to_persist()
-        self._msal_secret_store.save_credential(entry)
+        self._msal_secret_store.save_entry(entry)
 
     def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
         raise NotImplementedError
@@ -151,11 +163,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def logout_service_principal(self, sp):
         # remove service principal secrets
-        self._msal_secret_store.remove_credential(sp)
+        self._msal_secret_store.remove_entry(sp)
 
     def logout_all_service_principal(self):
         # remove service principal secrets
-        self._msal_secret_store.remove_all_credentials()
+        self._msal_secret_store.remove_all_entries()
 
     def get_user(self, user=None):
         accounts = self.msal_app.get_accounts(user) if user else self.msal_app.get_accounts()
@@ -165,7 +177,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return UserCredential(self.client_id, username, **self._msal_app_kwargs)
 
     def get_service_principal_credential(self, client_id):
-        entry = self._msal_secret_store.load_credential(client_id, self.tenant_id)
+        entry = self._msal_secret_store.load_entry(client_id, self.tenant_id)
         sp_auth = ServicePrincipalAuth(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
 
@@ -250,7 +262,7 @@ class ServicePrincipalStore:
         self._secret_file = secret_file
         self._entries = []
 
-    def load_credential(self, sp_id, tenant):
+    def load_entry(self, sp_id, tenant):
         self._load_persistence()
         matched = [x for x in self._entries if sp_id == x[_CLIENT_ID]]
         if not matched:
@@ -268,7 +280,7 @@ class ServicePrincipalStore:
 
         return cred
 
-    def save_credential(self, sp_entry):
+    def save_entry(self, sp_entry):
         self._load_persistence()
 
         self._entries = [
@@ -279,7 +291,7 @@ class ServicePrincipalStore:
         self._entries.append(sp_entry)
         self._save_persistence()
 
-    def remove_credential(self, sp_id):
+    def remove_entry(self, sp_id):
         self._load_persistence()
         state_changed = False
 
@@ -294,7 +306,7 @@ class ServicePrincipalStore:
         if state_changed:
             self._save_persistence()
 
-    def remove_all_credentials(self):
+    def remove_all_entries(self):
         try:
             os.remove(self._secret_file)
         except FileNotFoundError:
@@ -305,12 +317,6 @@ class ServicePrincipalStore:
 
     def _load_persistence(self):
         self._entries = self._secret_store.load()
-
-    def _serialize_secrets(self):
-        # ONLY FOR DEBUGGING PURPOSE. DO NOT USE IN PRODUCTION CODE.
-        logger.warning("Secrets are serialized as plain text and saved to `msalSecrets.cache.json`.")
-        with open(self._secret_file + ".json", "w") as fd:
-            fd.write(json.dumps(self._entries, indent=4))
 
 
 def _read_response_templates():

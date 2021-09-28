@@ -123,6 +123,7 @@ class Profile:
         self._authority = self.cli_ctx.cloud.endpoints.active_directory
         self._arm_scope = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
+        # Only enable token cache encryption for Windows (for now)
         token_encryption_fallback = sys.platform.startswith('win32')
         Identity.token_encryption = self.cli_ctx.config.getboolean('core', 'token_encryption',
                                                                    fallback=token_encryption_fallback)
@@ -194,8 +195,7 @@ class Profile:
         if allow_no_subscriptions:
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
-            profile = Profile(cli_ctx=self.cli_ctx)
-            tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)
+            tenant_accounts = self._build_tenant_level_accounts(bare_tenants)
             subscriptions.extend(tenant_accounts)
             if not subscriptions:
                 return []

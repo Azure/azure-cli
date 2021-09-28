@@ -3320,6 +3320,7 @@ def _get_dataplane_aad_token(cli_ctx, serverAppId):
     # this function is mostly copied from keyvault cli
     return Profile(cli_ctx=cli_ctx).get_raw_token(resource=serverAppId)[0][2].get('accessToken')
 
+
 DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
 DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces.custom'
 
