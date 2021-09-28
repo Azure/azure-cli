@@ -36,6 +36,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupSubnetId,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
                               cf_log_analytics_workspace_shared_keys, cf_resource, cf_network, cf_msi)
 
@@ -403,12 +404,12 @@ def _create_image_registry_credentials(cmd, resource_group_name, registry_login_
     image_registry_credentials = None
     if registry_login_server:
         if not registry_username:
-            raise CLIError('Please specify --registry-username in order to use custom image registry.')
+            raise RequiredArgumentMissingError('Please specify --registry-username in order to use custom image registry.')
         if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
             except NoTTYException:
-                raise CLIError('Please specify --registry-password in order to use custom image registry.')
+                raise RequiredArgumentMissingError('Please specify --registry-password in order to use custom image registry.')
         image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
                                                               username=registry_username,
                                                               password=registry_password)]
@@ -429,13 +430,13 @@ def _create_image_registry_credentials(cmd, resource_group_name, registry_login_
                 try:
                     registry_username = prompt(msg='Image registry username: ')
                 except NoTTYException:
-                    raise CLIError('Please specify --registry-username in order to use Azure Container Registry.')
+                    raise RequiredArgumentMissingError('Please specify --registry-username in order to use Azure Container Registry.')
 
             if not registry_password:
                 try:
                     registry_password = prompt_pass(msg='Image registry password: ')
                 except NoTTYException:
-                    raise CLIError('Please specify --registry-password in order to use Azure Container Registry.')
+                    raise RequiredArgumentMissingError('Please specify --registry-password in order to use Azure Container Registry.')
             if acr_server:
                 image_registry_credentials = [ImageRegistryCredential(server=acr_server,
                                                                       username=registry_username,
@@ -447,7 +448,7 @@ def _create_image_registry_credentials(cmd, resource_group_name, registry_login_
                                                                   username=registry_username,
                                                                   password=registry_password)]
         else:
-            raise CLIError('Failed to parse login server from image name; please explicitly specify --registry-server.')
+            raise RequiredArgumentMissingError('Failed to parse login server from image name; please explicitly specify --registry-server.')
 
     return image_registry_credentials
 
