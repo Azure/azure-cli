@@ -32,6 +32,13 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     DecoratorMode,
 )
+from azure.cli.command_modules.acs._loadbalancer import (
+    create_load_balancer_profile,
+    set_load_balancer_sku,
+)
+from azure.cli.command_modules.acs._loadbalancer import (
+    update_load_balancer_profile as _update_load_balancer_profile,
+)
 from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
     _ensure_aks_acr,
@@ -42,8 +49,6 @@ from azure.cli.command_modules.acs.custom import (
     _get_rg_location,
     _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
-    create_load_balancer_profile,
-    set_load_balancer_sku,
     subnet_role_assignment_exists,
 )
 from azure.cli.core import AzCommandsLoader
@@ -1933,17 +1938,18 @@ class AKSContext:
         load_balancer_managed_outbound_ip_count = self.raw_param.get(
             "load_balancer_managed_outbound_ip_count"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count is not None
-        ):
-            load_balancer_managed_outbound_ip_count = (
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
+                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count is not None
+            ):
+                load_balancer_managed_outbound_ip_count = (
+                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1960,17 +1966,18 @@ class AKSContext:
         load_balancer_outbound_ips = self.raw_param.get(
             "load_balancer_outbound_ips"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.outbound_i_ps and
-            self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps is not None
-        ):
-            load_balancer_outbound_ips = (
-                self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.outbound_i_ps and
+                self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps is not None
+            ):
+                load_balancer_outbound_ips = (
+                    self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1985,17 +1992,18 @@ class AKSContext:
         load_balancer_outbound_ip_prefixes = self.raw_param.get(
             "load_balancer_outbound_ip_prefixes"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes and
-            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes is not None
-        ):
-            load_balancer_outbound_ip_prefixes = (
-                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes and
+                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes is not None
+            ):
+                load_balancer_outbound_ip_prefixes = (
+                    self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -2012,16 +2020,17 @@ class AKSContext:
         load_balancer_outbound_ports = self.raw_param.get(
             "load_balancer_outbound_ports"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.allocated_outbound_ports is not None
-        ):
-            load_balancer_outbound_ports = (
-                self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.allocated_outbound_ports is not None
+            ):
+                load_balancer_outbound_ports = (
+                    self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -2038,16 +2047,17 @@ class AKSContext:
         load_balancer_idle_timeout = self.raw_param.get(
             "load_balancer_idle_timeout"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes is not None
-        ):
-            load_balancer_idle_timeout = (
-                self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes is not None
+            ):
+                load_balancer_idle_timeout = (
+                    self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -4438,6 +4448,40 @@ class AKSUpdateDecorator:
             )
         return mc
 
+    def update_load_balancer_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update load balancer profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        if not mc.network_profile:
+            raise UnknownError(
+                "Encounter an unexpected error while getting network profile from the cluster in the process of "
+                "trying to update the load balancer profile."
+            )
+
+        load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
+        load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
+        load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
+        load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
+        load_balancer_idle_timeout = self.context.get_load_balancer_idle_timeout()
+        # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
+        # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
+        # remain unchanged.
+        mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
+            managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
+            outbound_ips=load_balancer_outbound_ips,
+            outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
+            outbound_ports=load_balancer_outbound_ports,
+            idle_timeout=load_balancer_idle_timeout,
+            profile=mc.network_profile.load_balancer_profile,
+            models=self.models.lb_models)
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -4459,6 +4503,8 @@ class AKSUpdateDecorator:
         self.process_attach_detach_acr(mc)
         # update sku (uptime sla)
         mc = self.update_sku(mc)
+        # update load balancer profile
+        mc = self.update_load_balancer_profile(mc)
 
         return mc
 

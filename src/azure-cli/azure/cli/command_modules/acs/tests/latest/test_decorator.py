@@ -1634,6 +1634,32 @@ class AKSContextTestCase(unittest.TestCase):
             ctx_1.get_load_balancer_managed_outbound_ip_count(), 10
         )
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_managed_outbound_ip_count": None,
+            },
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            managed_outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            )(count=10)
+        )
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(
+            ctx_2.get_load_balancer_managed_outbound_ip_count(), None
+        )
+
     def test_get_load_balancer_outbound_ips(self):
         # default
         ctx_1 = AKSContext(
@@ -1672,6 +1698,36 @@ class AKSContextTestCase(unittest.TestCase):
                 )
             ],
         )
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_outbound_ips": None,
+            },
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            )(
+                public_i_ps=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_public_ip"
+                    )
+                ]
+            )
+        )
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ips(), None)
 
     def test_get_load_balancer_outbound_ip_prefixes(self):
         # default
@@ -1712,6 +1768,37 @@ class AKSContextTestCase(unittest.TestCase):
             ],
         )
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_outbound_ip_prefixes": None,
+            },
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ip_prefixes(), None)
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            outbound_ip_prefixes=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+            )(
+                public_ip_prefixes=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_public_ip_prefix"
+                    )
+                ]
+            )
+        )
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ip_prefixes(), None)
+
     def test_get_load_balancer_outbound_ports(self):
         # default
         ctx_1 = AKSContext(
@@ -1734,6 +1821,27 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_load_balancer_outbound_ports(), 10)
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_outbound_ports": None,
+            },
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ports(), None)
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(allocated_outbound_ports=10)
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ports(), None)
+
     def test_get_load_balancer_idle_timeout(self):
         # default
         ctx_1 = AKSContext(
@@ -1755,6 +1863,27 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_load_balancer_idle_timeout(), 10)
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_idle_timeout": None,
+            },
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_load_balancer_idle_timeout(), None)
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(idle_timeout_in_minutes=10)
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_load_balancer_idle_timeout(), None)
 
     def test_get_outbound_type(self):
         # default
@@ -5210,7 +5339,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                         acr_name_or_id="test_detach_acr",
                         subscription_id="test_subscription_id",
                         detach=True,
-                    )
+                    ),
                 ]
             )
 
@@ -5230,7 +5359,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         dec_1.context.attach_mc(mc_1)
         # fail on passing the wrong mc object
@@ -5242,7 +5371,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -5261,7 +5390,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         dec_2.context.attach_mc(mc_2)
         # fail on mutually exclusive uptime_sla and no_uptime_sla
@@ -5283,7 +5412,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid",
-            )
+            ),
         )
         dec_3.context.attach_mc(mc_3)
         dec_mc_3 = dec_3.update_sku(mc_3)
@@ -5292,7 +5421,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
@@ -5311,7 +5440,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         dec_4.context.attach_mc(mc_4)
         dec_mc_4 = dec_4.update_sku(mc_4)
@@ -5320,9 +5449,96 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid",
-            )
+            ),
         )
         self.assertEqual(dec_mc_4, ground_truth_mc_4)
+
+    def test_update_load_balancer_profile(self):
+        # default value in `aks_update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "load_balancer_sku": None,
+                "load_balancer_managed_outbound_ip_count": None,
+                "load_balancer_outbound_ips": None,
+                "load_balancer_outbound_ip_prefixes": None,
+                "load_balancer_outbound_ports": None,
+                "load_balancer_idle_timeout": None,
+            },
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_load_balancer_profile(None)
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        # fail on incomplete mc object (no network profile)
+        with self.assertRaises(UnknownError):
+            dec_1.update_load_balancer_profile(mc_0)
+        load_balancer_profile_1 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            managed_outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            )(count=3),
+            outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            )(
+                public_i_ps=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_1"
+                    ),
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_2"
+                    ),
+                ]
+            ),
+            allocated_outbound_ports=5,
+        )
+
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_1,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile_1,
+        )
+        dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_load_balancer_profile(None)
+        dec_mc_1 = dec_1.update_load_balancer_profile(mc_1)
+
+        ground_truth_load_balancer_profile_1 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            managed_outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            )(count=3),
+            outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            )(
+                public_i_ps=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_1"
+                    ),
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_2"
+                    ),
+                ]
+            ),
+            allocated_outbound_ports=5,
+        )
+        ground_truth_network_profile_1 = (
+            self.models.ContainerServiceNetworkProfile(
+                load_balancer_profile=ground_truth_load_balancer_profile_1,
+            )
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=ground_truth_network_profile_1,
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_update_default_mc_profile(self):
         pass
