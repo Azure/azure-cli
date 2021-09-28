@@ -17,6 +17,7 @@ from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                                cf_synapse_library)
 =======
                                cf_synapse_spark_job_definition)
@@ -27,6 +28,9 @@ from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf
 =======
                                cf_synapse_spark_job_definition)
 >>>>>>> 93fc2591d (add cmd for spark job definition)
+=======
+                               cf_synapse_spark_job_definition, cf_synapse_library)
+>>>>>>> 7f1776b4b (refine code)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
