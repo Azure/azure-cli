@@ -22,7 +22,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
-                          validate_allow_protected_append_writes_all, validate_blob_name_for_upload)
+                          validate_blob_name_for_upload)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches

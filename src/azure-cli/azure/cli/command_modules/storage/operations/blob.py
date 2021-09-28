@@ -24,13 +24,15 @@ from ..util import get_datetime_from_string
 logger = get_logger(__name__)
 
 
-def set_legal_hold(cmd, client, container_name, account_name, tags, allow_protected_append_writes_all, resource_group_name=None):
+def set_legal_hold(cmd, client, container_name, account_name, tags, allow_protected_append_writes_all,
+                   resource_group_name=None):
     LegalHold = cmd.get_models('LegalHold', resource_type=ResourceType.MGMT_STORAGE)
     legal_hold = LegalHold(tags=tags, allow_protected_append_writes_all=allow_protected_append_writes_all)
     return client.set_legal_hold(resource_group_name, account_name, container_name, legal_hold)
 
 
-def clear_legal_hold(cmd, client, container_name, account_name, tags, allow_protected_append_writes_all, resource_group_name=None):
+def clear_legal_hold(cmd, client, container_name, account_name, tags, allow_protected_append_writes_all,
+                     resource_group_name=None):
     LegalHold = cmd.get_models('LegalHold', resource_type=ResourceType.MGMT_STORAGE)
     legal_hold = LegalHold(tags=tags, allow_protected_append_writes_all=allow_protected_append_writes_all)
     return client.clear_legal_hold(resource_group_name, account_name, container_name, legal_hold)
