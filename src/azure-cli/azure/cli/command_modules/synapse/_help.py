@@ -1986,7 +1986,7 @@ examples:
   - name: Create a spark job definition.
     text: |-
         az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/notebook.ipynb/test.json
+          --name testsjdname --file @path/test.json
 """
 
 helps['synapse spark-job-definition update'] = """
@@ -1996,7 +1996,7 @@ examples:
   - name: Update a spark job definition.
     text: |-
         az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/notebook.ipynb/test.json
+          --name testsjdname --file @path/test.json
 """
 
 helps['synapse spark-job-definition wait'] = """
