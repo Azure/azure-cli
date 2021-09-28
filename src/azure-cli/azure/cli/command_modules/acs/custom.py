@@ -2252,7 +2252,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                    'azure-cli will grant Network Contributor role to the '
                    'system assigned identity after the cluster is created, and '
                    'the role assignment will take some time to take effect, see '
-                   'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, '
+                   'https://docs.microsoft.com/azure/aks/use-managed-identity, '
                    'proceed to create cluster with system assigned identity?')
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
@@ -2270,9 +2270,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 logger.warning('Could not create a role assignment for subnet. '
                                'Are you an Owner on this subscription?')
 
-    from azure.cli.command_modules.acs.decorator import AKSCreateModels
+    from azure.cli.command_modules.acs.decorator import AKSModels
     # store all the models used by load balancer
-    lb_models = AKSCreateModels(cmd).lb_models
+    lb_models = AKSModels(cmd).lb_models
     load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
@@ -2678,8 +2678,9 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     # Check if KUBECONFIG environmental variable is set
     # If path is different than default then that means -f/--file is passed
     # in which case we ignore the KUBECONFIG variable
+    # KUBECONFIG can be colon separated. If we find that condition, use the first entry
     if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
-        path = os.environ["KUBECONFIG"]
+        path = os.environ["KUBECONFIG"].split(":")[0]
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
@@ -2966,9 +2967,9 @@ def aks_update(cmd, client, resource_group_name, name,
         )
 
     if update_lb_profile:
-        from azure.cli.command_modules.acs.decorator import AKSCreateModels
+        from azure.cli.command_modules.acs.decorator import AKSModels
         # store all the models used by load balancer
-        lb_models = AKSCreateModels(cmd).lb_models
+        lb_models = AKSModels(cmd).lb_models
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
             load_balancer_managed_outbound_ip_count,
             load_balancer_outbound_ips,

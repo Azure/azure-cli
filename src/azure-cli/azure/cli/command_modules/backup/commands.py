@@ -6,7 +6,7 @@
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_protection_containers_cf, \
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
-    job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_cf, \
+    job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_non_crr_cf, \
     item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
     protection_containers_cf, protection_intent_cf, backup_resource_encryption_config_cf  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._format import (
@@ -31,8 +31,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vault')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_vaults')
-        g.custom_command('backup-properties show', 'get_backup_properties', client_factory=backup_storage_configs_cf)
-        g.custom_command('backup-properties set', 'set_backup_properties', client_factory=backup_storage_configs_cf)
+        g.custom_command('backup-properties show', 'get_backup_properties', client_factory=backup_storage_configs_non_crr_cf)
+        g.custom_command('backup-properties set', 'set_backup_properties', client_factory=backup_storage_configs_non_crr_cf)
         g.custom_command('delete', 'delete_vault', confirmation=True)
         g.custom_command('identity assign', 'assign_identity')
         g.custom_command('identity remove', 'remove_identity')

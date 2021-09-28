@@ -8,7 +8,7 @@ import unittest
 
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest,
-                               record_only)
+                               record_only, KeyVaultPreparer)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -154,6 +154,38 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('identity', result)
         self.assertTrue(result['identity']['principalId'])
         self.assertTrue(result['identity']['tenantId'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_create_storage_account_with_public_network_access(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
+        result = self.cmd(cmd).get_output_in_json()
+
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] is None)
+
+        name = self.create_random_name(prefix='cli', length=24)
+        cmd = 'az storage account create -n {} -g {} --public-network-access Disabled'.format(name, resource_group)
+        result = self.cmd(cmd).get_output_in_json()
+
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_update_storage_account_with_public_network_access(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --public-network-access Enabled'.format(name, resource_group)
+        result = self.cmd(create_cmd).get_output_in_json()
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] == 'Enabled')
+
+        update_cmd = 'az storage account update -n {} -g {} --public-network-access Disabled'.format(name, resource_group)
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('publicNetworkAccess', result)
+        self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -330,7 +362,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         name3 = self.create_random_name(prefix='cli', length=24)
         name4 = self.create_random_name(prefix='cli', length=24)
         self.cmd('az storage account create -n {} -g {}'.format(name1, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', None)])
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
         self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_0'.format(name2, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
@@ -346,16 +378,16 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(name_prefix='tls')
     def test_storage_update_with_min_tls(self, storage_account, resource_group):
         self.cmd('az storage account show -n {} -g {}'.format(storage_account, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', None)])
-
-        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_1'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_1')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_2'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
+
+        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_routing')
@@ -697,13 +729,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
-    def test_customer_managed_key(self, resource_group, storage_account):
-        self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': self.create_random_name('clitest', 24)}
+    @KeyVaultPreparer(location='southcentralus')
+    def test_customer_managed_key(self, resource_group, storage_account, key_vault):
+        self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': key_vault}
 
-        self.kwargs['vid'] = self.cmd('az keyvault create -n {vt} -g {rg} '
-                                      '-otsv --query id').output.rstrip('\n')
-        self.kwargs['vtn'] = self.cmd('az keyvault show -n {vt} -g {rg} '
-                                      '-otsv --query properties.vaultUri').output.strip('\n')
+        keyvault_result = self.cmd('az keyvault show -n {vt} -g {rg}').get_output_in_json()
+        self.kwargs['vid'] = keyvault_result['id']
+        self.kwargs['vtn'] = keyvault_result['properties']['vaultUri']
+
         self.kwargs['ver'] = self.cmd("az keyvault key create -n testkey -p software --vault-name {vt} "
                                       "-otsv --query 'key.kid'").output.rsplit('/', 1)[1].rstrip('\n')
         self.kwargs['oid'] = self.cmd("az storage account update -n {sa} -g {rg} --assign-identity "
@@ -765,14 +798,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
 
     @ResourceGroupPreparer(location='eastus2euap')
-    def test_user_assigned_identity(self, resource_group):
+    @KeyVaultPreparer(location='eastus2euap')
+    def test_user_assigned_identity(self, resource_group, key_vault):
         self.kwargs = {
             'rg': resource_group,
             'sa1': self.create_random_name(prefix='sa1', length=24),
             'sa2': self.create_random_name(prefix='sa2', length=24),
             'sa3': self.create_random_name(prefix='sa3', length=24),
             'identity': self.create_random_name(prefix='id', length=24),
-            'vt': self.create_random_name('clitest', 24)
+            'vt': key_vault
         }
         # Prepare managed identity
         identity = self.cmd('az identity create -n {identity} -g {rg}').get_output_in_json()
@@ -780,7 +814,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs['oid'] = identity['principalId']
 
         # Prepare key vault
-        keyvault = self.cmd('az keyvault create -n {vt} -g {rg} ').get_output_in_json()
+        keyvault = self.cmd('az keyvault show -n {vt} -g {rg} ').get_output_in_json()
         self.kwargs['vid'] = keyvault['id']
         self.kwargs['vtn'] = keyvault['properties']['vaultUri']
 
@@ -2176,3 +2210,30 @@ class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest
 
         self.cmd('storage account blob-inventory-policy delete --account-name {sa} -g {rg} -y')
         self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}', expect_failure=True)
+
+
+class StorageAccountHNSMigrationScenarioTest(StorageScenarioMixin, ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_hns_migrate', location='eastus2')
+    @StorageAccountPreparer(location='eastus2', kind='StorageV2', key='sa1', parameter_name='storage_account1')
+    @StorageAccountPreparer(location='eastus2', kind='StorageV2', key='sa2', parameter_name='storage_account2')
+    def test_storage_account_start_hns_migration(self, resource_group, storage_account1, storage_account2):
+        # test migration validation
+        self.cmd('storage account hns-migration start --request-type validation -n {sa1} -g {rg}')
+        # test migration
+        self.cmd('storage account hns-migration start --request-type upgrade -n {sa1} -g {rg}')
+        # test aborting migration
+        self.cmd('storage account hns-migration start --request-type validation -n {sa2} -g {rg}')
+        self.cmd('storage account hns-migration start --request-type upgrade -n {sa2} -g {rg} --no-wait')
+        retry = 0
+        while True:
+            from azure.core.exceptions import HttpResponseError
+            try:
+                self.cmd('storage account hns-migration stop -n {sa2} -g {rg}')
+                break
+            except HttpResponseError as ex:
+                if retry > 5:
+                    raise ex
+                if ex.reason == 'Hns migration for the account: {} is not found.'.format(storage_account2):
+                    retry += 1
+                    time.sleep(30)

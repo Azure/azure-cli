@@ -384,7 +384,7 @@ def update_ag_frontend_port(instance, parent, item_name, port=None):
 
 def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,
                             frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
-                            firewall_policy=None, no_wait=False, host_names=None):
+                            ssl_profile=None, firewall_policy=None, no_wait=False, host_names=None):
     ApplicationGatewayHttpListener, SubResource = cmd.get_models('ApplicationGatewayHttpListener', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -404,13 +404,16 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
     if cmd.supported_api_version(min_api='2019-09-01'):
         new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
 
+    if cmd.supported_api_version(min_api='2020-06-01'):
+        new_listener.ssl_profile = SubResource(id=ssl_profile) if ssl_profile else None
+
     upsert_to_collection(ag, 'http_listeners', new_listener, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
-                            host_name=None, ssl_cert=None, firewall_policy=None, host_names=None):
+                            host_name=None, ssl_cert=None, ssl_profile=None, firewall_policy=None, host_names=None):
     SubResource = cmd.get_models('SubResource')
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(id=frontend_ip)
@@ -429,6 +432,10 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
     if cmd.supported_api_version(min_api='2019-09-01'):
         if firewall_policy is not None:
             instance.firewall_policy = SubResource(id=firewall_policy)
+
+    if cmd.supported_api_version(min_api='2020-06-01'):
+        if ssl_profile is not None:
+            instance.ssl_profile = SubResource(id=ssl_profile)
 
     if host_names is not None:
         instance.host_names = host_names or None
@@ -655,6 +662,22 @@ def add_trusted_client_certificate(cmd, resource_group_name, application_gateway
                        application_gateway_name, appgw)
 
 
+def update_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
+                                      client_cert_data, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    for cert in appgw.trusted_client_certificates:
+        if cert.name == client_cert_name:
+            cert.data = client_cert_data
+            break
+    else:
+        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
+
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
 def list_trusted_client_certificate(cmd, resource_group_name, application_gateway_name):
     ncf = network_client_factory(cmd.cli_ctx)
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -675,6 +698,21 @@ def remove_trusted_client_certificate(cmd, resource_group_name, application_gate
 
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
                        application_gateway_name, appgw)
+
+
+def show_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    instance = None
+    for cert in appgw.trusted_client_certificates:
+        if cert.name == client_cert_name:
+            instance = cert
+            break
+    else:
+        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
+
+    return instance
 
 
 def show_ag_backend_health(cmd, client, resource_group_name, application_gateway_name, expand=None,
@@ -759,6 +797,43 @@ def add_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_prof
                        application_gateway_name, appgw)
 
 
+def update_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
+                       policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
+                       trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    instance = None
+    for profile in appgw.ssl_profiles:
+        if profile.name == ssl_profile_name:
+            instance = profile
+            break
+    else:
+        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
+
+    if policy_name is not None:
+        instance.ssl_policy.policy_name = policy_name
+    if policy_type is not None:
+        instance.ssl_policy.policy_type = policy_type
+    if min_protocol_version is not None:
+        instance.ssl_policy.min_protocol_version = min_protocol_version
+    if cipher_suites is not None:
+        instance.ssl_policy.cipher_suites = cipher_suites
+    if disabled_ssl_protocols is not None:
+        instance.ssl_policy.disabled_ssl_protocols = disabled_ssl_protocols
+    if trusted_client_certificates is not None:
+        SubResource = cmd.get_models('SubResource')
+        instance.trusted_client_certificates = [SubResource(id=item) for item in trusted_client_certificates]
+    if client_auth_configuration is not None:
+        ApplicationGatewayClientAuthConfiguration = cmd.get_models('ApplicationGatewayClientAuthConfiguration')
+        instance.client_auth_configuration = ApplicationGatewayClientAuthConfiguration(
+            verify_client_cert_issuer_dn=(client_auth_configuration == 'True')
+        )
+
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
 def list_ssl_profile(cmd, resource_group_name, application_gateway_name):
     ncf = network_client_factory(cmd.cli_ctx)
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -779,6 +854,19 @@ def remove_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_p
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
                        application_gateway_name, appgw)
 
+
+def show_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    instance = None
+    for profile in appgw.ssl_profiles:
+        if profile.name == ssl_profile_name:
+            instance = profile
+            break
+    else:
+        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
+    return instance
 
 # endregion
 
@@ -5920,13 +6008,19 @@ def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_n
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, custom_ip_prefix_name, prefix)
 
 
-def update_custom_ip_prefix(instance, signed_message=None, authorization_message=None, tags=None):
+def update_custom_ip_prefix(instance,
+                            signed_message=None,
+                            authorization_message=None,
+                            tags=None,
+                            commissioned_state=None):
     if tags is not None:
         instance.tags = tags
     if signed_message is not None:
         instance.signed_message = signed_message
     if authorization_message is not None:
         instance.authorization_message = authorization_message
+    if commissioned_state is not None:
+        instance.commissioned_state = commissioned_state
     return instance
 # endregion
 
@@ -7558,7 +7652,7 @@ def list_service_aliases(cmd, location, resource_group_name=None):
 
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
-                        public_ip_address, location=None, subnet='AzureBastionSubnet'):
+                        public_ip_address, location=None, subnet='AzureBastionSubnet', tags=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -7571,7 +7665,8 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                                   public_ip_address=SubResource(id=public_ip_address))
 
     bastion_host = BastionHost(ip_configurations=[ip_configuration],
-                               location=location)
+                               location=location,
+                               tags=tags)
     return client.begin_create_or_update(resource_group_name=resource_group_name,
                                          bastion_host_name=bastion_host_name,
                                          parameters=bastion_host)

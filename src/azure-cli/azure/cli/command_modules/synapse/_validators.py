@@ -61,3 +61,22 @@ def validate_repository_type(namespace):
     if namespace.repository_type is None:
         logger.warning('Parameter --repository-type is missing, the following arguments are ignored: %s. Repository configuration will not work.',
                        ' ,'.join(repository_config_args))
+
+
+def add_progress_callback(cmd, namespace):
+    def _update_progress(current, total):
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+

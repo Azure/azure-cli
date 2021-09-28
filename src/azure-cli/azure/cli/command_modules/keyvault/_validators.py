@@ -493,14 +493,14 @@ def _show_vault_only_deprecate_message(ns):
                        'Warning! If you have soft-delete protection enabled on this key vault, you will '
                        'not be able to reuse this key vault name until the key vault has been purged from '
                        'the soft deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
+                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
         'keyvault key delete':
             Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
                        'Warning! If you have soft-delete protection enabled on this key vault, this key '
                        'will be moved to the soft deleted state. You will not be able to create a key with '
                        'the same name within this key vault until the key has been purged from the '
                        'soft-deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview')
+                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview')
     }
     cmds = ['keyvault delete', 'keyvault key delete']
     for cmd in cmds:
@@ -544,6 +544,37 @@ def validate_key_id(entity_type):
             setattr(ns, 'vault_base_url', ident.vault)
             if ident.version and hasattr(ns, pure_entity_type + '_version'):
                 setattr(ns, pure_entity_type + '_version', ident.version)
+        elif not (name and vault):
+            raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
+                           '--name/-n NAME [--version VERSION]')
+
+    return _validate
+
+
+def validate_keyvault_resource_id(entity_type):
+    def _validate(ns):
+        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+
+        pure_entity_type = entity_type.replace('deleted', '')
+        name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
+        vault = getattr(ns, 'vault_base_url', None)
+        if not vault:
+            vault = getattr(ns, 'hsm_name', None)
+        identifier = getattr(ns, 'identifier', None)
+
+        if identifier:
+            vault_base_url = getattr(ns, 'vault_base_url', None)
+            hsm_name = getattr(ns, 'hsm_name', None)
+            if vault_base_url:
+                raise CLIError('--vault-name and --id are mutually exclusive.')
+            if hsm_name:
+                raise CLIError('--hsm-name and --id are mutually exclusive.')
+
+            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            setattr(ns, 'name', ident.name)
+            setattr(ns, 'vault_base_url', ident.vault)
+            if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
+                setattr(ns, 'version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
                            '--name/-n NAME [--version VERSION]')

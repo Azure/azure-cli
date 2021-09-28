@@ -213,6 +213,8 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
 
     assert hsm_name
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    logger.warning('This command will soft delete the resource, and you will still be billed until it is purged. '
+                   'For more information, go to https://aka.ms/doc/KeyVaultMHSMSoftDelete')
     return sdk_no_wait(
         no_wait, hsm_client.begin_delete,
         resource_group_name=resource_group_name,
@@ -1111,19 +1113,17 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
 
 
 # region KeyVault Key
-def create_key(cmd, client, key_name=None, vault_base_url=None,
-               hsm_name=None, protection=None, identifier=None,  # pylint: disable=unused-argument
+def create_key(client, key_name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, kty=None, curve=None):
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
 
-    return client.create_key(vault_base_url=vault_base_url,
-                             key_name=key_name,
-                             kty=kty,
-                             key_size=key_size,
-                             key_ops=key_ops,
-                             key_attributes=key_attrs,
+    return client.create_key(name=key_name,
+                             key_type=kty,
+                             size=key_size,
+                             key_operations=key_ops,
+                             enabled=not disabled,
+                             not_before=not_before,
+                             expires_on=expires,
                              tags=tags,
                              curve=curve)
 
@@ -1231,17 +1231,13 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disable=too-many-locals
-               hsm_name=None, identifier=None,  # pylint: disable=unused-argument
+def import_key(cmd, client, key_name=None,  # pylint: disable=too-many-locals
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
                byok_string=None, kty='RSA', curve=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
-
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    JsonWebKey = cmd.loader.get_sdk('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
 
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
@@ -1282,7 +1278,10 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         key_obj.t = byok_data
         key_obj.crv = curve
 
-    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+    return client.import_key(name=key_name, key=key_obj,
+                             hardware_protected=(protection == 'hsm'),
+                             enabled=not disabled, tags=tags,
+                             not_before=not_before, expires_on=expires)
 
 
 def _bytes_to_int(b):
