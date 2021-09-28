@@ -1060,7 +1060,7 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(creds[0], 'Bearer')
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
-        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
 
         # subscription should be set
         self.assertEqual(sub, self.subscription1.subscription_id)
@@ -1071,7 +1071,7 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(creds[0], 'Bearer')
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
-        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
 
         # subscription shouldn't be set
         self.assertIsNone(sub)
@@ -1095,7 +1095,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
         # the last in the tuple is the whole token entry which has several fields
-        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
 
         # subscription should be set
         self.assertEqual(sub, self.subscription1.subscription_id)
@@ -1106,7 +1106,7 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
-        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
 
         # subscription shouldn't be set
         self.assertIsNone(sub)

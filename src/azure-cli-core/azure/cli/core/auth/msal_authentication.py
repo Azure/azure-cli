@@ -86,4 +86,4 @@ def _build_sdk_access_token(token_entry):
     import time
     request_time = int(time.time())
 
-    return AccessToken(token_entry["access_token"], request_time + int(token_entry["expires_in"]))
+    return AccessToken(token_entry["access_token"], request_time + token_entry["expires_in"])

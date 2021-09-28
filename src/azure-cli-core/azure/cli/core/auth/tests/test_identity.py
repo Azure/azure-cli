@@ -77,14 +77,14 @@ class TestMsalSecretStore(unittest.TestCase):
         test_sp = {
             'client_id': 'myapp',
             'tenant_id': 'mytenant',
-            'secret': 'Secret'
+            'secret': 'test_secret'
         }
 
         secret_store = ServicePrincipalStore(None, None)
         store._content = [test_sp]
 
         entry = secret_store.load_credential("myapp", "mytenant")
-        self.assertEqual(entry['secret'], "Secret")
+        self.assertEqual(entry['secret'], "test_secret")
 
     @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
     def test_save_credential(self, load_secret_store_mock):
@@ -94,7 +94,7 @@ class TestMsalSecretStore(unittest.TestCase):
         test_sp = {
             'client_id': 'myapp',
             'tenant_id': 'mytenant',
-            'secret': 'Secret'
+            'secret': 'test_secret'
         }
 
         secret_store = ServicePrincipalStore(None, None)
@@ -110,12 +110,12 @@ class TestMsalSecretStore(unittest.TestCase):
         test_sp = {
             "client_id": "myapp",
             "tenant_id": "mytenant",
-            "secret": "Secret"
+            "secret": "test_secret"
         }
         test_sp2 = {
             "client_id": "myapp2",
             "tenant_id": "mytenant2",
-            "secret": "Secret2"
+            "secret": "test_secret2"
         }
 
         store._content = [test_sp]
@@ -131,12 +131,12 @@ class TestMsalSecretStore(unittest.TestCase):
         test_sp = {
             "client_id": "myapp",
             "tenant_id": "mytenant",
-            "accessToken": "Secret"
+            "accessToken": "test_secret"
         }
 
         store._content = [test_sp]
         new_creds = test_sp.copy()
-        new_creds['accessToken'] = 'Secret2'
+        new_creds['accessToken'] = 'test_secret'
 
         secret_store = ServicePrincipalStore(None, None)
         secret_store.save_credential(new_creds)
@@ -150,7 +150,7 @@ class TestMsalSecretStore(unittest.TestCase):
         test_sp = {
             "client_id": "myapp",
             "tenant_id": "mytenant",
-            "accessToken": "Secret"
+            "accessToken": "test_secret"
         }
 
         store._content = [test_sp]

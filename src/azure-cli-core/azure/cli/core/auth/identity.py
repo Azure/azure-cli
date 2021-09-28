@@ -109,9 +109,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         result = self.msal_app.acquire_token_interactive(
             scopes, prompt='select_account', success_template=success_template, error_template=error_template, **kwargs)
-
-        if not result or 'error' in result:
-            aad_error_handler(result)
         return check_result(result)
 
     def login_with_device_code(self, scopes=None, **kwargs):

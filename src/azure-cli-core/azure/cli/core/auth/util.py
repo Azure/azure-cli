@@ -121,15 +121,6 @@ def check_result(result, **kwargs):
     return None
 
 
-def can_launch_browser():
-    import webbrowser
-    try:
-        webbrowser.get()
-        return True
-    except webbrowser.Error:
-        return False
-
-
 def decode_access_token(access_token):
     # Decode the access token. We can do the same with https://jwt.ms
     from msal.oauth2cli.oidc import decode_part

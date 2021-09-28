@@ -11,10 +11,10 @@ from enum import Enum
 
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.auth.identity import Identity, AZURE_CLI_CLIENT_ID
-from azure.cli.core.auth.util import resource_to_scopes, can_launch_browser
+from azure.cli.core.auth.util import resource_to_scopes
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.util import in_cloud_console
+from azure.cli.core.util import in_cloud_console, can_launch_browser
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -162,16 +162,14 @@ class Profile:
                 logger.info('No web browser is available. Fall back to device code.')
                 use_device_code = True
 
-            if not use_device_code:
-                user_identity = identity.login_with_auth_code(scopes=scopes, **kwargs)
-            else:
+            if use_device_code:
                 user_identity = identity.login_with_device_code(scopes=scopes, **kwargs)
+            else:
+                user_identity = identity.login_with_auth_code(scopes=scopes, **kwargs)
         else:
             if not is_service_principal:
                 user_identity = identity.login_with_username_password(username, password, scopes=scopes, **kwargs)
             else:
-                if not tenant:
-                    raise CLIError('Please supply tenant using "--tenant"')
                 identity.login_with_service_principal(username, password, scopes=scopes)
 
         if user_identity:
@@ -191,18 +189,13 @@ class Profile:
             subscriptions = subscription_finder.find_using_common_tenant(username, credential)
 
         if not subscriptions and not allow_no_subscriptions:
-            if username:
-                msg = "No subscriptions found for {}.".format(username)
-            else:
-                # Don't show username if bare 'az login' is used
-                msg = "No subscriptions found."
-            raise CLIError(msg)
+            raise CLIError("No subscriptions found for {}.".format(username))
 
         if allow_no_subscriptions:
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             profile = Profile(cli_ctx=self.cli_ctx)
-            tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
+            tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)
             subscriptions.extend(tenant_accounts)
             if not subscriptions:
                 return []
@@ -400,9 +393,13 @@ class Profile:
             credential = self._create_credential(account, tenant)
             token = credential.get_token(*scopes)
 
+            import datetime
+            expiresOn = datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+
             token_entry = {
                 'accessToken': token.token,
-                'expiresOn': token.expires_on
+                'expires_on': token.expires_on,
+                'expiresOn': expiresOn
             }
 
             # (tokenType, accessToken, tokenEntry)
