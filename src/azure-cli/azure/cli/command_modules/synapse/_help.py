@@ -2024,6 +2024,7 @@ examples:
 """
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 helps['synapse spark-job-definition show'] = """
 type: command
 short-summary: Get a spark job definition.
@@ -2037,6 +2038,18 @@ examples:
 
 =======
 >>>>>>> a46060b12 (refine)
+=======
+helps['synapse spark-job-definition update'] = """
+type: command
+short-summary: Update a spark job definition.
+examples:
+  - name: Update a spark job definition.
+    text: |-
+        az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
+          --name testsjdname --file @path/notebook.ipynb/test.json
+"""
+
+>>>>>>> ecba9c9b0 (add spark job definition update cmd)
 helps['synapse spark-job-definition wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a spark job definition is met.
