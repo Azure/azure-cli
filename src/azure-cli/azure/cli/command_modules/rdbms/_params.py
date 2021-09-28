@@ -279,11 +279,17 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.'
         )
 
-        backup_retention_arg_type = CLIArgumentType(
+        pg_backup_retention_arg_type = CLIArgumentType(
             type=int,
             options_list=['--backup-retention'],
             help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
             validator=retention_validator
+        )
+
+        mysql_backup_retention_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--backup-retention'],
+            help='The number of days a backup is retained. Range of 1 to 35 days. Default is 7 days.',
         )
 
         version_arg_type = CLIArgumentType(
@@ -366,11 +372,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         mysql_high_availability_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled']),
+            arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled', 'Enabled']),
             options_list=['--high-availability'],
             help='Enable (ZoneRedundant or SameZone) or disable high availability feature. '
                  'Default value is Disabled. High availability can only be set during flexible server create time. '
-                 'Allowed values: ZoneRedundant, SameZone, Disabled'
         )
 
         private_dns_zone_arguments_arg_type = CLIArgumentType(
@@ -386,6 +391,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--restore-time'],
             default=get_current_time(),
             help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
+                 'The default value is set to current time.'
         )
 
         source_server_arg_type = CLIArgumentType(
@@ -405,6 +411,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
                 c.argument('version', default='12', arg_type=version_arg_type)
                 c.argument('high_availability', arg_type=pg_high_availability_arg_type, default="Disabled")
+                c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -413,10 +420,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
                 c.argument('high_availability', arg_type=mysql_high_availability_arg_type, default="Disabled")
+                c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
-            c.argument('backup_retention', default=7, arg_type=backup_retention_arg_type)
             c.argument('public_access', arg_type=public_access_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
             c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
@@ -444,7 +451,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('yes', arg_type=yes_arg_type)
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
-                           help='Determines the public access. Allowed Values: Enabled, Disabled',)
+                           help='Determines the public access. ')
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
@@ -454,7 +461,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('tier', arg_type=tier_arg_type)
             c.argument('sku_name', arg_type=sku_name_arg_type)
             c.argument('storage_gb', arg_type=storage_gb_arg_type)
-            c.argument('backup_retention', arg_type=backup_retention_arg_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
             if command_group == 'mysql':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
@@ -462,8 +468,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='The replication role of the server.')
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('high_availability', arg_type=mysql_high_availability_arg_type)
+                c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
             elif command_group == 'postgres':
                 c.argument('high_availability', arg_type=pg_high_availability_arg_type)
+                c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
 
         with self.argument_context('{} flexible-server restart'.format(command_group)) as c:
             if command_group == 'postgres':
