@@ -311,7 +311,8 @@ def unregister_container(cmd, client, vault_name, resource_group_name, container
         return custom_wl.unregister_wl_container(cmd, client, vault_name, resource_group_name, container_name)
     if container_type.lower() == "mab":
         result = client.unregister(vault_name, resource_group_name, fabric_name, container_name, raw=True)
-        return custom_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
+        return custom_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name,
+                                                    container_name)
     return None
 
 
