@@ -4698,6 +4698,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "assign_kubelet_identity": None,
                 "enable_ultra_ssd": False,
                 "edge_zone": None,
+                "disable_local_accounts": False,
                 "no_wait": False,
                 "yes": False,
                 "enable_azure_rbac": False,
@@ -4753,6 +4754,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             linux_profile=linux_profile_1,
             network_profile=network_profile_1,
             identity=identity_1,
+            disable_local_accounts=False,
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -4779,6 +4781,20 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             side_effect=err,
         ):
             dec_1.create_mc(mc_1)
+
+    def test_get_disable_local_accounts(self):
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": False},
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_disable_local_accounts(), False)
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": True},
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
 
 
 class AKSUpdateDecoratorTestCase(unittest.TestCase):
