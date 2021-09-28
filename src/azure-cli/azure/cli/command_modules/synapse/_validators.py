@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from knack.util import CLIError
+from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id
 
 
@@ -51,3 +52,12 @@ def validate_audit_policy_arguments(namespace):
          namespace.retention_days])
     if not namespace.state and not blob_storage_arguments_provided:
         raise CLIError('Either state or blob storage arguments are missing')
+
+
+def validate_repository_type(namespace):
+    logger = get_logger(__name__)
+    repository_config_args = ['--host-name', '--account-name', '--collaboration-branch', '--repository-name', '--root-folder'
+                              '--project-name', '--tenant-id']
+    if namespace.repository_type is None:
+        logger.warning('Parameter --repository-type is missing, the following arguments are ignored: %s. Repository configuration will not work.',
+                       ' ,'.join(repository_config_args))
