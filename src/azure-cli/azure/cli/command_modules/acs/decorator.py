@@ -3357,6 +3357,17 @@ class AKSContext:
         # this parameter does not need validation
         return edge_zone
 
+    def get_disable_local_accounts(self) -> bool:
+        """Obtain the value of disable_local_accounts.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_local_accounts = self.raw_param.get("disable_local_accounts")
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return disable_local_accounts
+
     def get_client_id_from_identity_or_sp_profile(self) -> str:
         """Helper function to obtain the value of client_id from identity_profile or service_principal_profile.
 
@@ -3421,7 +3432,7 @@ class AKSCreateDecorator:
         :return: the ManagedCluster object
         """
         # Initialize a ManagedCluster object with mandatory parameter location and optional parameters tags, dns_prefix,
-        # kubernetes_version, disable_rbac and node_osdisk_diskencryptionset_id.
+        # kubernetes_version, disable_rbac, node_osdisk_diskencryptionset_id, disable_local_accounts.
         mc = self.models.ManagedCluster(
             location=self.context.get_location(),
             tags=self.context.get_tags(),
@@ -3429,6 +3440,7 @@ class AKSCreateDecorator:
             kubernetes_version=self.context.get_kubernetes_version(),
             enable_rbac=not self.context.get_disable_rbac(),
             disk_encryption_set_id=self.context.get_node_osdisk_diskencryptionset_id(),
+            disable_local_accounts=self.context.get_disable_local_accounts(),
         )
 
         # attach mc to AKSContext
