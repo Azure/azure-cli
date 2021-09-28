@@ -1869,3 +1869,19 @@ def validate_policy(namespace):
     if namespace.id is not None:
         logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
                        "policy.")
+
+
+def validate_allow_protected_append_writes_all(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if namespace.allow_protected_append_writes_all and namespace.allow_protected_append_writes:
+        raise InvalidArgumentValueError("usage error: The 'allow-protected-append-writes' "
+                                        "and 'allow-protected-append-writes-all' "
+                                        "properties are mutually exclusive. 'allow-protected-append-writes-all' allows "
+                                        "new blocks to be written to both Append and Block Blobs, while "
+                                        "'allow-protected-append-writes' allows new blocks to be written to "
+                                        "Append Blobs only.")
+
+
+def validate_blob_name_for_upload(namespace):
+    if not namespace.blob_name:
+        namespace.blob_name = os.path.basename(namespace.file_path)

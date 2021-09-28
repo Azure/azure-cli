@@ -54,6 +54,7 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     NoTTYError,
     RequiredArgumentMissingError,
+    UnknownError,
 )
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -114,6 +115,18 @@ def safe_lower(obj: Any) -> Any:
     if isinstance(obj, str):
         return obj.lower()
     return obj
+
+
+def check_is_msi_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether managed identity is enabled.
+
+    :return: bool
+    """
+    if mc and mc.identity and mc.identity.type is not None:
+        identity_type = mc.identity.type.casefold()
+        if identity_type in ("systemassigned", "userassigned"):
+            return True
+    return False
 
 
 def validate_counts_in_autoscaler(
@@ -1580,7 +1593,7 @@ class AKSContext:
         # try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
         if self.mc and self.mc.identity:
-            enable_managed_identity = self.mc.identity.type is not None
+            enable_managed_identity = check_is_msi_cluster(self.mc)
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
@@ -1769,18 +1782,18 @@ class AKSContext:
 
         Note: attach_acr will not be decorated into the `mc` object.
 
-        This function will verify the parameter by default. When attach_acr is assigned, if both enable_managed_identity
-        and no_wait are assigned, a MutuallyExclusiveArgumentError will be raised; if service_principal is not assigned,
-        raise a RequiredArgumentMissingError.
+        This function will verify the parameter by default in create mode. When attach_acr is assigned, if both
+        enable_managed_identity and no_wait are assigned, a MutuallyExclusiveArgumentError will be raised; if
+        service_principal is not assigned, raise a RequiredArgumentMissingError.
 
-        :return: string
+        :return: string or None
         """
         # read the original value passed by the command
         attach_acr = self.raw_param.get("attach_acr")
 
         # this parameter does not need dynamic completion
         # validation
-        if attach_acr:
+        if self.decorator_mode == DecoratorMode.CREATE and attach_acr:
             if self._get_enable_managed_identity(enable_validation=False) and self.get_no_wait():
                 raise MutuallyExclusiveArgumentError(
                     "When --attach-acr and --enable-managed-identity are both specified, "
@@ -1794,6 +1807,20 @@ class AKSContext:
                     "No service principal provided to create the acrpull role assignment for acr."
                 )
         return attach_acr
+
+    def get_detach_acr(self) -> Union[str, None]:
+        """Obtain the value of detach_acr.
+
+        Note: detach_acr will not be decorated into the `mc` object.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        detach_acr = self.raw_param.get("detach_acr")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return detach_acr
 
     # pylint: disable=unused-argument
     def _get_load_balancer_sku(
@@ -3341,6 +3368,32 @@ class AKSContext:
         # this parameter does not need validation
         return disable_local_accounts
 
+    def get_client_id_from_identity_or_sp_profile(self) -> str:
+        """Helper function to obtain the value of client_id from identity_profile or service_principal_profile.
+
+        Note: This is not a parameter of aks_update, and it will not be decorated into the `mc` object.
+
+        If client_id cannot be obtained, raise an UnknownError.
+
+        :return: string
+        """
+        client_id = None
+        if check_is_msi_cluster(self.mc):
+            if self.mc.identity_profile is None or self.mc.identity_profile["kubeletidentity"] is None:
+                raise UnknownError(
+                    "Unexpected error getting kubelet's identity for the cluster. "
+                    "Please do not set --attach-acr or --detach-acr. "
+                    "You can manually grant or revoke permission to the identity named "
+                    "<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR."
+                )
+            client_id = self.mc.identity_profile["kubeletidentity"].client_id
+        elif self.mc and self.mc.service_principal_profile is not None:
+            client_id = self.mc.service_principal_profile.client_id
+
+        if not client_id:
+            raise UnknownError('Cannot get the AKS cluster\'s service principal.')
+        return client_id
+
 
 class AKSCreateDecorator:
     def __init__(
@@ -4250,6 +4303,37 @@ class AKSUpdateDecorator:
 
         return mc
 
+    def process_attach_detach_acr(self, mc: ManagedCluster) -> None:
+        """Attach or detach acr for the cluster.
+
+        The function "_ensure_aks_acr" will be called to create or delete an AcrPull role assignment for the acr, which
+        internally used AuthorizationManagementClient to send the request.
+
+        :return: None
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        subscription_id = self.context.get_subscription_id()
+        client_id = self.context.get_client_id_from_identity_or_sp_profile()
+        attach_acr = self.context.get_attach_acr()
+        detach_acr = self.context.get_detach_acr()
+
+        if attach_acr:
+            _ensure_aks_acr(self.cmd,
+                            client_id=client_id,
+                            acr_name_or_id=attach_acr,
+                            subscription_id=subscription_id)
+
+        if detach_acr:
+            _ensure_aks_acr(self.cmd,
+                            client_id=client_id,
+                            acr_name_or_id=detach_acr,
+                            subscription_id=subscription_id,
+                            detach=True)
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -4267,6 +4351,8 @@ class AKSUpdateDecorator:
         mc = self.fetch_mc()
         # update auto scaler profile
         mc = self.update_auto_scaler_profile(mc)
+        # attach or detach acr (add or delete role assignment for acr)
+        self.process_attach_detach_acr(mc)
 
         return mc
 

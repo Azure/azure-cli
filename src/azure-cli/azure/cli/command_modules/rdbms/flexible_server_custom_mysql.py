@@ -20,7 +20,7 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import mysql_arguments_validator, validate_replica_burstable_server
+from .validators import mysql_arguments_validator, validate_mysql_replica
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -50,7 +50,11 @@ def flexible_server_create(cmd, client,
         cf_availability=cf_mysql_check_resource_availability, cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations, logging_name='MySQL', command_group='mysql', server_client=client,
         location=location)
 
+    # Process parameters
     server_name = server_name.lower()
+    if high_availability and high_availability.lower() == 'enabled':
+        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
+        high_availability = 'ZoneRedundant'
 
     mysql_arguments_validator(db_context,
                               server_name=server_name,
@@ -202,6 +206,9 @@ def flexible_server_restore(cmd, client,
                                                                                   vnet_address_prefix=vnet_address_prefix,
                                                                                   subnet_address_prefix=subnet_address_prefix,
                                                                                   yes=yes)
+        else:
+            parameters.network = source_server_object.network
+
     except Exception as e:
         raise ResourceNotFoundError(e)
 
@@ -228,6 +235,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability, logging_name='MySQL', command_group='mysql', server_client=client,
         location=instance.location)
+
+    if high_availability and high_availability.lower() == 'enabled':
+        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
+        high_availability = 'ZoneRedundant'
 
     mysql_arguments_validator(db_context,
                               location=location,
@@ -424,7 +435,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     source_server_id_parts = parse_resource_id(source_server_id)
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
-        validate_replica_burstable_server(source_server_object)
+        validate_mysql_replica(cmd, source_server_object)
     except Exception as e:
         raise ResourceNotFoundError(e)
 
