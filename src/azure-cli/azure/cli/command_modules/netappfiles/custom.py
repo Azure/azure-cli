@@ -226,7 +226,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 # -- volume update
 def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=False,
                  backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None,
-                 is_default_quota_enabled=None, default_user_quota_in_ki_bs=None, default_group_quota_in_ki_bs=None):
+                 is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None):
     data_protection = None
     backup = None
     snapshot = None
@@ -244,9 +244,9 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
         service_level=service_level,
         data_protection=data_protection,
         tags=tags,
-        is_default_quota_enabled=is_default_quota_enabled,
-        default_user_quota_in_ki_bs=default_user_quota_in_ki_bs,
-        default_group_quota_in_ki_bs=default_group_quota_in_ki_bs)
+        is_default_quota_enabled=is_def_quota_enabled,
+        default_user_quota_in_ki_bs=default_user_quota,
+        default_group_quota_in_ki_bs=default_group_quota)
     if throughput_mibps is not None:
         params.throughput_mibps = throughput_mibps
     _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
