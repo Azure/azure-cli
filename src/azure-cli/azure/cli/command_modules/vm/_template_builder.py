@@ -734,25 +734,24 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
                 'name': backend_pool_name
             }
         ],
-        'inboundNatPools': [
-            {
-                'name': nat_pool_name,
-                'properties': {
-                    'frontendIPConfiguration': {
-                        'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(
-                            lb_id, frontend_ip_name)
-                    },
-                    'protocol': 'tcp',
-                    'frontendPortRangeStart': '50000',
-                    # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
-                    'frontendPortRangeEnd': str(max(50119,
-                                                    49999 + instance_count * (1 if disable_overprovision else 2))),
-                    'backendPort': backend_port
-                }
-            }
-        ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
+    if nat_pool_name:
+        lb_properties['inboundNatPools'] = [{
+            'name': nat_pool_name,
+            'properties': {
+                'frontendIPConfiguration': {
+                    'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(
+                        lb_id, frontend_ip_name)
+                },
+                'protocol': 'tcp',
+                'frontendPortRangeStart': '50000',
+                # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
+                'frontendPortRangeEnd': str(max(50119, 49999 + instance_count * (1 if disable_overprovision else 2))),
+                'backendPort': backend_port
+            }
+        }]
+
     lb = {
         'type': 'Microsoft.Network/loadBalancers',
         'name': name,

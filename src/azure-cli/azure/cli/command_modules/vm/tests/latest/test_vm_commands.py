@@ -5369,6 +5369,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('platformFaultDomain', 0)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='eastus2euap')
     @VirtualNetworkPreparer(location='eastus2euap', parameter_name='virtual_network')
     def test_vmss_complex_orchestration_mode(self, resource_group, virtual_network):
@@ -5501,6 +5502,26 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_quick_create_flexible_vmss_', location='eastus2euap')
+    def test_quick_create_flexible_vmss(self, resource_group):
+
+        self.kwargs.update({
+            'vmss': 'vmsslongnametest',
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntults --orchestration-mode flexible')
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('sku.capacity', 2),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('sku.tier', "Standard"),
+            self.check('singlePlacementGroup', False),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', self.kwargs['vmss'][:8]),
         ])
 
 
