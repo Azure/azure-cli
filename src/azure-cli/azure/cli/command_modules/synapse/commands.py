@@ -526,6 +526,7 @@ def load_command_table(self, _):
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         g.custom_command('update', 'create_or_update_spark_job_definition', supports_no_wait=True)
 
 =======
@@ -536,5 +537,9 @@ def load_command_table(self, _):
 =======
 
 >>>>>>> 1412e1627 (empty line)
+=======
+        g.custom_command('update', 'create_or_update_spark_job_definition', supports_no_wait=True)
+
+>>>>>>> ecba9c9b0 (add spark job definition update cmd)
     with self.command_group('synapse', is_preview=True):
         pass

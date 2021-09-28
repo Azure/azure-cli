@@ -1797,6 +1797,9 @@ class SynapseScenarioTests(ScenarioTest):
             ])
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ecba9c9b0 (add spark job definition update cmd)
         # Update a spark job definition
         self.cmd(
             'az synapse spark-job-definition update --workspace-name {workspace} --name {name} --file @"{file}" ',
@@ -1804,8 +1807,11 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', self.kwargs['name'])
             ])
 
+<<<<<<< HEAD
 =======
 >>>>>>> 93fc2591d (add cmd for spark job definition)
+=======
+>>>>>>> ecba9c9b0 (add spark job definition update cmd)
         # List spark job definitions
         self.cmd(
             'az synapse spark-job-definition list --workspace-name {workspace}',
