@@ -10,30 +10,11 @@ from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineReso
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
                                             NotebookResource, SparkJobDefinition)
 from azure.cli.core.util import sdk_no_wait, CLIError
+from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
                                cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool,
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-                               cf_synapse_library)
-=======
-                               cf_synapse_spark_job_definition)
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
                                cf_synapse_spark_job_definition, cf_synapse_library)
->>>>>>> 7f1776b4b (refine code)
-=======
-                               cf_synapse_spark_job_definition)
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
-                               cf_synapse_spark_job_definition, cf_synapse_library)
->>>>>>> 7f1776b4b (refine code)
-=======
-                               cf_synapse_spark_job_definition, cf_synapse_library)
->>>>>>> 2861d1432 (refine)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
@@ -195,6 +176,11 @@ def stop_trigger(cmd, workspace_name, trigger_name, no_wait=False):
 def rerun_trigger(cmd, workspace_name, trigger_name, run_id):
     client = cf_synapse_trigger_run(cmd.cli_ctx, workspace_name)
     return client.rerun_trigger_instance(trigger_name, run_id)
+
+
+def cancel_trigger(cmd, workspace_name, trigger_name, run_id):
+    client = cf_synapse_trigger_run(cmd.cli_ctx, workspace_name)
+    return client.cancel_trigger_instance(trigger_name, run_id)
 
 
 def query_trigger_runs_by_workspace(cmd, workspace_name, last_updated_after, last_updated_before,
@@ -367,9 +353,6 @@ def delete_notebook(cmd, workspace_name, notebook_name, no_wait=False):
     return sdk_no_wait(no_wait, client.begin_delete_notebook, notebook_name, polling=True)
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Workspace package
 def list_workspace_package(cmd, workspace_name):
     client = cf_synapse_library(cmd.cli_ctx, workspace_name)
@@ -454,11 +437,8 @@ def test_workspace_package(client, package_name):
 def delete_workspace_package(cmd, workspace_name, package_name, no_wait=False):
     client = cf_synapse_library(cmd.cli_ctx, workspace_name)
     return sdk_no_wait(no_wait, client.begin_delete, package_name)
-=======
-=======
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
->>>>>>> 2861d1432 (refine)
+
+
 # Spark job definition
 def list_spark_job_definition(cmd, workspace_name):
     client = cf_synapse_spark_job_definition(cmd.cli_ctx, workspace_name)
@@ -481,10 +461,3 @@ def create_or_update_spark_job_definition(cmd, workspace_name, spark_job_definit
     properties = SparkJobDefinition.from_dict(definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_spark_job_definition,
                        spark_job_definition_name, properties, polling=True)
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
->>>>>>> 2861d1432 (refine)

@@ -1971,21 +1971,9 @@ examples:
 
 helps['synapse spark-job-definition delete'] = """
 type: command
-<<<<<<< HEAD
-<<<<<<< HEAD
 short-summary: Delete a spark job definition.
 examples:
   - name: Delete a spark job definition.
-=======
-short-summary: delete a spark job definition.
-examples:
-  - name: delete a spark job definition.
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
-short-summary: Delete a spark job definition.
-examples:
-  - name: Delete a spark job definition.
->>>>>>> df776fea4 (help)
     text: |-
         az synapse spark-job-definition delete --workspace-name testsynapseworkspace \\
           --name testsjdname
@@ -1993,8 +1981,6 @@ examples:
 
 helps['synapse spark-job-definition create'] = """
 type: command
-<<<<<<< HEAD
-<<<<<<< HEAD
 short-summary: Create a spark job definition.
 examples:
   - name: Create a spark job definition.
@@ -2011,45 +1997,8 @@ examples:
     text: |-
         az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
           --name testsjdname --file @path/test.json
-=======
-short-summary: create a spark job definition.
-=======
-short-summary: Create a spark job definition.
->>>>>>> df776fea4 (help)
-examples:
-  - name: Create a spark job definition.
-    text: |-
-        az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/test.json
 """
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-helps['synapse spark-job-definition show'] = """
-type: command
-short-summary: Get a spark job definition.
-examples:
-  - name: Get a spark job definition.
-    text: |-
-        az synapse spark-job-definition show --workspace-name testsynapseworkspace \\
-          --name testsjdname
->>>>>>> 93fc2591d (add cmd for spark job definition)
-"""
-
-=======
->>>>>>> a46060b12 (refine)
-=======
-helps['synapse spark-job-definition update'] = """
-type: command
-short-summary: Update a spark job definition.
-examples:
-  - name: Update a spark job definition.
-    text: |-
-        az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/test.json
-"""
-
->>>>>>> ecba9c9b0 (add spark job definition update cmd)
 helps['synapse spark-job-definition wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a spark job definition is met.

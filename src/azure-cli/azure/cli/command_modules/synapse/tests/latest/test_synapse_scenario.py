@@ -1723,65 +1723,18 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
-<<<<<<< HEAD
-<<<<<<< HEAD
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_job_definition(self):
         self.kwargs.update({
+            'workspace': 'testsynapseworkspacepe',
             'name': 'SparkAutoCreate1',
-            'spark-pool': 'testpool',
-=======
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 10320cdf2 (refine)
-
-    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
-    def test_spark_job_definition(self):
-        self.kwargs.update({
-            'name': 'SparkAutoCreate1',
-<<<<<<< HEAD
             'spark-pool': 'testzes0730',
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
-            'spark-pool': 'testpool',
->>>>>>> 10320cdf2 (refine)
             'spark-version': '2.4',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
         })
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 10320cdf2 (refine)
-        # create a workspace
-        self._create_workspace()
-
-        # create firewall rule
-        self.cmd(
-            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
-            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
-                self.check('provisioningState', 'Succeeded')
-            ]
-        )
-
-        # create spark pool
-        self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
-                 ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium',
-                 checks=[
-                     self.check('name', self.kwargs['spark-pool']),
-                     self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
-                     self.check('provisioningState', 'Succeeded')
-                 ]).get_output_in_json()
-
-<<<<<<< HEAD
-=======
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
->>>>>>> 10320cdf2 (refine)
         # create a spark job definition
         self.cmd(
             'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" ',
@@ -1796,22 +1749,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', self.kwargs['name'])
             ])
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ecba9c9b0 (add spark job definition update cmd)
-        # Update a spark job definition
-        self.cmd(
-            'az synapse spark-job-definition update --workspace-name {workspace} --name {name} --file @"{file}" ',
-            checks=[
-                self.check('name', self.kwargs['name'])
-            ])
-
-<<<<<<< HEAD
-=======
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
->>>>>>> ecba9c9b0 (add spark job definition update cmd)
         # List spark job definitions
         self.cmd(
             'az synapse spark-job-definition list --workspace-name {workspace}',
@@ -1825,10 +1762,3 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
             expect_failure=True)
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> afedea1af (add cmd for spark job definition)
->>>>>>> 93fc2591d (add cmd for spark job definition)
-=======
->>>>>>> 10320cdf2 (refine)
