@@ -406,12 +406,26 @@ class NetworkCustomIpPrefix(ScenarioTest):
         # Test custom prefix CRUD
         self.cmd('network custom-ip prefix create -g {rg} -n {prefix} --cidr 40.40.40.0/24')
         self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+        # self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state Commissioning')
         self.cmd('network custom-ip prefix list -g {rg}',
                  checks=self.check('length(@)', 1))
         # Delete operation isn't ready.
         # self.cmd('network custom-ip prefix delete -g {rg} -n {prefix}')
         # self.cmd('network custom-ip prefix list -g {rg}',
         #          checks=self.is_empty())
+
+    @record_only()
+    def test_network_custom_ip_prefix_update_state(self):
+        self.kwargs.update({
+            'rg': 'cli_test_custom_ip_prefix',
+            'prefix': 'prefix1'
+        })
+
+        self.cmd('network custom-ip prefix show -g {rg} -n {prefix}',
+                 checks=self.check('commissionedState', 'Provisioned'))
+
+        self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state Commissioning',
+                 checks=self.check('commissionedState', 'Commissioning'))
 
 
 class NetworkPublicIpPrefix(ScenarioTest):
@@ -4836,6 +4850,7 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
 
 class NetworkBastionHostScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='test_network_bastion_host')
     def test_network_batsion_host_create(self, resource_group):
         self.kwargs.update({
@@ -4846,15 +4861,17 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             'subnet2': 'vmSubnet',
             'ip1': 'ip1',
             'bastion': 'clibastion'
+
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
         self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
                  '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password --nsg-rule None')
-        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1}', checks=[
+        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --tags a=b', checks=[
             self.check('type', 'Microsoft.Network/bastionHosts'),
-            self.check('name', '{bastion}')
+            self.check('name', '{bastion}'),
+            self.check('tags.a', 'b')
         ])
         self.cmd('network bastion list')
         self.cmd('network bastion list -g {rg}', checks=[
