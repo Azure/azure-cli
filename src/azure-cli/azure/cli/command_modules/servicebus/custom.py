@@ -9,13 +9,14 @@
 # pylint: disable=unused-variable
 
 import re
+from azure.cli.core.profiles import ResourceType
 
 
 # Namespace Region
-def cli_namespace_create(client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
+def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
                          capacity=None, default_action=None):
 
-    from azure.mgmt.servicebus.models import SBNamespace, SBSku
+   SBNamespace, SBSku = cmd.get_models('SBNamespace', 'SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
     client.begin_create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,

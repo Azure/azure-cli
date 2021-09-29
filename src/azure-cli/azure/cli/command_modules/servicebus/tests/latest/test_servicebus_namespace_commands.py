@@ -22,16 +22,18 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
     def test_sb_namespace(self, resource_group):
         self.kwargs.update({
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
+            'namespacename1': self.create_random_name(prefix='sb-nscli', length=20),
             'tags': {'tag1=value1'},
             'tags2': {'tag2=value2'},
             'sku': 'Standard',
-            'tier': 'Standard',
+            'skupremium': 'Premium',
             'authoname': self.create_random_name(prefix='cliAutho', length=20),
             'defaultauthorizationrule': 'RootManageSharedAccessKey',
             'accessrights': 'Send',
             'accessrights1': 'Listen',
             'primary': 'PrimaryKey',
-            'secondary': 'SecondaryKey'
+            'secondary': 'SecondaryKey',
+            'istrue': 'True'
         })
 
         # Check for the NameSpace name Availability
@@ -95,6 +97,12 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         # Delete Authorization Rule
         self.cmd(
             'servicebus namespace authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
+
+        # Create Namespace
+        self.cmd(
+            'servicebus namespace create --resource-group {rg} --name {namespacename1} --tags {tags} --sku {skupremium} --zone-redundant {istrue}',
+            checks=[self.check('sku.name', '{skupremium}'),
+                    self.check('properties.zoneRedundant','{istrue}')])
 
         # Delete Namespace list by ResourceGroup
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
