@@ -4876,14 +4876,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_autoscaler_then_update(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
+        tags = "tag1=v1 tag2=v2"
         self.kwargs.update({
             'name': aks_name,
             'resource_group': resource_group,
+            'tags': tags,
             'ssh_key_value': self.generate_ssh_keys()
         })
 
         # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --tags {tags} ' \
                      '--ssh-key-value={ssh_key_value} --enable-cluster-autoscaler ' \
                      '--min-count 1 --max-count 3 --cluster-autoscaler-profile scan-interval=30s expander=least-waste'
         self.cmd(create_cmd, checks=[
@@ -4892,26 +4894,37 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('autoScalerProfile.expander', 'least-waste'),
             self.check('agentPoolProfiles[0].enableAutoScaling', True),
             self.check('agentPoolProfiles[0].minCount', 1),
-            self.check('agentPoolProfiles[0].maxCount', 3)
+            self.check('agentPoolProfiles[0].maxCount', 3),
+            self.check('tags.tag1', 'v1'),
+            self.check('tags.tag2', 'v2'),
         ])
 
-        # disable autoscaler
-        disable_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} --disable-cluster-autoscaler'
+        # disable autoscaler and update tags
+        new_tags = "tag3=v3"
+        self.kwargs.update({'tags': new_tags})
+        disable_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                                 '--tags {tags} --disable-cluster-autoscaler'
         self.cmd(disable_autoscaler_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].enableAutoScaling', False),
             self.check('agentPoolProfiles[0].minCount', None),
-            self.check('agentPoolProfiles[0].maxCount', None)
+            self.check('agentPoolProfiles[0].maxCount', None),
+            self.check('tags.tag1', None),
+            self.check('tags.tag2', None),
+            self.check('tags.tag3', "v3"),
         ])
 
-        # enable autoscaler
+        # enable autoscaler and update tags
+        other_new_tags = ""
+        self.kwargs.update({'tags': other_new_tags})
         enable_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                                '--enable-cluster-autoscaler --min-count 2 --max-count 5'
+                                '--tags {tags} --enable-cluster-autoscaler --min-count 2 --max-count 5'
         self.cmd(enable_autoscaler_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].enableAutoScaling', True),
             self.check('agentPoolProfiles[0].minCount', 2),
-            self.check('agentPoolProfiles[0].maxCount', 5)
+            self.check('agentPoolProfiles[0].maxCount', 5),
+            self.check('tags', None),
         ])
 
         # clear autoscaler profile
