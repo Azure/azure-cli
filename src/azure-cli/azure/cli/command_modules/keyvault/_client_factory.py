@@ -85,7 +85,7 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
 
 def get_client_api_version(cli_ctx, resource_type):
     if resource_type == ResourceType.DATA_KEYVAULT_KEYS:
-        return '7.0' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
+        return '7.3-preview' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     return get_api_version(cli_ctx, resource_type)
 
 
