@@ -1,0 +1,3221 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2021-09-29T09:17:16Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centraluseuap", "tags": {}, "properties": {"addressSpace":
+      {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name":
+      "testsubnet000004", "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '318'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"testvnet000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003\",\r\n
+        \ \"etag\": \"W/\\\"efefd512-70ad-4dfc-ab62-e459f31820e4\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"b98f8941-04eb-4086-a0c3-bc743d3525b8\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"testsubnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
+        \       \"etag\": \"W/\\\"efefd512-70ad-4dfc-ab62-e459f31820e4\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8aff425-63a3-4b3a-b9b1-680eafcc5cef?api-version=2021-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1481'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 446c13e1-ef81-4216-8584-e3bcdd57b369
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8aff425-63a3-4b3a-b9b1-680eafcc5cef?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 589c30af-9e83-4f62-9316-a10855e8d7ac
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"testvnet000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003\",\r\n
+        \ \"etag\": \"W/\\\"4fcc3e62-322c-4ec0-a74f-4dc838b1c73b\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"b98f8941-04eb-4086-a0c3-bc743d3525b8\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"testsubnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
+        \       \"etag\": \"W/\\\"4fcc3e62-322c-4ec0-a74f-4dc838b1c73b\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1483'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:24 GMT
+      etag:
+      - W/"4fcc3e62-322c-4ec0-a74f-4dc838b1c73b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9c0cf066-76e8-498e-abc8-f9f927105a0b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"testsubnet000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
+        \ \"etag\": \"W/\\\"4fcc3e62-322c-4ec0-a74f-4dc838b1c73b\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '627'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:25 GMT
+      etag:
+      - W/"4fcc3e62-322c-4ec0-a74f-4dc838b1c73b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7223ce10-bd0f-4ff8-af08-6c31797bb7d7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004",
+      "name": "testsubnet000004", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '492'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"testsubnet000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
+        \ \"etag\": \"W/\\\"213bc3fa-6056-4f2c-8591-42130efefac4\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/21b42677-4a8b-4878-aa89-1fdc798ba244?api-version=2021-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '627'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 088f6cd5-1d7e-4674-8867-94a85b66ab7c
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/21b42677-4a8b-4878-aa89-1fdc798ba244?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c9b53584-500d-4507-a0c7-b4388ad43c18
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"testsubnet000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
+        \ \"etag\": \"W/\\\"7b8e5886-c508-40f3-94d1-dd6ef6fd4766\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '628'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:28 GMT
+      etag:
+      - W/"7b8e5886-c508-40f3-94d1-dd6ef6fd4766"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 640c9b1a-429b-4385-9ace-430d2bbeb4be
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://management.azure.com/metadata/endpoints?api-version=2019-05-01
+  response:
+    body:
+      string: '[{"portal":"https://portal.azure.com","authentication":{"loginEndpoint":"https://login.microsoftonline.com/","audiences":["https://management.core.windows.net/","https://management.azure.com/"],"tenant":"common","identityProvider":"AAD"},"media":"https://rest.media.azure.net","graphAudience":"https://graph.windows.net/","graph":"https://graph.windows.net/","name":"AzureCloud","suffixes":{"azureDataLakeStoreFileSystem":"azuredatalakestore.net","acrLoginServer":"azurecr.io","sqlServerHostname":"database.windows.net","azureDataLakeAnalyticsCatalogAndJob":"azuredatalakeanalytics.net","keyVaultDns":"vault.azure.net","storage":"core.windows.net","azureFrontDoorEndpointSuffix":"azurefd.net"},"batch":"https://batch.core.windows.net/","resourceManager":"https://management.azure.com/","vmImageAliasDoc":"https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json","activeDirectoryDataLake":"https://datalake.azure.net/","sqlManagement":"https://management.core.windows.net:8443/","gallery":"https://gallery.azure.com/"},{"portal":"https://portal.azure.cn","authentication":{"loginEndpoint":"https://login.chinacloudapi.cn","audiences":["https://management.core.chinacloudapi.cn","https://management.chinacloudapi.cn"],"tenant":"common","identityProvider":"AAD"},"media":"https://rest.media.chinacloudapi.cn","graphAudience":"https://graph.chinacloudapi.cn","graph":"https://graph.chinacloudapi.cn","name":"AzureChinaCloud","suffixes":{"acrLoginServer":"azurecr.cn","sqlServerHostname":"database.chinacloudapi.cn","keyVaultDns":"vault.azure.cn","storage":"core.chinacloudapi.cn","azureFrontDoorEndpointSuffix":""},"batch":"https://batch.chinacloudapi.cn","resourceManager":"https://management.chinacloudapi.cn","vmImageAliasDoc":"https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json","sqlManagement":"https://management.core.chinacloudapi.cn:8443","gallery":"https://gallery.chinacloudapi.cn"},{"portal":"https://portal.azure.us","authentication":{"loginEndpoint":"https://login.microsoftonline.us","audiences":["https://management.core.usgovcloudapi.net","https://management.usgovcloudapi.net"],"tenant":"common","identityProvider":"AAD"},"media":"https://rest.media.usgovcloudapi.net","graphAudience":"https://graph.windows.net","graph":"https://graph.windows.net","name":"AzureUSGovernment","suffixes":{"acrLoginServer":"azurecr.us","sqlServerHostname":"database.usgovcloudapi.net","keyVaultDns":"vault.usgovcloudapi.net","storage":"core.usgovcloudapi.net","azureFrontDoorEndpointSuffix":""},"batch":"https://batch.core.usgovcloudapi.net","resourceManager":"https://management.usgovcloudapi.net","vmImageAliasDoc":"https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json","sqlManagement":"https://management.core.usgovcloudapi.net:8443","gallery":"https://gallery.usgovcloudapi.net"},{"portal":"https://portal.microsoftazure.de","authentication":{"loginEndpoint":"https://login.microsoftonline.de","audiences":["https://management.core.cloudapi.de","https://management.microsoftazure.de"],"tenant":"common","identityProvider":"AAD"},"media":"https://rest.media.cloudapi.de","graphAudience":"https://graph.cloudapi.de","graph":"https://graph.cloudapi.de","name":"AzureGermanCloud","suffixes":{"sqlServerHostname":"database.cloudapi.de","keyVaultDns":"vault.microsoftazure.de","storage":"core.cloudapi.de","azureFrontDoorEndpointSuffix":""},"batch":"https://batch.cloudapi.de","resourceManager":"https://management.microsoftazure.de","vmImageAliasDoc":"https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json","sqlManagement":"https://management.core.cloudapi.de:8443","gallery":"https://gallery.cloudapi.de"}]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3843'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2021-09-29T09:17:16Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azuremachinelearningworkspaces/2018-03-01-preview Azure-SDK-For-Python/1.34.0
+      x-ms-client-amlsdk:
+      - 1.34.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002?api-version=2020-01-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.MachineLearningServices/workspaces/testaml000002''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '312'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-resource/2019-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2021-09-29T09:17:16Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.KeyVault/vaults", "name": "testamlekeyvault71944396", "apiVersion":
+      "2015-06-01", "location": "eastus", "tags": {}, "dependsOn": [], "properties":
+      {"enabledForDeployment": "true", "enabledForTemplateDeployment": "true", "enabledForVolumeEncryption":
+      "true", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "accessPolicies":
+      [], "sku": {"name": "Standard", "family": "A"}}}, {"type": "Microsoft.Storage/storageAccounts",
+      "name": "testamlestorage6ae7d51dd", "apiVersion": "2018-07-01", "location":
+      "eastus", "sku": {"name": "Standard_LRS"}, "kind": "StorageV2", "tags": {},
+      "dependsOn": [], "properties": {"encryption": {"services": {"blob": {"enabled":
+      "true"}, "file": {"enabled": "true"}}, "keySource": "Microsoft.Storage"}, "supportsHttpsTrafficOnly":
+      true}}, {"type": "microsoft.insights/components", "name": "testamleinsightsdb0b5755",
+      "kind": "web", "apiVersion": "2015-05-01", "location": "eastus", "tags": {},
+      "properties": {"Application_Type": "web"}}, {"type": "Microsoft.MachineLearningServices/workspaces",
+      "name": "testaml000002", "apiVersion": "2021-04-01", "identity": {"type": "SystemAssigned",
+      "userAssignedIdentities": null}, "location": "centraluseuap", "resources": [],
+      "dependsOn": ["[resourceId(''Microsoft.KeyVault/vaults'', ''testamlekeyvault71944396'')]",
+      "[resourceId(''Microsoft.Storage/storageAccounts'', ''testamlestorage6ae7d51dd'')]",
+      "[resourceId(''microsoft.insights/components'', ''testamleinsightsdb0b5755'')]"],
+      "sku": {"tier": "basic", "name": "basic"}, "tags": {}, "properties": {"containerRegistry":
+      null, "adbWorkspace": null, "keyVault": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396",
+      "applicationInsights": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755",
+      "friendlyName": "testaml000002", "storageAccount": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd",
+      "primaryUserAssignedIdentity": null, "encryption": {"status": "Disabled", "identity":
+      {"userAssignedIdentity": null}, "keyVaultProperties": {"keyVaultArmId": null,
+      "keyIdentifier": null, "identityClientId": ""}}, "hbiWorkspace": false, "systemDatastoresAuthMode":
+      "accessKey"}}]}, "parameters": {}, "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2834'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _arm_deploy_template
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822","name":"Microsoft.MachineLearningServices_15822","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10834599533442228020","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-09-29T09:17:35.7149942Z","duration":"PT1.7389311S","correlationId":"d86512e5-4f2d-4797-a508-b31a379b0e15","providers":[{"namespace":"Microsoft.KeyVault","resourceTypes":[{"resourceType":"vaults","locations":["eastus"]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["eastus"]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["eastus"]}]},{"namespace":"Microsoft.MachineLearningServices","resourceTypes":[{"resourceType":"workspaces","locations":["centraluseuap"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002","resourceType":"Microsoft.MachineLearningServices/workspaces","resourceName":"testaml000002"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operationStatuses/08585686998315015622?api-version=2019-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2305'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:17:40.4559747Z","duration":"PT4.2401027S","trackingId":"2f6a2ebb-4e13-4e86-bac6-4e09508af3c0","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"Accepted","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:17:40.137213Z","duration":"PT3.921341S","trackingId":"b98ecbc4-2599-43d1-a80a-cee01c079677","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2696'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:17:40.4559747Z","duration":"PT4.2401027S","trackingId":"2f6a2ebb-4e13-4e86-bac6-4e09508af3c0","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"Accepted","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:17:40.137213Z","duration":"PT3.921341S","trackingId":"b98ecbc4-2599-43d1-a80a-cee01c079677","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2696'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:17:40.4559747Z","duration":"PT4.2401027S","trackingId":"2f6a2ebb-4e13-4e86-bac6-4e09508af3c0","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"Accepted","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:17:40.137213Z","duration":"PT3.921341S","trackingId":"b98ecbc4-2599-43d1-a80a-cee01c079677","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2696'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:17:40.4559747Z","duration":"PT4.2401027S","trackingId":"2f6a2ebb-4e13-4e86-bac6-4e09508af3c0","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"Accepted","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:56.9253613Z","duration":"PT20.7094893S","trackingId":"a8847695-5f1f-4c46-9dc0-6e885379b3ce","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2701'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:17:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:00.055215Z","duration":"PT23.839343S","trackingId":"4e96d4d4-242e-44c8-b3b5-fcf4b1282349","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:56.9253613Z","duration":"PT20.7094893S","trackingId":"a8847695-5f1f-4c46-9dc0-6e885379b3ce","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2696'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-resource/2019-10-01 Azure-SDK-For-Python
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585686998315015622?api-version=2019-10-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/AB2F7D914799AFCB","operationId":"AB2F7D914799AFCB","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:18:03.1016352Z","duration":"PT3.0138738S","trackingId":"1d6b7775-705f-414b-b846-40a70d766981","serviceRequestId":"3b33adb0-8ef8-4157-ae98-f69beaba5119","statusCode":"Accepted","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002","resourceType":"Microsoft.MachineLearningServices/workspaces","resourceName":"testaml000002"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:00.055215Z","duration":"PT23.839343S","trackingId":"4e96d4d4-242e-44c8-b3b5-fcf4b1282349","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:56.9253613Z","duration":"PT20.7094893S","trackingId":"a8847695-5f1f-4c46-9dc0-6e885379b3ce","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3617'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/AB2F7D914799AFCB","operationId":"AB2F7D914799AFCB","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:18:03.1016352Z","duration":"PT3.0138738S","trackingId":"1d6b7775-705f-414b-b846-40a70d766981","serviceRequestId":"3b33adb0-8ef8-4157-ae98-f69beaba5119","statusCode":"Accepted","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002","resourceType":"Microsoft.MachineLearningServices/workspaces","resourceName":"testaml000002"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:00.055215Z","duration":"PT23.839343S","trackingId":"4e96d4d4-242e-44c8-b3b5-fcf4b1282349","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:56.9253613Z","duration":"PT20.7094893S","trackingId":"a8847695-5f1f-4c46-9dc0-6e885379b3ce","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3617'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/AB2F7D914799AFCB","operationId":"AB2F7D914799AFCB","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:18:03.1016352Z","duration":"PT3.0138738S","trackingId":"1d6b7775-705f-414b-b846-40a70d766981","serviceRequestId":"3b33adb0-8ef8-4157-ae98-f69beaba5119","statusCode":"Accepted","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002","resourceType":"Microsoft.MachineLearningServices/workspaces","resourceName":"testaml000002"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:00.055215Z","duration":"PT23.839343S","trackingId":"4e96d4d4-242e-44c8-b3b5-fcf4b1282349","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:56.9253613Z","duration":"PT20.7094893S","trackingId":"a8847695-5f1f-4c46-9dc0-6e885379b3ce","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3617'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/AB2F7D914799AFCB","operationId":"AB2F7D914799AFCB","properties":{"provisioningOperation":"Create","provisioningState":"Running","timestamp":"2021-09-29T09:18:22.8075296Z","duration":"PT22.7197682S","trackingId":"fc069394-e45f-41f0-8097-033857b9368c","serviceRequestId":"3b33adb0-8ef8-4157-ae98-f69beaba5119","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002","resourceType":"Microsoft.MachineLearningServices/workspaces","resourceName":"testaml000002"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:00.055215Z","duration":"PT23.839343S","trackingId":"4e96d4d4-242e-44c8-b3b5-fcf4b1282349","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:56.9253613Z","duration":"PT20.7094893S","trackingId":"a8847695-5f1f-4c46-9dc0-6e885379b3ce","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3612'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/AB2F7D914799AFCB","operationId":"AB2F7D914799AFCB","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:24.8896756Z","duration":"PT24.8019142S","trackingId":"5c4d2f20-2c0e-462c-b120-4ab9b317f4a2","serviceRequestId":"3b33adb0-8ef8-4157-ae98-f69beaba5119","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002","resourceType":"Microsoft.MachineLearningServices/workspaces","resourceName":"testaml000002"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:00.055215Z","duration":"PT23.839343S","trackingId":"4e96d4d4-242e-44c8-b3b5-fcf4b1282349","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:56.9253613Z","duration":"PT20.7094893S","trackingId":"a8847695-5f1f-4c46-9dc0-6e885379b3ce","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/08585686998315015622","operationId":"08585686998315015622","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:24.960315Z","duration":"PT24.8725536S","trackingId":"461de51b-2744-4792-947a-06fa0260a820","statusCode":"OK"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4154'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/AB2F7D914799AFCB","operationId":"AB2F7D914799AFCB","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:24.8896756Z","duration":"PT24.8019142S","trackingId":"5c4d2f20-2c0e-462c-b120-4ab9b317f4a2","serviceRequestId":"3b33adb0-8ef8-4157-ae98-f69beaba5119","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002","resourceType":"Microsoft.MachineLearningServices/workspaces","resourceName":"testaml000002"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:00.055215Z","duration":"PT23.839343S","trackingId":"4e96d4d4-242e-44c8-b3b5-fcf4b1282349","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:56.9253613Z","duration":"PT20.7094893S","trackingId":"a8847695-5f1f-4c46-9dc0-6e885379b3ce","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/08585686998315015622","operationId":"08585686998315015622","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:24.960315Z","duration":"PT24.8725536S","trackingId":"461de51b-2744-4792-947a-06fa0260a820","statusCode":"OK"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4154'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-resource/2019-10-01 Azure-SDK-For-Python
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585686998315015622?api-version=2019-10-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-resource/2019-10-01 Azure-SDK-For-Python
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822","name":"Microsoft.MachineLearningServices_15822","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10834599533442228020","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:24.9776301Z","duration":"PT51.001567S","correlationId":"d86512e5-4f2d-4797-a508-b31a379b0e15","providers":[{"namespace":"Microsoft.KeyVault","resourceTypes":[{"resourceType":"vaults","locations":["eastus"]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["eastus"]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["eastus"]}]},{"namespace":"Microsoft.MachineLearningServices","resourceTypes":[{"resourceType":"workspaces","locations":["centraluseuap"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002","resourceType":"Microsoft.MachineLearningServices/workspaces","resourceName":"testaml000002"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3205'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azureml-sdk-core/1.34.0 azureml-cli/1.34.0
+      accept-language:
+      - en-US
+      x-ms-caller-name:
+      - _check_deployment_status
+      x-ms-client-session-id:
+      - 4bd998a1-6dce-46ac-8fbb-6fdd945f4ff8
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/deployments/mock-deployment/operations?api-version=2019-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/AB2F7D914799AFCB","operationId":"AB2F7D914799AFCB","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:24.8896756Z","duration":"PT24.8019142S","trackingId":"5c4d2f20-2c0e-462c-b120-4ab9b317f4a2","serviceRequestId":"3b33adb0-8ef8-4157-ae98-f69beaba5119","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002","resourceType":"Microsoft.MachineLearningServices/workspaces","resourceName":"testaml000002"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/07A2B88F6409F81F","operationId":"07A2B88F6409F81F","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:00.055215Z","duration":"PT23.839343S","trackingId":"4e96d4d4-242e-44c8-b3b5-fcf4b1282349","serviceRequestId":"d64a1322-289c-489b-ba5c-d2d8c03aaa32","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/testamlestorage6ae7d51dd","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"testamlestorage6ae7d51dd"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/1C3900AC5888A679","operationId":"1C3900AC5888A679","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:56.9253613Z","duration":"PT20.7094893S","trackingId":"a8847695-5f1f-4c46-9dc0-6e885379b3ce","serviceRequestId":"e35ed1e2-5862-47dd-84ba-86d36e16fd2e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/testamlekeyvault71944396","resourceType":"Microsoft.KeyVault/vaults","resourceName":"testamlekeyvault71944396"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/CBAE9275CC397BA4","operationId":"CBAE9275CC397BA4","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-09-29T09:17:40.0404243Z","duration":"PT3.8245523S","trackingId":"2eb55e49-18bf-41f2-94a3-c13c3a77cbbc","serviceRequestId":"49d443d1-1d11-4cdb-9230-51cb09a7015b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755","resourceType":"microsoft.insights/components","resourceName":"testamleinsightsdb0b5755"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.MachineLearningServices_15822/operations/08585686998315015622","operationId":"08585686998315015622","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2021-09-29T09:18:24.960315Z","duration":"PT24.8725536S","trackingId":"461de51b-2744-4792-947a-06fa0260a820","statusCode":"OK"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4154'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azuremachinelearningworkspaces/2018-03-01-preview Azure-SDK-For-Python/1.34.0
+      x-ms-client-amlsdk:
+      - 1.34.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002?api-version=2020-01-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002\",\n
+        \ \"name\": \"testaml000002\",\n  \"type\": \"Microsoft.MachineLearningServices/workspaces\",\n
+        \ \"location\": \"centraluseuap\",\n  \"tags\": {},\n  \"etag\": null,\n  \"properties\":
+        {\n    \"friendlyName\": \"testaml000002\",\n    \"description\": \"\",\n
+        \   \"storageAccount\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.storage/storageaccounts/testamlestorage6ae7d51dd\",\n
+        \   \"keyVault\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.keyvault/vaults/testamlekeyvault71944396\",\n
+        \   \"applicationInsights\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.insights/components/testamleinsightsdb0b5755\",\n
+        \   \"hbiWorkspace\": false,\n    \"tenantId\": \"72f988bf-86f1-41af-91ab-2d7cd011db47\",\n
+        \   \"imageBuildCompute\": \"\",\n    \"provisioningState\": \"Succeeded\",\n
+        \   \"containerRegistry\": null,\n    \"creationTime\": \"2021-09-29T09:18:02.8324621+00:00\",\n
+        \   \"notebookInfo\": {\n      \"resourceId\": \"c6995246c49c4bb3b977c62dba04f87e\",\n
+        \     \"fqdn\": \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\",\n
+        \     \"isPrivateLinkEnabled\": false,\n      \"notebookPreparationError\":
+        null\n    },\n    \"storageHnsEnabled\": false,\n    \"workspaceId\": \"f31c67e5-86b8-4c0d-b21e-4a33071f29a0\",\n
+        \   \"linkedModelInventoryArmId\": null,\n    \"privateLinkCount\": 0,\n    \"allowPublicAccessWhenBehindVnet\":
+        false,\n    \"publicNetworkAccess\": \"Disabled\",\n    \"discoveryUrl\":
+        \"https://master.api.azureml-test.ms/discovery\",\n    \"mlFlowTrackingUri\":
+        \"azureml://master.api.azureml-test.ms/mlflow/v1.0/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002\",\n
+        \   \"sdkTelemetryAppInsightsKey\": \"e31c22bb-e424-4992-a495-6519750e273a\"\n
+        \ },\n  \"identity\": {\n    \"type\": \"SystemAssigned\",\n    \"principalId\":
+        \"5b9737c1-c365-43b3-bc0a-5c81afd76545\",\n    \"tenantId\": \"72f988bf-86f1-41af-91ab-2d7cd011db47\"\n
+        \ },\n  \"sku\": {\n    \"name\": \"Basic\",\n    \"tier\": \"Basic\"\n  },\n
+        \ \"systemData\": {\n    \"createdAt\": \"2021-09-29T09:18:02.0341561Z\",\n
+        \   \"createdBy\": \"jiewe@microsoft.com\",\n    \"createdByType\": \"User\",\n
+        \   \"lastModifiedAt\": \"2021-09-29T09:18:02.0341561Z\",\n    \"lastModifiedBy\":
+        \"jiewe@microsoft.com\",\n    \"lastModifiedByType\": \"User\"\n  }\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2846'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.015'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2021-09-29T09:17:16Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centraluseuap", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "manualPrivateLinkServiceConnections": [{"name": "priv_endpointconn000006",
+      "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002",
+      "groupIds": ["amlworkspace"]}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '784'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"priv_endpoint000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\r\n
+        \ \"etag\": \"W/\\\"47aad6e3-5464-4f4e-a53c-7a0251f82506\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"priv_endpointconn000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005/manualPrivateLinkServiceConnections/priv_endpointconn000006\",\r\n
+        \       \"etag\": \"W/\\\"47aad6e3-5464-4f4e-a53c-7a0251f82506\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002\",\r\n
+        \         \"groupIds\": [\r\n            \"amlworkspace\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000005.nic.966e4d76-eacf-42dd-a2ed-01396a277953\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8a40d3f2-d2c6-4cda-a8f1-e02bc96faea6?api-version=2021-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2361'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c127e5f6-d2e4-42af-9cfb-19fed5f80304
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8a40d3f2-d2c6-4cda-a8f1-e02bc96faea6?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:18:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cf6fe8bb-1b5c-4a4a-8c1e-b3f8d5ced398
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8a40d3f2-d2c6-4cda-a8f1-e02bc96faea6?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:19:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b1bd6555-b5d2-439f-a83d-ab11da862f29
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8a40d3f2-d2c6-4cda-a8f1-e02bc96faea6?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:19:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 18f7c6c1-f814-4e08-9169-c7c784311697
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8a40d3f2-d2c6-4cda-a8f1-e02bc96faea6?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e258f5c2-234b-4814-946b-f9f7213200c1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"priv_endpoint000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\r\n
+        \ \"etag\": \"W/\\\"fb26783f-3119-45b2-a129-f2ac1ead550e\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"priv_endpointconn000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005/manualPrivateLinkServiceConnections/priv_endpointconn000006\",\r\n
+        \       \"etag\": \"W/\\\"fb26783f-3119-45b2-a129-f2ac1ead550e\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002\",\r\n
+        \         \"groupIds\": [\r\n            \"amlworkspace\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000005.nic.966e4d76-eacf-42dd-a2ed-01396a277953\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2345'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:03 GMT
+      etag:
+      - W/"fb26783f-3119-45b2-a129-f2ac1ead550e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - acf3aec8-f22a-47d4-9365-300a74870a5e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \     \"name\": \"testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \     \"type\": \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \     \"location\": null,\n      \"etag\": null,\n      \"peConnectionProxyName\":
+        \"priv_endpoint000005.1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\n      \"peName\":
+        \"priv_endpoint000005\",\n      \"plsConnectionName\": \"priv_endpointconn000006\",\n
+        \     \"plsProxyName\": \"priv_endpoint000005.proxy.0421bd9e-965a-484e-8ec5-36ccdb9449d7\",\n
+        \     \"connectionDetails\": [\n        {\n          \"id\": \"ee2dbbd6-9b70-442a-a92c-e7721d8771ac\",\n
+        \         \"privateIpAddress\": \"10.0.0.4\",\n          \"linkIdentifier\":
+        \"805306373\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"default\"\n        },\n        {\n          \"id\": \"2467efd8-4ed6-4b83-a2d4-ee3082026647\",\n
+        \         \"privateIpAddress\": \"10.0.0.5\",\n          \"linkIdentifier\":
+        \"805308371\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"notebook\"\n        },\n        {\n          \"id\": \"2fbe8205-941f-4950-848b-aedcf2a3edd2\",\n
+        \         \"privateIpAddress\": \"10.0.0.6\",\n          \"linkIdentifier\":
+        \"805318373\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"inference\"\n        }\n      ],\n      \"requestDescription\": \"\",\n
+        \     \"properties\": {\n        \"provisioningState\": \"Succeeded\",\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\n
+        \         \"subnetArmId\": null\n        },\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Pending\",\n          \"description\": \"\",\n
+        \         \"actionsRequired\": \"None\"\n        }\n      },\n      \"notebookInternalFqdn\":
+        \"privatelink.notebookapis.azure.com\",\n      \"notebookCustomerVisibleFqdns\":
+        [\n        \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \     ]\n    }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2355'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.024'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --description --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \ \"name\": \"testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n  \"type\":
+        \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \ \"location\": null,\n  \"etag\": null,\n  \"peConnectionProxyName\": \"priv_endpoint000005.1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\n
+        \ \"peName\": \"priv_endpoint000005\",\n  \"plsConnectionName\": \"priv_endpointconn000006\",\n
+        \ \"plsProxyName\": \"priv_endpoint000005.proxy.0421bd9e-965a-484e-8ec5-36ccdb9449d7\",\n
+        \ \"connectionDetails\": [\n    {\n      \"id\": \"ee2dbbd6-9b70-442a-a92c-e7721d8771ac\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"805306373\",\n
+        \     \"groupId\": \"amlworkspace\",\n      \"memberName\": \"default\"\n
+        \   },\n    {\n      \"id\": \"2467efd8-4ed6-4b83-a2d4-ee3082026647\",\n      \"privateIpAddress\":
+        \"10.0.0.5\",\n      \"linkIdentifier\": \"805308371\",\n      \"groupId\":
+        \"amlworkspace\",\n      \"memberName\": \"notebook\"\n    },\n    {\n      \"id\":
+        \"2fbe8205-941f-4950-848b-aedcf2a3edd2\",\n      \"privateIpAddress\": \"10.0.0.6\",\n
+        \     \"linkIdentifier\": \"805318373\",\n      \"groupId\": \"amlworkspace\",\n
+        \     \"memberName\": \"inference\"\n    }\n  ],\n  \"requestDescription\":
+        \"\",\n  \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\n
+        \     \"subnetArmId\": null\n    },\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\",\n      \"description\": \"\",\n      \"actionsRequired\":
+        \"None\"\n    }\n  },\n  \"notebookInternalFqdn\": \"privatelink.notebookapis.azure.com\",\n
+        \ \"notebookCustomerVisibleFqdns\": [\n    \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \ ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.035'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21",
+      "name": "testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21", "type": "Microsoft.MachineLearningServices/workspaces/privateEndpointConnections",
+      "location": null, "etag": null, "peConnectionProxyName": "priv_endpoint000005.1b2f49bf-4bb8-4c00-91f2-0172449b9e00",
+      "peName": "priv_endpoint000005", "plsConnectionName": "priv_endpointconn000006",
+      "plsProxyName": "priv_endpoint000005.proxy.0421bd9e-965a-484e-8ec5-36ccdb9449d7",
+      "connectionDetails": [{"id": "ee2dbbd6-9b70-442a-a92c-e7721d8771ac", "privateIpAddress":
+      "10.0.0.4", "linkIdentifier": "805306373", "groupId": "amlworkspace", "memberName":
+      "default"}, {"id": "2467efd8-4ed6-4b83-a2d4-ee3082026647", "privateIpAddress":
+      "10.0.0.5", "linkIdentifier": "805308371", "groupId": "amlworkspace", "memberName":
+      "notebook"}, {"id": "2fbe8205-941f-4950-848b-aedcf2a3edd2", "privateIpAddress":
+      "10.0.0.6", "linkIdentifier": "805318373", "groupId": "amlworkspace", "memberName":
+      "inference"}], "requestDescription": "", "properties": {"provisioningState":
+      "Succeeded", "privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005",
+      "subnetArmId": null}, "privateLinkServiceConnectionState": {"status": "Approved",
+      "description": "somedescription", "actionsRequired": "None"}}, "notebookInternalFqdn":
+      "privatelink.notebookapis.azure.com", "notebookCustomerVisibleFqdns": ["ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1926'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --resource-name -n --description --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \ \"name\": \"testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n  \"type\":
+        \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \ \"location\": null,\n  \"etag\": null,\n  \"peConnectionProxyName\": \"priv_endpoint000005.1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\n
+        \ \"peName\": \"priv_endpoint000005\",\n  \"plsConnectionName\": \"priv_endpointconn000006\",\n
+        \ \"plsProxyName\": \"priv_endpoint000005.proxy.0421bd9e-965a-484e-8ec5-36ccdb9449d7\",\n
+        \ \"connectionDetails\": [\n    {\n      \"id\": \"ee2dbbd6-9b70-442a-a92c-e7721d8771ac\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"805306373\",\n
+        \     \"groupId\": \"amlworkspace\",\n      \"memberName\": \"default\"\n
+        \   },\n    {\n      \"id\": \"2467efd8-4ed6-4b83-a2d4-ee3082026647\",\n      \"privateIpAddress\":
+        \"10.0.0.5\",\n      \"linkIdentifier\": \"805308371\",\n      \"groupId\":
+        \"amlworkspace\",\n      \"memberName\": \"notebook\"\n    },\n    {\n      \"id\":
+        \"2fbe8205-941f-4950-848b-aedcf2a3edd2\",\n      \"privateIpAddress\": \"10.0.0.6\",\n
+        \     \"linkIdentifier\": \"805318373\",\n      \"groupId\": \"amlworkspace\",\n
+        \     \"memberName\": \"inference\"\n    }\n  ],\n  \"requestDescription\":
+        \"\",\n  \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\n
+        \     \"subnetArmId\": null\n    },\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Approved\",\n      \"description\": \"somedescription\",\n
+        \     \"actionsRequired\": \"None\"\n    }\n  },\n  \"notebookInternalFqdn\":
+        \"privatelink.notebookapis.azure.com\",\n  \"notebookCustomerVisibleFqdns\":
+        [\n    \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \ ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2146'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '1.623'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --description --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \ \"name\": \"testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n  \"type\":
+        \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \ \"location\": null,\n  \"etag\": null,\n  \"peConnectionProxyName\": \"priv_endpoint000005.1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\n
+        \ \"peName\": \"priv_endpoint000005\",\n  \"plsConnectionName\": \"priv_endpointconn000006\",\n
+        \ \"plsProxyName\": \"priv_endpoint000005.proxy.0421bd9e-965a-484e-8ec5-36ccdb9449d7\",\n
+        \ \"connectionDetails\": [\n    {\n      \"id\": \"ee2dbbd6-9b70-442a-a92c-e7721d8771ac\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"805306373\",\n
+        \     \"groupId\": \"amlworkspace\",\n      \"memberName\": \"default\"\n
+        \   },\n    {\n      \"id\": \"2467efd8-4ed6-4b83-a2d4-ee3082026647\",\n      \"privateIpAddress\":
+        \"10.0.0.5\",\n      \"linkIdentifier\": \"805308371\",\n      \"groupId\":
+        \"amlworkspace\",\n      \"memberName\": \"notebook\"\n    },\n    {\n      \"id\":
+        \"2fbe8205-941f-4950-848b-aedcf2a3edd2\",\n      \"privateIpAddress\": \"10.0.0.6\",\n
+        \     \"linkIdentifier\": \"805318373\",\n      \"groupId\": \"amlworkspace\",\n
+        \     \"memberName\": \"inference\"\n    }\n  ],\n  \"requestDescription\":
+        \"\",\n  \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\n
+        \     \"subnetArmId\": null\n    },\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Approved\",\n      \"description\": \"somedescription\",\n
+        \     \"actionsRequired\": \"None\"\n    }\n  },\n  \"notebookInternalFqdn\":
+        \"privatelink.notebookapis.azure.com\",\n  \"notebookCustomerVisibleFqdns\":
+        [\n    \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \ ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2146'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.042'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2021-09-29T09:17:16Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centraluseuap", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "manualPrivateLinkServiceConnections": [{"name": "priv_endpointconn000008",
+      "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002",
+      "groupIds": ["amlworkspace"]}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '784'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"priv_endpoint000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007\",\r\n
+        \ \"etag\": \"W/\\\"513ac56b-57db-49c3-829b-fdc18fa653a5\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"f54c7d64-ab90-4999-9c69-00d7014dbd89\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"priv_endpointconn000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007/manualPrivateLinkServiceConnections/priv_endpointconn000008\",\r\n
+        \       \"etag\": \"W/\\\"513ac56b-57db-49c3-829b-fdc18fa653a5\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002\",\r\n
+        \         \"groupIds\": [\r\n            \"amlworkspace\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000007.nic.89ba838c-2b1d-466e-bac3-e144514cfb3c\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fbd292d0-b7b8-44a1-9bc2-45da49e70dca?api-version=2021-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2361'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d5348fbb-7994-456d-b16f-d5e67f532fd4
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fbd292d0-b7b8-44a1-9bc2-45da49e70dca?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b9404d03-6d7d-4ac9-8549-3234cbd7cb8e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fbd292d0-b7b8-44a1-9bc2-45da49e70dca?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:20:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7770fda5-d16e-4dd7-ad94-b56c7c9a9df9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fbd292d0-b7b8-44a1-9bc2-45da49e70dca?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:21:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2ac5ec39-0e88-4eb8-bc5e-4389ff92eceb
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fbd292d0-b7b8-44a1-9bc2-45da49e70dca?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:21:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f52c7cb6-d550-4603-b257-7c9d5e11e3bc
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet --vnet-name --private-connection-resource-id --group-id --connection-name
+        --manual-request
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.7.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"priv_endpoint000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007\",\r\n
+        \ \"etag\": \"W/\\\"1d27545a-99ab-4049-940f-dbfa7b4509f4\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"f54c7d64-ab90-4999-9c69-00d7014dbd89\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"priv_endpointconn000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007/manualPrivateLinkServiceConnections/priv_endpointconn000008\",\r\n
+        \       \"etag\": \"W/\\\"1d27545a-99ab-4049-940f-dbfa7b4509f4\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002\",\r\n
+        \         \"groupIds\": [\r\n            \"amlworkspace\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000007.nic.89ba838c-2b1d-466e-bac3-e144514cfb3c\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2345'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:21:40 GMT
+      etag:
+      - W/"1d27545a-99ab-4049-940f-dbfa7b4509f4"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 79553329-7e98-4eb3-b458-e3728db8e058
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \     \"name\": \"testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \     \"type\": \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \     \"location\": null,\n      \"etag\": null,\n      \"peConnectionProxyName\":
+        \"priv_endpoint000005.1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\n      \"peName\":
+        \"priv_endpoint000005\",\n      \"plsConnectionName\": \"priv_endpointconn000006\",\n
+        \     \"plsProxyName\": \"priv_endpoint000005.proxy.0421bd9e-965a-484e-8ec5-36ccdb9449d7\",\n
+        \     \"connectionDetails\": [\n        {\n          \"id\": \"ee2dbbd6-9b70-442a-a92c-e7721d8771ac\",\n
+        \         \"privateIpAddress\": \"10.0.0.4\",\n          \"linkIdentifier\":
+        \"805306373\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"default\"\n        },\n        {\n          \"id\": \"2467efd8-4ed6-4b83-a2d4-ee3082026647\",\n
+        \         \"privateIpAddress\": \"10.0.0.5\",\n          \"linkIdentifier\":
+        \"805308371\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"notebook\"\n        },\n        {\n          \"id\": \"2fbe8205-941f-4950-848b-aedcf2a3edd2\",\n
+        \         \"privateIpAddress\": \"10.0.0.6\",\n          \"linkIdentifier\":
+        \"805318373\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"inference\"\n        }\n      ],\n      \"requestDescription\": \"\",\n
+        \     \"properties\": {\n        \"provisioningState\": \"Succeeded\",\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\n
+        \         \"subnetArmId\": null\n        },\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Approved\",\n          \"description\": \"somedescription\",\n
+        \         \"actionsRequired\": \"None\"\n        }\n      },\n      \"notebookInternalFqdn\":
+        \"privatelink.notebookapis.azure.com\",\n      \"notebookCustomerVisibleFqdns\":
+        [\n        \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \     ]\n    },\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n
+        \     \"name\": \"testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n
+        \     \"type\": \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \     \"location\": null,\n      \"etag\": null,\n      \"peConnectionProxyName\":
+        \"priv_endpoint000007.f54c7d64-ab90-4999-9c69-00d7014dbd89\",\n      \"peName\":
+        \"priv_endpoint000007\",\n      \"plsConnectionName\": \"priv_endpointconn000008\",\n
+        \     \"plsProxyName\": \"priv_endpoint000007.proxy.41784dc7-6025-4f4d-bdff-ddff9b5b1499\",\n
+        \     \"connectionDetails\": [\n        {\n          \"id\": \"37073289-6d29-4269-84fd-0536207628d4\",\n
+        \         \"privateIpAddress\": \"10.0.0.7\",\n          \"linkIdentifier\":
+        \"805314378\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"default\"\n        },\n        {\n          \"id\": \"ae82f27d-8b6d-490a-81e9-bad52735a30c\",\n
+        \         \"privateIpAddress\": \"10.0.0.8\",\n          \"linkIdentifier\":
+        \"805328376\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"notebook\"\n        },\n        {\n          \"id\": \"1a845dee-cb75-4830-a434-81bb8c79347e\",\n
+        \         \"privateIpAddress\": \"10.0.0.9\",\n          \"linkIdentifier\":
+        \"805327371\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"inference\"\n        }\n      ],\n      \"requestDescription\": \"\",\n
+        \     \"properties\": {\n        \"provisioningState\": \"Succeeded\",\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007\",\n
+        \         \"subnetArmId\": null\n        },\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Pending\",\n          \"description\": \"\",\n
+        \         \"actionsRequired\": \"None\"\n        }\n      },\n      \"notebookInternalFqdn\":
+        \"privatelink.notebookapis.azure.com\",\n      \"notebookCustomerVisibleFqdns\":
+        [\n        \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \     ]\n    }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4707'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:21:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.025'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --description --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n
+        \ \"name\": \"testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n  \"type\":
+        \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \ \"location\": null,\n  \"etag\": null,\n  \"peConnectionProxyName\": \"priv_endpoint000007.f54c7d64-ab90-4999-9c69-00d7014dbd89\",\n
+        \ \"peName\": \"priv_endpoint000007\",\n  \"plsConnectionName\": \"priv_endpointconn000008\",\n
+        \ \"plsProxyName\": \"priv_endpoint000007.proxy.41784dc7-6025-4f4d-bdff-ddff9b5b1499\",\n
+        \ \"connectionDetails\": [\n    {\n      \"id\": \"37073289-6d29-4269-84fd-0536207628d4\",\n
+        \     \"privateIpAddress\": \"10.0.0.7\",\n      \"linkIdentifier\": \"805314378\",\n
+        \     \"groupId\": \"amlworkspace\",\n      \"memberName\": \"default\"\n
+        \   },\n    {\n      \"id\": \"ae82f27d-8b6d-490a-81e9-bad52735a30c\",\n      \"privateIpAddress\":
+        \"10.0.0.8\",\n      \"linkIdentifier\": \"805328376\",\n      \"groupId\":
+        \"amlworkspace\",\n      \"memberName\": \"notebook\"\n    },\n    {\n      \"id\":
+        \"1a845dee-cb75-4830-a434-81bb8c79347e\",\n      \"privateIpAddress\": \"10.0.0.9\",\n
+        \     \"linkIdentifier\": \"805327371\",\n      \"groupId\": \"amlworkspace\",\n
+        \     \"memberName\": \"inference\"\n    }\n  ],\n  \"requestDescription\":
+        \"\",\n  \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007\",\n
+        \     \"subnetArmId\": null\n    },\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\",\n      \"description\": \"\",\n      \"actionsRequired\":
+        \"None\"\n    }\n  },\n  \"notebookInternalFqdn\": \"privatelink.notebookapis.azure.com\",\n
+        \ \"notebookCustomerVisibleFqdns\": [\n    \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \ ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:21:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.024'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a",
+      "name": "testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a", "type": "Microsoft.MachineLearningServices/workspaces/privateEndpointConnections",
+      "location": null, "etag": null, "peConnectionProxyName": "priv_endpoint000007.f54c7d64-ab90-4999-9c69-00d7014dbd89",
+      "peName": "priv_endpoint000007", "plsConnectionName": "priv_endpointconn000008",
+      "plsProxyName": "priv_endpoint000007.proxy.41784dc7-6025-4f4d-bdff-ddff9b5b1499",
+      "connectionDetails": [{"id": "37073289-6d29-4269-84fd-0536207628d4", "privateIpAddress":
+      "10.0.0.7", "linkIdentifier": "805314378", "groupId": "amlworkspace", "memberName":
+      "default"}, {"id": "ae82f27d-8b6d-490a-81e9-bad52735a30c", "privateIpAddress":
+      "10.0.0.8", "linkIdentifier": "805328376", "groupId": "amlworkspace", "memberName":
+      "notebook"}, {"id": "1a845dee-cb75-4830-a434-81bb8c79347e", "privateIpAddress":
+      "10.0.0.9", "linkIdentifier": "805327371", "groupId": "amlworkspace", "memberName":
+      "inference"}], "requestDescription": "", "properties": {"provisioningState":
+      "Succeeded", "privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007",
+      "subnetArmId": null}, "privateLinkServiceConnectionState": {"status": "Rejected",
+      "description": "somedescription", "actionsRequired": "None"}}, "notebookInternalFqdn":
+      "privatelink.notebookapis.azure.com", "notebookCustomerVisibleFqdns": ["ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1926'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --resource-name -n --description --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n
+        \ \"name\": \"testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n  \"type\":
+        \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \ \"location\": null,\n  \"etag\": null,\n  \"peConnectionProxyName\": \"priv_endpoint000007.f54c7d64-ab90-4999-9c69-00d7014dbd89\",\n
+        \ \"peName\": \"priv_endpoint000007\",\n  \"plsConnectionName\": \"priv_endpointconn000008\",\n
+        \ \"plsProxyName\": \"priv_endpoint000007.proxy.41784dc7-6025-4f4d-bdff-ddff9b5b1499\",\n
+        \ \"connectionDetails\": [\n    {\n      \"id\": \"37073289-6d29-4269-84fd-0536207628d4\",\n
+        \     \"privateIpAddress\": \"10.0.0.7\",\n      \"linkIdentifier\": \"805314378\",\n
+        \     \"groupId\": \"amlworkspace\",\n      \"memberName\": \"default\"\n
+        \   },\n    {\n      \"id\": \"ae82f27d-8b6d-490a-81e9-bad52735a30c\",\n      \"privateIpAddress\":
+        \"10.0.0.8\",\n      \"linkIdentifier\": \"805328376\",\n      \"groupId\":
+        \"amlworkspace\",\n      \"memberName\": \"notebook\"\n    },\n    {\n      \"id\":
+        \"1a845dee-cb75-4830-a434-81bb8c79347e\",\n      \"privateIpAddress\": \"10.0.0.9\",\n
+        \     \"linkIdentifier\": \"805327371\",\n      \"groupId\": \"amlworkspace\",\n
+        \     \"memberName\": \"inference\"\n    }\n  ],\n  \"requestDescription\":
+        \"\",\n  \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007\",\n
+        \     \"subnetArmId\": null\n    },\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Rejected\",\n      \"description\": \"somedescription\",\n
+        \     \"actionsRequired\": \"None\"\n    }\n  },\n  \"notebookInternalFqdn\":
+        null,\n  \"notebookCustomerVisibleFqdns\": null\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2023'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:21:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '5.444'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --description --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n
+        \ \"name\": \"testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n  \"type\":
+        \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \ \"location\": null,\n  \"etag\": null,\n  \"peConnectionProxyName\": \"priv_endpoint000007.f54c7d64-ab90-4999-9c69-00d7014dbd89\",\n
+        \ \"peName\": \"priv_endpoint000007\",\n  \"plsConnectionName\": \"priv_endpointconn000008\",\n
+        \ \"plsProxyName\": \"priv_endpoint000007.proxy.41784dc7-6025-4f4d-bdff-ddff9b5b1499\",\n
+        \ \"connectionDetails\": [\n    {\n      \"id\": \"37073289-6d29-4269-84fd-0536207628d4\",\n
+        \     \"privateIpAddress\": \"10.0.0.7\",\n      \"linkIdentifier\": \"805314378\",\n
+        \     \"groupId\": \"amlworkspace\",\n      \"memberName\": \"default\"\n
+        \   },\n    {\n      \"id\": \"ae82f27d-8b6d-490a-81e9-bad52735a30c\",\n      \"privateIpAddress\":
+        \"10.0.0.8\",\n      \"linkIdentifier\": \"805328376\",\n      \"groupId\":
+        \"amlworkspace\",\n      \"memberName\": \"notebook\"\n    },\n    {\n      \"id\":
+        \"1a845dee-cb75-4830-a434-81bb8c79347e\",\n      \"privateIpAddress\": \"10.0.0.9\",\n
+        \     \"linkIdentifier\": \"805327371\",\n      \"groupId\": \"amlworkspace\",\n
+        \     \"memberName\": \"inference\"\n    }\n  ],\n  \"requestDescription\":
+        \"\",\n  \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007\",\n
+        \     \"subnetArmId\": null\n    },\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Rejected\",\n      \"description\": \"somedescription\",\n
+        \     \"actionsRequired\": \"None\"\n    }\n  },\n  \"notebookInternalFqdn\":
+        null,\n  \"notebookCustomerVisibleFqdns\": null\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2023'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:21:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.023'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \     \"name\": \"testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \     \"type\": \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \     \"location\": null,\n      \"etag\": null,\n      \"peConnectionProxyName\":
+        \"priv_endpoint000005.1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\n      \"peName\":
+        \"priv_endpoint000005\",\n      \"plsConnectionName\": \"priv_endpointconn000006\",\n
+        \     \"plsProxyName\": \"priv_endpoint000005.proxy.0421bd9e-965a-484e-8ec5-36ccdb9449d7\",\n
+        \     \"connectionDetails\": [\n        {\n          \"id\": \"ee2dbbd6-9b70-442a-a92c-e7721d8771ac\",\n
+        \         \"privateIpAddress\": \"10.0.0.4\",\n          \"linkIdentifier\":
+        \"805306373\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"default\"\n        },\n        {\n          \"id\": \"2467efd8-4ed6-4b83-a2d4-ee3082026647\",\n
+        \         \"privateIpAddress\": \"10.0.0.5\",\n          \"linkIdentifier\":
+        \"805308371\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"notebook\"\n        },\n        {\n          \"id\": \"2fbe8205-941f-4950-848b-aedcf2a3edd2\",\n
+        \         \"privateIpAddress\": \"10.0.0.6\",\n          \"linkIdentifier\":
+        \"805318373\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"inference\"\n        }\n      ],\n      \"requestDescription\": \"\",\n
+        \     \"properties\": {\n        \"provisioningState\": \"Succeeded\",\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\n
+        \         \"subnetArmId\": null\n        },\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Approved\",\n          \"description\": \"somedescription\",\n
+        \         \"actionsRequired\": \"None\"\n        }\n      },\n      \"notebookInternalFqdn\":
+        \"privatelink.notebookapis.azure.com\",\n      \"notebookCustomerVisibleFqdns\":
+        [\n        \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \     ]\n    },\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n
+        \     \"name\": \"testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a\",\n
+        \     \"type\": \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \     \"location\": null,\n      \"etag\": null,\n      \"peConnectionProxyName\":
+        \"priv_endpoint000007.f54c7d64-ab90-4999-9c69-00d7014dbd89\",\n      \"peName\":
+        \"priv_endpoint000007\",\n      \"plsConnectionName\": \"priv_endpointconn000008\",\n
+        \     \"plsProxyName\": \"priv_endpoint000007.proxy.41784dc7-6025-4f4d-bdff-ddff9b5b1499\",\n
+        \     \"connectionDetails\": [\n        {\n          \"id\": \"37073289-6d29-4269-84fd-0536207628d4\",\n
+        \         \"privateIpAddress\": \"10.0.0.7\",\n          \"linkIdentifier\":
+        \"805314378\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"default\"\n        },\n        {\n          \"id\": \"ae82f27d-8b6d-490a-81e9-bad52735a30c\",\n
+        \         \"privateIpAddress\": \"10.0.0.8\",\n          \"linkIdentifier\":
+        \"805328376\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"notebook\"\n        },\n        {\n          \"id\": \"1a845dee-cb75-4830-a434-81bb8c79347e\",\n
+        \         \"privateIpAddress\": \"10.0.0.9\",\n          \"linkIdentifier\":
+        \"805327371\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"inference\"\n        }\n      ],\n      \"requestDescription\": \"\",\n
+        \     \"properties\": {\n        \"provisioningState\": \"Succeeded\",\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007\",\n
+        \         \"subnetArmId\": null\n        },\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Rejected\",\n          \"description\": \"somedescription\",\n
+        \         \"actionsRequired\": \"None\"\n        }\n      },\n      \"notebookInternalFqdn\":
+        null,\n      \"notebookCustomerVisibleFqdns\": null\n    }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4592'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:21:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.025'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --resource-name -n --type -y
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.e34039a3-dc5d-45c4-8ea3-e8429059f45a?api-version=2021-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/centraluseuap/workspaceOperationsStatus/36c7fa6d-7310-4fdb-81ee-dfea212483c9?api-version=2021-01-01&type=async
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 29 Sep 2021 09:22:01 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/centraluseuap/workspaceOperationsStatus/36c7fa6d-7310-4fdb-81ee-dfea212483c9?api-version=2021-01-01&type=location
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.611'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \     \"name\": \"testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \     \"type\": \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \     \"location\": null,\n      \"etag\": null,\n      \"peConnectionProxyName\":
+        \"priv_endpoint000005.1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\n      \"peName\":
+        \"priv_endpoint000005\",\n      \"plsConnectionName\": \"priv_endpointconn000006\",\n
+        \     \"plsProxyName\": \"priv_endpoint000005.proxy.0421bd9e-965a-484e-8ec5-36ccdb9449d7\",\n
+        \     \"connectionDetails\": [\n        {\n          \"id\": \"ee2dbbd6-9b70-442a-a92c-e7721d8771ac\",\n
+        \         \"privateIpAddress\": \"10.0.0.4\",\n          \"linkIdentifier\":
+        \"805306373\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"default\"\n        },\n        {\n          \"id\": \"2467efd8-4ed6-4b83-a2d4-ee3082026647\",\n
+        \         \"privateIpAddress\": \"10.0.0.5\",\n          \"linkIdentifier\":
+        \"805308371\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"notebook\"\n        },\n        {\n          \"id\": \"2fbe8205-941f-4950-848b-aedcf2a3edd2\",\n
+        \         \"privateIpAddress\": \"10.0.0.6\",\n          \"linkIdentifier\":
+        \"805318373\",\n          \"groupId\": \"amlworkspace\",\n          \"memberName\":
+        \"inference\"\n        }\n      ],\n      \"requestDescription\": \"\",\n
+        \     \"properties\": {\n        \"provisioningState\": \"Succeeded\",\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\n
+        \         \"subnetArmId\": null\n        },\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Approved\",\n          \"description\": \"somedescription\",\n
+        \         \"actionsRequired\": \"None\"\n        }\n      },\n      \"notebookInternalFqdn\":
+        \"privatelink.notebookapis.azure.com\",\n      \"notebookCustomerVisibleFqdns\":
+        [\n        \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \     ]\n    }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2371'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:22:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.023'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21?api-version=2021-01-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n
+        \ \"name\": \"testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21\",\n  \"type\":
+        \"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections\",\n
+        \ \"location\": null,\n  \"etag\": null,\n  \"peConnectionProxyName\": \"priv_endpoint000005.1b2f49bf-4bb8-4c00-91f2-0172449b9e00\",\n
+        \ \"peName\": \"priv_endpoint000005\",\n  \"plsConnectionName\": \"priv_endpointconn000006\",\n
+        \ \"plsProxyName\": \"priv_endpoint000005.proxy.0421bd9e-965a-484e-8ec5-36ccdb9449d7\",\n
+        \ \"connectionDetails\": [\n    {\n      \"id\": \"ee2dbbd6-9b70-442a-a92c-e7721d8771ac\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"805306373\",\n
+        \     \"groupId\": \"amlworkspace\",\n      \"memberName\": \"default\"\n
+        \   },\n    {\n      \"id\": \"2467efd8-4ed6-4b83-a2d4-ee3082026647\",\n      \"privateIpAddress\":
+        \"10.0.0.5\",\n      \"linkIdentifier\": \"805308371\",\n      \"groupId\":
+        \"amlworkspace\",\n      \"memberName\": \"notebook\"\n    },\n    {\n      \"id\":
+        \"2fbe8205-941f-4950-848b-aedcf2a3edd2\",\n      \"privateIpAddress\": \"10.0.0.6\",\n
+        \     \"linkIdentifier\": \"805318373\",\n      \"groupId\": \"amlworkspace\",\n
+        \     \"memberName\": \"inference\"\n    }\n  ],\n  \"requestDescription\":
+        \"\",\n  \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\n
+        \     \"subnetArmId\": null\n    },\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Approved\",\n      \"description\": \"somedescription\",\n
+        \     \"actionsRequired\": \"None\"\n    }\n  },\n  \"notebookInternalFqdn\":
+        \"privatelink.notebookapis.azure.com\",\n  \"notebookCustomerVisibleFqdns\":
+        [\n    \"ml-testamlew-centraluseuap-f31c67e5-86b8-4c0d-b21e-4a33071f29a0.notebooks.azure.net\"\n
+        \ ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2146'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 29 Sep 2021 09:22:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.031'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --resource-name -n --type -y
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.19041-SP0) AZURECLI/2.26.1
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.MachineLearningServices/workspaces/testaml000002/privateEndpointConnections/testaml000002.34341af0-ea37-4b5a-870f-4eb92c3f9f21?api-version=2021-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/centraluseuap/workspaceOperationsStatus/0a9067a7-a57f-4151-ae62-543d21291204?api-version=2021-01-01&type=async
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 29 Sep 2021 09:22:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/centraluseuap/workspaceOperationsStatus/0a9067a7-a57f-4151-ae62-543d21291204?api-version=2021-01-01&type=location
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:512cc15a-13b5-415b-bfd0-dce7accb6bb1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-ms-response-type:
+      - standard
+      x-request-time:
+      - '0.557'
+    status:
+      code: 202
+      message: Accepted
+version: 1
