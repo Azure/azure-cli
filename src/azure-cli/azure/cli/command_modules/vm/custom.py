@@ -3467,12 +3467,9 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
                          location=None, no_wait=False, tags=None, permissions=None, soft_delete=None):
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    gallery = Gallery(description=description, location=location, tags=(tags or {}))
     if soft_delete is not None:
-        policy = {'is_soft_delete_enabled': soft_delete}
-        gallery = Gallery(description=description, location=location, tags=(tags or {}), soft_delete_policy=policy)
-    else:
-        gallery = Gallery(description=description, location=location, tags=(tags or {}))
-
+        gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
     client = _compute_client_factory(cmd.cli_ctx)
     if permissions:
         SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
