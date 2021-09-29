@@ -38,6 +38,7 @@ from azure.cli.command_modules.acs.decorator import (
     safe_list_get,
     safe_lower,
     validate_counts_in_autoscaler,
+    validate_decorator_mode,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockCLI,
@@ -81,6 +82,15 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
     def test_safe_lower(self):
         self.assertEqual(safe_lower(None), None)
         self.assertEqual(safe_lower("ABC"), "abc")
+
+    def test_validate_decorator_mode(self):
+        self.assertEqual(validate_decorator_mode(DecoratorMode.CREATE), True)
+        self.assertEqual(validate_decorator_mode(DecoratorMode.UPDATE), True)
+        self.assertEqual(validate_decorator_mode(DecoratorMode), False)
+        self.assertEqual(validate_decorator_mode(1), False)
+        self.assertEqual(validate_decorator_mode("1"), False)
+        self.assertEqual(validate_decorator_mode(True), False)
+        self.assertEqual(validate_decorator_mode({}), False)
 
     def test_check_is_msi_cluster(self):
         self.assertEqual(check_is_msi_cluster(None), False)
@@ -284,6 +294,9 @@ class AKSContextTestCase(unittest.TestCase):
         # fail on not passing dictionary-like parameters
         with self.assertRaises(CLIInternalError):
             AKSContext(self.cmd, [], decorator_mode=DecoratorMode.CREATE)
+        # fail on not passing decorator_mode with Enum type DecoratorMode
+        with self.assertRaises(CLIInternalError):
+            AKSContext(self.cmd, {}, decorator_mode=1)
 
     def test_attach_mc(self):
         ctx_1 = AKSContext(self.cmd, {}, decorator_mode=DecoratorMode.CREATE)
@@ -3035,11 +3048,11 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {
-                "uptime_sla": None,
+                "uptime_sla": False,
             },
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_1.get_uptime_sla(), None)
+        self.assertEqual(ctx_1.get_uptime_sla(), False)
         sku = self.models.ManagedClusterSKU(
             name="Basic",
             tier="Paid",
@@ -3050,6 +3063,91 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_uptime_sla(), True)
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "uptime_sla": False,
+            },
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        sku_2 = self.models.ManagedClusterSKU(
+            name="Basic",
+            tier="Paid",
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            sku=sku_2,
+        )
+        ctx_2.attach_mc(mc_2)
+        self.assertEqual(ctx_2.get_uptime_sla(), False)
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {
+                "uptime_sla": True,
+                "no_uptime_sla": True,
+            },
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        sku_3 = self.models.ManagedClusterSKU(
+            name="Basic",
+            tier="Free",
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            sku=sku_3,
+        )
+        ctx_3.attach_mc(mc_3)
+        self.assertEqual(ctx_3.get_uptime_sla(), False)
+
+    def test_get_no_uptime_sla(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {
+                "no_uptime_sla": False,
+            },
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_no_uptime_sla(), False)
+        sku = self.models.ManagedClusterSKU(
+            name="Basic",
+            tier="Paid",
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            sku=sku,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_no_uptime_sla(), False)
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "uptime_sla": True,
+                "no_uptime_sla": True,
+            },
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        sku_2 = self.models.ManagedClusterSKU(
+            name="Basic",
+            tier="Free",
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            sku=sku_2,
+        )
+        ctx_2.attach_mc(mc_2)
+        # fail on mutually exclusive uptime_sla and no_uptime_sla
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_uptime_sla()
+        # fail on mutually exclusive uptime_sla and no_uptime_sla
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_no_uptime_sla()
 
     def test_get_tags(self):
         # default
@@ -4827,6 +4925,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             {},
         )
+        # fail on no updated parameter provided
         with self.assertRaises(RequiredArgumentMissingError):
             dec_1.check_raw_parameters()
 
@@ -4935,6 +5034,9 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             ],
         )
         dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_auto_scaler_profile(None)
         dec_mc_1 = dec_1.update_auto_scaler_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -4973,9 +5075,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         dec_2.context.attach_mc(mc_2)
-        # fail on passing the wrong mc object
-        with self.assertRaises(CLIInternalError):
-            dec_2.update_auto_scaler_profile(None)
         dec_mc_2 = dec_2.update_auto_scaler_profile(mc_2)
         ground_truth_agent_pool_profile_2 = (
             self.models.ManagedClusterAgentPoolProfile(
@@ -5114,6 +5213,116 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                     )
                 ]
             )
+
+    def test_update_sku(self):
+        # default value in `aks_update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "uptime_sla": False,
+                "no_uptime_sla": False,
+            },
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Free",
+            )
+        )
+        dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_sku(None)
+        dec_mc_1 = dec_1.update_sku(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Free",
+            )
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "uptime_sla": True,
+                "no_uptime_sla": True,
+            },
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Free",
+            )
+        )
+        dec_2.context.attach_mc(mc_2)
+        # fail on mutually exclusive uptime_sla and no_uptime_sla
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_2.update_sku(mc_2)
+
+        # custom value
+        dec_3 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "uptime_sla": False,
+                "no_uptime_sla": True,
+            },
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Paid",
+            )
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_sku(mc_3)
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Free",
+            )
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        # custom value
+        dec_4 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "uptime_sla": True,
+                "no_uptime_sla": False,
+            },
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Free",
+            )
+        )
+        dec_4.context.attach_mc(mc_4)
+        dec_mc_4 = dec_4.update_sku(mc_4)
+        ground_truth_mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(
+                name="Basic",
+                tier="Paid",
+            )
+        )
+        self.assertEqual(dec_mc_4, ground_truth_mc_4)
 
     def test_update_default_mc_profile(self):
         pass
