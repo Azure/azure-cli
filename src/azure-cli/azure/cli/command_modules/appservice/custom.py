@@ -1769,7 +1769,7 @@ def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
 
 
 def list_backups(cmd, resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'get_backup_configuration', slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'list_backups', slot)
 
 
 def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
