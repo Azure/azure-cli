@@ -4349,6 +4349,43 @@ class VMGalleryImage(ScenarioTest):
         ])
 
 
+    @ResourceGroupPreparer(location='westus')
+    def test_gallery_soft_delete(self, resource_group):
+        self.kwargs.update({
+            'gallery_name': self.create_random_name('sig_', 10)
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery_name} --soft-delete True', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True)
+        ])
+
+        self.cmd('sig show -g {rg} -r {gallery_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True)
+        ])
+
+        self.cmd('sig update -g {rg} -r {gallery_name} --soft-delete False', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+
+        self.cmd('sig show -g {rg} -r {gallery_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+
+        self.cmd('sig delete -g {rg} -r {gallery_name}')
+
+
 # endregion
 
 

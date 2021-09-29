@@ -29,6 +29,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
+    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     DecoratorMode,
 )
 from azure.cli.command_modules.acs.custom import (
@@ -3387,12 +3388,10 @@ class AKSContext:
         """
         # read the original value passed by the command
         tags = self.raw_param.get("tags")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.tags is not None
-        ):
-            tags = self.mc.tags
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.tags is not None:
+                tags = self.mc.tags
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -3419,6 +3418,17 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return edge_zone
+
+    def get_disable_local_accounts(self) -> bool:
+        """Obtain the value of disable_local_accounts.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_local_accounts = self.raw_param.get("disable_local_accounts")
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return disable_local_accounts
 
     def get_client_id_from_identity_or_sp_profile(self) -> str:
         """Helper function to obtain the value of client_id from identity_profile or service_principal_profile.
@@ -3484,7 +3494,7 @@ class AKSCreateDecorator:
         :return: the ManagedCluster object
         """
         # Initialize a ManagedCluster object with mandatory parameter location and optional parameters tags, dns_prefix,
-        # kubernetes_version, disable_rbac and node_osdisk_diskencryptionset_id.
+        # kubernetes_version, disable_rbac, node_osdisk_diskencryptionset_id, disable_local_accounts.
         mc = self.models.ManagedCluster(
             location=self.context.get_location(),
             tags=self.context.get_tags(),
@@ -3492,6 +3502,7 @@ class AKSCreateDecorator:
             kubernetes_version=self.context.get_kubernetes_version(),
             enable_rbac=not self.context.get_disable_rbac(),
             disk_encryption_set_id=self.context.get_node_osdisk_diskencryptionset_id(),
+            disable_local_accounts=self.context.get_disable_local_accounts(),
         )
 
         # attach mc to AKSContext
@@ -3910,6 +3921,10 @@ class AKSCreateDecorator:
                 addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
             addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
             addons.remove('confcom')
+        if 'open-service-mesh' in addons:
+            addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
+            addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
+            addons.remove('open-service-mesh')
         mc.addon_profiles = addon_profiles
         return mc
 
@@ -4280,14 +4295,14 @@ class AKSUpdateDecorator:
                 '"--disable-cluster-autoscaler" or '
                 '"--update-cluster-autoscaler" or '
                 '"--cluster-autoscaler-profile" or '
-                '"--load-balancer-managed-outbound-ip-count" or'
+                '"--load-balancer-managed-outbound-ip-count" or '
                 '"--load-balancer-outbound-ips" or '
-                '"--load-balancer-outbound-ip-prefixes" or'
-                '"--load-balancer-outbound-ports" or'
-                '"--load-balancer-idle-timeout" or'
+                '"--load-balancer-outbound-ip-prefixes" or '
+                '"--load-balancer-outbound-ports" or '
+                '"--load-balancer-idle-timeout" or '
                 '"--auto-upgrade-channel" or '
-                '"--attach-acr" or "--detach-acr" or'
-                '"--uptime-sla" or'
+                '"--attach-acr" or "--detach-acr" or '
+                '"--uptime-sla" or '
                 '"--no-uptime-sla" or '
                 '"--api-server-authorized-ip-ranges" or '
                 '"--enable-aad" or '
@@ -4301,7 +4316,8 @@ class AKSUpdateDecorator:
                 '"--enable-azure-rbac" or '
                 '"--disable-azure-rbac" or '
                 '"--enable-public-fqdn" or '
-                '"--disable-public-fqdn"'
+                '"--disable-public-fqdn" or '
+                '"--tags"'
             )
 
     def fetch_mc(self) -> ManagedCluster:
@@ -4317,7 +4333,22 @@ class AKSUpdateDecorator:
         self.context.attach_mc(mc)
         return mc
 
-    def update_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
+    def update_tags(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update tags for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        tags = self.context.get_tags()
+        if tags is not None:
+            mc.tags = tags
+        return mc
+
+    def update_auto_scaler_profile(self, mc):
         """Update autoscaler profile for the ManagedCluster object.
 
         :return: the ManagedCluster object
