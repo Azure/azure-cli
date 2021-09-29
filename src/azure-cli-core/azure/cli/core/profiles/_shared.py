@@ -190,7 +190,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'activity_log_alerts': '2017-04-01',
             'activity_logs': '2015-04-01',
@@ -273,7 +273,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_QUEUE: '2019-07-07',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
@@ -317,7 +317,7 @@ AZURE_API_PROFILES = {
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
