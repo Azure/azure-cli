@@ -234,9 +234,7 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
                             location_mode=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
-        if account_name:
-            account_name = account_name.split('.', 2)[0]
-        client_kwargs = {'account_name': account_name,
+        client_kwargs = {'account_name': account_name.split('.', 2)[0] if account_name else account_name,
                          'account_key': account_key,
                          'connection_string': connection_string,
                          'sas_token': sas_token}
