@@ -289,7 +289,7 @@ def _pg_high_availability_validator(high_availability, standby_availability_zone
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
         if single_az:
-            raise ArgumentUsageError("This region is single availability zone."
+            raise ArgumentUsageError("This region is single availability zone. "
                                      "High availability is not supported in a single availability zone region.")
 
     if standby_availability_zone:
@@ -315,7 +315,7 @@ def maintenance_window_validator(ns):
         if len(parsed_input) >= 1 and parsed_input[0] not in options:
             raise CLIError('Incorrect value for --maintenance-window. '
                            'The first value means the scheduled day in a week or '
-                           'can be "Disabled" to reset maintenance window.'
+                           'can be "Disabled" to reset maintenance window. '
                            'Allowed values: {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"}')
         if len(parsed_input) >= 2 and \
            (not parsed_input[1].isdigit() or int(parsed_input[1]) < 0 or int(parsed_input[1]) > 23):
@@ -387,9 +387,13 @@ def validate_server_name(db_context, server_name, type_):
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
 
     if db_context.command_group == 'mysql':
-        # result = client.execute(db_context.location, name_availability_request={'name': server_name, 'type': type_})
-        return
-    result = client.execute(name_availability_request={'name': server_name, 'type': type_})
+        result = client.execute(db_context.location,
+                                name_availability_request={
+                                    'name': server_name,
+                                    'location_name': db_context.location,
+                                    'type': type_})
+    else:
+        result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 
     if not result.name_available:
         raise ValidationError(result.message)

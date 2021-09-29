@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+from dateutil import parser
 from importlib import import_module
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
@@ -20,7 +21,7 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import mysql_arguments_validator, validate_mysql_replica
+from .validators import mysql_arguments_validator, validate_mysql_replica, validate_server_name
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -175,14 +176,18 @@ def flexible_server_restore(cmd, client,
     try:
         id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
-
         if not zone:
             zone = source_server_object.availability_zone
-
         location = ''.join(source_server_object.location.lower().split())
+
+        db_context = DbContext(
+            cmd=cmd, cf_availability=cf_mysql_check_resource_availability, logging_name='MySQL', command_group='mysql', server_client=client,
+            location=location)
+        validate_server_name(db_context, server_name, provider + '/flexibleServers')
+
         parameters = mysql_flexibleservers.models.Server(
             location=location,
-            restore_point_in_time=restore_point_in_time,
+            restore_point_in_time=parser.parse(restore_point_in_time),
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
             availability_zone=zone

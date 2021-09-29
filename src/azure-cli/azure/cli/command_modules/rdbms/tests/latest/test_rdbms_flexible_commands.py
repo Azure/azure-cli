@@ -205,7 +205,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('local-context off')
 
-        location = 'eastus2euap'
+        location = 'westus2'
         _, _, iops_info = get_mysql_list_skus_info(self, location)
 
         # flexible-server create with user input
@@ -299,9 +299,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         earliest_restore_time = result['backup']['earliestRestoreDate']
         date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
 
-        # if current_time < earliest_restore_time:
-        #     sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time,
-        #                                                                                      date_format)).total_seconds())
+        if current_time < earliest_restore_time:
+            sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time,
+                                                                                             date_format)).total_seconds())
 
         # default vnet resources
         restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} '
@@ -379,13 +379,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access), checks=NoneCheck())
 
-        # sleep(60 * 5)  # wait until associationk links are deleted
-
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
+    mysql_location = 'westus2'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -758,7 +756,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
+    mysql_location = 'westus2'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1211,7 +1209,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
+    mysql_location = 'westus2'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -1432,7 +1430,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
+    mysql_location = 'westus2'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)

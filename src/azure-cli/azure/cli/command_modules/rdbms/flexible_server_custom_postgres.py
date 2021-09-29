@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+from dateutil import parser
 from importlib import import_module
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
@@ -184,7 +185,7 @@ def flexible_server_restore(cmd, client,
         location = ''.join(source_server_object.location.lower().split())
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
-            point_in_time_utc=restore_point_in_time,
+            point_in_time_utc=parser.parse(restore_point_in_time),
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
             availability_zone=zone
