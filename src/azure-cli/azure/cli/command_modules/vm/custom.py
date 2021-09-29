@@ -3567,19 +3567,13 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                     namespace='Microsoft.Compute', type='snapshots', name=s)
     source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
+    profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
+                                            end_of_life_date=end_of_life_date,
+                                            target_regions=target_regions or [TargetRegion(name=location)],
+                                            source=source, replica_count=replica_count,
+                                            storage_account_type=storage_account_type)
     if replication_mode is not None:
-        profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
-                                                end_of_life_date=end_of_life_date,
-                                                target_regions=target_regions or [TargetRegion(name=location)],
-                                                source=source, replica_count=replica_count,
-                                                storage_account_type=storage_account_type,
-                                                replication_mode=replication_mode)
-    else:
-        profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
-                                                end_of_life_date=end_of_life_date,
-                                                target_regions=target_regions or [TargetRegion(name=location)],
-                                                source=source, replica_count=replica_count,
-                                                storage_account_type=storage_account_type)
+        profile.replication_mode = replication_mode
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
             raise CLIError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
