@@ -242,14 +242,14 @@ parameters:
                         ...n
                     },
                     // Optional parameter to list tables that you want included in the migration.
-                    "table_map": {
-                      "sourceSchema.tableName": "targetSchema.tableName",
-                      "sourceSchema.tableName": "targetSchema.tableName",
-                      "sourceSchema.tableName": "targetSchema.tableName"}
+                    "selectedTables": [
+                        "schemaName1.tableName1",
+                        ...n
+                    ]
                 },
                 ...n
             ]
-        
+
         For MySQL, the format of the database options JSON object.
             [
                 {
@@ -300,14 +300,14 @@ parameters:
                         "DelayProgressUpdatesInStorageInterval": "00:00:30",
                     },
                     // Optional parameter to list tables that you want included in the migration.
-                    "selectedTables": [
-                        "schemaName1.tableName1",
-                        ...n
-                    ]
+                    "table_map": {
+                      "sourceSchema.tableName": "targetSchema.tableName",
+                      "sourceSchema.tableName": "targetSchema.tableName",
+                      "sourceSchema.tableName": "targetSchema.tableName"}
                 },
                 ...n
             ]
-            
+
   - name: --source-connection-json
     type: string
     short-summary: >
@@ -333,7 +333,7 @@ parameters:
             "encryptConnection": true,      // highly recommended to leave as true
             "trustServerCertificate": false  // highly recommended to leave as false
         }
-        
+
       The format of the connection JSON object for MySQL connections.
         {
             "userName": "user name",    // if this is missing or null, you will be prompted

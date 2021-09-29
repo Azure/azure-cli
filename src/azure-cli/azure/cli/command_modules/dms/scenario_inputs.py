@@ -81,7 +81,6 @@ def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
         if source_setting is not None and isinstance(source_setting, dict):
             make_source_server_read_only = source_setting.get('make_source_server_read_only', False)
 
-
     return MigrateMySqlAzureDbForMySqlOfflineTaskInput(source_connection_info=source_connection_info,
                                                        target_connection_info=target_connection_info,
                                                        selected_databases=database_options,
