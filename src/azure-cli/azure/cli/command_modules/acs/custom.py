@@ -100,6 +100,7 @@ from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_A
 from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
 from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
 from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
+from ._consts import CONST_OPEN_SERVICE_MESH_ADDON_NAME
 from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
 from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM, CONST_PRIVATE_DNS_ZONE_NONE
@@ -3512,6 +3513,15 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
                 if enable_sgxquotehelper:
                     addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+            elif addon == CONST_OPEN_SERVICE_MESH_ADDON_NAME:
+                if addon_profile.enabled:
+                    raise AzureInternalError(
+                        'The open-service-mesh addon is already enabled for this managed '
+                        'cluster.\n To change open-service-mesh configuration, run '
+                        '"az aks disable-addons -a open-service-mesh -n {} -g {}" '
+                        'before enabling it again.'
+                        .format(name, resource_group_name))
+                addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -3625,6 +3635,10 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
             addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
         addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
         addons.remove('confcom')
+    if 'open-service-mesh' in addons:
+        addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
+        addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
+        addons.remove('open-service-mesh')
     # error out if any (unrecognized) addons remain
     if addons:
         raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
