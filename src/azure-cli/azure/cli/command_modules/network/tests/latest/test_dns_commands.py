@@ -169,6 +169,8 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} create -n myrs{0} -g {{rg}} --zone-name {{zone}}'.format(t))
             add_command = 'set-record' if t == 'cname' else 'add-record'
             self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t], add_command))
+            # Issue 10467: FIX add-record is not idempotent
+            self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t], add_command))
             # test creating the record set at the same time you add records
             self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0}alt {1}'.format(t, args[t], add_command))
 

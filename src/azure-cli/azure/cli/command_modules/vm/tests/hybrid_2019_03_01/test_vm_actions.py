@@ -7,7 +7,7 @@ import os
 import shutil
 import tempfile
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,

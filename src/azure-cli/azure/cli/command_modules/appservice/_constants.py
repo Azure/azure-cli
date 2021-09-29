@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import enum
 import os
 
 NODE_VERSION_DEFAULT = "10.14"
@@ -91,3 +92,9 @@ WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'java': 'AppService/windows/java-jar-webapp-on-azure.yml',
     'tomcat': 'AppService/windows/java-war-webapp-on-azure.yml'
 }
+
+
+class APP_TYPE(enum.Enum):
+    WEBAPP = "webapp"
+    FUNCTIONAPP = "functionapp"
+    LOGICAPP = "logicapp"

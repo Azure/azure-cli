@@ -210,3 +210,27 @@ def cf_synapse_notebook(cli_ctx, workspace_name):
 
 def cf_synapse_spark_pool(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).big_data_pools
+
+
+def cf_synapse_library(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).library
+
+
+def cf_synapse_client_managedprivateendpoints_factory(cli_ctx, workspace_name):
+    from azure.synapse.managedprivateendpoints import ManagedPrivateEndpointsClient
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
+    cred, _, _ = profile.get_login_credentials(
+        resource=cli_ctx.cloud.endpoints.synapse_analytics_resource_id,
+        subscription_id=subscription_id
+    )
+    return ManagedPrivateEndpointsClient(
+        credential=cred,
+        endpoint='{}{}{}'.format("https://", workspace_name, cli_ctx.cloud.suffixes.synapse_analytics_endpoint)
+    )
+
+
+def cf_synapse_managedprivateendpoints_factory(cli_ctx, workspace_name):
+    return cf_synapse_client_managedprivateendpoints_factory(cli_ctx, workspace_name).managed_private_endpoints

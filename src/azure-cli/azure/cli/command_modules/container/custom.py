@@ -32,7 +32,7 @@ from knack.prompting import prompt_pass, prompt, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
-                                                 ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
+                                                 ResourceRequirements, Volume, VolumeMount, ContainerExecRequest, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
@@ -63,7 +63,7 @@ def get_container(client, resource_group_name, name):
 
 def delete_container(client, resource_group_name, name, **kwargs):
     """Delete a container group. """
-    return client.delete(resource_group_name, name)
+    return client.begin_delete(resource_group_name, name)
 
 
 # pylint: disable=too-many-statements
@@ -219,7 +219,7 @@ def create_container(cmd,
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
-    lro = sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name,
+    lro = sdk_no_wait(no_wait, container_group_client.begin_create_or_update, resource_group_name,
                       name, cgroup)
 
     if assign_identity is not None and identity_scope:
@@ -372,7 +372,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     return None, {}
 
 
-# pylint: disable=unsupported-assignment-operation
+# pylint: disable=unsupported-assignment-operation,protected-access
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
@@ -398,12 +398,11 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
 
     cg_defintion['name'] = name
 
-    location = location or cg_defintion.get('location', None)
-    if not location:
-        location = resource_client.resource_groups.get(resource_group_name).location
+    if cg_defintion.get('location'):
+        location = cg_defintion.get('location')
     cg_defintion['location'] = location
 
-    api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
+    api_version = cg_defintion.get('apiVersion', None) or container_group_client._config.api_version
 
     return sdk_no_wait(no_wait,
                        resource_client.resources.begin_create_or_update,
@@ -561,6 +560,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             stream_args=(container_client, resource_group_name, name, container_name, container_group.restart_policy))
 
 
+# pylint: disable=protected-access
 def container_export(cmd, resource_group_name, name, file):
     resource_client = cf_resource(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
@@ -569,7 +569,7 @@ def container_export(cmd, resource_group_name, name, file):
                                              '',
                                              "containerGroups",
                                              name,
-                                             container_group_client.api_version).__dict__
+                                             container_group_client._config.api_version).__dict__
 
     # Remove unwanted properites
     resource['properties'].pop('instanceView', None)
@@ -597,7 +597,7 @@ def container_export(cmd, resource_group_name, name, file):
         resource['properties']['containers'][i]['properties'].pop('instanceView', None)
 
     # Add the api version
-    resource['apiVersion'] = container_group_client.api_version
+    resource['apiVersion'] = container_group_client._config.api_version
 
     with open(file, 'w+') as f:
         yaml.safe_dump(resource, f, default_flow_style=False)
@@ -615,10 +615,14 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
         if container_name is None:
             container_name = container_group.containers[0].name
 
-        terminalsize = os.get_terminal_size()
+        try:
+            terminalsize = os.get_terminal_size()
+        except OSError:
+            terminalsize = os.terminal_size((80, 24))
         terminal_size = ContainerExecRequestTerminalSize(rows=terminalsize.lines, cols=terminalsize.columns)
+        exec_request = ContainerExecRequest(command=exec_command, terminal_size=terminal_size)
 
-        execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_command, terminal_size)
+        execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_request)
 
         if platform.system() is WINDOWS_NAME:
             _start_exec_pipe_windows(execContainerResponse.web_socket_uri, execContainerResponse.password)
@@ -703,7 +707,7 @@ def _flush_stdin(ws, buff, lock):
     while True:
         time.sleep(0.01)
         try:
-            if len(buff) == 0:
+            if not buff:
                 continue
             lock.acquire()
             x = bytes(buff)

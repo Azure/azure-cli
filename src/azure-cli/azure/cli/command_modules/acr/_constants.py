@@ -25,6 +25,8 @@ ACR_NULL_CONTEXT = '/dev/null'
 
 ACR_TASK_QUICKTASK = 'quicktask'
 
+ACR_RUN_DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
+
 
 def get_classic_sku(cmd):
     SkuName = cmd.get_models('SkuName')

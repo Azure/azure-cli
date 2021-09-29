@@ -465,6 +465,15 @@ examples:
         az security setting show -n "MCAS"
 """
 
+helps['security setting update'] = """
+type: command
+short-summary: Updates a security setting.
+examples:
+  - name: Update a security setting.
+    text: >
+        az security setting update -n "Sentinel" --enabled true
+"""
+
 helps['security task'] = """
 type: group
 short-summary: View security tasks (recommendations).

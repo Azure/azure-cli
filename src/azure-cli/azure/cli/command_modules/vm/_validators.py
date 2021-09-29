@@ -245,6 +245,10 @@ def _parse_image_argument(cmd, namespace):
     if is_valid_resource_id(namespace.image):
         return 'image_id'
 
+    from ._vm_utils import is_shared_gallery_image_id
+    if is_shared_gallery_image_id(namespace.image):
+        return 'shared_gallery_image_id'
+
     # 2 - attempt to match an URN pattern
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
     if urn_match:
@@ -324,7 +328,7 @@ def _get_image_plan_info_if_exists(cmd, namespace):
                        "will be skipped", namespace.image, ex.message)
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, too-many-return-statements
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
         return 'create unmanaged OS disk created from generalized VHD'
@@ -338,6 +342,8 @@ def _get_storage_profile_description(profile):
         return 'create managed OS disk from Azure Marketplace image'
     if profile == StorageProfile.ManagedSpecializedOSDisk:
         return 'attach existing managed OS disk'
+    if profile == StorageProfile.SharedGalleryImage:
+        return 'create OS disk from shared gallery image'
 
 
 def _validate_location(cmd, namespace, zone_info, size_info):
@@ -379,6 +385,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         elif image_type == 'image_id':
             # STORAGE PROFILE #5
             namespace.storage_profile = StorageProfile.ManagedCustomImage
+        elif image_type == 'shared_gallery_image_id':
+            namespace.storage_profile = StorageProfile.SharedGalleryImage
         elif image_type == 'urn':
             if namespace.use_unmanaged_disk:
                 # STORAGE PROFILE #1
@@ -410,6 +418,10 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                      'storage_container_name', 'use_unmanaged_disk']
         if for_scale_set:
             forbidden.append('os_disk_name')
+
+    elif namespace.storage_profile == StorageProfile.SharedGalleryImage:
+        required = ['image']
+        forbidden = ['attach_os_disk', 'storage_account', 'storage_container_name', 'use_unmanaged_disk']
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
@@ -506,7 +518,23 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                                             'Microsoft.Compute') for d in namespace.attach_data_disks]
 
     if not namespace.os_type:
-        namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+        if namespace.storage_profile == StorageProfile.SharedGalleryImage:
+
+            if namespace.location is None:
+                from azure.cli.core.azclierror import RequiredArgumentMissingError
+                raise RequiredArgumentMissingError(
+                    'Please input the location of the shared gallery image through the parameter --location.')
+
+            from ._vm_utils import parse_shared_gallery_image_id
+            image_info = parse_shared_gallery_image_id(namespace.image)
+
+            from ._client_factory import cf_shared_gallery_image
+            shared_gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+            namespace.os_type = shared_gallery_image_info.os_type
+
+        else:
+            namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
@@ -1244,7 +1272,13 @@ def process_vm_create_namespace(cmd, namespace):
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
+    _validate_capacity_reservation_group(cmd, namespace)
+
 # endregion
+
+
+def process_vm_update_namespace(cmd, namespace):
+    _validate_capacity_reservation_group(cmd, namespace)
 
 
 # region VMSS Create Validators
@@ -1561,6 +1595,8 @@ def process_vmss_create_namespace(cmd, namespace):
     if namespace.eviction_policy and not namespace.priority:
         raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
 
+    _validate_capacity_reservation_group(cmd, namespace)
+
 
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
     if not namespace.instance_id:
@@ -1569,6 +1605,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
                            " Please use --instance-id to specify a VM instance")
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
+    _validate_capacity_reservation_group(cmd, namespace)
 # endregion
 
 
@@ -1909,3 +1946,22 @@ def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
             'name': namespace.edge_zone,
             'type': 'EdgeZone'
         }
+
+
+def _validate_capacity_reservation_group(cmd, namespace):
+
+    if namespace.capacity_reservation_group == 'None':
+        namespace.capacity_reservation_group = ''
+
+    elif namespace.capacity_reservation_group:
+
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        if not is_valid_resource_id(namespace.capacity_reservation_group):
+            namespace.capacity_reservation_group = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute',
+                type='CapacityReservationGroups',
+                name=namespace.capacity_reservation_group
+            )
