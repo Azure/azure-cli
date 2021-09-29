@@ -2805,7 +2805,8 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_public_fqdn=False,
                disable_public_fqdn=False,
                enable_azure_rbac=False,
-               disable_azure_rbac=False):
+               disable_azure_rbac=False,
+               tags=None):
     ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                        operation_group='managed_clusters')
@@ -2851,19 +2852,20 @@ def aks_update(cmd, client, resource_group_name, name,
             not enable_local_accounts and
             not disable_local_accounts and
             not enable_public_fqdn and
-            not disable_public_fqdn):
+            not disable_public_fqdn and
+            tags is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
                        '"--cluster-autoscaler-profile" or '
-                       '"--load-balancer-managed-outbound-ip-count" or'
+                       '"--load-balancer-managed-outbound-ip-count" or '
                        '"--load-balancer-outbound-ips" or '
-                       '"--load-balancer-outbound-ip-prefixes" or'
-                       '"--load-balancer-outbound-ports" or'
-                       '"--load-balancer-idle-timeout" or'
+                       '"--load-balancer-outbound-ip-prefixes" or '
+                       '"--load-balancer-outbound-ports" or '
+                       '"--load-balancer-idle-timeout" or '
                        '"--auto-upgrade-channel" or '
-                       '"--attach-acr" or "--detach-acr" or'
-                       '"--uptime-sla" or'
+                       '"--attach-acr" or "--detach-acr" or '
+                       '"--uptime-sla" or '
                        '"--no-uptime-sla" or '
                        '"--api-server-authorized-ip-ranges" or '
                        '"--enable-aad" or '
@@ -2879,13 +2881,19 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--enable-local-accounts" or '
                        '"--disable-local-accounts" or '
                        '"--enable-public-fqdn" or '
-                       '"--disable-public-fqdn"')
+                       '"--disable-public-fqdn" or '
+                       '"--tags"')
 
     if not enable_managed_identity and assign_identity:
         raise CLIError(
             '--assign-identity can only be specified when --enable-managed-identity is specified')
 
     instance = client.get(resource_group_name, name)
+
+    # update tags
+    if tags is not None:
+        instance.tags = tags
+
     # For multi-agent pool, use the az aks nodepool command
     if update_autoscaler > 0 and len(instance.agent_pool_profiles) > 1:
         raise CLIError('There are more than one node pool in the cluster. Please use "az aks nodepool" command '

@@ -3068,6 +3068,21 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_tags(), {})
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "tags": {"xyz": "100"},
+            },
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            tags={},
+        )
+        ctx_2.attach_mc(mc_2)
+        self.assertEqual(ctx_2.get_tags(), {"xyz": "100"})
+
     def test_get_edge_zone(self):
         # default
         ctx_1 = AKSContext(
@@ -4848,6 +4863,55 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc, ground_truth_mc)
         self.assertEqual(dec_mc, dec_1.context.mc)
         self.client.get.assert_called_once_with("test_rg_name", "test_cluster")
+
+    def test_update_tags(self):
+        # default value in `aks_create`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "tags": None,
+            },
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            tags={"abc": "xyz"},
+        )
+        dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_tags(None)
+        dec_mc_1 = dec_1.update_tags(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            tags={"abc": "xyz"},
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom_value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            self.models,
+            {
+                "tags": {},
+            },
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            tags={"abc": "xyz"},
+        )
+        dec_2.context.attach_mc(mc_2)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_2.update_tags(None)
+        dec_mc_2 = dec_2.update_tags(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            tags={},
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
     def test_update_auto_scaler_profile(self):
         # default value in `aks_update`
