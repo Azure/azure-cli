@@ -59,7 +59,8 @@ def file_data_service_factory(cli_ctx, kwargs):
     return generic_data_service_factory(cli_ctx, t_file_svc, kwargs.pop('account_name', None),
                                         kwargs.pop('account_key', None),
                                         connection_string=kwargs.pop('connection_string', None),
-                                        sas_token=kwargs.pop('sas_token', None))
+                                        sas_token=kwargs.pop('sas_token', None),
+                                        endpoint_suffix=kwargs.pop('endpoint_suffix', None))
 
 
 def page_blob_service_factory(cli_ctx, kwargs):
@@ -68,7 +69,8 @@ def page_blob_service_factory(cli_ctx, kwargs):
                                         kwargs.pop('account_key', None),
                                         connection_string=kwargs.pop('connection_string', None),
                                         sas_token=kwargs.pop('sas_token', None),
-                                        token_credential=kwargs.pop('token_credential', None))
+                                        token_credential=kwargs.pop('token_credential', None),
+                                        endpoint_suffix=kwargs.pop('endpoint_suffix', None))
 
 
 def blob_data_service_factory(cli_ctx, kwargs):
@@ -94,7 +96,8 @@ def table_data_service_factory(cli_ctx, kwargs):
                                         kwargs.pop('account_name', None),
                                         kwargs.pop('account_key', None),
                                         connection_string=kwargs.pop('connection_string', None),
-                                        sas_token=kwargs.pop('sas_token', None))
+                                        sas_token=kwargs.pop('sas_token', None),
+                                        endpoint_suffix=kwargs.pop('endpoint_suffix', None))
 
 
 def queue_data_service_factory(cli_ctx, kwargs):
@@ -105,7 +108,8 @@ def queue_data_service_factory(cli_ctx, kwargs):
         kwargs.pop('account_key', None),
         connection_string=kwargs.pop('connection_string', None),
         sas_token=kwargs.pop('sas_token', None),
-        token_credential=kwargs.pop('token_credential', None))
+        token_credential=kwargs.pop('token_credential', None),
+        endpoint_suffix=kwargs.pop('endpoint_suffix', None))
 
 
 def cloud_storage_account_service_factory(cli_ctx, kwargs):
@@ -113,9 +117,12 @@ def cloud_storage_account_service_factory(cli_ctx, kwargs):
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     sas_token = kwargs.pop('sas_token', None)
+    endpoint_suffix = kwargs.pop('endpoint_suffix', None)
     kwargs.pop('connection_string', None)
-    kwargs.pop('endpoint_suffix', None)
-    return t_cloud_storage_account(account_name, account_key, sas_token)
+    return t_cloud_storage_account(account_name=account_name,
+                                   account_key=account_key,
+                                   sas_token=sas_token,
+                                   endpoint_suffix=endpoint_suffix)
 
 
 def multi_service_properties_factory(cli_ctx, kwargs):
@@ -274,6 +281,7 @@ def cf_adls_service(cli_ctx, kwargs):
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
+    endpoint_suffix = kwargs.pop('endpoint_suffix', None)
 
     location_mode = kwargs.pop('location_mode', None)
     if location_mode:
@@ -282,7 +290,7 @@ def cf_adls_service(cli_ctx, kwargs):
     if connection_string:
         return t_adls_service.from_connection_string(conn_str=connection_string, **client_kwargs)
 
-    account_url = get_account_url(cli_ctx, account_name=account_name, service='dfs')
+    account_url = get_account_url(cli_ctx, account_name=account_name, service='dfs', endpoint_suffix=endpoint_suffix)
     credential = account_key or sas_token or token_credential
 
     return t_adls_service(account_url=account_url, credential=credential, **client_kwargs)
@@ -314,11 +322,12 @@ def cf_queue_service(cli_ctx, kwargs):
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
+    endpoint_suffix = kwargs.pop('endpoint_suffix', None)
 
     if connection_string:
         return t_queue_service.from_connection_string(conn_str=connection_string, **client_kwargs)
 
-    account_url = get_account_url(cli_ctx, account_name=account_name, service='queue')
+    account_url = get_account_url(cli_ctx, account_name=account_name, service='queue', endpoint_suffix=endpoint_suffix)
     credential = account_key or sas_token or token_credential
 
     return t_queue_service(account_url=account_url, credential=credential, **client_kwargs)
