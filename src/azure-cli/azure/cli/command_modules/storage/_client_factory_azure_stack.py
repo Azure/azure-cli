@@ -112,12 +112,11 @@ def cloud_storage_account_service_factory(cli_ctx, kwargs):
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     sas_token = kwargs.pop('sas_token', None)
-    endpoint_suffix = kwargs.pop('endpoint_suffix', None)
+    kwargs.pop('endpoint_suffix', None)
     kwargs.pop('connection_string', None)
     return t_cloud_storage_account(account_name=account_name,
                                    account_key=account_key,
-                                   sas_token=sas_token,
-                                   endpoint_suffix=endpoint_suffix)
+                                   sas_token=sas_token)
 
 
 def multi_service_properties_factory(cli_ctx, kwargs):

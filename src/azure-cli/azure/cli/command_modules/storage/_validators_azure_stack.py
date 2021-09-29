@@ -146,12 +146,12 @@ def validate_client_parameters(cmd, namespace):
     if not n.connection_string:
         n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
-    # if connection string supplied or in environment variables, extract account key and name
-    if n.connection_string:
-        conn_dict = validate_key_value_pairs(n.connection_string)
-        n.account_name = conn_dict.get('AccountName')
-        n.account_key = conn_dict.get('AccountKey')
-        n.sas_token = conn_dict.get('SharedAccessSignature')
+    # # if connection string supplied or in environment variables, extract account key and name
+    # if n.connection_string:
+    #     conn_dict = validate_key_value_pairs(n.connection_string)
+    #     n.account_name = conn_dict.get('AccountName')
+    #     n.account_key = conn_dict.get('AccountKey')
+    #     n.sas_token = conn_dict.get('SharedAccessSignature')
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
@@ -167,7 +167,7 @@ def validate_client_parameters(cmd, namespace):
         n.sas_token = n.sas_token.lstrip('?')
 
     # if account name is specified but no key, attempt to query
-    if n.account_name and not n.account_key and not n.sas_token:
+    if n.account_name and not n.account_key and not n.sas_token and not n.connection_string:
         logger.warning('There are no credentials provided in your command and environment, we will query for the '
                        'account key inside your storage account. \nPlease provide --connection-string, '
                        '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
@@ -176,7 +176,8 @@ def validate_client_parameters(cmd, namespace):
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
                        'Setting the corresponding environment variables can avoid inputting credentials in '
                        'your command. Please use --help to get more information.')
-        n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        account_name = n.account_name.split('.', 2)[0] if len(n.account_name.split('.', 2)) > 1 else n.account_name
+        n.account_key = _query_account_key(cmd.cli_ctx, account_name)
 
 
 def validate_encryption_key(cmd, namespace):

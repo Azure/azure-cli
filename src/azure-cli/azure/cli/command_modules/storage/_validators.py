@@ -190,7 +190,7 @@ For more information about RBAC roles in storage, visit https://docs.microsoft.c
                        'variable usage.', message)
         try:
             # process account_name with dns
-            account_name, _ = n.account_name.split('.', 2)
+            account_name = n.account_name.split('.', 2)[0] if len(n.account_name.split('.', 2)) > 1 else n.account_name
             n.account_key = _query_account_key(cmd.cli_ctx, account_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("\nSkip querying account key due to failure: %s", ex)
