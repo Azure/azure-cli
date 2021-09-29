@@ -6008,13 +6008,19 @@ def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_n
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, custom_ip_prefix_name, prefix)
 
 
-def update_custom_ip_prefix(instance, signed_message=None, authorization_message=None, tags=None):
+def update_custom_ip_prefix(instance,
+                            signed_message=None,
+                            authorization_message=None,
+                            tags=None,
+                            commissioned_state=None):
     if tags is not None:
         instance.tags = tags
     if signed_message is not None:
         instance.signed_message = signed_message
     if authorization_message is not None:
         instance.authorization_message = authorization_message
+    if commissioned_state is not None:
+        instance.commissioned_state = commissioned_state
     return instance
 # endregion
 
@@ -7646,7 +7652,7 @@ def list_service_aliases(cmd, location, resource_group_name=None):
 
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
-                        public_ip_address, location=None, subnet='AzureBastionSubnet'):
+                        public_ip_address, location=None, subnet='AzureBastionSubnet', tags=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -7659,7 +7665,8 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                                   public_ip_address=SubResource(id=public_ip_address))
 
     bastion_host = BastionHost(ip_configurations=[ip_configuration],
-                               location=location)
+                               location=location,
+                               tags=tags)
     return client.begin_create_or_update(resource_group_name=resource_group_name,
                                          bastion_host_name=bastion_host_name,
                                          parameters=bastion_host)

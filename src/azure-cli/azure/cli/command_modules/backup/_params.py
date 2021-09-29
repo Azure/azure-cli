@@ -24,12 +24,13 @@ allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase']
 allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPHanaDatabase', 'SQLDataBase']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
+allowed_extended_backup_management_types = allowed_backup_management_types + ['MAB']
 allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem']
 allowed_target_tier_type_chk_archivable = ['VaultArchive']
 allowed_tier_type = ['VaultStandard', 'Snapshot', 'VaultArchive', 'VaultStandardRehydrated', 'SnapshotAndVaultStandard', 'SnapshotAndVaultArchive']
 allowed_rehyd_priority_type = ['Standard', 'High']
 
-backup_management_type_help = """Specifiy the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
+backup_management_type_help = """Specify the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
 workload_type_help = """Specify the type of applications within the Resource which should be discovered and protected by Azure Backup. """
 restore_mode_help = """Specify the restore mode."""
@@ -55,6 +56,7 @@ policy_name_type = CLIArgumentType(help='Name of the backup policy.', options_li
 job_name_type = CLIArgumentType(help='Name of the job.', options_list=['--name', '-n'])
 rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=['--rp-name', '-r'])
 backup_management_type = CLIArgumentType(help=backup_management_type_help, arg_type=get_enum_type(allowed_backup_management_types), options_list=['--backup-management-type'])
+extended_backup_management_type = CLIArgumentType(help=backup_management_type_help, arg_type=get_enum_type(allowed_extended_backup_management_types), options_list=['--backup-management-type'])
 workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_workload_types), options_list=['--workload-type'])
 azure_workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_azure_workload_types), options_list=['--workload-type'])
 restore_mode_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'])
@@ -135,12 +137,12 @@ def load_arguments(self, _):
 
     with self.argument_context('backup container show') as c:
         c.argument('name', container_name_type, options_list=['--name', '-n'], help='Name of the container. You can use the backup container list command to get the name of a container.', id_part='child_name_2')
-        c.argument('backup_management_type', backup_management_type)
+        c.argument('backup_management_type', extended_backup_management_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show container in secondary region.')
 
     with self.argument_context('backup container list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
-        c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
+        c.argument('backup_management_type', extended_backup_management_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list containers in secondary region.')
 
     with self.argument_context('backup container unregister') as c:
@@ -165,7 +167,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup item show') as c:
         c.argument('name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.', id_part='child_name_3')
-        c.argument('backup_management_type', backup_management_type)
+        c.argument('backup_management_type', extended_backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show item in secondary region.')
 
@@ -173,12 +175,12 @@ def load_arguments(self, _):
     with self.argument_context('backup item set-policy') as c:
         c.argument('item_name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.', id_part='child_name_3')
         c.argument('policy_name', policy_name_type, help='Name of the Backup policy. You can use the backup policy list command to get the name of a backup policy.')
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help=backup_management_type_help)
+        c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
 
     with self.argument_context('backup item list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
-        c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
+        c.argument('backup_management_type', extended_backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list items in secondary region.')
 
@@ -324,7 +326,7 @@ def load_arguments(self, _):
     with self.argument_context('backup protectable-item list') as c:
         c.argument('server_name', options_list=['--server-name'], help='Parent Server name of the item.')
         c.argument('protectable_item_type', protectable_item_type)
-        c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
+        c.argument('backup_management_type', backup_management_type)
 
     # Restore
     # TODO: Need to use recovery_point.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
@@ -369,6 +371,7 @@ def load_arguments(self, _):
         c.argument('recovery_config', options_list=['--recovery-config'], help="""Specify the recovery configuration of a backed up item. The configuration object can be obtained from 'backup recoveryconfig show' command.""")
         c.argument('rehydration_duration', type=int, help='Set the maximum time, in days (between 10-30, both inclusive) for which the recovery point stays in hydrated state.')
         c.argument('rehydration_priority', rehyd_priority_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to restore from a recoverypoint in secondary region.')
 
     # Recoveryconfig
     with self.argument_context('backup recoveryconfig show') as c:
@@ -386,6 +389,8 @@ def load_arguments(self, _):
         c.argument('from_full_rp_name', from_full_rp_type)
         c.argument('filepath', filepath_type)
         c.argument('backup_management_type', backup_management_type)
+        c.argument('target_resource_group', options_list=['--target-resource-group'], help="""Specify the resource group of target item for Cross Region Restore. Default value will be same as --resource-group if not specified.""")
+        c.argument('target_vault_name', options_list=['--target-vault-name'], help="""Specify the vault name of target item for Cross Region Restore. Default value will be same as --vault-name if not specified.""")
 
     # Job
     with self.argument_context('backup job') as c:
@@ -403,7 +408,7 @@ def load_arguments(self, _):
         c.argument('operation', arg_type=get_enum_type(['Backup', 'ConfigureBackup', 'DeleteBackupData', 'DisableBackup', 'Restore']), help='User initiated operation.')
         c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
         c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
-        c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
+        c.argument('backup_management_type', extended_backup_management_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
 
     with self.argument_context('backup job wait') as c:

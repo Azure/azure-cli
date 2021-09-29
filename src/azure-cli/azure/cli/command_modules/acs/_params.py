@@ -277,6 +277,7 @@ def load_arguments(self, _):
         c.argument('appgw_watch_namespace', options_list=[
                    '--appgw-watch-namespace'], arg_group='Application Gateway')
         c.argument('assign_kubelet_identity', validator=validate_assign_kubelet_identity)
+        c.argument('disable_local_accounts', action='store_true')
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_sgxquotehelper', action='store_true')
@@ -319,6 +320,8 @@ def load_arguments(self, _):
         c.argument('enable_managed_identity', action='store_true')
         c.argument('assign_identity', type=str,
                    validator=validate_assign_identity)
+        c.argument('disable_local_accounts', action='store_true')
+        c.argument('enable_local_accounts', action='store_true')
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 

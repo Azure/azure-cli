@@ -51,3 +51,21 @@ def validate_audit_policy_arguments(namespace):
          namespace.retention_days])
     if not namespace.state and not blob_storage_arguments_provided:
         raise CLIError('Either state or blob storage arguments are missing')
+
+
+def add_progress_callback(cmd, namespace):
+    def _update_progress(current, total):
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress

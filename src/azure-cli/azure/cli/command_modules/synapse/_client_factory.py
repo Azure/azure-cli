@@ -212,6 +212,10 @@ def cf_synapse_spark_pool(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).big_data_pools
 
 
+def cf_synapse_library(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).library
+
+
 def cf_synapse_client_managedprivateendpoints_factory(cli_ctx, workspace_name):
     from azure.synapse.managedprivateendpoints import ManagedPrivateEndpointsClient
     from azure.cli.core._profile import Profile
