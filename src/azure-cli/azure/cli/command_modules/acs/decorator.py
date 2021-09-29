@@ -3325,12 +3325,10 @@ class AKSContext:
         """
         # read the original value passed by the command
         tags = self.raw_param.get("tags")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.tags is not None
-        ):
-            tags = self.mc.tags
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.tags is not None:
+                tags = self.mc.tags
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -4234,14 +4232,14 @@ class AKSUpdateDecorator:
                 '"--disable-cluster-autoscaler" or '
                 '"--update-cluster-autoscaler" or '
                 '"--cluster-autoscaler-profile" or '
-                '"--load-balancer-managed-outbound-ip-count" or'
+                '"--load-balancer-managed-outbound-ip-count" or '
                 '"--load-balancer-outbound-ips" or '
-                '"--load-balancer-outbound-ip-prefixes" or'
-                '"--load-balancer-outbound-ports" or'
-                '"--load-balancer-idle-timeout" or'
+                '"--load-balancer-outbound-ip-prefixes" or '
+                '"--load-balancer-outbound-ports" or '
+                '"--load-balancer-idle-timeout" or '
                 '"--auto-upgrade-channel" or '
-                '"--attach-acr" or "--detach-acr" or'
-                '"--uptime-sla" or'
+                '"--attach-acr" or "--detach-acr" or '
+                '"--uptime-sla" or '
                 '"--no-uptime-sla" or '
                 '"--api-server-authorized-ip-ranges" or '
                 '"--enable-aad" or '
@@ -4255,7 +4253,8 @@ class AKSUpdateDecorator:
                 '"--enable-azure-rbac" or '
                 '"--disable-azure-rbac" or '
                 '"--enable-public-fqdn" or '
-                '"--disable-public-fqdn"'
+                '"--disable-public-fqdn" or '
+                '"--tags"'
             )
 
     def fetch_mc(self) -> ManagedCluster:
@@ -4269,6 +4268,21 @@ class AKSUpdateDecorator:
 
         # attach mc to AKSContext
         self.context.attach_mc(mc)
+        return mc
+
+    def update_tags(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update tags for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        tags = self.context.get_tags()
+        if tags is not None:
+            mc.tags = tags
         return mc
 
     def update_auto_scaler_profile(self, mc):
