@@ -47,13 +47,56 @@ class LogicappBasicE2ETest(ScenarioTest):
         self.cmd('logicapp show -g {} -n {}'.format(resource_group, logicapp_name),
         checks=[
             JMESPathCheck('name', logicapp_name),
-            JMESPathCheck('kind', 'functionapp,workflowapp')
+            JMESPathCheck('kind', 'functionapp,workflowapp'),
+            JMESPathCheck('state', 'Running') # app should be running on creation
         ])
 
         self.cmd('logicapp list -g {}'.format(resource_group),
         checks=[
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].name', logicapp_name)
+        ])
+
+        #restarting a running app
+        self.cmd('logicapp restart -g {} -n {}'.format(resource_group, logicapp_name))
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', logicapp_name)
+        ])
+
+        #stopping a running app
+        self.cmd('logicapp stop -g {} -n {}'.format(resource_group, logicapp_name))
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+            JMESPathCheck('state', 'Stopped'),
+            JMESPathCheck('name', logicapp_name)
+        ])
+
+        #stopping a stopped app
+        self.cmd('logicapp stop -g {} -n {}'.format(resource_group, logicapp_name))
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+            JMESPathCheck('state', 'Stopped'),
+            JMESPathCheck('name', logicapp_name)
+        ])
+
+        #restarting a stopped app
+        self.cmd('logicapp restart -g {} -n {}'.format(resource_group, logicapp_name))
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+            JMESPathCheck('state', 'Stopped'),
+            JMESPathCheck('name', logicapp_name)
+        ])
+
+        #starting a stopped app
+        self.cmd('logicapp start -g {} -n {}'.format(resource_group, logicapp_name))
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', logicapp_name)
+        ])
+
+        #starting a running app
+        self.cmd('logicapp start -g {} -n {}'.format(resource_group, logicapp_name))
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', logicapp_name)
         ])
 
         self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
