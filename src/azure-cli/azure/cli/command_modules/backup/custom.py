@@ -510,7 +510,7 @@ def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_nam
                 raise RequiredArgumentMissingError("--vm or --resource-group missing. Please provide the required "
                                                    "arguments.")
             vm_id = virtual_machines_cf(cmd.cli_ctx).get(resource_group_name, vm).id
-    vm_name, vm_rg = _get_resource_name_and_rg(resource_group_name, vm_id)
+    vm_name, vm_rg = cust_help.get_resource_name_and_rg(resource_group_name, vm_id)
     vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
     parameters = BackupStatusRequest(resource_type='VM', resource_id=vm_id)
     return backup_status_cf(cmd.cli_ctx).get(vm.location, parameters).vault_id
