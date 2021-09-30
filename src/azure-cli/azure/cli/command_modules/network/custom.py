@@ -6020,7 +6020,7 @@ def update_custom_ip_prefix(instance,
     if authorization_message is not None:
         instance.authorization_message = authorization_message
     if commissioned_state is not None:
-        instance.commissioned_state =  commissioned_state[0].upper() + commissioned_state[1:] + 'ing'
+        instance.commissioned_state = commissioned_state[0].upper() + commissioned_state[1:] + 'ing'
     return instance
 # endregion
 
