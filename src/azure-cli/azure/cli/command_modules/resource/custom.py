@@ -2167,7 +2167,7 @@ def delete_deployment_stack_at_subscription(cmd, name=None, stack=None):
     raise CLIError("Please enter the stack name or stack resource id")
 
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
     if not deployment_scope:
         #fix this
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + resource_group

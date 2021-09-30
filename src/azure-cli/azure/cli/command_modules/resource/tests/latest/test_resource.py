@@ -2235,6 +2235,212 @@ class DeploymentStacksTest(ScenarioTest):
         #confirm stack is deleted
         self.cmd('stacks group list --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
 
+    def test_show_deployment_stack_snapshot_subscription(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-get-deployment-stack-subscription', 60)
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'update-behavior': "detach",
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+
+        })
+
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        deployment_stack_snapshot_id = created_deployment_stack['snapshot_id']
+        #double check this
+        deployment_stack_snapshot_name = created_deployment_stack['snapshot_name']
+
+        self.kwargs.update({'snapshot-id': deployment_stack_snapshot_id,
+                            'snapshot-name': deployment_stack_snapshot_name})
+
+        # show snapshot with stack name and snapshot name
+        self.cmd('stacks snapshot sub show --snapshot {name} --name {snapshot-name}', checks=self.check('name', '{snapshot-name}'))
+
+        # show stack with stack id
+        self.cmd('stacks snapshot sub show --snapshot {snapshot-id}', checks=self.check('name', '{snapshot-name}'))
+
+        # will this need snapshot delete
+        # cleanup
+        self.cmd('stacks sub delete --name {name}')
+    
+    def test_list_deployment_stack_snapshot_subscription(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-list-deployment-stack-snapshot-subscription', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+        })
+
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        deployment_stack_snapshot_id = created_deployment_stack['snapshot_id']
+
+        self.kwargs.update({'snapshot-id': deployment_stack_snapshot_id})
+
+        # list snapshots using stack name
+        list_with_stack_name = self.cmd('stacks snapshot sub list --name {name}').get_output_in_json()
+
+        self.assertTrue(len(list_with_stack_name) > 0)
+        self.assertTrue(list_with_stack_name[0]['name'], '{name}')
+
+        #list snapshots using stack id
+        list_with_stack_id = self.cmd('stacks snapshot sub list --stack {snapshot-id}').get_output_in_json()
+
+        self.assertTrue(len(list_with_stack_id) > 0)
+        self.assertTrue(list_with_stack_id[0]['name'], '{name}')
+
+
+         # cleanup 
+        self.cmd('stacks sub delete --name {name}')
+    
+    def test_delete_deployment_stack_snapshot_subscription(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-delete-deployment-stack-snapshot-subscription', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'location': "westus2",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+        })
+
+        # create stack
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        snapshot_name = created_deployment_stack['snapshot_name']
+
+        self.kwargs.update({'snapshot-name': snapshot_name})
+
+        self.cmd('stacks snapshot sub show --name {snapshot-name} --stack-name {name}', checks=self.check('name', '{name}'))
+
+        # delete stack with snapshot name and stack name
+        self.cmd('stacks snapshot sub delete --name {snapshot-name} --stack-name {name}')
+        
+        #confirm stack is deleted
+        self.cmd('stacks snapshot sub list --name {name}', checks=self.check("length([?name=='{name}'])", 0))
+
+        # create stack
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        snapshot_id = created_deployment_stack['snapshot_id']
+
+        self.kwargs.update({'snapshot-id': snapshot_id})
+
+        self.cmd('stacks snapshot sub show --name {name}', checks=self.check('name', '{name}'))
+
+        # delete stack with snapshot id
+        self.cmd('stacks snapshot sub delete --snapshot {snapshot-id}')
+        
+        #confirm stack is deleted
+        self.cmd('stacks snapshot sub list --name {name}', checks=self.check("length([?name=='{name}'])", 0))
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    def test_show_deployment_stack_snapshot_resource_group(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-deployment-stack-resource-group', 60)
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'update-behavior': "detach",
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+
+        })
+
+        created_deployment_stack = self.cmd('stacks sub group --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        deployment_stack_snapshot_id = created_deployment_stack['snapshot_id']
+        #double check this
+        deployment_stack_snapshot_name = created_deployment_stack['snapshot_name']
+
+        self.kwargs.update({'snapshot-id': deployment_stack_snapshot_id,
+                            'snapshot-name': deployment_stack_snapshot_name})
+
+        # show snapshot with stack name and snapshot name
+        self.cmd('stacks snapshot group show --stack-name {name} --name {snapshot-name} --resource-group {resource-group}', checks=self.check('name', '{snapshot-name}'))
+
+        # show stack with stack id
+        self.cmd('stacks snapshot group show --snapshot {snapshot-id}', checks=self.check('name', '{snapshot-name}'))
+
+        # will this need snapshot delete
+        # cleanup
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    def test_list_deployment_stack_snapshot_resource_group(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-deployment-stack-snapshot-resource-group', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+        })
+
+        created_deployment_stack = self.cmd('stacks group reate --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        deployment_stack_snapshot_id = created_deployment_stack['snapshot_id']
+
+        self.kwargs.update({'snapshot-id': deployment_stack_snapshot_id})
+
+        # list snapshots using stack name
+        list_with_stack_name = self.cmd('stacks snapshot group list --name {name} --resource-group {resource-group}').get_output_in_json()
+
+        self.assertTrue(len(list_with_stack_name) > 0)
+        self.assertTrue(list_with_stack_name[0]['name'], '{name}')
+
+        #list snapshots using stack id
+        list_with_stack_id = self.cmd('stacks snapshot group list --stack {snapshot-id}').get_output_in_json()
+
+        self.assertTrue(len(list_with_stack_id) > 0)
+        self.assertTrue(list_with_stack_id[0]['name'], '{name}')
+
+
+         # cleanup 
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')    
+    def test_delete_deployment_stack_snapshot_resource_group(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-delete-deployment-stack-snapshot-resource-group', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'update-behavior': "detach",
+        })
+
+        # create stack
+        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        snapshot_name = created_deployment_stack['snapshot_name']
+
+        self.kwargs.update({'snapshot-name': snapshot_name})
+
+        self.cmd('stacks snapshot group show --name {snapshot-name} --stack-name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
+
+        # delete stack with snapshot name and stack name
+        self.cmd('stacks snapshot group delete --name {snapshot-name} --stack-name {name} --resource-group {resource-group}')
+        
+        #confirm stack is deleted
+        self.cmd('stacks snapshot group list --name {name} --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
+
+        # create stack
+        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        snapshot_id = created_deployment_stack['snapshot_id']
+
+        self.kwargs.update({'snapshot-id': snapshot_id})
+
+        self.cmd('stacks snapshot group show --name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
+
+        # delete stack with snapshot id
+        self.cmd('stacks snapshot group delete --snapshot {snapshot-id}')
+        
+        #confirm stack is deleted
+        self.cmd('stacks snapshot group list --name {name} --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
+
 
 class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
 

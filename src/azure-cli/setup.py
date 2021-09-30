@@ -116,7 +116,7 @@ DEPENDENCIES = [
     'azure-mgmt-redis~=13.0.0',
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource==19.0.0',
+    'azure-mgmt-resource==20.0.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=2.0.0b1',
@@ -131,7 +131,7 @@ DEPENDENCIES = [
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=2.0.0',
     'azure-multiapi-storage~=0.6.2',
-    'azure-storage-common~=1.4',
+    'azure-storage-common~=1.4.2',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.8.0',
     'azure-synapse-spark~=0.2.0',
