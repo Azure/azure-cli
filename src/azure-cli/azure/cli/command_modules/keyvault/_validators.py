@@ -18,6 +18,8 @@ from knack.util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -133,8 +135,6 @@ def process_secret_set_namespace(cmd, namespace):
 
 
 def process_sas_token_parameter(cmd, ns):
-    from azure.cli.core.profiles import ResourceType
-
     SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_KEYVAULT)
     return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
 
@@ -209,6 +209,21 @@ def validate_key_type(ns):
             raise CLIError('The key type {} is invalid for software protected keys. Omit --protection')
 
     setattr(ns, 'kty', kty)
+
+
+def process_key_release_policy(cmd, ns):
+    if not ns.release_policy:
+        return
+
+    import os
+    if os.path.exists(ns.release_policy):
+        data = get_file_json(ns.release_policy)
+    else:
+        data = shell_safe_json_parse(ns.release_policy)
+
+    import json
+    KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
+    ns.release_policy = KeyReleasePolicy(data=json.dumps(data).encode('utf-8'))
 
 
 def validate_policy_permissions(ns):
