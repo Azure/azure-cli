@@ -7,6 +7,7 @@
 # pylint: disable=too-many-lines
 # pylint: disable=inconsistent-return-statements
 # pylint: disable=unused-variable
+# pylint: disable=too-many-locals
 
 import re
 from azure.cli.core.profiles import ResourceType
@@ -296,7 +297,7 @@ def cli_topicautho_create(cmd, client, resource_group_name, namespace_name, topi
             parameters={'rights': accessrights_converter(rights)})
 
 
-def cli_topicauthokey_renew(cmd,client, resource_group_name, namespace_name, topic_name, name, key_type=None, key=None):
+def cli_topicauthokey_renew(cmd, client, resource_group_name, namespace_name, topic_name, name, key_type=None, key=None):
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
         return client.regenerate_keys(
             resource_group_name=resource_group_name,
@@ -516,7 +517,7 @@ def cli_migration_show(cmd, client, resource_group_name, namespace_name, config_
         return client.get(resource_group_name, namespace_name, config_name)
 
 
-def cli_migration_complete(cmd, client, resource_group_name, namespace_name, config_name="$default"):
+def cli_migration_complete(client, resource_group_name, namespace_name, config_name="$default"):
     return client.complete_migration(resource_group_name, namespace_name, config_name)
 
 

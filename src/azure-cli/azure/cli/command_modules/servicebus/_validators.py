@@ -124,7 +124,7 @@ def validate_rights(namespace):
             raise CLIError('Error : Assigning \'Manage\' to --rights requires \'Listen\' and \'Send\' to be included with. e.g. --rights Manage Send Listen')
 
 
-def validate_private_endpoint_connection_id(cmd, namespace):
+def validate_private_endpoint_connection_id(namespace):
     if namespace.connection_id:
         from azure.cli.core.util import parse_proxy_resource_id
         result = parse_proxy_resource_id(namespace.connection_id)
