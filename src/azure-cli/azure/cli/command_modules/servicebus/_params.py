@@ -7,6 +7,7 @@
 
 from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, get_location_type, get_three_state_flag, get_resource_name_completion_list
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.profiles import ResourceType
 
 
 def load_arguments_sb(self, _):

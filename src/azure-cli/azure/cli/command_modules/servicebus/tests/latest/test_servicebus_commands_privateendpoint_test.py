@@ -14,7 +14,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 # pylint: disable=too-many-lines
 
 
-class EHNetworkCURDScenarioTest(ScenarioTest):
+class SBNamespacePrivateEndpointCRUDScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_eh_network')
     def test_sb_privateendpoint(self, resource_group):
@@ -24,7 +24,7 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
             'loc': 'eastus',
             'tags': {'tag1=value1'},
             'tags2': {'tag2=value2'},
-            'sku': 'Standard',
+            'sku': 'Premium',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
@@ -89,5 +89,7 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
         getstatus = self.cmd(
             'servicebus namespace private-endpoint-connection show --namespace-name {namespacename} -g {rg} --name {ehn_pec_name}').get_output_in_json()
         self.assertEqual(getstatus['privateLinkServiceConnectionState']['status'], 'Rejected')
+
+        time.sleep(30)
 
         self.cmd('servicebus namespace private-endpoint-connection delete --id {sa_pec_id} -y')

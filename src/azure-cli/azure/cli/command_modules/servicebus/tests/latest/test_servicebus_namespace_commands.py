@@ -33,8 +33,15 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
             'accessrights1': 'Listen',
             'primary': 'PrimaryKey',
             'secondary': 'SecondaryKey',
-            'istrue': 'True'
+            'istrue': 'True',
+            'location': 'eastus2'
         })
+
+        # Create Namespace
+        getresponse = self.cmd(
+            'servicebus namespace create --resource-group {rg} --name {namespacename1} --location {location}  --tags {tags} --sku {skupremium} --zone-redundant {istrue}').get_output_in_json()
+        self.assertEqual(getresponse['sku']['name'], self.kwargs['skupremium'])
+        self.assertTrue(getresponse['zoneRedundant'])
 
         # Check for the NameSpace name Availability
         self.cmd('servicebus namespace exists --name {namespacename}',
@@ -97,12 +104,6 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         # Delete Authorization Rule
         self.cmd(
             'servicebus namespace authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
-
-        # Create Namespace
-        self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename1} --tags {tags} --sku {skupremium} --zone-redundant {istrue}',
-            checks=[self.check('sku.name', '{skupremium}'),
-                    self.check('properties.zoneRedundant','{istrue}')])
 
         # Delete Namespace list by ResourceGroup
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')

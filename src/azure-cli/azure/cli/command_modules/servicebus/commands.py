@@ -17,7 +17,9 @@ def load_command_table(self, _):
                                                                        subscriptions_mgmt_client_factory,
                                                                        rules_mgmt_client_factory,
                                                                        disaster_recovery_mgmt_client_factory,
-                                                                       migration_mgmt_client_factory)
+                                                                       migration_mgmt_client_factory,
+                                                                       private_endpoint_connections_mgmt_client_factory,
+                                                                       private_link_mgmt_client_factory)
 
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
@@ -54,6 +56,16 @@ def load_command_table(self, _):
         client_factory=migration_mgmt_client_factory,
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
+    sb_private_endpoints_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventhub.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=private_endpoint_connections_mgmt_client_factory,
+        resource_type=ResourceType.MGMT_SERVICEBUS)
+
+    sb_private_links_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventhub.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=private_link_mgmt_client_factory,
+        resource_type=ResourceType.MGMT_SERVICEBUS)
+
     from ._validators import validate_subnet
 
 # Namespace Region
@@ -75,6 +87,24 @@ def load_command_table(self, _):
         g.custom_command('keys renew', 'cli_keys_renew')
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
+
+    with self.command_group('servicebus namespace private-endpoint-connection', sb_private_endpoints_util, resource_type=ResourceType.MGMT_SERVICEBUS,
+                            custom_command_type=servicebus_custom, is_preview=True,
+                            client_factory=private_endpoint_connections_mgmt_client_factory) as g:
+        from ._validators import validate_private_endpoint_connection_id
+        g.command('delete', 'begin_delete', confirmation=True, validator=validate_private_endpoint_connection_id)
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.command('list', 'list', validator=validate_private_endpoint_connection_id)
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+
+    with self.command_group('servicebus namespace private-link-resource', sb_private_links_util,
+                            resource_type=ResourceType.MGMT_SERVICEBUS) as g:
+        from azure.cli.core.commands.transform import gen_dict_to_list_transform
+        g.show_command('show', 'get', is_preview=True, min_api='2021-06-01-preview',
+                       transform=gen_dict_to_list_transform(key="value"))
 
 # Queue Region
     with self.command_group('servicebus queue', sb_queue_util, client_factory=queues_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
