@@ -12,14 +12,14 @@ from azure.cli.core.profiles import ResourceType
 
 def load_command_table(self, _):
     from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory,
-                                                                       queues_mgmt_client_factory,
-                                                                       topics_mgmt_client_factory,
-                                                                       subscriptions_mgmt_client_factory,
-                                                                       rules_mgmt_client_factory,
-                                                                       disaster_recovery_mgmt_client_factory,
-                                                                       migration_mgmt_client_factory,
-                                                                       private_endpoint_connections_mgmt_client_factory,
-                                                                       private_link_mgmt_client_factory)
+                                                                      queues_mgmt_client_factory,
+                                                                      topics_mgmt_client_factory,
+                                                                      subscriptions_mgmt_client_factory,
+                                                                      rules_mgmt_client_factory,
+                                                                      disaster_recovery_mgmt_client_factory,
+                                                                      migration_mgmt_client_factory,
+                                                                      private_endpoint_connections_mgmt_client_factory,
+                                                                      private_link_mgmt_client_factory)
 
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
