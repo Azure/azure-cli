@@ -1730,7 +1730,7 @@ def load_arguments(self, _):
         c.argument('cidr', help='The prefix range in CIDR notation. Should include the start address and the prefix length.')
 
     with self.argument_context('network custom-ip prefix update') as c:
-        c.argument('commissioned_state', options_list='--state', help='Commissioned State of the custom ip prefix.', arg_type=get_enum_type(['Commissioning', 'Deprovisioning', 'Provisioning']))
+        c.argument('commissioned_state', options_list='--state', help='Commissioned State of the custom ip prefix.', arg_type=get_enum_type(['commission', 'decommission', 'deprovision', 'provision']))
     # endregion
 
     # region PublicIPAddresses
