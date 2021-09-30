@@ -430,3 +430,57 @@ def validate_assign_kubelet_identity(namespace):
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.assign_kubelet_identity):
             raise InvalidArgumentValueError("--assign-kubelet-identity is not a valid Azure resource ID.")
+
+
+def extract_comma_separated_string(
+    raw_string,
+    enable_strip=False,
+    extract_kv=False,
+    key_only=False,
+    keep_none=False,
+    default_value=None,
+):
+    """Extract comma-separated string.
+
+    If enable_strip is specified, will remove leading and trailing whitespace before each operation on the string.
+    If extract_kv is specified, will extract key value pair from the string, otherwise keep the entire string.
+    Option key_only is valid since extract_kv is specified, when the number of string segments split by "=" is not 2,
+    only the first segment is retained as the key.
+    If keep_none is specified, will return None when input is None. Otherwise will return default_value if input is
+    None or empty string.
+    """
+    if raw_string is None:
+        if keep_none:
+            return None
+        return default_value
+    if enable_strip:
+        raw_string = raw_string.strip()
+    if raw_string == "":
+        return default_value
+
+    result = {} if extract_kv else []
+    for item in raw_string.split(","):
+        if enable_strip:
+            item = item.strip()
+        if extract_kv:
+            kv = item.split("=")
+            if len(kv) == 2:
+                if enable_strip:
+                    result[kv[0].strip()] = kv[1].strip()
+                else:
+                    result[kv[0]] = kv[1]
+            else:
+                if key_only:
+                    if enable_strip:
+                        result[kv[0].strip()] = ""
+                    else:
+                        result[kv[0]] = ""
+                else:
+                    raise InvalidArgumentValueError(
+                        "The format of '{}' in '{}' is incorrect".format(
+                            item, raw_string
+                        )
+                    )
+        else:
+            result.append(item)
+    return result
