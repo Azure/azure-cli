@@ -43,7 +43,7 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
-                   help='Enabling this property creates a ServiceBus Premium Namespace in regions supported availability zones')
+                   help='Enabling this property creates a ServiceBus Zone Redundant Namespace in regions supported availability zones')
 
     # region Namespace Authorization Rule
     with self.argument_context('servicebus namespace authorization-rule list') as c:
