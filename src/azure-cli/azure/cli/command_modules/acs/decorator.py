@@ -3873,11 +3873,9 @@ class AKSCreateDecorator:
         if 'http_application_routing' in addons:
             addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
-            addons.remove('http_application_routing')
         if 'kube-dashboard' in addons:
             addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
-            addons.remove('kube-dashboard')
         # TODO: can we help the user find a workspace resource ID?
         if 'monitoring' in addons:
             workspace_resource_id = self.context.get_workspace_resource_id()
@@ -3887,11 +3885,9 @@ class AKSCreateDecorator:
             _ensure_container_insights_for_monitoring(self.cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
             # set intermediate
             self.context.set_intermediate("monitoring", True, overwrite_exists=True)
-            addons.remove('monitoring')
         if 'azure-policy' in addons:
             addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
-            addons.remove('azure-policy')
         if 'virtual-node' in addons:
             aci_subnet_name = self.context.get_aci_subnet_name()
             # TODO: how about aciConnectorwindows, what is its addon name?
@@ -3902,7 +3898,6 @@ class AKSCreateDecorator:
             )
             # set intermediate
             self.context.set_intermediate("enable_virtual_node", True, overwrite_exists=True)
-            addons.remove('virtual-node')
         if 'ingress-appgw' in addons:
             addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
             appgw_name = self.context.get_appgw_name()
@@ -3923,18 +3918,15 @@ class AKSCreateDecorator:
             addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
             # set intermediate
             self.context.set_intermediate("ingress_appgw_addon_enabled", True, overwrite_exists=True)
-            addons.remove('ingress-appgw')
         if 'confcom' in addons:
             addon_profile = ManagedClusterAddonProfile(
                 enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
             if self.context.get_enable_sgxquotehelper():
                 addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
             addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
-            addons.remove('confcom')
         if 'open-service-mesh' in addons:
             addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
             addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
-            addons.remove('open-service-mesh')
         mc.addon_profiles = addon_profiles
         return mc
 
