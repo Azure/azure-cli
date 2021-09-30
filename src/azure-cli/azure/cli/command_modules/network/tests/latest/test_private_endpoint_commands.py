@@ -326,11 +326,13 @@ class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection delete --id {sa_pec_id} -y')
 
 class NetworkPrivateLinkAMLScenarioTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_aml_plr')
     def test_private_link_resource_aml(self):
         self.kwargs.update({
             'workspace_name': self.create_random_name('testaml', 20)
         })
+        self.cmd('extension add -n azure-cli-ml')
         result = self.cmd('ml workspace create --workspace-name {workspace_name} --resource-group {rg}').get_output_in_json()
         self.kwargs['workspace_id'] = result['id']
         self.cmd('network private-link-resource list --id {workspace_id}', checks=[
