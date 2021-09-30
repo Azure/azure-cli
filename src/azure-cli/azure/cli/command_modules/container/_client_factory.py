@@ -58,3 +58,9 @@ def cf_network(cli_ctx):
     return get_mgmt_service_client(cli_ctx, NetworkManagementClient,
                                    api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]
                                    ['container_network'])
+
+
+def cf_msi(cli_ctx):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient)
