@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-import requests
 import unittest
 from unittest.mock import Mock, call, patch
 
+import requests
 from azure.cli.command_modules.acs._consts import (
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
     CONST_AZURE_POLICY_ADDON_NAME,
@@ -22,6 +22,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
@@ -4119,7 +4120,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.models,
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
-                "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom",
+                "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom,open-service-mesh",
                 "workspace_resource_id": "test_workspace_resource_id",
                 "aci_subnet_name": "test_aci_subnet_name",
                 "appgw_name": "test_appgw_name",
@@ -4172,6 +4173,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "true"},
             ),
+            CONST_OPEN_SERVICE_MESH_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={},
+            )
         }
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location", addon_profiles=addon_profiles_2
@@ -5475,6 +5480,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         # fail on incomplete mc object (no network profile)
         with self.assertRaises(UnknownError):
             dec_1.update_load_balancer_profile(mc_0)
+
         load_balancer_profile_1 = self.models.lb_models.get(
             "ManagedClusterLoadBalancerProfile"
         )(
@@ -5495,7 +5501,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             ),
             allocated_outbound_ports=5,
         )
-
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
             load_balancer_profile=load_balancer_profile_1,
         )
@@ -5504,9 +5509,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             network_profile=network_profile_1,
         )
         dec_1.context.attach_mc(mc_1)
-        # fail on passing the wrong mc object
-        with self.assertRaises(CLIInternalError):
-            dec_1.update_load_balancer_profile(None)
         dec_mc_1 = dec_1.update_load_balancer_profile(mc_1)
 
         ground_truth_load_balancer_profile_1 = self.models.lb_models.get(
