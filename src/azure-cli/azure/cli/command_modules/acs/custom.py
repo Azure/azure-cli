@@ -2085,7 +2085,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                disable_local_accounts=False,
                no_wait=False,
                yes=False,
-               enable_azure_rbac=False):
+               enable_azure_rbac=False,
+               aks_custom_headers=None):
     # get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
@@ -2824,7 +2825,8 @@ def aks_update(cmd, client, resource_group_name, name,
                disable_public_fqdn=False,
                enable_azure_rbac=False,
                disable_azure_rbac=False,
-               tags=None):
+               tags=None,
+               aks_custom_headers=None):
     ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                        operation_group='managed_clusters')

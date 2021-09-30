@@ -51,6 +51,7 @@ from azure.cli.command_modules.acs.custom import (
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
 )
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -3494,6 +3495,28 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return edge_zone
+
+    def get_aks_custom_headers(self) -> Dict[str, str]:
+        """Obtain the value of aks_custom_headers.
+
+        Note: aks_custom_headers will not be decorated into the `mc` object.
+
+        This function will normalize the parameter by default. It will call "extract_comma_separated_string" to extract
+        comma-separated key value pairs from the string.
+
+        :return: dictionary
+        """
+        # read the original value passed by the command
+        aks_custom_headers = self.raw_param.get("aks_custom_headers")
+        # normalize
+        aks_custom_headers = extract_comma_separated_string(
+            aks_custom_headers,
+            enable_strip=True,
+            extract_kv=True,
+            default_value={},
+        )
+        # this parameter does not need validation
+        return aks_custom_headers
 
     def get_disable_local_accounts(self) -> bool:
         """Obtain the value of disable_local_accounts.
