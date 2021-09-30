@@ -219,20 +219,6 @@ def track_register_operation(cli_ctx, result, vault_name, resource_group, contai
                                                                    operation_id, cls=get_pipeline_response)
 
 
-# def track_mab_unregister_operation(cli_ctx, result, vault_name, resource_group, container_name):
-#    protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
-
-#    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
-#    result = protection_container_operation_results_client.get(vault_name, resource_group,
-#                                                               fabric_name, container_name,
-#                                                               operation_id, raw=True)
-#    while result.response.status_code == 202:
-#        time.sleep(5)
-#        result = protection_container_operation_results_client.get(vault_name, resource_group,
-#                                                                   fabric_name, container_name,
-#                                                                   operation_id, raw=True)
-
-
 def track_inquiry_operation(cli_ctx, result, vault_name, resource_group, container_name):
     protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
 

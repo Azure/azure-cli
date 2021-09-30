@@ -320,7 +320,7 @@ def unregister_container(cmd, client, vault_name, resource_group_name, container
     #    mab_client = registered_identities_cf(cmd.cli_ctx)
     #    result = mab_client.delete(resource_group_name, vault_name, container_friendly_name,
     #                               cls=custom_help.get_pipeline_response)
-    #    return custom_help.track_mab_unregister_operation(cmd.cli_ctx, result, vault_name, resource_group_name,
+    #    return custom_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name,
     #                                                container_name)
     return None
 
