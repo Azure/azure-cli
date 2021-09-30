@@ -339,8 +339,9 @@ class NetworkPrivateLinkAMLScenarioTest(ScenarioTest):
         self.cmd('network private-link-resource list --id {workspace_id}', checks=[
             self.check('length(@)', 1)])
 
+    @live_only()
     @ResourceGroupPreparer(location='centraluseuap')
-    def test_private_endpoint_connection_aml(self, resource_group):
+    def test_private_endpoint_connection_aml(self):
         self.kwargs.update({
             'workspace_name': self.create_random_name('testaml', 20),
             'vnet_name': self.create_random_name('testvnet', 20),
@@ -356,6 +357,7 @@ class NetworkPrivateLinkAMLScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
 
+        self.cmd('extension add -n azure-cli-ml')
         result = self.cmd('ml workspace create --workspace-name {workspace_name} --resource-group {rg}').get_output_in_json()
         self.kwargs['workspace_id'] = result['id']
 
