@@ -1377,17 +1377,20 @@ class CosmosDBTests(ScenarioTest):
         assert cmk_output["keyVaultKeyUri"] == key_uri
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_managed_service_identity')
-    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
     def test_cosmosdb_managed_service_identity(self, resource_group, key_vault):
         key_name = self.create_random_name(prefix='cli', length=15)
         key_uri = "https://{}.vault.azure.net/keys/{}".format(key_vault, key_name)
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
+            'acc2': self.create_random_name(prefix='cli', length=15),
             'kv_name': key_vault,
             'key_name': key_name,
             'key_uri': key_uri,
-            'location': "eastus2"
+            'location': "eastus2",
+            'id1': self.create_random_name(prefix='cli', length=15),
+            'id2': self.create_random_name(prefix='cli', length=15)
         })
 
         self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --spn a232010e-820c-4083-83bb-3ace5fc29d0b --key-permissions get unwrapKey wrapKey')
@@ -1410,9 +1413,79 @@ class CosmosDBTests(ScenarioTest):
             'identity_principal_id': identity_principal_id
         })
         self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --object-id {identity_principal_id} --key-permissions get unwrapKey wrapKey')
-
+        
+        # System assigned identity tests
         cmk_account = self.cmd('az cosmosdb update -n {acc} -g {rg} --default-identity SystemAssignedIdentity').get_output_in_json()
         assert cmk_account["defaultIdentity"] == 'SystemAssignedIdentity'
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "None"
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned"
+
+        # User assigned identity tests
+        user_identity1 = self.cmd('az identity create -n {id1} -g {rg}').get_output_in_json()
+        user_identity2 = self.cmd('az identity create -n {id2} -g {rg}').get_output_in_json()
+        id1 = user_identity1["id"]
+        id1principal = user_identity1["principalId"]
+        id2 = user_identity2["id"]
+        self.kwargs.update({
+            'id1': id1,
+            'id2': id2,
+            'id1principal': id1principal
+        })
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id1}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert list(identity_output["userAssignedIdentities"])[0] == id1
+        assert len(identity_output["userAssignedIdentities"]) == 1
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id2}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert (list(identity_output["userAssignedIdentities"])[0] == id2 or list(identity_output["userAssignedIdentities"])[1] == id2)
+        assert len(identity_output["userAssignedIdentities"]) == 2
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "UserAssigned"
+        assert len(identity_output["userAssignedIdentities"]) == 2
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id2}').get_output_in_json()
+        assert identity_output["type"] == "UserAssigned"
+        assert list(identity_output["userAssignedIdentities"])[0] == id1
+        assert len(identity_output["userAssignedIdentities"]) == 1
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id2}').get_output_in_json()
+        assert identity_output["type"] == "UserAssigned"
+        assert (list(identity_output["userAssignedIdentities"])[0] == id2 or list(identity_output["userAssignedIdentities"])[1] == id2)
+        assert len(identity_output["userAssignedIdentities"]) == 2
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id1} {id2}').get_output_in_json()
+        assert identity_output["type"] == "None"
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert len(identity_output["userAssignedIdentities"]) == 2
+        
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id2}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert len(identity_output["userAssignedIdentities"]) == 1
+        
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id1}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned"
+        
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert len(identity_output["userAssignedIdentities"]) == 2
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
+        assert identity_output["type"] == "None"
+        
+        # Default identity tests
+        self.cmd('az keyvault set-policy --name {kv_name} --object-id {id1principal} --key-permissions get unwrapKey wrapKey')
+        default_id_acct = self.cmd('az cosmosdb create -n {acc2} -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri} --assign-identity {id1} --default-identity "UserAssignedIdentity={id1}"').get_output_in_json()
+        assert default_id_acct["identity"]["type"] == "UserAssigned"
+        assert list(default_id_acct["identity"]["userAssignedIdentities"])[0] == id1
+        assert default_id_acct["defaultIdentity"] == "UserAssignedIdentity=" + id1
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_role')
     def test_cosmosdb_sql_role(self, resource_group):
@@ -1672,6 +1745,55 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
 
         time.sleep(300)
+
+        self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
+        self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
+            self.check('restoreParameters.restoreMode', 'PointInTime'),
+            self.check('restoreParameters.restoreSource', restorable_database_account['id']),
+            self.check('restoreParameters.restoreTimestampInUtc', restore_ts_string)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_deleted_account_restore', parameter_name_for_location='location')
+    @AllowLargeResponse(size_kb=9999)
+    def test_cosmosdb_deleted_account_restore(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': self.create_random_name(prefix='cli', length=15),
+            'col': col,
+            'loc': location
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'ins_id': account['instanceId']
+        })
+
+        restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
+
+        import dateutil
+        import time
+        from datetime import timedelta
+
+        # Get correct restore ts
+        account_creation_time = restorable_database_account['creationTime']
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
+        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+
+        restore_ts_string = restore_ts.isoformat()
+        self.kwargs.update({
+            'rts': restore_ts_string
+        })
+
+        # Create content in account and triggering restore
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+
+        time.sleep(300)
+        self.cmd('az cosmosdb delete -n {acc} -g {rg} --yes')
 
         self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
         self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[

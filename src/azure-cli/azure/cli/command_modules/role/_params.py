@@ -50,7 +50,7 @@ def load_arguments(self, _):
         c.argument('app_roles', type=validate_file_or_dict,
                    help="declare the roles you want to associate with your application. Should be in manifest json format. See examples below for details")
         c.argument('optional_claims', type=validate_file_or_dict,
-                   help="declare the optional claims for the application. Should be in manifest json format. See examples below for details. Please reference https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims#optionalclaim-type for optional claim properties.")
+                   help="declare the optional claims for the application. Should be in manifest json format. See examples below for details. Please reference https://docs.microsoft.com/azure/active-directory/develop/active-directory-optional-claims#optionalclaim-type for optional claim properties.")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
         c.argument('credential_description', help="the description of the password")
 
@@ -214,6 +214,7 @@ def load_arguments(self, _):
             user = "User"
             group = "Group"
             service_principal = "ServicePrincipal"
+            foreign_group = "ForeignGroup"
 
         c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
                    help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')

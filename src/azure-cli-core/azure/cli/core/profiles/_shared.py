@@ -8,6 +8,11 @@ from enum import Enum
 from functools import total_ordering
 from importlib import import_module
 
+from knack.log import get_logger
+
+
+logger = get_logger(__name__)
+
 
 class APIVersionException(Exception):
     def __init__(self, type_name, api_profile):
@@ -51,13 +56,15 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_TEMPLATESPECS = ('azure.mgmt.resource.templatespecs', 'TemplateSpecsClient')
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
+    DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyClient')
     DATA_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
     DATA_KEYVAULT_ADMINISTRATION_BACKUP = ('azure.keyvault.administration', 'KeyVaultBackupClient')
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
+    MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', 'IotCentralClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
-    MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
+    MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShift4Client')
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
@@ -83,7 +90,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
     MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
-    MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', None)
     MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
     MGMT_MAPS = ('azure.mgmt.maps', None)
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
@@ -136,25 +142,25 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2021-04-01',
+        ResourceType.MGMT_STORAGE: '2021-06-01',
         ResourceType.MGMT_NETWORK: '2021-02-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2021-03-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2021-07-01', {
             'resource_skus': '2019-04-01',
             'disks': '2020-12-01',
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
             'snapshots': '2020-12-01',
-            'galleries': '2020-09-30',
+            'galleries': '2021-07-01',
             'gallery_images': '2020-09-30',
             'gallery_image_versions': '2020-09-30',
             'shared_galleries': '2020-09-30',
-            'virtual_machine_scale_sets': '2021-03-01'
+            'virtual_machine_scale_sets': '2021-04-01',
         }),
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2020-09-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2020-10-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2021-04-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
@@ -165,12 +171,15 @@ AZURE_API_PROFILES = {
             'role_definitions': '2018-01-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2020-11-01-preview', {
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2021-06-01-preview', {
             'agent_pools': '2019-06-01-preview',
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
             'runs': '2019-06-01-preview',
         }),
+        # The order does make things different.
+        # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',
@@ -181,7 +190,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'activity_log_alerts': '2017-04-01',
             'activity_logs': '2015-04-01',
@@ -215,11 +224,12 @@ AZURE_API_PROFILES = {
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
-        ResourceType.MGMT_IOTHUB: '2021-03-31',
+        ResourceType.MGMT_IOTHUB: '2021-07-01',
+        ResourceType.MGMT_IOTCENTRAL: '2018-09-01',
         ResourceType.MGMT_ARO: '2020-04-30',
-        ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
+        ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-05-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-07-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         })
@@ -239,7 +249,7 @@ AZURE_API_PROFILES = {
             'virtual_machine_scale_sets': '2020-06-01'
         }),
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
@@ -247,11 +257,14 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2016-09-01', {
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01',
             'policy_assignments': '2016-12-01',
             'policy_definitions': '2016-12-01'
         }),
+        # The order does make things different.
+        # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
@@ -260,7 +273,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_QUEUE: '2019-07-07',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
@@ -290,6 +303,9 @@ AZURE_API_PROFILES = {
             'policy_assignments': '2016-12-01',
             'policy_definitions': '2016-12-01'
         }),
+        # The order does make things different.
+        # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2017-11-09',
@@ -301,7 +317,7 @@ AZURE_API_PROFILES = {
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
@@ -320,6 +336,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
+        # The order does make things different.
+        # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
         ResourceType.DATA_STORAGE_BLOB: '2017-04-17',
@@ -343,6 +362,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
+        # The order does make things different.
+        # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2015-04-05',
         ResourceType.DATA_STORAGE_BLOB: '2015-04-05',
@@ -573,6 +595,8 @@ def _get_attr(sdk_path, mod_attr_path, checked=True):
                 op = getattr(op, part)
         return op
     except (ImportError, AttributeError) as ex:
+        import traceback
+        logger.debug(traceback.format_exc())
         if checked:
             return None
         raise ex

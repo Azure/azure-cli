@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 import datetime
 import unittest
-import unittest.mock as mock
+from unittest import mock
 from unittest.mock import MagicMock
 
 from azure.cli.core.adal_authentication import AdalAuthentication, _try_scopes_to_resource

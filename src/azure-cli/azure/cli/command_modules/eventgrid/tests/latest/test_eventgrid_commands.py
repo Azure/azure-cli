@@ -609,7 +609,7 @@ class EventGridTests(ScenarioTest):
         self.cmd('az eventgrid system-topic delete --name {storage_system_topic_name_regional} --resource-group {regional_resource_group} --yes')
 
     @ResourceGroupPreparer(name_prefix='clieventgrid', location='centraluseuap')
-    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap', kind='StorageV2')
     def test_event_subscription_delivery_attributes(self, resource_group, resource_group_location, storage_account):
 
         scope = self.cmd('az group show -n {} -o json'.format(resource_group)).get_output_in_json()['id']
@@ -622,8 +622,8 @@ class EventGridTests(ScenarioTest):
             'scope': scope
         })
 
-        self.kwargs['source_resource_id'] = self.cmd('storage account create --resource-group {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']
-        self.cmd('az storage account update -g {rg} -n {sa} --set kind=StorageV2')
+        sub_id = self.get_subscription_id()
+        self.kwargs['source_resource_id'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.format(sub_id, resource_group, storage_account)
 
         self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint \"{endpoint_url}\" --delivery-attribute-mapping somestaticname1 static somestaticvalue1  --delivery-attribute-mapping somestaticname2 static somestaticvalue2 true --delivery-attribute-mapping somestaticname3 static somestaticvalue3 false --delivery-attribute-mapping somedynamicattribname1 dynamic data.key1', checks=[
             self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
@@ -640,8 +640,8 @@ class EventGridTests(ScenarioTest):
         self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
 
     @ResourceGroupPreparer(name_prefix='clieventgrid', location='centraluseuap')
-    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
-    def test_event_subscription_with_storagequeuemessage_ttl(self, resource_group):
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap', kind='StorageV2')
+    def test_event_subscription_with_storagequeuemessage_ttl(self, resource_group, storage_account):
         scope = self.cmd('az group show -n {} -o json'.format(resource_group)).get_output_in_json()['id']
         event_subscription_name = self.create_random_name(prefix='cli', length=40)
         storagequeue_endpoint_id = '/subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg/queueServices/default/queues/stogqueuedestination'
@@ -653,8 +653,8 @@ class EventGridTests(ScenarioTest):
             'scope': scope,
         })
 
-        self.kwargs['source_resource_id'] = self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']
-        self.cmd('az storage account update -g {rg} -n {sa} --set kind=StorageV2')
+        sub_id = self.get_subscription_id()
+        self.kwargs['source_resource_id'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.format(sub_id, resource_group, storage_account)
 
         # Create a storage queue destination with storagequeuemessage ttl set to 2 mins
         self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint-type stoRAgequeue --endpoint {storagequeue_endpoint_id} --event-delivery-schema cloudeventschemav1_0 --storage-queue-msg-ttl 120', checks=[
@@ -669,6 +669,44 @@ class EventGridTests(ScenarioTest):
         ])
 
         self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
+
+    @ResourceGroupPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap', kind='StorageV2')
+    def test_event_subscription_with_delivery_identity(self, resource_group, storage_account):
+        scope = self.cmd('az group show -n {} -o json'.format(resource_group)).get_output_in_json()['id']
+        event_subscription_name = self.create_random_name(prefix='cli', length=40)
+        eventhub_id = '/subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/DevExpRg/providers/Microsoft.eventhub/namespaces/devexpeh/eventhubs/eventhub1'
+
+        self.kwargs.update({
+            'event_subscription_name': event_subscription_name,
+            'eventhub_id': eventhub_id,
+            'location': 'centraluseuap',
+            'scope': scope,
+        })
+
+        sub_id = self.get_subscription_id()
+        self.kwargs['source_resource_id'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.format(sub_id, resource_group, storage_account)
+
+        # Create an eventsubscription with eventhub as destination
+        self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint-type eventhub --endpoint {eventhub_id}', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # Turn on delivery with resource identity
+        self.cmd('az eventgrid event-subscription update --source-resource-id {source_resource_id} --name {event_subscription_name} --delivery-identity systemassigned --delivery-identity-endpoint-type eventhub --delivery-identity-endpoint {eventhub_id}', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # Turn off delivery with resource identity
+        self.cmd('az eventgrid event-subscription update --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint-type eventhub --endpoint {eventhub_id}', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
+
 
     @ResourceGroupPreparer()
     @unittest.skip('Will be re-enabled once global operations are enabled for 2020-01-01-preview API version')
@@ -742,7 +780,7 @@ class EventGridTests(ScenarioTest):
         self.cmd('az eventgrid event-subscription delete --source-resource-id {scope} --name {event_subscription_name}')
 
     @ResourceGroupPreparer(name_prefix='clieventgridrg', location='centraluseuap')
-    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap', kind='StorageV2')
     def test_create_event_subscriptions_to_resource(self, resource_group, resource_group_location, storage_account):
         event_subscription_name = self.create_random_name(prefix='cli', length=40)
         endpoint_url = 'https://eventgridclitestapp.azurewebsites.net/api/SubscriptionValidation?code=<HIDDEN>'
@@ -755,8 +793,8 @@ class EventGridTests(ScenarioTest):
             'endpoint_baseurl': endpoint_baseurl
         })
 
-        self.kwargs['source_resource_id'] = self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']
-        self.cmd('az storage account update -g {rg} -n {sa} --set kind=StorageV2')
+        sub_id = self.get_subscription_id()
+        self.kwargs['source_resource_id'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.format(sub_id, resource_group, storage_account)
 
         self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint \"{endpoint_url}\"', checks=[
             self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
@@ -834,8 +872,8 @@ class EventGridTests(ScenarioTest):
         self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
-    def test_create_event_subscriptions_with_filters(self, resource_group):
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap', kind='StorageV2')
+    def test_create_event_subscriptions_with_filters(self, resource_group, storage_account):
         event_subscription_name = 'eventsubscription2'
         endpoint_url = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>'
         endpoint_baseurl = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid'
@@ -858,8 +896,8 @@ class EventGridTests(ScenarioTest):
             'label_2': label_2
         })
 
-        self.kwargs['source_resource_id'] = self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']
-        self.cmd('az storage account update -g {rg} -n {sa} --set kind=StorageV2')
+        sub_id = self.get_subscription_id()
+        self.kwargs['source_resource_id'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.format(sub_id, resource_group, storage_account)
 
         self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint \"{endpoint_url}\" --subject-ends-with {subject_ends_with} --included-event-types {event_type_1} {event_type_2} --subject-case-sensitive --labels {label_1} {label_2}')
 
@@ -888,11 +926,10 @@ class EventGridTests(ScenarioTest):
         ])
 
         self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
-        self.cmd('az storage account delete -y -g {rg} -n {sa}')
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
-    def test_create_event_subscriptions_with_20180501_features(self, resource_group):
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap', kind='StorageV2')
+    def test_create_event_subscriptions_with_20180501_features(self, resource_group, storage_account):
         event_subscription_name1 = 'CliTestEventsubscription1'
         event_subscription_name2 = 'CliTestEventsubscription2'
         event_subscription_name3 = 'CliTestEventsubscription3'
@@ -922,8 +959,8 @@ class EventGridTests(ScenarioTest):
             'servicebusqueue_endpoint_id': servicebusqueue_endpoint_id,
         })
 
-        self.kwargs['source_resource_id'] = self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']
-        self.cmd('az storage account update -g {rg} -n {sa} --set kind=StorageV2')
+        sub_id = self.get_subscription_id()
+        self.kwargs['source_resource_id'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.format(sub_id, resource_group, storage_account)
 
         # Failure cases
         # Invalid Event TTL value
@@ -982,11 +1019,10 @@ class EventGridTests(ScenarioTest):
         self.cmd('az eventgrid event-subscription delete  --source-resource-id {source_resource_id} --name {event_subscription_name2}')
         self.cmd('az eventgrid event-subscription delete  --source-resource-id {source_resource_id} --name {event_subscription_name3}')
         # self.cmd('az eventgrid event-subscription delete  --source-resource-id {source_resource_id} --name {event_subscription_name4}')
-        self.cmd('az storage account delete -y -g {rg} -n {sa}')
 
     @ResourceGroupPreparer(name_prefix='clieventgridrg', location='eastus2euap')
-    @StorageAccountPreparer(name_prefix='clieventgrid', location='eastus2euap')
-    def test_create_event_subscriptions_with_20200101_features(self, resource_group):
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='eastus2euap', kind='StorageV2')
+    def test_create_event_subscriptions_with_20200101_features(self, resource_group, storage_account):
         event_subscription_name1 = 'CliTestEventGridEventsubscription1'
         event_subscription_name2 = 'CliTestEventGridEventsubscription2'
         event_subscription_name3 = 'CliTestEventGridEventsubscription3'
@@ -1020,8 +1056,8 @@ class EventGridTests(ScenarioTest):
             'location': 'eastus2euap'
         })
 
-        self.kwargs['source_resource_id'] = self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']
-        self.cmd('az storage account update -g {rg} -n {sa} --set kind=StorageV2')
+        sub_id = self.get_subscription_id()
+        self.kwargs['source_resource_id'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.format(sub_id, resource_group, storage_account)
 
         # Create a servicebustopic destination based event subscription with CloudEvent 1.0 as the delivery schema
         self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name1} --endpoint-type SErvIcEBusTOPic --endpoint {servicebustopic_endpoint_id} --subject-begins-with SomeRandomText1 --event-delivery-schema CloudEVENTSchemaV1_0')
@@ -1098,7 +1134,6 @@ class EventGridTests(ScenarioTest):
         self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name2}')
         self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name3}')
         self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name4}')
-        self.cmd('az storage account delete -y -g {rg} -n {sa}')
 
     @ResourceGroupPreparer()
     def test_advanced_filters(self, resource_group):

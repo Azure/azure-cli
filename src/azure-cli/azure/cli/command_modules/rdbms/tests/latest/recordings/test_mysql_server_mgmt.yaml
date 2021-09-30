@@ -18,8 +18,50 @@ interactions:
         azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.19.0
       accept-language:
       - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-07-22T20:59:39Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 08 Feb 2021 18:02:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --admin-user --admin-password --sku-name --tags --geo-redundant-backup
+        --backup-retention
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.19.0
+      accept-language:
+      - en-US
     method: HEAD
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
       string: ''
@@ -62,7 +104,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForMySQL/checkNameAvailability?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/checkNameAvailability?api-version=2017-12-01
   response:
     body:
       string: '{"error":{"code":"GatewayTimeout","message":"The gateway did not receive
@@ -112,7 +154,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForMySQL/checkNameAvailability?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/checkNameAvailability?api-version=2017-12-01
   response:
     body:
       string: '{"nameAvailable":true,"message":""}'
@@ -168,7 +210,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:03:51.35Z"}'
@@ -311,7 +353,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -358,7 +400,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The requested resource
@@ -407,7 +449,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServerDatabase","startTime":"2021-02-08T18:05:55.45Z"}'
@@ -455,7 +497,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -501,7 +543,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -553,7 +595,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:05:56.483Z"}'
@@ -649,7 +691,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"properties":{"charset":"latin1","collation":"latin1_swedish_ci"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003/databases/defaultdb","name":"defaultdb","type":"Microsoft.DBforMySQL/servers/databases"}'
@@ -741,7 +783,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLS1_2","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -787,7 +829,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLS1_2","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -840,7 +882,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:06:58.48Z"}'
@@ -934,7 +976,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Disabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -980,7 +1022,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Disabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1032,7 +1074,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:08:00.38Z"}'
@@ -1126,7 +1168,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Disabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1172,7 +1214,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Disabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1224,7 +1266,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:09:02.363Z"}'
@@ -1318,7 +1360,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_4","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Disabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1364,7 +1406,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_4","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Disabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1410,7 +1452,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_4","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Disabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1462,7 +1504,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:10:04.493Z"}'
@@ -1556,7 +1598,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Disabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1602,7 +1644,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Disabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1654,7 +1696,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:11:06.277Z"}'
@@ -1748,7 +1790,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1794,7 +1836,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1846,7 +1888,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:12:08.217Z"}'
@@ -1940,7 +1982,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -1986,7 +2028,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -2037,7 +2079,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBForMySQL/servers/azuredbclirestore000004?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforMySQL/servers/azuredbclirestore000004?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"RestoreElasticServer","startTime":"2021-02-08T18:13:52.147Z"}'
@@ -3189,7 +3231,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBForMySQL/servers/azuredbclirestore000004?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforMySQL/servers/azuredbclirestore000004?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclirestore000004.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:23:52.79+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforMySQL/servers/azuredbclirestore000004","name":"azuredbclirestore000004","type":"Microsoft.DBforMySQL/servers"}'
@@ -3235,7 +3277,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"}'
@@ -3288,7 +3330,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBForMySQL/servers/azuredbcligeorestore000005?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforMySQL/servers/azuredbcligeorestore000005?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"RestoreElasticServer","startTime":"2021-02-08T18:17:57.03Z"}'
@@ -3388,8 +3430,50 @@ interactions:
         azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.19.0
       accept-language:
       - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-07-22T20:59:39Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 08 Feb 2021 18:18:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --admin-user --admin-password --sku-name --tags --geo-redundant-backup
+        --backup-retention --infrastructure-encryption
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.19.0
+      accept-language:
+      - en-US
     method: HEAD
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
       string: ''
@@ -3432,7 +3516,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForMySQL/checkNameAvailability?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/checkNameAvailability?api-version=2017-12-01
   response:
     body:
       string: '{"nameAvailable":true,"message":""}'
@@ -3489,7 +3573,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliinfraencrypt000006?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliinfraencrypt000006?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:18:11.35Z"}'
@@ -3585,7 +3669,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliinfraencrypt000006?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliinfraencrypt000006?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbcliinfraencrypt000006.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:28:11.723+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Enabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliinfraencrypt000006","name":"azuredbcliinfraencrypt000006","type":"Microsoft.DBforMySQL/servers"}'
@@ -3632,7 +3716,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliinfraencrypt000006/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliinfraencrypt000006/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The requested resource
@@ -3681,7 +3765,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliinfraencrypt000006/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliinfraencrypt000006/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServerDatabase","startTime":"2021-02-08T18:19:32.657Z"}'
@@ -3729,7 +3813,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBForMySQL/servers?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforMySQL/servers?api-version=2017-12-01
   response:
     body:
       string: '{"value":[{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclirestore000004.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:23:52.79+00:00","replicationRole":"","masterServerId":"","byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforMySQL/servers/azuredbclirestore000004","name":"azuredbclirestore000004","type":"Microsoft.DBforMySQL/servers"}]}'
@@ -3772,7 +3856,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForMySQL/servers?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/servers?api-version=2017-12-01
   response:
     body:
       string: '{"value":[{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000003.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:13:51.757+00:00","replicationRole":"","masterServerId":"","byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Disabled"},"location":"westus2","tags":{"key":"3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003","name":"azuredbclitest000003","type":"Microsoft.DBforMySQL/servers"},{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclirestore000004.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:23:52.79+00:00","replicationRole":"","masterServerId":"","byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforMySQL/servers/azuredbclirestore000004","name":"azuredbclirestore000004","type":"Microsoft.DBforMySQL/servers"},{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbcliinfraencrypt000006.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:28:11.723+00:00","replicationRole":"","masterServerId":"","byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Enabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliinfraencrypt000006","name":"azuredbcliinfraencrypt000006","type":"Microsoft.DBforMySQL/servers"}]}'
@@ -3820,8 +3904,50 @@ interactions:
         azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.19.0
       accept-language:
       - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-07-22T20:59:39Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 08 Feb 2021 18:19:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --admin-user --admin-password --sku-name --tags --geo-redundant-backup
+        --backup-retention --version
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.19.0
+      accept-language:
+      - en-US
     method: HEAD
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
       string: ''
@@ -3864,7 +3990,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForMySQL/checkNameAvailability?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/checkNameAvailability?api-version=2017-12-01
   response:
     body:
       string: '{"nameAvailable":true,"message":""}'
@@ -3921,7 +4047,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServer","startTime":"2021-02-08T18:19:36.38Z"}'
@@ -4017,7 +4143,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliinfraencrypt000006/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliinfraencrypt000006/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"properties":{"charset":"latin1","collation":"latin1_swedish_ci"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliinfraencrypt000006/databases/defaultdb","name":"defaultdb","type":"Microsoft.DBforMySQL/servers/databases"}'
@@ -4111,7 +4237,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.6","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbcliupgrade000007.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:29:36.723+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007","name":"azuredbcliupgrade000007","type":"Microsoft.DBforMySQL/servers"}'
@@ -4158,7 +4284,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The requested resource
@@ -4207,7 +4333,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"UpsertElasticServerDatabase","startTime":"2021-02-08T18:20:59.98Z"}'
@@ -4307,7 +4433,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007?api-version=2017-12-01
   response:
     body:
       string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":10,"geoRedundantBackup":"Enabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbcliupgrade000007.mysql.database.azure.com","earliestRestoreDate":"2021-02-08T18:29:36.723+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus2","tags":{"key":"1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007","name":"azuredbcliupgrade000007","type":"Microsoft.DBforMySQL/servers"}'
@@ -4355,7 +4481,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000003?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000003?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"DropElasticServer","startTime":"2021-02-08T18:21:00.953Z"}'
@@ -4451,7 +4577,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"error":{"code":"InternalServerError","message":"An unexpected error
@@ -4499,7 +4625,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"error":{"code":"InternalServerError","message":"An unexpected error
@@ -4639,7 +4765,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"error":{"code":"InternalServerError","message":"An unexpected error
@@ -4688,7 +4814,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBForMySQL/servers/azuredbclirestore000004?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforMySQL/servers/azuredbclirestore000004?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"DropElasticServer","startTime":"2021-02-08T18:21:17.483Z"}'
@@ -4737,7 +4863,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007/databases/defaultdb?api-version=2017-12-01
   response:
     body:
       string: '{"error":{"code":"InternalServerError","message":"An unexpected error
@@ -4878,7 +5004,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliinfraencrypt000006?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliinfraencrypt000006?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"DropElasticServer","startTime":"2021-02-08T18:21:32.92Z"}'
@@ -5020,7 +5146,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbcliupgrade000007?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbcliupgrade000007?api-version=2017-12-01
   response:
     body:
       string: '{"operation":"DropElasticServer","startTime":"2021-02-08T18:21:49.407Z"}'
@@ -5161,7 +5287,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers?api-version=2017-12-01
   response:
     body:
       string: '{"value":[]}'
@@ -5203,7 +5329,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBForMySQL/servers?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforMySQL/servers?api-version=2017-12-01
   response:
     body:
       string: '{"value":[]}'
@@ -5249,7 +5375,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.0 azsdk-python-mgmt-rdbms/unknown Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForMySQL/locations/westus2/performanceTiers?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/westus2/performanceTiers?api-version=2017-12-01
   response:
     body:
       string: '{"value":[{"id":"Basic","serviceLevelObjectives":[{"edition":"Basic","vCore":1,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":1048576,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"B_Gen5_1"},{"edition":"Basic","vCore":2,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":1048576,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"B_Gen5_2"}],"minStorageMB":5120,"maxStorageMB":1048576,"minLargeStorageMB":0,"maxLargeStorageMB":0,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"features":[{"name":"MicrosoftDBMySQLSTOP","value":"Enabled"},{"name":"MicrosoftDBMySQLUPGRADE","value":"Enabled"}],"subscriptionFeatures":[]},{"id":"GeneralPurpose","serviceLevelObjectives":[{"edition":"GeneralPurpose","vCore":2,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"GP_Gen5_2"},{"edition":"GeneralPurpose","vCore":4,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"GP_Gen5_4"},{"edition":"GeneralPurpose","vCore":8,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"GP_Gen5_8"},{"edition":"GeneralPurpose","vCore":16,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"GP_Gen5_16"},{"edition":"GeneralPurpose","vCore":32,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"GP_Gen5_32"},{"edition":"GeneralPurpose","vCore":64,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"GP_Gen5_64"}],"minStorageMB":5120,"maxStorageMB":16777216,"minLargeStorageMB":0,"maxLargeStorageMB":0,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"features":[{"name":"MicrosoftDBMySQLBYOK","value":"Enabled"},{"name":"MicrosoftDBMySQLInfrastructureEncryption","value":"Enabled"},{"name":"MicrosoftDBMySQLSTOP","value":"Enabled"},{"name":"MicrosoftDBMySQLUPGRADE","value":"Enabled"}],"subscriptionFeatures":[]},{"id":"MemoryOptimized","serviceLevelObjectives":[{"edition":"MemoryOptimized","vCore":2,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"MO_Gen5_2"},{"edition":"MemoryOptimized","vCore":4,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"MO_Gen5_4"},{"edition":"MemoryOptimized","vCore":8,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"MO_Gen5_8"},{"edition":"MemoryOptimized","vCore":16,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"MO_Gen5_16"},{"edition":"MemoryOptimized","vCore":32,"hardwareGeneration":"Gen5","minStorageMB":5120,"maxStorageMB":16777216,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"id":"MO_Gen5_32"}],"minStorageMB":5120,"maxStorageMB":16777216,"minLargeStorageMB":0,"maxLargeStorageMB":0,"minBackupRetentionDays":7,"maxBackupRetentionDays":35,"features":[{"name":"MicrosoftDBMySQLBYOK","value":"Enabled"},{"name":"MicrosoftDBMySQLInfrastructureEncryption","value":"Enabled"},{"name":"MicrosoftDBMySQLSTOP","value":"Enabled"},{"name":"MicrosoftDBMySQLUPGRADE","value":"Enabled"}],"subscriptionFeatures":[]}]}'

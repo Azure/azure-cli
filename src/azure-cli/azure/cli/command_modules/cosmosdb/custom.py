@@ -9,7 +9,6 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
-from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.util import sdk_no_wait
 
 from azure.mgmt.cosmosdb.models import (
@@ -58,7 +57,8 @@ from azure.mgmt.cosmosdb.models import (
     RestoreParameters,
     ContinuousModeBackupPolicy,
     ContinuousBackupRestoreLocation,
-    CreateMode
+    CreateMode,
+    Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties
 )
 
 logger = get_logger(__name__)
@@ -87,7 +87,8 @@ DEFAULT_INDEXING_POLICY = """{
 
 
 # pylint: disable=too-many-locals
-def cli_cosmosdb_create(cmd, client,
+def cli_cosmosdb_create(cmd,
+                        client,
                         resource_group_name,
                         account_name,
                         locations=None,
@@ -171,6 +172,7 @@ def cli_cosmosdb_create(cmd, client,
 
 
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-branches
 def _create_database_account(client,
                              resource_group_name,
                              account_name,
@@ -220,12 +222,30 @@ def _create_database_account(client,
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
-    system_assigned_identity = None
+    managed_service_identity = None
+    SYSTEM_ID = '[system]'
+    enable_system = False
     if assign_identity is not None:
         if assign_identity == [] or (len(assign_identity) == 1 and assign_identity[0] == '[system]'):
-            system_assigned_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
+            enable_system = True
+            managed_service_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
         else:
-            raise InvalidArgumentValueError("Only '[system]' is supported right now for command '--assign-identity'.")
+            user_identities = {}
+            for x in assign_identity:
+                if x != SYSTEM_ID:
+                    user_identities[x] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+                else:
+                    enable_system = True
+            if enable_system:
+                managed_service_identity = ManagedServiceIdentity(
+                    type=ResourceIdentityType.system_assigned_user_assigned.value,
+                    user_assigned_identities=user_identities
+                )
+            else:
+                managed_service_identity = ManagedServiceIdentity(
+                    type=ResourceIdentityType.user_assigned.value,
+                    user_assigned_identities=user_identities
+                )
 
     api_properties = {}
     if kind == DatabaseAccountKind.mongo_db.value:
@@ -297,7 +317,7 @@ def _create_database_account(client,
         network_acl_bypass=network_acl_bypass,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
         backup_policy=backup_policy,
-        identity=system_assigned_identity,
+        identity=managed_service_identity,
         default_identity=default_identity,
         analytical_storage_configuration=analytical_storage_configuration,
         create_mode=create_mode,
@@ -1426,19 +1446,51 @@ def cli_cosmosdb_identity_show(client, resource_group_name, account_name):
 
 def cli_cosmosdb_identity_assign(client,
                                  resource_group_name,
-                                 account_name):
-    """ Show the identity associated with a Cosmos DB account """
+                                 account_name,
+                                 identities=None):
+    """ Update the identities associated with a Cosmos DB account """
 
     existing = client.get(resource_group_name, account_name)
 
-    if ResourceIdentityType.system_assigned.value in existing.identity.type:
+    SYSTEM_ID = '[system]'
+    enable_system = identities is None or SYSTEM_ID in identities
+    new_user_identities = []
+    if identities is not None:
+        new_user_identities = [x for x in identities if x != SYSTEM_ID]
+
+    only_enabling_system = enable_system and len(new_user_identities) == 0
+    system_already_added = existing.identity.type == ResourceIdentityType.system_assigned or existing.identity.type == ResourceIdentityType.system_assigned_user_assigned
+    all_new_users_already_added = new_user_identities and existing.identity and existing.identity.user_assigned_identities and all(x in existing.identity.user_assigned_identities for x in new_user_identities)
+    if only_enabling_system and system_already_added:
+        return existing.identity
+    if (not enable_system) and all_new_users_already_added:
+        return existing.identity
+    if enable_system and system_already_added and all_new_users_already_added:
         return existing.identity
 
-    if existing.identity.type == ResourceIdentityType.user_assigned.value:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned_user_assigned.value)
+    if existing.identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif existing.identity and existing.identity.type == ResourceIdentityType.system_assigned and new_user_identities:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif existing.identity and existing.identity.type == ResourceIdentityType.user_assigned and enable_system:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif new_user_identities and enable_system:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif new_user_identities:
+        identity_type = ResourceIdentityType.user_assigned
     else:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
-    params = DatabaseAccountUpdateParameters(identity=identity)
+        identity_type = ResourceIdentityType.system_assigned
+
+    if identity_type in [ResourceIdentityType.system_assigned, ResourceIdentityType.none]:
+        new_identity = ManagedServiceIdentity(type=identity_type.value)
+    else:
+        new_assigned_identities = existing.identity.user_assigned_identities or {}
+        for identity in new_user_identities:
+            new_assigned_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
+
+        new_identity = ManagedServiceIdentity(type=identity_type.value, user_assigned_identities=new_assigned_identities)
+
+    params = DatabaseAccountUpdateParameters(identity=new_identity)
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
@@ -1446,19 +1498,61 @@ def cli_cosmosdb_identity_assign(client,
 
 def cli_cosmosdb_identity_remove(client,
                                  resource_group_name,
-                                 account_name):
-    """ Remove the SystemAssigned identity associated with a Cosmos DB account """
+                                 account_name,
+                                 identities=None):
+    """ Remove the identities associated with a Cosmos DB account """
 
     existing = client.get(resource_group_name, account_name)
 
-    if ResourceIdentityType.system_assigned.value not in existing.identity.type:
-        return existing.identity
+    SYSTEM_ID = '[system]'
+    remove_system_assigned_identity = False
+    if not identities:
+        remove_system_assigned_identity = True
+    elif SYSTEM_ID in identities:
+        remove_system_assigned_identity = True
+        identities.remove(SYSTEM_ID)
 
-    if ResourceIdentityType.user_assigned.value in existing.identity.type:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.user_assigned.value)
+    if existing.identity is None:
+        return ManagedServiceIdentity(type=ResourceIdentityType.none.value)
+    if existing.identity.user_assigned_identities:
+        existing_identities = existing.identity.user_assigned_identities.keys()
     else:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.none.value)
-    params = DatabaseAccountUpdateParameters(identity=identity)
+        existing_identities = []
+    if identities:
+        identities_to_remove = identities
+    else:
+        identities_to_remove = []
+    non_existing = [x for x in identities_to_remove if x not in set(existing_identities)]
+
+    if non_existing:
+        raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), account_name))
+    identities_remaining = [x for x in existing_identities if x not in set(identities_to_remove)]
+    if remove_system_assigned_identity and ((not existing.identity) or (existing.identity and existing.identity.type in [ResourceIdentityType.none, ResourceIdentityType.user_assigned])):
+        raise CLIError("System-assigned identity is not associated with '{}'".format(account_name))
+
+    if identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        set_type = ResourceIdentityType.system_assigned_user_assigned
+    elif identities_remaining and remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        set_type = ResourceIdentityType.user_assigned
+    elif identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.user_assigned:
+        set_type = ResourceIdentityType.user_assigned
+    elif not identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        set_type = ResourceIdentityType.system_assigned
+    elif not identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned:
+        set_type = ResourceIdentityType.system_assigned
+    else:
+        set_type = ResourceIdentityType.none
+
+    new_user_identities = {}
+    for identity in identities_remaining:
+        new_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
+    if set_type in [ResourceIdentityType.system_assigned_user_assigned, ResourceIdentityType.user_assigned]:
+        for removed_identity in identities_to_remove:
+            new_user_identities[removed_identity] = None
+    if not new_user_identities:
+        new_user_identities = None
+
+    params = DatabaseAccountUpdateParameters(identity=ManagedServiceIdentity(type=set_type, user_assigned_identities=new_user_identities))
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
@@ -1615,11 +1709,13 @@ def cli_cosmosdb_restore(cmd,
     if restore_timestamp_datetime_utc > current_dateTime:
         raise CLIError("Restore timestamp {} should be less than current timestamp {}".format(restore_timestamp_datetime_utc, current_dateTime))
 
+    is_source_restorable_account_deleted = False
     for account in restorable_database_accounts_list:
         if account.account_name == account_name:
             if account.deletion_time is not None:
                 if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
                     target_restorable_account = account
+                    is_source_restorable_account_deleted = True
                     break
             else:
                 if restore_timestamp_datetime_utc >= account.creation_time:
@@ -1629,35 +1725,36 @@ def cli_cosmosdb_restore(cmd,
     if target_restorable_account is None:
         raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
 
-    # Validate if source account is empty
-    restorable_resources = None
-    if target_restorable_account.api_type.lower() == "sql":
-        try:
-            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_resources
-            restorable_sql_resources_client = cf_restorable_sql_resources(cmd.cli_ctx, [])
-            restorable_resources = restorable_sql_resources_client.list(
-                target_restorable_account.location,
-                target_restorable_account.name,
-                location,
-                restore_timestamp_datetime_utc)
-        except ResourceNotFoundError:
-            raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
-    elif target_restorable_account.api_type.lower() == "mongodb":
-        try:
-            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_resources
-            restorable_mongodb_resources_client = cf_restorable_mongodb_resources(cmd.cli_ctx, [])
-            restorable_resources = restorable_mongodb_resources_client.list(
-                target_restorable_account.location,
-                target_restorable_account.name,
-                location,
-                restore_timestamp_datetime_utc)
-        except ResourceNotFoundError:
-            raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
-    else:
-        raise CLIError("Provided API Type {} is not supported for account {}".format(target_restorable_account.api_type, account_name))
+    # Validate if source account is empty only for live account restores. For deleted account restores the api will not work
+    if not is_source_restorable_account_deleted:
+        restorable_resources = None
+        if target_restorable_account.api_type.lower() == "sql":
+            try:
+                from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_resources
+                restorable_sql_resources_client = cf_restorable_sql_resources(cmd.cli_ctx, [])
+                restorable_resources = restorable_sql_resources_client.list(
+                    target_restorable_account.location,
+                    target_restorable_account.name,
+                    location,
+                    restore_timestamp_datetime_utc)
+            except ResourceNotFoundError:
+                raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
+        elif target_restorable_account.api_type.lower() == "mongodb":
+            try:
+                from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_resources
+                restorable_mongodb_resources_client = cf_restorable_mongodb_resources(cmd.cli_ctx, [])
+                restorable_resources = restorable_mongodb_resources_client.list(
+                    target_restorable_account.location,
+                    target_restorable_account.name,
+                    location,
+                    restore_timestamp_datetime_utc)
+            except ResourceNotFoundError:
+                raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
+        else:
+            raise CLIError("Provided API Type {} is not supported for account {}".format(target_restorable_account.api_type, account_name))
 
-    if restorable_resources is None or not any(restorable_resources):
-        raise CLIError("Database account {} contains no restorable resources in location {} at given restore timestamp {}".format(target_restorable_account, location, restore_timestamp_datetime_utc))
+        if restorable_resources is None or not any(restorable_resources):
+            raise CLIError("Database account {} contains no restorable resources in location {} at given restore timestamp {}".format(target_restorable_account, location, restore_timestamp_datetime_utc))
 
     # Trigger restore
     locations = []

@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=unused-argument, line-too-long
 from azure.cli.core.util import sdk_no_wait, read_file_content
-from azure.mgmt.synapse.models import BigDataPoolResourceInfo, AutoScaleProperties, AutoPauseProperties, LibraryRequirements, NodeSizeFamily
+from azure.mgmt.synapse.models import BigDataPoolResourceInfo, AutoScaleProperties, AutoPauseProperties, LibraryRequirements, NodeSizeFamily, LibraryInfo
 from .._client_factory import cf_synapse_client_workspace_factory
+from .artifacts import get_workspace_package
 
 
 # Synapse sparkpool
@@ -18,7 +19,6 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                       node_size_family=NodeSizeFamily.memory_optimized.value, enable_auto_scale=None,
                       min_node_count=None, max_node_count=None,
                       enable_auto_pause=None, delay=None, spark_events_folder="/events",
-                      library_requirements=None,
                       spark_log_folder="/logs", tags=None, no_wait=False):
 
     workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
@@ -36,10 +36,6 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
     big_data_pool_info.auto_pause = AutoPauseProperties(enabled=enable_auto_pause,
                                                         delay_in_minutes=delay)
 
-    if library_requirements:
-        library_requirements_content = read_file_content(library_requirements)
-        big_data_pool_info.library_requirements = LibraryRequirements(filename=library_requirements,
-                                                                      content=library_requirements_content)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, spark_pool_name,
                        big_data_pool_info)
 
@@ -48,7 +44,9 @@ def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                       node_size=None, node_count=None, enable_auto_scale=None,
                       min_node_count=None, max_node_count=None,
                       enable_auto_pause=None, delay=None,
-                      library_requirements=None, tags=None, force=False, no_wait=False):
+                      library_requirements=None,
+                      package_action=None, package=None,
+                      tags=None, force=False, no_wait=False):
     existing_spark_pool = client.get(resource_group_name, workspace_name, spark_pool_name)
 
     if node_size:
@@ -82,6 +80,17 @@ def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
     else:
         existing_spark_pool.auto_pause = AutoPauseProperties(enabled=enable_auto_pause,
                                                              delay_in_minutes=delay)
+
+    if package_action and package:
+        if package_action == "Add":
+            if existing_spark_pool.custom_libraries is None:
+                existing_spark_pool.custom_libraries = []
+            for item in package:
+                package_get = get_workspace_package(cmd, workspace_name, item)
+                library = LibraryInfo(name=package_get.name, type=package_get.properties.type, path=package_get.properties.path, container_name=package_get.properties.container_name)
+                existing_spark_pool.custom_libraries.append(library)
+        if package_action == "Remove":
+            existing_spark_pool.custom_libraries = [library for library in existing_spark_pool.custom_libraries if library.name not in package]
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, spark_pool_name,
                        existing_spark_pool, force=force)

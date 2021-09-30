@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import mock
+import time
+from unittest import mock
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
-
 
 class AmsSpTests(ScenarioTest):
     @ResourceGroupPreparer()
@@ -28,8 +28,8 @@ class AmsSpTests(ScenarioTest):
                 self.check('location', 'West US 2')
             ])
 
-            spPassword = self.create_random_name(prefix='spp!', length=16)
-            spNewPassword = self.create_random_name(prefix='spp!', length=16)
+            spPassword = self.create_random_name(prefix='spp1!', length=16)
+            spNewPassword = self.create_random_name(prefix='spp1!', length=16)
 
             self.kwargs.update({
                 'spName': 'http://{}'.format(resource_group),
@@ -45,6 +45,9 @@ class AmsSpTests(ScenarioTest):
                     self.check('AccountName', '{amsname}')
                 ])
 
+                # Wait 2 minutes for role assignment to be created.
+                time.sleep(120)
+                
                 self.cmd('az ams account sp reset-credentials -a {amsname} -n {spName} -g {rg} -p {spNewPassword} --role {role}', checks=[
                     self.check('AadSecret', '{spNewPassword}'),
                     self.check('ResourceGroup', '{rg}'),

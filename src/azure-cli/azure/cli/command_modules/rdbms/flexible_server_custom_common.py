@@ -5,6 +5,8 @@
 
 # pylint: disable=unused-argument, line-too-long
 
+import os
+import json
 import uuid
 from datetime import datetime
 from knack.log import get_logger
@@ -13,7 +15,7 @@ from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
-from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     GITHUB_ACTION_PATH
@@ -80,24 +82,27 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
         parameters)
 
 
-def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_id=None):
+def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_name=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
-
-    if migration_id is None:
+    properties_filepath = os.path.join(os.path.abspath(os.getcwd()), properties)
+    if not os.path.exists(properties_filepath):
+        raise FileOperationError("Properties file does not exist in the given location")
+    with open(properties_filepath, "r") as f:
+        json_data = f.read()
+    if migration_name is None:
         # Convert a UUID to a string of hex digits in standard form
-        migration_id = str(uuid.uuid4())
-
-    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, properties)
+        migration_name = str(uuid.uuid4())
+    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, json_data)
 
     return r.json()
 
 
-def migration_show_func(cmd, client, resource_group_name, server_name, migration_id, level="Default"):
+def migration_show_func(cmd, client, resource_group_name, server_name, migration_name, level="Default"):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id, level))
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name, level))
 
     return r.json()
 
@@ -111,7 +116,7 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
     return r.json()
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_id, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, start_data_migration=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -141,25 +146,39 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         operationSpecified = True
         properties = "{\"properties\": {\"triggerCutover\": \"true\"} }"
 
+    if start_data_migration is True:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        properties = "{\"properties\": {\"startDataMigration\": \"true\"} }"
+
     if operationSpecified is False:
         raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
 
-    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, properties)
+    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
 
     return r.json()
 
 
-def migration_delete_func(cmd, client, resource_group_name, server_name, migration_id, yes=None):
+def migration_delete_func(cmd, client, resource_group_name, server_name, migration_name, yes=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if not yes:
         user_confirmation(
             "Are you sure you want to delete the migration '{0}' on target server '{1}', resource group '{2}'".format(
-                migration_id, server_name, resource_group_name))
+                migration_name, server_name, resource_group_name))
 
-    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id))
+    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name))
 
+    return r.json()
+
+
+def migration_check_name_availability(cmd, client, resource_group_name, server_name, migration_name):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    properties = json.dumps({"name": "%s" % migration_name, "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"})
+    r = send_raw_request(cmd.cli_ctx, "post", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/checkMigrationNameAvailability?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name), None, None, properties)
     return r.json()
 
 
@@ -199,7 +218,7 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
 def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
     result = None
     if resource_group_name is None or server_name is None or database_name is None:
-        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
+        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name. "
                        "If your parameter persistence is turned ON, make sure these three parameters exist in "
                        "persistent parameters using \'az config param-persist show\'. "
                        "If your parameter persistence is turned OFF, consider passing them explicitly.")
@@ -252,7 +271,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
 def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
 
     server = client.get(resource_group_name, server_name)
-    if server.public_network_access == 'Disabled':
+    if server.network.public_network_access == 'Disabled':
         raise ClientRequestError("This command only works with public access enabled server.")
     if allow_push and not branch:
         raise RequiredArgumentMissingError("Provide remote branch name to allow pushing the action file to your remote branch.")
