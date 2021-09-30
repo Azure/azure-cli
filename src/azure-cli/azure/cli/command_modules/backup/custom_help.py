@@ -34,7 +34,7 @@ password_offset = 33
 password_length = 15
 
 backup_management_type_map = {"AzureVM": "AzureIaasVM", "AzureWorkload": "AzureWorkLoad",
-                              "AzureStorage": "AzureStorage"}
+                              "AzureStorage": "AzureStorage", "MAB": "MAB"}
 
 # Client Utilities
 
@@ -121,6 +121,10 @@ def validate_azurefileshare_item(azurefileshare_item):
 def validate_object(obj, error_message):
     if obj is None:
         raise ResourceNotFoundError(error_message)
+
+
+# def get_pipeline_response(pipeline_response, _0, _1):
+#    return pipeline_response
 
 
 def get_target_path(resource_type, path, logical_name, data_directory_paths):
@@ -214,6 +218,20 @@ def track_register_operation(cli_ctx, result, vault_name, resource_group, contai
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
                                                                    operation_id, raw=True)
+
+
+# def track_mab_unregister_operation(cli_ctx, result, vault_name, resource_group, container_name):
+#    protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
+
+#    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
+#    result = protection_container_operation_results_client.get(vault_name, resource_group,
+#                                                               fabric_name, container_name,
+#                                                               operation_id, raw=True)
+#    while result.response.status_code == 202:
+#        time.sleep(5)
+#        result = protection_container_operation_results_client.get(vault_name, resource_group,
+#                                                                   fabric_name, container_name,
+#                                                                   operation_id, raw=True)
 
 
 def track_inquiry_operation(cli_ctx, result, vault_name, resource_group, container_name):
@@ -396,7 +414,7 @@ def get_vault_from_arm_id(arm_id):
 
 def validate_and_extract_container_type(container_name, backup_management_type):
     if not is_native_name(container_name) and backup_management_type is None:
-        raise CLIError("""backup management type required""")
+        raise CLIError("""--backup-management-type is required when providing container's friendly name.""")
 
     if not is_native_name(container_name) and backup_management_type is not None:
         if backup_management_type in backup_management_type_map.values():
@@ -405,7 +423,7 @@ def validate_and_extract_container_type(container_name, backup_management_type):
 
     container_type = container_name.split(";")[0]
     container_type_mappings = {"IaasVMContainer": "AzureIaasVM", "StorageContainer": "AzureStorage",
-                               "VMAppContainer": "AzureWorkload"}
+                               "VMAppContainer": "AzureWorkload", "Windows": "MAB"}
 
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]

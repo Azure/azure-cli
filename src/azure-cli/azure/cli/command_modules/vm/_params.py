@@ -42,6 +42,7 @@ def load_arguments(self, _):
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
     GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
+    ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -1019,12 +1020,17 @@ def load_arguments(self, _):
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
                    min_api='2020-09-30', is_experimental=True,
                    help='This property allows you to specify the permission of sharing gallery.')
+        c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
+                   help='Enable soft-deletion for resources in this gallery, '
+                        'allowing them to be recovered within retention time.')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
                    min_api='2020-09-30', is_experimental=True,
                    help='This property allows you to specify the permission of sharing gallery.')
-
+        c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
+                   help='Enable soft-deletion for resources in this gallery, '
+                        'allowing them to be recovered within retention time.')
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:
@@ -1055,6 +1061,7 @@ def load_arguments(self, _):
         c.argument('data_vhds_uris', nargs='+', help='Source VHD URIs (space-delimited) of data disks')
         c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
         c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
+        c.argument('replication_mode', min_api='2021-07-01', arg_type=get_enum_type(ReplicationMode), help='Optional parameter which specifies the mode to be used for replication. This property is not updatable.')
 
     with self.argument_context('sig image-version list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')

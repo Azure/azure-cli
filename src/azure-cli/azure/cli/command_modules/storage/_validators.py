@@ -1871,6 +1871,29 @@ def validate_policy(namespace):
                        "policy.")
 
 
+def validate_immutability_arguments(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if not namespace.enable_alw:
+        if any([namespace.immutability_period_since_creation_in_days,
+                namespace.immutability_policy_state, namespace.allow_protected_append_writes is not None]):
+            raise InvalidArgumentValueError("Incorrect usage: To enable account level immutability, "
+                                            "need to specify --enable-alw true. "
+                                            "Cannot set --enable_alw to false and specify "
+                                            "--immutability-period --immutability-state "
+                                            "--allow-append")
+
+
+def validate_allow_protected_append_writes_all(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if namespace.allow_protected_append_writes_all and namespace.allow_protected_append_writes:
+        raise InvalidArgumentValueError("usage error: The 'allow-protected-append-writes' "
+                                        "and 'allow-protected-append-writes-all' "
+                                        "properties are mutually exclusive. 'allow-protected-append-writes-all' allows "
+                                        "new blocks to be written to both Append and Block Blobs, while "
+                                        "'allow-protected-append-writes' allows new blocks to be written to "
+                                        "Append Blobs only.")
+
+
 def validate_blob_name_for_upload(namespace):
     if not namespace.blob_name:
         namespace.blob_name = os.path.basename(namespace.file_path)
