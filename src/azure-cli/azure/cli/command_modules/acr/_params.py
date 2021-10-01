@@ -407,11 +407,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'], help='The login server of the Cloud ACR registry. Must be the FQDN to support also Azure Stack.', required=True)
         c.argument('connected_registry_name', options_list=['--name', '-n'], help='Name for the connected registry. Name must be between 5 to 40 character long, start with a letter and contain only alphanumeric characters (including ‘_’ or ‘-’). Name must be unique under the Cloud ACR hierarchy.', required=True)
         c.argument('parent_name', options_list=['--parent', '-p'], help='The name of the parent connected registry.', required=False)
-        c.argument('repositories', options_list=['--repository', c.deprecate(target='-t', redirect='--repository', hide=True)], nargs='+', help='Specifies the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...', required=False)
+        c.argument('repositories', options_list=['--repository'], nargs='+', help='Specifies the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...', required=False)
         c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token used to synchronize the connected registry with its parent. It most have only repo permissions and at least the actions required for its mode. It can include access for multiple repositories.', required=False)
         c.argument('cleanup', help='It will aslo delete the sync token and the scope map resources.', required=False)
         c.argument('no_children', help='Used to remove all children from the list.', required=False, action='store_true')
         c.argument('sync_audit_logs_enabled', options_list=['--audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
+
+        c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Required parameter to specify the parent protocol.', required=True)
+        c.argument('generate_password', arg_type=get_enum_type(['1', '2']), options_list=['--generate-password'], help='Select which password you want to generate, and it is required to retrieve the password from the sync token.', required=False)
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
@@ -436,9 +439,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
         c.argument('remove_repos', options_list=['--remove'], nargs='*', required=False,
                    help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
-
-    with self.argument_context('acr connected-registry install') as c:
-        c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Required parameter to specify the parent protocol.', required=True)
 
 
 def _get_helm_default_install_location():

@@ -1308,6 +1308,48 @@ examples:
             --sync-schedule "0 12 * * *" --sync-window PT4H
 """
 
+helps['acr connected-registry get-settings'] = """
+type: command
+short-summary: Retrieves information required to activate a connected registry, and renews the sync token credentials.
+examples:
+  - name: Gets the settings information required to install a connected registry without the password.
+    text: >
+        az acr connected-registry get-settings -r mycloudregistry -n myconnectedregistry --parent-protocol http
+  - name: Generates a new sync token password 1 and gets the settings information required to install a connected registry.
+    text: >
+        az acr connected-registry get-settings -r mycloudregistry -n myconnectedregistry --generate-password 1 --parent-protocol https
+"""
+
+helps['acr connected-registry permissions'] = """
+type: group
+short-summary: Helps manage the repository permissions accross multiple connected registries. Please see https://aka.ms/acr/connected-registry for more information.
+"""
+
+helps['acr connected-registry permissions update'] = """
+type: command
+short-summary: Adds and removes repository permissiones accross all the necessary connected registry sync scope maps.
+examples:
+  - name: Adds permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
+    text: >
+        az acr connected-registry permissions update -r mycloudregistry -n myconnectedregistry --add repo1 repo2
+  - name: Removes permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
+    text: >
+        az acr connected-registry permissions update -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
+  - name: Removes permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
+    text: >
+        az acr connected-registry permissions update -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
+"""
+
+helps['acr connected-registry permissions show'] = """
+type: command
+short-summary: Shows the connected registry sync scope map information.
+examples:
+  - name: Show details and attributes of a sync scope map for an Connected Registry.
+    text: >
+        az acr connected-registry permissions show -r mycloudregistry -n myconnectedregistry
+"""
+
+### To be deprecated ###
 helps['acr connected-registry install'] = """
 type: group
 short-summary: Helps to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.

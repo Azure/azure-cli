@@ -38,8 +38,6 @@ REPO_SCOPES_BY_MODE = {
     ConnectedRegistryModes.REGISTRY.value: ['content/read', 'content/write', 'content/delete',
                                             'metadata/read', 'metadata/write']
 }
-SYNC_SCOPE_MAP_NAME = "{}-sync-scope-map"
-SYNC_TOKEN_NAME = "{}-sync-token"
 REPOSITORY = "repositories/"
 GATEWAY = "gateway/"
 
@@ -342,14 +340,14 @@ def _create_sync_token(cmd,
     gateway_actions_list = [[connected_registry_name.lower()] + DEFAULT_GATEWAY_SCOPE]
     try:
         message = "Created by connected registry sync token: {}"
-        sync_scope_map_name = SYNC_SCOPE_MAP_NAME.format(connected_registry_name)
+        sync_scope_map_name = connected_registry_name
         logger.warning("If sync scope map '%s' already exists, its actions will be overwritten", sync_scope_map_name)
         sync_scope_map = create_default_scope_map(cmd, resource_group_name, registry_name, sync_scope_map_name,
                                                   repository_actions_list, gateway_actions_list,
                                                   scope_map_description=message.format(connected_registry_name),
                                                   force=True)
 
-        sync_token_name = SYNC_TOKEN_NAME.format(connected_registry_name)
+        sync_token_name = connected_registry_name
         logger.warning("If sync token '%s' already exists, it properties will be overwritten", sync_token_name)
         Token = cmd.get_models('Token')
         poller = token_client.begin_create(
@@ -406,8 +404,8 @@ def acr_connected_registry_install_info(cmd,
                                         registry_name,
                                         parent_protocol,
                                         resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, parent_protocol,
-                             resource_group_name)
+    return acr_connected_registry_get_settings(cmd, client, connected_registry_name, registry_name, parent_protocol,
+                                               None, False, resource_group_name)
 
 
 def acr_connected_registry_install_renew_credentials(cmd,
@@ -415,22 +413,53 @@ def acr_connected_registry_install_renew_credentials(cmd,
                                                      connected_registry_name,
                                                      registry_name,
                                                      parent_protocol,
+                                                     yes=False,
                                                      resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, parent_protocol,
-                             resource_group_name)
+    return acr_connected_registry_get_settings(cmd, client, connected_registry_name, registry_name, parent_protocol,
+                                               '1', yes, resource_group_name)
 
 
-def _get_install_info(cmd,
-                      client,
-                      connected_registry_name,
-                      registry_name,
-                      regenerate_credentials,
-                      parent_protocol,
-                      resource_group_name=None):
+def acr_connected_registry_get_settings(cmd,
+                                        client,
+                                        connected_registry_name,
+                                        registry_name,
+                                        parent_protocol,
+                                        generate_password=None,
+                                        yes=False,
+                                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
+
+    sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
+    if generate_password:
+        user_confirmation("Are you sure you want to generate a new sync token '{}' password{}?".format(
+        sync_token_name, generate_password), yes)
+        from ._client_factory import cf_acr_token_credentials
+        from .token import acr_token_credential_generate
+        cred_client = cf_acr_token_credentials(cmd.cli_ctx)
+        if generate_password == '1':
+            password1 = True
+            password2 = False
+        else:
+            password1 = False
+            password2 = True
+
+        poller = acr_token_credential_generate(
+            cmd, cred_client, registry_name, sync_token_name,
+            password1=password1, password2=password2, resource_group_name=resource_group_name)
+        credentials = LongRunningOperation(cmd.cli_ctx)(poller)
+        sync_username = credentials.username
+        if credentials.passwords[0].name.endswith(generate_password):
+            sync_password = credentials.passwords[0].value
+        else:
+            sync_password = credentials.passwords[1].value
+        logger.warning('Please store your generated credentials safely.')
+    else:
+        sync_username = sync_token_name
+        sync_password = "<use --generate-password to generate a new password>"
+
     parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
     if parent_gateway_endpoint is None or parent_gateway_endpoint == '':
         parent_gateway_endpoint = "<parent gateway endpoint>"
@@ -443,30 +472,16 @@ def _get_install_info(cmd,
         if parent_protocol != "https":
             logger.warning("Parent endpoint protocol must be 'https' when parent is a cloud registry.")
         parent_endpoint_protocol = "https"
-    sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
-
     connected_registry_login_server = "<Optional: connected registry login server. " + \
         "More info at https://aka.ms/acr/connected-registry>"
-
-    if regenerate_credentials:
-        from ._client_factory import cf_acr_token_credentials
-        from .token import acr_token_credential_generate
-        cred_client = cf_acr_token_credentials(cmd.cli_ctx)
-        poller = acr_token_credential_generate(
-            cmd, cred_client, registry_name, sync_token_name,
-            password1=True, password2=False, resource_group_name=resource_group_name)
-        credentials = LongRunningOperation(cmd.cli_ctx)(poller)
-        sync_username = credentials.username
-        sync_password = credentials.passwords[0].value
-        logger.warning('Please store your generated credentials safely.')
-    else:
-        sync_username = sync_token_name
-        sync_password = "<sync token password>"
-
     connection_string = "ConnectedRegistryName=%s;" % connected_registry_name + \
         "SyncTokenName=%s;SyncTokenPassword=%s;" % (sync_username, sync_password) + \
         "ParentGatewayEndpoint=%s;ParentEndpointProtocol=%s" % (parent_gateway_endpoint, parent_endpoint_protocol)
     return {
+        "SYNC_TOKEN_USER": sync_username,
+        "SYNC_TOKEN_PASSWORD": sync_password,
+        "ACR_REGISTRY_CERTIFICATE_VOLUME": "/var/acr/certs",
+        "ACR_REGISTRY_DATA_VOLUME": "/var/acr/data",
         "ACR_REGISTRY_CONNECTION_STRING": connection_string,
         "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server
     }
@@ -545,13 +560,26 @@ def _get_scope_map_actions_set(repos, actions):
     return set(parse_scope_map_actions(repos))
 
 
-def acr_connected_registry_repo(cmd,
-                                client,
-                                connected_registry_name,
-                                registry_name,
-                                add_repos=None,
-                                remove_repos=None,
-                                resource_group_name=None):
+def acr_connected_registry_permissions_show(cmd,
+                                            client,
+                                            connected_registry_name,
+                                            registry_name,
+                                            resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name)
+    connected_registry = acr_connected_registry_show(
+        cmd, client, connected_registry_name, registry_name, resource_group_name)
+    sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
+    return get_scope_map_from_id(cmd, sync_token.scope_map_id)
+
+
+def acr_connected_registry_permissions_update(cmd,
+                                              client,
+                                              connected_registry_name,
+                                              registry_name,
+                                              add_repos=None,
+                                              remove_repos=None,
+                                              resource_group_name=None):
     if not (add_repos or remove_repos):
         raise CLIError('No repository permissions to update.')
     _, resource_group_name = validate_managed_registry(
