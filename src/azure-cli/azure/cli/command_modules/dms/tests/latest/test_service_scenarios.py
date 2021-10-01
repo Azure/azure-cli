@@ -21,7 +21,7 @@ class DmsServiceTests(ScenarioTest):
                           JMESPathCheck('reason', 'AlreadyExists')]
     name_available_checks = [JMESPathCheck('nameAvailable', True)]
 
-    @ResourceGroupPreparer(name_prefix='dms_cli_test', location=location_name)
+    @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
     @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_service_commands(self, resource_group):
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
@@ -200,7 +200,7 @@ class DmsServiceTests(ScenarioTest):
 
         project_name_mysql = self.create_random_name('projectmysql', 20)
         task_name_mysql = self.create_random_name('taskmysql', 20)
-        source_connection_info_mysql = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealsourceserver', 'databaseName': 'notarealdatabasename', 'encryptConnection': False, 'trustServerCertificate': True }"
+        source_connection_info_mysql = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealsourceserver', 'databaseName': 'notarealdatabasename', 'encryptConnection': False }"
         target_connection_info_mysql = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealtargetserver', 'databaseName': 'notarealdatabasename'}"
         database_options_mysql = "[ { 'name': 'SourceDatabase1', 'target_database_name': 'TargetDatabase1', 'table_map': { 'sourceSchema.tableName': 'targetSchema.tableName'} } ]"
 
@@ -285,11 +285,9 @@ class DmsServiceTests(ScenarioTest):
                                JMESPathCheck('properties.input.sourceConnectionInfo.serverName',
                                              'notarealsourceserver'),
                                JMESPathCheck('properties.input.sourceConnectionInfo.encryptConnection', False),
-                               JMESPathCheck('properties.input.sourceConnectionInfo.trustServerCertificate', True),
                                JMESPathCheck('properties.input.targetConnectionInfo.serverName',
                                              'notarealtargetserver'),
                                JMESPathCheck('properties.input.targetConnectionInfo.encryptConnection', True),
-                               JMESPathCheck('properties.input.targetConnectionInfo.trustServerCertificate', False),
                                JMESPathCheck('properties.taskType', 'Migrate.MySql.AzureDbForMySql')]
         cancel_checks_mysql = [JMESPathCheck('name', task_name_mysql),
                                JMESPathPatternCheck('properties.state', 'Cancel(?:ed|ing)')]
@@ -311,7 +309,7 @@ class DmsServiceTests(ScenarioTest):
 
         self.cmd('az dms project task create --task-type OfflineMigration --database-options-json "{dboptions2}" -n {tname2} --project-name {pname} -g {rg} --service-name {sname} --source-connection-json "{sconn}" --target-connection-json "{tconn}"')
 
-        list_checks = [JMESPathCheck('length(@)', 3),
+        list_checks = [JMESPathCheck('length(@)', 2),
                        JMESPathCheck("length([?name == '{}'])".format(task_name1), 1)]
         self.cmd('az dms project task list -g {rg} --service-name {sname} --project-name {pname} --task-type "Migrate.SqlServer.SqlDb"', checks=list_checks)
 

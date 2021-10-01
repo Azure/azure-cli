@@ -323,10 +323,14 @@ def create_connection(connection_info_json, prompt_prefix, typeOfInfo):
     if "mysql" in typeOfInfo:
         server_name = connection_info_json.get('serverName', None)
         port = connection_info_json.get('port', 3306)
+        encrypt_connection = connection_info_json.get('encryptConnection', True)
+        trust_server_certificate = connection_info_json.get('trustServerCertificate', True)
         return MySqlConnectionInfo(user_name=user_name,
                                    password=password,
                                    server_name=server_name,
-                                   port=port)
+                                   port=port,
+                                   encrypt_connection=encrypt_connection,
+                                   trust_server_certificate=trust_server_certificate)
 
     if "postgres" in typeOfInfo:
         server_name = connection_info_json.get('serverName', None)
