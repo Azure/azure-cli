@@ -606,7 +606,7 @@ def acr_connected_registry_permissions_update(cmd,
         remove_repos_set = _get_scope_map_actions_set(remove_repos, remove_actions)
         descendants = _get_descendants(family_tree, target_connected_registry.id)
         for connected_registry in descendants:
-            msg = "Removing '{}' permissions from {}".format(remove_repos_txt, connected_registry.name)
+            msg = "Removing '{}' repository permissions from {}".format(remove_repos_txt, connected_registry.name)
             _update_repo_permissions(cmd, resource_group_name, registry_name,
                                      connected_registry, set(), remove_repos_set, msg=msg)
     else:
@@ -620,7 +620,7 @@ def acr_connected_registry_permissions_update(cmd,
         parent_id = target_connected_registry.parent.id
         while parent_id and not parent_id.isspace():
             connected_registry = family_tree[parent_id]["connectedRegistry"]
-            msg = "Adding '{}' permissions to {}".format(add_repos_txt, connected_registry.name)
+            msg = "Adding '{}' repository permissions to {}".format(add_repos_txt, connected_registry.name)
             _update_repo_permissions(cmd, resource_group_name, registry_name,
                                      connected_registry, add_repos_set, set(), msg=msg)
             parent_id = connected_registry.parent.id
@@ -629,12 +629,12 @@ def acr_connected_registry_permissions_update(cmd,
 
     # update target connected registry repo permissions.
     if add_repos and remove_repos:
-        msg = "Adding '{}' and removing '{}' permissions in {}".format(
+        msg = "Adding '{}' and removing '{}' repository permissions in {}".format(
             add_repos_txt, remove_repos_txt, target_connected_registry.name)
     elif add_repos:
-        msg = "Adding '{}' permissions to {}".format(add_repos_txt, target_connected_registry.name)
+        msg = "Adding '{}' repository permissions to {}".format(add_repos_txt, target_connected_registry.name)
     else:
-        msg = "Removing '{}' permissions from {}".format(remove_repos_txt, target_connected_registry.name)
+        msg = "Removing '{}' repository permissions from {}".format(remove_repos_txt, target_connected_registry.name)
     _update_repo_permissions(cmd, resource_group_name, registry_name,
                              target_connected_registry, add_repos_set, remove_repos_set, msg=msg)
 # endregion
