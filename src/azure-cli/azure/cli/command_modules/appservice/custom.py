@@ -1514,7 +1514,10 @@ def _resolve_hostname_through_dns(hostname):
     return socket.gethostbyname(hostname)
 
 
-def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None):
+def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None, deployment_container_image_name=None):
+    if deployment_container_image_name and not configuration_source:
+        raise ArgumentUsageError("cannot use --deployment_container_image_name without --configuration_source")
+
     Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, webapp)
@@ -1545,7 +1548,7 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
-        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source)
+        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source, deployment_container_image_name)
 
     result.name = result.name.split('/')[-1]
     return result
@@ -1570,7 +1573,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     return result
 
 
-def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None):
+def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None, deployment_container_image_name=None):
     clone_from_prod = configuration_source.lower() == webapp.lower()
     site_config = get_site_configs(cmd, resource_group_name, webapp,
                                    None if clone_from_prod else configuration_source)
@@ -1600,6 +1603,10 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
     _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
                                 'update_connection_strings',
                                 connection_strings, slot, client)
+
+    if deployment_container_image_name:
+        update_container_settings(cmd, resource_group_name, webapp,
+            docker_custom_image_name=deployment_container_image_name, slot=slot)
 
 
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
