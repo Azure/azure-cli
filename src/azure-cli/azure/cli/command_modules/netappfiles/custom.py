@@ -88,7 +88,7 @@ def patch_account(instance, account_name, resource_group_name, tags=None, encryp
     _update_mapper(instance, body, ['tags'])
     return body
 
-
+# list accounts by subscription or resource group
 def list_accounts(client, resource_group_name=None):
     if resource_group_name is None:
         return client.list_by_subscription()
