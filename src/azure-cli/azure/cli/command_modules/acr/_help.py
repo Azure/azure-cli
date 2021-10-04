@@ -1349,7 +1349,7 @@ examples:
         az acr connected-registry permissions show -r mycloudregistry -n myconnectedregistry
 """
 
-### To be deprecated ###
+# To be deprecated
 helps['acr connected-registry install'] = """
 type: group
 short-summary: Helps to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.

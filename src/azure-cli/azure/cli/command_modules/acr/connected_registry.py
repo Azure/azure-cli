@@ -435,7 +435,7 @@ def acr_connected_registry_get_settings(cmd,
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
     if generate_password:
         user_confirmation("Are you sure you want to generate a new sync token '{}' password{}?".format(
-        sync_token_name, generate_password), yes)
+                          sync_token_name, generate_password), yes)
         from ._client_factory import cf_acr_token_credentials
         from .token import acr_token_credential_generate
         cred_client = cf_acr_token_credentials(cmd.cli_ctx)
