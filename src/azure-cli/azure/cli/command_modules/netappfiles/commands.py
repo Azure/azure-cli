@@ -90,9 +90,11 @@ def load_command_table(self, _):
 def load_accounts_command_groups(self, netappfiles_accounts_sdk):
     with self.command_group('netappfiles account', netappfiles_accounts_sdk) as g:
         g.show_command('show', 'get')
-        g.command('list', 'list')
         g.command('delete', 'begin_delete')
-        g.command('list-by-subscription', 'list_by_subscription')
+        g.custom_command('list', 'list_accounts',
+                         client_factory=accounts_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
+                         exception_handler=netappfiles_exception_handler)
         g.custom_command('create', 'create_account',
                          client_factory=accounts_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccount',

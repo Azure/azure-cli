@@ -122,20 +122,11 @@ examples:
 
 helps['netappfiles account list'] = """
 type: command
-short-summary: List ANF accounts.
+short-summary: List ANF accounts by subscription or by resource group name.
 examples:
   - name: List ANF accounts within a resource group
     text: >
         az netappfiles account list -g mygroup
-"""
-
-helps['netappfiles account list-by-subscription'] = """
-type: command
-short-summary: List all ANF accounts in subscription.
-examples:
-  - name: List all ANF accounts within a subscription
-    text: >
-        az netappfiles account list-by-subscription
 """
 
 helps['netappfiles account show'] = """

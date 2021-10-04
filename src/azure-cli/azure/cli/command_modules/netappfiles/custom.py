@@ -89,6 +89,12 @@ def patch_account(instance, account_name, resource_group_name, tags=None, encryp
     return body
 
 
+def list_accounts(client, resource_group_name=None):
+    if resource_group_name is None:
+        return client.list_by_subscription()
+    return client.list(resource_group_name)
+
+
 # ---- POOL ----
 def create_pool(client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None,
                 qos_type=None, cool_access=None, encryption_type=None):
