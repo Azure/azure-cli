@@ -2027,7 +2027,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         # create template spec
         basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location {location} --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
-        template_spec_id = basic_template_spec['id']
+        template_spec_id = basic_template_spec['id'] + "/versions/v1"
 
         self.kwargs.update({'template-spec-id': template_spec_id})
 
@@ -2038,10 +2038,10 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks sub delete --name {name}')
 
         #create deployment stack with template spec and parameter file
-        # self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-spec "{template-spec-id}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-spec "{template-spec-id}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup 
-        # self.cmd('stacks sub delete --name {name}')
+        self.cmd('stacks sub delete --name {name}')
 
     def test_show_deployment_stack_subscription(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -2155,7 +2155,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         # create templete spec
         basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location {location} --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
-        template_spec_id = basic_template_spec['id']
+        template_spec_id = basic_template_spec['id'] + "/versions/v1"
 
         self.kwargs.update({'template-spec-id': template_spec_id})
 
