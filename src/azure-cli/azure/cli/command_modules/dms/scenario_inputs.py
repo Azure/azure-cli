@@ -12,6 +12,8 @@ from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigrateMySqlAzureDbForMySqlOfflineTaskInput,
                                              MigrateMySqlAzureDbForMySqlOfflineDatabaseInput)
 
+from azure.cli.core.azclierror import ValidationError
+
 
 def get_migrate_sql_to_sqldb_offline_input(database_options_json,
                                            source_connection_info,
@@ -67,19 +69,39 @@ def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
     database_options = []
     optional_agent_settings = {}
     make_source_server_read_only = False
+    selected_databases = []
 
-    for d in database_options_json:
+    if not isinstance(database_options_json, dict):
+        raise ValidationError('Format of the database option file is wrong')
+    else:
+        if 'selected_databases' in database_options_json:
+            selected_databases = database_options_json.get('selected_databases')
+        else:
+            raise ValidationError('Database option file should contain atleast one selected database for migration')
+
+    for database in selected_databases:
+        if not isinstance(database, dict):
+            raise ValidationError('Format of the selected database file is wrong')
+        if 'name' not in database:
+            raise ValidationError('Selected database should have a name')
+        if 'target_database_name' not in database:
+            raise ValidationError('Selected database should have a target_database_name')
+        if 'table_map' in database and (not isinstance(database.get('table_map'), dict) or
+                                        len(database.get('table_map')) == 0):
+            raise ValidationError('Table map should be dictionary and non empty, to select all tables remove table_map')
         database_options.append(
             MigrateMySqlAzureDbForMySqlOfflineDatabaseInput(
-                name=d.get('name', None),
-                target_database_name=d.get('target_database_name', None),
-                table_map=d.get('table_map', None)))
+                name=database.get('name', None),
+                target_database_name=database.get('target_database_name', None),
+                table_map=database.get('table_map', None)))
 
-    if isinstance(database_options_json, dict):
+    if 'optional_agent_settings' in database_options_json and (not isinstance(database_options_json, dict) or \
+            len(database_options_json.get('optional_agent_settings')) == 0):
+        raise ValidationError('optional_agent_settings have wrong format or is empty')
+    if 'optional_agent_settings' in database_options_json and isinstance(database_options_json, dict):
         optional_agent_settings = database_options_json.get('optional_agent_settings', None)
-        source_setting = database_options_json.get('sourceSetting', None)
-        if source_setting is not None and isinstance(source_setting, dict):
-            make_source_server_read_only = source_setting.get('make_source_server_read_only', False)
+    if 'make_source_server_read_only' in database_options_json and isinstance(database_options_json, dict):
+        make_source_server_read_only = database_options_json.get('make_source_server_read_only', None)
 
     return MigrateMySqlAzureDbForMySqlOfflineTaskInput(source_connection_info=source_connection_info,
                                                        target_connection_info=target_connection_info,

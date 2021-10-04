@@ -22,6 +22,8 @@ from azure.mgmt.datamigration.models import (DataMigrationService,
                                              ProjectTask,
                                              ServiceSku,
                                              SqlConnectionInfo)
+
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.util import sdk_no_wait, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.dms._client_factory import dms_cf_projects
 from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sqldb_offline_input,
@@ -198,7 +200,6 @@ for the supported scenarios.")
                                                     enable_query_analysis_validation)
 
     parameters = ProjectTask(properties=task_properties)
-    print("Log " + str(parameters.properties.serialize()))
     return client.create_or_update(group_name=resource_group_name,
                                    service_name=service_name,
                                    project_name=project_name,
@@ -322,6 +323,8 @@ def create_connection(connection_info_json, prompt_prefix, typeOfInfo):
 
     if "mysql" in typeOfInfo:
         server_name = connection_info_json.get('serverName', None)
+        if server_name is None:
+            raise RequiredArgumentMissingError('ServerName cannot be null/empty')
         port = connection_info_json.get('port', 3306)
         encrypt_connection = connection_info_json.get('encryptConnection', True)
         trust_server_certificate = connection_info_json.get('trustServerCertificate', True)

@@ -202,7 +202,7 @@ class DmsServiceTests(ScenarioTest):
         task_name_mysql = self.create_random_name('taskmysql', 20)
         source_connection_info_mysql = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealsourceserver', 'databaseName': 'notarealdatabasename', 'encryptConnection': False }"
         target_connection_info_mysql = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealtargetserver', 'databaseName': 'notarealdatabasename'}"
-        database_options_mysql = "[ { 'name': 'SourceDatabase1', 'target_database_name': 'TargetDatabase1', 'table_map': { 'sourceSchema.tableName': 'targetSchema.tableName'} } ]"
+        database_options_mysql = "{'make_source_server_read_only': 'true', 'selected_databases':[ { 'name': 'SourceDatabase1', 'target_database_name': 'TargetDatabase1', 'table_map': { 'sourceSchema.tableName': 'targetSchema.tableName'} } ], 'migration_level_settings': { 'DesiredRangesCount': '4', 'QueryTableDataRangeTaskCount':'8'}}"
 
         self.kwargs.update({
             'lname': self.location_name,
@@ -281,7 +281,14 @@ class DmsServiceTests(ScenarioTest):
         create_checks_mysql = [JMESPathCheck('name', task_name_mysql),
                                JMESPathCheck('resourceGroup', resource_group),
                                JMESPathCheck('type', 'Microsoft.DataMigration/services/projects/tasks'),
-                               JMESPathCheck('length(properties.input.selectedDatabases[0].tableMap)', 1),
+                               # JMESPathCheck('properties.input.selectedDatabases.get(\'make_source_server_read_only\')',
+                               #               True),
+                               # JMESPathCheck('length(properties.input.selectedDatabases.get(\'selected_databases\'))',
+                               #               1),
+                               # JMESPathCheck('length(properties.input.selectedDatabases.get(\'selected_databases\')[0].table_map)',
+                               #               1),
+                               # JMESPathCheck('length(properties.input.selectedDatabases[0].tableMap)', 1),
+                               JMESPathCheck('length(properties.input.selectedDatabases)', 3),
                                JMESPathCheck('properties.input.sourceConnectionInfo.serverName',
                                              'notarealsourceserver'),
                                JMESPathCheck('properties.input.sourceConnectionInfo.encryptConnection', False),
