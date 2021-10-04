@@ -251,7 +251,6 @@ parameters:
             ]
 
         For MySQL, the format of the database options JSON object.
-                
         {
             // Details of mapped schemas that needs to be migrated. Multiple schemas can be migrated at a time.
             "selected_databases":[
@@ -261,15 +260,15 @@ parameters:
                   "target_database_name": "targetSchema1",
                   // Table mapping from source to target schemas [Optional]
                   // Don't add it if all tables of this database needs to be migrated
-                  "table_map": {"sourceSchema1.table1": "targetSchema1.table1", 
-                                "sourceSchema1.table2": "targetSchema1.table2", 
-                                "sourceSchema1.table3": "targetSchema1.table3", 
+                  "table_map": {"sourceSchema1.table1": "targetSchema1.table1",
+                                "sourceSchema1.table2": "targetSchema1.table2",
+                                "sourceSchema1.table3": "targetSchema1.table3",
                                 ..n}
                 },
                 ...n
-            ],            
-                    
-            // Used for manipulating the underlying migration engine. [Optional]      
+            ],
+
+            // Used for manipulating the underlying migration engine. [Optional]
             // Only provide if instructed to do so or if you really know what you are doing.
             "migration_level_settings": {
                 // Optional setting that configures the maximum number of parallel reads on tables located on the source database.
@@ -296,7 +295,7 @@ parameters:
                 "DelayProgressUpdatesInStorageInterval": "00:00:30",
                 },
             // [Optional]
-            "make_source_server_read_only": "true|false" 
+            "make_source_server_read_only": "true|false"
         }
 
   - name: --source-connection-json

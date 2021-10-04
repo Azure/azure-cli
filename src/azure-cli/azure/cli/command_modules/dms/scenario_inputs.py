@@ -73,11 +73,10 @@ def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
 
     if not isinstance(database_options_json, dict):
         raise ValidationError('Format of the database option file is wrong')
-    else:
-        if 'selected_databases' in database_options_json:
-            selected_databases = database_options_json.get('selected_databases')
-        else:
-            raise ValidationError('Database option file should contain atleast one selected database for migration')
+
+    if 'selected_databases' not in database_options_json:
+        raise ValidationError('Database option file should contain atleast one selected database for migration')
+    selected_databases = database_options_json.get('selected_databases')
 
     for database in selected_databases:
         if not isinstance(database, dict):
@@ -95,8 +94,9 @@ def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
                 target_database_name=database.get('target_database_name', None),
                 table_map=database.get('table_map', None)))
 
-    if 'optional_agent_settings' in database_options_json and (not isinstance(database_options_json, dict) or \
-            len(database_options_json.get('optional_agent_settings')) == 0):
+    if 'optional_agent_settings' in database_options_json and \
+            (not isinstance(database_options_json, dict) or len(
+                database_options_json.get('optional_agent_settings')) == 0):
         raise ValidationError('optional_agent_settings have wrong format or is empty')
     if 'optional_agent_settings' in database_options_json and isinstance(database_options_json, dict):
         optional_agent_settings = database_options_json.get('optional_agent_settings', None)
