@@ -73,30 +73,35 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus'
     mysql_location = 'westus2'
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_iops_mgmt(self, resource_group):
-        self._test_flexible_server_iops_mgmt('mysql', resource_group)
+    # @AllowLargeResponse()
+    # @ResourceGroupPreparer(location=mysql_location)
+    # def test_mysql_flexible_server_iops_mgmt(self, resource_group):
+    #     self._test_flexible_server_iops_mgmt('mysql', resource_group)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_mgmt(self, resource_group):
-        self._test_flexible_server_mgmt('postgres', resource_group)
+    # @AllowLargeResponse()
+    # @ResourceGroupPreparer(location=postgres_location)
+    # def test_postgres_flexible_server_mgmt(self, resource_group):
+    #     self._test_flexible_server_mgmt('postgres', resource_group)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_mgmt(self, resource_group):
-        self._test_flexible_server_mgmt('mysql', resource_group)
+    # @AllowLargeResponse()
+    # @ResourceGroupPreparer(location=mysql_location)
+    # def test_mysql_flexible_server_mgmt(self, resource_group):
+    #     self._test_flexible_server_mgmt('mysql', resource_group)
+    
+    # @AllowLargeResponse()
+    # @ResourceGroupPreparer(location=postgres_location)
+    # def test_postgres_flexible_server_restore_mgmt(self, resource_group):
+    #     self._test_flexible_server_restore_mgmt('postgres', resource_group)
+    
+    # @AllowLargeResponse()
+    # @ResourceGroupPreparer(location=mysql_location)
+    # def test_mysql_flexible_server_restore_mgmt(self, resource_group):
+    #     self._test_flexible_server_restore_mgmt('mysql', resource_group)
     
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_restore_mgmt(self, resource_group):
-        self._test_flexible_server_restore_mgmt('postgres', resource_group)
-    
-    @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_restore_mgmt(self, resource_group):
-        self._test_flexible_server_restore_mgmt('mysql', resource_group)
+    def test_mysql_flexible_server_georestore_mgmt(self, resource_group):
+        self._test_flexible_server_georestore_mgmt('mysql', resource_group)
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
@@ -206,7 +211,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('local-context off')
 
         location = 'westus2'
-        _, _, iops_info = get_mysql_list_skus_info(self, location)
+        list_skus_info = get_mysql_list_skus_info(self, location)
+        iops_info = list_skus_info['iops_info']
 
         # flexible-server create with user input
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -378,6 +384,120 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access), checks=NoneCheck())
+
+    def _test_flexible_server_georestore_mgmt(self, database_engine, resource_group):
+    
+        private_dns_param = 'privateDnsZoneResourceId' if database_engine == 'mysql' else 'privateDnsZoneArmResourceId'
+        if database_engine == 'postgres':
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            location = 'eastus2euap'
+            target_location = 'centraluseuap'
+        
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_server_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_diff_vnet = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_diff_vnet_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_public_access = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_public_access_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        source_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
+        source_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
+        new_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
+        new_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
+        new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
+        new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --geo-redundant-backup Enabled --yes'.format(
+                 database_engine, resource_group, source_server, source_vnet, source_subnet, location))
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
+        self.assertEqual(result['backup']['geoRedundantBackup'], 'Enabled')
+
+        self.cmd('{} flexible-server create -g {} -n {} --public-access None -l {} --geo-redundant-backup Enabled'.format(
+                 database_engine, resource_group, source_server_2, location))
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server_2)).get_output_in_json()
+        self.assertEqual(result['backup']['geoRedundantBackup'], 'Enabled')
+        self.assertEqual(result['network']['publicNetworkAccess'], 'Enabled')
+
+        sleep(60 * 15)
+
+        # 1. vnet -> vnet without network parameters fail
+        self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} '
+                 .format(database_engine, resource_group, target_location, target_server_default, source_server), expect_failure=True)
+
+        # 2. vnet to public access
+        if database_engine == 'mysql':
+            restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} --public-access enabled'
+                                  .format(database_engine, resource_group, target_location, target_server_public_access, source_server)).get_output_in_json()
+
+            self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
+            self.assertEqual(restore_result['location'], 'Central US EUAP')
+
+        # 3. vnet to different vnet
+        self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
+                 resource_group, target_location, new_vnet))
+
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+                          resource_group, new_subnet, new_vnet)).get_output_in_json()
+
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --yes'.format(
+                                  database_engine, resource_group, target_location, target_server_diff_vnet, source_server, subnet["id"])).get_output_in_json()
+        
+        self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                             self.get_subscription_id(), resource_group, new_vnet, new_subnet))
+
+        self.assertEqual(restore_result['network'][private_dns_param],  # private dns zone needs to be created
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                             self.get_subscription_id(), resource_group, '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)))
+        
+        # 4. public access to vnet
+        if database_engine == 'mysql':
+            self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
+            resource_group, target_location, new_vnet_2))
+
+            subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+                            resource_group, new_subnet_2, new_vnet_2)).get_output_in_json()
+
+            private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet_2, database_engine)
+            self.cmd('network private-dns zone create -g {} --name {}'.format(resource_group, private_dns_zone))
+            
+            restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --private-dns-zone {} --public-access disabled --yes'.format(
+                                    database_engine, resource_group, target_location, target_server_diff_vnet_2, source_server_2, subnet["id"], private_dns_zone)).get_output_in_json()
+            
+            self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
+                            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                                self.get_subscription_id(), resource_group, new_vnet_2, new_subnet_2))
+
+            self.assertEqual(restore_result['network'][private_dns_param],
+                            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
+                                self.get_subscription_id(), resource_group, private_dns_zone))
+        
+        # 5. public to public
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} '
+                                  .format(database_engine, resource_group, target_location, target_server_public_access_2, source_server_2)).get_output_in_json()
+
+        self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
+        self.assertEqual(restore_result['location'], 'Central US EUAP')
+
+        # Delete servers        
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_server), checks=NoneCheck())
+        
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_diff_vnet), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_diff_vnet_2), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_public_access), checks=NoneCheck())
+        
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_public_access_2), checks=NoneCheck())
+            
+        sleep(60*5)
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):

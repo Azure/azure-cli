@@ -123,11 +123,17 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None,
                               server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
                               subnet=None, public_access=None, version=None, auto_grow=None, replication_role=None,
-                              instance=None):
+                              geo_redundant_backup=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
-    sku_info, single_az, _ = get_mysql_list_skus_info(db_context.cmd, location)
+
+    list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
+    sku_info = list_skus_info['sku_info']
+    single_az = list_skus_info['single_az']
+    geo_paired_regions = list_skus_info['geo_paired_regions']
+
     _network_arg_validator(subnet, public_access)
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
+    _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions)
     if tier is None and instance is not None:
         tier = instance.sku.tier
     _mysql_retention_validator(backup_retention, sku_info, tier)
@@ -159,6 +165,11 @@ def _mysql_storage_validator(storage_gb, sku_info, tier, instance):
         if not max(min_mysql_storage, storage_sizes[0]) <= storage_gb <= storage_sizes[1]:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
                            .format(max(min_mysql_storage, storage_sizes[0]), storage_sizes[1]))
+
+
+def _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions):
+    if geo_redundant_backup.lower() == 'enabled' and len(geo_paired_regions) == 0:
+        raise ArgumentUsageError("The region of the server does not support geo-restore feature.")
 
 
 def _mysql_tier_validator(tier, sku_info):
@@ -230,7 +241,9 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    sku_info, single_az = get_postgres_list_skus_info(db_context.cmd, location)
+    list_skus_info = get_postgres_list_skus_info(db_context.cmd, location)
+    sku_info = list_skus_info['sku_info']
+    single_az = list_skus_info['single_az']
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -433,7 +446,20 @@ def validate_mysql_replica(cmd, server):
                               "Try using GeneralPurpose or MemoryOptimized tiers.")
 
     # single az validation
-    _, single_az, _ = get_mysql_list_skus_info(cmd, server.location)
+    list_skus_info = get_mysql_list_skus_info(cmd, server.location)
+    single_az = list_skus_info['single_az']
     if single_az:
         raise ValidationError("Replica can only be created for multi-availability zone regions. "
-                              "The location of the source server is in single availability zone region.")
+                              "The location of the source server is in a single availability zone region.")
+
+def validate_georestore_location(db_context, location):
+    list_skus_info = get_mysql_list_skus_info(db_context.cmd, db_context.location)
+    geo_paired_regions = list_skus_info['geo_paired_regions']
+
+    if location not in geo_paired_regions:
+        raise ValidationError("The region is not paired with the region of the source server. ")
+
+def validate_georestore_network(source_server_object, public_access, vnet, subnet):
+    if source_server_object.network.public_network_access == 'Enabled' and not any((public_access, vnet, subnet)):
+        raise ValidationError("Please specify network parameters if you are geo-restoring a private access server. "
+                              "Run 'az mysql flexible-server goe-restore --help' command to see examples")
