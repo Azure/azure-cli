@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**DMS**
+
+* `az dms project create/az dms project task create`: Add MySQL projects/tasks for offline migrations. (#19634)
+
 2.28.1
 ++++++
 
