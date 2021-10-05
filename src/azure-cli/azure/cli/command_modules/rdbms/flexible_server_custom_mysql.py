@@ -21,7 +21,8 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import mysql_arguments_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, validate_georestore_network
+from .validators import mysql_arguments_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
+    validate_georestore_network, validate_mysql_tier_update
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -336,6 +337,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.sku.name = sku_name
 
     if tier:
+        validate_mysql_tier_update(instance, tier)
         instance.sku.tier = tier
 
     if backup_retention:

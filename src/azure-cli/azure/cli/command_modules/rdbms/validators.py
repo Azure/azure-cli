@@ -228,10 +228,10 @@ def _mysql_high_availability_validator(high_availability, standby_availability_z
                                      "Zone redundant high availability is not supported "
                                      "in a single availability zone region.")
         if auto_grow.lower == 'Disabled':
-            raise ArgumentUsageError("Enabling High Availability requires Auto grow to be turned ON.")
+            raise ArgumentUsageError("Enabling High availability requires auto-grow to be turned ON.")
     if standby_availability_zone:
         if not high_availability or high_availability.lower() != 'zoneredundant':
-            raise ArgumentUsageError("You need to enable high availability to set standby availability zone.")
+            raise ArgumentUsageError("You need to enable zone redundant high availability to set standby availability zone.")
         if zone == standby_availability_zone:
             raise ArgumentUsageError("Your server is in availability zone {}. "
                                      "The zone of the server cannot be same as the standby zone.".format(zone))
@@ -442,8 +442,8 @@ def validate_vnet_location(vnet, location):
 def validate_mysql_replica(cmd, server):
     # Tier validation
     if server.sku.tier == 'Burstable':
-        raise ValidationError("Replication for Burstable servers are not supported. "
-                              "Try using GeneralPurpose or MemoryOptimized tiers.")
+        raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
+                              "Scale up the source server to General Purpose or Memory Optimized. ")
 
     # single az validation
     list_skus_info = get_mysql_list_skus_info(cmd, server.location)
@@ -451,6 +451,14 @@ def validate_mysql_replica(cmd, server):
     if single_az:
         raise ValidationError("Replica can only be created for multi-availability zone regions. "
                               "The location of the source server is in a single availability zone region.")
+
+
+def validate_mysql_tier_update(instance, tier):
+    if instance.sku.tier in ['GeneralPurpose', 'MemoryOptimized'] and tier == 'Burstable':
+        if instance.replication_role == 'Source':
+            raise ValidationError("Read replica is not supported for Burstable Tier")
+        if instance.high_availability.mode != 'Disabled':
+            raise ValidationError("High availability is not supported for Burstable Tier")
 
 
 def validate_georestore_location(db_context, location):
