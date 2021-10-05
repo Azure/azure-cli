@@ -168,7 +168,7 @@ def _mysql_storage_validator(storage_gb, sku_info, tier, instance):
 
 
 def _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions):
-    if geo_redundant_backup.lower() == 'enabled' and len(geo_paired_regions) == 0:
+    if geo_redundant_backup and geo_redundant_backup.lower() == 'enabled' and len(geo_paired_regions) == 0:
         raise ArgumentUsageError("The region of the server does not support geo-restore feature.")
 
 
@@ -452,6 +452,7 @@ def validate_mysql_replica(cmd, server):
         raise ValidationError("Replica can only be created for multi-availability zone regions. "
                               "The location of the source server is in a single availability zone region.")
 
+
 def validate_georestore_location(db_context, location):
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, db_context.location)
     geo_paired_regions = list_skus_info['geo_paired_regions']
@@ -459,7 +460,8 @@ def validate_georestore_location(db_context, location):
     if location not in geo_paired_regions:
         raise ValidationError("The region is not paired with the region of the source server. ")
 
+
 def validate_georestore_network(source_server_object, public_access, vnet, subnet):
-    if source_server_object.network.public_network_access == 'Enabled' and not any((public_access, vnet, subnet)):
+    if source_server_object.network.public_network_access == 'Disabled' and not any((public_access, vnet, subnet)):
         raise ValidationError("Please specify network parameters if you are geo-restoring a private access server. "
                               "Run 'az mysql flexible-server goe-restore --help' command to see examples")

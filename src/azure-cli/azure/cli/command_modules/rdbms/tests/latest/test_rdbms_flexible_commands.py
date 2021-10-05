@@ -73,30 +73,30 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus'
     mysql_location = 'westus2'
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_iops_mgmt(self, resource_group):
-    #     self._test_flexible_server_iops_mgmt('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_iops_mgmt(self, resource_group):
+        self._test_flexible_server_iops_mgmt('mysql', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # def test_postgres_flexible_server_mgmt(self, resource_group):
-    #     self._test_flexible_server_mgmt('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_mgmt('postgres', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_mgmt(self, resource_group):
-    #     self._test_flexible_server_mgmt('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_mgmt('mysql', resource_group)
     
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # def test_postgres_flexible_server_restore_mgmt(self, resource_group):
-    #     self._test_flexible_server_restore_mgmt('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_restore_mgmt(self, resource_group):
+        self._test_flexible_server_restore_mgmt('postgres', resource_group)
     
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_restore_mgmt(self, resource_group):
-    #     self._test_flexible_server_restore_mgmt('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_restore_mgmt(self, resource_group):
+        self._test_flexible_server_restore_mgmt('mysql', resource_group)
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -420,8 +420,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(result['backup']['geoRedundantBackup'], 'Enabled')
         self.assertEqual(result['network']['publicNetworkAccess'], 'Enabled')
 
-        sleep(60 * 15)
-
         # 1. vnet -> vnet without network parameters fail
         self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} '
                  .format(database_engine, resource_group, target_location, target_server_default, source_server), expect_failure=True)
@@ -475,7 +473,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                 self.get_subscription_id(), resource_group, private_dns_zone))
         
         # 5. public to public
-        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} '
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {}'
                                   .format(database_engine, resource_group, target_location, target_server_public_access_2, source_server_2)).get_output_in_json()
 
         self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
@@ -496,8 +494,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access_2), checks=NoneCheck())
-            
-        sleep(60*5)
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):

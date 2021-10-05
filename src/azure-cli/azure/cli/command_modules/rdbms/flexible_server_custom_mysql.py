@@ -265,8 +265,9 @@ def flexible_server_georestore(cmd, client,
         )
 
         db_context.location = location
-        # if source server is public access enabled -> public access default, 
-        
+        if source_server_object.network.public_network_access == 'Enabled' and not any((public_access, vnet, subnet)):
+            public_access = 'Enabled'
+
         parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
                                                                               resource_group_name=resource_group_name,
                                                                               server_name=server_name,
@@ -284,6 +285,7 @@ def flexible_server_georestore(cmd, client,
         raise ResourceNotFoundError(e)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+
 
 # pylint: disable=too-many-branches
 def flexible_server_update_custom_func(cmd, client, instance,
