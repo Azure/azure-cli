@@ -1513,10 +1513,15 @@ def _resolve_hostname_through_dns(hostname):
     import socket
     return socket.gethostbyname(hostname)
 
+# TODO test container options with windows app
+def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None,
+        deployment_container_image_name=None, docker_registry_server_password=None, docker_registry_server_user=None):
 
-def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None, deployment_container_image_name=None):
-    if deployment_container_image_name and not configuration_source:
-        raise ArgumentUsageError("cannot use --deployment_container_image_name without --configuration_source")
+    # TODO does this constraint make sense? Should the user be able to set these configs without using a configuration_source?
+    if (deployment_container_image_name or docker_registry_server_password or docker_registry_server_user) and not configuration_source:
+        raise ArgumentUsageError("Cannot use arguments --deployment_container_image_name, --docker_registry_server_password, or --docker_registry_server_user without argument --configuration_source")
+
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
     Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
@@ -1548,7 +1553,9 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
-        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source, deployment_container_image_name)
+        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source,
+            deployment_container_image_name, docker_registry_server_password, docker_registry_server_user,
+            docker_registry_server_url=docker_registry_server_url)
 
     result.name = result.name.split('/')[-1]
     return result
@@ -1573,7 +1580,10 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     return result
 
 
-def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None, deployment_container_image_name=None):
+def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None,
+    deployment_container_image_name=None, docker_registry_server_password=None, docker_registry_server_user=None,
+    docker_registry_server_url=None):
+
     clone_from_prod = configuration_source.lower() == webapp.lower()
     site_config = get_site_configs(cmd, resource_group_name, webapp,
                                    None if clone_from_prod else configuration_source)
@@ -1604,9 +1614,12 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
                                 'update_connection_strings',
                                 connection_strings, slot, client)
 
-    if deployment_container_image_name:
+    if deployment_container_image_name or docker_registry_server_password or docker_registry_server_user:
         update_container_settings(cmd, resource_group_name, webapp,
-            docker_custom_image_name=deployment_container_image_name, slot=slot)
+            docker_custom_image_name=deployment_container_image_name, slot=slot,
+            docker_registry_server_user=docker_registry_server_user,
+            docker_registry_server_password=docker_registry_server_password,
+            docker_registry_server_url=docker_registry_server_url)
 
 
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
