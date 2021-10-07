@@ -137,8 +137,8 @@ DEPENDENCIES = [
     'azure-synapse-spark~=0.2.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'fabric~=2.4',
-    'javaproperties==0.5.1',
-    'jsondiff==1.2.0',
+    'javaproperties~=0.5.1',
+    'jsondiff~=1.2.0',
     'packaging~=20.9',
     'PyGithub~=1.38',
     'PyNaCl~=1.4.0',
@@ -147,7 +147,8 @@ DEPENDENCIES = [
     'semver==2.13.0',
     'sshtunnel~=0.1.4',
     'websocket-client~=0.56.0',
-    'xmltodict~=0.12'
+    'xmltodict~=0.12',
+    'chardet~=3.0.4'
 ]
 
 # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked
