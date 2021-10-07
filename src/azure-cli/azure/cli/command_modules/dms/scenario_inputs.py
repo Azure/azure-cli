@@ -67,7 +67,7 @@ def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
                                                        source_connection_info,
                                                        target_connection_info):
     database_options = []
-    optional_agent_settings = {}
+    migration_level_settings = {}
     make_source_server_read_only = False
     selected_databases = []
 
@@ -94,17 +94,17 @@ def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
                 target_database_name=database.get('target_database_name', None),
                 table_map=database.get('table_map', None)))
 
-    if 'optional_agent_settings' in database_options_json and \
+    if 'migration_level_settings' in database_options_json and \
             (not isinstance(database_options_json, dict) or len(
-                database_options_json.get('optional_agent_settings')) == 0):
-        raise ValidationError('optional_agent_settings have wrong format or is empty')
-    if 'optional_agent_settings' in database_options_json and isinstance(database_options_json, dict):
-        optional_agent_settings = database_options_json.get('optional_agent_settings', None)
+                database_options_json.get('migration_level_settings')) == 0):
+        raise ValidationError('migration_level_settings have wrong format or is empty')
+    if 'migration_level_settings' in database_options_json and isinstance(database_options_json, dict):
+        migration_level_settings = database_options_json.get('migration_level_settings', None)
     if 'make_source_server_read_only' in database_options_json and isinstance(database_options_json, dict):
         make_source_server_read_only = database_options_json.get('make_source_server_read_only', None)
 
     return MigrateMySqlAzureDbForMySqlOfflineTaskInput(source_connection_info=source_connection_info,
                                                        target_connection_info=target_connection_info,
                                                        selected_databases=database_options,
-                                                       optional_agent_settings=optional_agent_settings,
+                                                       optional_agent_settings=migration_level_settings,
                                                        make_source_server_read_only=make_source_server_read_only)

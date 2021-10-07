@@ -21,7 +21,7 @@ class DmsServiceTests(ScenarioTest):
                           JMESPathCheck('reason', 'AlreadyExists')]
     name_available_checks = [JMESPathCheck('nameAvailable', True)]
 
-    @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
+    @ResourceGroupPreparer(name_prefix='dms_cli_test', location=location_name)
     @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_service_commands(self, resource_group):
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
@@ -81,7 +81,7 @@ class DmsServiceTests(ScenarioTest):
 
         self.cmd('az dms check-name -l {lname} -n {sname}', checks=self.name_available_checks)
 
-    @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
+    @ResourceGroupPreparer(name_prefix='dms_cli_test', location=location_name)
     @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_project_commands(self, resource_group):
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
@@ -170,7 +170,7 @@ class DmsServiceTests(ScenarioTest):
         # Clean up service for live runs
         self.cmd('az dms delete -g {rg} -n {sname} --delete-running-tasks true -y')
 
-    @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
+    @ResourceGroupPreparer(name_prefix='dms_cli_test', location=location_name)
     @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_task_commands(self, resource_group):
         from azure.cli.testsdk.checkers import JMESPathPatternCheck
@@ -283,6 +283,8 @@ class DmsServiceTests(ScenarioTest):
                                JMESPathCheck('type', 'Microsoft.DataMigration/services/projects/tasks'),
                                JMESPathCheck('length(properties.input.selectedDatabases)', 1),
                                JMESPathCheck('length(properties.input.selectedDatabases[0])', 3),
+                               JMESPathCheck('length(properties.input.selectedDatabases[0].tableMap)', 1),
+                               JMESPathCheck('length(properties.input.optionalAgentSettings)', 2),
                                JMESPathCheck('properties.input.makeSourceServerReadOnly', True),
                                JMESPathCheck('properties.input.sourceConnectionInfo.serverName',
                                              'notarealsourceserver'),
