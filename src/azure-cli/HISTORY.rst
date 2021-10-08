@@ -78,7 +78,7 @@ Release History
 * Add `az network vnet-gateway vpn-client ipsec-policy wait` (#19474)
 * Add `az network vnet-gateway nat-rule wait` (#19474)
 * Add `az network vpn-connection packet-capture wait` (#19474)
-* Add microsoft.botservice to supported private endpoints operations (#19555)
+* Private link and endpoint support for provider `Microsoft.BotService/botServices` to supported private endpoints operations (#19555)
 * `az network application-gateway client-cert`: add commands `update` and `show` (#19466)
 * `az network application-gateway ssl-profile`: add commands `update` and `show` (#19466)
 * `az network application-gateway http-listener create`: add parameter `--ssl-profile` (#19466)
