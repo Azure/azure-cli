@@ -55,13 +55,13 @@ Release History
 
 **Cosmos DB**
 
-* Add support for user identity to 'az cosmosdb identity assign/remove' (#19533)
+* `az cosmosdb identity assign/remove`: Add support for user identity (#19533)
 
 **Eventhub**
 
-* 'az eventhubs namespace update' : Add `--infra-encryption` for encryption (enable-require-infrastructure-encryption). (#19677)
-* 'az eventhubs namespace create/update' : Add `--disable-local-auth` to enable or disable  SAS authentication. (#19677)
-* Added new private-endpoint-connection and private-link-resource commands for namespace (#19677)
+* `az eventhubs namespace update` : Add `--infra-encryption` for encryption (enable-require-infrastructure-encryption). (#19677)
+* `az eventhubs namespace create/update` : Add `--disable-local-auth` to enable or disable  SAS authentication. (#19677)
+* Added new private-endpoint-connection and private-link-resource commands for `az eventhubs namespace` (#19677)
 
 **Key Vault**
 
@@ -112,12 +112,16 @@ Release History
 
 **Synapse**
 
-* [BREAKING CHANGE] add parameter `blob-storage-target-state`,`log-analytics-target-state` , `event-hub-target-state` (at least choose one of these 3 paras)to `az synapse sql audit-policy update`  and `az synapse sql pool audit-policy update` (#19384)
-* [BREAKING CHANGE] az synapse : add and change some cmdlets (#19524)
+* [BREAKING CHANGE] Add parameter `blob-storage-target-state`, `log-analytics-target-state`, `event-hub-target-state` (at least choose one of these 3 paras) to `az synapse sql audit-policy update` and `az synapse sql pool audit-policy update` (#19384)
+* `az synapse integration-runtime`: Support start/stop integration-runtime (#19524)
+* `az synapse trigger`: Add az synapse trigger wait (#19524)
+* `az synapse trigger-run`: Add az synapse trigger-run cancel (#19524)
+* `az synapse integration-runtime`: Deprecate `create` command and will redirect to `managed create` or `self-hosted create` command (#19524)
+* `az synapse dataset/pipeline/linked-service/trigger`: Deprecate `set` command and will redirect to `update` command (#19524)
 * `az synapse workspace-package`: Support workspace package CRUD (#19560)
 * `az synapse spark pool update`: Support add or remove specific packages (#19560)
-* `az synapse workspace create&update`: add arguments for supporting synapse workspace repository configuration (#19643)
-* `synapse spark-job-definition`: Support spark job definition CRUD (#19593)
+* `az synapse workspace create/update`: Add arguments for supporting synapse workspace repository configuration (#19643)
+* `az synapse spark-job-definition`: Support spark job definition CRUD (#19593)
 
 2.28.1
 ++++++
