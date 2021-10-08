@@ -135,7 +135,7 @@ DEPENDENCIES = [
     'azure-synapse-artifacts~=0.8.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'azure-synapse-spark~=0.2.0',
-    'chardet~=3.0.4'
+    'chardet~=3.0.4',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
     'jsondiff~=1.2.0',
@@ -148,7 +148,7 @@ DEPENDENCIES = [
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     'websocket-client~=0.56.0',
-    'xmltodict~=0.12',
+    'xmltodict~=0.12'
 ]
 
 # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked
