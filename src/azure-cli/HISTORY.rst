@@ -61,7 +61,7 @@ Release History
 
 * `az eventhubs namespace update` : Add `--infra-encryption` for encryption (enable-require-infrastructure-encryption). (#19677)
 * `az eventhubs namespace create/update` : Add `--disable-local-auth` to enable or disable SAS authentication. (#19677)
-* Add new private-endpoint-connection and private-link-resource commands for `az eventhubs namespace` (#19677)
+* `az eventhubs namespace`: Add `private-endpoint-connection` and `private-link-resource` command groups (#19677)
 
 **Key Vault**
 
