@@ -198,7 +198,7 @@ def validate_counts_in_autoscaler(
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class AKSModels:
-    """Store the models used in aks_create.
+    """Store the models used in aks_create and aks_update.
 
     The api version of the class corresponding to a model is determined by resource_type.
     """
@@ -357,23 +357,33 @@ class AKSModels:
 
 # pylint: disable=too-many-public-methods
 class AKSContext:
-    """Implement getter functions for all parameters in aks_create.
+    """Implement getter functions for all parameters in aks_create and aks_update.
 
-    Note: One of the most basic principles is that when parameters are put into a certain profile (and further
-    decorated into the ManagedCluster object by AKSCreateDecorator), it shouldn't be modified any more, only
-    read-only operations (e.g. validation) can be performed.
+    Each getter function is responsible for obtaining the corresponding one or more parameter values, and perform
+    necessary parameter value completion or normalization and validation checks.
 
     This class also stores a copy of the original function parameters, some intermediate variables (such as the
-    subscription ID) and a reference of the ManagedCluster object.
+    subscription ID), a reference of the ManagedCluster object and an indicator that specifies the current decorator
+    mode (currently supports create and update).
 
-    When adding a new parameter for aks_create, please also provide a "getter" function named `get_xxx`, where `xxx` is
+    In the create mode, the most basic principles is that when parameters are put into a certain profile (and further
+    decorated into the ManagedCluster object by AKSCreateDecorator), it shouldn't be modified any more, only read-only
+    operations (e.g. validation) can be performed. In other words, when we try to get the value of a parameter, we
+    should use its attribute value in the `mc` object as a preference. Only when the value has not been set in the `mc`
+    object, we could return the user input value.
+
+    In the update mode, in contrast to the create mode, we should use the value provided by the user to update the
+    corresponding attribute value in the `mc` object.
+
+    When adding support for a new parameter, you need to provide a "getter" function named `get_xxx`, where `xxx` is
     the parameter name. In this function, the process of obtaining parameter values, dynamic completion (optional),
     and validation (optional) should be followed. The obtaining of parameter values should further follow the order
     of obtaining from the ManagedCluster object or from the original value.
 
-    Attention: In case of checking the validity of parameters, make sure enable_validation is never set to True and
-    read_only is set to True when necessary to avoid loop calls, when using the getter function to obtain the value of
-    other parameters.
+    When checking the validity of parameter values, a pair of parameters checking each other will cause a loop call.
+    To avoid this problem, we can implement a new internal function. In the newly added internal function, we can
+    easily skip the value completion and validation check by setting the `read_only` and `enable_validation` options
+    respectively.
     """
     def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, models: AKSModels, decorator_mode):
         if not isinstance(raw_parameters, dict):
@@ -3462,13 +3472,59 @@ class AKSContext:
     def get_disable_local_accounts(self) -> bool:
         """Obtain the value of disable_local_accounts.
 
+        This function will verify the parameter by default. If both disable_local_accounts and enable_local_accounts are
+        specified, raise a MutuallyExclusiveArgumentError.
+
         :return: bool
         """
         # read the original value passed by the command
         disable_local_accounts = self.raw_param.get("disable_local_accounts")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.disable_local_accounts is not None:
+                disable_local_accounts = self.mc.disable_local_accounts
+
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        # validation
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if disable_local_accounts and self._get_enable_local_accounts(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --disable-local-accounts and "
+                    "--enable-local-accounts at the same time."
+                )
         return disable_local_accounts
+
+    # pylint: disable=unused-argument
+    def _get_enable_local_accounts(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of enable_local_accounts.
+
+        This function supports the option of enable_validation. When enabled, if both disable_local_accounts and
+        enable_local_accounts are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_local_accounts = self.raw_param.get("enable_local_accounts")
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if enable_local_accounts and self.get_disable_local_accounts():
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --disable-local-accounts and "
+                    "--enable-local-accounts at the same time."
+                )
+        return enable_local_accounts
+
+    def get_enable_local_accounts(self) -> bool:
+        """Obtain the value of enable_local_accounts.
+
+        This function will verify the parameter by default. If both disable_local_accounts and enable_local_accounts are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_local_accounts(enable_validation=True)
 
     def get_client_id_from_identity_or_sp_profile(self) -> str:
         """Helper function to obtain the value of client_id from identity_profile or service_principal_profile.
@@ -4498,6 +4554,23 @@ class AKSUpdateDecorator:
             models=self.models.lb_models)
         return mc
 
+    def update_disable_local_accounts(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update disable/enable local accounts for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        if self.context.get_disable_local_accounts():
+            mc.disable_local_accounts = True
+
+        if self.context.get_enable_local_accounts():
+            mc.disable_local_accounts = False
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -4513,6 +4586,8 @@ class AKSUpdateDecorator:
         self.check_raw_parameters()
         # fetch the ManagedCluster object
         mc = self.fetch_mc()
+        # update tags
+        mc = self.update_tags(mc)
         # update auto scaler profile
         mc = self.update_auto_scaler_profile(mc)
         # attach or detach acr (add or delete role assignment for acr)
@@ -4521,6 +4596,8 @@ class AKSUpdateDecorator:
         mc = self.update_sku(mc)
         # update load balancer profile
         mc = self.update_load_balancer_profile(mc)
+        # update disable/enable local accounts
+        mc = self.update_disable_local_accounts(mc)
 
         return mc
 
