@@ -23,7 +23,6 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
         result = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
                           checks=self.check('displayName', '{display_name}')).get_output_in_json()
 
-        self.assertEqual(result['name'], result['appId'])
         self.kwargs['app_id'] = result['appId']
 
         # show/list app

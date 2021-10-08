@@ -42,9 +42,6 @@ ROLE_ASSIGNMENT_CREATE_WARNING = (
     "If needed, use the --role argument to explicitly create a role assignment."
 )
 
-NAME_DEPRECATION_WARNING = \
-    "'name' property in the output is deprecated and will be removed in the future. Use 'appId' instead."
-
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines
@@ -1500,7 +1497,6 @@ def create_service_principal_for_rbac(
                     raise
 
     logger.warning(CREDENTIAL_WARNING)
-    logger.warning(NAME_DEPRECATION_WARNING)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1514,7 +1510,6 @@ def create_service_principal_for_rbac(
     result = {
         'appId': app_id,
         'password': password,
-        'name': app_id,
         'displayName': app_display_name,
         'tenant': graph_client.config.tenant_id
     }
