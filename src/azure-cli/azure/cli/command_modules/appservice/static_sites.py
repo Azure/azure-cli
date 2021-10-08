@@ -59,6 +59,15 @@ def list_staticsite_environments(cmd, name, resource_group_name=None):
     return client.get_static_site_builds(resource_group_name, name)
 
 
+def delete_staticsite_environment(cmd, name, environment_name='default', resource_group_name=None, no_wait=False):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return sdk_no_wait(no_wait, client.delete_static_site_build,
+                       resource_group_name, name, environment_name)
+
+
 def show_staticsite_environment(cmd, name, environment_name='default', resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
@@ -346,3 +355,24 @@ def _find_user_id_and_authentication_provider(client, resource_group_name, name,
         raise CLIError("user details and authentication provider was not found.")
 
     return user_id, authentication_provider
+
+
+def list_staticsite_secrets(cmd, name, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return client.list_static_site_secrets(resource_group_name=resource_group_name, name=name)
+
+
+def reset_staticsite_api_key(cmd, name, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    existing_staticsite = show_staticsite(cmd, name, resource_group_name)
+    ResetPropertiesEnvelope = cmd.get_models('StaticSiteResetPropertiesARMResource')
+    reset_envelope = ResetPropertiesEnvelope(repository_token=existing_staticsite.repository_token)
+    return client.reset_static_site_api_key(resource_group_name=resource_group_name,
+                                            name=name,
+                                            reset_properties_envelope=reset_envelope)

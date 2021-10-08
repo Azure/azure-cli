@@ -286,12 +286,15 @@ def _urlretrieve(url):
 
 # pylint: disable=redefined-outer-name
 def _remove_comments_from_json(template, preserve_order=True, file_path=None):
-    from jsmin import jsmin
+    from ._json_handler import json_min
 
     # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
-    # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
+    # It will affect the subsequent multi-line processing logic, so remove those comments in advance here.
+    # Related issue: https://github.com/Azure/azure-cli/issues/11995, the sample is in the additional context of it.
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
-    minified = jsmin(template)
+
+    # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
+    minified = json_min(template)
     try:
         return shell_safe_json_parse(minified, preserve_order, strict=False)  # use strict=False to allow multiline strings
     except CLIError:
@@ -403,7 +406,6 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
     def on_request(self, request):
         http_request = request.http_request
-        logger.info(http_request.data)
         if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
             template = http_request.data["properties"]["template"]
             if not isinstance(template, JsonCTemplate):
@@ -1929,9 +1931,9 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         exists = False
         if no_prompt is False:
             try:  # Check if child template spec already exists.
-                existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+                rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
                 from knack.prompting import prompt_y_n
-                confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
+                confirmation = prompt_y_n("This will override template spec {} version {}. Proceed?".format(name, version))
                 if not confirmation:
                     return None
                 exists = True

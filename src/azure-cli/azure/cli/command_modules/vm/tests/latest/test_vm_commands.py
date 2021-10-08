@@ -4293,6 +4293,8 @@ class VMGalleryImage(ScenarioTest):
             'vm': self.create_random_name('vm', 16),
             'vm_with_shared_gallery': self.create_random_name('vm_sg', 16),
             'vm_with_shared_gallery_version': self.create_random_name('vm_sgv', 16),
+            'vm_with_shared_gallery_version2': self.create_random_name('vm_sgv2', 16),
+            'vmss_with_shared_gallery_version': self.create_random_name('vmss', 16),
             'gallery': self.create_random_name('gellery', 16),
             'image': self.create_random_name('image', 16),
             'version': '1.1.2',
@@ -4325,6 +4327,21 @@ class VMGalleryImage(ScenarioTest):
             self.check('storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
         ])
 
+        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version2} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None --os-type linux')
+
+        self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
+            self.check('storageProfile.osDisk.osType', 'Linux'),
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} --generate-ssh-keys --upgrade-policy-mode automatic --admin-username clitest1 ')
+
+        self.cmd('vmss show -g {rg} -n {vmss_with_shared_gallery_version}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.storageProfile.imageReference.sharedGalleryImageId', '{shared_gallery_image_version}'),
+        ])
+
         # gallery permissions must be reset, or the resource group can't be deleted
         self.cmd('sig share reset --gallery-name {gallery} -g {rg}')
         self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
@@ -4332,6 +4349,80 @@ class VMGalleryImage(ScenarioTest):
         ])
 
 
+    @ResourceGroupPreparer(location='westus')
+    def test_gallery_soft_delete(self, resource_group):
+        self.kwargs.update({
+            'gallery_name': self.create_random_name('sig_', 10)
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery_name} --soft-delete True', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True)
+        ])
+
+        self.cmd('sig show -g {rg} -r {gallery_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True)
+        ])
+
+        self.cmd('sig update -g {rg} -r {gallery_name} --soft-delete False', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+
+        self.cmd('sig show -g {rg} -r {gallery_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+
+        self.cmd('sig delete -g {rg} -r {gallery_name}')
+
+
+    @ResourceGroupPreparer(location='eastus')
+    def test_replication_mode(self, resource_group):
+        self.kwargs.update({
+            'sig_name': self.create_random_name('sig_', 10),
+            'img_def_name': self.create_random_name('def_', 10),
+            'pub_name': self.create_random_name('pub_', 10),
+            'of_name': self.create_random_name('of_', 10),
+            'sku_name': self.create_random_name('sku_', 10),
+            'vm_name': self.create_random_name('vm_', 10),
+            'img_name': self.create_random_name('img_', 10),
+            'img_ver_name': self.create_random_name('ver_', 10)
+        })
+        self.cmd('sig create -g {rg} -r {sig_name}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {sig_name} '
+                 '--gallery-image-definition {img_def_name} --os-type linux -p {pub_name} -f {of_name} -s {sku_name}')
+        self.cmd('vm create -g {rg} -n {vm_name} --image Ubuntults')
+        self.cmd('vm deallocate -g {rg} -n {vm_name}')
+        self.cmd('vm generalize -g {rg} -n {vm_name}')
+        self.cmd('image create -g {rg} -n {img_name} --source {vm_name}')
+        self.cmd('sig image-version create --replication-mode Full -g {rg} -r {sig_name}'
+                 ' -i {img_def_name} -e 1.1.1 --managed-image {img_name}', checks=[
+            self.check('name', '1.1.1'),
+            self.check('publishingProfile.replicationMode', 'Full')
+        ])
+        self.cmd('sig image-version show -g {rg} -r {sig_name} -i {img_def_name} -e 1.1.1', checks=[
+            self.check('name', '1.1.1'),
+            self.check('publishingProfile.replicationMode', 'Full')
+        ])
+        self.cmd('sig image-version create --replication-mode Shallow -g {rg} -r {sig_name}'
+                 ' -i {img_def_name} -e 1.1.2 --managed-image {img_name}', checks=[
+            self.check('name', '1.1.2'),
+            self.check('publishingProfile.replicationMode', 'Shallow')
+        ])
+        self.cmd('sig image-version show -g {rg} -r {sig_name} -i {img_def_name} -e 1.1.2', checks=[
+            self.check('name', '1.1.2'),
+            self.check('publishingProfile.replicationMode', 'Shallow')
+        ])
 # endregion
 
 
@@ -5352,6 +5443,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('platformFaultDomain', 0)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='eastus2euap')
     @VirtualNetworkPreparer(location='eastus2euap', parameter_name='virtual_network')
     def test_vmss_complex_orchestration_mode(self, resource_group, virtual_network):
@@ -5484,6 +5576,26 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_quick_create_flexible_vmss_', location='eastus2euap')
+    def test_quick_create_flexible_vmss(self, resource_group):
+
+        self.kwargs.update({
+            'vmss': 'vmsslongnametest',
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntults --orchestration-mode flexible')
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('sku.capacity', 2),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('sku.tier', "Standard"),
+            self.check('singlePlacementGroup', False),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', self.kwargs['vmss'][:8]),
         ])
 
 
@@ -5822,6 +5934,175 @@ class DiskZRSScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n d1 --image ubuntults --zone 1 --attach-data-disks d1 --generate-ssh-keys --nsg-rule None')
         # ZRS disks cannot be pinned with a zone
         self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku StandardSSD_ZRS --zone 1', expect_failure=True)
+
+
+class CapacityReservationScenarioTest(ScenarioTest):
+
+    # Due to the bug in service, the resources generated by the test cannot be deleted normally.
+    # The public IP generated by this test will cause the ICM with serv 2. Therefore, disable this test for now
+    @unittest.skip('Service bug')
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_', location='centraluseuap')
+    def test_capacity_reservation(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'reservation_group': self.create_random_name('cli_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_reservation_name_', 40),
+            'reservation_group2': self.create_random_name('cli_reservation_group2_', 40),
+            'reservation_name2': self.create_random_name('cli_reservation_name2_', 40),
+            'sku': 'Standard_DS1_v2',
+            'vm': self.create_random_name('vm', 10),
+            'vmss': self.create_random_name('vmss', 10),
+            'username': 'ubuntu',
+            'auth': 'ssh',
+            'image': 'UbuntuLTS',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.kwargs['reservation_group_id1'] = self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --tags key=val --zones 1 2', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val'})
+        ]).get_output_in_json()['id']
+
+        self.cmd('capacity reservation group update -n {reservation_group} -g {rg} --tags key=val key1=val1', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('tags', {'key': 'val', 'key1': 'val1'})
+        ])
+
+        self.cmd('capacity reservation group show -n {reservation_group} -g {rg}', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val', 'key1': 'val1'})
+        ])
+
+        self.cmd('capacity reservation group list -g {rg} --query "[?name==\'{reservation_group}\']" ', checks=[
+            self.check('[0].name', '{reservation_group}'),
+            self.check('[0].zones', ['1', '2']),
+            self.check('[0].tags', {'key': 'val', 'key1': 'val1'})
+        ])
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} --sku {sku} --capacity 5 --zone 1 --tags key=val', checks=[
+            self.check('name', '{reservation_name}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 5),
+            self.check('zones', ['1']),
+            self.check('tags', {'key': 'val'}),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('capacity reservation update -c {reservation_group} -n {reservation_name} -g {rg} --capacity 3 --tags key=val key1=val1', checks=[
+            self.check('name', '{reservation_name}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 3),
+            self.check('tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} --instance-view', checks=[
+            self.check('name', '{reservation_name}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 3),
+            self.check('tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('zones', ['1']),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded')
+        ])
+
+        self.cmd('capacity reservation list -c {reservation_group} -g {rg} --query "[?name==\'{reservation_name}\']" ', checks=[
+            self.check('[0].name', '{reservation_name}'),
+            self.check('[0].sku.name', '{sku}'),
+            self.check('[0].sku.capacity', 3),
+            self.check('[0].tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('[0].zones', ['1']),
+            self.check('[0].provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('capacity reservation group show -n {reservation_group} -g {rg} --instance-view', checks=[
+            self.check('name', '{reservation_group}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val', 'key1': 'val1'}),
+            self.check('instanceView.capacityReservations[0].name', '{reservation_name}')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {username} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --nsg-rule None --capacity-reservation-group {reservation_group} --zone 1 ')
+
+        self.kwargs['vm_id'] = self.cmd('vm show -g {rg} -n {vm} ', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('capacityReservation.capacityReservationGroup.id', '{reservation_group_id1}', case_sensitive=False),
+        ]).get_output_in_json()['id']
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image {image} --admin-username deploy --ssh-key-value "{ssh_key}" --capacity-reservation-group {reservation_group} --zone 1 ', checks=[
+            self.check('vmss.provisioningState', 'Succeeded'),
+            self.check('vmss.virtualMachineProfile.capacityReservation.capacityReservationGroup.id', '{reservation_group_id1}', case_sensitive=False),
+        ])
+
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss} ', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.capacityReservation.capacityReservationGroup.id', '{reservation_group_id1}', case_sensitive=False),
+        ]).get_output_in_json()['id']
+
+        vm_associated = self.cmd('capacity reservation group list -g {rg} --query "[?name==\'{reservation_group}\']" --vm-instance --vmss-instance', checks=[
+            self.check('[0].name', '{reservation_group}'),
+            self.check('[0].zones', ['1', '2']),
+            self.check('[0].tags', {'key': 'val', 'key1': 'val1'})
+        ]).get_output_in_json()[0]['virtualMachinesAssociated']
+
+        vm_associated_list = [i['id'].lower() for i in vm_associated]
+        self.assertTrue(self.kwargs['vm_id'].lower() in vm_associated_list)
+        contains_vmss_id = False
+        for id in vm_associated_list:
+            if self.kwargs['vmss_id'].lower() in id:
+                contains_vmss_id = True
+                break
+        self.assertTrue(contains_vmss_id)
+
+        self.kwargs['reservation_group_id2'] = self.cmd('capacity reservation group create -n {reservation_group2} -g {rg} --tags key=val --zones 1 2', checks=[
+            self.check('name', '{reservation_group2}'),
+            self.check('zones', ['1', '2']),
+            self.check('tags', {'key': 'val'})
+        ]).get_output_in_json()['id']
+
+        self.cmd('capacity reservation create -c {reservation_group2} -n {reservation_name2} -g {rg} --sku {sku} --capacity 5 --zone 1 --tags key=val', checks=[
+            self.check('name', '{reservation_name2}'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.capacity', 5),
+            self.check('zones', ['1']),
+            self.check('tags', {'key': 'val'}),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # Updating capacity reservation group requires the VM(s) to be deallocated.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+
+        self.cmd('vm update -g {rg} -n {vm} --capacity-reservation-group {reservation_group2}')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('capacityReservation.capacityReservationGroup.id', '{reservation_group_id2}', case_sensitive=False),
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --capacity-reservation-group {reservation_group2}')
+
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.capacityReservation.capacityReservationGroup.id', '{reservation_group_id2}', case_sensitive=False),
+        ])
+
+        # Updating capacity reservation group requires the VM(s) to be deallocated.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+
+        # Before delete the capacity reservation that has been associated with VM/VMSS, we need to disassociate the capacity reservation group first
+        self.cmd('vm update -g {rg} -n {vm} --capacity-reservation-group None')
+
+        self.cmd('vmss update -g {rg} -n {vmss} --capacity-reservation-group None')
+
+        self.cmd('capacity reservation delete -c {reservation_group} -n {reservation_name} -g {rg} --yes')
+        self.cmd('capacity reservation delete -c {reservation_group2} -n {reservation_name2} -g {rg} --yes')
+
+        self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
+        self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
 
 if __name__ == '__main__':

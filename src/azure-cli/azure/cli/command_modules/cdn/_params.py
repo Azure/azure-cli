@@ -83,6 +83,9 @@ def load_arguments(self, _):
 
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
+        c.argument('content_types_to_compress', nargs='+',
+                   help='List of content types on which compression applies. The value should be a valid MIME type.')
+
     with self.argument_context('cdn endpoint set') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
 

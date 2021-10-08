@@ -421,8 +421,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     elif namespace.storage_profile == StorageProfile.SharedGalleryImage:
         required = ['image']
-        forbidden = ['os_type', 'attach_os_disk', 'storage_account',
-                     'storage_container_name', 'use_unmanaged_disk']
+        forbidden = ['attach_os_disk', 'storage_account', 'storage_container_name', 'use_unmanaged_disk']
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
@@ -1273,7 +1272,13 @@ def process_vm_create_namespace(cmd, namespace):
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
+    _validate_capacity_reservation_group(cmd, namespace)
+
 # endregion
+
+
+def process_vm_update_namespace(cmd, namespace):
+    _validate_capacity_reservation_group(cmd, namespace)
 
 
 # region VMSS Create Validators
@@ -1510,6 +1515,29 @@ def process_vmss_create_namespace(cmd, namespace):
             raise CLIError('usage error: In VM mode, only name, resource-group, location, '
                            'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
 
+        if namespace.image:
+
+            if namespace.vm_sku is None:
+                from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
+                if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
+                    namespace.vm_sku = 'Standard_DS1_v2'
+                else:
+                    namespace.vm_sku = 'Standard_D1_v2'
+
+            if namespace.single_placement_group:
+                raise ArgumentUsageError(
+                    'usage error: single placement group can only be set to False in Flexible VMSS')
+            namespace.single_placement_group = False
+
+            if namespace.network_api_version is None:
+                namespace.network_api_version = '2020-11-01'
+
+            if namespace.platform_fault_domain_count is None:
+                namespace.platform_fault_domain_count = 1
+
+            if namespace.computer_name_prefix is None:
+                namespace.computer_name_prefix = namespace.vmss_name[:8]
+
         # if namespace.platform_fault_domain_count is None:
         #     raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
 
@@ -1519,15 +1547,20 @@ def process_vmss_create_namespace(cmd, namespace):
         # validate_edge_zone(cmd, namespace)
         if namespace.application_security_groups is not None:
             validate_asg_names_or_ids(cmd, namespace)
+
         if getattr(namespace, 'attach_os_disk', None) or namespace.image is not None:
             _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
-        if namespace.vnet_name or namespace.subnet:
-            _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 
-        if namespace.load_balancer is not None or namespace.application_gateway is not None:
+        if namespace.vnet_name or namespace.subnet or namespace.image:
+            _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
+            _validate_vmss_create_subnet(namespace)
+
+        if namespace.load_balancer or namespace.application_gateway or namespace.image:
             _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
-        if namespace.public_ip_address is not None:
+
+        if namespace.public_ip_address or namespace.image:
             _validate_vmss_create_public_ip(cmd, namespace)
+
         if namespace.nsg is not None:
             _validate_vmss_create_nsg(cmd, namespace)
         if namespace.accelerated_networking is not None:
@@ -1550,6 +1583,7 @@ def process_vmss_create_namespace(cmd, namespace):
 
         if namespace.eviction_policy and not namespace.priority:
             raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+
         return
 
     # Uniform mode
@@ -1590,6 +1624,8 @@ def process_vmss_create_namespace(cmd, namespace):
     if namespace.eviction_policy and not namespace.priority:
         raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
 
+    _validate_capacity_reservation_group(cmd, namespace)
+
 
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
     if not namespace.instance_id:
@@ -1598,6 +1634,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
                            " Please use --instance-id to specify a VM instance")
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
+    _validate_capacity_reservation_group(cmd, namespace)
 # endregion
 
 
@@ -1938,3 +1975,19 @@ def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
             'name': namespace.edge_zone,
             'type': 'EdgeZone'
         }
+
+
+def _validate_capacity_reservation_group(cmd, namespace):
+
+    if namespace.capacity_reservation_group and namespace.capacity_reservation_group != 'None':
+
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        if not is_valid_resource_id(namespace.capacity_reservation_group):
+            namespace.capacity_reservation_group = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute',
+                type='CapacityReservationGroups',
+                name=namespace.capacity_reservation_group
+            )

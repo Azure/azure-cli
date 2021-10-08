@@ -10,7 +10,8 @@ from azure.cli.command_modules.appservice.static_sites import \
     reconnect_staticsite, list_staticsite_environments, show_staticsite_environment, list_staticsite_domains, \
     set_staticsite_domain, delete_staticsite_domain, list_staticsite_functions, list_staticsite_function_app_settings, \
     set_staticsite_function_app_settings, delete_staticsite_function_app_settings, list_staticsite_users, \
-    invite_staticsite_users, update_staticsite_users, update_staticsite
+    invite_staticsite_users, update_staticsite_users, update_staticsite, list_staticsite_secrets, \
+    reset_staticsite_api_key, delete_staticsite_environment
 
 
 class TestStaticAppCommands(unittest.TestCase):
@@ -267,6 +268,18 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.delete_static_site_custom_domain.assert_called_once_with(
             resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
 
+    def test_delete_staticsite_environment_with_resourcegroup(self):
+        delete_staticsite_environment(self.mock_cmd, self.name1, self.environment1, self.rg1)
+
+        self.staticapp_client.delete_static_site_build.assert_called_once_with(self.rg1, self.name1, self.environment1)
+
+    def test_delete_staticsite_environment_without_resourcegroup(self):
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
+
+        delete_staticsite_environment(self.mock_cmd, self.name1, self.environment1)
+
+        self.staticapp_client.delete_static_site_build.assert_called_once_with(self.rg1, self.name1, self.environment1)
+
     def test_list_staticsite_functions_with_resourcegroup(self):
         list_staticsite_functions(self.mock_cmd, self.name1, self.rg1, self.environment1)
 
@@ -502,6 +515,32 @@ class TestStaticAppCommands(unittest.TestCase):
         with self.assertRaises(CLIError):
             update_staticsite_users(self.mock_cmd, self.name1, roles, authentication_provider=authentication_provider,
                                     resource_group_name=self.rg1)
+
+    def test_list_staticsite_secrets(self):
+        from azure.mgmt.web.models import StringDictionary
+        self.staticapp_client.list_static_site_secrets.return_value = StringDictionary(properties={"apiKey": "key"})
+
+        secret = list_staticsite_secrets(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.list_static_site_secrets.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
+        from ast import literal_eval
+        self.assertEqual(literal_eval(secret.__str__())["properties"]["apiKey"], "key")
+    
+    def test_reset_staticsite_api_key(self):
+        from azure.mgmt.web.models import StringDictionary, StaticSiteResetPropertiesARMResource
+        self.staticapp_client.get_static_site.return_value = self.app1
+        self.staticapp_client.reset_static_site_api_key.return_value = StringDictionary(properties={"apiKey": "new_key"})
+        self.mock_cmd.get_models.return_value = StaticSiteResetPropertiesARMResource
+
+        secret = reset_staticsite_api_key(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.get_static_site.assert_called_once_with(self.rg1, self.name1)
+        self.mock_cmd.get_models.assert_called_once_with('StaticSiteResetPropertiesARMResource')
+        self.staticapp_client.reset_static_site_api_key.assert_called_once()
+
+        from ast import literal_eval
+        reset_envelope = literal_eval(self.staticapp_client.reset_static_site_api_key.call_args[1]["reset_properties_envelope"].__str__())
+        self.assertEqual(reset_envelope["repository_token"], self.token1)     
 
 
 def _set_up_client_mock(self):

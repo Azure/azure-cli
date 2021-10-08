@@ -97,8 +97,15 @@ class TestWebappMocked(unittest.TestCase):
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
         client.web_apps.create_or_update_host_name_binding.return_value = binding
+        client.web_apps.create_or_update_host_name_binding_slot.return_value = binding
         # action
         result = add_hostname(cmd_mock, 'g1', webapp.name, domain)
+
+        # assert
+        self.assertEqual(result.domain_id, domain)
+
+         # action- Slot
+        result = add_hostname(cmd_mock, 'g1', webapp.name, domain, 'slot1')
 
         # assert
         self.assertEqual(result.domain_id, domain)
@@ -221,7 +228,7 @@ class TestWebappMocked(unittest.TestCase):
         faked_web = mock.MagicMock()
         site_op_mock.return_value = faked_web
         # action
-        result = show_webapp(mock.MagicMock(), 'myRG', 'myweb', slot=None, app_instance=None)
+        result = show_webapp(mock.MagicMock(), 'myRG', 'myweb', slot=None)
         # assert (we invoke the site op)
         self.assertEqual(faked_web, result)
         self.assertTrue(rename_mock.called)
@@ -279,7 +286,7 @@ class TestWebappMocked(unittest.TestCase):
         restore_deleted_webapp(cmd_mock, '12345', 'rg', 'web1', None, True)
 
         # assert
-        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'restore_from_deleted_app', None, request)
+        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'begin_restore_from_deleted_app', None, request)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_list_webapp_snapshots(self, site_op_mock):

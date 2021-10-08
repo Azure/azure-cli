@@ -64,6 +64,13 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         blob_name = self.create_random_name(prefix='blob', length=24)
         account_info = self.get_account_info(group, account)
 
+        # create file for uploading without --name
+        local_file_without_name = self.create_temp_file(file_size_kb)
+        blob_name_for_substitution = self.create_random_name(prefix='blob', length=24)
+        old_file_name = os.path.basename(local_file_without_name)
+        new_file_name_with_path = local_file_without_name.replace(old_file_name, blob_name_for_substitution)
+        os.rename(local_file_without_name, new_file_name_with_path)
+
         container = self.create_container(account_info)
 
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
@@ -73,6 +80,14 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                          container, local_file, blob_name, blob_type)
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('exists', True))
+
+        # upload without specifying name
+        self.storage_cmd('storage blob upload -c {} -f "{}" --type {}', account_info,
+                         container, new_file_name_with_path, blob_type)
+        os.rename(new_file_name_with_path, local_file_without_name)
+        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name_for_substitution, container) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
         self.storage_cmd('storage blob list -c {} -otable --num-results 1', account_info, container)
 
         show_result = self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name,
@@ -340,40 +355,39 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind='StorageV2')
-    def test_storage_blob_soft_delete(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-        container = self.create_container(account_info)
+    def test_storage_blob_soft_delete(self, resource_group, storage_account_info):
+        container = self.create_container(storage_account_info)
         import time
 
         # create a blob
         local_file = self.create_temp_file(1)
         blob_name = self.create_random_name(prefix='blob', length=24)
 
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', account_info,
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', storage_account_info,
                          container, local_file, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
-                                              account_info, container).get_output_in_json()), 1)
+                                              storage_account_info, container).get_output_in_json()), 1)
 
         # set delete-policy to enable soft-delete
         self.storage_cmd('storage blob service-properties delete-policy update --enable true --days-retained 2',
-                         account_info)
+                         storage_account_info)
         self.storage_cmd('storage blob service-properties delete-policy show',
-                         account_info).assert_with_checks(JMESPathCheck('enabled', True),
-                                                          JMESPathCheck('days', 2))
+                         storage_account_info).assert_with_checks(JMESPathCheck('enabled', True),
+                                                                  JMESPathCheck('days', 2))
         time.sleep(10)
         # soft-delete and check
-        self.storage_cmd('storage blob delete -c {} -n {}', account_info, container, blob_name)
+        self.storage_cmd('storage blob delete -c {} -n {}', storage_account_info, container, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
-                                              account_info, container).get_output_in_json()), 0)
+                                              storage_account_info, container).get_output_in_json()), 0)
 
         time.sleep(30)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {} --include d',
-                                              account_info, container).get_output_in_json()), 1)
+                                              storage_account_info, container).get_output_in_json()), 1)
 
         # undelete and check
-        self.storage_cmd('storage blob undelete -c {} -n {}', account_info, container, blob_name)
+        self.storage_cmd('storage blob undelete -c {} -n {}', storage_account_info, container, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
-                                              account_info, container).get_output_in_json()), 1)
+                                              storage_account_info, container).get_output_in_json()), 1)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -815,7 +829,7 @@ class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck('name', self.kwargs['container2']),
                      JMESPathCheck('immutableStorageWithVersioning.enabled', None)})
 
-        self.cmd('storage container immutability-policy create -c {container2} --account-name {sa} -w --period 1',
+        self.cmd('storage container immutability-policy create -c {container2} --account-name {sa} -g {rg} -w --period 1',
                  checks={
                      JMESPathCheck('name', self.kwargs['container2']),
                      JMESPathCheck('immutabilityPeriodSinceCreationInDays', 1)})
