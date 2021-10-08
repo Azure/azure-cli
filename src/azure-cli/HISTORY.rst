@@ -41,7 +41,6 @@ Release History
 
 **Compute **
 
-* Upgrade api-version for VM and VMSS from `2021-04-01` to `2021-07-01` (#19457)
 * `az sig create/update`: Add new parameter `--soft-delete` to support soft delete (#19569)
 * `az sig image-version`: Add new parameter `--replication-mode` to support setting replication mode (#19580)
 * `az vm/vmss update`: Fix disassociation VM/VMSS from capacity reservation (#19666)
