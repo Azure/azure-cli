@@ -2543,6 +2543,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     master_template = ArmTemplateBuilder()
 
     uniform_str = 'Uniform'
+    flexible_str = 'Flexible'
     if orchestration_mode:
         from msrestazure.tools import resource_id, is_valid_resource_id
 
@@ -2648,7 +2649,12 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                         public_ip_address)
 
             # calculate default names if not provided
-            nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
+            if orchestration_mode.lower() == flexible_str.lower():
+                # inbound nat pools are not supported on VMSS Flex
+                nat_pool_name = None
+            else:
+                nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
+
             if not backend_port:
                 backend_port = 3389 if os_type == 'windows' else 22
 
