@@ -59,14 +59,14 @@ Release History
 
 **Eventhub**
 
-* `az eventhubs namespace update` : Add `--infra-encryption` for encryption (enable-require-infrastructure-encryption). (#19677)
-* `az eventhubs namespace create/update` : Add `--disable-local-auth` to enable or disable SAS authentication. (#19677)
+* `az eventhubs namespace update`: Add `--infra-encryption` for encryption (enable-require-infrastructure-encryption). (#19677)
+* `az eventhubs namespace create/update`: Add `--disable-local-auth` to enable or disable SAS authentication. (#19677)
 * `az eventhubs namespace`: Add `private-endpoint-connection` and `private-link-resource` command groups (#19677)
 
 **Key Vault**
 
-* [BREAKING CHANGE] Fix #18479 : `az keyvault network-rule add`: Fix the bug which allows duplicate `--ip-address` with the ones already in the network-rule (#19477)
-* Fix #10254 : `az keyvault network-rule add`: Add capability to accept multiple ip-addresses as a list in the form of `--ip-address ip1 [ip2] [ip3]...` (#19477)
+* [BREAKING CHANGE] Fix #18479: `az keyvault network-rule add`: Fix the bug which allows duplicate `--ip-address` with the ones already in the network-rule (#19477)
+* Fix #10254: `az keyvault network-rule add`: Add capability to accept multiple ip-addresses as a list in the form of `--ip-address ip1 [ip2] [ip3]...` (#19477)
 * `az keyvault delete`: Add warning when deleting managed HSM (#19515)
 
 **Network**
@@ -103,7 +103,7 @@ Release History
 * Fix #19279: Add clarification for file system name to also mean container name. (#19481)
 * Fix #19059: Fix doc link to point to public doc website (#19484)
 * `az storage account hns-migration start/stop`: Support migrate a storage account to enable hierarchical namespace (#19520)
-* `az storage container-rm create/update` : Add `--root-squash` to support enable nfsv3 root squash or all squash (#19549)
+* `az storage container-rm create/update`: Add `--root-squash` to support enable nfsv3 root squash or all squash (#19549)
 * Fix #17858: `az storage blob upload`: make --name optional (#19553)
 * `az storage account create/update`: Add --public-network-access parameter (#19576)
 * `az storage container immutability-policy create`: Add --allow-protected-append-writes-all/--w-all parameter (#19698)
@@ -167,7 +167,7 @@ Hotfix: Fix #19468: pip installs azure-cli 2.0.73 because of the dependency on d
 * `az webapp config hostname add`: Fix the issue caused by AttributeError (#19348)
 * Fix #16470: `az staticwebapp secrets`: Add commands to manage deployment secrets (#19347)
 * `az webapp deployment source config-local-git`: Fix the issue caused by AttributeError when slot option is specified (#19404)
-* `az webapp deleted restore` : Fix the issue that 'WebAppsOperations' object has no attribute 'restore_from_deleted_app' (#19404)
+* `az webapp deleted restore`: Fix the issue that 'WebAppsOperations' object has no attribute 'restore_from_deleted_app' (#19404)
 * `az webapp up`: Add ability to deploy Linux and Windows webapps to the same resource group (#19344)
 * `az webapp up`: Add support for deploying to an App Service Environment (#19425)
 * Fix #19098: `az webapp deployment slot auto-swap `: Fix the AttributeError error for parameters `--slot --disable` (#19376)
@@ -309,7 +309,7 @@ Upgrade batch management-plane to [azure-batch-mgmt 16.0.0](https://pypi.org/pro
 * `az appservice ase create`: Support for ASEv3 External and Zone redundancy (#18748)
 * `az webapp hybrid-connection add`: Improve help/error message and unblock Linux (#18843)
 * `az webapp config access-restriction remove`: Fix #18947 issue removing service endpoint rules (#18986)
-* : Fix #17424: `az appservice plan show`: Provide correct exit status (#18994)
+* Fix #17424: `az appservice plan show`: Provide correct exit status (#18994)
 
 **ARM**
 
@@ -475,7 +475,7 @@ Upgrade batch management-plane to [azure-batch-mgmt 16.0.0](https://pypi.org/pro
 * `az webapp/functionapp config access-restriction remove`: Remove service endpoints are case-insensitive (#18024)
 * `az webapp config access-restrictions add`: Skip validation if user does not have access to get service tag list. (#18527)
 * Add support for Linux Consumption and improve how content share name is generated. (#18675)
-* : Fix an issue where adding VNET integration & Hybrid connections on a slot is not working (#18582)
+* Fix an issue where adding VNET integration & Hybrid connections on a slot is not working (#18582)
 * `az appservice domain create`: Fix get correct domain agreements (#18622)
 * `az webapp deployment github-actions add/remove`: new commands (#18261)
 
