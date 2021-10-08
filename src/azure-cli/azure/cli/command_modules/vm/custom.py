@@ -1405,6 +1405,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
         SubResource = cmd.get_models('SubResource')
+        if capacity_reservation_group == 'None':
+            capacity_reservation_group = None
         sub_resource = SubResource(id=capacity_reservation_group)
         capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
         vm.capacity_reservation = capacity_reservation
@@ -3103,6 +3105,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
         SubResource = cmd.get_models('SubResource')
+        if capacity_reservation_group == 'None':
+            capacity_reservation_group = None
         sub_resource = SubResource(id=capacity_reservation_group)
         capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
         vmss.virtual_machine_profile.capacity_reservation = capacity_reservation
