@@ -65,9 +65,9 @@ Release History
 
 **Key Vault**
 
-* [BREAKING CHANGE] Fix #18479 : `az keyvault network-rule add --ip-address`: Fix the bug which allows duplicate ip-address with the ones already in the network-rule (#19477)
-* Fix #10254 : `az keyvault network-rule add --ip-address`: Add capability to accept multiple ip-addresses as a list in the form of `--ip-address ip1 [ip2] [ip3]...` (#19477)
-* `az keyvault delete --hsm-name`: Add warning when deleting managed HSM (#19515)
+* [BREAKING CHANGE] Fix #18479 : `az keyvault network-rule add`: Fix the bug which allows duplicate `--ip-address` with the ones already in the network-rule (#19477)
+* Fix #10254 : `az keyvault network-rule add`: Add capability to accept multiple ip-addresses as a list in the form of `--ip-address ip1 [ip2] [ip3]...` (#19477)
+* `az keyvault delete`: Add warning when deleting managed HSM (#19515)
 
 **Network**
 
