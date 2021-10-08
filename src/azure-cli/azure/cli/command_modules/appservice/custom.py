@@ -52,7 +52,14 @@ from .tunnel import TunnelServer
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
-from .utils import _normalize_sku, get_sku_name, retryable_method, raise_missing_token_suggestion
+from .utils import (_normalize_sku,
+                    get_sku_name,
+                    retryable_method,
+                    raise_missing_token_suggestion,
+                    _get_location_from_resource_group,
+                    _list_app,
+                    _rename_server_farm_props,
+                    _get_location_from_webapp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -60,7 +67,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
                          NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
-                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
+                         APP_TYPE)
 from ._github_oauth import (get_github_access_token)
 
 logger = get_logger(__name__)
@@ -594,16 +602,8 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             raise ex
 
 
-def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
-    webapp = app_instance
-    if not app_instance:  # when the routine is invoked as a help method, not through commands
-        webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    if not webapp:
-        raise ResourceNotFoundError("WebApp'{}', is not found on RG '{}'.".format(name, resource_group_name))
-    webapp.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
-    _rename_server_farm_props(webapp)
-    _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
-    return webapp
+def show_webapp(cmd, resource_group_name, name, slot=None):
+    return _show_app(cmd, resource_group_name, name, APP_TYPE.WEBAPP, slot)
 
 
 # for generic updater
@@ -697,6 +697,10 @@ def get_functionapp(cmd, resource_group_name, name, slot=None):
     return function_app
 
 
+def show_functionapp(cmd, resource_group_name, name, slot=None):
+    return _show_app(cmd, resource_group_name, name, APP_TYPE.FUNCTIONAPP, slot)
+
+
 def list_webapp(cmd, resource_group_name=None):
     full_list = _list_app(cmd.cli_ctx, resource_group_name)
     # ignore apps with kind==null & not functions apps
@@ -718,6 +722,32 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 def list_function_app(cmd, resource_group_name=None):
     return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
                        _list_app(cmd.cli_ctx, resource_group_name)))
+
+
+def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not app:
+        raise ResourceNotFoundError("Unable to find {} '{}', in RG '{}'.".format(
+                                    cmd_app_type, name, resource_group_name))
+
+    app_type = _kind_to_app_type(app.kind) if app else None
+    if app_type != cmd_app_type:
+        raise ResourceNotFoundError(
+            "Unable to find {} '{}', in RG '{}'".format(cmd_app_type.value, name, resource_group_name),
+            "Use 'az {} show' to show {}s".format(app_type.value, app_type.value))
+
+    app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    _rename_server_farm_props(app)
+    _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+    return app
+
+
+def _kind_to_app_type(kind):
+    if "workflow" in kind:
+        return APP_TYPE.LOGICAPP
+    if "function" in kind:
+        return APP_TYPE.FUNCTIONAPP
+    return APP_TYPE.WEBAPP
 
 
 def _list_app(cli_ctx, resource_group_name=None):
@@ -938,13 +968,6 @@ def list_runtimes_hardcoded(linux=False):
     if linux:
         return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['linux']]
     return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['windows']]
-
-
-def _rename_server_farm_props(webapp):
-    # Should be renamed in SDK in a future release
-    setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)
-    del webapp.server_farm_id
-    return webapp
 
 
 def delete_function_app(cmd, resource_group_name, name, slot=None):
@@ -1744,7 +1767,7 @@ def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
 
 
 def list_backups(cmd, resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'get_backup_configuration', slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'list_backups', slot)
 
 
 def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
@@ -1902,19 +1925,6 @@ def _parse_frequency(cmd, frequency):
         raise CLIError('Frequency must be positive')
 
     return frequency_num, frequency_unit
-
-
-def _get_location_from_resource_group(cli_ctx, resource_group_name):
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-    group = client.resource_groups.get(resource_group_name)
-    return group.location
-
-
-def _get_location_from_webapp(client, resource_group_name, webapp):
-    webapp = client.web_apps.get(resource_group_name, webapp)
-    if not webapp:
-        raise CLIError("'{}' app doesn't exist".format(webapp))
-    return webapp.location
 
 
 def _get_deleted_apps_locations(cli_ctx):
@@ -3783,7 +3793,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
                            "'{}'. Please create a new app "
                            "to continue this operation. For more information on default behaviors, "
-                           "see https://docs.microsoft.com/en-us/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
+                           "see https://docs.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
                            .format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
@@ -4356,11 +4366,11 @@ def _validate_asp_sku(app_service_environment, sku):
     if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
         if not app_service_environment:
             raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
             raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):

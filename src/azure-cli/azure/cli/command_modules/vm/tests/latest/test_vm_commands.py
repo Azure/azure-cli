@@ -4349,6 +4349,80 @@ class VMGalleryImage(ScenarioTest):
         ])
 
 
+    @ResourceGroupPreparer(location='westus')
+    def test_gallery_soft_delete(self, resource_group):
+        self.kwargs.update({
+            'gallery_name': self.create_random_name('sig_', 10)
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery_name} --soft-delete True', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True)
+        ])
+
+        self.cmd('sig show -g {rg} -r {gallery_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True)
+        ])
+
+        self.cmd('sig update -g {rg} -r {gallery_name} --soft-delete False', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+
+        self.cmd('sig show -g {rg} -r {gallery_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+
+        self.cmd('sig delete -g {rg} -r {gallery_name}')
+
+
+    @ResourceGroupPreparer(location='eastus')
+    def test_replication_mode(self, resource_group):
+        self.kwargs.update({
+            'sig_name': self.create_random_name('sig_', 10),
+            'img_def_name': self.create_random_name('def_', 10),
+            'pub_name': self.create_random_name('pub_', 10),
+            'of_name': self.create_random_name('of_', 10),
+            'sku_name': self.create_random_name('sku_', 10),
+            'vm_name': self.create_random_name('vm_', 10),
+            'img_name': self.create_random_name('img_', 10),
+            'img_ver_name': self.create_random_name('ver_', 10)
+        })
+        self.cmd('sig create -g {rg} -r {sig_name}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {sig_name} '
+                 '--gallery-image-definition {img_def_name} --os-type linux -p {pub_name} -f {of_name} -s {sku_name}')
+        self.cmd('vm create -g {rg} -n {vm_name} --image Ubuntults')
+        self.cmd('vm deallocate -g {rg} -n {vm_name}')
+        self.cmd('vm generalize -g {rg} -n {vm_name}')
+        self.cmd('image create -g {rg} -n {img_name} --source {vm_name}')
+        self.cmd('sig image-version create --replication-mode Full -g {rg} -r {sig_name}'
+                 ' -i {img_def_name} -e 1.1.1 --managed-image {img_name}', checks=[
+            self.check('name', '1.1.1'),
+            self.check('publishingProfile.replicationMode', 'Full')
+        ])
+        self.cmd('sig image-version show -g {rg} -r {sig_name} -i {img_def_name} -e 1.1.1', checks=[
+            self.check('name', '1.1.1'),
+            self.check('publishingProfile.replicationMode', 'Full')
+        ])
+        self.cmd('sig image-version create --replication-mode Shallow -g {rg} -r {sig_name}'
+                 ' -i {img_def_name} -e 1.1.2 --managed-image {img_name}', checks=[
+            self.check('name', '1.1.2'),
+            self.check('publishingProfile.replicationMode', 'Shallow')
+        ])
+        self.cmd('sig image-version show -g {rg} -r {sig_name} -i {img_def_name} -e 1.1.2', checks=[
+            self.check('name', '1.1.2'),
+            self.check('publishingProfile.replicationMode', 'Shallow')
+        ])
 # endregion
 
 

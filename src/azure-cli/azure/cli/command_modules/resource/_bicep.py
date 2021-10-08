@@ -31,7 +31,7 @@ from azure.cli.core.azclierror import (
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
 
-# See: https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-syntax#template-format
+# See: https://docs.microsoft.com/azure/azure-resource-manager/templates/template-syntax#template-format
 _template_schema_pattern = r"https?://schema\.management\.azure\.com/schemas/[0-9a-zA-Z-]+/(?P<templateType>[a-zA-Z]+)Template\.json#?"  # pylint: disable=line-too-long
 
 _config_dir = get_config_dir()
