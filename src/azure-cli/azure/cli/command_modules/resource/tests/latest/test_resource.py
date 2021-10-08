@@ -2008,7 +2008,9 @@ class DeploymentScriptsTest(ScenarioTest):
                  checks=self.check("length([?name=='{deployment_script_name}'])", 0))
 
 class DeploymentStacksTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    global location
+    location = "eastus2euap"
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_create_deployment_stack_subscription(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-create-deployment-stack-subscription', 60)
@@ -2016,7 +2018,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         self.kwargs.update({
             'name': deployment_stack_name,
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'update-behavior': "detachResources",
@@ -2026,7 +2028,7 @@ class DeploymentStacksTest(ScenarioTest):
         })
 
         # create template spec
-        basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location {location} --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
+        basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location "westus2" --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
         template_spec_id = basic_template_spec['id'] + "/versions/v1"
 
         self.kwargs.update({'template-spec-id': template_spec_id})
@@ -2049,7 +2051,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({
             'name': deployment_stack_name,
             'update-behavior': "detachResources",
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
 
@@ -2079,7 +2081,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({
             'name': deployment_stack_name,
             'update-behavior': "detachResources",
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
 
@@ -2105,7 +2107,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         self.kwargs.update({
             'name': deployment_stack_name,
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'update-behavior': "detachResources",
@@ -2136,7 +2138,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks sub list', checks=self.check("length([?name=='{name}'])", 0))
 
     
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_create_deployment_stack_resource_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-create-deployment-stack-resource-group', 60)
@@ -2145,7 +2147,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({
             'name': deployment_stack_name,
             'resource-group': resource_group,
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'update-behavior': "detachResources",
@@ -2171,7 +2173,7 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup 
         self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
     
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_show_deployment_stack_resource_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-show-deployment-stack-resource-group', 60)
@@ -2198,7 +2200,7 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup 
         self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
     
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_list_deployment_stack_resource_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-list-deployment-stack-resource-group', 60)
@@ -2206,7 +2208,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({
             'name': deployment_stack_name,
             'resource-group': resource_group,
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'update-behavior': "detachResources",
@@ -2223,7 +2225,7 @@ class DeploymentStacksTest(ScenarioTest):
          # cleanup 
         self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
     
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_delete_deployment_stack_resource_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-delete-deployment-stack-resource-group', 60)
@@ -2231,7 +2233,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({
             'name': deployment_stack_name,
             'resource-group': resource_group,
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'update-behavior': "detachResources",
@@ -2269,7 +2271,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({
             'name': deployment_stack_name,
             'update-behavior': "detachResources",
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
 
@@ -2299,7 +2301,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         self.kwargs.update({
             'name': deployment_stack_name,
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'update-behavior': "detachResources",
@@ -2331,7 +2333,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         self.kwargs.update({
             'name': deployment_stack_name,
-            'location': "westus2",
+            'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'update-behavior': "detachResources",
@@ -2373,7 +2375,7 @@ class DeploymentStacksTest(ScenarioTest):
         #confirm stack is deleted
         self.cmd('stacks snapshot sub list --name {name}', checks=self.check("length([?name=='{name}'])", 0))
     
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_show_deployment_stack_snapshot_resource_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-deployment-stack-resource-group', 60)
@@ -2403,7 +2405,7 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup
         self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
     
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_list_deployment_stack_snapshot_resource_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-deployment-stack-snapshot-resource-group', 60)
@@ -2436,7 +2438,7 @@ class DeploymentStacksTest(ScenarioTest):
          # cleanup 
         self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location='westus2')    
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)    
     def test_delete_deployment_stack_snapshot_resource_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-delete-deployment-stack-snapshot-resource-group', 60)

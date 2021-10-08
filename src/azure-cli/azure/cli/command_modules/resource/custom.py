@@ -2211,10 +2211,14 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
         deployment_stack_model.template_link = deployment_stacks_template_link
     else:
         # deployment_stack_model.template = json.load(open(t_file))
-        template_content = run_bicep_command(["build", "--stdout", t_file]) if is_bicep_file(t_file) else json.load(open(t_file))
-        print("hello")
-        print(template_content)
-        deployment_stack_model.template = json.loads(template_content)
+        if is_bicep_file(t_file):
+            template_content = run_bicep_command(["build", "--stdout", t_file])
+            input_content = _remove_comments_from_json(template_content, file_path=t_file)
+            input_template = json.loads(json.dumps(input_content))
+        else:
+            input_template =  json.load(open(t_file))
+
+        deployment_stack_model.template = input_template
 
 
     #new code start
