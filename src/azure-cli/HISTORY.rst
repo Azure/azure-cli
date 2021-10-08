@@ -82,7 +82,7 @@ Release History
 * Onboard hdinsight private link2 network cmdlets (#19676)
 * `az network bastion create`: Add `--tags` argument (#19693)
 * Private link support for provider Microsoft.Authorization/resourceManagementPrivateLinks (#19742)
-* `az network private-endpoint-connection`: support `Microsoft.MachineLearningServices/workspaces` (#19729)
+* Private link and endpoint support for provider `Microsoft.MachineLearningServices/workspaces` (#19729)
 
 **RDBMS**
 
