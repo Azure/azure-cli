@@ -112,7 +112,7 @@ Release History
 
 **Synapse**
 
-* [BREAKING CHANGE] Add parameter `blob-storage-target-state`, `log-analytics-target-state`, `event-hub-target-state` (at least choose one of these 3 paras) to `az synapse sql audit-policy update` and `az synapse sql pool audit-policy update` (#19384)
+* [BREAKING CHANGE] `az synapse sql/pool audit-policy update`: Add parameter `blob-storage-target-state`, `log-analytics-target-state`, `event-hub-target-state` (at least choose one of these 3 paras)  (#19384)
 * `az synapse integration-runtime`: Support start/stop integration-runtime (#19524)
 * `az synapse trigger`: Add az synapse trigger wait (#19524)
 * `az synapse trigger-run`: Add az synapse trigger-run cancel (#19524)
