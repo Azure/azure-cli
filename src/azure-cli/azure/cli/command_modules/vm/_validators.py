@@ -1950,10 +1950,7 @@ def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
 
 def _validate_capacity_reservation_group(cmd, namespace):
 
-    if namespace.capacity_reservation_group == 'None':
-        namespace.capacity_reservation_group = ''
-
-    elif namespace.capacity_reservation_group:
+    if namespace.capacity_reservation_group and namespace.capacity_reservation_group != 'None':
 
         from msrestazure.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands.client_factory import get_subscription_id
