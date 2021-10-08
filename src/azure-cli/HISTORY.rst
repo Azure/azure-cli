@@ -49,9 +49,9 @@ Release History
 
 **Container**
 
-* [BREAKING CHANGE] `az container create`: Removing `--network-profile` parameter, property no longer supported (#19705)
+* [BREAKING CHANGE] `az container create`: Remove `--network-profile` parameter, property no longer supported (#19705)
 * `az container logs`: Fix the attribute error introduced by Track 2 migration (#19637)
-* `az container create`: Add parameter `--acr-identity`  for support of MSI authenticated ACR image pull (#19705)
+* `az container create`: Add parameter `--acr-identity` for support of MSI authenticated ACR image pull (#19705)
 
 **Cosmos DB**
 
