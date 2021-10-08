@@ -88,7 +88,7 @@ Release History
 
 **Profile**
 
-* `az account show`: Deprecate `--sdk-auth`
+* `az account show`: Deprecate `--sdk-auth` (#19414)
 
 **RDBMS**
 
@@ -100,7 +100,7 @@ Release History
 
 **Role**
 
-* `az ad sp create-for-rbac`: Deprecate `--sdk-auth`
+* `az ad sp create-for-rbac`: Deprecate `--sdk-auth` (#19414)
 
 **Security**
 
