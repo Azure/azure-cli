@@ -461,6 +461,6 @@ class ScenarioType(Enum):
     # PostgresSQL to Azure for PostgreSQL
     postgres_azurepostgres_online = 31
     # MySQL to Azure for MySQL Offline
-    mysql_azuremysql_offline = 41
+    mysql_azuremysql_offline = 22
 
 # endregion
