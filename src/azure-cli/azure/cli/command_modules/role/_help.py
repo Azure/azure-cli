@@ -389,14 +389,10 @@ long-summary: >-
     [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
 
 
-    By default, this command assigns the 'Contributor' role to the service principal at the subscription scope.
-    To reduce your risk of a compromised service principal, use --skip-assignment to avoid creating a role assignment,
-    then assign a more specific role and narrow the scope to a resource or resource group.
+    By default, this command does not create role assignment for the service principal.
+    You may use --role and --scopes to assign a specific role and narrow the scope to a resource or resource group.
+    You may also use `az role assignment create` to create role assignments for this service principal later.
     See [steps to add a role assignment](https://aka.ms/azadsp-more) for more information.
-
-
-    WARNING: In a future release, this command will NOT create a 'Contributor' role assignment by default.
-    If needed, use the --role argument to explicitly create a role assignment.
 parameters:
   - name: --name -n
     short-summary: Display name of the service principal. If not present, default to azure-cli-%Y-%m-%d-%H-%M-%S where the suffix is the time of creation.
@@ -419,12 +415,10 @@ parameters:
   - name: --role
     short-summary: Role of the service principal.
 examples:
-  - name: Create with a default role assignment.
+  - name: Create without role assignment.
     text: az ad sp create-for-rbac
-  - name: Create using a custom name, and with a default assignment.
+  - name: Create using a custom display name.
     text: az ad sp create-for-rbac -n "MyApp"
-  - name: Create without a default assignment.
-    text: az ad sp create-for-rbac --skip-assignment
   - name: Create with a Contributor role assignments on specified scope.
     text: az ad sp create-for-rbac -n "MyApp" --role Contributor --scopes /subscriptions/{SubID}/resourceGroups/{ResourceGroup1} /subscriptions/{SubID}/resourceGroups/{ResourceGroup2}
   - name: Create using a self-signed certificate.
