@@ -85,7 +85,7 @@ Release History
 * `az network application-gateway http-listener update`: add parameter `--ssl-profile` (#19466)
 * Onboard hdinsight private link2 network cmdlets (#19676)
 * `az network bastion create`: Add `--tags` argument (#19693)
-* Private link support for provider Microsoft.Authorization/resourceManagementPrivateLinks (#19742)
+* Private link and endpoint support for provider `Microsoft.Authorization/resourceManagementPrivateLinks` (#19742)
 * Private link and endpoint support for provider `Microsoft.MachineLearningServices/workspaces` (#19729)
 
 **RDBMS**
