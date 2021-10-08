@@ -86,6 +86,10 @@ Release History
 * Private link and endpoint support for provider `Microsoft.Authorization/resourceManagementPrivateLinks` (#19742)
 * Private link and endpoint support for provider `Microsoft.MachineLearningServices/workspaces` (#19729)
 
+**Profile**
+
+* `az account show`: Deprecate `--sdk-auth`
+
 **RDBMS**
 
 * [BREAKING CHANGE] `az postgres flexible-server migration`: Change `--properties @{filepath}` to `--properties {filepath}` (#19516)
@@ -93,6 +97,10 @@ Release History
 * `az postgres flexible-server migration check-name-availability`: Add a command to check if a migration name is available. (#19516)
 * `az postgres flexible-server migration update`:  Add `--start-data-migration` to reschedule the migration to start right now. (#19516)
 * Update list-skus, create command location setting and replica command (#19531)
+
+**Role**
+
+* `az ad sp create-for-rbac`: Deprecate `--sdk-auth`
 
 **Security**
 
