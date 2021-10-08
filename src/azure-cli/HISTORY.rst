@@ -26,7 +26,6 @@ Release History
 * `az webapp config backup list`: Fix issue that returned backup configuration instead of backup list (#19722)
 * `az logicapp start/restart/stop`: Add new commands for logicapp (#19613)
 * `az webapp config storage-account`: Update parameter descriptions (#19646)
-* Update SDK `azure-mgmt-web` to new version `4.0.0` (#19498)
 
 **ARM**
 
