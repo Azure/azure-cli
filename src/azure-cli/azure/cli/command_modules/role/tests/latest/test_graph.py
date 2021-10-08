@@ -291,8 +291,10 @@ class CreateForRbacScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_create_for_rbac_no_role_assignment(self):
         # Verify no role assignment is created by default
+        self.kwargs['display_name'] = self.create_random_name(prefix='cli-graph', length=14)
+
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            result = self.cmd('ad sp create-for-rbac').get_output_in_json()
+            result = self.cmd('ad sp create-for-rbac -n {display_name}').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
 
             self.cmd('ad sp list --spn {app_id}',
