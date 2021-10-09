@@ -237,8 +237,8 @@ def intelligent_experience(cmd, namespace, missing_args):
     # arguments from interactive inputs
     for arg in missing_args:
         if arg not in cmd_arg_values:
-            _help = '{} ({})'.format(missing_args[arg].get('help'), missing_args[arg].get('options')[0])
-            value = interactive_input(arg, _help)
+            hint = '{} ({})'.format(missing_args[arg].get('help'), '/'.join(missing_args[arg].get('options')))
+            value = interactive_input(arg, hint)
             cmd_arg_values[arg] = value
 
     return cmd_arg_values
@@ -349,7 +349,7 @@ def get_missing_connection_name(namespace):
     if getattr(namespace, 'connection_name', None) is None:
         missing_args['connection_name'] = {
             'help': 'The connection name',
-            'options': ['--connection-name']
+            'options': ['--connection-name', '--name', '-n']
         }
 
     return missing_args

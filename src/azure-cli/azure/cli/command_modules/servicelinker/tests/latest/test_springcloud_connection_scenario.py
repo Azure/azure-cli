@@ -4,6 +4,8 @@
 # license information.
 # --------------------------------------------------------------------------
 
+import unittest
+
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
@@ -16,6 +18,7 @@ from azure.cli.command_modules.servicelinker._resource_config import (
 )
 
 
+@unittest.skip('Need spring-cloud extension installed')
 class SpringCloudConnectionScenarioTest(ScenarioTest):
     # @record_only
     def test_springcloud_appconfig_e2e(self):
