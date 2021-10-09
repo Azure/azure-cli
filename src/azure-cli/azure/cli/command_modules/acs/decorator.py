@@ -78,6 +78,7 @@ ContainerServiceClient = TypeVar("ContainerServiceClient")
 Identity = TypeVar("Identity")
 ManagedCluster = TypeVar("ManagedCluster")
 ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
+ManagedClusterPropertiesAutoScalerProfile = TypeVar("ManagedClusterPropertiesAutoScalerProfile")
 ResourceReference = TypeVar("ResourceReference")
 
 # TODO
@@ -374,7 +375,7 @@ class AKSContext:
     read_only is set to True when necessary to avoid loop calls, when using the getter function to obtain the value of
     other parameters.
     """
-    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, decorator_mode):
+    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, models: AKSModels, decorator_mode):
         if not isinstance(raw_parameters, dict):
             raise CLIInternalError(
                 "Unexpected raw_parameters object with type '{}'.".format(
@@ -389,6 +390,7 @@ class AKSContext:
             )
         self.cmd = cmd
         self.raw_param = raw_parameters
+        self.models = models
         self.decorator_mode = decorator_mode
         self.intermediates = dict()
         self.mc = None
@@ -3306,10 +3308,37 @@ class AKSContext:
         (extract the dictionary from the ManagedClusterPropertiesAutoScalerProfile object), and then update the copied
         dictionary with the dictionary of new options.
 
+        This function will verify the parameter by default. If the user input is not empty, take the keys from the
+        attribute map of ManagedClusterPropertiesAutoScalerProfile to verify whether the keys in the key-value pairs
+        provided by the user are valid. If not, raise an InvalidArgumentValueError. The value of the raw parameter
+        should be a dictionary after being processed by the validator. If not, raise a CLIInternalError.
+
         :return: dictionary or None
         """
         # read the original value passed by the command
         cluster_autoscaler_profile = self.raw_param.get("cluster_autoscaler_profile")
+        # validate user input (replace function "_validate_cluster_autoscaler_key" in file "_validators.py")
+        if cluster_autoscaler_profile is not None:
+            if not isinstance(cluster_autoscaler_profile, dict):
+                raise CLIInternalError(
+                    "Unexpected input cluster-autoscaler-profile, value: '{}', type '{}'.".format(
+                        cluster_autoscaler_profile,
+                        type(cluster_autoscaler_profile),
+                    )
+                )
+            valid_keys = list(
+                k.replace("_", "-") for k in self.models.ManagedClusterPropertiesAutoScalerProfile._attribute_map.keys()
+            )
+            for key in cluster_autoscaler_profile.keys():
+                if not key:
+                    raise InvalidArgumentValueError("Empty key specified for cluster-autoscaler-profile")
+                if key not in valid_keys:
+                    raise InvalidArgumentValueError(
+                        "'{}' is an invalid key for cluster-autoscaler-profile. Valid keys are {}.".format(
+                            key, ", ".join(valid_keys)
+                        )
+                    )
+
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.auto_scaler_profile is not None:
@@ -3472,9 +3501,8 @@ class AKSCreateDecorator:
         self,
         cmd: AzCliCommand,
         client: ContainerServiceClient,
-        models: AKSModels,
         raw_parameters: Dict,
-        resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
+        resource_type: ResourceType,
     ):
         """Internal controller of aks_create.
 
@@ -3486,14 +3514,9 @@ class AKSCreateDecorator:
         """
         self.cmd = cmd
         self.client = client
-        self.models = models
+        self.models = AKSModels(cmd, resource_type)
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSContext(cmd, raw_parameters, decorator_mode=DecoratorMode.CREATE)
-        # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
-        # containerservice SDK, most models have been passed through the `models` parameter (instantiatied
-        # from `AKSModels` (or `PreviewAKSModels` in aks-preview), where resource_type (i.e.,
-        # api version) has been specified).
-        self.resource_type = resource_type
+        self.context = AKSContext(cmd, raw_parameters, self.models, decorator_mode=DecoratorMode.CREATE)
 
     def init_mc(self) -> ManagedCluster:
         """Initialize a ManagedCluster object with several parameters and attach it to internal context.
@@ -4242,8 +4265,8 @@ class AKSUpdateDecorator:
         self,
         cmd: AzCliCommand,
         client: ContainerServiceClient,
-        models: AKSModels,
         raw_parameters: Dict,
+        resource_type: ResourceType,
     ):
         """Internal controller of aks_update.
 
@@ -4255,9 +4278,9 @@ class AKSUpdateDecorator:
         """
         self.cmd = cmd
         self.client = client
-        self.models = models
+        self.models = AKSModels(cmd, resource_type)
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSContext(cmd, raw_parameters, decorator_mode=DecoratorMode.UPDATE)
+        self.context = AKSContext(cmd, raw_parameters, self.models, decorator_mode=DecoratorMode.UPDATE)
 
     def check_raw_parameters(self):
         """Helper function to check whether any parameters are set.
