@@ -29,9 +29,11 @@ from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encodin
 
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
-                          __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
-                          __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
-                          __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
+                          __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv,
+                          __read_kv_from_app_service, __write_kv_to_app_service, __print_restore_preview,
+                          __serialize_kv_list_to_comparable_json_object, __print_preview,
+                          __serialize_features_from_kv_list_to_comparable_json_object, __print_preview_and_export_kvset,
+                          __serialize_feature_list_to_comparable_json_object, __print_features_preview)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -189,6 +191,7 @@ def export_config(cmd,
                   separator=None,
                   naming_convention='pascal',
                   resolve_keyvault=False,
+                  profile='appconfig/default',
                   # to-config-store parameters
                   dest_name=None,
                   dest_connection_string=None,
@@ -202,11 +205,25 @@ def export_config(cmd,
     dest_features = []
     dest_kvs = []
     destination = destination.lower()
+    profile = profile.lower()
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
 
-    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+    if profile == 'appconfig/kvset':
+        if destination != 'file':
+            raise CLIError('The export profile \'appconfig/kvset\' only be used when exporting to the file.')
+        if prefix != '':
+            raise CLIError('\'--prefix\' option is not supported when using \'appconfig/kvset\' export profile.')
+        if format_ is not None and format_ != 'json':
+            raise CLIError('The export profile \'appconfig/kvset\' only supports exporting in the json format')
+        if dest_label is not None:
+            raise CLIError('\'--dest-label\' option is not supported when using \'appconfig/kvset\' export profile.')
+        if resolve_keyvault:
+            raise CLIError('Keyvault references are not resolved when exporting using \'appconfig/kvset\' export profile.')
+        if separator is not None:
+            raise CLIError('\'--separator\' option is not supported when using \'appconfig/kvset\' export profile.')
 
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     dest_azconfig_client = None
     if destination == 'appconfig':
         if dest_label is not None and preserve_labels:
@@ -228,8 +245,10 @@ def export_config(cmd,
     if skip_keyvault:
         src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
 
-    # We need to separate KV from feature flags
-    __discard_features_from_retrieved_kv(src_kvs)
+    # We need to separate KV from feature flags for the default export profile and only need to discard
+    # if skip_features is true for the appconfig/kvset export profile.
+    if profile == 'appconfig/default' or (profile == 'appconfig/kvset' and skip_features):
+        __discard_features_from_retrieved_kv(src_kvs)
 
     if not skip_features:
         # Get all Feature flags with matching label
@@ -246,6 +265,10 @@ def export_config(cmd,
                                         all_=True,
                                         auth_mode=auth_mode,
                                         endpoint=endpoint)
+
+    if profile == 'appconfig/kvset':
+        __print_preview_and_export_kvset(file_path=path, keyvalues=src_kvs, yes=yes)
+        return
 
     # if customer needs preview & confirmation
     if not yes:

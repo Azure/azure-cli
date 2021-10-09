@@ -554,16 +554,22 @@ def __serialize_feature_list_to_comparable_json_object(features):
     return res
 
 
-def __serialize_kv_list_to_comparable_json_list(keyvalues):
+def __serialize_kv_list_to_comparable_json_list(keyvalues, profile='appconfig/default'):
     res = []
     for kv in keyvalues:
         # value
-        kv_json = {'key': kv.key,
-                   'value': kv.value,
-                   'label': kv.label,
-                   'locked': kv.locked,
-                   'last modified': kv.last_modified,
-                   'content type': kv.content_type}
+        if profile == 'appconfig/kvset':
+            kv_json = {'key': kv.key,
+                       'value': kv.value,
+                       'label': kv.label,
+                       'content_type': kv.content_type}
+        else:
+            kv_json = {'key': kv.key,
+                       'value': kv.value,
+                       'label': kv.label,
+                       'locked': kv.locked,
+                       'last modified': kv.last_modified,
+                       'content type': kv.content_type}
         # tags
         tag_json = {}
         if kv.tags:
@@ -662,6 +668,24 @@ def __print_preview(old_json, new_json):
                 logger.warning('+ %s', json.dumps(new_record, ensure_ascii=False))
     logger.warning("")  # printing an empty line for formatting purpose
     return True
+
+def __print_preview_and_export_kvset(file_path, keyvalues, yes):
+    kvset = __serialize_kv_list_to_comparable_json_list(keyvalues, 'appconfig/kvset')
+    obj = dict(items=kvset)
+    json_string = json.dumps(obj, indent=2, ensure_ascii=False)
+    if not yes:
+        logger.warning('\n---------------- Key Values Preview (Beta) ----------------')
+        if len(kvset) == 0:
+            logger.warning('\nSource configuration is empty. Nothing to export.')
+            return
+        logger.warning(json_string)
+        logger.warning("")  # printing an empty line for formatting purpose
+        user_confirmation('Do you want to continue? \n')
+    try:
+        with open(file_path, 'w', encoding='utf-8') as fp:
+            fp.write(json_string)
+    except Exception as exception:
+        raise CLIError("Failed to export key-values to file. " + str(exception))
 
 
 def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
@@ -998,7 +1022,6 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
     except Exception as exception:
         raise CLIError(str(exception))
-
 
 class Undef:  # pylint: disable=too-few-public-methods
     '''
