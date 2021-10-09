@@ -3326,6 +3326,7 @@ class AKSContext:
                         type(cluster_autoscaler_profile),
                     )
                 )
+            # pylint: disable=protected-access
             valid_keys = list(
                 k.replace("_", "-") for k in self.models.ManagedClusterPropertiesAutoScalerProfile._attribute_map.keys()
             )
