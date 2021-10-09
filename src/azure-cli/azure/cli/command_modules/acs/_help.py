@@ -468,6 +468,9 @@ parameters:
   - name: --tags
     type: string
     short-summary: The tags of the managed cluster. The managed cluster instance and all resources managed by the cloud provider will be tagged.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -634,6 +637,9 @@ parameters:
   - name: --tags
     type: string
     short-summary: The tags of the managed cluster. The managed cluster instance and all resources managed by the cloud provider will be tagged.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
