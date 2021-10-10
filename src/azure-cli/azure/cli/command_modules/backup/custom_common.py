@@ -126,6 +126,14 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
     return paged_items
 
 
+def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type):
+    filter_string = custom_help.get_filter_string({
+        'policyName': name,
+        'backupManagementType': backup_management_type})
+    items = client.list(vault_name, resource_group_name, filter_string)
+    return custom_help.get_list_from_paged_response(items)
+
+
 def fetch_tier(paged_recovery_points):
 
     for rp in paged_recovery_points:

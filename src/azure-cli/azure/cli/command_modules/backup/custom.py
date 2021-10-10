@@ -426,14 +426,6 @@ def list_policies(client, resource_group_name, vault_name):
     return cust_help.get_list_from_paged_response(policies)
 
 
-def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type):
-    filter_string = cust_help.get_filter_string({
-        'policyName': name,
-        'backupManagementType': backup_management_type})
-    items = client.list(vault_name, resource_group_name, filter_string)
-    return cust_help.get_list_from_paged_response(items)
-
-
 def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     policy_object = cust_help.get_policy_from_json(client, policy)
     retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days

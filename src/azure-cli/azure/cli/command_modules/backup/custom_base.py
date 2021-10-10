@@ -247,7 +247,7 @@ def get_default_policy_for_vm(client, resource_group_name, vault_name):
 
 
 def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type=None):
-    return custom.list_associated_items_for_policy(client, resource_group_name, vault_name, name,
+    return common.list_associated_items_for_policy(client, resource_group_name, vault_name, name,
                                                    backup_management_type)
 
 
@@ -524,10 +524,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
 
 
 def undelete_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,
-                        backup_management_type, workload_type=None):
+                        backup_management_type=None, workload_type=None):
+    container_type = custom_help.validate_and_extract_container_type(container_name, backup_management_type)
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
-                     backup_management_type, workload_type)
+                     container_type, workload_type)
     custom_help.validate_item(item)
 
     if isinstance(item, list):
