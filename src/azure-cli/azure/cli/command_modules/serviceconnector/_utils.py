@@ -19,6 +19,22 @@ class CommandExecutionError(CLIInternalError):
         return 'Command execution failed, command is: {}, error message is: {}'.format(self.cmd, self.error_msg)
 
 
+def should_load_source(source):
+    '''Check whether to load `az {source} connection`
+    If {source} is an extension (e.g, spring-cloud), load the command group only when {source} is installed
+    '''
+    from azure.cli.core.extension.operations import list_extensions
+    from ._resource_config import SOURCE_RESOURCES_IN_EXTENSION
+
+    # names of CLI installed extensions
+    installed_extensions = [item.get('name') for item in list_extensions()]
+    # if source resource is released as an extension, load our command groups
+    # only when the extension is installed
+    if source not in SOURCE_RESOURCES_IN_EXTENSION or source.value in installed_extensions:
+        return True
+    return False
+
+
 def generate_random_string(length=5, prefix='', lower_only=False, ensure_complexity=False):
     '''Generate a random string
     :param length: the length of generated random string, not including the prefix

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.extension.operations import list_extensions
 from ._transformers import (
     transform_support_types,
     transform_linker_properties
@@ -12,8 +11,8 @@ from ._transformers import (
 from ._resource_config import (
     SOURCE_RESOURCES,
     TARGET_RESOURCES,
-    SOURCE_RESOURCES_IN_EXTENSION
 )
+from ._utils import should_load_source
 
 
 def load_command_table(self, _):
@@ -23,12 +22,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.servicelinker.operations._linker_operations#LinkerOperations.{}',
         client_factory=cf_linker)
 
-    # names of CLI installed extensions
-    installed_extensions = [item.get('name') for item in list_extensions()]
     for source in SOURCE_RESOURCES:
         # if source resource is released as an extension, load our command groups
         # only when the extension is installed
-        if source not in SOURCE_RESOURCES_IN_EXTENSION or source.value in installed_extensions:
+        if should_load_source(source):
             with self.command_group('{} connection'.format(source.value),
                                     connection_type, client_factory=cf_linker) as og:
                 og.custom_command('list', 'connection_list')

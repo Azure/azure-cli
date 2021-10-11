@@ -11,9 +11,12 @@ from ._resource_config import (
     SUPPORTED_AUTH_TYPE
 )
 from ._addon_factory import AddonFactory
+from ._utils import should_load_source
 
 
 for source in SOURCE_RESOURCES:
+    if not should_load_source(source):
+      continue
 
     source_id = SOURCE_RESOURCES.get(source)
     connection_id = ('/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/'
