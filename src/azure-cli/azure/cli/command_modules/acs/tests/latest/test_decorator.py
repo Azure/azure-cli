@@ -688,6 +688,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"os_sku": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_os_sku(), None)
@@ -3540,6 +3541,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"disable_local_accounts": False},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_disable_local_accounts(), False)
@@ -3554,6 +3556,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {"disable_local_accounts": True, "enable_local_accounts": True},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_2.get_disable_local_accounts(), True)
@@ -3562,6 +3565,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_3 = AKSContext(
             self.cmd,
             {"disable_local_accounts": True, "enable_local_accounts": True},
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         # fail on mutually exclusive disable_local_accounts and enable_local_accounts
@@ -3573,6 +3577,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"enable_local_accounts": False},
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1.get_enable_local_accounts(), False)
@@ -3581,6 +3586,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {"enable_local_accounts": True, "disable_local_accounts": True},
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         # fail on mutually exclusive disable_local_accounts and enable_local_accounts
@@ -5796,11 +5802,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "disable_local_accounts": False,
                 "enable_local_accounts": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         # fail on passing the wrong mc object
         with self.assertRaises(CLIInternalError):
@@ -5822,11 +5828,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "disable_local_accounts": True,
                 "enable_local_accounts": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_2 = self.models.ManagedCluster(
@@ -5845,11 +5851,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "disable_local_accounts": False,
                 "enable_local_accounts": True,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_3 = self.models.ManagedCluster(
