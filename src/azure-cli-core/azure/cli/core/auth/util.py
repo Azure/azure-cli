@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
-from azure.cli.core.util import in_cloud_console
 
 logger = get_logger(__name__)
 
@@ -15,6 +14,7 @@ def aad_error_handler(error, **kwargs):
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
 
+    from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
         import socket
         logger.warning("A Cloud Shell credential problem occurred. When you report the issue with the error "
