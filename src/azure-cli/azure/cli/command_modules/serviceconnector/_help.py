@@ -10,12 +10,12 @@ from ._resource_config import (
     TARGET_RESOURCES,
     SUPPORTED_AUTH_TYPE
 )
+from ._addon_factory import AddonFactory
 
 
 for source in SOURCE_RESOURCES:
 
-    source_id = ('/subscriptions/{subscription}/resourceGroups/{source_resource_group}/'
-                 'providers/Microsoft.Web/sites/{site}')
+    source_id = SOURCE_RESOURCES.get(source)
     connection_id = ('/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/'
                      'Microsoft.Web/sites/{site}/providers/Microsoft.ServiceLinker/linkers/{linker}')
 
@@ -33,7 +33,7 @@ for source in SOURCE_RESOURCES:
                   az {source} connection list-support-types -o table
           - name: List {source} supported auth types for a specific target resource type
             text: |-
-                  az {source} connection list list-support-types --target-type storage-blob -o table
+                  az {source} connection list-support-types --target-type storage-blob -o table
     """.format(source=source.value)
 
     helps['{source} connection list'.format(source=source.value)] = """
@@ -116,25 +116,19 @@ for source in SOURCE_RESOURCES:
     """.format(source=source.value)
 
     for target in TARGET_RESOURCES:
+        target_id = TARGET_RESOURCES.get(target)
+
         # params in example
         auth_param_map = {
             AUTH_TYPE.Secret: '--secret name=XX secret=XX',
-            AUTH_TYPE.SecretAuto: '--auto-secret',
+            AUTH_TYPE.SecretAuto: '--secret',
             AUTH_TYPE.SystemIdentity: '--system-identity'
         }
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
         auth_param = auth_param_map.get(auth_types[0])
-        source_id = SOURCE_RESOURCES.get(source)
-        target_id = TARGET_RESOURCES.get(target)
 
-        # secet params in help message
+        # auth info params in help message
         secret_param = '''
-            - name: --secret
-              short-summary: The secret auth info
-              long-summary: |
-                Usage: --secret
-
-        ''' if AUTH_TYPE.SecretAuto in auth_types else '''
             - name: --secret
               short-summary: The secret auth info
               long-summary: |
@@ -142,18 +136,22 @@ for source in SOURCE_RESOURCES:
 
                 name    : Required. Username or account name for secret auth.
                 secret  : Required. Password or account key for secret auth.
-        '''
+        ''' if AUTH_TYPE.Secret in auth_types else ''
+        secret_auto_param = '''
+            - name: --secret
+              short-summary: The secret auth info
+              long-summary: |
+                Usage: --secret
 
-        helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
-          type: command
-          short-summary: Create a {source} connection to {target}.
-          parameters:
-            {secret_param}
+        ''' if AUTH_TYPE.SecretAuto in auth_types else ''
+        system_identity_param = '''
             - name: --system-identity
               short-summary: The system assigned identity auth info
               long-summary: |
                 Usage: --system-identity
 
+        ''' if AUTH_TYPE.SystemIdentity in auth_types else ''
+        user_identity_param = '''
             - name: --user-identity
               short-summary: The user assigned identity auth info
               long-summary: |
@@ -161,6 +159,8 @@ for source in SOURCE_RESOURCES:
 
                 client-id      : Required. Client id of the user assigned identity.
                 subs-id        : Required. Subscription id of the user assigned identity.
+        ''' if AUTH_TYPE.UserIdentity in auth_types else ''
+        service_principal_param = '''
             - name: --service-principal
               short-summary: The service principal auth info
               long-summary: |
@@ -169,7 +169,27 @@ for source in SOURCE_RESOURCES:
                 client-id      : Required. Client id of the service principal.
                 object-id      : Required. Object id of the service principal.
                 secret         : Required. Secret of the service principal.
+        ''' if AUTH_TYPE.ServicePrincipalSecret in auth_types else ''
 
+        # create with `--new` examples
+        provision_example = '''
+            - name: Create a new {target} and connect {source} to it interactively
+              text: |-
+                    az {source} connection create {target} --new
+            - name: Create a new {target} and connect {source} to it
+              text: |-
+                    az {source} connection create {target} --source-id {source_id} --new
+        '''.format(source=source.value, target=target.value, source_id=source_id) if target in AddonFactory else ''
+
+        helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
+          type: command
+          short-summary: Create a {source} connection to {target}.
+          parameters:
+            {secret_param}
+            {secret_auto_param}
+            {system_identity_param}
+            {user_identity_param}
+            {service_principal_param}
           examples:
             - name: Create a connection between {source} and {target} interactively
               text: |-
@@ -177,46 +197,29 @@ for source in SOURCE_RESOURCES:
             - name: Create a connection between {source} and {target}
               text: |-
                      az {source} connection create {target} --name MyConn --client-type python --source-id {source_id} --target-id {target_id} {auth_param}
-            - name: Create a new {target} and connect {source} to it interactively
-              text: |-
-                     az {source} connection create {target} --new
-            - name: Create a new {target} and connect {source} to it
-              text: |-
-                     az {source} connection create {target} --source-id {source_id} --new
+            {provision_example}
         """.format(
             source=source.value,
             target=target.value,
-            secret_param=secret_param,
             source_id=source_id,
             target_id=target_id,
-            auth_param=auth_param)
+            secret_param=secret_param,
+            secret_auto_param=secret_auto_param,
+            system_identity_param=system_identity_param,
+            user_identity_param=user_identity_param,
+            service_principal_param=service_principal_param,
+            auth_param=auth_param,
+            provision_example=provision_example)
 
         helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """
           type: command
           short-summary: Update a {source} to {target} connection.
           parameters:
             {secret_param}
-            - name: --system-identity
-              short-summary: The system assigned identity auth info
-              long-summary: |
-                Usage: --system-identity
-
-            - name: --user-identity
-              short-summary: The user assigned identity auth info
-              long-summary: |
-                Usage: --user-identity client-id=XX subs-id=XX
-
-                client-id      : Required. Client id of the user assigned identity.
-                subs-id        : Required. Subscription id of the user assigned identity.
-            - name: --service-principal
-              short-summary: The service principal auth info
-              long-summary: |
-                Usage: --service-principal client-id=XX object-id=XX secret=XX
-
-                client-id      : Required. Client id of the service principal.
-                object-id      : Required. Object id of the service principal.
-                secret         : Required. Secret of the service principal.
-
+            {secret_auto_param}
+            {system_identity_param}
+            {user_identity_param}
+            {service_principal_param}
           examples:
             - name: Update a {source} to {target} connection interactively
               text: |-
@@ -228,5 +231,9 @@ for source in SOURCE_RESOURCES:
             source=source.value,
             target=target.value,
             secret_param=secret_param,
+            secret_auto_param=secret_auto_param,
+            system_identity_param=system_identity_param,
+            user_identity_param=user_identity_param,
+            service_principal_param=service_principal_param,
             auth_param=auth_param,
             connection_id=connection_id)
