@@ -29,8 +29,8 @@ import webbrowser
 import zipfile
 from distutils.version import StrictVersion
 from math import isnan
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from six.moves.urllib.error import URLError  # pylint: disable=import-error
+from urllib.request import urlopen
+from urllib.error import URLError
 
 # pylint: disable=import-error
 import yaml
@@ -2274,7 +2274,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     from azure.cli.command_modules.acs.decorator import AKSModels
     # store all the models used by load balancer
-    lb_models = AKSModels(cmd).lb_models
+    lb_models = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).lb_models
     load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
@@ -2998,7 +2998,7 @@ def aks_update(cmd, client, resource_group_name, name,
     if update_lb_profile:
         from azure.cli.command_modules.acs.decorator import AKSModels
         # store all the models used by load balancer
-        lb_models = AKSModels(cmd).lb_models
+        lb_models = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).lb_models
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
             load_balancer_managed_outbound_ip_count,
             load_balancer_outbound_ips,

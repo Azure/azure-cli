@@ -14,6 +14,4 @@ def file_related_exception_handler(ex):
         raise FileOperationError(ex, recommendation='File is expected, not a directory.')
     if isinstance(ex, NotADirectoryError):
         raise FileOperationError(ex, recommendation='Directory is expected, not a file.')
-    import sys
-    from six import reraise
-    reraise(*sys.exc_info())
+    raise ex
