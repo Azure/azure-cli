@@ -464,20 +464,21 @@ def extract_comma_separated_string(
             item = item.strip()
         if extract_kv:
             kv = item.split("=")
-            if len(kv) == 2:
+            if key_only:
                 if enable_strip:
-                    result[kv[0].strip()] = kv[1].strip()
+                    result[kv[0].strip()] = ""
                 else:
-                    result[kv[0]] = kv[1]
+                    result[kv[0]] = ""
             else:
-                if key_only:
+                if len(kv) == 2:
                     if enable_strip:
-                        result[kv[0].strip()] = ""
+                        result[kv[0].strip()] = kv[1].strip()
                     else:
-                        result[kv[0]] = ""
+                        result[kv[0]] = kv[1]
                 else:
                     raise InvalidArgumentValueError(
-                        "The format of '{}' in '{}' is incorrect".format(
+                        "The format of '{}' in '{}' is incorrect, correct format should be "
+                        "'Key1=Value1,Key2=Value2'.".format(
                             item, raw_string
                         )
                     )

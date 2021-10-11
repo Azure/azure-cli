@@ -5317,7 +5317,15 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         # default value in `aks_create`
         mc_1 = self.models.ManagedCluster(location="test_location")
         dec_1 = AKSCreateDecorator(
-            self.cmd, self.client, {}, ResourceType.MGMT_CONTAINERSERVICE
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_managed_identity": True,
+                "no_wait": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         # fail on passing the wrong mc object
         with self.assertRaises(CLIInternalError):
