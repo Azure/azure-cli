@@ -453,7 +453,7 @@ def load_arguments(self, _):
     with self.argument_context('vm extension') as c:
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='Name of the extension.', id_part='child_name_1')
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
-        c.argument('expand', deprecate_info=c.deprecate(expiration='3.0.0', hide=True))
+        c.argument('expand', deprecate_info=c.deprecate(expiration='4.0.0', hide=True))
 
     with self.argument_context('vm extension list') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
@@ -1037,7 +1037,7 @@ def load_arguments(self, _):
         c.ignore('gallery_image')
 
     with self.argument_context('sig image-version') as c:
-        deprecated_option = c.deprecate(target='--gallery-image-version-name', redirect='--gallery-image-version', hide=True, expiration="3.0.0")
+        deprecated_option = c.deprecate(target='--gallery-image-version-name', redirect='--gallery-image-version', hide=True, expiration="4.0.0")
         c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
 
