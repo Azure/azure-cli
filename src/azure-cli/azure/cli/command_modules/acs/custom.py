@@ -2086,10 +2086,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
-    # decorator pattern
+    # get all the original parameters and save them as a dictionary
     raw_parameters = locals()
+
+    # decorator pattern
     from .decorator import AKSCreateDecorator
-    # prepare decorator
     aks_create_decorator = AKSCreateDecorator(
         cmd=cmd,
         client=client,
