@@ -155,8 +155,7 @@ class TestUtils(unittest.TestCase):
         platform = sys.platform.lower()
         open_page_in_browser('http://foo')
         if is_wsl():
-            subprocess_open_mock.assert_called_once_with(['powershell.exe', '-NoProfile', '-Command',
-                                                          'Start-Process "http://foo"'])
+            subprocess_open_mock.assert_called_once_with(['powershell.exe', '-Command', 'Start-Process "http://foo"'])
         elif platform == 'darwin':
             subprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
         else:

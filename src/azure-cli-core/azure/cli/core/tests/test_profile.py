@@ -1355,7 +1355,7 @@ class TestProfile(unittest.TestCase):
             'suberror': 'basic_action'
         }
 
-        err = AuthenticationError(error_description, recommendation=None, msal_result=msal_result)
+        err = AuthenticationError(error_description, recommendation=None)
 
         # MFA error raised on the second call
         mock_arm_client.subscriptions.list.side_effect = [[deepcopy(self.subscription1_raw)], err]

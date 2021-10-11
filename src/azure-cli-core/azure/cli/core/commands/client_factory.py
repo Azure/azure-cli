@@ -117,7 +117,7 @@ def configure_common_settings(cli_ctx, client):
 
 
 def _prepare_client_kwargs_track2(cli_ctx):
-    """Prepare kwargs for Track 2 data and mgmt SDK clients."""
+    """Prepare kwargs for Track 2 SDK client."""
     client_kwargs = {}
 
     # Prepare connection_verify to change SSL verification behavior, used by ConnectionConfiguration

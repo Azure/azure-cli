@@ -39,7 +39,7 @@ WELCOME_MESSAGE = r"""
  /_/    \_\/___|\__,_|_|  \___|
 
 
-Welcome to Azure CLI v3 beta with MSAL support!
+Welcome to the cool new Azure CLI!
 
 Use `az --version` to display the current version.
 Here are the base commands:

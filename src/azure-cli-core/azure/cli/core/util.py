@@ -87,7 +87,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             error_msg = extract_common_error_message(ex)
         status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
         AzCLIErrorType = get_error_type_by_status_code(status_code)
-        az_error = AzCLIErrorType(error_msg, original_error=ex)
+        az_error = AzCLIErrorType(error_msg)
 
     elif isinstance(ex, ValidationError):
         az_error = azclierror.ValidationError(error_msg)
@@ -100,7 +100,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         if extract_common_error_message(ex):
             error_msg = extract_common_error_message(ex)
         AzCLIErrorType = get_error_type_by_azure_error(ex)
-        az_error = AzCLIErrorType(error_msg, original_error=ex)
+        az_error = AzCLIErrorType(error_msg)
 
     elif isinstance(ex, AzureException):
         if is_azure_connection_error(error_msg):

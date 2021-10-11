@@ -24,7 +24,7 @@ def aad_error_handler(error, **kwargs):
     login_message = _generate_login_message(**kwargs)
 
     from azure.cli.core.azclierror import AuthenticationError
-    raise AuthenticationError(msg, recommendation=login_message, msal_result=error)
+    raise AuthenticationError(msg, recommendation=login_message)
 
 
 def _generate_login_command(scopes=None):

@@ -583,8 +583,7 @@ def supported_resource_type(api_profile, resource_type):
         return False
 
 
-def _get_attr(sdk_path, mod_attr_path, checked=False):
-    """If `checked` is True, None is returned in case of import failure."""
+def _get_attr(sdk_path, mod_attr_path, checked=True):
     try:
         attr_mod, attr_path = mod_attr_path.split('#') \
             if '#' in mod_attr_path else (mod_attr_path, '')

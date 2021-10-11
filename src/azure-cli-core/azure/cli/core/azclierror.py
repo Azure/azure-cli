@@ -25,10 +25,9 @@ class AzCLIError(CLIError):
     """ Base class for all the AzureCLI defined error classes.
     DO NOT raise this error class in your codes. """
 
-    def __init__(self, error_msg, recommendation=None, original_error=None):
+    def __init__(self, error_msg, recommendation=None):
         # error message
         self.error_msg = error_msg
-        self.original_error = original_error
 
         # manual recommendations provided based on developers' knowledge
         self.recommendations = []
@@ -265,10 +264,7 @@ class RecommendationError(ClientError):
     pass
 
 
-class AuthenticationError(AzCLIError):
-    """ Raised when authentication fails. """
-    def __init__(self, error_msg, recommendation=None, msal_result=None):
-        super().__init__(error_msg, recommendation)
-        self.msal_result = msal_result
+class AuthenticationError(ServiceError):
+    """ Raised when AAD authentication fails. """
 
 # endregion

@@ -71,10 +71,8 @@ def patch_retrieve_token_for_user(unit_test):
             import time
             fake_raw_token = 'top-secret-token-for-you'
             now = int(time.time())
-            # Mock sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:230
             return AccessToken(fake_raw_token, now + 3600)
 
-    # Creating a PublicClientApplication will trigger an HTTP request to validate the tenant. Patch it!
     mock_in_unit_test(unit_test, 'azure.cli.core.auth.identity.UserCredential', UserCredentialMock)
 
 
