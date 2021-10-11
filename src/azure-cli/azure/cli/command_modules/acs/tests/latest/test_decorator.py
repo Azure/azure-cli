@@ -1701,6 +1701,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_managed_outbound_ip_count": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         load_balancer_profile_2 = self.models.lb_models.get(
@@ -1767,6 +1768,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_outbound_ips": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         load_balancer_profile_2 = self.models.lb_models.get(
@@ -1837,6 +1839,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_outbound_ip_prefixes": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_2.get_load_balancer_outbound_ip_prefixes(), None)
@@ -1891,6 +1894,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_outbound_ports": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_2.get_load_balancer_outbound_ports(), None)
@@ -1935,6 +1939,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_idle_timeout": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_2.get_load_balancer_idle_timeout(), None)
@@ -5650,7 +5655,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "load_balancer_sku": None,
                 "load_balancer_managed_outbound_ip_count": None,
@@ -5659,6 +5663,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 "load_balancer_outbound_ports": None,
                 "load_balancer_idle_timeout": None,
             },
+            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         )
         # fail on passing the wrong mc object
         with self.assertRaises(CLIInternalError):
