@@ -24,20 +24,27 @@ short-summary: Create a Synapse workspace.
 examples:
   - name: Create a Synapse workspace
     text: |-
-        az synapse workspace create --name fromcli4 --resource-group rg \\
+        az synapse workspace create --name testworkspace --resource-group rg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
   - name: Create a Synapse workspace with storage resource id
     text: |-
-        az synapse workspace create --name fromcli4 --resource-group rg \\
+        az synapse workspace create --name testworkspace --resource-group rg \\
           --storage-account /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
   - name: Create a Synapse workspace using customer-managed key
     text: |-
-        az synapse workspace create --name fromcli4 --resource-group rg \\
+        az synapse workspace create --name testworkspace --resource-group rg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
           --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
+  - name: Create a Synapse workspace connecting to azure devops
+    text: |-
+        az synapse workspace create --name testworkspace --resource-group rg \\
+          --storage-account testadlsgen2 --file-system testfilesystem \\
+          --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
+          --repository-type AzureDevOpsGit --account-name testuser --project-name testprj \\
+          --repository-name testrepo --collaboration-branch main
 """
 
 helps['synapse workspace list'] = """
@@ -1943,4 +1950,63 @@ examples:
     text: |-
         az synapse managed-private-endpoints delete --workspace-name testsynapseworkspace \\
           --pe-name testendpointname
+"""
+
+helps['synapse spark-job-definition'] = """
+type: group
+short-summary: Manage spark job definitions in a synapse workspace.
+"""
+
+helps['synapse spark-job-definition show'] = """
+type: command
+short-summary: Get a spark job definition.
+examples:
+  - name: Get a spark job definition.
+    text: |-
+        az synapse spark-job-definition show --workspace-name testsynapseworkspace \\
+          --name testsjdname
+"""
+
+helps['synapse spark-job-definition list'] = """
+type: command
+short-summary: List spark job definitions.
+examples:
+  - name: List spark job definitions.
+    text: |-
+        az synapse spark-job-definition list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse spark-job-definition delete'] = """
+type: command
+short-summary: Delete a spark job definition.
+examples:
+  - name: Delete a spark job definition.
+    text: |-
+        az synapse spark-job-definition delete --workspace-name testsynapseworkspace \\
+          --name testsjdname
+"""
+
+helps['synapse spark-job-definition create'] = """
+type: command
+short-summary: Create a spark job definition.
+examples:
+  - name: Create a spark job definition.
+    text: |-
+        az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
+          --name testsjdname --file @path/test.json
+"""
+
+helps['synapse spark-job-definition update'] = """
+type: command
+short-summary: Update a spark job definition.
+examples:
+  - name: Update a spark job definition.
+    text: |-
+        az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
+          --name testsjdname --file @path/test.json
+"""
+
+helps['synapse spark-job-definition wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a spark job definition is met.
 """

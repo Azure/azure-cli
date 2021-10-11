@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.28.1"
+VERSION = "2.29.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -76,7 +76,7 @@ DEPENDENCIES = [
     'azure-mgmt-cognitiveservices~=12.0.0',
     'azure-mgmt-compute~=23.0.0',
     'azure-mgmt-consumption~=2.0',
-    'azure-mgmt-containerinstance~=8.0.0',
+    'azure-mgmt-containerinstance~=9.0.0',
     'azure-mgmt-containerregistry==8.1.0',
     'azure-mgmt-containerservice~=16.1.0',
     'azure-mgmt-cosmosdb~=6.4.0',
@@ -88,7 +88,7 @@ DEPENDENCIES = [
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
     'azure-mgmt-eventgrid==9.0.0',
-    'azure-mgmt-eventhub~=4.1.0',
+    'azure-mgmt-eventhub~=9.1.0',
     'azure-mgmt-extendedlocation~=1.0.0b2',
     'azure-mgmt-hdinsight~=8.0.0',
     'azure-mgmt-imagebuilder~=0.4.0',
@@ -129,7 +129,7 @@ DEPENDENCIES = [
     'azure-mgmt-storage~=19.0.0',
     'azure-mgmt-synapse~=2.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
-    'azure-mgmt-web~=2.0.0',
+    'azure-mgmt-web~=4.0.0',
     'azure-multiapi-storage~=0.6.2',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
@@ -137,8 +137,8 @@ DEPENDENCIES = [
     'azure-synapse-spark~=0.2.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'fabric~=2.4',
-    'javaproperties==0.5.1',
-    'jsondiff==1.2.0',
+    'javaproperties~=0.5.1',
+    'jsondiff~=1.2.0',
     'packaging~=20.9',
     'PyGithub~=1.38',
     'PyNaCl~=1.4.0',
@@ -148,7 +148,8 @@ DEPENDENCIES = [
     'six~=1.12',
     'sshtunnel~=0.1.4',
     'websocket-client~=0.56.0',
-    'xmltodict~=0.12'
+    'xmltodict~=0.12',
+    'chardet~=3.0.4'
 ]
 
 # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked

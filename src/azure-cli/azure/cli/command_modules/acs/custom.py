@@ -100,6 +100,7 @@ from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_A
 from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
 from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
 from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
+from ._consts import CONST_OPEN_SERVICE_MESH_ADDON_NAME
 from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
 from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM, CONST_PRIVATE_DNS_ZONE_NONE
@@ -2081,6 +2082,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                assign_kubelet_identity=None,
                enable_ultra_ssd=False,
                edge_zone=None,
+               disable_local_accounts=False,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
@@ -2467,7 +2469,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         identity=identity,
         disk_encryption_set_id=node_osdisk_diskencryptionset_id,
         identity_profile=identity_profile,
-        auto_upgrade_profile=auto_upgrade_profile
+        auto_upgrade_profile=auto_upgrade_profile,
+        disable_local_accounts=bool(disable_local_accounts)
     )
 
     if disable_public_fqdn:
@@ -2795,12 +2798,15 @@ def aks_update(cmd, client, resource_group_name, name,
                auto_upgrade_channel=None,
                enable_managed_identity=False,
                assign_identity=None,
+               disable_local_accounts=False,
+               enable_local_accounts=False,
                yes=False,
                no_wait=False,
                enable_public_fqdn=False,
                disable_public_fqdn=False,
                enable_azure_rbac=False,
-               disable_azure_rbac=False):
+               disable_azure_rbac=False,
+               tags=None):
     ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                        operation_group='managed_clusters')
@@ -2843,20 +2849,23 @@ def aks_update(cmd, client, resource_group_name, name,
             not windows_admin_password and
             not enable_managed_identity and
             not assign_identity and
+            not enable_local_accounts and
+            not disable_local_accounts and
             not enable_public_fqdn and
-            not disable_public_fqdn):
+            not disable_public_fqdn and
+            tags is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
                        '"--cluster-autoscaler-profile" or '
-                       '"--load-balancer-managed-outbound-ip-count" or'
+                       '"--load-balancer-managed-outbound-ip-count" or '
                        '"--load-balancer-outbound-ips" or '
-                       '"--load-balancer-outbound-ip-prefixes" or'
-                       '"--load-balancer-outbound-ports" or'
-                       '"--load-balancer-idle-timeout" or'
+                       '"--load-balancer-outbound-ip-prefixes" or '
+                       '"--load-balancer-outbound-ports" or '
+                       '"--load-balancer-idle-timeout" or '
                        '"--auto-upgrade-channel" or '
-                       '"--attach-acr" or "--detach-acr" or'
-                       '"--uptime-sla" or'
+                       '"--attach-acr" or "--detach-acr" or '
+                       '"--uptime-sla" or '
                        '"--no-uptime-sla" or '
                        '"--api-server-authorized-ip-ranges" or '
                        '"--enable-aad" or '
@@ -2869,14 +2878,22 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--assign-identity" or '
                        '"--enable-azure-rbac" or '
                        '"--disable-azure-rbac" or '
+                       '"--enable-local-accounts" or '
+                       '"--disable-local-accounts" or '
                        '"--enable-public-fqdn" or '
-                       '"--disable-public-fqdn"')
+                       '"--disable-public-fqdn" or '
+                       '"--tags"')
 
     if not enable_managed_identity and assign_identity:
         raise CLIError(
             '--assign-identity can only be specified when --enable-managed-identity is specified')
 
     instance = client.get(resource_group_name, name)
+
+    # update tags
+    if tags is not None:
+        instance.tags = tags
+
     # For multi-agent pool, use the az aks nodepool command
     if update_autoscaler > 0 and len(instance.agent_pool_profiles) > 1:
         raise CLIError('There are more than one node pool in the cluster. Please use "az aks nodepool" command '
@@ -2965,6 +2982,18 @@ def aks_update(cmd, client, resource_group_name, name,
             name="Basic",
             tier="Free"
         )
+
+    if disable_local_accounts and enable_local_accounts:
+        raise MutuallyExclusiveArgumentError(
+            'Cannot specify --disable-local-accounts and '
+            '--enable-local-accounts at the same time.'
+        )
+
+    if disable_local_accounts:
+        instance.disable_local_accounts = True
+
+    if enable_local_accounts:
+        instance.disable_local_accounts = False
 
     if update_lb_profile:
         from azure.cli.command_modules.acs.decorator import AKSModels
@@ -3482,6 +3511,15 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
                 if enable_sgxquotehelper:
                     addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+            elif addon == CONST_OPEN_SERVICE_MESH_ADDON_NAME:
+                if addon_profile.enabled:
+                    raise AzureInternalError(
+                        'The open-service-mesh addon is already enabled for this managed '
+                        'cluster.\n To change open-service-mesh configuration, run '
+                        '"az aks disable-addons -a open-service-mesh -n {} -g {}" '
+                        'before enabling it again.'
+                        .format(name, resource_group_name))
+                addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -3595,6 +3633,10 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
             addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
         addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
         addons.remove('confcom')
+    if 'open-service-mesh' in addons:
+        addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
+        addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
+        addons.remove('open-service-mesh')
     # error out if any (unrecognized) addons remain
     if addons:
         raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(

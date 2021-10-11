@@ -22,10 +22,10 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
-                          validate_blob_name_for_upload)
+                          validate_immutability_arguments, validate_blob_name_for_upload)
 
 
-def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
+def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
     from argcomplete.completers import FilesCompleter
     from six import u as unicode_string
 
@@ -221,6 +221,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='The action of virtual network rule. Possible value is Allow.'
     )
 
+    immutability_period_since_creation_in_days_type = CLIArgumentType(
+        options_list=['--immutability-period-in-days', '--immutability-period'], min_api='2021-06-01',
+        help='The immutability period for the blobs in the container since the policy creation, in days.',
+        is_preview=True
+    )
+
+    account_immutability_policy_state_enum = self.get_sdk(
+        'models._storage_management_client_enums#AccountImmutabilityPolicyState',
+        resource_type=ResourceType.MGMT_STORAGE)
+    immutability_policy_state_type = CLIArgumentType(
+        arg_type=get_enum_type(account_immutability_policy_state_enum),
+        options_list='--immutability-state', min_api='2021-06-01',
+        help='Defines the mode of the policy. Disabled state disables the policy, '
+        'Unlocked state allows increase and decrease of immutability retention time '
+        'and also allows toggling allow-protected-append-write property, '
+        'Locked state only allows the increase of the immutability retention time. '
+        'A policy can only be created in a Disabled or Unlocked state and can be toggled between the '
+        'two states. Only a policy in an Unlocked state can transition to a Locked state which cannot '
+        'be reverted.', is_preview=True)
+
     public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
                                               resource_type=ResourceType.MGMT_STORAGE)
 
@@ -341,6 +361,28 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
+        c.argument('enable_alw', arg_type=get_three_state_flag(), min_api='2021-06-01',
+                   help='The account level immutability property. The property is immutable and can only be set to true'
+                        ' at the account creation time. When set to true, it enables object level immutability for all '
+                        'the containers in the account by default.',
+                   arg_group='Account Level Immutability',
+                   validator=validate_immutability_arguments, is_preview=True)
+        c.argument('immutability_period_since_creation_in_days',
+                   arg_type=immutability_period_since_creation_in_days_type,
+                   arg_group='Account Level Immutability',
+                   validator=validate_immutability_arguments, is_preview=True)
+        c.argument('immutability_policy_state', arg_type=immutability_policy_state_type,
+                   arg_group='Account Level Immutability',
+                   validator=validate_immutability_arguments, is_preview=True)
+        c.argument('allow_protected_append_writes', arg_type=get_three_state_flag(),
+                   options_list=['--allow-protected-append-writes', '--allow-append', '-w'],
+                   min_api='2021-06-01',
+                   help='This property can only be changed for disabled and unlocked time-based retention policies. '
+                        'When enabled, new blocks can be written to an append blob while maintaining immutability '
+                        'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
+                        'modified or deleted.',
+                   arg_group='Account Level Immutability',
+                   validator=validate_immutability_arguments, is_preview=True)
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
@@ -407,6 +449,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
+        c.argument('immutability_period_since_creation_in_days',
+                   arg_type=immutability_period_since_creation_in_days_type,
+                   arg_group='Account Level Immutability')
+        c.argument('immutability_policy_state', arg_type=immutability_policy_state_type,
+                   arg_group='Account Level Immutability')
+        c.argument('allow_protected_append_writes', arg_type=get_three_state_flag(),
+                   options_list=['--allow-protected-append-writes', '--allow-append', '-w'],
+                   min_api='2021-06-01',
+                   help='This property can only be changed for disabled and unlocked time-based retention policies. '
+                        'When enabled, new blocks can be written to an append blob while maintaining immutability '
+                        'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
+                        'modified or deleted.',
+                   arg_group='Account Level Immutability', is_preview=True)
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
