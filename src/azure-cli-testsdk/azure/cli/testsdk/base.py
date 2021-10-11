@@ -278,7 +278,7 @@ class ExecutionResult(object):
         return self.json_value
 
     def _in_process_execute(self, cli_ctx, command, expect_failure=False):
-        from six import StringIO
+        from io import StringIO
         from vcr.errors import CannotOverwriteExistingCassetteException
 
         if command.startswith('az '):
