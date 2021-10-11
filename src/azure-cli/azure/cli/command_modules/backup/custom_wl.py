@@ -26,12 +26,13 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
-    _backup_client_factory, recovery_points_cf
+    _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
+import azure.cli.command_modules.backup.custom as custom
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
-    ResourceNotFoundError, ArgumentUsageError
+    ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 
 
 fabric_name = "Azure"
@@ -109,8 +110,11 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     container_name = _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id)
 
     if container_name is None or not cust_help.is_native_name(container_name):
+        filter_string = cust_help.get_filter_string({'backupManagementType': "AzureWorkload"})
         # refresh containers and try to get the protectable container object again
-        client.refresh(vault_name, resource_group_name, fabric_name)
+        refresh_result = client.refresh(vault_name, resource_group_name, fabric_name,
+                                        filter=filter_string, raw=True)
+        cust_help.track_refresh_operation(cmd.cli_ctx, refresh_result, vault_name, resource_group_name)
         container_name = _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id)
 
         if container_name is None or not cust_help.is_native_name(container_name):
@@ -566,7 +570,7 @@ def list_workload_items(cmd, vault_name, resource_group_name, container_name,
 
 
 def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, rehydration_duration=15,
-                     rehydration_priority=None):
+                     rehydration_priority=None, use_secondary_region=None):
 
     recovery_config_object = cust_help.get_or_read_json(recovery_config)
     restore_mode = recovery_config_object['restore_mode']
@@ -575,6 +579,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     recovery_point_id = recovery_config_object['recovery_point_id']
     log_point_in_time = recovery_config_object['log_point_in_time']
     item_type = recovery_config_object['item_type']
+    workload_type = recovery_config_object['workload_type']
     source_resource_id = recovery_config_object['source_resource_id']
     database_name = recovery_config_object['database_name']
     container_id = recovery_config_object['container_id']
@@ -585,8 +590,13 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, None)
     if log_point_in_time is None:
         recovery_point = common.show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name,
-                                                    vault_name, container_uri, item_uri, recovery_point_id, item_type,
-                                                    backup_management_type="AzureWorkload")
+                                                    vault_name, container_uri, item_uri, recovery_point_id,
+                                                    workload_type, "AzureWorkload", use_secondary_region)
+
+        if recovery_point is None:
+            raise InvalidArgumentValueError("""
+            Specified recovery point not found. Please check the recovery config file
+            or try removing --use-secondary-region if provided""")
 
         rp_list = [recovery_point]
         common.fetch_tier(rp_list)
@@ -646,6 +656,24 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
+    if use_secondary_region:
+        if rehydration_priority is not None:
+            raise MutuallyExclusiveArgumentError("Archive restore isn't supported for secondary region.")
+        vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+        vault_location = vault.location
+        azure_region = custom.secondary_region_map[vault_location]
+        aad_client = aad_properties_cf(cmd.cli_ctx)
+        filter_string = cust_help.get_filter_string({'backupManagementType': 'AzureWorkload'})
+        aad_result = aad_client.get(azure_region, filter_string)
+        rp_client = recovery_points_cf(cmd.cli_ctx)
+        crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
+                                                      item_uri, recovery_point_id, aad_result).properties
+        crr_client = cross_region_restore_cf(cmd.cli_ctx)
+        trigger_restore_properties.region = azure_region
+        result = crr_client.trigger(azure_region, crr_access_token, trigger_restore_properties, raw=True,
+                                    polling=False).result()
+        return cust_help.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
+
     # Trigger restore and wait for completion
     result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
                             item_uri, recovery_point_id, trigger_restore_request, raw=True, polling=False).result()
@@ -654,7 +682,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
                          rp_name, target_item, target_item_name, log_point_in_time, from_full_rp_name,
-                         filepath, target_container):
+                         filepath, target_container, target_resource_group, target_vault_name):
     if log_point_in_time is not None:
         datetime_type(log_point_in_time)
 
@@ -717,7 +745,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
 
     alternate_directory_paths = []
     if 'sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore':
-        items = list_workload_items(cmd, vault_name, resource_group_name, container_name)
+        items = list_workload_items(cmd, target_vault_name, target_resource_group, target_container.name)
         for titem in items:
             if titem.properties.friendly_name == target_item.properties.friendly_name:
                 if titem.properties.server_name == target_item.properties.server_name:
@@ -749,6 +777,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'recovery_point_id': recovery_point.name,
         'log_point_in_time': log_point_in_time,
         'item_type': 'SQL' if 'sql' in item_type.lower() else 'SAPHana',
+        'workload_type': item_type,
         'source_resource_id': item.properties.source_resource_id,
         'database_name': db_name,
         'container_id': container_id,
