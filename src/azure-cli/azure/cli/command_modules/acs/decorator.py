@@ -205,7 +205,7 @@ class AKSModels:
     def __init__(
         self,
         cmd: AzCommandsLoader,
-        resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
+        resource_type: ResourceType,
     ):
         self.__cmd = cmd
         self.resource_type = resource_type

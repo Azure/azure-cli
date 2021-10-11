@@ -65,7 +65,7 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
-        self.models = AKSModels(self.cmd)
+        self.models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
 
     def test_format_parameter_name_to_option_name(self):
         self.assertEqual(
@@ -154,7 +154,7 @@ class AKSModelsTestCase(unittest.TestCase):
         self.cmd = MockCmd(self.cli_ctx)
 
     def test_models(self):
-        models = AKSModels(self.cmd)
+        models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
 
         # load models directly (instead of through the `get_sdk` method provided by the cli component)
         from azure.cli.core.profiles._shared import AZURE_API_PROFILES
@@ -289,7 +289,7 @@ class AKSContextTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
-        self.models = AKSModels(self.cmd)
+        self.models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
 
     def test__init__(self):
         # fail on not passing dictionary-like parameters
@@ -3590,7 +3590,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
-        self.models = AKSModels(self.cmd)
+        self.models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
         self.client = MockClient()
 
     def test_init_mc(self):
@@ -5240,7 +5240,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
-        self.models = AKSModels(self.cmd)
+        self.models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
         self.client = MockClient()
 
     def test_check_raw_parameters(self):
