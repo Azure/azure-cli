@@ -683,6 +683,23 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD_v2")
 
+    def test_get_os_sku(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"os_sku": None},
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_os_sku(), None)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", os_sku="test_mc_os_sku"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_os_sku(), "test_mc_os_sku")
+
     def test_get_vnet_subnet_id(self):
         # default
         ctx_1 = AKSContext(
@@ -3683,6 +3700,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "nodepool_labels": None,
                 "node_count": 3,
                 "node_vm_size": "Standard_DS2_v2",
+                "os_sku": None,
                 "vnet_subnet_id": None,
                 "ppg": None,
                 "zones": None,
@@ -3712,6 +3730,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             count=3,
             vm_size="Standard_DS2_v2",
             os_type="Linux",
+            os_sku=None,
             vnet_subnet_id=None,
             proximity_placement_group_id=None,
             availability_zones=None,
@@ -3742,6 +3761,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "nodepool_labels": {"k1": "v1", "k2": "v2"},
                 "node_count": 10,
                 "node_vm_size": "Standard_DSx_vy",
+                "os_sku": "CBLMariner",
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "ppg": "test_ppg_id",
                 "zones": ["tz1", "tz2"],
@@ -3768,6 +3788,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             count=10,
             vm_size="Standard_DSx_vy",
             os_type="Linux",
+            os_sku="CBLMariner",
             vnet_subnet_id="test_vnet_subnet_id",
             proximity_placement_group_id="test_ppg_id",
             availability_zones=["tz1", "tz2"],

@@ -912,6 +912,32 @@ class AKSContext:
         # this parameter does not need validation
         return node_vm_size
 
+    def get_os_sku(self) -> Union[str, None]:
+        """Obtain the value of os_sku.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("os_sku")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                value_obtained_from_mc = agent_pool_profile.os_sku
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            os_sku = value_obtained_from_mc
+        else:
+            os_sku = raw_value
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return os_sku
+
     def get_vnet_subnet_id(self) -> Union[str, None]:
         """Obtain the value of vnet_subnet_id.
 
@@ -3625,6 +3651,7 @@ class AKSCreateDecorator:
             count=node_count,
             vm_size=self.context.get_node_vm_size(),
             os_type="Linux",
+            os_sku=self.context.get_os_sku(),
             vnet_subnet_id=self.context.get_vnet_subnet_id(),
             proximity_placement_group_id=self.context.get_ppg(),
             availability_zones=self.context.get_zones(),
