@@ -54,9 +54,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         config_dir = get_config_dir()
         self._token_cache_file = os.path.join(config_dir, "tokenCache")
         self._secret_file = os.path.join(config_dir, "secrets")
-        self._http_cache_file = os.path.join(config_dir, "httpCache")
+        self._http_cache_file = os.path.join(config_dir, "msalHttpCache")
 
         # Prepare HTTP cache.
+        # https://github.com/AzureAD/microsoft-authentication-library-for-python/pull/407
         # if not Identity.http_cache:
         #     Identity.http_cache = self._load_http_cache()
 
@@ -66,6 +67,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self._msal_app_kwargs = {
             "authority": self.msal_authority,
             "token_cache": self._load_msal_cache()
+            # "http_cache": Identity.http_cache
         }
 
     def _load_msal_cache(self):
@@ -77,10 +79,20 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def _load_http_cache(self):
         import atexit
-        import shelve
-        http_cache = persisted_http_cache = shelve.open(self._http_cache_file)
-        atexit.register(persisted_http_cache.close)
-        return http_cache
+        import pickle
+
+        try:
+            with open(self._http_cache_file, 'rb') as f:
+                persisted_http_cache = pickle.load(f)  # Take a snapshot
+        except:  # pylint: disable=bare-except
+            persisted_http_cache = {}  # Ignore a non-exist or corrupted http_cache
+        atexit.register(lambda: pickle.dump(
+            # When exit, flush it back to the file.
+            # If 2 processes write at the same time, the cache will be corrupted,
+            # but that is fine. Subsequent runs would reach eventual consistency.
+            persisted_http_cache, open(self._http_cache_file, 'wb')))
+
+        return persisted_http_cache
 
     def _build_persistent_msal_app(self):
         # Initialize _msal_app for logout, token migration which Azure Identity doesn't support
