@@ -4,15 +4,67 @@
 # license information.
 # --------------------------------------------------------------------------
 
+from unittest.signals import installHandler
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure_devtools.scenario_tests import (
+    AllowLargeResponse,
+    RecordingProcessor
+)
+from azure_devtools.scenario_tests.utilities import is_text_payload
 from azure.cli.testsdk import (
     ScenarioTest, 
     record_only
 )
 
 
+class CredentialReplacer(RecordingProcessor):
+
+    def recursive_hide(self, props):
+        # hide sensitive data recursively
+        fake_content = 'hidden'
+        sensitive_data = ['password=', 'key=']
+
+        if isinstance(props, dict):
+            for key, val in props.items():
+                props[key] = self.recursive_hide(val)
+        elif isinstance(props, list):
+            for index, val in enumerate(props):
+                props[index] = self.recursive_hide(val)
+        elif isinstance(props, str):
+            for data in sensitive_data:
+                if data in props.lower():
+                    props = fake_content
+
+        return props
+
+    def process_request(self, request):
+        import json
+
+        if is_text_payload(request) and request.body and json.loads(request.body):
+            body = self.recursive_hide(json.loads(request.body))
+            request.body = json.dumps(body)
+        return request
+
+    def process_response(self, response):
+        import json
+
+        if is_text_payload(response) and response['body']['string']:
+            try:
+                body = json.loads(response['body']['string'])
+                body = self.recursive_hide(body)
+                response['body']['string'] = json.dumps(body)
+            except Exception:
+                pass
+        return response
+
+
 class WebAppAddonScenarioTest(ScenarioTest):
+
+    def __init__(self, method_name):
+        super(WebAppAddonScenarioTest, self).__init__(
+            method_name,
+            recording_processors=[CredentialReplacer()]
+        )
 
     @AllowLargeResponse()
     # @record_only()
