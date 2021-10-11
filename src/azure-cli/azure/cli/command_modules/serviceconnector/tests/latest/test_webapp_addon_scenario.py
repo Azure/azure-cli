@@ -13,7 +13,7 @@ from azure_devtools.scenario_tests import (
 from azure_devtools.scenario_tests.utilities import is_text_payload
 from azure.cli.testsdk import (
     ScenarioTest, 
-    record_only
+    live_only
 )
 
 
@@ -67,7 +67,7 @@ class WebAppAddonScenarioTest(ScenarioTest):
         )
 
     @AllowLargeResponse()
-    # @record_only()
+    @live_only()
     def test_webapp_postgres_addon(self):
         self.kwargs.update({
             'rg': 'clitest',
@@ -97,7 +97,7 @@ class WebAppAddonScenarioTest(ScenarioTest):
 
 
     @AllowLargeResponse()
-    # @record_only()
+    @live_only()
     def test_webapp_keyvault_addon(self):
         self.kwargs.update({
             'rg': 'clitest',
@@ -126,7 +126,7 @@ class WebAppAddonScenarioTest(ScenarioTest):
 
 
     @AllowLargeResponse()
-    # @record_only()
+    @live_only()
     def test_webapp_storageblob_addon(self):
         self.kwargs.update({
             'rg': 'clitest',
