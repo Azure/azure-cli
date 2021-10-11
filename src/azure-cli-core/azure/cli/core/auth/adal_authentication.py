@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import requests
-from azure.cli.core.auth.util import try_scopes_to_resource
 from azure.core.credentials import AccessToken
 from knack.log import get_logger
 from msrestazure.azure_active_directory import MSIAuthentication
+
+from .util import _normalize_scopes, scopes_to_resource
 
 logger = get_logger(__name__)
 
@@ -16,7 +17,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     # This method is exposed for Azure Core. Add *scopes, **kwargs to fit azure.core requirement
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         logger.debug("MSIAuthenticationWrapper.get_token invoked by Track 2 SDK with scopes=%s", scopes)
-        resource = try_scopes_to_resource(scopes)
+        resource = scopes_to_resource(_normalize_scopes(scopes))
         if resource:
             # If available, use resource provided by SDK
             self.resource = resource

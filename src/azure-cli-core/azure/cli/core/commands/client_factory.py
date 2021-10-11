@@ -202,21 +202,6 @@ def _get_mgmt_service_client(cli_ctx,
                              aux_subscriptions=None,
                              aux_tenants=None,
                              **kwargs):
-    """
-
-    :param cli_ctx:
-    :param client_type:
-    :param subscription_bound:
-    :param subscription_id:
-    :param api_version:
-    :param base_url_bound:
-    :param resource: For track 1 SDK which uses msrest and ADAL. It will be passed to get_login_credentials.
-    :param sdk_profile:
-    :param aux_subscriptions:
-    :param aux_tenants:
-    :param kwargs:
-    :return:
-    """
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
 

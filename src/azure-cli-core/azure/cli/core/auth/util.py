@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
+from azure.cli.core.util import in_cloud_console
 
 logger = get_logger(__name__)
 
@@ -13,6 +14,12 @@ def aad_error_handler(error, **kwargs):
 
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
+
+    if in_cloud_console():
+        import socket
+        logger.warning("A Cloud Shell credential problem occurred. When you report the issue with the error "
+                       "below, please mention the hostname '%s'", socket.gethostname())
+
     msg = error.get('error_description')
     login_message = _generate_login_message(**kwargs)
 
@@ -67,10 +74,11 @@ def scopes_to_resource(scopes):
     :return: The ADAL resource
     :rtype: str
     """
+    if not scopes:
+        return None
+
     scope = scopes[0]
-
     suffixes = ['/.default', '/user_impersonation']
-
     for s in suffixes:
         if scope.endswith(s):
             return scope[:-len(s)]
@@ -78,8 +86,8 @@ def scopes_to_resource(scopes):
     return scope
 
 
-def try_scopes_to_resource(scopes):
-    """Wrap scopes_to_resource to workaround some SDK issues."""
+def _normalize_scopes(scopes):
+    """Normalize scopes to workaround some SDK issues."""
 
     # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/239 don't maintain
     # credential_scopes and call `get_token` with empty scopes.
@@ -94,10 +102,9 @@ def try_scopes_to_resource(scopes):
     # As a workaround, remove the first one if there are multiple scopes provided.
     if len(scopes) > 1:
         logger.debug("Multiple scopes are provided by the SDK, discarding the first one: %s", scopes[0])
-        return scopes_to_resource(scopes[1:])
+        return scopes[1:]
 
-    # Exactly only one scope is provided
-    return scopes_to_resource(scopes)
+    return scopes
 
 
 def check_result(result, **kwargs):

@@ -74,7 +74,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         from .persistence import load_persisted_token_cache
         # Store for user token persistence
         cache = load_persisted_token_cache(self._token_cache_file, self.token_encryption)
-        cache._reload_if_necessary()  # pylint: disable=protected-access
         return cache
 
     def _load_http_cache(self):
@@ -95,7 +94,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return persisted_http_cache
 
     def _build_persistent_msal_app(self):
-        # Initialize _msal_app for logout, token migration which Azure Identity doesn't support
+        # Initialize _msal_app for login and logout
         from msal import PublicClientApplication
         msal_app = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
         return msal_app
@@ -136,11 +135,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def login_with_service_principal(self, client_id, credential, scopes=None):
         """
         'credential' is a dict like below. Only one key can exist:
-            {
-                'secret': 'my_secret',
-                'certificate': '/path/to/cert.pem',
-                'client_assertion': 'my_token'
-            }
+        {
+            'secret': 'my_secret',
+            'certificate': '/path/to/cert.pem',
+            'client_assertion': 'my_federated_token'
+        }
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
 
@@ -193,16 +192,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplementedError
 
-    def serialize_token_cache(self, path=None):
-        path = path or os.path.join(get_config_dir(), "msal.cache.snapshot.json")
-        path = os.path.expanduser(path)
-        logger.warning("Token cache is exported to '%s'. The exported cache is unencrypted. "
-                       "It contains login information of all logged-in users. Make sure you protect it safely.", path)
-
-        cache = self._load_msal_cache()
-        with open(path, "w") as fd:
-            fd.write(cache.serialize())
-
 
 class ServicePrincipalAuth:
 
@@ -239,9 +228,9 @@ class ServicePrincipalAuth:
     def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
-            "secret": "xxx",
-            "certificate": "/path/to/cert.pem",
-            "client_assertion": "xxx"
+            'secret': 'my_secret',
+            'certificate': '/path/to/cert.pem',
+            'client_assertion': 'my_federated_token'
         }
         """
         entry = {}
@@ -262,7 +251,7 @@ class ServicePrincipalAuth:
 
 
 class ServicePrincipalStore:
-    """Caches secrets in MSAL custom secret store for Service Principal authentication.
+    """Save secrets in MSAL custom secret store for Service Principal authentication.
     """
 
     def __init__(self, secret_file, encrypt):

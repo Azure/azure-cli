@@ -173,6 +173,7 @@ class Profile:
             else:
                 identity.login_with_service_principal(username, password, scopes=scopes)
 
+        # We have finished login. Let's find all subscriptions.
         if user_identity:
             username = user_identity['username']
 
@@ -351,7 +352,7 @@ class Profile:
                 external_credentials.append(self._create_credential(account, external_tenant, client_id=client_id))
             from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
             cred = CredentialAdaptor(credential,
-                                     external_credentials=external_credentials,
+                                     auxiliary_credentials=external_credentials,
                                      resource=resource)
         else:
             # managed identity
