@@ -1413,7 +1413,7 @@ class CosmosDBTests(ScenarioTest):
             'identity_principal_id': identity_principal_id
         })
         self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --object-id {identity_principal_id} --key-permissions get unwrapKey wrapKey')
-        
+
         # System assigned identity tests
         cmk_account = self.cmd('az cosmosdb update -n {acc} -g {rg} --default-identity SystemAssignedIdentity').get_output_in_json()
         assert cmk_account["defaultIdentity"] == 'SystemAssignedIdentity'
@@ -1466,20 +1466,20 @@ class CosmosDBTests(ScenarioTest):
         identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
         assert identity_output["type"] == "SystemAssigned,UserAssigned"
         assert len(identity_output["userAssignedIdentities"]) == 2
-        
+
         identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id2}').get_output_in_json()
         assert identity_output["type"] == "SystemAssigned,UserAssigned"
         assert len(identity_output["userAssignedIdentities"]) == 1
-        
+
         identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id1}').get_output_in_json()
         assert identity_output["type"] == "SystemAssigned"
-        
+
         identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
         assert identity_output["type"] == "SystemAssigned,UserAssigned"
         assert len(identity_output["userAssignedIdentities"]) == 2
         identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
         assert identity_output["type"] == "None"
-        
+
         # Default identity tests
         self.cmd('az keyvault set-policy --name {kv_name} --object-id {id1principal} --key-permissions get unwrapKey wrapKey')
         default_id_acct = self.cmd('az cosmosdb create -n {acc2} -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri} --assign-identity {id1} --default-identity "UserAssignedIdentity={id1}"').get_output_in_json()
@@ -1654,7 +1654,7 @@ class CosmosDBTests(ScenarioTest):
         restorable_database_account = next(acc for acc in restorable_accounts_list if acc['name'] == account['instanceId'])
 
         account_creation_time = restorable_database_account['creationTime']
-        import dateutil
+        import dateutil.parser
         from datetime import timedelta
         creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
         restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
@@ -1695,7 +1695,7 @@ class CosmosDBTests(ScenarioTest):
 
         restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
 
-        import dateutil
+        import dateutil.parser
         import time
         from datetime import timedelta
 
@@ -1774,7 +1774,7 @@ class CosmosDBTests(ScenarioTest):
 
         restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
 
-        import dateutil
+        import dateutil.parser
         import time
         from datetime import timedelta
 
@@ -1838,7 +1838,7 @@ class CosmosDBTests(ScenarioTest):
         assert restorable_containers[0]['resource']['ownerId'] == col
 
         account_creation_time = restorable_database_account['creationTime']
-        import dateutil
+        import dateutil.parser
         from datetime import timedelta
         creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
         restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
@@ -1895,7 +1895,7 @@ class CosmosDBTests(ScenarioTest):
         assert restorable_containers[0]['resource']['ownerId'] == col
 
         account_creation_time = restorable_database_account['creationTime']
-        import dateutil
+        import dateutil.parser
         from datetime import timedelta
         creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
         restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
