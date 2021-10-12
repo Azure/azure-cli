@@ -314,6 +314,7 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
                                                         vnet_name,
                                                         VirtualNetwork(name=vnet_name,
                                                                        location=location,
+                                                                       polling=False,
                                                                        address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
         subnet = Subnet(
             name=subnet_name,
