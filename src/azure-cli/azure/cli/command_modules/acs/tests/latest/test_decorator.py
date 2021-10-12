@@ -683,6 +683,24 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD_v2")
 
+    def test_get_os_sku(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"os_sku": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_os_sku(), None)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", os_sku="test_mc_os_sku"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_os_sku(), "test_mc_os_sku")
+
     def test_get_vnet_subnet_id(self):
         # default
         ctx_1 = AKSContext(
@@ -3501,7 +3519,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {
-                "tags": None,
+                "edge_zone": None,
             },
             self.models,
             decorator_mode=DecoratorMode.CREATE,
@@ -3517,6 +3535,63 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_edge_zone(), "test_edge_zone")
+
+    def test_get_disable_local_accounts(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": False},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_disable_local_accounts(), False)
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        ctx_1.attach_mc(mc_1)
+        self.assertEqual(ctx_1.get_disable_local_accounts(), True)
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": True, "enable_local_accounts": True},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": True, "enable_local_accounts": True},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on mutually exclusive disable_local_accounts and enable_local_accounts
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_disable_local_accounts()
+
+    def test_get_enable_local_accounts(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"enable_local_accounts": False},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_enable_local_accounts(), False)
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"enable_local_accounts": True, "disable_local_accounts": True},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on mutually exclusive disable_local_accounts and enable_local_accounts
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_enable_local_accounts()
 
     def test_get_client_id_from_identity_or_sp_profile(self):
         # default
@@ -3631,6 +3706,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "nodepool_labels": None,
                 "node_count": 3,
                 "node_vm_size": "Standard_DS2_v2",
+                "os_sku": None,
                 "vnet_subnet_id": None,
                 "ppg": None,
                 "zones": None,
@@ -3660,6 +3736,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             count=3,
             vm_size="Standard_DS2_v2",
             os_type="Linux",
+            os_sku=None,
             vnet_subnet_id=None,
             proximity_placement_group_id=None,
             availability_zones=None,
@@ -3690,6 +3767,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "nodepool_labels": {"k1": "v1", "k2": "v2"},
                 "node_count": 10,
                 "node_vm_size": "Standard_DSx_vy",
+                "os_sku": "CBLMariner",
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "ppg": "test_ppg_id",
                 "zones": ["tz1", "tz2"],
@@ -3716,6 +3794,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             count=10,
             vm_size="Standard_DSx_vy",
             os_type="Linux",
+            os_sku="CBLMariner",
             vnet_subnet_id="test_vnet_subnet_id",
             proximity_placement_group_id="test_ppg_id",
             availability_zones=["tz1", "tz2"],
@@ -4366,7 +4445,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             CONST_OPEN_SERVICE_MESH_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={},
-            )
+            ),
         }
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location", addon_profiles=addon_profiles_2
@@ -5219,22 +5298,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         ):
             dec_1.create_mc(mc_1)
 
-    def test_get_disable_local_accounts(self):
-        ctx_1 = AKSContext(
-            self.cmd,
-            {"disable_local_accounts": False},
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_1.get_disable_local_accounts(), False)
-        ctx_2 = AKSContext(
-            self.cmd,
-            {"disable_local_accounts": True},
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
-
 
 class AKSUpdateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -5733,6 +5796,79 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             network_profile=ground_truth_network_profile_1,
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_update_disable_local_accounts(self):
+        # default value in `aks_update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_local_accounts": False,
+                "enable_local_accounts": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_disable_local_accounts(None)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_disable_local_accounts(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_local_accounts": True,
+                "enable_local_accounts": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=False,
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_disable_local_accounts(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # custom value
+        dec_3 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_local_accounts": False,
+                "enable_local_accounts": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_disable_local_accounts(mc_3)
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=False,
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
     def test_update_default_mc_profile(self):
         pass
