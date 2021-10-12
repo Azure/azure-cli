@@ -576,6 +576,9 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#ServerAzureADAdministratorsOperations.{}',
         client_factory=get_sql_server_azure_ad_administrators_operations)
 
+    aadadmin_update_server_sdk = CliCommandType(
+        operations_tmpl="azure.cli.command_modules.sql.custom#{}")
+
     with self.command_group('sql server ad-admin',
                             aadadmin_operations,
                             client_factory=get_sql_server_azure_ad_administrators_operations) as g:
@@ -583,7 +586,8 @@ def load_command_table(self, _):
         g.command('list', 'list_by_server')
         g.command('delete', 'begin_delete')
         g.generic_update_command('update',
-                                 setter_name='begin_create_or_update',
+                                 setter_name='server_ad_admin_update_setter',
+                                 setter_type=aadadmin_update_server_sdk,
                                  custom_func_name='server_ad_admin_update',
                                  setter_arg_name='parameters')
 

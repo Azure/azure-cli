@@ -3714,6 +3714,24 @@ def server_ad_admin_update(
 
     return instance
 
+def server_ad_admin_update_setter(
+    client,
+    resource_group_name,
+    server_name,
+    **kwargs):
+    '''
+    Updates a server' AD admin.
+    '''
+    
+    kwargs['tenant_id'] = _get_tenant_id()
+    kwargs['administrator_type'] = AdministratorType.ACTIVE_DIRECTORY
+
+    return client.begin_create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY,
+        parameters=kwargs)
+
 #####
 #           sql server firewall-rule
 #####
