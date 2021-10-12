@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.2.6
++++++
+* Add retry utility
+
+0.2.5
++++++
 * Add resource group name prefix validator in resource group preparer
 
 0.2.4
