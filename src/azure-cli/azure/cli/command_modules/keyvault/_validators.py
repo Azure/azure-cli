@@ -43,7 +43,6 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     :return: resource group name or None
     :rtype: str
     """
-    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
     if vault_name:
@@ -86,7 +85,6 @@ def process_secret_set_namespace(cmd, namespace):
     if (content and file_path) or (not content and not file_path):
         raise use_error
 
-    from azure.cli.core.profiles import ResourceType
     SecretAttributes = cmd.get_models('SecretAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     namespace.secret_attributes = SecretAttributes()
     if namespace.expires:
@@ -305,7 +303,6 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     """
     Validate a deleted vault name; populate or validate location and resource_group_name
     """
-    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
     vault_name = getattr(ns, 'vault_name', None)

@@ -64,7 +64,7 @@ def transform_key_decryption_output(output, **command_args):
 def transform_key_output(result, **command_args):
     from azure.keyvault.keys import KeyVaultKey, JsonWebKey
     import base64
-    from knack.util import todict
+
     if not isinstance(result, KeyVaultKey):
         return result
 
