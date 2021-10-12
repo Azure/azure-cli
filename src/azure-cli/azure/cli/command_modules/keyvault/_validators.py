@@ -220,7 +220,8 @@ def process_key_release_policy(cmd, ns):
         data = shell_safe_json_parse(ns.release_policy)
 
     import json
-    KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
+    KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
+                                          resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     ns.release_policy = KeyReleasePolicy(data=json.dumps(data).encode('utf-8'))
 
 
