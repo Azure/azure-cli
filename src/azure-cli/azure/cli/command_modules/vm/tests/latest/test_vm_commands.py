@@ -5118,19 +5118,25 @@ class DiskAccessTest(ScenarioTest):
         ])
 
         self.cmd('disk-access update -g {rg} -n {diskaccess} --tags tag1=val1')
-        self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
+        self.kwargs['disk_access_id'] = self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
             self.check('name', '{diskaccess}'),
             self.check('location', '{loc}'),
             self.check('tags.tag1', 'val1')
-        ])
+        ]).get_output_in_json()['id']
 
         self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
+
+        self.cmd('disk update -g {rg} -n {disk} --network-access-policy AllowPrivate --disk-access {disk_access_id}')
+
         self.cmd('disk show -g {rg} -n {disk}', checks=[
             self.check('name', '{disk}'),
             self.check('networkAccessPolicy', 'AllowPrivate')
         ])
 
         self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
+
+        self.cmd('snapshot update -g {rg} -n {snapshot} --network-access-policy AllowPrivate --disk-access {disk_access_id}')
+
         self.cmd('snapshot show -g {rg} -n {snapshot}', checks=[
             self.check('name', '{snapshot}'),
             self.check('networkAccessPolicy', 'AllowPrivate')
