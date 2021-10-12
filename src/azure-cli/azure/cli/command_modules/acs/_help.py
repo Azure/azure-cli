@@ -522,6 +522,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu
   - name: Create a kubernetes cluster with custom tags
     text: az aks create -g MyResourceGroup -n MyManagedCluster --tags "foo=bar" "baz=qux"
+  - name: Create a kubernetes cluster with custom headers
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
 """
 
 helps['aks update'] = """
@@ -679,6 +681,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-rbac
   - name: Update the tags of a kubernetes cluster
     text: az aks update -g MyResourceGroup -n MyManagedCLuster --tags "foo=bar" "baz=qux"
+  - name: Update a kubernetes cluster with custom headers
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
 """
 
 helps['aks delete'] = """
