@@ -168,8 +168,8 @@ def interactive_input(arg, hint):
     '''
     value = None
     if arg == 'secret_auth_info':
-        name = prompt('User name of database: ')
-        secret = prompt_pass('Password of database: ')
+        name = prompt('User name of database (--secret): ')
+        secret = prompt_pass('Password of database (--secret): ')
         value = {
             'name': name,
             'secret': secret,
@@ -180,16 +180,16 @@ def interactive_input(arg, hint):
             'auth_type': 'secret'
         }
     elif arg == 'service_principal_auth_info_secret':
-        client_id = prompt('ServicePrincipal client-id: ')
-        object_id = prompt('ServicePrincipal object-id: ')
+        client_id = prompt('ServicePrincipal client-id (--service-principal): ')
+        object_id = prompt('ServicePrincipal object-id (--service-principal): ')
         value = {
             'client_id': client_id,
             'principal_id': object_id,
             'auth_type': 'servicePrincipalSecret'
         }
     elif arg == 'user_identity_auth_info':
-        client_id = prompt('UserAssignedIdentity client-id: ')
-        subscription_id = prompt('UserAssignedIdentity subscription-id: ')
+        client_id = prompt('UserAssignedIdentity client-id (--user-identity): ')
+        subscription_id = prompt('UserAssignedIdentity subscription-id (--user-identity): ')
         value = {
             'client_id': client_id,
             'subscription_id': subscription_id,

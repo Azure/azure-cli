@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.transform import build_table_output
+from azure.cli.core.azclierror import CLIInternalError
 from knack.util import todict
 
 
@@ -23,8 +24,7 @@ def transform_support_types(result):
 def transform_linker_properties(result):
     from azure.core.polling import LROPoller
     from ._utils import (
-        run_cli_cmd,
-        CommandExecutionError
+        run_cli_cmd
     )
 
     # manually polling if result is a poller
@@ -36,6 +36,6 @@ def transform_linker_properties(result):
     try:
         output = run_cli_cmd('az webapp connection list-configuration --id {}'.format(resource_id))
         result['configurations'] = output.get('configurations')
-    except CommandExecutionError:
+    except CLIInternalError:
         pass
     return result

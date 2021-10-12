@@ -43,9 +43,15 @@ class CredentialReplacer(RecordingProcessor):
     def process_request(self, request):
         import json
 
+        # hide secrets in request body
         if is_text_payload(request) and request.body and json.loads(request.body):
             body = self.recursive_hide(json.loads(request.body))
             request.body = json.dumps(body)
+
+        # hide token in header
+        if 'x-ms-cupertino-test-token' in request.headers:
+            request.headers['x-ms-cupertino-test-token'] = 'hidden'
+        
         return request
 
     def process_response(self, response):
@@ -58,6 +64,7 @@ class CredentialReplacer(RecordingProcessor):
                 response['body']['string'] = json.dumps(body)
             except Exception:
                 pass
+
         return response
 
 

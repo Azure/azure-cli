@@ -5,7 +5,7 @@
 
 import argparse
 from collections import defaultdict
-from knack.util import CLIError
+from azure.cli.core.azclierror import ValidationError
 
 
 class AddSecretAuthInfo(argparse.Action):
@@ -20,7 +20,7 @@ class AddSecretAuthInfo(argparse.Action):
                 properties[k].append(v)
             properties = dict(properties)
         except ValueError:
-            raise CLIError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
+            raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}
         for k in properties:
             kl = k.lower()
@@ -30,10 +30,10 @@ class AddSecretAuthInfo(argparse.Action):
             elif kl == 'secret':
                 d['secret'] = v[0]
             else:
-                raise CLIError('Unsupported Key {} is provided for parameter secret_auth_info. All possible keys are: '
-                               'name, secret'.format(k))
+                raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. '
+                                      'All possible keys are: name, secret'.format(k))
         if len(d) != 2:
-            raise CLIError('Required keys missing for parameter --secret. All possible keys are: name, secret')
+            raise ValidationError('Required keys missing for parameter --secret. All possible keys are: name, secret')
         d['auth_type'] = 'secret'
         return d
 
@@ -50,10 +50,10 @@ class AddSecretAuthInfoAuto(argparse.Action):
                 properties[k].append(v)
             properties = dict(properties)
         except ValueError:
-            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+            raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}
         for k in properties:
-            raise CLIError('Unsupported Key {} is provided for parameter --auto-secret')
+            raise ValidationError('Unsupported Key {} is provided for parameter --auto-secret')
         d['auth_type'] = 'secret'
         return d
 
@@ -70,7 +70,7 @@ class AddUserAssignedIdentityAuthInfo(argparse.Action):
                 properties[k].append(v)
             properties = dict(properties)
         except ValueError:
-            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+            raise ValidationError('usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}
         for k in properties:
             kl = k.lower()
@@ -80,11 +80,11 @@ class AddUserAssignedIdentityAuthInfo(argparse.Action):
             elif kl == 'subs-id':
                 d['subscription_id'] = v[0]
             else:
-                raise CLIError('Unsupported Key {} is provided for parameter --user-identity. All '
-                               'possible keys are: client-id, subs-id'.format(k))
+                raise ValidationError('Unsupported Key {} is provided for parameter --user-identity. All '
+                                      'possible keys are: client-id, subs-id'.format(k))
         if len(d) != 2:
-            raise CLIError('Required keys missing for parameter --user-identity. '
-                           'All possible keys are: client-id, subs-id')
+            raise ValidationError('Required keys missing for parameter --user-identity. '
+                                  'All possible keys are: client-id, subs-id')
         d['auth_type'] = 'userAssignedIdentity'
         return d
 
@@ -101,10 +101,10 @@ class AddSystemAssignedIdentityAuthInfo(argparse.Action):
                 properties[k].append(v)
             properties = dict(properties)
         except ValueError:
-            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+            raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}
         for k in properties:
-            raise CLIError('Unsupported Key {} is provided for parameter --system-identity')
+            raise ValidationError('Unsupported Key {} is provided for parameter --system-identity')
         d['auth_type'] = 'systemAssignedIdentity'
         return d
 
@@ -121,7 +121,7 @@ class AddServicePrincipalAuthInfo(argparse.Action):
                 properties[k].append(v)
             properties = dict(properties)
         except ValueError:
-            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+            raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}
         for k in properties:
             kl = k.lower()
@@ -133,10 +133,10 @@ class AddServicePrincipalAuthInfo(argparse.Action):
             elif kl == 'secret':
                 d['secret'] = v[0]
             else:
-                raise CLIError('Unsupported Key {} is provided for parameter --service-principal. All possible '
-                               'keys are: client-id, object-id, secret'.format(k))
+                raise ValidationError('Unsupported Key {} is provided for parameter --service-principal. All possible '
+                                      'keys are: client-id, object-id, secret'.format(k))
         if len(d) != 3:
-            raise CLIError('Required keys missing for parameter --service-principal. '
-                           'All possible keys are: client-id, object-id, secret')
+            raise ValidationError('Required keys missing for parameter --service-principal. '
+                                  'All possible keys are: client-id, object-id, secret')
         d['auth_type'] = 'servicePrincipalSecret'
         return d

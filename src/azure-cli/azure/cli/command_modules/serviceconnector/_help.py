@@ -29,7 +29,7 @@ for source in SOURCE_RESOURCES:
 
     helps['{source} connection list-support-types'.format(source=source.value)] = """
         type: command
-        short-summary: List target resource types and auth types supported by {source} connections.
+        short-summary: List client types and auth types supported by {source} connections.
         examples:
           - name: List all {source} supported target resource types and auth types
             text: |-

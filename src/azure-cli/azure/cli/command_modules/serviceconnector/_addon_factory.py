@@ -11,7 +11,6 @@ from azure.cli.core.azclierror import (
     InvalidArgumentValueError
 )
 from ._utils import (
-    CommandExecutionError,
     generate_random_string,
     run_cli_cmd
 )
@@ -94,7 +93,7 @@ class AddonBase:
             cmd = step.format(**self._params)
             try:
                 run_cli_cmd(cmd)
-            except CommandExecutionError as err:
+            except CLIInternalError as err:
                 logger.warning('Creation failed, start rolling back')
                 self.rollback(cnt)
                 raise CLIInternalError('Provision failed, please create the target resource manually '
@@ -146,7 +145,7 @@ class AddonBase:
             cmd = deletion_steps[index].format(**self._params)
             try:
                 run_cli_cmd(cmd)
-            except CommandExecutionError:
+            except CLIInternalError:
                 logger.warning('Rollback failed, please manually check and delete the unintended resources '
                                'in resource group: %s', self._params.get('source_resource_group'))
                 return

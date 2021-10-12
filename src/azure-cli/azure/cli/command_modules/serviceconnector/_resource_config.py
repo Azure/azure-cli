@@ -144,7 +144,7 @@ TARGET_RESOURCES_PARAMS = {
             'help': 'The resource group which contains the postgres service'
         },
         'server': {
-            'options': ['--postgres'],
+            'options': ['--server'],
             'help': 'Name of postgres server'
         },
         'database': {

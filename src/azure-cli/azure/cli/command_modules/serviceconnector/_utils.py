@@ -8,20 +8,10 @@ from azure.cli.core.azclierror import (
 )
 
 
-class CommandExecutionError(CLIInternalError):
-    '''Command execution failed
-    '''
-    def __init__(self, cmd, err):
-        super().__init__(err)
-        self.cmd = cmd
-
-    def __str__(self):
-        return 'Command execution failed, command is: {}, error message is: {}'.format(self.cmd, self.error_msg)
-
-
 def should_load_source(source):
     '''Check whether to load `az {source} connection`
     If {source} is an extension (e.g, spring-cloud), load the command group only when {source} is installed
+    :param source: the source resource type
     '''
     from azure.cli.core.extension.operations import list_extensions
     from ._resource_config import SOURCE_RESOURCES_IN_EXTENSION
@@ -78,6 +68,7 @@ def run_cli_cmd(cmd, retry=0):
         if retry:
             run_cli_cmd(cmd, retry - 1)
         else:
-            raise CommandExecutionError(cmd, output.stderr)
+            raise CLIInternalError('Command execution failed, command is: '
+                                   '{}, error message is: {}'.format(cmd, output.stderr))
 
     return json.loads(output.stdout) if output.stdout else None
