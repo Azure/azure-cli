@@ -2813,19 +2813,19 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
     return value
 
 
-def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    os_type=None, functions_version=None, runtime=None, runtime_version=None,
-                    consumption_plan_location=None, app_insights=None, app_insights_key=None,
-                    disable_app_insights=None, deployment_source_url=None,
-                    deployment_source_branch='master', deployment_local_git=None,
-                    docker_registry_server_password=None, docker_registry_server_user=None,
-                    deployment_container_image_name=None, tags=None, assign_identities=None,
-                    role='Contributor', scope=None):
+def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None, os_type=None,
+                       functions_version=None, runtime=None, runtime_version=None,
+                       consumption_plan_location=None, app_insights=None, app_insights_key=None,
+                       disable_app_insights=None, deployment_source_url=None,
+                       deployment_source_branch='master', deployment_local_git=None,
+                       docker_registry_server_password=None, docker_registry_server_user=None,
+                       deployment_container_image_name=None, tags=None, assign_identities=None,
+                       role='Contributor', scope=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
-        logger.warning("No functions version specified so defaulting to 2. In the future, specifying a version will "
-                       "be required. To create a 2.x function you would pass in the flag `--functions-version 2`")
-        functions_version = '2'
+        logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
+                       "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
+        functions_version = '3'
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
@@ -2891,6 +2891,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                                           functions_version,
                                                                           runtime_version,
                                                                           is_linux)
+
     if not runtime_version_json:
         supported_runtime_versions = list(map(lambda x: x[KEYS.DISPLAY_VERSION],
                                               _get_supported_runtime_versions_functionapp(runtime_json,

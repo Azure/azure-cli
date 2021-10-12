@@ -24,7 +24,7 @@ PYTHON_VERSIONS = ['3.9', '3.8', '3.7', '3.6']
 NETCORE_VERSIONS = ['2.1', '3.1']
 DOTNET_VERSIONS = ['3.5', '4.8']
 LINUX_SKU_DEFAULT = "P1V2"
-FUNCTIONS_VERSIONS = ['2', '3']
+FUNCTIONS_VERSIONS = ['2', '3', '4']
 FUNCTIONS_STACKS_API_JSON_PATHS = {
     'windows': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WindowsFunctionsStacks.json')),
     'linux': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/LinuxFunctionsStacks.json'))
