@@ -1272,6 +1272,17 @@ def process_vm_create_namespace(cmd, namespace):
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
+    if not namespace.nics and namespace.nic_delete_option:
+        if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1: # pylint: disable=line-too-long
+            namespace.nic_delete_option = namespace.nic_delete_option[0]
+        elif len(namespace.nic_delete_option) > 1 or any([len(delete_option.split('='))>1 for delete_options in namespace.nic_delete_options]): # pylint: disable=line-too-long
+            from azure.cli.core.parser import InvalidArgumentValueError
+            raise InvalidArgumentValueError("incorrect usage: Cannot specify individual delete option when no nic is "
+                                            "specified. Either specify a list of nics and their delete option like: "
+                                            "--nics nic1 nic2 --nic-delete-option nic1=Delete nic2=Detach "
+                                            "or specify delete option for all: --nics nic1 nic2 --nic-delete-option Delete "
+                                            "or specify delete option for the new nic created: --nic-delete-option Delete ")
+
     _validate_capacity_reservation_group(cmd, namespace)
 
 # endregion
