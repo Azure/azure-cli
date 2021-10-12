@@ -85,7 +85,6 @@ def _handle_global_configuration(config, cloud_forbid_telemetry):
                 except ValueError:
                     logger.error('TTL must be a positive integer')
                     cache_ttl = None
-
             # save the global config
             config.set_value('core', 'output', OUTPUT_LIST[output_index]['name'])
             config.set_value('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
