@@ -7,10 +7,9 @@ import threading
 import time
 import ast
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
+from urllib.request import urlopen
+
 from binascii import hexlify
 from os import urandom
 import datetime
@@ -21,7 +20,6 @@ import uuid
 from functools import reduce
 from nacl import encoding, public
 
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
 from fabric import Connection
 
@@ -69,8 +67,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
                          NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
-                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
-                         APP_TYPE)
+                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
 from ._github_oauth import (get_github_access_token)
 
 logger = get_logger(__name__)
@@ -99,7 +96,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         parse_result = parse_resource_id(plan)
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
-        plan_info = client.app_service_plans.get(resource_group_name, plan)
+        plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist in the resource group '{}".format(plan, resource_group_name))
     is_linux = plan_info.reserved
@@ -605,7 +602,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
 
 def show_webapp(cmd, resource_group_name, name, slot=None):
-    return _show_app(cmd, resource_group_name, name, APP_TYPE.WEBAPP, slot)
+    return _show_app(cmd, resource_group_name, name, "webapp", slot)
 
 
 # for generic updater
@@ -700,7 +697,7 @@ def get_functionapp(cmd, resource_group_name, name, slot=None):
 
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
-    return _show_app(cmd, resource_group_name, name, APP_TYPE.FUNCTIONAPP, slot)
+    return _show_app(cmd, resource_group_name, name, 'functionapp', slot)
 
 
 def list_webapp(cmd, resource_group_name=None):
@@ -731,13 +728,11 @@ def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
     if not app:
         raise ResourceNotFoundError("Unable to find {} '{}', in RG '{}'.".format(
                                     cmd_app_type, name, resource_group_name))
-
     app_type = _kind_to_app_type(app.kind) if app else None
     if app_type != cmd_app_type:
         raise ResourceNotFoundError(
             "Unable to find {} '{}', in RG '{}'".format(cmd_app_type.value, name, resource_group_name),
             "Use 'az {} show' to show {}s".format(app_type.value, app_type.value))
-
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     _rename_server_farm_props(app)
     _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
@@ -746,10 +741,10 @@ def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
 
 def _kind_to_app_type(kind):
     if "workflow" in kind:
-        return APP_TYPE.LOGICAPP
+        return "logicapp"
     if "function" in kind:
-        return APP_TYPE.FUNCTIONAPP
-    return APP_TYPE.WEBAPP
+        return "functionapp"
+    return "webapp"
 
 
 def _list_app(cli_ctx, resource_group_name=None):

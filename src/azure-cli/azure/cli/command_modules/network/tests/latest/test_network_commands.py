@@ -424,7 +424,7 @@ class NetworkCustomIpPrefix(ScenarioTest):
         self.cmd('network custom-ip prefix show -g {rg} -n {prefix}',
                  checks=self.check('commissionedState', 'Provisioned'))
 
-        self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state Commissioning',
+        self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state commission',
                  checks=self.check('commissionedState', 'Commissioning'))
 
 

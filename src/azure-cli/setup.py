@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.28.1"
+VERSION = "2.29.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -76,7 +76,7 @@ DEPENDENCIES = [
     'azure-mgmt-cognitiveservices~=12.0.0',
     'azure-mgmt-compute~=23.0.0',
     'azure-mgmt-consumption~=2.0',
-    'azure-mgmt-containerinstance~=8.0.0',
+    'azure-mgmt-containerinstance~=9.0.0',
     'azure-mgmt-containerregistry==8.1.0',
     'azure-mgmt-containerservice~=16.1.0',
     'azure-mgmt-cosmosdb~=6.4.0',
@@ -117,34 +117,35 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==19.0.0',
-    # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=2.0.0b1',
     'azure-mgmt-servicebus~=6.0.0',
-    'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
+    'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=1.0.0b1',
     'azure-mgmt-sql~=3.0.1',
     'azure-mgmt-storage~=19.0.0',
     'azure-mgmt-synapse~=2.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
-    'azure-mgmt-web~=2.0.0',
+    'azure-mgmt-web~=4.0.0',
     'azure-multiapi-storage~=0.6.2',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.8.0',
-    'azure-synapse-spark~=0.2.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
+    'azure-synapse-spark~=0.2.0',
+    'chardet~=3.0.4',
     'fabric~=2.4',
-    'javaproperties==0.5.1',
-    'jsondiff==1.2.0',
+    'javaproperties~=0.5.1',
+    'jsondiff~=1.2.0',
     'packaging~=20.9',
     'PyGithub~=1.38',
     'PyNaCl~=1.4.0',
     'pytz==2019.1',
     'scp~=0.13.2',
     'semver==2.13.0',
+    'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12'

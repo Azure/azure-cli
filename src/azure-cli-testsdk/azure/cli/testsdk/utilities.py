@@ -22,7 +22,7 @@ def find_recording_dir(test_file):
 
 @contextmanager
 def force_progress_logging():
-    from six import StringIO
+    from io import StringIO
     import logging
     from knack.log import get_logger
     from .reverse_dependency import get_commands_loggers
