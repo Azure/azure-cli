@@ -24,20 +24,27 @@ short-summary: Create a Synapse workspace.
 examples:
   - name: Create a Synapse workspace
     text: |-
-        az synapse workspace create --name fromcli4 --resource-group rg \\
+        az synapse workspace create --name testworkspace --resource-group rg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
   - name: Create a Synapse workspace with storage resource id
     text: |-
-        az synapse workspace create --name fromcli4 --resource-group rg \\
+        az synapse workspace create --name testworkspace --resource-group rg \\
           --storage-account /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
   - name: Create a Synapse workspace using customer-managed key
     text: |-
-        az synapse workspace create --name fromcli4 --resource-group rg \\
+        az synapse workspace create --name testworkspace --resource-group rg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
           --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
+  - name: Create a Synapse workspace connecting to azure devops
+    text: |-
+        az synapse workspace create --name testworkspace --resource-group rg \\
+          --storage-account testadlsgen2 --file-system testfilesystem \\
+          --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
+          --repository-type AzureDevOpsGit --account-name testuser --project-name testprj \\
+          --repository-name testrepo --collaboration-branch main
 """
 
 helps['synapse workspace list'] = """
@@ -144,6 +151,10 @@ examples:
     text: |-
         az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
         --enable-auto-scale --min-node-count 3 --max-node-count 100
+  - name: Update the Spark pool's custom libraries.
+    text: |-
+        az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --package-action Add --package package1.jar package2.jar
 """
 
 helps['synapse spark pool delete'] = """
@@ -1092,11 +1103,21 @@ examples:
           --name testlinkedservice --file @path/linkedservice.json
 """
 
+helps['synapse linked-service update'] = """
+type: command
+short-summary: Update an exist linked service.
+examples:
+  - name: Update an exist linked service.
+    text: |-
+        az synapse linked-service update --workspace-name testsynapseworkspace \\
+          --name testlinkedservice --file @path/linkedservice.json
+"""
+
 helps['synapse linked-service set'] = """
 type: command
-short-summary: Set an exist linked service.
+short-summary: Update an exist linked service.
 examples:
-  - name: Set an exist linked service.
+  - name: Update an exist linked service.
     text: |-
         az synapse linked-service set --workspace-name testsynapseworkspace \\
           --name testlinkedservice --file @path/linkedservice.json
@@ -1146,11 +1167,21 @@ examples:
           --name testdataset --file @path/dataset.json
 """
 
+helps['synapse dataset update'] = """
+type: command
+short-summary: Update an exist dataset.
+examples:
+  - name: Update an exist dataset.
+    text: |-
+        az synapse dataset update --workspace-name testsynapseworkspace \\
+          --name testdataset --file @path/dataset.json
+"""
+
 helps['synapse dataset set'] = """
 type: command
-short-summary: Set an exist dataset.
+short-summary: Update an exist dataset.
 examples:
-  - name: Set an exist dataset.
+  - name: Update an exist dataset.
     text: |-
         az synapse dataset set --workspace-name testsynapseworkspace \\
           --name testdataset --file @path/dataset.json
@@ -1200,11 +1231,21 @@ examples:
           --name testpipeline --file @path/pipeline.json
 """
 
+helps['synapse pipeline update'] = """
+type: command
+short-summary: Update an exist pipeline.
+examples:
+  - name: Update an exist pipeline.
+    text: |-
+        az synapse pipeline update --workspace-name testsynapseworkspace \\
+          --name testpipeline --file @path/pipeline.json
+"""
+
 helps['synapse pipeline set'] = """
 type: command
-short-summary: Set an exist pipeline.
+short-summary: Update an exist pipeline.
 examples:
-  - name: Set an exist pipeline.
+  - name: Update an exist pipeline.
     text: |-
         az synapse pipeline set --workspace-name testsynapseworkspace \\
           --name testpipeline --file @path/pipeline.json
@@ -1316,11 +1357,21 @@ examples:
           --name testtrigger --file @path/trigger.json
 """
 
+helps['synapse trigger update'] = """
+type: command
+short-summary: Update an exist trigger.
+examples:
+  - name: Update an exist trigger.
+    text: |-
+        az synapse trigger update --workspace-name testsynapseworkspace \\
+          --name testtrigger --file @path/trigger.json
+"""
+
 helps['synapse trigger set'] = """
 type: command
-short-summary: Set an exist trigger.
+short-summary: Update an exist trigger.
 examples:
-  - name: Set an exist trigger.
+  - name: Update an exist trigger.
     text: |-
         az synapse trigger set --workspace-name testsynapseworkspace \\
           --name testtrigger --file @path/trigger.json
@@ -1353,6 +1404,11 @@ examples:
     text: |-
         az synapse trigger delete --workspace-name testsynapseworkspace \\
           --name testtrigger
+"""
+
+helps['synapse trigger wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a trigger is met.
 """
 
 helps['synapse trigger subscribe-to-event'] = """
@@ -1417,6 +1473,16 @@ examples:
   - name: Rerun single trigger instance by runId.
     text: |-
         az synapse trigger-run rerun --workspace-name testsynapseworkspace \\
+          --name testtrigger --run-id 08586024068106001417583731803CU31
+"""
+
+helps['synapse trigger-run cancel'] = """
+type: command
+short-summary: Cancel a single trigger instance by runId.
+examples:
+  - name: Cancel a single trigger instance by runId.
+    text: |-
+        az synapse trigger-run cancel --workspace-name testsynapseworkspace \\
           --name testtrigger --run-id 08586024068106001417583731803CU31
 """
 
@@ -1562,10 +1628,93 @@ examples:
         az synapse notebook delete --workspace-name testsynapseworkspace \\
           --name testnotebook
 """
+helps['synapse workspace-package'] = """
+type: group
+short-summary: Manage Synapse's workspace packages.
+"""
+
+helps['synapse workspace-package upload'] = """
+type: command
+short-summary: Upload a local workspace package file to an Azure Synapse workspace.
+examples:
+  - name: Upload a local workspace package file to an Azure Synapse workspace.
+    text: |-
+        az synapse workspace-package upload --workspace-name testsynapseworkspace \\
+          --package C:/package.jar
+"""
+
+helps['synapse workspace-package upload-batch'] = """
+type: command
+short-summary: Upload workspace package files from a local directory to an Azure Synapse workspace.
+examples:
+  - name: Upload workspace package files from a local directory to an Azure Synapse workspace.
+    text: |-
+        az synapse workspace-package upload-batch --workspace-name testsynapseworkspace \\
+          --source C:/package
+"""
+
+helps['synapse workspace-package show'] = """
+type: command
+short-summary: Get a workspace package.
+examples:
+  - name: Get a workspace package.
+    text: |-
+        az synapse workspace-package show --workspace-name testsynapseworkspace \\
+          --name testpackage.jar
+"""
+
+helps['synapse workspace-package list'] = """
+type: command
+short-summary: List workspace packages.
+examples:
+  - name: List workspace packages.
+    text: |-
+        az synapse workspace-package list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse workspace-package delete'] = """
+type: command
+short-summary: Delete a workspace package.
+examples:
+  - name: Delete a workspace package.
+    text: |-
+        az synapse workspace-package delete --workspace-name testsynapseworkspace \\
+          --name testpackage.jar
+"""
 
 helps['synapse integration-runtime'] = """
 type: group
 short-summary: Manage Synapse's integration runtimes.
+"""
+
+helps['synapse integration-runtime managed'] = """
+    type: group
+    short-summary: Manage integration runtime with synapse sub group managed
+"""
+
+helps['synapse integration-runtime managed create'] = """
+type: command
+short-summary: Create an managed integration runtime.
+examples:
+  - name: Create an managed integration runtime.
+    text: |-
+        az synapse integration-runtime managed create --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime self-hosted'] = """
+    type: group
+    short-summary: Manage integration runtime with synapse sub group self-hosted
+"""
+
+helps['synapse integration-runtime self-hosted create'] = """
+type: command
+short-summary: Create an self-hosted integration runtime.
+examples:
+  - name: Create an self-hosted integration runtime.
+    text: |-
+        az synapse integration-runtime self-hosted create --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
 """
 
 helps['synapse integration-runtime create'] = """
@@ -1692,6 +1841,26 @@ examples:
           --name selfhostedintegrationruntime
 """
 
+helps['synapse integration-runtime start'] = """
+type: command
+short-summary: start an SSIS integration runtime.
+examples:
+  - name: start an SSIS integration runtime.
+    text: |-
+        az synapse integration-runtime start --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime stop'] = """
+type: command
+short-summary: stop an SSIS integration runtime.
+examples:
+  - name: stop an SSIS integration runtime.
+    text: |-
+        az synapse integration-runtime stop --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
 helps['synapse integration-runtime-node'] = """
 type: group
 short-summary: Manage Synapse's self-hosted integration runtime nodes.
@@ -1781,4 +1950,63 @@ examples:
     text: |-
         az synapse managed-private-endpoints delete --workspace-name testsynapseworkspace \\
           --pe-name testendpointname
+"""
+
+helps['synapse spark-job-definition'] = """
+type: group
+short-summary: Manage spark job definitions in a synapse workspace.
+"""
+
+helps['synapse spark-job-definition show'] = """
+type: command
+short-summary: Get a spark job definition.
+examples:
+  - name: Get a spark job definition.
+    text: |-
+        az synapse spark-job-definition show --workspace-name testsynapseworkspace \\
+          --name testsjdname
+"""
+
+helps['synapse spark-job-definition list'] = """
+type: command
+short-summary: List spark job definitions.
+examples:
+  - name: List spark job definitions.
+    text: |-
+        az synapse spark-job-definition list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse spark-job-definition delete'] = """
+type: command
+short-summary: Delete a spark job definition.
+examples:
+  - name: Delete a spark job definition.
+    text: |-
+        az synapse spark-job-definition delete --workspace-name testsynapseworkspace \\
+          --name testsjdname
+"""
+
+helps['synapse spark-job-definition create'] = """
+type: command
+short-summary: Create a spark job definition.
+examples:
+  - name: Create a spark job definition.
+    text: |-
+        az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
+          --name testsjdname --file @path/test.json
+"""
+
+helps['synapse spark-job-definition update'] = """
+type: command
+short-summary: Update a spark job definition.
+examples:
+  - name: Update a spark job definition.
+    text: |-
+        az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
+          --name testsjdname --file @path/test.json
+"""
+
+helps['synapse spark-job-definition wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a spark job definition is met.
 """

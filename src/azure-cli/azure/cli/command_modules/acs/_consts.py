@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from enum import Enum
+
 CONST_OUTBOUND_TYPE_LOAD_BALANCER = "loadBalancer"
 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING = "userDefinedRouting"
 
@@ -39,6 +41,9 @@ CONST_ACC_SGX_QUOTE_HELPER_ENABLED = "ACCSGXQuoteHelperEnabled"
 CONST_PRIVATE_DNS_ZONE_SYSTEM = "system"
 CONST_PRIVATE_DNS_ZONE_NONE = "none"
 
+# Open Service Mesh addon keys
+CONST_OPEN_SERVICE_MESH_ADDON_NAME = "openServiceMesh"
+
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     'monitoring': CONST_MONITORING_ADDON_NAME,
@@ -46,10 +51,17 @@ ADDONS = {
     'kube-dashboard': CONST_KUBE_DASHBOARD_ADDON_NAME,
     'azure-policy': CONST_AZURE_POLICY_ADDON_NAME,
     'ingress-appgw': CONST_INGRESS_APPGW_ADDON_NAME,
-    "confcom": CONST_CONFCOM_ADDON_NAME
+    "confcom": CONST_CONFCOM_ADDON_NAME,
+    'open-service-mesh': CONST_OPEN_SERVICE_MESH_ADDON_NAME,
 }
 
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.3-alpha"
 
 CONST_MANAGED_IDENTITY_OPERATOR_ROLE = 'Managed Identity Operator'
 CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID = 'f1a07417-d97a-45cb-824c-7a7467783830'
+
+
+# decorator mode
+class DecoratorMode(Enum):
+    CREATE = 1
+    UPDATE = 2

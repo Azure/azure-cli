@@ -2408,6 +2408,14 @@ helps['staticwebapp environment show'] = """
       text: az staticwebapp environment show -n MyStaticAppName
 """
 
+helps['staticwebapp environment delete'] = """
+    type: command
+    short-summary: Delete the static app production environment or the specified environment.
+    examples:
+    - name: Delete a static app environment.
+      text: az staticwebapp environment delete -n MyStaticAppName
+"""
+
 helps['staticwebapp environment functions'] = """
     type: command
     short-summary: Show information about functions.
