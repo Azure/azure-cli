@@ -78,7 +78,7 @@ def generate_connection_name(cmd):
     randstr = ''.join(random.sample(string.ascii_letters + string.digits, 5))
     name = '{}_{}_{}'.format(source, target, randstr)
 
-    logger.warning('Connection name is not specified, the generated one is: %s', name)
+    logger.warning('Connection name is not specified, use generated one: --connection-name %s', name)
     return name
 
 
@@ -156,10 +156,13 @@ def get_client_type(cmd, namespace):
         client_type = _infer_webapp(namespace.source_id)
     elif 'spring-cloud' in cmd.name:
         client_type = _infer_springcloud(namespace.source_id)
+
+    method = 'detected'
     if client_type is None:
         client_type = CLIENT_TYPE.Dotnet
+        method = 'default'
 
-    logger.warning('Client type is not specified, use: %s', client_type.value)
+    logger.warning('Client type is not specified, use %s one: --client-type %s', method, client_type.value)
     return client_type.value
 
 
@@ -167,44 +170,59 @@ def interactive_input(arg, hint):
     '''Get interactive inputs from users
     '''
     value = None
+    cmd_value = None
     if arg == 'secret_auth_info':
-        name = prompt('User name of database (--secret): ')
-        secret = prompt_pass('Password of database (--secret): ')
+        name = prompt('User name of database (--secret name=): ')
+        secret = prompt_pass('Password of database (--secret secret=): ')
         value = {
             'name': name,
             'secret': secret,
             'auth_type': 'secret'
         }
+        cmd_value = 'name={} secret={}'.format(name, secret)
     elif arg == 'secret_auth_info_auto':
         value = {
             'auth_type': 'secret'
         }
+        cmd_value = ''
     elif arg == 'service_principal_auth_info_secret':
-        client_id = prompt('ServicePrincipal client-id (--service-principal): ')
-        object_id = prompt('ServicePrincipal object-id (--service-principal): ')
+        client_id = prompt('ServicePrincipal client-id (--service-principal client_id=): ')
+        principal_id = prompt('ServicePrincipal object-id (--service-principal principal_id=): ')
+        secret = prompt('ServicePrincipal object-id (--service-principal secret=): ')
         value = {
             'client_id': client_id,
-            'principal_id': object_id,
+            'principal_id': principal_id,
+            'secret': secret,
             'auth_type': 'servicePrincipalSecret'
         }
+        cmd_value = 'client_id={} principal_id={} secret={}'.format(client_id, principal_id, secret)
     elif arg == 'user_identity_auth_info':
-        client_id = prompt('UserAssignedIdentity client-id (--user-identity): ')
-        subscription_id = prompt('UserAssignedIdentity subscription-id (--user-identity): ')
+        client_id = prompt('UserAssignedIdentity client-id (--user-identity client_id=): ')
+        subscription_id = prompt('UserAssignedIdentity subscription-id (--user-identity subs_id=): ')
         value = {
             'client_id': client_id,
             'subscription_id': subscription_id,
             'auth_type': 'userAssignedIdentity'
         }
+        cmd_value = 'client_id={} subscription_id={}'.format(client_id, subscription_id)
     elif arg == 'system_identity_auth_info':
         value = {
             'auth_type': 'systemAssignedIdentity'
         }
+        cmd_value = ''
     else:
         value = prompt('{}: '.format(hint))
+        cmd_value = value
 
-    if not value:
+    # check blank value
+    if isinstance(value, dict):
+        for sub_val in value.values():
+            if not sub_val:
+                raise RequiredArgumentMissingError('{} should not be blank'.format(hint))
+    elif not value:
         raise RequiredArgumentMissingError('{} should not be blank'.format(hint))
-    return value
+
+    return value, cmd_value
 
 
 def intelligent_experience(cmd, namespace, missing_args):
@@ -235,11 +253,18 @@ def intelligent_experience(cmd, namespace, missing_args):
             cmd_arg_values.update(context_arg_values)
 
     # arguments from interactive inputs
+    param_str = ''
     for arg in missing_args:
         if arg not in cmd_arg_values:
             hint = '{} ({})'.format(missing_args[arg].get('help'), '/'.join(missing_args[arg].get('options')))
-            value = interactive_input(arg, hint)
+            value, cmd_value = interactive_input(arg, hint)
             cmd_arg_values[arg] = value
+
+            # show applied params
+            option = missing_args[arg].get('options')[0]
+            param_str += '{} {}, '.format(option, cmd_value)
+    if param_str:
+        logger.warning('Apply interactive input arguments: %s', param_str.strip(', '))
 
     return cmd_arg_values
 
