@@ -43,7 +43,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal~=1.2.7',
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
     'azure-mgmt-core>=1.2.0,<2',
@@ -51,7 +50,7 @@ DEPENDENCIES = [
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack~=0.8.2',
-    'msal>=1.10.0,<2.0.0',
+    'msal>=1.15.0,<2.0.0',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
     'PyJWT>=2.1.0',
@@ -82,5 +81,5 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.6.0',
-    package_data={'azure.cli.core': ['auth_landing_pages/*.html']}
+    package_data={'azure.cli.core': ['auth/landing_pages/*.html']}
 )

@@ -151,18 +151,8 @@ def keyvault_data_plane_factory(cli_ctx, *_):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        import adal
-        try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
-                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
-        except adal.AdalError as err:
-            # pylint: disable=no-member
-            if (hasattr(err, 'error_response') and
-                    ('error_description' in err.error_response) and
-                    ('AADSTS70008:' in err.error_response['error_description'])):
-                raise CLIError(
-                    "Credentials have expired due to inactivity. Please run 'az login'")
-            raise CLIError(err)
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
+                                                      subscription=cli_ctx.data.get('subscription_id'))[0]
 
     client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
 
@@ -188,19 +178,8 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        import adal
-        try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
-                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
-        except adal.AdalError as err:
-            # pylint: disable=no-member
-            if (hasattr(err, 'error_response') and
-                    ('error_description' in err.error_response) and
-                    ('AADSTS70008:' in err.error_response['error_description'])):
-                raise CLIError(
-                    "Credentials have expired due to inactivity. Please run 'az login'")
-            raise CLIError(err)
-
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
+                                                      subscription=cli_ctx.data.get('subscription_id'))[0]
     client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
 
     # HACK, work around the fact that KeyVault library does't take confiuration object on constructor
