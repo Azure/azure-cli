@@ -14,44 +14,86 @@ short-summary: Manage Azure Database for MySQL Flexible Servers.
 
 helps['mysql flexible-server create'] = """
 type: command
-short-summary: Create a flexible server.
+short-summary: Create a MySQL flexible server.
+long-summary: >
+    Create a MySQL flexible server with custom or default configuration. For more information for network configuration, see
+    
+    - Configure public access
+    
+    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
+    
+    - Configure private access
+    
+    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
+
 examples:
-  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with Public access enabled by default.
-    text: |
-        az mysql flexible-server create
-  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with all public IPs (0.0.0.0 - 255.255.255.255).
-    text: |
-        az mysql flexible-server create --public-access all
-  - name: Create a MySQL flexible server with default params ( resource group, location, servername, username, password ) with public access without any firewall rules.
-    text: |
-        az mysql flexible-server create --public-access none
-  - name: Create a MySQL flexible server with public access and add client IP address to have access to the server
-    text: |
-        az mysql flexible-server create --public-access <my_client_ip>
-  - name: Create a MySQL flexible server with public access and add the range of IP address to have access to this server
-    text: |
-      az mysql flexible-server create --public-access <start_ip_address-end_ip_address>
-  - name: Create a MySQL flexible server with public access and allow applications from Azure IP addresses to connect to your flexible server
-    text: |
-      az mysql flexible-server create --public-access 0.0.0.0
-  - name: Create a MySQL flexible server with specified SKU and storage, using defaults from local context.
-    text: |
-        az mysql flexible-server create --name testServer --admin-password password
-  - name: Create a MySQL flexible server using already existing virtual network and subnet. If provided virtual network and subnet does not exists then virtual network and subnet with default address prefix will be created.
-    text: |
-      az mysql flexible-server create --vnet myVnet --subnet mySubnet
-  - name: Create a MySQL flexible server using already existing virtual network, subnet, and using the subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforMySQL/flexibleServers, if not already delegated.
-    text: |
-      az mysql flexible-server create --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName}
-  - name: Create a MySQL flexible server using new virtual network, subnet with non-default address prefix.
-    text: |
-      az mysql flexible-server create --vnet myVnet --address-prefixes 10.0.0.0/24 --subnet mySubnet --subnet-prefixes 10.0.0.0/24
-  - name: Create a MySQL flexible server with  parameters set.
-    text: |
+  - name: >
+      Create a MySQL flexible server with custom parameters
+    text: >
         az mysql flexible-server create --location northeurope --resource-group testGroup \\
           --name testServer --admin-user username --admin-password password \\
           --sku-name Standard-B1ms --tier Burstable --public-access 0.0.0.0 --storage-size 32 \\
-          --tags "key=value" --version 5.7
+          --tags "key=value" --version 5.7 --high-availability ZoneRedundant --zone 1 \\
+          --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Create a MySQL flexible server with default parameters and public access enabled by default. \
+      Resource group, server name, username, password, and default database will be created by CLI
+    text: >
+        az mysql flexible-server create [--yes]
+  - name: >
+      Create a MySQL flexible server with public access and add the range of IP address to have access to this server.
+      The --public-access parameter can be 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
+    text: >
+      az mysql flexible-server create --resource-group testGroup --name testServer --public-access 125.23.54.31-125.23.54.35
+  - name: >
+      Create a MySQL flexible server with private access. If provided virtual network and subnet do not exists, virtual network and subnet with the specified address prefixes will be created.
+    text: >
+      az mysql flexible-server create --resource-group testGroup --name testServer --vnet myVnet --subnet mySubnet --address-prefixes 10.0.0.0/16 --subnet-prefixes 10.0.0.0/24
+  - name: >
+      Create a MySQL flexible server using a new subnet resource ID and new private DNS zone resource ID. The subnet and DNS zone can be created in different subscription or resource group. 
+    text: |
+      az mysql flexible-server create \\
+        --resource-group testGroup --name testServer \\
+        --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName} \\
+        --private-dns-zone /subscriptions/{SubID}/resourceGroups/{resourceGroup}/providers/Microsoft.Network/privateDnsZones/testMySQLFlexibleDnsZone.private.mysql.database.azure.com \\
+        [--address-prefixes 172.0.0.0/16] [--subnet-prefixes 172.0.0.0/24]
+  - name: >
+      Create a MySQL flexible server using existing network resources in the same resource group.
+      the existing subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforMySQL/flexibleServers, if not already delegated.
+      The private DNS zone will be linked to the virtual network if not already linked. 
+    text: >
+      # create vnet
+      
+      az network vnet create --resource-group testGroup --name testVnet -location testLocation --address-prefixes 172.0.0.0/16
+      
+      
+      # create subnet
+      
+      az network vnet subnet create --resource-group testGroup --vnet-name testVnet --address-prefixes 172.0.0.0/24 --name testSubnet
+
+
+      # private dns zone
+      
+      az network private-dns zone create -g testGroup -n testDNS.private.mysql.database.azure.com
+
+
+      az mysql flexible-server create --resource-group testGroup \\
+        --name testServer --location testLocation \\
+        --subnet /subscriptions/{SubId}/resourceGroups/{testGroup}/providers/Microsoft.Network/virtualNetworks/tesetVnet/subnets/testSubnet \\
+        --private-dns-zone /subscriptions/{SubId}/resourceGroups/{testGroup}/providers/Microsoft.Network/privateDnsZones/testDNS.mysql.database.azure.com\\
+      
+      
+      az mysql flexible-server create --resource-group testGroup --name testServer \\
+        --vnet testVnet --subnet testSubnet --location testLocation \\
+        --private-dns-zone /subscriptions/{SubId}/resourceGroups/{testGroup}/providers/Microsoft.Network/privateDnsZones/testDNS.mysql.database.azure.com
+  
+  - name: >
+      Create a MySQL flexible server using existing network resources in the different subscription.
+    text: >
+      az mysql flexible-server create --resource-group testGroup \\
+         --name testServer --location testLocation \\
+        --subnet /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/virtualNetworks/tesetVnet/subnets/testSubnet \\
+        --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.mysql.database.azure.com
 """
 
 helps['mysql flexible-server db'] = """
@@ -63,11 +105,14 @@ helps['mysql flexible-server db create'] = """
 type: command
 short-summary: Create a MySQL database on a flexible server.
 examples:
-  - name: Create database 'testDatabase' in the flexible server 'testServer' with the default parameters.
-    text: az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase
-  - name: Create database 'testDatabase' in the flexible server 'testServer' with a given character set and collation rules.
-    text: az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase \\
-            --charset validCharset --collation validCollation
+  - name: >
+      Create database 'testDatabase' in the flexible server 'testServer' with default charset utf8 and collation utf8_general_cis.
+    text: >
+      az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase
+  - name: >
+      Create database 'testDatabase' in the flexible server 'testServer' with a given character set and collation rules.
+    text: >
+      az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase --charset validCharset --collation validCollation
 """
 
 helps['mysql flexible-server db delete'] = """
@@ -100,7 +145,7 @@ short-summary: Delete a flexible server.
 examples:
   - name: Delete a flexible server.
     text: az mysql flexible-server delete --resource-group testGroup --name testServer
-  - name: Delete a flexible server without prompt or confirmation.
+  - name: Delete a flexible server without confirmation prompt.
     text: az mysql flexible-server delete --resource-group testGroup --name testServer --yes
 """
 
@@ -113,10 +158,18 @@ helps['mysql flexible-server firewall-rule create'] = """
 type: command
 short-summary: Create a new firewall rule for a flexible server.
 examples:
-  - name: Create a firewall rule allowing connections from a specific IP address.
-    text: az mysql flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
-  - name: Create a firewall rule allowing connections from an IP address range.
-    text: az mysql flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
+  - name: >
+      Create a firewall rule allowing connections from a specific IP address.
+    text: >
+      az mysql flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowip --start-ip-address 107.46.14.221
+  - name: >
+      Create a firewall rule allowing connections from an IP address range.
+    text: >
+        az mysql flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
+  - name: >
+      Create a firewall rule allowing connections to all Azure services
+    text: >
+      az mysql flexible-server firewall-rule create --resource-group testGroup --name testServer --start-ip-address 0.0.0.0
 """
 
 helps['mysql flexible-server firewall-rule delete'] = """
@@ -125,16 +178,16 @@ short-summary: Delete a firewall rule.
 examples:
   - name: Delete a firewall rule.
     text: az mysql flexible-server firewall-rule delete --rule-name testRule --resource-group testGroup --name testServer
-    crafted: true
+  - name: Delete a firewall rule without confirmation.
+    text: az mysql flexible-server firewall-rule delete --rule-name testRule --resource-group testGroup --name testServer --yes
 """
 
 helps['mysql flexible-server firewall-rule list'] = """
 type: command
 short-summary: List all firewall rules for a flexible server.
-example:
-  - name: List all firewall rules for a server.
+examples:
+  - name: List all firewall rules for a flexible server.
     text: az mysql server firewall-rule list --resource-group testGroup --name testServer
-    crafted: false
 """
 
 helps['mysql flexible-server firewall-rule show'] = """
@@ -202,7 +255,6 @@ short-summary: Get the parameter for a flexible server."
 examples:
   - name: Get the parameter for a server.W
     text: az mysql flexible-server parameter show --name parameterName
-    crafted: true
 """
 
 helps['mysql flexible-server replica'] = """
@@ -214,8 +266,8 @@ helps['mysql flexible-server replica create'] = """
 type: command
 short-summary: Create a read replica for a server.
 examples:
-  - name: Create a read replica 'testReplicaServer' for 'testServer'.
-    text: az mysql flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testServer
+  - name: Create a read replica 'testReplicaServer' for 'testServer' in the specified zone if available.
+    text: az mysql flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testServer --zone 3
 """
 
 helps['mysql flexible-server replica list'] = """
@@ -241,14 +293,51 @@ examples:
   - name: Restart a flexible server.
     text: az mysql flexible-server restart --resource-group testGroup --name testServer
     crafted: true
+  - name: Restart a flexible server with failover
+    text: az mysql flexible-server restart --resource-group testGroup --name testServer --failover Forced
 """
 
 helps['mysql flexible-server restore'] = """
 type: command
 short-summary: Restore a flexible server from backup.
 examples:
-  - name: Restore 'testServer' to a specific point-in-time as a new server 'testServerNew'.
+  - name: >
+      Restore 'testServer' to a specific point-in-time as a new server 'testServerNew' with the same network configuration.
     text: az mysql flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --restore-time "2017-06-15T13:10:00Z"
+  - name: >
+      Restore public access or private access server 'testServer' as a new server 'testServerNew' with new subnet to current point-in-time. 
+      New vnet, subnet, and private dns zone for the restored server will be provisioned. Please refer to 'flexible-server create' command for more private access scenarios.
+    text: >
+      az mysql flexible-server restore --resource-group testGroup --name testServerNew \\
+        --source-server testServer --vnet newVnet --subnet newSubnet \\
+        --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
+        --private-dns-zone testDNS.mysql.database.azure.com
+  - name: Restore private access server 'testServer' to current point-in-time as a new server 'testServerNew' with public access. 
+    text: >
+      az mysql flexible-server restore --resource-group testGroup --name testServerNew \\
+        --source-server testServer --public-access Enabled
+"""
+
+helps['mysql flexible-server geo-restore'] = """
+type: command
+short-summary: Geo-restore a flexible server from backup.
+examples:
+  - name: >
+      Geo-restore 'testServer' to a new server 'testServerNew' in location 'newLocation' with the same network configuration.
+      Private access server will use different private dns zone. 
+    text: az mysql flexible-server geo-restore --resource-group testGroup --name testServerNew --source-server testServer --location newLocation"
+  - name: >
+      Geo-estore public access or private access server 'testServer' as a new server 'testServerNew' with new subnet. 
+      New vnet, subnet, and private dns zone for the restored server will be provisioned. Please refer to 'flexible-server create' command for more private access scenarios.
+    text: >
+      az mysql flexible-server geo-restore --resource-group testGroup --name testServerNew \\
+        --source-server testServer --vnet newVnet --subnet newSubnet \\
+        --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
+        --private-dns-zone testDNS.mysql.database.azure.com
+  - name: Gep-estore private access server 'testServer' as a new server 'testServerNew' with public access. 
+    text: >
+      az mysql flexible-server restore --resource-group testGroup --name testServerNew \\
+        --source-server testServer --public-access Enabled
 """
 
 helps['mysql flexible-server show'] = """
@@ -295,6 +384,8 @@ short-summary: Lists available sku's in the given region.
 examples:
   - name: Lists available sku's in the given region.
     text: az mysql flexible-server list-skus -l eastus
+  - name: Lists available sku's in the given region in table output
+    text: az mysql flexible-server list-skus -l eastus -o table
 """
 
 helps['mysql flexible-server wait'] = """

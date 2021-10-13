@@ -76,7 +76,7 @@ def flexible_server_create(cmd, client,
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
 
-    server_result = firewall_id = subnet_id = None
+    server_result = firewall_name = subnet_id = None
 
     network, start_ip, end_ip = flexible_server_provision_network_resource(cmd=cmd,
                                                                            resource_group_name=resource_group_name,
