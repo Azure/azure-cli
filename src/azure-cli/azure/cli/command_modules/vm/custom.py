@@ -1411,10 +1411,22 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.capacity_reservation = capacity_reservation
 
     if dedicated_host is not None:
-        vm.host.id = dedicated_host
+        if vm.host is None:
+            DedicatedHost = cmd.get_models('SubResource')
+            vm.host = DedicatedHost(additional_properties={}, id=dedicated_host)
+        else:
+            vm.host.id = dedicated_host
+        if vm.host_group is not None:
+            vm.host_group = None
 
     if dedicated_host_group is not None:
-        vm.host_group.id = dedicated_host_group
+        if vm.host_group is None:
+            DedicatedHostGroup = cmd.get_models('SubResource')
+            vm.host_group = DedicatedHostGroup(additional_properties={}, id=dedicated_host_group)
+        else:
+            vm.host_group.id = dedicated_host_group
+        if vm.host is not None:
+            vm.host = None
 
     if ultra_ssd_enabled is not None:
         if vm.additional_capabilities is None:
