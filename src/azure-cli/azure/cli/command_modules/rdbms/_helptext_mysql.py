@@ -72,7 +72,7 @@ examples:
       az network vnet subnet create --resource-group testGroup --vnet-name testVnet --address-prefixes 172.0.0.0/24 --name testSubnet
 
 
-      # private dns zone
+      # create private dns zone
 
       az network private-dns zone create -g testGroup -n testDNS.private.mysql.database.azure.com
 
