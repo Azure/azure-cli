@@ -1446,6 +1446,7 @@ class VMMonitorTestDefault(ScenarioTest):
 class VMMonitorTestCreateLinux(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_workspace_linux', location='eastus')
+    @AllowLargeResponse()
     def test_vm_create_with_workspace_linux(self, resource_group):
 
         self.kwargs.update({
