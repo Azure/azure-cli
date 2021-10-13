@@ -198,3 +198,18 @@ class GeneralNameReplacer(_BuggyGeneralNameReplacer):
                     request.body = body.replace(old, new)
 
         return request
+
+
+class MsalAuthRequestFilter(RecordingProcessor):
+    """Remove oauth authentication requests and responses from recording.
+    This is a patch for azure_devtools.scenario_tests.recording_processors.OAuthRequestResponsesFilter
+    """
+    def process_request(self, request):
+        # filter MSAL requests like:
+        # Tenant discovery: GET
+        # https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/v2.0/.well-known/openid-configuration
+        # Get access token: POST
+        # https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/oauth2/v2.0/token
+        if request.uri.startswith('https://login.microsoftonline.com'):
+            return None
+        return request
