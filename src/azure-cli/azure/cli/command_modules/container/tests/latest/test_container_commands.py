@@ -302,19 +302,12 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         container_group_name = self.create_random_name('clicontainer', 16)
         vnet_name = self.create_random_name('vent', 16)
         subnet_name = self.create_random_name('subnet', 16)
-        network_profile_name = self.create_random_name('nprofile', 16)
-        network_profile_id = resource_id(subscription=test_sub_id,
-                                         resource_group=resource_group,
-                                         namespace='Microsoft.Network', type='networkProfiles',
-                                         name=network_profile_name)
 
         self.kwargs.update({
             'container_group_name': container_group_name,
             'resource_group_location': resource_group_location,
             'vnet_name': vnet_name,
-            'subnet_name': subnet_name,
-            'network_profile_name': network_profile_name,
-            'network_profile_id': network_profile_id
+            'subnet_name': subnet_name
         })
 
         # Vnet name with no subnet
@@ -326,10 +319,9 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
             self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
                      '--subnet {subnet_name} ')
 
-        # Network Profile doesn't exists from name
-        with self.assertRaisesRegexp(HttpResponseError, 'NetworkProfileNotFound'):
-            self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
-                     '--network-profile {network_profile_name} ')
+        self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name} --subnet {subnet_name}',
+            checks=[self.exists('subnetIds[0].id')])
+
 
     # Test export container.
     @ResourceGroupPreparer()
@@ -471,6 +463,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{gitrepo_mount_path}')])
 
+    # Changing to live only because of intermittent test failures: https://github.com/Azure/azure-cli/issues/19804
+    @live_only()
     @ResourceGroupPreparer()
     def test_container_attach(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)

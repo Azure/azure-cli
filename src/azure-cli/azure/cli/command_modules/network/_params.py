@@ -6,8 +6,6 @@
 # pylint: disable=line-too-long, too-many-lines
 from argcomplete.completers import FilesCompleter
 
-import six
-
 from knack.arguments import CLIArgumentType, ignore_type
 
 from azure.cli.core.commands.parameters import (get_location_type, get_resource_name_completion_list,
@@ -766,8 +764,7 @@ def load_arguments(self, _):
         c.extra('cmd')
 
     with self.argument_context('network express-route peering') as c:
-        # Using six.integer_types so we get int for Py3 and long for Py2
-        c.argument('peer_asn', help='Autonomous system number of the customer/connectivity provider.', type=six.integer_types[-1])
+        c.argument('peer_asn', help='Autonomous system number of the customer/connectivity provider.', type=int)
         c.argument('vlan_id', help='Identifier used to identify the customer.')
         c.argument('circuit_name', circuit_name_type)
         c.argument('peering_name', name_arg_type, id_part='child_name_1')
@@ -1730,7 +1727,7 @@ def load_arguments(self, _):
         c.argument('cidr', help='The prefix range in CIDR notation. Should include the start address and the prefix length.')
 
     with self.argument_context('network custom-ip prefix update') as c:
-        c.argument('commissioned_state', options_list='--state', help='Commissioned State of the custom ip prefix.', arg_type=get_enum_type(['Commissioning', 'Deprovisioning', 'Provisioning']))
+        c.argument('commissioned_state', options_list='--state', help='Commissioned State of the custom ip prefix.', arg_type=get_enum_type(['commission', 'decommission', 'deprovision', 'provision']))
     # endregion
 
     # region PublicIPAddresses

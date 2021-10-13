@@ -537,6 +537,79 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  '--subnet {subnet} --default-action Deny --hns --sku Standard_LRS ',
                  checks=[JMESPathCheck('enableNfsV3', True)])
 
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-06-01')
+    @ResourceGroupPreparer(location='centraluseuap', name_prefix='cli_storage_account')
+    def test_storage_account_with_alw(self, resource_group):
+        self.kwargs = {
+            'name1': self.create_random_name(prefix='sa1', length=24),
+            'name2': self.create_random_name(prefix='sa2', length=24),
+            'rg': resource_group
+        }
+
+        # test success case during create
+        result = self.cmd('storage account create -n {name1} -g {rg} --enable-alw --immutability-period 10 '
+                 '--immutability-state Disabled --allow-append').get_output_in_json()
+        self.assertIn('immutableStorageWithVersioning', result)
+        self.assertEqual(result['immutableStorageWithVersioning']['enabled'], True)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['allowProtectedAppendWrites'], True)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['immutabilityPeriodSinceCreationInDays'], 10)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['state'], 'Disabled')
+
+        # test failure cases during create
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-alw false --immutability-period 10 '
+                              '--immutability-state Disabled --allow-append')
+
+        # missing required parameter --immutability-state
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-alw --immutability-period 10  --allow-append')
+
+        # cannot have create policy with Locked state
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account create -n {name2} -g {rg} --enable-alw --immutability-period 10 '
+                              '--immutability-state Locked --allow-append')
+
+        # test success case during update
+        result = self.cmd('storage account update -n {name1} --immutability-period 15 '
+                          '--immutability-state Unlocked --allow-append false').get_output_in_json()
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['allowProtectedAppendWrites'],
+                         False)
+        self.assertEqual(
+            result['immutableStorageWithVersioning']['immutabilityPolicy']['immutabilityPeriodSinceCreationInDays'], 15)
+        self.assertEqual(result['immutableStorageWithVersioning']['immutabilityPolicy']['state'], 'Unlocked')
+
+        # test failure cases during update
+        self.cmd('storage account create -n {name2} -g {rg} --enable-alw false')
+
+        # cannot add policy when alw is disabled
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name2} --immutability-period 10 '
+                     '--immutability-state Disabled --allow-append')
+
+        self.cmd('storage account update -n {name1} --immutability-state Disabled')
+
+        # cannot directly change the state to Locked from Disabled
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name1} --immutability-state Locked')
+
+        self.cmd('storage account update -n {name1} --immutability-state UnLocked')
+        self.cmd('storage account update -n {name1} --immutability-state Locked')
+
+        # cannot reduce immutability-period when locked
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name1} --immutability-period 10')
+
+        # cannot unlock a locked policy
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name1} --immutability-state UnLocked')
+
+        # cannot changed allowProtectedAppendWrites for locked policy
+        with self.assertRaises(HttpResponseError):
+            self.cmd('storage account update -n {name1} --allow-append')
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 

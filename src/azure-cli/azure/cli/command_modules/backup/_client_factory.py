@@ -50,6 +50,10 @@ def vaults_cf(cli_ctx, *_):
     return _common_client_factory(cli_ctx).vaults
 
 
+# def registered_identities_cf(cli_ctx, *_):
+#    return _common_client_factory(cli_ctx).registered_identities
+
+
 def backup_storage_configs_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_resource_storage_configs
 

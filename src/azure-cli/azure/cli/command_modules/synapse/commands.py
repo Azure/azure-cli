@@ -186,6 +186,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.synapse.managedprivateendpoints.operations#ManagedPrivateEndpoints.{}',
         client_factory=None)
 
+    synapse_spark_job_definition_sdk = CliCommandType(
+        operations_tmpl='azure.synapse.artifacts.operations#SparkJobDefinitionOperations.{}',
+        client_factory=None)
+
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
                             custom_command_type=get_custom_sdk('workspace', cf_synapse_client_workspace_factory),
@@ -510,6 +514,16 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_Managed_private_endpoints')
         g.custom_command('list', 'list_Managed_private_endpoints')
         g.custom_command('delete', 'delete_Managed_private_endpoints', confirmation=True)
+
+    # Data Plane Commands --Artifacts Spark job definitions operations
+    with self.command_group('synapse spark-job-definition', synapse_spark_job_definition_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
+        g.custom_command('list', 'list_spark_job_definition')
+        g.custom_show_command('show', 'get_spark_job_definition')
+        g.custom_command('delete', 'delete_spark_job_definition', supports_no_wait=True)
+        g.custom_command('create', 'create_or_update_spark_job_definition', supports_no_wait=True)
+        g.custom_wait_command('wait', 'get_spark_job_definition')
+        g.custom_command('update', 'create_or_update_spark_job_definition', supports_no_wait=True)
 
     with self.command_group('synapse', is_preview=True):
         pass

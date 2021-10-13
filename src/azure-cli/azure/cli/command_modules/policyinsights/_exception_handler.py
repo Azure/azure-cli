@@ -12,7 +12,4 @@ def policy_insights_exception_handler(ex):
     if isinstance(ex, QueryFailure):
         message = '({}) {}'.format(ex.error.error.code, ex.error.error.message)
         raise CLIError(message)
-    import sys
-    from six import reraise
-
-    reraise(*sys.exc_info())
+    raise ex

@@ -336,16 +336,17 @@ parameters:
     short-summary: Enable the Kubernetes addons in a comma-separated list.
     long-summary: |-
         These addons are available:
-            http_application_routing - configure ingress with automatic public DNS name creation.
-            monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
-                         Specify "--workspace-resource-id" to use an existing workspace.
-                         If monitoring addon is enabled --no-wait argument will have no effect
-            azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
-                         Learn more at aka.ms/aks/policy.
-            virtual-node - enable AKS Virtual Node.
-                         Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-                         aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
-            confcom      - enable confcom addon, this will enable SGX device plugin by default.
+            - http_application_routing : configure ingress with automatic public DNS name creation.
+            - monitoring               : turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
+                                         Specify "--workspace-resource-id" to use an existing workspace.
+                                         If monitoring addon is enabled --no-wait argument will have no effect
+            - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                                         Learn more at aka.ms/aks/policy.
+            - virtual-node             : enable AKS Virtual Node.
+                                         Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+                                         aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
+            - confcom                  : enable confcom addon, this will enable SGX device plugin by default.
+            - open-service-mesh        : enable Open Service Mesh addon.
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -464,6 +465,12 @@ parameters:
   - name: --disable-local-accounts
     type: bool
     short-summary: If set to true, getting static credential will be disabled for this cluster.
+  - name: --tags
+    type: string
+    short-summary: The tags of the managed cluster. The managed cluster instance and all resources managed by the cloud provider will be tagged.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -513,6 +520,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --location <location> --kubernetes-version 1.20.7 --edge-zone <edge-zone-name>
   - name: Create a kubernetes cluster with a specific OS SKU
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu
+  - name: Create a kubernetes cluster with custom tags
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --tags "foo=bar" "baz=qux"
+  - name: Create a kubernetes cluster with custom headers
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
 """
 
 helps['aks update'] = """
@@ -625,6 +636,12 @@ parameters:
   - name: --enable-local-accounts
     type: bool
     short-summary: If set to true, will enable getting static credential for this cluster.
+  - name: --tags
+    type: string
+    short-summary: The tags of the managed cluster. The managed cluster instance and all resources managed by the cloud provider will be tagged.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -662,6 +679,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-rbac
   - name: Disable Azure RBAC in a managed AAD AKS cluster
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-rbac
+  - name: Update the tags of a kubernetes cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --tags "foo=bar" "baz=qux"
+  - name: Update a kubernetes cluster with custom headers
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
 """
 
 helps['aks delete'] = """
@@ -691,13 +712,14 @@ type: command
 short-summary: Enable Kubernetes addons.
 long-summary: |-
     These addons are available:
-        http_application_routing - configure ingress with automatic public DNS name creation.
-        monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
-                     If monitoring addon is enabled --no-wait argument will have no effect
-        virtual-node - enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-        azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
-                     Learn more at aka.ms/aks/policy.
-        ingress-appgw - enable Application Gateway Ingress Controller addon.
+        - http_application_routing : configure ingress with automatic public DNS name creation.
+        - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+                                     If monitoring addon is enabled --no-wait argument will have no effect
+        - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+        - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                                     Learn more at aka.ms/aks/policy.
+        - ingress-appgw            : enable Application Gateway Ingress Controller addon.
+        - open-service-mesh        : enable Open Service Mesh addon.
 parameters:
   - name: --addons -a
     type: string
@@ -729,6 +751,9 @@ examples:
     crafted: true
   - name: Enable ingress-appgw addon with subnet prefix.
     text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.2.0.0/16 --appgw-name gateway
+    crafted: true
+  - name: Enable open-service-mesh addon.
+    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons open-service-mesh
     crafted: true
 """
 
