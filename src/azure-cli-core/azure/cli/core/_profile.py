@@ -142,12 +142,7 @@ class Profile:
               use_cert_sn_issuer=None,
               **kwargs):
         """
-        For service principal credential, specify `password` as a dict like below. Only one key can exist:
-            {
-                'secret': 'my_secret',
-                'certificate': '/path/to/cert.pem',
-                'client_assertion': 'my_token'
-            }
+        For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
         if not scopes:
             scopes = self._arm_scope

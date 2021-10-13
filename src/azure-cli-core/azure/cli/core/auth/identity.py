@@ -52,9 +52,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
 
         config_dir = get_config_dir()
-        self._token_cache_file = os.path.join(config_dir, "tokenCache")
-        self._secret_file = os.path.join(config_dir, "secrets")
-        self._http_cache_file = os.path.join(config_dir, "msalHttpCache")
+        self._token_cache_file = os.path.join(config_dir, "msal_token_cache")
+        self._secret_file = os.path.join(config_dir, "service_principal_entries")
+        self._http_cache_file = os.path.join(config_dir, "msal_http_cache")
 
         # Prepare HTTP cache.
         # https://github.com/AzureAD/microsoft-authentication-library-for-python/pull/407
@@ -134,12 +134,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def login_with_service_principal(self, client_id, credential, scopes=None):
         """
-        'credential' is a dict like below. Only one key can exist:
-        {
-            'secret': 'my_secret',
-            'certificate': '/path/to/cert.pem',
-            'client_assertion': 'my_federated_token'
-        }
+        `credential` is a dict returned by ServicePrincipalAuth.build_credential
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
 
@@ -228,7 +223,7 @@ class ServicePrincipalAuth:
     def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
-            'secret': 'my_secret',
+            'client_secret': 'my_secret',
             'certificate': '/path/to/cert.pem',
             'client_assertion': 'my_federated_token'
         }
