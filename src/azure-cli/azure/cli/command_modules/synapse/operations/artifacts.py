@@ -8,13 +8,14 @@ import logging
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
-                                            NotebookResource, SparkJobDefinition)
+                                            NotebookResource, SparkJobDefinition, SqlScriptResource, SqlScriptFolder,
+                                            SqlScriptContent, SqlScriptMetadata, SqlScript, SqlConnection)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
                                cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool,
-                               cf_synapse_spark_job_definition, cf_synapse_library)
+                               cf_synapse_spark_job_definition, cf_synapse_library, cf_synapse_sql_script)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
@@ -461,3 +462,53 @@ def create_or_update_spark_job_definition(cmd, workspace_name, spark_job_definit
     properties = SparkJobDefinition.from_dict(definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_spark_job_definition,
                        spark_job_definition_name, properties, polling=True)
+
+
+def list_sql_scripts(cmd, workspace_name):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    return client.get_sql_scripts_by_workspace()
+
+
+def get_sql_script(cmd, workspace_name, sql_script_name):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    return client.get_sql_scripts_by_workspace(sql_script_name)
+
+
+def delete_sql_script(cmd, workspace_name, sql_script_name, no_wait=False):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    return sdk_no_wait(no_wait, client.begin_delete_sql_script, sql_script_name, polling=True)
+
+
+def rename_sql_script(cmd, workspace_name, sql_script_name, new_name=None, no_wait=False):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    return sdk_no_wait(no_wait, client.begin_rename_sql_script, sql_script_name, new_name, polling=True)
+
+
+def create_or_update_sql_script(cmd, workspace_name, sql_script_name, query, result_limit=-1,
+                                folder_name=None, description=None, sqlpool_name=None,
+                                sqlpool_type=None, database_name=None, additional_properties=None,
+                                no_wait=False):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    type = 'SqlQuery'
+    if sqlpool_name.lower() == 'build-in':
+        sqlpool_type = 'SqlOnDemand'
+    else:
+        sqlpool_type = 'SqlPool'
+    current_connection = SqlConnection(type=sqlpool_type,
+                                       pool_name=sqlpool_name,
+                                       database_name=database_name)
+    SqlScriptMetadata = SqlScriptMetadata(language='sql')
+    SqlScriptContent = SqlScriptContent(query=query,
+                                        current_connection=current_connection,
+                                        result_limit=result_limit,
+                                        metadata=SqlScriptMetadata)
+    SqlScriptFolder = SqlScriptFolder(name=folder_name)
+    properties = SqlScript(SqlScriptContent,
+                           additional_properties,
+                           description,
+                           type,
+                           SqlScriptContent,
+                           SqlScriptFolder)
+    sql_script = SqlScriptResource(name=sql_script_name, properties=properties)
+    return sdk_no_wait(no_wait, client.begin_create_or_update_sql_script,
+                       sql_script_name, sql_script, polling=True)

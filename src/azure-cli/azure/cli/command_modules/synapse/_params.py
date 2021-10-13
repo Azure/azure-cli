@@ -953,3 +953,6 @@ def load_arguments(self, _):
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('spark_job_definition_name', options_list=['--name', '-n'], help='The spark job definition name')
             c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    with self.argument_context('synapse sql-script create') as c:
+        c.argument('query', help='SQL script query')
