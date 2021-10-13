@@ -471,7 +471,7 @@ def list_sql_scripts(cmd, workspace_name):
 
 def get_sql_script(cmd, workspace_name, sql_script_name):
     client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
-    return client.get_sql_scripts_by_workspace(sql_script_name)
+    return client.get_sql_script(sql_script_name)
 
 
 def delete_sql_script(cmd, workspace_name, sql_script_name, no_wait=False):
@@ -484,12 +484,13 @@ def rename_sql_script(cmd, workspace_name, sql_script_name, new_name=None, no_wa
     return sdk_no_wait(no_wait, client.begin_rename_sql_script, sql_script_name, new_name, polling=True)
 
 
-def create_or_update_sql_script(cmd, workspace_name, sql_script_name, query, result_limit=-1,
+def create_or_update_sql_script(cmd, workspace_name, sql_script_name, query_file, result_limit=-1,
                                 folder_name=None, description=None, sqlpool_name=None,
                                 sqlpool_type=None, database_name=None, additional_properties=None,
                                 no_wait=False):
     client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
-    type = 'SqlQuery'
+    with open(query_file, 'rb') as stream:
+        query = stream.read()
     if sqlpool_name.lower() == 'build-in':
         sqlpool_type = 'SqlOnDemand'
     else:
@@ -497,18 +498,16 @@ def create_or_update_sql_script(cmd, workspace_name, sql_script_name, query, res
     current_connection = SqlConnection(type=sqlpool_type,
                                        pool_name=sqlpool_name,
                                        database_name=database_name)
-    SqlScriptMetadata = SqlScriptMetadata(language='sql')
-    SqlScriptContent = SqlScriptContent(query=query,
+    SqlScriptContentinfo = SqlScriptContent(query=query,
                                         current_connection=current_connection,
                                         result_limit=result_limit,
-                                        metadata=SqlScriptMetadata)
-    SqlScriptFolder = SqlScriptFolder(name=folder_name)
-    properties = SqlScript(SqlScriptContent,
-                           additional_properties,
-                           description,
-                           type,
-                           SqlScriptContent,
-                           SqlScriptFolder)
+                                        metadata=SqlScriptMetadata(language='sql'))
+    SqlScriptFolderinfo = SqlScriptFolder(name=folder_name)
+    properties = SqlScript(additional_properties=additional_properties,
+                           description=description,
+                           type='SqlQuery',
+                           content=SqlScriptContentinfo,
+                           folder=SqlScriptFolderinfo)
     sql_script = SqlScriptResource(name=sql_script_name, properties=properties)
     return sdk_no_wait(no_wait, client.begin_create_or_update_sql_script,
                        sql_script_name, sql_script, polling=True)
