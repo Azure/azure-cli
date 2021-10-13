@@ -51,6 +51,7 @@ from azure.cli.command_modules.acs.custom import (
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
 )
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -3495,6 +3496,44 @@ class AKSContext:
         # this parameter does not need validation
         return edge_zone
 
+    def get_aks_custom_headers(self) -> Dict[str, str]:
+        """Obtain the value of aks_custom_headers.
+
+        Note: aks_custom_headers will not be decorated into the `mc` object.
+
+        This function will normalize the parameter by default. It will call "extract_comma_separated_string" to extract
+        comma-separated key value pairs from the string.
+
+        :return: dictionary
+        """
+        # read the original value passed by the command
+        aks_custom_headers = self.raw_param.get("aks_custom_headers")
+        # normalize user-provided header
+        # usually the purpose is to enable (preview) features through AKSHTTPCustomFeatures
+        aks_custom_headers = extract_comma_separated_string(
+            aks_custom_headers,
+            enable_strip=True,
+            extract_kv=True,
+            default_value={},
+        )
+
+        # In create mode, add AAD session key to header.
+        # If the service principal is not dynamically generated (this could happen when the cluster enables managed
+        # identity or the user explicitly provides a service principal), we will not have an AAD session key. In this
+        # case, the header is useless and that's OK to not add this header.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.service_principal_profile is not None:
+                aks_custom_headers.update(
+                    {
+                        "Ocp-Aad-Session-Key": self.get_intermediate(
+                            "aad_session_key"
+                        )
+                    }
+                )
+
+        # this parameter does not need validation
+        return aks_custom_headers
+
     def get_disable_local_accounts(self) -> bool:
         """Obtain the value of disable_local_accounts.
 
@@ -4233,26 +4272,6 @@ class AKSCreateDecorator:
             )
         return mc
 
-    def build_custom_headers(self, mc: ManagedCluster) -> None:
-        """Build a dictionary contains custom headers.
-
-        This function will store an intermediate custom_headers.
-
-        :return: None
-        """
-        if not isinstance(mc, self.models.ManagedCluster):
-            raise CLIInternalError(
-                "Unexpected mc object with type '{}'.".format(type(mc))
-            )
-
-        # Add AAD session key to header.
-        # If principal_obj is None, we will not add this header, this can happen when the cluster enables managed
-        # identity. In this case, the header is useless and that's OK to not add this header.
-        custom_headers = None
-        if mc.service_principal_profile:
-            custom_headers = {'Ocp-Aad-Session-Key': self.context.get_intermediate("aad_session_key")}
-        self.context.set_intermediate("custom_headers", custom_headers, overwrite_exists=True)
-
     def construct_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -4295,8 +4314,6 @@ class AKSCreateDecorator:
         mc = self.set_up_sku(mc)
         # set up extended location
         mc = self.set_up_extended_location(mc)
-        # build custom header
-        self.build_custom_headers(mc)
         return mc
 
     def create_mc(self, mc: ManagedCluster) -> ManagedCluster:
@@ -4332,7 +4349,7 @@ class AKSCreateDecorator:
                     self.context.get_vnet_subnet_id(),
                     self.context.get_enable_managed_identity(),
                     self.context.get_attach_acr(),
-                    self.context.get_intermediate("custom_headers"),
+                    self.context.get_aks_custom_headers(),
                     self.context.get_no_wait())
                 return created_cluster
             except CloudError as ex:
