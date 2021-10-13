@@ -1011,6 +1011,7 @@ def _validate_vm_create_nics(cmd, namespace):
     namespace.public_ip_address_type = None
     logger.debug('existing NIC(s) will be used')
 
+
 def _validate_vm_nic_delete_option(namespace):
     if not namespace.nics and namespace.nic_delete_option:
         if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
@@ -1022,6 +1023,7 @@ def _validate_vm_nic_delete_option(namespace):
                                             "--nics nic1 nic2 --nic-delete-option nic1=Delete nic2=Detach or specify "
                                             "delete option for all: --nics nic1 nic2 --nic-delete-option Delete or "
                                             "specify delete option for the new nic created: --nic-delete-option Delete")
+
 
 def _validate_vm_vmss_create_auth(namespace, cmd=None):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
