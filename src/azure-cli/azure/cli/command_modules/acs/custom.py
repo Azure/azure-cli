@@ -43,6 +43,7 @@ from msrestazure.azure_exceptions import CloudError
 import requests
 
 # pylint: disable=no-name-in-module,import-error
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
@@ -2085,7 +2086,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                disable_local_accounts=False,
                no_wait=False,
                yes=False,
-               enable_azure_rbac=False):
+               enable_azure_rbac=False,
+               aks_custom_headers=None):
     # get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
@@ -2533,14 +2535,22 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             type=ExtendedLocationTypes.EDGE_ZONE
         )
 
+    # normalize user-provided header
+    # usually the purpose is to enable (preview) features through AKSHTTPCustomFeatures
+    custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+
     # Add AAD session key to header.
     # If principal_obj is None, we will not add this header, this can happen
     # when the cluster enables managed identity. In this case, the header is useless
     # and that's OK to not add this header
-    custom_headers = None
     if principal_obj:
-        custom_headers = {
-            'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")}
+        custom_headers.update({
+            'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")})
 
     # Due to SPN replication latency, we do a few retries here
     max_retry = 30
@@ -2824,7 +2834,8 @@ def aks_update(cmd, client, resource_group_name, name,
                disable_public_fqdn=False,
                enable_azure_rbac=False,
                disable_azure_rbac=False,
-               tags=None):
+               tags=None,
+               aks_custom_headers=None):
     ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                        operation_group='managed_clusters')
@@ -3143,6 +3154,15 @@ def aks_update(cmd, client, resource_group_name, name,
             instance.addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME +
                                     'Linux'].enabled
 
+    # normalize user-provided header
+    # usually the purpose is to enable (preview) features through AKSHTTPCustomFeatures
+    custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+
     return _put_managed_cluster_ensuring_permission(
         cmd,
         client,
@@ -3157,7 +3177,7 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.agent_pool_profiles[0].vnet_subnet_id,
         _is_msi_cluster(instance),
         attach_acr,
-        None,
+        custom_headers,
         no_wait)
 
 
