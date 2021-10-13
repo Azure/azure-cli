@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from argparse import Namespace
 import re
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -373,10 +372,10 @@ def _validate_start_and_end_ip_address_order(start_ip, end_ip):
     end_ip_elements = end_ip.split('.')
 
     for idx in range(4):
+        if start_ip_elements[idx] < end_ip_elements[idx]:
+            break
         if start_ip_elements[idx] > end_ip_elements[idx]:
             raise ArgumentUsageError("The end IP address is smaller than the start IP address.")
-        elif start_ip_elements[idx] < end_ip_elements[idx]:
-            break
 
 
 def _validate_ip(ips):

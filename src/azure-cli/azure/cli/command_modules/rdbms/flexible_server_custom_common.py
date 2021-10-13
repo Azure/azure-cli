@@ -238,11 +238,11 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
 
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
     # allow access to azure ip addresses
-    cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name  # NOQA pylint: disable=unused-variable
+    cf_firewall = db_context.cf_firewall  # NOQA pylint: disable=unused-variable
     firewall_client = cf_firewall(cmd.cli_ctx, None)
     firewall = firewall_rule_create_func(firewall_client, resource_group_name, server_name,
                                          start_ip_address=start_ip, end_ip_address=end_ip)
-    # return firewall.result().name
+    return firewall.result().name
 
 
 def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
