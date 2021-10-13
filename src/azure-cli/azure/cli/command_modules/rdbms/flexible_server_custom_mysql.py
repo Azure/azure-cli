@@ -129,7 +129,7 @@ def flexible_server_create(cmd, client,
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
-        firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+        firewall_name = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     # Create mysql database if it does not exist
     if database_name is None:
@@ -153,7 +153,7 @@ def flexible_server_create(cmd, client,
     return _form_response(user, sku, loc, server_id, host, version,
                           administrator_login_password if administrator_login_password is not None else '*****',
                           _create_mysql_connection_string(host, database_name, user, administrator_login_password),
-                          database_name, firewall_id, subnet_id)
+                          database_name, firewall_name, subnet_id)
 
 
 def flexible_server_restore(cmd, client,

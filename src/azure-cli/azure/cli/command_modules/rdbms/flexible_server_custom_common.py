@@ -49,7 +49,8 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
 
     if end_ip_address is None and start_ip_address is not None:
         end_ip_address = start_ip_address
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip_address)
+    elif start_ip_address is None and end_ip_address is not None:
+        start_ip_address = end_ip_address
 
     if firewall_rule_name is None:
         now = datetime.now()
@@ -60,8 +61,9 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
                            'Azure resources...')
             firewall_rule_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month,
                                                                                                             now.day, now.hour,
-                                                                                                            now.minute,
-                                                                                                            now.second)
+                                                                                                            now.minute, now.second)
+        elif start_ip_address == end_ip_address:
+            logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip_address)
         else:
             if start_ip_address == '0.0.0.0' and end_ip_address == '255.255.255.255':
                 firewall_rule_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day,
@@ -237,35 +239,10 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
     # allow access to azure ip addresses
     cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name  # NOQA pylint: disable=unused-variable
-    now = datetime.now()
-    firewall_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                 now.second)
-    if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
-        logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
-                       'Azure resources...')
-        firewall_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month,
-                                                                                                   now.day, now.hour,
-                                                                                                   now.minute,
-                                                                                                   now.second)
-    elif start_ip == end_ip:
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip)
-    else:
-        if start_ip == '0.0.0.0' and end_ip == '255.255.255.255':
-            firewall_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                now.second)
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip,
-                       end_ip)
     firewall_client = cf_firewall(cmd.cli_ctx, None)
-
-    # Commenting out until firewall_id is properly returned from RP
-    # return resolve_poller(
-    #    firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
-    #    cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
-
-    firewall = firewall_rule_create_func(firewall_client, resource_group_name, server_name, firewall_rule_name=firewall_name,
+    firewall = firewall_rule_create_func(firewall_client, resource_group_name, server_name,
                                          start_ip_address=start_ip, end_ip_address=end_ip)
-
-    return firewall.result().name
+    # return firewall.result().name
 
 
 def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):

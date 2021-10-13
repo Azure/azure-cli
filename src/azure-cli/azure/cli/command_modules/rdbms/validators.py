@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from argparse import Namespace
+import re
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
@@ -348,6 +350,8 @@ def ip_address_validator(ns):
        (ns.start_ip_address and not _validate_ip(ns.start_ip_address)):
         raise CLIError('Incorrect value for ip address. '
                        'Ip address should be IPv4 format. Example: 12.12.12.12. ')
+    if ns.start_ip_address and ns.end_ip_address:
+        _validate_start_and_end_ip_address_order(ns.start_ip_address, ns.end_ip_address)
 
 
 def public_access_validator(ns):
@@ -359,6 +363,20 @@ def public_access_validator(ns):
                            'Acceptable values are \'all\', \'none\',\'<startIP>\' and '
                            '\'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from '
                            '0.0.0.0 to 255.255.255.255')
+        if len(val.split('-')) == 2:
+            vals = val.split('-')
+            _validate_start_and_end_ip_address_order(vals[0], vals[1])
+
+
+def _validate_start_and_end_ip_address_order(start_ip, end_ip):
+    start_ip_elements = start_ip.split('.')
+    end_ip_elements = end_ip.split('.')
+
+    for idx in range(4):
+        if start_ip_elements[idx] > end_ip_elements[idx]:
+            raise ArgumentUsageError("The end IP address is smaller than the start IP address.")
+        elif start_ip_elements[idx] < end_ip_elements[idx]:
+            break
 
 
 def _validate_ip(ips):
@@ -389,6 +407,12 @@ def _valid_range(addr_range):
     if 0 <= addr_range <= 255:
         return True
     return False
+
+
+def firewall_rule_name_validator(ns):
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
+        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\' "
+                              "and the name cannot exceed 126 characters. ")
 
 
 def validate_server_name(db_context, server_name, type_):

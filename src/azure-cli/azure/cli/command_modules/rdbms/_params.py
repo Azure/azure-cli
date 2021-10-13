@@ -15,7 +15,8 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
-    tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, retention_validator
+    tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
+    retention_validator, firewall_rule_name_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -540,7 +541,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         for scope in ['create', 'delete', 'show', 'update']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'],
+                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'], validator=firewall_rule_name_validator,
                            help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
                 c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
                            help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
@@ -559,7 +560,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server db list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-            c.argument('database_name', id_part=None, arg_type=database_name_arg_type)
 
         with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
             c.argument('charset', help='The charset of the database. The default value is UTF8')
