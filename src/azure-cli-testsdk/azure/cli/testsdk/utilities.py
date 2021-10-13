@@ -200,12 +200,12 @@ class GeneralNameReplacer(_BuggyGeneralNameReplacer):
         return request
 
 
-class MsalAuthRequestFilter(RecordingProcessor):
+class AADAuthRequestFilter(RecordingProcessor):
     """Remove oauth authentication requests and responses from recording.
     This is a patch for azure_devtools.scenario_tests.recording_processors.OAuthRequestResponsesFilter
     """
     def process_request(self, request):
-        # filter MSAL requests like:
+        # filter AAD requests like:
         # Tenant discovery: GET
         # https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/v2.0/.well-known/openid-configuration
         # Get access token: POST
