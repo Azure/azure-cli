@@ -4695,62 +4695,53 @@ class DedicatedHostScenarioTest(ScenarioTest):
         })
 
         self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
-                 '--host {host_id} --generate-ssh-keys --admin-username azureuser --nsg-rule NONE')
+                 '--generate-ssh-keys --admin-username azureuser --nsg-rule NONE')
 
         # validate resources created successfully
         vm_json = self.cmd('vm show -n {vm-name} -g {rg}', checks=[
             self.check('name', '{vm-name}'),
             self.check('provisioningState', 'Succeeded')
         ]).get_output_in_json()
+        self.assertEqual(vm_json['host'], None)
 
-        host_json = self.cmd('vm host show --name {host-name} --host-group {host-group} -g {rg}', checks=[
-            self.check('name', '{host-name}'),
-        ]).get_output_in_json()
-
-        host_group_json = self.cmd('vm host group show --name {host-group} -g {rg}', checks=[
-            self.check('name', '{host-group}'),
-        ]).get_output_in_json()
-
-        self.assertTrue(vm_json['host']['id'].lower(), host_json['id'].lower())
-        self.assertTrue(host_json['virtualMachines'][0]['id'].lower(), vm_json['id'].lower())
-        self.assertTrue(host_group_json['hosts'][0]['id'].lower(), host_json['id'].lower())
-
+        # validate none host to host
         self.cmd('vm deallocate -n {vm-name} -g {rg}')
-        # self.cmd('vm update -n {vm-name} -g {rg} --host {host2_id}')
+        self.cmd('vm update -n {vm-name} -g {rg} --host {host_id} --set tags.tagName=tagValue')
+        self.cmd('vm start -n {vm-name} -g {rg}')
+
+        self.cmd('vm show -n {vm-name} -g {rg}', checks=[
+            self.check('name', '{vm-name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check_pattern('host.id', '.*/{host-name}$'),
+            # Test --update multiple arguments
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # validate host to host2
+        self.cmd('vm deallocate -n {vm-name} -g {rg}')
         self.cmd('vm update -n {vm-name} -g {rg} --host {host2_id} --set tags.tagName=tagValue')
         self.cmd('vm start -n {vm-name} -g {rg}')
 
-        # validate resources created successfully
-        vm_json = self.cmd('vm show -n {vm-name} -g {rg}', checks=[
+        self.cmd('vm show -n {vm-name} -g {rg}', checks=[
             self.check('name', '{vm-name}'),
             self.check('provisioningState', 'Succeeded'),
+            self.check_pattern('host.id', '.*/{host2-name}$'),
             # Test --update multiple arguments
             self.check('tags.tagName', 'tagValue'),
-        ]).get_output_in_json()
-
-        host_json = self.cmd('vm host show --name {host2-name} --host-group {host2-group} -g {rg}', checks=[
-            self.check('name', '{host2-name}'),
-        ]).get_output_in_json()
-
-        host_group_json = self.cmd('vm host group show --name {host2-group} -g {rg}', checks=[
-            self.check('name', '{host2-group}'),
-        ]).get_output_in_json()
-
-        self.assertTrue(vm_json['host']['id'].lower(), host_json['id'].lower())
-        self.assertTrue(host_json['virtualMachines'][0]['id'].lower(), vm_json['id'].lower())
-        self.assertTrue(host_group_json['hosts'][0]['id'].lower(), host_json['id'].lower())
+        ])
 
         # delete resources (test vm host delete commands)
+        # Service has problem. It is not deleted yet but it returns.
         self.cmd('vm delete --name {vm-name} -g {rg} --yes')
         time.sleep(30)
         self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg} --yes')
-        # Service has problem. It is not deleted yet but it returns.
         time.sleep(30)
         self.cmd('vm host delete --name {host2-name} --host-group {host2-group} -g {rg} --yes')
         time.sleep(30)
         self.cmd('vm host group delete --name {host-group} -g {rg} --yes')
         time.sleep(30)
         self.cmd('vm host group delete --name {host2-group} -g {rg} --yes')
+        time.sleep(30)
 
         # Test --automatic-placement
         self.cmd('vm host group create -n {host-group} -c 1 -g {rg} --automatic-placement', checks=[
@@ -4765,32 +4756,77 @@ class DedicatedHostScenarioTest(ScenarioTest):
             'host_id': host_id,
             'host2_id': host2_id
         })
-        self.cmd('vm create -g {rg} -n vm1 --image centos --host {host_id} --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
-        self.cmd('vm create -g {rg} -n vm2 --image centos --host-group {host-group} --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm create -g {rg} -n vm1 --image centos --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm create -g {rg} -n vm2 --image centos --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm show -g {rg} -n vm1', checks=[
+            self.check('host', None)
+        ])
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check('hostGroup', None)
+        ])
+
+        # validate none host to host
+        self.cmd('vm deallocate -n vm1 -g {rg}')
+        self.cmd('vm update -n vm1 -g {rg} --host {host_id}')
+        self.cmd('vm start -n vm1 -g {rg}')
         self.cmd('vm show -g {rg} -n vm1', checks=[
             self.check_pattern('host.id', '.*/{host-name}$')
         ])
-        self.cmd('vm show -g {rg} -n vm2', checks=[
-            self.check_pattern('hostGroup.id', '.*/{host-group}$')
-        ])
+
+        # validate host to host2
         self.cmd('vm deallocate -n vm1 -g {rg}')
         self.cmd('vm update -n vm1 -g {rg} --host {host2_id}')
         self.cmd('vm start -n vm1 -g {rg}')
         self.cmd('vm show -g {rg} -n vm1', checks=[
             self.check_pattern('host.id', '.*/{host2-name}$')
         ])
+
+        # validate none group to group
+        self.cmd('vm deallocate -n vm2 -g {rg}')
+        self.cmd('vm update -n vm2 -g {rg} --host-group {host-group}')
+        self.cmd('vm start -n vm2 -g {rg}')
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check_pattern('hostGroup.id', '.*/{host-group}$')
+        ])
+
+        # validate group to group2
         self.cmd('vm deallocate -n vm2 -g {rg}')
         self.cmd('vm update -n vm2 -g {rg} --host-group {host2-group}')
         self.cmd('vm start -n vm2 -g {rg}')
         self.cmd('vm show -g {rg} -n vm2', checks=[
             self.check_pattern('hostGroup.id', '.*/{host2-group}$')
         ])
+
+        # validate group2 to host
+        self.cmd('vm deallocate -n vm2 -g {rg}')
+        self.cmd('vm update -n vm2 -g {rg} --host {host_id}')
+        self.cmd('vm start -n vm2 -g {rg}')
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check_pattern('host.id', '.*/{host-name}$')
+        ])
+
+        # validate host to group2
+        self.cmd('vm deallocate -n vm2 -g {rg}')
+        self.cmd('vm update -n vm2 -g {rg} --host-group {host2-group}')
+        self.cmd('vm start -n vm2 -g {rg}')
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check_pattern('hostGroup.id', '.*/{host2-group}$')
+        ])
+
+        # delete resources (test vm host delete commands)
+        # Service has problem. It is not deleted yet but it returns.
         self.cmd('vm delete --name vm1 -g {rg} --yes')
+        time.sleep(30)
         self.cmd('vm delete --name vm2 -g {rg} --yes')
+        time.sleep(30)
         self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg} --yes')
+        time.sleep(30)
         self.cmd('vm host delete --name {host2-name} --host-group {host2-group} -g {rg} --yes')
+        time.sleep(30)
         self.cmd('vm host group delete --name {host-group} -g {rg} --yes')
+        time.sleep(30)
         self.cmd('vm host group delete --name {host2-group} -g {rg} --yes')
+        time.sleep(30)
 # endregion
 
 
