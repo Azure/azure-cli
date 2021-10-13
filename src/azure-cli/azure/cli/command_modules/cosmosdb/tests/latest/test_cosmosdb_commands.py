@@ -1356,7 +1356,7 @@ class CosmosDBTests(ScenarioTest):
         assert db_througput_update["resource"]["throughput"] == tp2
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_key_vault_key_uri')
-    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
     def test_cosmosdb_key_vault_key_uri(self, resource_group, key_vault):
         key_name = self.create_random_name(prefix='cli', length=15)
         key_uri = "https://{}.vault.azure.net/keys/{}".format(key_vault, key_name)
