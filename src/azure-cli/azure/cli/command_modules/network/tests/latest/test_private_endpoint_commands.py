@@ -2409,5 +2409,62 @@ class NetworkPrivateLinkHDInsightScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}', expect_failure=True)
 
 
+class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_acfr_plr')
+    def test_private_link_resource_acfr(self, resource_group):
+        self.kwargs.update({
+            'cache_name': self.create_random_name('cli-test-acfr-plr', 28),
+            'loc': 'eastus'
+        })
+        self.cmd('az redis create --location {loc} --name {cache_name} --resource-group {rg} --sku Basic --vm-size c0')
+
+        self.cmd('network private-link-resource list --name {cache_name} -g {rg} --type Microsoft.Cache/Redis' , checks=[
+            self.check('length(@)', 1)]) #####
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_acfr_pe')
+    def test_private_endpoint_connection_acfr(self,resource_group):
+        self.kwargs.update({
+            'cache_name': self.create_random_name('cli-test-acfr-pe-', 28),
+            'loc': 'westus',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        # Prepare Redis Cache and network
+        cache = self.cmd('az redis create --location {loc} --name {cache_name} --resource-group {rg} --sku Standard --vm-size c1').get_output_in_json()
+        self.kwargs['acfr_id'] = cache['id'] 
+    
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+        
+        # Waiting for Cache creation
+        if self.is_live:
+            time.sleep(25 * 60)
+
+        # Creating Private Endpoint
+        pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} --connection-name {pe_connection} --private-connection-resource-id {acfr_id} --group-id redisCache').get_output_in_json() 
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Test get connection details of private endpoint
+        results = self.kwargs['pe_id'].split('/')
+        self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/privateEndpoints/{2}'.format(results[2], results[4], results[-1])
+        
+        self.cmd('az network private-endpoint show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+
+        self.cmd(
+            'az network private-endpoint show --resource-group {rg} --name {pe_name}',
+            checks=self.check('name', '{pe_name}'))
+        
+        # Test delete
+        self.cmd('az network private-endpoint delete --id {pec_id}')
+
 if __name__ == '__main__':
     unittest.main()
