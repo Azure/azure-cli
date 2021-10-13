@@ -117,12 +117,11 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==19.0.0',
-    # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=2.0.0b1',
     'azure-mgmt-servicebus~=6.0.0',
-    'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
+    'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=1.0.0b1',
     'azure-mgmt-sql~=3.0.1',
@@ -130,12 +129,13 @@ DEPENDENCIES = [
     'azure-mgmt-synapse~=2.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=4.0.0',
-    'azure-multiapi-storage~=0.6.2',
+    'azure-multiapi-storage~=0.7.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.8.0',
-    'azure-synapse-spark~=0.2.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
+    'azure-synapse-spark~=0.2.0',
+    'chardet~=3.0.4',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
     'jsondiff~=1.2.0',
@@ -145,10 +145,10 @@ DEPENDENCIES = [
     'pytz==2019.1',
     'scp~=0.13.2',
     'semver==2.13.0',
+    'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     'websocket-client~=0.56.0',
-    'xmltodict~=0.12',
-    'chardet~=3.0.4'
+    'xmltodict~=0.12'
 ]
 
 # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked

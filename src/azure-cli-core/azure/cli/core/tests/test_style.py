@@ -64,6 +64,12 @@ class TestStyle(unittest.TestCase):
             (Style.ACTION, "Blue: Commands, parameters, and system inputs")
         ]
 
+        # Try to delete _is_legacy_powershell cache
+        try:
+            delattr(format_styled_text, '_is_legacy_powershell')
+        except AttributeError:
+            pass
+
         # When theme is 'none', no need to call is_modern_terminal and get_parent_proc_name
         formatted = format_styled_text(styled_text, theme='none')
         is_modern_terminal_mock.assert_not_called()
