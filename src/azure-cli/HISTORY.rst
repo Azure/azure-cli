@@ -6,10 +6,6 @@ Release History
 2.29.0
 ++++++
 
-**DMS**
-
-* `az dms project create/az dms project task create`: Add MySQL projects/tasks for offline migrations. (#19634)
-
 **AKS**
 
 * `az aks check-acr`: Bump canipull to 0.0.3 alpha to support sovereign cloud (#19616)
