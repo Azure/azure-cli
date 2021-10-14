@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.mgmt.web.models import StaticSiteCustomDomainRequestPropertiesARMResource
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
 from knack.util import CLIError
@@ -89,10 +91,16 @@ def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    client.validate_custom_domain_can_be_added_to_static_site(resource_group_name, name, hostname)
+    # TODO check if validation method is right
+    validation_method = "dns-txt-token"
+    domain_envelope = StaticSiteCustomDomainRequestPropertiesARMResource(validation_method=validation_method)
 
-    return sdk_no_wait(no_wait, client.create_or_update_static_site_custom_domain,
-                       resource_group_name=resource_group_name, name=name, domain_name=hostname)
+    client.begin_validate_custom_domain_can_be_added_to_static_site(resource_group_name,
+                                                                           name, hostname, domain_envelope)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update_static_site_custom_domain,
+                       resource_group_name=resource_group_name, name=name, domain_name=hostname,
+                       static_site_custom_domain_request_properties_envelope=domain_envelope)
 
 
 def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False):
@@ -101,7 +109,7 @@ def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_w
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
     logger.warning("After deleting a custom domain, there can be a 15 minute delay for the change to propagate.")
-    return sdk_no_wait(no_wait, client.delete_static_site_custom_domain,
+    return sdk_no_wait(no_wait, client.begin_delete_static_site_custom_domain,
                        resource_group_name=resource_group_name, name=name, domain_name=hostname)
 
 
