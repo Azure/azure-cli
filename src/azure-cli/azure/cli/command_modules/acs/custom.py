@@ -3385,17 +3385,7 @@ def _get_command_context(command_files):
 
 def _get_dataplane_aad_token(cli_ctx, serverAppId):
     # this function is mostly copied from keyvault cli
-    import adal
-    try:
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=serverAppId)[0][2].get('accessToken')
-    except adal.AdalError as err:
-        # pylint: disable=no-member
-        if (hasattr(err, 'error_response') and
-                ('error_description' in err.error_response) and
-                ('AADSTS70008:' in err.error_response['error_description'])):
-            raise CLIError(
-                "Credentials have expired due to inactivity. Please run 'az login'")
-        raise CLIError(err)
+    return Profile(cli_ctx=cli_ctx).get_raw_token(resource=serverAppId)[0][2].get('accessToken')
 
 
 DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
