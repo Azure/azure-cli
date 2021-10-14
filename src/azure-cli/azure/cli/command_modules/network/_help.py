@@ -2848,8 +2848,7 @@ examples:
   - name: Add connection config to ExpressRoute circuit connection.
     text: |
         az network express-route peering connection config add -g MyResourceGroup --circuit-name \\
-            MyCircuit --peering-name AzurePrivatePeering -n myConnection --peer-circuit \\
-            MyOtherCircuit --address-prefix .../125 --address-prefix-type IPv6
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection --address-prefix .../125 --address-prefix-type IPv6
 """
 
 helps['network express-route peering connection config remove'] = """
@@ -2859,8 +2858,7 @@ examples:
   - name: Remove connection config to ExpressRoute circuit connection.
     text: |
         az network express-route peering connection config remove -g MyResourceGroup --circuit-name \\
-            MyCircuit --peering-name AzurePrivatePeering -n myConnection --peer-circuit \\
-            MyOtherCircuit --address-prefix-type IPv6
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection --address-prefix-type IPv6
 """
 
 helps['network express-route peering create'] = """
