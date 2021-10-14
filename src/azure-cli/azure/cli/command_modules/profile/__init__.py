@@ -69,7 +69,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.ignore('_subscription')
 
         with self.argument_context('account list') as c:
-            c.argument('all', help="List all subscriptions, rather than just 'Enabled' ones", action='store_true')
+            c.argument('all', help="List all subscriptions from all clouds, rather than just 'Enabled' ones", action='store_true')
             c.argument('refresh', help="retrieve up-to-date subscriptions from server", action='store_true')
             c.ignore('_subscription')  # hide the global subscription parameter
 
