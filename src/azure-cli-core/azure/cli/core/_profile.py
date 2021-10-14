@@ -147,10 +147,7 @@ class Profile:
         if not scopes:
             scopes = self._arm_scope
 
-        # For ADFS, auth_tenant is 'adfs'
-        # https://github.com/Azure/azure-sdk-for-python/blob/661cd524e88f480c14220ed1f86de06aaff9a977/sdk/identity/azure-identity/CHANGELOG.md#L19
-        authority, auth_tenant = _detect_adfs_authority(self.cli_ctx.cloud.endpoints.active_directory, tenant)
-        identity = Identity(authority=authority, tenant_id=auth_tenant, client_id=client_id)
+        identity = Identity(self._authority, tenant_id=tenant, client_id=client_id)
 
         user_identity = None
         if interactive:
@@ -589,7 +586,7 @@ class Profile:
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         tenant_id = tenant_id if tenant_id else account[_TENANT_ID]
-        identity = Identity(client_id=client_id, authority=self._authority, tenant_id=tenant_id)
+        identity = Identity(self._authority, tenant_id=tenant_id, client_id=client_id)
 
         # User
         if user_type == _USER:
@@ -720,7 +717,7 @@ class SubscriptionFinder:
 
             logger.info("Finding subscriptions under tenant %s", t.tenant_id_name)
 
-            identity = Identity(self.authority, tenant_id)
+            identity = Identity(self.authority, tenant_id=tenant_id)
 
             specific_tenant_credential = identity.get_user_credential(username)
 

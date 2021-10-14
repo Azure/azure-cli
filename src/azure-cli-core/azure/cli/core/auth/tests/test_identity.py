@@ -7,7 +7,8 @@ import os
 import unittest
 from unittest import mock
 
-from azure.cli.core.auth.identity import Identity, ServicePrincipalAuth, ServicePrincipalStore
+from azure.cli.core.auth.identity import (Identity, ServicePrincipalAuth, ServicePrincipalStore,
+                                          _get_authority_url)
 from knack.util import CLIError
 
 
@@ -15,7 +16,7 @@ class TestIdentity(unittest.TestCase):
 
     def test_login_with_service_principal_certificate_cert_err(self):
         import os
-        identity = Identity()
+        identity = Identity('https://login.microsoftonline.com')
         current_dir = os.path.dirname(os.path.realpath(__file__))
         test_cert_file = os.path.join(current_dir, 'err_sp_cert.pem')
 
@@ -137,6 +138,34 @@ class TestMsalSecretStore(unittest.TestCase):
         secret_store = ServicePrincipalStore(None, None)
         secret_store.remove_entry('myapp')
         assert store._content == []
+
+
+class TestUtils(unittest.TestCase):
+
+    def test_get_authority_url(self):
+        # AAD
+        # Default tenant
+        self.assertEqual(_get_authority_url('https://login.microsoftonline.com', None),
+                         'https://login.microsoftonline.com/organizations')
+        # Trailing slash is stripped
+        self.assertEqual(_get_authority_url('https://login.microsoftonline.com/', None),
+                         'https://login.microsoftonline.com/organizations')
+        # Custom tenant
+        self.assertEqual(_get_authority_url('https://login.microsoftonline.com',
+                                            '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'),
+                         'https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
+
+        # ADFS
+        # Default tenant
+        self.assertEqual(_get_authority_url('https://adfs.redmond.azurestack.corp.microsoft.com/adfs', None),
+                         'https://adfs.redmond.azurestack.corp.microsoft.com/adfs')
+        # Trailing slash is stripped
+        self.assertEqual(_get_authority_url('https://adfs.redmond.azurestack.corp.microsoft.com/adfs/', None),
+                         'https://adfs.redmond.azurestack.corp.microsoft.com/adfs')
+        # Tenant ID is discarded
+        self.assertEqual(_get_authority_url('https://adfs.redmond.azurestack.corp.microsoft.com/adfs',
+                                            '601d729d-0000-0000-0000-000000000000'),
+                         'https://adfs.redmond.azurestack.corp.microsoft.com/adfs')
 
 
 class MemoryStore:
