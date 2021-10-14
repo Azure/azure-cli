@@ -1098,8 +1098,8 @@ class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
 
 
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_aad_admin(self, resource_group, server):
         self.kwargs.update({
             'rg': resource_group,
@@ -1118,23 +1118,33 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
                      self.check('login', '{user}'),
                      self.check('sid', '{oid}')])
 
+        print('Passed Create')
+
         self.cmd('sql server ad-admin list -s {sn} -g {rg}',
                  checks=[
                      self.check('[0].login', '{user}'),
                      self.check('[0].sid', '{oid}')])
+        
+        print('Passed List')
 
         self.cmd('sql server ad-admin update -s {sn} -g {rg}'
                  ' -u {user2} -i {oid2}',
                  checks=[
                      self.check('login', '{user2}'),
                      self.check('sid', '{oid2}')])
+        
+        print('Passed Update')
 
         self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
+
+        print('Passed Delete')
 
         self.cmd('sql server ad-admin list -s {sn} -g {rg}',
                  checks=[
                      self.check('[0].login', None),
                      self.check('[0].sid', None)])
+
+        print('Passed list2')
 
 
 class SqlServerADOnlyAuthScenarioTest(ScenarioTest):

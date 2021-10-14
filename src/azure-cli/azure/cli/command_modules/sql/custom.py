@@ -3691,6 +3691,8 @@ def server_ad_admin_set(
     kwargs['tenant_id'] = _get_tenant_id()
     kwargs['administrator_type'] = AdministratorType.ACTIVE_DIRECTORY
 
+    print("Creator")
+
     return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -3706,6 +3708,7 @@ def server_ad_admin_update(
     '''
     Updates a server' AD admin.
     '''
+    print("old Update")
 
     # Apply params to instance
     instance.login = login or instance.login
@@ -3722,6 +3725,8 @@ def server_ad_admin_update_setter(
     '''
     Updates a server' AD admin.
     '''
+
+    print("UpdateSetter")
     
     kwargs['tenant_id'] = _get_tenant_id()
     kwargs['administrator_type'] = AdministratorType.ACTIVE_DIRECTORY
@@ -3731,6 +3736,26 @@ def server_ad_admin_update_setter(
         resource_group_name=resource_group_name,
         administrator_name=AdministratorName.ACTIVE_DIRECTORY,
         parameters=kwargs)
+
+def server_ad_admin_update_getter(
+    client,
+    resource_group_name,
+    server_name,
+    **kwargs):
+    '''
+    Updates a server' AD admin.
+    '''
+
+    print("UpdateGetter")
+    
+    kwargs['tenant_id'] = _get_tenant_id()
+    kwargs['administrator_type'] = AdministratorType.ACTIVE_DIRECTORY
+
+    return client.get(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY)
+
 
 #####
 #           sql server firewall-rule
