@@ -817,6 +817,8 @@ def load_arguments(self, _):
             c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
+            c.argument('ephemeral_os_disk_placement', options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(['ResourceDisk', 'CacheDisk']), min_api='2019-12-01',
+                       help='Only applicable when used with `--ephemeral-os-disk`. Allows you to choose the Ephemeral OS disk provisioning location. Allowed values: ResourceDisk, CacheDisk', is_preview=True)
             c.argument('os_disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set for OS disk.')
             c.argument('data_disk_encryption_sets', nargs='+', min_api='2019-07-01',
                        help='Names or IDs (space delimited) of disk encryption sets for data disks.')
