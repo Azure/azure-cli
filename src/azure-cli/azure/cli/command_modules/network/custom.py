@@ -2843,8 +2843,8 @@ def add_express_route_peering_connection_config(cmd, resource_group_name, circui
     return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
 
 
-def remove_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name, connection_name,
-                                                   address_prefix_type):
+def remove_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name,
+                                                   connection_name, address_prefix_type):
     client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
 
     # Get Conn
