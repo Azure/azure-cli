@@ -1666,7 +1666,7 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise CLIError(usage_error)
             # autodetect copy_start for `az snapshot create`
-            if namespace.source_snapshot and namespace.copy_start is None:
+            if namespace.source_snapshot and hasattr(namespace, 'copy_start') and namespace.copy_start is None:
                 if not source_info:
                     from azure.cli.core.util import parse_proxy_resource_id
                     dict = parse_proxy_resource_id(namespace.source_snapshot)
