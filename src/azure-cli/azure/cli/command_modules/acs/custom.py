@@ -2505,7 +2505,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                             "It should always be empty for public cluster")
         mc.api_server_access_profile.private_dns_zone = private_dns_zone
         from msrestazure.tools import is_valid_resource_id
-        if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
+        # pylint: disable=line-too-long
+        if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM and private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_NONE:
             if is_valid_resource_id(private_dns_zone):
                 use_custom_private_dns_zone = True
             else:
