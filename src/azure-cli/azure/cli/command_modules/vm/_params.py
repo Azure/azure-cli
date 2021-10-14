@@ -42,6 +42,7 @@ def load_arguments(self, _):
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
     GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
+    ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -617,14 +618,14 @@ def load_arguments(self, _):
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
         c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In Uniform mode, you define a virtual machine model and Azure will generate identical instances based on that model. In Flexible mode, you manually create and add a virtual machine of any configuration to the scale set or generate identical instances based on virtual machine model defined for the scale set.',
-                   arg_type=get_enum_type(['Uniform', 'Flexible']), is_preview=True)
+                   arg_type=get_enum_type(['Uniform', 'Flexible']))
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
         c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
-        c.argument('network_api_version', is_preview=True, min_api='2021-03-01',
+        c.argument('network_api_version', min_api='2021-03-01',
                    help="Specify the Microsoft.Network API version used when creating networking resources in the Network "
-                        "Interface Configurations for Virtual Machine Scale Set with orchestration mode 'Flexible'. Possible "
+                        "Interface Configurations for Virtual Machine Scale Set with orchestration mode 'Flexible'. Default "
                         "value is 2020-11-01.")
         c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01', help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
         c.argument('spot_restore_timeout', min_api='2021-04-01', help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
@@ -825,7 +826,7 @@ def load_arguments(self, _):
             c.argument('encryption_at_host', arg_type=get_three_state_flag(), help='Enable Host Encryption for the VM or VMSS. This will enable the encryption for all the disks including Resource/Temp disk at host itself.')
             c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2021-03-01',
                        help='Specify the behavior of the managed disk when the VM gets deleted i.e whether the managed disk is deleted or detached.')
-            c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', '--data-delete-option'],
+            c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', self.deprecate(target='--data-delete-option', redirect='--data-disk-delete-option', hide=True)],
                        nargs='+', min_api='2021-03-01',
                        help='Specify whether data disk should be deleted or detached upon VM deletion.')
 
@@ -1019,12 +1020,17 @@ def load_arguments(self, _):
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
                    min_api='2020-09-30', is_experimental=True,
                    help='This property allows you to specify the permission of sharing gallery.')
+        c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
+                   help='Enable soft-deletion for resources in this gallery, '
+                        'allowing them to be recovered within retention time.')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
                    min_api='2020-09-30', is_experimental=True,
                    help='This property allows you to specify the permission of sharing gallery.')
-
+        c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
+                   help='Enable soft-deletion for resources in this gallery, '
+                        'allowing them to be recovered within retention time.')
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:
@@ -1055,6 +1061,7 @@ def load_arguments(self, _):
         c.argument('data_vhds_uris', nargs='+', help='Source VHD URIs (space-delimited) of data disks')
         c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
         c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
+        c.argument('replication_mode', min_api='2021-07-01', arg_type=get_enum_type(ReplicationMode), help='Optional parameter which specifies the mode to be used for replication. This property is not updatable.')
 
     with self.argument_context('sig image-version list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')

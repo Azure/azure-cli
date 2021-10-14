@@ -14,11 +14,11 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class SynapseScenarioTests(ScenarioTest):
-    location = "eastus2euap"
+    location = "eastus"
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspaces(self, resource_group, storage_account):
         # create a workspace
         self._create_workspace()
@@ -59,7 +59,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_managed_virtual_network_workspace(self):
         # test workspace with managed virtual network
         self._create_workspace("--enable-managed-virtual-network")
@@ -72,12 +72,10 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_pool(self):
         self.kwargs.update({
             'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
             'spark-pool': self.create_random_name(prefix='testpool', length=15),
             'spark-version': '2.4'
         })
@@ -232,7 +230,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -466,6 +464,7 @@ class SynapseScenarioTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_ws_audit_policy_logentry_eventhub(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -479,7 +478,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace_eastus()
+        self._create_workspace()
 
         self.kwargs['storage-endpoint'] = self._get_storage_endpoint(self.kwargs['storage-account'], self.kwargs['rg'])
         self.kwargs['storage-key'] = self._get_storage_key(self.kwargs['storage-account'], self.kwargs['rg'])
@@ -630,6 +629,7 @@ class SynapseScenarioTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool_audit_policy_logentry_eventhub(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -645,7 +645,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         # create a workspace
-        self._create_workspace_eastus()
+        self._create_workspace()
 
         # create sql pool
         sql_pool = self.cmd(
@@ -704,7 +704,7 @@ class SynapseScenarioTests(ScenarioTest):
                  self.check('retentionDays', self.kwargs['retention-days']),
                  self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
-        ## create log analytics workspace
+        # create log analytics workspace
         self.kwargs['log_analytics_workspace_id']= self.cmd('az monitor log-analytics workspace create --resource-group {rg} '
                                               '--workspace-name {log_analytics_workspace_name}',
                                               checks=[
@@ -843,11 +843,9 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_ip_firewall_rules(self, resource_group, storage_account):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
             'ruleName': self.create_random_name(prefix='rule', length=8),
             'startIpAddress': "0.0.0.0",
             'endIpAddress': "255.255.255.255",
@@ -1149,14 +1147,6 @@ class SynapseScenarioTests(ScenarioTest):
             'login-password': self.create_random_name(prefix='Pswd1', length=16)
         })
 
-        # Create adlsgen2
-        # self._create_storage_account()
-
-        # Wait some time to improve robustness
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(60)
-
         # create synapse workspace
         self.cmd(
             'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
@@ -1165,80 +1155,12 @@ class SynapseScenarioTests(ScenarioTest):
             ' --location {location} ' + ' '.join(additional_create_params), checks=[
                 self.check('name', self.kwargs['workspace']),
                 self.check('type', 'Microsoft.Synapse/workspaces'),
-                self.check('provisioningState', 'Succeeded')
-            ])
-
-    def _create_storage_account(self):
-        self.kwargs.update({
-            'location': self.location,
-            'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
-        })
-
-        # Wait some time to improve robustness
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(60)
-
-        # create storage account
-        self.cmd(
-            'az storage account create --name {storage-account} --resource-group {rg} --enable-hierarchical-namespace true --location {location}',
-            checks=[
-                self.check('name', self.kwargs['storage-account']),
-                self.check('type', 'Microsoft.Storage/storageAccounts'),
-                self.check('provisioningState', 'Succeeded')
-            ])
-
-    def _create_workspace_eastus(self, *additional_create_params):
-        self.kwargs.update({
-            'workspace': self.create_random_name(prefix='clitest', length=16),
-            'location': 'eastus',
-            'file-system': 'testfilesystem',
-            'login-user': 'cliuser1',
-            'login-password': self.create_random_name(prefix='Pswd1', length=16)
-        })
-
-        # Create adlsgen2
-        self._create_storage_account_eastus()
-
-        # Wait some time to improve robustness
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(60)
-
-        # create synapse workspace
-        self.cmd(
-            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
-            '--file-system {file-system} --sql-admin-login-user {login-user} '
-            '--sql-admin-login-password {login-password}'
-            ' --location {location} ' + ' '.join(additional_create_params), checks=[
-                self.check('name', self.kwargs['workspace']),
-                self.check('type', 'Microsoft.Synapse/workspaces'),
-                self.check('provisioningState', 'Succeeded')
-            ])
-
-    def _create_storage_account_eastus(self):
-        self.kwargs.update({
-            'location': 'eastus',
-            'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
-        })
-
-        # Wait some time to improve robustness
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(60)
-
-        # create storage account
-        self.cmd(
-            'az storage account create --name {storage-account} --resource-group {rg} --enable-hierarchical-namespace true --location {location}',
-            checks=[
-                self.check('name', self.kwargs['storage-account']),
-                self.check('type', 'Microsoft.Storage/storageAccounts'),
                 self.check('provisioningState', 'Succeeded')
             ])
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_linked_service(self):
         self.kwargs.update({
             'name': 'linkedservice',
@@ -1287,7 +1209,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_dataset(self):
         self.kwargs.update({
             'name': 'dataset'})
@@ -1407,7 +1329,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'trigger',
             'event-trigger': 'EventTrigger',
             'tumbling-window-trigger': 'TumblingWindowTrigger',
-            'run-id': '08586024051698130326966471413CU40',
+            'run-id': '08585700206218758559786000276CU61',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'trigger.json')
         })
 
@@ -1518,7 +1440,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
-    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, hns=True, key='storage-account')
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_notebook(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
@@ -1586,21 +1508,76 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_workspace_package(self):
+        self.kwargs.update({
+            'name': 'wordcount.jar',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'wordcount.jar')
+        })
+
+        # create a workspace
+        self._create_workspace()
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+        import time
+        time.sleep(20)
+
+        # upload workspace package
+        self.cmd(
+            'az synapse workspace-package upload --workspace-name {workspace} --package "{file}"',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get workspace package
+        self.cmd(
+            'az synapse workspace-package show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list workspace package
+        self.cmd(
+            'az synapse workspace-package list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/libraries')
+            ])
+
+        # delete workspace package
+        self.cmd(
+            'az synapse workspace-package delete --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse workspace-package show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
     @record_only()
     def test_integration_runtime(self):
         self.kwargs.update({
             'rg': 'chayang-test-rg',
             'workspace': 'zes0219test',
             'name': 'integrationruntime',
-            'type': 'Managed',
+            'selfhosted-name': 'selfhostedir',
             'selfhosted-integration-runtime': 'IntegrationRuntime0219selfhosted0507',
-            'node': 'MININT-Q3EGQJ8'})
+            'ssisirname':'testssisir'})
 
-        # create integration runtime
+        # create managed integration runtime
         self.cmd(
-            'az synapse integration-runtime create --resource-group {rg} --workspace-name {workspace} --name {name} --type {type}',
+            'az synapse integration-runtime managed create --resource-group {rg} --workspace-name {workspace} --name {name}',
             checks=[
                 self.check('name', self.kwargs['name'])
+            ])
+
+        # create self-hosted integration runtime
+        self.cmd(
+            'az synapse integration-runtime self-hosted create --resource-group {rg} --workspace-name {workspace} --name {selfhosted-name}',
+            checks=[
+                self.check('name', self.kwargs['selfhosted-name'])
             ])
 
         # get integration runtime
@@ -1632,7 +1609,6 @@ class SynapseScenarioTests(ScenarioTest):
         key = self.cmd(
             'az synapse integration-runtime list-auth-key --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}').get_output_in_json()
         assert key['authKey1'] is not None
-        assert key['authKey2'] is not None
 
         # regenerate self-hosted integration runtime key
         key = self.cmd(
@@ -1648,34 +1624,35 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
 
+        # skip self-hosted integration runtime node test because it need real ir hosted computer 
         # get self-hosted integration runtime node information
-        self.cmd(
-            'az synapse integration-runtime-node show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
-            '--node-name {node}',
-            checks=[
-                self.check('nodeName', self.kwargs['node'])
-            ])
+        #self.cmd(
+        #    'az synapse integration-runtime-node show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+        #    '--node-name {node}',
+        #    checks=[
+        #        self.check('nodeName', self.kwargs['node'])
+        #    ])
 
         # update self-hosted integration runtime node
-        self.cmd(
-            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} \
-            --name {selfhosted-integration-runtime} --node-name {node} --auto-update On --update-delay-offset PT03H',
-            checks=[
-                self.check('nodeName', self.kwargs['node'])
-            ])
+        #self.cmd(
+        #    'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} \
+        #    --name {selfhosted-integration-runtime} --node-name {node} --auto-update On --update-delay-offset PT03H',
+        #    checks=[
+        #        self.check('nodeName', self.kwargs['node'])
+        #    ])
 
         # get self-hosted integration runtime node ip
-        self.cmd(
-            'az synapse integration-runtime-node get-ip-address --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
-            '--node-name {node}')
+        #self.cmd(
+        #    'az synapse integration-runtime-node get-ip-address --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+        #    '--node-name {node}')
 
         # sync credentials among integration runtime nodes
         self.cmd(
             'az synapse integration-runtime sync-credentials --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
 
         # get connection info
-        self.cmd(
-            'az synapse integration-runtime get-connection-info --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+        #self.cmd(
+        #    'az synapse integration-runtime get-connection-info --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
 
         # get status
         self.cmd(
@@ -1683,6 +1660,15 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
+
+        # start/stop ssis integration runtime
+        self.cmd(
+            'az synapse integration-runtime start --resource-group {rg} --workspace-name {workspace} --name {ssisirname}',
+            checks=[
+                self.check('properties.state', 'Started')
+            ])
+        self.cmd(
+            'az synapse integration-runtime stop --resource-group {rg} --workspace-name {workspace} --name {ssisirname} -y')
 
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('az storage account show -g {} -n {}'
@@ -1737,3 +1723,62 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_spark_job_definition(self):
+        self.kwargs.update({
+            'name': 'SparkAutoCreate1',
+            'spark-pool': 'testpool',
+            'spark-version': '2.4',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        # create spark pool
+        self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
+                 ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium',
+                 checks=[
+                     self.check('name', self.kwargs['spark-pool']),
+                     self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
+                     self.check('provisioningState', 'Succeeded')
+                 ]).get_output_in_json()
+
+        # create a spark job definition
+        self.cmd(
+            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" ',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # Get a spark job definition
+        self.cmd(
+            'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # List spark job definitions
+        self.cmd(
+            'az synapse spark-job-definition list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/sparkjobdefinitions')
+            ])
+
+        # delete a spark job definition
+        self.cmd(
+            'az synapse spark-job-definition delete --workspace-name {workspace} --name {name}')
+        self.cmd(
+            'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
