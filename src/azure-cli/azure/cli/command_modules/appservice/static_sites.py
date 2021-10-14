@@ -35,7 +35,7 @@ def disconnect_staticsite(cmd, name, resource_group_name=None, no_wait=False):
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return sdk_no_wait(no_wait, client.detach_static_site,
+    return sdk_no_wait(no_wait, client.begin_detach_static_site,
                        resource_group_name=resource_group_name, name=name)
 
 
@@ -232,7 +232,7 @@ def create_staticsites(cmd, resource_group_name, name, location,
         sku=sku_def)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.create_or_update_static_site,
+    return sdk_no_wait(no_wait, client.begin_create_or_update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
 
@@ -273,7 +273,7 @@ def delete_staticsite(cmd, name, resource_group_name=None, no_wait=False):
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return sdk_no_wait(no_wait, client.delete_static_site,
+    return sdk_no_wait(no_wait, client.begin_delete_static_site,
                        resource_group_name=resource_group_name, name=name)
 
 
