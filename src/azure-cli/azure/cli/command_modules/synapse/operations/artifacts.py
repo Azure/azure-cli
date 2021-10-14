@@ -486,8 +486,7 @@ def rename_sql_script(cmd, workspace_name, sql_script_name, new_name=None, no_wa
 
 def create_or_update_sql_script(cmd, workspace_name, sql_script_name, query_file, result_limit=-1,
                                 folder_name=None, description=None, sqlpool_name=None,
-                                sqlpool_type=None, database_name=None, additional_properties=None,
-                                no_wait=False):
+                                database_name=None, additional_properties=None, no_wait=False):
     client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
     with open(query_file, 'rb') as stream:
         query = stream.read()

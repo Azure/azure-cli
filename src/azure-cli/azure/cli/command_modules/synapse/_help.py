@@ -2010,3 +2010,18 @@ helps['synapse spark-job-definition wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a spark job definition is met.
 """
+
+helps['synapse sql-script'] = """
+type: group
+short-summary: Manage SQL scripts in a synapse workspace.
+"""
+
+helps['synapse sql-script show'] = """
+type: command
+short-summary: Get a SQL scripts.
+examples:
+  - name: Get a SQL scripts.
+    text: |-
+        az synapse sql-script show --workspace-name testsynapseworkspace \\
+          --name testsjdname
+"""
