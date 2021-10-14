@@ -21,7 +21,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
-    table_transform_output_list_skus)
+    table_transform_output_list_skus,
+    table_transform_output_parameters)
 
 # from .transformers import table_transform_connection_string
 # from .validators import db_up_namespace_processor
@@ -141,7 +142,7 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_config,
+                            client_factory=cf_postgres_flexible_config, table_transformer=table_transform_output_parameters,
                             is_preview=True) as g:
         g.custom_command('set', 'flexible_parameter_update')
         g.show_command('show', 'get')
@@ -208,7 +209,7 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('mysql flexible-server parameter', mysql_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
-                            client_factory=cf_mysql_flexible_config,
+                            client_factory=cf_mysql_flexible_config, table_transformer=table_transform_output_parameters,
                             is_preview=True) as g:
         g.custom_command('set', 'flexible_parameter_update')
         g.show_command('show', 'get')

@@ -73,25 +73,25 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus'
     mysql_location = 'westus2'
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_iops_mgmt(self, resource_group):
-    #     self._test_flexible_server_iops_mgmt('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_iops_mgmt(self, resource_group):
+        self._test_flexible_server_iops_mgmt('mysql', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # def test_postgres_flexible_server_mgmt(self, resource_group):
-    #     self._test_flexible_server_mgmt('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_mgmt('postgres', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_mgmt(self, resource_group):
-    #     self._test_flexible_server_mgmt('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_mgmt('mysql', resource_group)
     
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # def test_postgres_flexible_server_restore_mgmt(self, resource_group):
-    #     self._test_flexible_server_restore_mgmt('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_restore_mgmt(self, resource_group):
+        self._test_flexible_server_restore_mgmt('postgres', resource_group)
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -299,7 +299,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --yes'.format(
                  database_engine, resource_group, source_server, source_vnet, source_subnet, location))
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
-        sleep(15*60)
+
         # Wait until snapshot is created
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
         earliest_restore_time = result['backup']['earliestRestoreDate']
@@ -419,7 +419,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server_2)).get_output_in_json()
         self.assertEqual(result['backup']['geoRedundantBackup'], 'Enabled')
         self.assertEqual(result['network']['publicNetworkAccess'], 'Enabled')
-        sleep(15*60)
+
         # 1. vnet -> vnet without network parameters fail
         self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} '
                  .format(database_engine, resource_group, target_location, target_server_default, source_server), expect_failure=True)
@@ -494,7 +494,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access_2), checks=NoneCheck())
-        sleep(15*60)
+
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
@@ -797,7 +797,6 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replicationRole', 'None')]).get_output_in_json()
-        time.sleep(5 * 60)
 
         # test replica create
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2'
@@ -874,11 +873,11 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus2euap'
     mysql_location = 'westus2'
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # def test_postgres_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
-    #     # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
-    #     self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
+        # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
+        self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -886,21 +885,21 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('mysql', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
-    #     self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
+        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
-    # @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_2')
-    # def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
-    #     self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_2')
+    def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
+        self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_1')
@@ -1090,7 +1089,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  checks=NoneCheck())
 
 
-        time.sleep(15 * 60)
+        # time.sleep(15 * 60)
 
         # remove delegations from all vnets
         self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group_1,
@@ -1327,11 +1326,11 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     postgres_location = 'eastus2euap'
     mysql_location = 'westus2'
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-    def test_postgres_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
-        self._test_flexible_server_existing_private_dns_zone('postgres', server_resource_group, vnet_resource_group)
+    # @AllowLargeResponse()
+    # @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
+    # @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    # def test_postgres_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
+    #     self._test_flexible_server_existing_private_dns_zone('postgres', server_resource_group, vnet_resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -1339,12 +1338,12 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     def test_mysql_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
         self._test_flexible_server_existing_private_dns_zone('mysql', server_resource_group, vnet_resource_group)
     
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
-    def test_postgres_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
-        self._test_flexible_server_new_private_dns_zone('postgres', server_resource_group, vnet_resource_group, dns_resource_group)
+    # @AllowLargeResponse()
+    # @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
+    # @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    # @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
+    # def test_postgres_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
+    #     self._test_flexible_server_new_private_dns_zone('postgres', server_resource_group, vnet_resource_group, dns_resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
