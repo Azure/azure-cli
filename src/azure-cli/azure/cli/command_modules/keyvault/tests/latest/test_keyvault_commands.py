@@ -2492,6 +2492,22 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             self.check('length(properties.networkAcls.ipRules)', 4)
         ])
 
+class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pna')
+    def test_keyvault_public_network_access(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-pna-', 24),
+            'kv2': self.create_random_name('cli-test-kv2-pna-', 24),
+            'kv3': self.create_random_name('cli-test-kv3-pna-', 24),
+            'loc': 'eastus2euap'
+        })
+        self.cmd('keyvault create -g {rg} -n {kv} -l {loc}',
+                 checks=[self.check('properties.publicNetworkAccess', None)])
+        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --public-network-access Enabled',
+                 checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
+        self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --public-network-access Disabled',
+                 checks=[self.check('properties.publicNetworkAccess', 'Disabled')])
+
 
 if __name__ == '__main__':
     unittest.main()
