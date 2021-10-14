@@ -32,7 +32,7 @@ examples:
     text: >
         az mysql flexible-server create --location northeurope --resource-group testGroup \\
           --name testServer --admin-user username --admin-password password \\
-          --sku-name Standard-B1ms --tier Burstable --public-access 0.0.0.0 --storage-size 32 \\
+          --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 --storage-size 32 \\
           --tags "key=value" --version 5.7 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3 --storage-auto-grow Enabled --iops 500
   - name: >
@@ -59,12 +59,12 @@ examples:
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24
   - name: >
       Create a MySQL flexible server using existing network resources in the same resource group.
-      the existing subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforMySQL/flexibleServers, if not already delegated.
+      The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforMySQL/flexibleServers, if not already delegated.
       The private DNS zone will be linked to the virtual network if not already linked.
     text: >
       # create vnet
 
-      az network vnet create --resource-group testGroup --name testVnet -location testLocation --address-prefixes 172.0.0.0/16
+      az network vnet create --resource-group testGroup --name testVnet --location testLocation --address-prefixes 172.0.0.0/16
 
 
       # create subnet
@@ -87,7 +87,7 @@ examples:
         --vnet testVnet --subnet testSubnet --location testLocation \\
         --private-dns-zone /subscriptions/{SubId}/resourceGroups/{testGroup}/providers/Microsoft.Network/privateDnsZones/testDNS.mysql.database.azure.com
   - name: >
-      Create a MySQL flexible server using existing network resources in the different subscription.
+      Create a MySQL flexible server using existing network resources in the different resource group / subscription.
     text: >
       az mysql flexible-server create --resource-group testGroup \\
          --name testServer --location testLocation \\
@@ -335,7 +335,7 @@ examples:
         --private-dns-zone testDNS.mysql.database.azure.com --location newLocation
   - name: Gep-estore private access server 'testServer' as a new server 'testServerNew' with public access.
     text: >
-      az mysql flexible-server restore --resource-group testGroup --name testServerNew  --source-server testServer --public-access Enabled --location newLocation
+      az mysql flexible-server geo-restore --resource-group testGroup --name testServerNew  --source-server testServer --public-access Enabled --location newLocation
 """
 
 helps['mysql flexible-server show'] = """
