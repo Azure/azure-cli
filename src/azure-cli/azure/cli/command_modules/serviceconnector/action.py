@@ -129,7 +129,7 @@ class AddServicePrincipalAuthInfo(argparse.Action):
             if kl == 'client-id':
                 d['client_id'] = v[0]
             elif kl == 'object-id':
-                d['principal_id'] = v[0]
+                d['object-id'] = v[0]
             elif kl == 'secret':
                 d['secret'] = v[0]
             else:

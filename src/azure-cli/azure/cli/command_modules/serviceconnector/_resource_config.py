@@ -106,29 +106,35 @@ SOURCE_RESOURCES_PARAMS = {
     RESOURCE.WebApp: {
         'source_resource_group': {
             'options': ['--resource-group', '-g'],
-            'help': 'The resource group which contains the webapp'
+            'help': 'The resource group which contains the webapp',
+            'placeholder': 'WebAppRG'
         },
         'site': {
             'options': ['--webapp'],
-            'help': 'Name of the webapp'
+            'help': 'Name of the webapp',
+            'placeholder': 'MyWebApp'
         }
     },
     RESOURCE.SpringCloud: {
         'source_resource_group': {
             'options': ['--resource-group', '-g'],
-            'help': 'The resource group which contains the spring-cloud'
+            'help': 'The resource group which contains the spring-cloud',
+            'placeholder': 'SpringCloudRG'
         },
         'spring': {
             'options': ['--service'],
-            'help': 'Name of the spring-cloud service'
+            'help': 'Name of the spring-cloud service',
+            'placeholder': 'MySpringService'
         },
         'app': {
             'options': ['--app'],
-            'help': 'Name of the spring-cloud app'
+            'help': 'Name of the spring-cloud app',
+            'placeholder': 'MyApp'
         },
         'deployment': {
             'options': ['--deployment'],
-            'help': 'The deployment name of the app'
+            'help': 'The deployment name of the app',
+            'placeholder': 'MyDeployment'
         }
     }
 }
@@ -141,225 +147,272 @@ TARGET_RESOURCES_PARAMS = {
     RESOURCE.Postgres: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the postgres service'
+            'help': 'The resource group which contains the postgres service',
+            'placeholder': 'PostgresRG'
         },
         'server': {
             'options': ['--server'],
-            'help': 'Name of postgres server'
+            'help': 'Name of postgres server',
+            'placeholder': 'MyServer'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of database'
+            'help': 'Name of database',
+            'placeholder': 'MyDB'
         }
     },
     RESOURCE.PostgresFlexible: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the flexible postgres service'
+            'help': 'The resource group which contains the flexible postgres service',
+            'placeholder': 'PostgresRG'
         },
         'server': {
             'options': ['--server'],
-            'help': 'Name of flexible postgres server'
+            'help': 'Name of flexible postgres server',
+            'placeholder': 'MyServer'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of database'
+            'help': 'Name of database',
+            'placeholder': 'MyDB'
         }
     },
     RESOURCE.MysqlFlexible: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the mysql flexible server'
+            'help': 'The resource group which contains the mysql flexible server',
+            'placeholder': 'MysqlRG'
         },
         'server': {
             'options': ['--server'],
-            'help': 'Name of the server'
+            'help': 'Name of the server',
+            'placeholder': 'MyServer'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of the database'
+            'help': 'Name of the database',
+            'placeholder': 'MyDB'
         }
     },
     RESOURCE.Mysql: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the mysql server'
+            'help': 'The resource group which contains the mysql server',
+            'placeholder': 'MysqlRG'
         },
         'server': {
             'options': ['--server'],
-            'help': 'Name of the server'
+            'help': 'Name of the server',
+            'placeholder': 'MyServer'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of the database'
+            'help': 'Name of the database',
+            'placeholder': 'MyDB'
         }
     },
     RESOURCE.Sql: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the sql server'
+            'help': 'The resource group which contains the sql server',
+            'placeholder': 'SqlRG'
         },
         'server': {
             'options': ['--server'],
-            'help': 'Name of the server'
+            'help': 'Name of the server',
+            'placeholder': 'MyServer'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of the database'
+            'help': 'Name of the database',
+            'placeholder': 'MyDB'
         }
     },
     RESOURCE.CosmosCassandra: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the cosmos database account'
+            'help': 'The resource group which contains the cosmos database account',
+            'placeholder': 'CosmosRG'
         },
         'account': {
             'options': ['--account'],
-            'help': 'Name of the cosmos database account'
+            'help': 'Name of the cosmos database account',
+            'placeholder': 'MyAccount'
         },
         'key_space': {
             'options': ['--key-space'],
-            'help': 'Name of the keyspace'
+            'help': 'Name of the keyspace',
+            'placeholder': 'MyKeySpace'
         }
     },
     RESOURCE.CosmosGremlin: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the cosmos database account'
+            'help': 'The resource group which contains the cosmos database account',
+            'placeholder': 'CosmosRG'
         },
         'account': {
             'options': ['--account'],
-            'help': 'Name of the cosmos database account'
+            'help': 'Name of the cosmos database account',
+            'placeholder': 'MyAccount'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of the database'
+            'help': 'Name of the database',
+            'placeholder': 'MyDB'
         },
         'graph': {
             'options': ['--graph'],
-            'help': 'Name of the graph'
+            'help': 'Name of the graph',
+            'placeholder': 'MyGraph'
         }
     },
     RESOURCE.CosmosMongo: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the cosmos database account'
+            'help': 'The resource group which contains the cosmos database account',
+            'placeholder': 'CosmosRG'
         },
         'account': {
             'options': ['--account'],
-            'help': 'Name of the cosmos database account'
+            'help': 'Name of the cosmos database account',
+            'placeholder': 'MyAccount'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of the database'
+            'help': 'Name of the database',
+            'placeholder': 'MyDB'
         }
     },
     RESOURCE.CosmosSql: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the cosmos database account'
+            'help': 'The resource group which contains the cosmos database account',
+            'placeholder': 'CosmosRG'
         },
         'account': {
             'options': ['--account'],
-            'help': 'Name of the cosmos database account'
+            'help': 'Name of the cosmos database account',
+            'placeholder': 'MyAccount'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of the database'
+            'help': 'Name of the database',
+            'placeholder': 'MyDB'
         }
     },
     RESOURCE.CosmosTable: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the cosmos database account'
+            'help': 'The resource group which contains the cosmos database account',
+            'placeholder': 'CosmosRG'
         },
         'account': {
             'options': ['--account'],
-            'help': 'Name of the cosmos database account'
+            'help': 'Name of the cosmos database account',
+            'placeholder': 'MyAccount'
         },
         'table': {
             'options': ['--table'],
-            'help': 'Name of the table'
+            'help': 'Name of the table',
+            'placeholder': 'MyTable'
         }
     },
     RESOURCE.StorageBlob: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the storage account'
+            'help': 'The resource group which contains the storage account',
+            'placeholder': 'StorageRG'
         },
         'account': {
             'options': ['--account'],
-            'help': 'Name of the storage account'
+            'help': 'Name of the storage account',
+            'placeholder': 'MyAccount'
         },
     },
     RESOURCE.StorageQueue: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the storage account'
+            'help': 'The resource group which contains the storage account',
+            'placeholder': 'StorageRG'
         },
         'account': {
             'options': ['--account'],
-            'help': 'Name of the storage account'
+            'help': 'Name of the storage account',
+            'placeholder': 'MyAccount'
         },
     },
     RESOURCE.StorageFile: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the storage account'
+            'help': 'The resource group which contains the storage account',
+            'placeholder': 'StorageRG'
         },
         'account': {
             'options': ['--account'],
-            'help': 'Name of the storage account'
+            'help': 'Name of the storage account',
+            'placeholder': 'MyAccount'
         },
     },
     RESOURCE.StorageTable: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the storage account'
+            'help': 'The resource group which contains the storage account',
+            'placeholder': 'StorageRG'
         },
         'account': {
             'options': ['--account'],
-            'help': 'Name of the storage account'
+            'help': 'Name of the storage account',
+            'placeholder': 'MyAccount'
         },
     },
     RESOURCE.KeyVault: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the keyvault'
+            'help': 'The resource group which contains the keyvault',
+            'placeholder': 'KeyvaultRG'
         },
         'vault': {
             'options': ['--vault'],
-            'help': 'Name of the keyvault'
+            'help': 'Name of the keyvault',
+            'placeholder': 'MyVault'
         }
     },
     RESOURCE.AppConfig: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the app configuration'
+            'help': 'The resource group which contains the app configuration',
+            'placeholder': 'AppconfigRG'
         },
         'config_store': {
             'options': ['--app-config'],
-            'help': 'Name of the app configuration'
+            'help': 'Name of the app configuration',
+            'placeholder': 'MyConfigStore'
         }
     },
     RESOURCE.EventHub: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the eventhub'
+            'help': 'The resource group which contains the eventhub',
+            'placeholder': 'EventhubRG'
         },
         'namespace': {
             'options': ['--namespace'],
-            'help': 'Name of the eventhub namespace'
+            'help': 'Name of the eventhub namespace',
+            'placeholder': 'MyNamespace'
         }
     },
     RESOURCE.ServiceBus: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
-            'help': 'The resource group which contains the servicebus'
+            'help': 'The resource group which contains the servicebus',
+            'placeholder': 'ServicebusRG'
         },
         'namespace': {
             'options': ['--namespace'],
-            'help': 'Name of the servicebus namespace'
+            'help': 'Name of the servicebus namespace',
+            'placeholder': 'MyNamespace'
         }
     },
 }

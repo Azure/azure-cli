@@ -7,11 +7,50 @@ from knack.help_files import helps
 from ._resource_config import (
     AUTH_TYPE,
     SOURCE_RESOURCES,
+    SOURCE_RESOURCES_PARAMS,
     TARGET_RESOURCES,
+    TARGET_RESOURCES_PARAMS,
     SUPPORTED_AUTH_TYPE
 )
-from ._addon_factory import AddonFactory
+
 from ._utils import should_load_source
+from ._addon_factory import AddonFactory
+
+
+def get_source_resource_params(resource):
+    params = SOURCE_RESOURCES_PARAMS.get(resource).values()
+
+    param_str = ''
+    for param in params:
+        option = param.get('options')[-1]
+        placeholder = param.get('placeholder')
+        param_str += '{} {} '.format(option, placeholder)
+
+    return param_str.strip()
+
+
+def get_target_resource_params(resource):
+    params = TARGET_RESOURCES_PARAMS.get(resource).values()
+
+    param_str = ''
+    for param in params:
+        option = param.get('options')[-1]
+        placeholder = param.get('placeholder')
+        param_str += '{} {} '.format(option, placeholder)
+
+    return param_str.strip()
+
+
+def get_auth_info_params(auth_type):
+    auth_params_map = {
+        AUTH_TYPE.Secret: '--secret name=XX secret=XX',
+        AUTH_TYPE.SecretAuto: '--secret',
+        AUTH_TYPE.SystemIdentity: '--system-identity',
+        AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX object-id=XX secret=XX',
+        AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX'
+    }
+
+    return auth_params_map.get(auth_type)
 
 
 for source in SOURCE_RESOURCES:
@@ -19,6 +58,7 @@ for source in SOURCE_RESOURCES:
         continue
 
     source_id = SOURCE_RESOURCES.get(source)
+    source_params = get_source_resource_params(source)
     connection_id = ('/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/'
                      'Microsoft.Web/sites/{site}/providers/Microsoft.ServiceLinker/linkers/{linker}')
 
@@ -46,10 +86,13 @@ for source in SOURCE_RESOURCES:
         - name: List {source} connections interactively
           text: |-
                  az {source} connection list
+        - name: List {source} connections by source resource name
+          text: |-
+                 az {source} connection list {source_params}
         - name: List {source} connections by source resource id
           text: |-
                  az {source} connection list --source-id {source_id}
-    """.format(source=source.value, source_id=source_id)
+    """.format(source=source.value, source_params=source_params, source_id=source_id)
 
     helps['{source} connection delete'.format(source=source.value)] = """
       type: command
@@ -58,10 +101,13 @@ for source in SOURCE_RESOURCES:
         - name: Delete a {source} connection interactively
           text: |-
                  az {source} connection delete
+        - name: Delete a {source} connection by connection name
+          text: |-
+                 az {source} connection delete {source_params} -n MyConnection
         - name: Delete a {source} connection by connection id
           text: |-
                  az {source} connection delete --id {connection_id}
-    """.format(source=source.value, connection_id=connection_id)
+    """.format(source=source.value, source_params=source_params, connection_id=connection_id)
 
     helps['{source} connection list-configuration'.format(source=source.value)] = """
       type: command
@@ -70,10 +116,13 @@ for source in SOURCE_RESOURCES:
         - name: List a connection's source configurations interactively
           text: |-
                  az {source} connection list-configuration
+        - name: List a connection's source configurations by connection name
+          text: |-
+                 az {source} connection list-configuration {source_params} -n MyConnection
         - name: List a connection's source configurations by connection id
           text: |-
                  az {source} connection list-configuration --id {connection_id}
-    """.format(source=source.value, connection_id=connection_id)
+    """.format(source=source.value, source_params=source_params, connection_id=connection_id)
 
     helps['{source} connection validate'.format(source=source.value)] = """
       type: command
@@ -82,10 +131,13 @@ for source in SOURCE_RESOURCES:
         - name: Validate a connection interactively
           text: |-
                  az {source} connection validate
+        - name: Validate a connection by connection name
+          text: |-
+                 az {source} connection validate {source_params} -n MyConnection
         - name: Validate a connection by connection id
           text: |-
                  az {source} connection validate --id {connection_id}
-    """.format(source=source.value, connection_id=connection_id)
+    """.format(source=source.value, source_params=source_params, connection_id=connection_id)
 
     helps['{source} connection wait'.format(source=source.value)] = """
       type: command
@@ -103,10 +155,13 @@ for source in SOURCE_RESOURCES:
           - name: Get a connection interactively
             text: |-
                    az {source} connection show
+          - name: Get a connection by connection name
+            text: |-
+                   az {source} connection show {source_params} -n MyConnection
           - name: Get a connection by connection id
             text: |-
                    az {source} connection show --id {connection_id}
-    """.format(source=source.value, connection_id=connection_id)
+    """.format(source=source.value, source_params=source_params, connection_id=connection_id)
 
     helps['{source} connection create'.format(source=source.value)] = """
       type: group
@@ -121,14 +176,12 @@ for source in SOURCE_RESOURCES:
     for target in TARGET_RESOURCES:
         target_id = TARGET_RESOURCES.get(target)
 
-        # params in example
-        auth_param_map = {
-            AUTH_TYPE.Secret: '--secret name=XX secret=XX',
-            AUTH_TYPE.SecretAuto: '--secret',
-            AUTH_TYPE.SystemIdentity: '--system-identity'
-        }
+        # target resource params
+        target_params = get_target_resource_params(target)
+
+        # auth info params
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
-        auth_param = auth_param_map.get(auth_types[0])
+        auth_params = get_auth_info_params(auth_types[0])
 
         # auth info params in help message
         secret_param = '''
@@ -197,9 +250,12 @@ for source in SOURCE_RESOURCES:
             - name: Create a connection between {source} and {target} interactively
               text: |-
                      az {source} connection create {target}
-            - name: Create a connection between {source} and {target}
+            - name: Create a connection between {source} and {target} with resource name
               text: |-
-                     az {source} connection create {target} --name MyConn --client-type python --source-id {source_id} --target-id {target_id} {auth_param}
+                     az {source} connection create {target} {source_params} {target_params} {auth_params}
+            - name: Create a connection between {source} and {target} with resource id
+              text: |-
+                     az {source} connection create {target} --source-id {source_id} --target-id {target_id} {auth_params}
             {provision_example}
         """.format(
             source=source.value,
@@ -211,7 +267,9 @@ for source in SOURCE_RESOURCES:
             system_identity_param=system_identity_param,
             user_identity_param=user_identity_param,
             service_principal_param=service_principal_param,
-            auth_param=auth_param,
+            source_params=source_params,
+            target_params=target_params,
+            auth_params=auth_params,
             provision_example=provision_example)
 
         helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """
@@ -224,12 +282,12 @@ for source in SOURCE_RESOURCES:
             {user_identity_param}
             {service_principal_param}
           examples:
-            - name: Update a {source} to {target} connection interactively
+            - name: Update the client type of a connection with resource name
               text: |-
-                     az {source} connection update {target}
-            - name: Update the client type and auth info of a connection
+                     az {source} connection update {target} {source_params} -n MyConnection --client-type dotnet
+            - name: Update the client type of a connection with resource id
               text: |-
-                     az {source} connection update {target} --id {connection_id} --client-type python {auth_param}
+                     az {source} connection update {target} --id {connection_id} --client-type dotnet
         """.format(
             source=source.value,
             target=target.value,
@@ -238,5 +296,5 @@ for source in SOURCE_RESOURCES:
             system_identity_param=system_identity_param,
             user_identity_param=user_identity_param,
             service_principal_param=service_principal_param,
-            auth_param=auth_param,
+            source_params=source_params,
             connection_id=connection_id)

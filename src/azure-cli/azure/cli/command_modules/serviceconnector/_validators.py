@@ -182,15 +182,15 @@ def interactive_input(arg, hint):
         cmd_value = 'name={} secret={}'.format(name, secret)
     elif arg == 'service_principal_auth_info_secret':
         client_id = prompt('ServicePrincipal client-id (--service-principal client_id=): ')
-        principal_id = prompt('ServicePrincipal object-id (--service-principal principal_id=): ')
+        object_id = prompt('ServicePrincipal object-id (--service-principal object-id=): ')
         secret = prompt('ServicePrincipal object-id (--service-principal secret=): ')
         value = {
             'client_id': client_id,
-            'principal_id': principal_id,
+            'object-id': object_id,
             'secret': secret,
             'auth_type': 'servicePrincipalSecret'
         }
-        cmd_value = 'client_id={} principal_id={} secret={}'.format(client_id, principal_id, secret)
+        cmd_value = 'client-id={} principal-id={} secret={}'.format(client_id, object_id, secret)
     elif arg == 'user_identity_auth_info':
         client_id = prompt('UserAssignedIdentity client-id (--user-identity client_id=): ')
         subscription_id = prompt('UserAssignedIdentity subscription-id (--user-identity subs_id=): ')
@@ -199,7 +199,7 @@ def interactive_input(arg, hint):
             'subscription_id': subscription_id,
             'auth_type': 'userAssignedIdentity'
         }
-        cmd_value = 'client_id={} subscription_id={}'.format(client_id, subscription_id)
+        cmd_value = 'client-id={} subscription-id={}'.format(client_id, subscription_id)
     else:
         value = prompt('{}: '.format(hint))
         cmd_value = value
