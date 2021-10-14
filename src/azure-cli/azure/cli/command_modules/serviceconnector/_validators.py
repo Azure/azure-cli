@@ -5,7 +5,7 @@
 
 import re
 from knack.log import get_logger
-from knack.prompting import prompt, prompt_pass
+from knack.prompting import prompt
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
@@ -75,7 +75,7 @@ def generate_connection_name(cmd):
     import string
     source = get_source_resource_name(cmd).value.replace('-', '')
     target = get_target_resource_name(cmd).value.replace('-', '')
-    randstr = ''.join(random.sample(string.ascii_letters + string.digits, 5))
+    randstr = ''.join(random.sample(string.ascii_lowercase + string.digits, 5))
     name = '{}_{}_{}'.format(source, target, randstr)
 
     logger.warning('Connection name is not specified, use generated one: --connection-name %s', name)
@@ -173,18 +173,13 @@ def interactive_input(arg, hint):
     cmd_value = None
     if arg == 'secret_auth_info':
         name = prompt('User name of database (--secret name=): ')
-        secret = prompt_pass('Password of database (--secret secret=): ')
+        secret = prompt('Password of database (--secret secret=): ')
         value = {
             'name': name,
             'secret': secret,
             'auth_type': 'secret'
         }
         cmd_value = 'name={} secret={}'.format(name, secret)
-    elif arg == 'secret_auth_info_auto':
-        value = {
-            'auth_type': 'secret'
-        }
-        cmd_value = ''
     elif arg == 'service_principal_auth_info_secret':
         client_id = prompt('ServicePrincipal client-id (--service-principal client_id=): ')
         principal_id = prompt('ServicePrincipal object-id (--service-principal principal_id=): ')
@@ -205,11 +200,6 @@ def interactive_input(arg, hint):
             'auth_type': 'userAssignedIdentity'
         }
         cmd_value = 'client_id={} subscription_id={}'.format(client_id, subscription_id)
-    elif arg == 'system_identity_auth_info':
-        value = {
-            'auth_type': 'systemAssignedIdentity'
-        }
-        cmd_value = ''
     else:
         value = prompt('{}: '.format(hint))
         cmd_value = value
@@ -229,10 +219,23 @@ def intelligent_experience(cmd, namespace, missing_args):
     '''Use local context and interactive inputs to get arg values
     '''
     cmd_arg_values = dict()
+
     # use commandline source/target resource args
     for arg in missing_args:
         if getattr(namespace, arg, None) is not None:
             cmd_arg_values[arg] = getattr(namespace, arg)
+
+    # for auth info without additional parameters
+    if 'secret_auth_info_auto' in missing_args:
+        cmd_arg_values['secret_auth_info_auto'] = {
+            'auth_type': 'secret'
+        }
+        logger.warning('Auth info is not specified, use default one: --secret')
+    elif 'system_identity_auth_info' in missing_args:
+        cmd_arg_values['system_identity_auth_info'] = {
+            'auth_type': 'systemAssignedIdentity'
+        }
+        logger.warning('Auth info is not specified, use default one: --system-identity')
 
     if cmd.cli_ctx.local_context.is_on:
         # arguments found in local context
@@ -247,9 +250,9 @@ def intelligent_experience(cmd, namespace, missing_args):
         for arg in context_arg_values:
             option = missing_args[arg].get('options')[0]
             value = context_arg_values[arg]
-            param_str += '{} {}, '.format(option, value)
+            param_str += '{} {} '.format(option, value)
         if param_str:
-            logger.warning('Apply local context arguments: %s', param_str.strip(', '))
+            logger.warning('Apply local context arguments: %s', param_str.strip())
             cmd_arg_values.update(context_arg_values)
 
     # arguments from interactive inputs
@@ -262,9 +265,9 @@ def intelligent_experience(cmd, namespace, missing_args):
 
             # show applied params
             option = missing_args[arg].get('options')[0]
-            param_str += '{} {}, '.format(option, cmd_value)
+            param_str += '{} {} '.format(option, cmd_value)
     if param_str:
-        logger.warning('Apply interactive input arguments: %s', param_str.strip(', '))
+        logger.warning('Apply interactive input arguments: %s', param_str.strip())
 
     return cmd_arg_values
 
@@ -292,7 +295,7 @@ def validate_connection_id(namespace):
         matched = False
         for resource in SOURCE_RESOURCES.values():
             regex = '({})/providers/Microsoft.ServiceLinker/linkers/([^/]*)'.format(get_resource_regex(resource))
-            matched = re.match(regex, namespace.indentifier)
+            matched = re.match(regex, namespace.indentifier, re.IGNORECASE)
             if matched:
                 namespace.source_id = matched.group(1)
                 namespace.connection_name = matched.group(2)
@@ -309,7 +312,7 @@ def validate_target_resource_id(namespace):
     if getattr(namespace, 'target_id', None):
         matched = False
         for resource in TARGET_RESOURCES.values():
-            matched = re.match(get_resource_regex(resource), namespace.target_id)
+            matched = re.match(get_resource_regex(resource), namespace.target_id, re.IGNORECASE)
             if matched:
                 namespace.target_id = matched.group()
                 return True
@@ -360,6 +363,7 @@ def get_missing_auth_args(cmd, namespace):
 
     if source and target and not auth_param_exist:
         default_auth_type = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})[0]
+
         for arg, content in AUTH_TYPE_PARAMS.get(default_auth_type).items():
             if getattr(namespace, arg, None) is None:
                 missing_args[arg] = content
