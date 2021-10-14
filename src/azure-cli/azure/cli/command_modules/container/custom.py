@@ -200,10 +200,10 @@ def create_container(cmd,
 
     cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id)
 
-    #Setup zones
+    # Setup zones, validation done in control plane so check is not needed here
     zones = None
     if zone:
-      zones = [zone]
+        zones = [zone]
 
     container = Container(name=name,
                           image=image,
