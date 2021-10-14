@@ -2822,6 +2822,41 @@ def create_express_route_peering_connection(cmd, resource_group_name, circuit_na
     return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
 
 
+def add_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name, connection_name, address_prefix, address_prefix_type):
+    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
+
+    # Get Conn
+    try:
+        conn = client.get(resource_group_name, circuit_name, peering_name, connection_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError("Peering Connection {} doesn't exist".format(connection_name))
+
+    if address_prefix_type == 'IPv6':
+        Ipv6CircuitConnectionConfig = cmd.get_models('Ipv6CircuitConnectionConfig')
+
+        ipv6_config = Ipv6CircuitConnectionConfig(
+            address_prefix=address_prefix
+        )
+        conn.ipv6_circuit_connection_config = ipv6_config
+
+    return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
+
+
+def remove_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name, connection_name, address_prefix_type):
+    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
+
+    # Get Conn
+    try:
+        conn = client.get(resource_group_name, circuit_name, peering_name, connection_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError("Peering Connection {} doesn't exist".format(connection_name))
+    
+    if address_prefix_type == 'IPv6':
+        conn.ipv6_circuit_connection_config = None
+    
+    return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
+
+
 def _validate_ipv6_address_prefixes(prefixes):
     from ipaddress import ip_network, IPv6Network
     prefixes = prefixes if isinstance(prefixes, list) else [prefixes]
