@@ -1111,6 +1111,9 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
             'user2': 'TestUser'
         })
 
+        # print(resource_group)
+        # print(server)
+
         print('Arguments are updated with login and sid data')
 
         self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid} -u {user}',

@@ -584,8 +584,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_server_azure_ad_administrators_operations) as g:
         g.custom_command('create', 'server_ad_admin_set')
         g.command('list', 'list_by_server')
-        # g.custom_command('delete', 'server_ad_admin_delete')
-        g.command('delete', 'begin_delete')
+        g.custom_command('delete', 'server_ad_admin_delete')
         g.generic_update_command('update',
                                 getter_name='server_ad_admin_update_getter',
                                 getter_type=aadadmin_update_server_sdk,
