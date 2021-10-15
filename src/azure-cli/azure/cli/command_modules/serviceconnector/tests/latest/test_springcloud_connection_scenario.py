@@ -95,7 +95,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.AppConfig).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create appconfig --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create appconfig --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
         
         # list connection
@@ -141,7 +141,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosCassandra).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-cassandra --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create cosmos-cassandra --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
         
         # list connection
@@ -188,7 +188,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosGremlin).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-gremlin --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create cosmos-gremlin --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
         
         # list connection
@@ -234,7 +234,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosMongo).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-mongo --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create cosmos-mongo --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type dotnet'.format(name, source_id, target_id))
         
         # list connection
@@ -280,7 +280,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosSql).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-sql --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create cosmos-sql --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
         
         # list connection
@@ -326,7 +326,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosTable).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create cosmos-table --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create cosmos-table --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
         
         # list connection
@@ -371,7 +371,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.EventHub).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create eventhub --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create eventhub --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
         
         # list connection
@@ -422,7 +422,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.PostgresFlexible).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create postgres-flexible --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create postgres-flexible --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
         
         # list connection
@@ -467,7 +467,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create keyvault --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create keyvault --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
         
         # list connection
@@ -518,7 +518,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.Mysql).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create mysql --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create mysql --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
         
         # list connection
@@ -569,7 +569,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.MysqlFlexible).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create mysql-flexible --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create mysql-flexible --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
         
         # list connection
@@ -620,7 +620,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.Postgres).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create postgres --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create postgres --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
         
         # list connection
@@ -671,7 +671,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.Sql).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create sql --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create sql --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
         
         # list connection
@@ -716,7 +716,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create storage-blob --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create storage-blob --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
         
         # list connection
@@ -761,7 +761,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageQueue).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create storage-queue --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create storage-queue --connection {} --source-id {} --target-id {} '
                  '--secret --client-type python'.format(name, source_id, target_id))
         
         # list connection
@@ -806,7 +806,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageFile).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create storage-file --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create storage-file --connection {} --source-id {} --target-id {} '
                  '--secret --client-type python'.format(name, source_id, target_id))
 
         # list connection
@@ -851,7 +851,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageTable).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create storage-table --name {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create storage-table --connection {} --source-id {} --target-id {} '
                  '--secret --client-type python'.format(name, source_id, target_id))
 
         # list connection

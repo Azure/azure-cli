@@ -103,7 +103,7 @@ for source in SOURCE_RESOURCES:
                  az {source} connection delete
         - name: Delete a {source} connection by connection name
           text: |-
-                 az {source} connection delete {source_params} -n MyConnection
+                 az {source} connection delete {source_params} --connection MyConnection
         - name: Delete a {source} connection by connection id
           text: |-
                  az {source} connection delete --id {connection_id}
@@ -118,7 +118,7 @@ for source in SOURCE_RESOURCES:
                  az {source} connection list-configuration
         - name: List a connection's source configurations by connection name
           text: |-
-                 az {source} connection list-configuration {source_params} -n MyConnection
+                 az {source} connection list-configuration {source_params} --connection MyConnection
         - name: List a connection's source configurations by connection id
           text: |-
                  az {source} connection list-configuration --id {connection_id}
@@ -133,7 +133,7 @@ for source in SOURCE_RESOURCES:
                  az {source} connection validate
         - name: Validate a connection by connection name
           text: |-
-                 az {source} connection validate {source_params} -n MyConnection
+                 az {source} connection validate {source_params} --connection MyConnection
         - name: Validate a connection by connection id
           text: |-
                  az {source} connection validate --id {connection_id}
@@ -157,7 +157,7 @@ for source in SOURCE_RESOURCES:
                    az {source} connection show
           - name: Get a connection by connection name
             text: |-
-                   az {source} connection show {source_params} -n MyConnection
+                   az {source} connection show {source_params} --connection MyConnection
           - name: Get a connection by connection id
             text: |-
                    az {source} connection show --id {connection_id}
@@ -284,7 +284,7 @@ for source in SOURCE_RESOURCES:
           examples:
             - name: Update the client type of a connection with resource name
               text: |-
-                     az {source} connection update {target} {source_params} -n MyConnection --client-type dotnet
+                     az {source} connection update {target} {source_params} --connection MyConnection --client-type dotnet
             - name: Update the client type of a connection with resource id
               text: |-
                      az {source} connection update {target} --id {connection_id} --client-type dotnet

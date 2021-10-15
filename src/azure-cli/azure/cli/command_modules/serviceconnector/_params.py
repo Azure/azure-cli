@@ -80,7 +80,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                               'are not specified.'.format(required_args=str(required_args)))
 
     def add_connection_name_argument(context, source):
-        context.argument('connection_name', options_list=['--name', '-n', '--connection-name'], type=str,
+        context.argument('connection_name', options_list=['--connection'], type=str,
                          help='Name of the {} connection.'.format(source.value), validator=validate_params)
 
     def add_client_type_argument(context, source, target):

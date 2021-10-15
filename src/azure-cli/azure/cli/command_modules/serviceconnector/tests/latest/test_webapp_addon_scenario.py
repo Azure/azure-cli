@@ -92,7 +92,7 @@ class WebAppAddonScenarioTest(ScenarioTest):
         # servicelinker provision experience
         connection_name = 'testconn_postgres'
         connection = self.cmd('webapp connection create postgres --source-id {} '
-                              '--name {} --new'.format(source_id, connection_name)).get_output_in_json()
+                              '--connection {} --new'.format(source_id, connection_name)).get_output_in_json()
         target_id = connection.get('targetId')
         connection_id = connection.get('id')
 
@@ -122,13 +122,13 @@ class WebAppAddonScenarioTest(ScenarioTest):
         # servicelinker provision experience
         connection_name = 'testconn_keyvault'
         connection = self.cmd('webapp connection create keyvault --source-id {} '
-                              '--name {} --new'.format(source_id, connection_name)).get_output_in_json()
+                              '--connection {} --new'.format(source_id, connection_name)).get_output_in_json()
         target_id = connection.get('targetId')
         connection_id = connection.get('id')
 
         # validate the created postgres
         vault_name = target_id.split('/')[-1]
-        self.cmd('keyvault show --name {}'.format(vault_name))
+        self.cmd('keyvault show --connection {}'.format(vault_name))
         self.cmd('webapp connection show --id {}'.format(connection_id))
 
 
@@ -151,11 +151,11 @@ class WebAppAddonScenarioTest(ScenarioTest):
         # servicelinker provision experience
         connection_name = 'testconn_storageblob'
         connection = self.cmd('webapp connection create storage-blob --source-id {} '
-                              '--name {} --new'.format(source_id, connection_name)).get_output_in_json()
+                              '--connection {} --new'.format(source_id, connection_name)).get_output_in_json()
         target_id = connection.get('targetId')
         connection_id = connection.get('id')
 
         # validate the created postgres
         account_name = target_id.split('/')[-3]
-        self.cmd('storage account show --name {}'.format(account_name))
+        self.cmd('storage account show --connection {}'.format(account_name))
         self.cmd('webapp connection show --id {}'.format(connection_id))

@@ -6,6 +6,10 @@
 import re
 from knack.log import get_logger
 from knack.prompting import prompt
+from msrestazure.tools import (
+    parse_resource_id,
+    is_valid_resource_id
+)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
@@ -130,10 +134,10 @@ def get_client_type(cmd, namespace):
     def _infer_springcloud(source_id):
         client_type = None
         try:
-            regex = '*/resourceGroups/([^/]*)/providers/Microsoft.AppPlatform/Spring/([^/]*)/apps/([^/]*)/*'
-            matched = re.match(regex, source_id)
+            segments = parse_resource_id(source_id)
             output = run_cli_cmd('az spring-cloud app show '
-                                 '-g {} -s {} -n {}'.format(matched.group(1), matched.group(2), matched.group(3)))
+                                 '-g {} -s {} -n {}'.format(segments.get('name'), segments.get('child_name_1'),
+                                                            segments.get('child_name_2')))
             prop_val = output.get('properties')\
                              .get('activeDeployment')\
                              .get('properties')\
@@ -276,6 +280,8 @@ def validate_source_resource_id(namespace):
     '''Validate resource id of a source resource
     '''
     if getattr(namespace, 'source_id', None):
+        if not is_valid_resource_id(namespace.source_id):
+            raise InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.source_id))
         matched = False
         for resource in SOURCE_RESOURCES.values():
             matched = re.match(get_resource_regex(resource), namespace.source_id)
@@ -283,7 +289,7 @@ def validate_source_resource_id(namespace):
                 namespace.source_id = matched.group()
                 return True
         if not matched:
-            raise InvalidArgumentValueError('Source resource id is invalid: {}'.format(namespace.source_id))
+            raise InvalidArgumentValueError('Unsupported source resource id: {}'.format(namespace.source_id))
 
     return False
 
@@ -310,6 +316,8 @@ def validate_target_resource_id(namespace):
     '''Validate resource id of a target resource
     '''
     if getattr(namespace, 'target_id', None):
+        if not is_valid_resource_id(namespace.target_id):
+            raise InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.target_id))
         matched = False
         for resource in TARGET_RESOURCES.values():
             matched = re.match(get_resource_regex(resource), namespace.target_id, re.IGNORECASE)
@@ -317,7 +325,7 @@ def validate_target_resource_id(namespace):
                 namespace.target_id = matched.group()
                 return True
         if not matched:
-            raise InvalidArgumentValueError('Target resource id is invalid: {}'.format(namespace.target_id))
+            raise InvalidArgumentValueError('Unsupported target resource id is invalid: {}'.format(namespace.target_id))
 
     return False
 

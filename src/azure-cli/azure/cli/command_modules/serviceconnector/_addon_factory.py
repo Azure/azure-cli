@@ -5,6 +5,10 @@
 
 import re
 from knack.log import get_logger
+from msrestazure.tools import (
+    parse_resource_id,
+    is_valid_resource_id
+)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (
     CLIInternalError,
@@ -147,7 +151,8 @@ class AddonBase:
                 run_cli_cmd(cmd)
             except CLIInternalError:
                 logger.warning('Rollback failed, please manually check and delete the unintended resources '
-                               'in resource group: %s', self._params.get('source_resource_group'))
+                               'in resource group: %s. You may use this command: %s',
+                               self._params.get('source_resource_group'), cmd)
                 return
         logger.warning('Rollback succeeded, the created resources were successfully deleted')
 
@@ -168,13 +173,11 @@ class AddonBase:
     def _retrive_source_rg(self):
         '''Retrive the resource group name in source resource id
         '''
-        regex = '.*/resourceGroups/([^/]*)'
-        matched = re.match(regex, self._source_id)
-
-        if not matched:
+        if not is_valid_resource_id(self._source_id):
             raise InvalidArgumentValueError('The source resource id is invalid: {}'.format(self._source_id))
 
-        return matched.group(1)
+        segments = parse_resource_id(self._source_id)
+        return segments.get('resource_group')
 
     def _retrive_source_loc(self):
         '''Retrive the location of source resource group
