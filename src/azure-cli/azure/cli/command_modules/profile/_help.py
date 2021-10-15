@@ -43,7 +43,9 @@ long-summary: To clear the current subscription, use 'az logout'.
 
 helps['account list'] = """
 type: command
-short-summary: Get a list of subscriptions for the logged in account.
+short-summary: >-
+    Get a list of subscriptions for the logged in account. By default, only 'Enabled' subscriptions from the current
+    cloud is shown.
 """
 
 helps['account list-locations'] = """
