@@ -486,9 +486,11 @@ def apply_auth_args(cmd, namespace, arg_values):
     source = get_source_resource_name(cmd)
     target = get_target_resource_name(cmd)
     if source and target:
-        default_auth_type = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})[0]
-        for arg in AUTH_TYPE_PARAMS.get(default_auth_type):
-            setattr(namespace, arg, arg_values.get(arg, None))
+        auth_types = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})
+        for auth_type in auth_types:
+            for arg in AUTH_TYPE_PARAMS.get(auth_type):
+                if arg in arg_values:
+                    setattr(namespace, arg, arg_values.get(arg, None))
 
 
 def apply_connection_name(namespace, arg_values):
