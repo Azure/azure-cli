@@ -9,7 +9,7 @@ from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.commands.parameters import get_datetime_type
+from azure.cli.core.commands.parameters import get_datetime_type, resource_group_name_type
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
@@ -750,102 +750,132 @@ def load_arguments(self, _):
         with self.argument_context('{} stop'.format(scope)) as c:
             c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.', min_api='2019-03-01')
 
-        with self.argument_context('{} run-command set'.format(scope)) as c:
-            c.argument('resource_group_name', resource_group_name_type)
-            c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
-            c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
-            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.')
-            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                       validator=get_default_location_from_resource_group)
-            c.argument('tags', tags_type)
-            c.argument('source', action=AddVirtualmachineruncommandsSource, nargs='+',
-                       help='The source of the run command '
-                            'script.')
-            c.argument('parameters', action=AddVirtualmachineruncommandsParameters, nargs='+',
-                       help='The parameters used '
-                            'by the script.')
-            c.argument('protected_parameters', action=AddProtectedParameters, nargs='+',
-                       help='The parameters used by the '
-                            'script.')
-            c.argument('async_execution', arg_type=get_three_state_flag(),
-                       help='Optional. If set to true, provisioning '
-                            'will complete as soon as the script starts and will not wait for script to complete.')
-            c.argument('run_as_user', type=str,
-                       help='Specifies the user account on the VM when executing the run command.')
-            c.argument('run_as_password', type=str,
-                       help='Specifies the user account password on the VM when executing the '
-                            'run command.')
-            c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
-            c.argument('output_blob_uri', type=str,
-                       help='Specifies the Azure storage blob where script output stream will '
-                            'be uploaded.')
-            c.argument('error_blob_uri', type=str,
-                       help='Specifies the Azure storage blob where script error stream will '
-                            'be uploaded.')
-        with self.argument_context('res virtual-machine-run-command list') as c:
-            c.argument('resource_group_name', resource_group_name_type)
-            c.argument('vm_name', type=str, help='The name of the virtual machine containing the run command.')
-            c.argument('expand', type=str, help='The expand expression to apply on the operation.')
-            c.argument('location', arg_type=get_location_type(self.cli_ctx))
+    with self.argument_context('vm run-command create', ) as c:
+        c.argument('vm_name', options_list=['--vm-name'], help='The name of the virtual machine where the run command should be created or updated.')
+        c.argument('run_command_name', options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('script', help='Contain the powershell or bash script to execute on the VM.')
+        c.argument('script_uri', help='Contain a uri to the script to execute on the VM. Uri can be any link accessible from the VM or a storage blob without SAS. If subscription has access to the storage blob, then SAS will be auto-generated. ')
+        c.argument('command_id', help='Specify a command id of predefined script. All command ids can be listed using "list" command.')
+        c.argument('parameters', nargs='+', help='Set custom parameters in a name-value pair.')
+        c.argument('protected_parameters', nargs='+', help='Set custom parameters in a name-value pair. These parameters will be encrypted during transmission and will not be logged.')
+        c.argument('async_execution', arg_type=get_three_state_flag(), help='Optional. If set to true, provisioning '
+                   'will complete as soon as the script starts and will not wait for script to complete.')
+        c.argument('run_as_user', help='By default script process runs under system/root user. Specify custom user to host the process.')
+        c.argument('run_as_password', help='Password if needed for using run-as-user parameter. It will be encrypted and not logged. ')
+        c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
+        c.argument('output_blob_uri', help='Specify the Azure storage blob where script output stream will be uploaded.')
+        c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
 
-        with self.argument_context('res virtual-machine-run-command show') as c:
-            c.argument('resource_group_name', resource_group_name_type)
-            c.argument('vm_name', type=str, help='The name of the virtual machine containing the run command.',
-                       id_part='name')
-            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.',
-                       id_part='child_name_1')
-            c.argument('expand', type=str, help='The expand expression to apply on the operation.')
-            c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-            c.argument('command_id', type=str, help='The command id.', id_part='child_name_1')
+    with self.argument_context('vm run-command update', ) as c:
+        c.argument('vm_name', options_list=['--vm-name'], help='The name of the virtual machine where the run command should be created or updated.')
+        c.argument('run_command_name', options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('script', help='Contain the powershell or bash script to execute on the VM.')
+        c.argument('script_uri', help='Contain a uri to the script to execute on the VM. Uri can be any link accessible from the VM or a storage blob without SAS. If subscription has access to the storage blob, then SAS will be auto-generated. ')
+        c.argument('command_id', help='Specify a command id of predefined script. All command ids can be listed using "list" command.')
+        c.argument('parameters', nargs='+', help='Set custom parameters in a name-value pair.')
+        c.argument('protected_parameters', nargs='+', help='Set custom parameters in a name-value pair. These parameters will be encrypted during transmission and will not be logged.')
+        c.argument('async_execution', arg_type=get_three_state_flag(), help='Optional. If set to true, provisioning '
+                   'will complete as soon as the script starts and will not wait for script to complete.')
+        c.argument('run_as_user', help='By default script process runs under system/root user. Specify custom user to host the process.')
+        c.argument('run_as_password', help='Password if needed for using run-as-user parameter. It will be encrypted and not logged. ')
+        c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
+        c.argument('output_blob_uri', help='Specify the Azure storage blob where script output stream will be uploaded.')
+        c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
 
-        with self.argument_context('res virtual-machine-run-command update') as c:
-            c.argument('resource_group_name', resource_group_name_type)
-            c.argument('vm_name', type=str,
-                       help='The name of the virtual machine where the run command should be updated.', id_part='name')
-            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.',
-                       id_part='child_name_1')
-            c.argument('tags', tags_type)
-            c.argument('source', action=AddVirtualmachineruncommandsSource, nargs='+',
-                       help='The source of the run command '
-                            'script.')
-            c.argument('parameters', action=AddVirtualmachineruncommandsParameters, nargs='+',
-                       help='The parameters used '
-                            'by the script.')
-            c.argument('protected_parameters', action=AddProtectedParameters, nargs='+',
-                       help='The parameters used by the '
-                            'script.')
-            c.argument('async_execution', arg_type=get_three_state_flag(),
-                       help='Optional. If set to true, provisioning '
-                            'will complete as soon as the script starts and will not wait for script to complete.')
-            c.argument('run_as_user', type=str,
-                       help='Specifies the user account on the VM when executing the run command.')
-            c.argument('run_as_password', type=str,
-                       help='Specifies the user account password on the VM when executing the '
-                            'run command.')
-            c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
-            c.argument('output_blob_uri', type=str,
-                       help='Specifies the Azure storage blob where script output stream will '
-                            'be uploaded.')
-            c.argument('error_blob_uri', type=str,
-                       help='Specifies the Azure storage blob where script error stream will '
-                            'be uploaded.')
+    with self.argument_context('vm run-command delete') as c:
+        c.argument('vm_name', options_list=['--vm-name'], help='The name of the virtual machine where the run command should be deleted.')
+        c.argument('run_command_name', options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
 
-        with self.argument_context('res virtual-machine-run-command delete') as c:
-            c.argument('resource_group_name', resource_group_name_type)
-            c.argument('vm_name', type=str,
-                       help='The name of the virtual machine where the run command should be deleted.', id_part='name')
-            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.',
-                       id_part='child_name_1')
+    with self.argument_context('vm run-command list') as c:
+        c.argument('vm_name', options_list=['--vm-name'], help='The name of the virtual machine containing the run command.', id_part=None)
+        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
-        with self.argument_context('res virtual-machine-run-command wait') as c:
-            c.argument('resource_group_name', resource_group_name_type)
-            c.argument('vm_name', type=str, help='The name of the virtual machine containing the run command.',
-                       id_part='name')
-            c.argument('run_command_name', type=str, help='The name of the virtual machine run command.',
-                       id_part='child_name_1')
-            c.argument('expand', type=str, help='The expand expression to apply on the operation.')
-            c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-            c.argument('command_id', type=str, help='The command id.', id_part='child_name_1')
+    with self.argument_context('vm run-command show') as c:
+        c.argument('vm_name', options_list=['--vm-name'], help='The name of the virtual machine containing the run command.')
+        c.argument('run_command_name', options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
+        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('command_id', help='The command id.')
+
+    with self.argument_context('vm run-command wait') as c:
+        c.argument('vm_name', options_list=['--vm-name'], help='The name of the virtual machine containing the run command.')
+        c.argument('run_command_name', options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
+        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('command_id', help='The command id.')
+
+    with self.argument_context('vmss run-command create') as c:
+        c.argument('vmss_name', options_list=['--vmss-name'], help='The name of the VM scale set.')
+        c.argument('instance_id', help='The instance ID of the virtual machine.')
+        c.argument('run_command_name', options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('script', help='Contain the powershell or bash script to execute on the VM.')
+        c.argument('script_uri',
+                   help='Contain a uri to the script to execute on the VM. Uri can be any link accessible from the VM or a storage blob without SAS. If subscription has access to the storage blob, then SAS will be auto-generated. ')
+        c.argument('command_id',
+                   help='Specify a command id of predefined script. All command ids can be listed using "list" command.')
+        c.argument('parameters', nargs='+', help='Set custom parameters in a name-value pair.')
+        c.argument('protected_parameters', nargs='+',
+                   help='Set custom parameters in a name-value pair. These parameters will be encrypted during transmission and will not be logged.')
+        c.argument('async_execution', arg_type=get_three_state_flag(), help='Optional. If set to true, provisioning '
+                                                                            'will complete as soon as the script starts and will not wait for script to complete.')
+        c.argument('run_as_user',
+                   help='By default script process runs under system/root user. Specify custom user to host the process.')
+        c.argument('run_as_password',
+                   help='Password if needed for using run-as-user parameter. It will be encrypted and not logged. ')
+        c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
+        c.argument('output_blob_uri', help='Uri (without SAS) to an append blob where the script output will be uploaded.')
+        c.argument('error_blob_uri', help='Uri (without SAS) to an append blob where the script error stream will be uploaded.')
+
+    with self.argument_context('vmss run-command update') as c:
+        c.argument('vmss_name', options_list=['--vmss-name'], help='The name of the VM scale set.')
+        c.argument('instance_id', help='The instance ID of the virtual machine.')
+        c.argument('run_command_name', options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('script', help='Contain the powershell or bash script to execute on the VM.')
+        c.argument('script_uri',
+                   help='Contain a uri to the script to execute on the VM. Uri can be any link accessible from the VM or a storage blob without SAS. If subscription has access to the storage blob, then SAS will be auto-generated. ')
+        c.argument('command_id',
+                   help='Specify a command id of predefined script. All command ids can be listed using "list" command.')
+        c.argument('parameters', nargs='+', help='Set custom parameters in a name-value pair.')
+        c.argument('protected_parameters', nargs='+',
+                   help='Set custom parameters in a name-value pair. These parameters will be encrypted during transmission and will not be logged.')
+        c.argument('async_execution', arg_type=get_three_state_flag(), help='Optional. If set to true, provisioning '
+                                                                            'will complete as soon as the script starts and will not wait for script to complete.')
+        c.argument('run_as_user',
+                   help='By default script process runs under system/root user. Specify custom user to host the process.')
+        c.argument('run_as_password',
+                   help='Password if needed for using run-as-user parameter. It will be encrypted and not logged. ')
+        c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
+        c.argument('output_blob_uri', help='Uri (without SAS) to an append blob where the script output will be uploaded.')
+        c.argument('error_blob_uri', help='Uri (without SAS) to an append blob where the script error stream will be uploaded.')
+
+    with self.argument_context('vmss run-command delete') as c:
+        c.argument('vmss_name', options_list=['--vmss-name'], help='The name of the VM scale set.')
+        c.argument('instance_id', help='The instance ID of the virtual machine.')
+        c.argument('run_command_name', options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
+
+    with self.argument_context('vmss run-command list') as c:
+        c.argument('vmss_name', options_list=['--vmss-name'], help='The name of the VM scale set.', id_part=None)
+        c.argument('instance_id', help='The instance ID of the virtual machine.')
+        c.argument('expand', help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vmss run-command show') as c:
+        c.argument('vmss_name', options_list=['--vmss-name'], help='The name of the VM scale set.')
+        c.argument('instance_id', help='The instance ID of the virtual machine.')
+        c.argument('run_command_name', options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
+        c.argument('expand', help='The expand expression to apply on the operation.')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
