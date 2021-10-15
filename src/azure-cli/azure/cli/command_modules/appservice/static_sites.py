@@ -99,7 +99,7 @@ def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait
     domain_envelope = StaticSiteCustomDomainRequestPropertiesARMResource(validation_method=validation_method)
 
     client.begin_validate_custom_domain_can_be_added_to_static_site(resource_group_name,
-                                                                           name, hostname, domain_envelope)
+                                                                    name, hostname, domain_envelope)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update_static_site_custom_domain,
                        resource_group_name=resource_group_name, name=name, domain_name=hostname,
