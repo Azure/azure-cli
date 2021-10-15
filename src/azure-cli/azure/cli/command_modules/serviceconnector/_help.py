@@ -64,7 +64,7 @@ for source in SOURCE_RESOURCES:
 
     helps['{source} connection'.format(source=source.value)] = """
         type: group
-        short-summary: Manage {source} connections
+        short-summary: Commands to manage {source} connections
     """.format(source=source.value)
 
     helps['{source} connection list-support-types'.format(source=source.value)] = """
