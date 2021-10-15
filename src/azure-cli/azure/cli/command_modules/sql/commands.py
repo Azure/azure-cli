@@ -586,11 +586,11 @@ def load_command_table(self, _):
         g.command('list', 'list_by_server')
         g.custom_command('delete', 'server_ad_admin_delete')
         g.generic_update_command('update',
-                                getter_name='server_ad_admin_update_getter',
-                                getter_type=aadadmin_update_server_sdk,
-                                setter_name='server_ad_admin_update_setter',
-                                setter_type=aadadmin_update_server_sdk,
-                                custom_func_name='server_ad_admin_update')
+                                 getter_name='server_ad_admin_update_getter',
+                                 getter_type=aadadmin_update_server_sdk,
+                                 setter_name='server_ad_admin_update_setter',
+                                 setter_type=aadadmin_update_server_sdk,
+                                 custom_func_name='server_ad_admin_update')
 
     server_keys_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerKeysOperations.{}',

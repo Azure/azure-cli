@@ -3701,8 +3701,7 @@ def server_ad_admin_set(
 def server_ad_admin_delete(
         client,
         resource_group_name,
-        server_name,
-        **kwargs):
+        server_name):
     '''
     Sets a server's AD admin.
     '''
@@ -3729,11 +3728,12 @@ def server_ad_admin_update(
 
     return instance
 
+
 def server_ad_admin_update_setter(
-    client,
-    resource_group_name,
-    server_name,
-    **kwargs):
+        client,
+        resource_group_name,
+        server_name,
+        **kwargs):
     '''
     Updates a server' AD admin.
     '''
@@ -3744,15 +3744,15 @@ def server_ad_admin_update_setter(
         administrator_name=AdministratorName.ACTIVE_DIRECTORY,
         parameters=kwargs["parameters"])
 
+
 def server_ad_admin_update_getter(
-    client,
-    resource_group_name,
-    server_name,
-    **kwargs):
+        client,
+        resource_group_name,
+        server_name):
     '''
     Updates a server' AD admin.
     '''
-    
+
     return client.get(
         server_name=server_name,
         resource_group_name=resource_group_name,

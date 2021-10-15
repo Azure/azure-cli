@@ -1504,7 +1504,6 @@ def load_arguments(self, _):
                 'sid',
             ])
 
-
     #####
     #           sql server audit-policy
     ######
