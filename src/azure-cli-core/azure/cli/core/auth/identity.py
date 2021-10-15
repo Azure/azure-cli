@@ -13,6 +13,7 @@ from knack.util import CLIError
 
 from .msal_authentication import UserCredential, ServicePrincipalCredential
 from .util import check_result
+from .persistence import load_persisted_token_cache, file_extensions
 
 # Service principal entry properties
 from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION,\
@@ -74,7 +75,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         }
 
     def _load_msal_cache(self):
-        from .persistence import load_persisted_token_cache
         # Store for user token persistence
         cache = load_persisted_token_cache(self._token_cache_file, self.token_encryption)
         return cache
@@ -162,10 +162,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self.msal_app.remove_account(account)
 
     def logout_all_users(self):
-        try:
-            os.remove(self._token_cache_file)
-        except FileNotFoundError:
-            pass
+        for e in file_extensions.values():
+            _try_remove(self._token_cache_file + e)
 
     def logout_service_principal(self, sp):
         # remove service principal secrets
@@ -303,10 +301,8 @@ class ServicePrincipalStore:
             self._save_persistence()
 
     def remove_all_entries(self):
-        try:
-            os.remove(self._secret_file)
-        except FileNotFoundError:
-            pass
+        for e in file_extensions.values():
+            _try_remove(self._secret_file + e)
 
     def _save_persistence(self):
         self._secret_store.save(self._entries)
@@ -345,3 +341,10 @@ def _get_authority_url(authority_endpoint, tenant):
     else:
         authority_url = '{}/{}'.format(authority_endpoint, tenant or "organizations")
     return authority_url
+
+
+def _try_remove(path):
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass

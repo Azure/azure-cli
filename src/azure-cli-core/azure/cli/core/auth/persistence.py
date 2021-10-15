@@ -18,6 +18,9 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+# Files extensions for encrypted and plaintext persistence
+file_extensions = {True: '.bin', False: '.json'}
+
 
 def load_persisted_token_cache(location, encrypt):
     persistence = build_persistence(location, encrypt)
@@ -31,8 +34,8 @@ def load_secret_store(location, encrypt):
 
 def build_persistence(location, encrypt):
     """Build a suitable persistence instance based your current OS"""
+    location += file_extensions[encrypt]
     if encrypt:
-        location += '.bin'
         if sys.platform.startswith('win'):
             return FilePersistenceWithDataProtection(location)
         if sys.platform.startswith('darwin'):
@@ -44,7 +47,6 @@ def build_persistence(location, encrypt):
                 attributes={"my_attr1": "foo", "my_attr2": "bar"}
             )
     else:
-        location += '.json'
         return FilePersistence(location)
 
 
