@@ -643,6 +643,58 @@ class Profile:
 
         self._set_subscriptions(result, merge=False)
 
+    def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
+        """Generate a JSON for --sdk-auth argument when used in:
+            - az ad sp create-for-rbac --sdk-auth
+            - az account show --sdk-auth
+        """
+        from collections import OrderedDict
+        account = self.get_subscription(subscription_id)
+
+        # is the credential created through command like 'create-for-rbac'?
+        result = OrderedDict()
+        if name and (password or cert_file):
+            result['clientId'] = name
+            if password:
+                result['clientSecret'] = password
+            else:
+                result['clientCertificate'] = cert_file
+            result['subscriptionId'] = subscription_id or account[_SUBSCRIPTION_ID]
+        else:  # has logged in through cli
+            user_type = account[_USER_ENTITY].get(_USER_TYPE)
+            if user_type == _SERVICE_PRINCIPAL:
+                client_id = account[_USER_ENTITY][_USER_NAME]
+                result['clientId'] = client_id
+                identity = Identity(tenant_id=account[_TENANT_ID])
+                sp_entry = identity.get_service_principal_entry(client_id)
+
+                from .auth.msal_authentication import _CLIENT_SECRET, _CERTIFICATE
+                secret = sp_entry.get(_CLIENT_SECRET)
+                if secret:
+                    result['clientSecret'] = secret
+                else:
+                    # we can output 'clientCertificateThumbprint' if asked
+                    result['clientCertificate'] = sp_entry.get(_CERTIFICATE)
+                result['subscriptionId'] = account[_SUBSCRIPTION_ID]
+            else:
+                raise CLIError('SDK Auth file is only applicable when authenticated using a service principal')
+
+        result[_TENANT_ID] = account[_TENANT_ID]
+        endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
+        endpoint_mappings['active_directory'] = 'activeDirectoryEndpointUrl'
+        endpoint_mappings['resource_manager'] = 'resourceManagerEndpointUrl'
+        endpoint_mappings['active_directory_graph_resource_id'] = 'activeDirectoryGraphResourceId'
+        endpoint_mappings['sql_management'] = 'sqlManagementEndpointUrl'
+        endpoint_mappings['gallery'] = 'galleryEndpointUrl'
+        endpoint_mappings['management'] = 'managementEndpointUrl'
+        from azure.cli.core.cloud import CloudEndpointNotSetException
+        for e in endpoint_mappings:
+            try:
+                result[endpoint_mappings[e]] = getattr(get_active_cloud(self.cli_ctx).endpoints, e)
+            except CloudEndpointNotSetException:
+                result[endpoint_mappings[e]] = None
+        return result
+
     def get_installation_id(self):
         installation_id = self._storage.get(_INSTALLATION_ID)
         if not installation_id:
