@@ -13,6 +13,7 @@ from knack.util import CLIError
 
 from .msal_authentication import UserCredential, ServicePrincipalCredential
 from .util import check_result
+from .persistence import load_persisted_token_cache, file_extensions
 
 # Service principal entry properties
 from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION,\
@@ -38,18 +39,21 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     # https://github.com/AzureAD/microsoft-authentication-library-for-python/pull/407
     http_cache = None
 
-    def __init__(self, authority=None, tenant_id=None, client_id=None):
+    def __init__(self, authority, tenant_id=None, client_id=None):
         """
-
-        :param authority: AAD endpoint, like https://login.microsoftonline.com/
-        :param tenant_id: Tenant GUID, like 00000000-0000-0000-0000-000000000000
+        :param authority: Authentication authority endpoint. For example,
+            - AAD: https://login.microsoftonline.com
+            - ADFS: https://adfs.redmond.azurestack.corp.microsoft.com/adfs
+        :param tenant_id: Tenant GUID, like 00000000-0000-0000-0000-000000000000. If unspecified, default to
+            'organizations'.
         :param client_id: Client ID of the CLI application.
         """
         self.authority = authority
-        self.tenant_id = tenant_id or "organizations"
-        # Build the authority in MSAL style, like https://login.microsoftonline.com/your_tenant
-        self.msal_authority = "{}/{}".format(self.authority, self.tenant_id)
+        self.tenant_id = tenant_id
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
+
+        # Build the authority in MSAL style
+        self._msal_authority, self._is_adfs = _get_authority_url(authority, tenant_id)
 
         config_dir = get_config_dir()
         self._token_cache_file = os.path.join(config_dir, "msal_token_cache")
@@ -65,13 +69,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # Store for Service principal credential persistence
         self._msal_secret_store = ServicePrincipalStore(self._secret_file, self.token_encryption)
         self._msal_app_kwargs = {
-            "authority": self.msal_authority,
+            "authority": self._msal_authority,
             "token_cache": self._load_msal_cache()
             # "http_cache": Identity.http_cache
         }
 
     def _load_msal_cache(self):
-        from .persistence import load_persisted_token_cache
         # Store for user token persistence
         cache = load_persisted_token_cache(self._token_cache_file, self.token_encryption)
         return cache
@@ -108,15 +111,17 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def login_with_auth_code(self, scopes=None, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
-        logger.warning("The default web browser has been opened at %s/oauth2/v2.0/authorize. "
-                       "Please continue the login in the web browser. "
+        logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
-                       "with `az login --use-device-code`.", self.msal_authority)
+                       "with `az login --use-device-code`.", self._msal_authority)
 
         success_template, error_template = _read_response_templates()
 
+        # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
+        # on port 8400 from the old design. However, ADFS only allows port 8400.
         result = self.msal_app.acquire_token_interactive(
-            scopes, prompt='select_account', success_template=success_template, error_template=error_template, **kwargs)
+            scopes, prompt='select_account', port=8400 if self._is_adfs else None,
+            success_template=success_template, error_template=error_template, **kwargs)
         return check_result(result)
 
     def login_with_device_code(self, scopes=None, **kwargs):
@@ -159,10 +164,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self.msal_app.remove_account(account)
 
     def logout_all_users(self):
-        try:
-            os.remove(self._token_cache_file)
-        except FileNotFoundError:
-            pass
+        for e in file_extensions.values():
+            _try_remove(self._token_cache_file + e)
 
     def logout_service_principal(self, sp):
         # remove service principal secrets
@@ -304,10 +307,8 @@ class ServicePrincipalStore:
             self._save_persistence()
 
     def remove_all_entries(self):
-        try:
-            os.remove(self._secret_file)
-        except FileNotFoundError:
-            pass
+        for e in file_extensions.values():
+            _try_remove(self._secret_file + e)
 
     def _save_persistence(self):
         self._secret_store.save(self._entries)
@@ -327,3 +328,30 @@ def _read_response_templates():
         error_template = f.read()
 
     return success_template, error_template
+
+
+def _get_authority_url(authority_endpoint, tenant):
+    """Convert authority endpoint (active_directory) to MSAL authority:
+        - AAD: https://login.microsoftonline.com/your_tenant
+        - ADFS: https://adfs.redmond.azurestack.corp.microsoft.com/adfs
+    For ADFS, tenant is discarded.
+    """
+
+    # Some Azure Stack (bellevue)'s metadata returns
+    #   "loginEndpoint": "https://login.microsoftonline.com/"
+    # Normalize it by removing the trailing /, so that authority_url won't become
+    # "https://login.microsoftonline.com//tenant_id".
+    authority_endpoint = authority_endpoint.rstrip('/').lower()
+    is_adfs = authority_endpoint.endswith('adfs')
+    if is_adfs:
+        authority_url = authority_endpoint
+    else:
+        authority_url = '{}/{}'.format(authority_endpoint, tenant or "organizations")
+    return authority_url, is_adfs
+
+
+def _try_remove(path):
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
