@@ -241,7 +241,7 @@ helps['postgres flexible-server firewall-rule create'] = """
 type: command
 short-summary: Create a new firewall rule for a flexible server.
 examples:
-   - name: >
+  - name: >
       Create a firewall rule allowing connections from a specific IP address.
     text: >
       az postgres flexible-server firewall-rule create --resource-group testGroup --name testserver --rule-name allowip --start-ip-address 107.46.14.221

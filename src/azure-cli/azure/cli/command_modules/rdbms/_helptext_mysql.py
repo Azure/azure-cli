@@ -338,7 +338,7 @@ short-summary: List the parameter values for a flexible server.
 examples:
   - name: List the parameter values for a flexible server.
     text: az mysql flexible-server parameter list --resource-group testGroup --server-name testserver
-    - name: List the parameter values for a flexible server in table format.
+  - name: List the parameter values for a flexible server in table format.
     text: az mysql flexible-server parameter list --resource-group testGroup --server-name testserver --output table
 """
 
