@@ -2022,6 +2022,57 @@ short-summary: Get a SQL scripts.
 examples:
   - name: Get a SQL scripts.
     text: |-
+        az synapse sql-script show --workspace-name testsynapseworkspace
+"""
+
+helps['synapse sql-script show'] = """
+type: command
+short-summary: Get a SQL script.
+examples:
+  - name: Get a SQL script.
+    text: |-
         az synapse sql-script show --workspace-name testsynapseworkspace \\
-          --name testsjdname
+          --sql-script-name testsqlscriptname
+"""
+
+helps['synapse sql-script delete'] = """
+type: command
+short-summary: Delete a SQL script.
+examples:
+  - name: Delete a SQL script.
+    text: |-
+        az synapse sql-script delete --workspace-name testsynapseworkspace \\
+          --sql-script-name testsqlscriptname
+"""
+
+helps['synapse sql-script create'] = """
+type: command
+short-summary: Create a SQL script.
+examples:
+  - name: Create a SQL script.
+    text: |-
+        az synapse sql-script create --workspace-name testsynapseworkspace \\
+          --sql-script-name testsqlscriptname \\
+          --query-file queryfilename
+"""
+
+helps['synapse sql-script update'] = """
+type: command
+short-summary: Update a SQL script.
+examples:
+  - name: Update a SQL script.
+    text: |-
+        az synapse sql-script update --workspace-name testsynapseworkspace \\
+          --sql-script-name testsqlscriptname \\
+          --query-file queryfilename
+"""
+
+helps['synapse sql-script rename'] = """
+type: command
+short-summary: Rename a SQL script.
+examples:
+  - name: Rename a SQL script.
+    text: |-
+        az synapse sql-script rename --workspace-name testsynapseworkspace \\
+          --sql-script-name testsqlscriptname
 """
