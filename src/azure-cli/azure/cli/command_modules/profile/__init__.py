@@ -75,7 +75,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('account show') as c:
             c.argument('show_auth_for_sdk', options_list=['--sdk-auth'], action='store_true',
-                       deprecate_info=c.deprecate(target='--sdk-auth', expiration='3.0.0'),
+                       deprecate_info=c.deprecate(target='--sdk-auth'),
                        help='Output result to a file compatible with Azure SDK auth. Only applicable when authenticating with a Service Principal.')
 
         with self.argument_context('account get-access-token') as c:
