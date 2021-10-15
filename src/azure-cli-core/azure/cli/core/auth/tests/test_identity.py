@@ -146,26 +146,27 @@ class TestUtils(unittest.TestCase):
         # AAD
         # Default tenant
         self.assertEqual(_get_authority_url('https://login.microsoftonline.com', None),
-                         'https://login.microsoftonline.com/organizations')
+                         ('https://login.microsoftonline.com/organizations', False))
         # Trailing slash is stripped
         self.assertEqual(_get_authority_url('https://login.microsoftonline.com/', None),
-                         'https://login.microsoftonline.com/organizations')
+                         ('https://login.microsoftonline.com/organizations', False))
         # Custom tenant
         self.assertEqual(_get_authority_url('https://login.microsoftonline.com',
                                             '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'),
-                         'https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
+                         ('https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a', False))
 
         # ADFS
         # Default tenant
+        adfs_expected = ('https://adfs.redmond.azurestack.corp.microsoft.com/adfs', True)
         self.assertEqual(_get_authority_url('https://adfs.redmond.azurestack.corp.microsoft.com/adfs', None),
-                         'https://adfs.redmond.azurestack.corp.microsoft.com/adfs')
+                         adfs_expected)
         # Trailing slash is stripped
         self.assertEqual(_get_authority_url('https://adfs.redmond.azurestack.corp.microsoft.com/adfs/', None),
-                         'https://adfs.redmond.azurestack.corp.microsoft.com/adfs')
+                         adfs_expected)
         # Tenant ID is discarded
         self.assertEqual(_get_authority_url('https://adfs.redmond.azurestack.corp.microsoft.com/adfs',
                                             '601d729d-0000-0000-0000-000000000000'),
-                         'https://adfs.redmond.azurestack.corp.microsoft.com/adfs')
+                         adfs_expected)
 
 
 class MemoryStore:

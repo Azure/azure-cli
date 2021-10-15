@@ -53,7 +53,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
 
         # Build the authority in MSAL style
-        self.msal_authority = _get_authority_url(authority, tenant_id)
+        self._msal_authority, self._is_adfs = _get_authority_url(authority, tenant_id)
 
         config_dir = get_config_dir()
         self._token_cache_file = os.path.join(config_dir, "msal_token_cache")
@@ -69,7 +69,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # Store for Service principal credential persistence
         self._msal_secret_store = ServicePrincipalStore(self._secret_file, self.token_encryption)
         self._msal_app_kwargs = {
-            "authority": self.msal_authority,
+            "authority": self._msal_authority,
             "token_cache": self._load_msal_cache()
             # "http_cache": Identity.http_cache
         }
@@ -113,12 +113,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # Only show the path part of the URL and hide the query string.
         logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
-                       "with `az login --use-device-code`.", self.msal_authority)
+                       "with `az login --use-device-code`.", self._msal_authority)
 
         success_template, error_template = _read_response_templates()
 
+        # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
+        # on port 8400 from the old design. However, ADFS only allows port 8400.
         result = self.msal_app.acquire_token_interactive(
-            scopes, prompt='select_account', port=8400,
+            scopes, prompt='select_account', port=8400 if self._is_adfs else None,
             success_template=success_template, error_template=error_template, **kwargs)
         return check_result(result)
 
@@ -336,11 +338,12 @@ def _get_authority_url(authority_endpoint, tenant):
     # Normalize it by removing the trailing /, so that authority_url won't become
     # "https://login.microsoftonline.com//tenant_id".
     authority_endpoint = authority_endpoint.rstrip('/').lower()
-    if authority_endpoint.endswith('adfs'):
+    is_adfs = authority_endpoint.endswith('adfs')
+    if is_adfs:
         authority_url = authority_endpoint
     else:
         authority_url = '{}/{}'.format(authority_endpoint, tenant or "organizations")
-    return authority_url
+    return authority_url, is_adfs
 
 
 def _try_remove(path):
