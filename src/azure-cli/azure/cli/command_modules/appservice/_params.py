@@ -1011,8 +1011,8 @@ def load_arguments(self, _):
     with self.argument_context('staticwebapp hostname set') as c:
         c.argument('validation_method',
                    options_list=['--validation-method', '-m'],
-                   help="Validation method for the custom domain.",
-                   arg_type=get_enum_type(["dns-txt-token", "cname-delegation"])
+                   help="Validation method for the custom domain. 'dns-txt-token' validation will be added to a future release, but is not yet supported",
+                   arg_type=get_enum_type(["cname-delegation"])
                    )
     with self.argument_context('staticwebapp appsettings') as c:
         c.argument('setting_pairs', options_list=['--setting-names'],
