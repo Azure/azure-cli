@@ -82,7 +82,7 @@ def generate_connection_name(cmd):
     randstr = ''.join(random.sample(string.ascii_lowercase + string.digits, 5))
     name = '{}_{}_{}'.format(source, target, randstr)
 
-    logger.warning('Connection name is not specified, use generated one: --connection-name %s', name)
+    logger.warning('Connection name is not specified, use generated one: --connection %s', name)
     return name
 
 
@@ -386,7 +386,7 @@ def get_missing_connection_name(namespace):
     if getattr(namespace, 'connection_name', None) is None:
         missing_args['connection_name'] = {
             'help': 'The connection name',
-            'options': ['--connection-name', '--name', '-n']
+            'options': ['--connection']
         }
 
     return missing_args

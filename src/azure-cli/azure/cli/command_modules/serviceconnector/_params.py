@@ -44,7 +44,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                              "are not specified.".format(source=source.value, required_args=str(required_args)),
                              **validator_kwargs)
         else:
-            required_args.append('--connection-name')
+            required_args.append('--connection')
             context.argument('indentifier', options_list=['--id'], type=str,
                              help="The resource id of the connection. {required_args} are required "
                                   "if '--id' is not specified.".format(required_args=str(required_args)))

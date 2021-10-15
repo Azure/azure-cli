@@ -74,7 +74,7 @@ def connection_show(client,
                     site=None,
                     spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
-        raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection-name'))
+        raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return client.get(resource_uri=source_id,
                       linker_name=connection_name)
 
@@ -88,7 +88,7 @@ def connection_delete(client,
                       spring=None, app=None, deployment=None,
                       no_wait=False):
     if not source_id or not connection_name:
-        raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection-name'))
+        raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
 
     return sdk_no_wait(no_wait,
                        client.begin_delete,
@@ -104,7 +104,7 @@ def connection_list_configuration(client,
                                   site=None,
                                   spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
-        raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection-name'))
+        raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return client.list_configurations(resource_uri=source_id,
                                       linker_name=connection_name)
 
@@ -117,7 +117,7 @@ def connection_validate(client,
                         site=None,
                         spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
-        raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection-name'))
+        raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return client.begin_validate(resource_uri=source_id,
                                  linker_name=connection_name)
 
