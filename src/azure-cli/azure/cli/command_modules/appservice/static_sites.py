@@ -86,12 +86,9 @@ def list_staticsite_domains(cmd, name, resource_group_name=None):
     return client.list_static_site_custom_domains(resource_group_name, name)
 
 
+# TODO need to implement a polling command to allow user to get the code for 'dns-txt-token' validation
 def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False,
                           validation_method="cname-delegation"):
-    if validation_method == "dns-txt-token":
-        # TODO need to implement a polling command to allow user to get the code for TXT validation
-        raise CLIError("dns-txt-token validation is not yet supported")
-
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
