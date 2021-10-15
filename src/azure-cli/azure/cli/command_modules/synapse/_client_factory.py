@@ -234,3 +234,7 @@ def cf_synapse_client_managedprivateendpoints_factory(cli_ctx, workspace_name):
 
 def cf_synapse_managedprivateendpoints_factory(cli_ctx, workspace_name):
     return cf_synapse_client_managedprivateendpoints_factory(cli_ctx, workspace_name).managed_private_endpoints
+
+
+def cf_synapse_spark_job_definition(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).spark_job_definition

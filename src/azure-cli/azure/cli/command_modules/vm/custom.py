@@ -16,13 +16,9 @@ import os
 
 import requests
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
-
+from urllib.parse import urlparse
 # the urlopen is imported for automation purpose
-from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
+from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -454,10 +450,11 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.encryption.type = encryption_type
     if network_access_policy is not None:
         instance.network_access_policy = network_access_policy
-    if disk_access is not None and not is_valid_resource_id(disk_access):
-        disk_access = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
+    if disk_access is not None:
+        if not is_valid_resource_id(disk_access):
+            disk_access = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
         instance.disk_access_id = disk_access
     if enable_bursting is not None:
         instance.bursting_enabled = enable_bursting
@@ -1374,7 +1371,8 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
-              enable_vtpm=None, user_data=None, capacity_reservation_group=None, **kwargs):
+              enable_vtpm=None, user_data=None, capacity_reservation_group=None,
+              dedicated_host=None, dedicated_host_group=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1405,9 +1403,29 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
         SubResource = cmd.get_models('SubResource')
+        if capacity_reservation_group == 'None':
+            capacity_reservation_group = None
         sub_resource = SubResource(id=capacity_reservation_group)
         capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
         vm.capacity_reservation = capacity_reservation
+
+    if dedicated_host is not None:
+        if vm.host is None:
+            DedicatedHost = cmd.get_models('SubResource')
+            vm.host = DedicatedHost(additional_properties={}, id=dedicated_host)
+        else:
+            vm.host.id = dedicated_host
+        if vm.host_group is not None:
+            vm.host_group = None
+
+    if dedicated_host_group is not None:
+        if vm.host_group is None:
+            DedicatedHostGroup = cmd.get_models('SubResource')
+            vm.host_group = DedicatedHostGroup(additional_properties={}, id=dedicated_host_group)
+        else:
+            vm.host_group.id = dedicated_host_group
+        if vm.host is not None:
+            vm.host = None
 
     if ultra_ssd_enabled is not None:
         if vm.additional_capabilities is None:
@@ -2541,6 +2559,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     master_template = ArmTemplateBuilder()
 
     uniform_str = 'Uniform'
+    flexible_str = 'Flexible'
     if orchestration_mode:
         from msrestazure.tools import resource_id, is_valid_resource_id
 
@@ -2646,7 +2665,12 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                         public_ip_address)
 
             # calculate default names if not provided
-            nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
+            if orchestration_mode.lower() == flexible_str.lower():
+                # inbound nat pools are not supported on VMSS Flex
+                nat_pool_name = None
+            else:
+                nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
+
             if not backend_port:
                 backend_port = 3389 if os_type == 'windows' else 22
 
@@ -3103,6 +3127,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
         SubResource = cmd.get_models('SubResource')
+        if capacity_reservation_group == 'None':
+            capacity_reservation_group = None
         sub_resource = SubResource(id=capacity_reservation_group)
         capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
         vmss.virtual_machine_profile.capacity_reservation = capacity_reservation

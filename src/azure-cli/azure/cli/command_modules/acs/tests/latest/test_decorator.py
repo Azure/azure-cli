@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-import requests
 import unittest
 from unittest.mock import Mock, call, patch
 
+import requests
 from azure.cli.command_modules.acs._consts import (
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
     CONST_AZURE_POLICY_ADDON_NAME,
@@ -22,6 +22,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
@@ -64,7 +65,7 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
-        self.models = AKSModels(self.cmd)
+        self.models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
 
     def test_format_parameter_name_to_option_name(self):
         self.assertEqual(
@@ -153,7 +154,7 @@ class AKSModelsTestCase(unittest.TestCase):
         self.cmd = MockCmd(self.cli_ctx)
 
     def test_models(self):
-        models = AKSModels(self.cmd)
+        models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
 
         # load models directly (instead of through the `get_sdk` method provided by the cli component)
         from azure.cli.core.profiles._shared import AZURE_API_PROFILES
@@ -288,18 +289,22 @@ class AKSContextTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
-        self.models = AKSModels(self.cmd)
+        self.models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
 
     def test__init__(self):
         # fail on not passing dictionary-like parameters
         with self.assertRaises(CLIInternalError):
-            AKSContext(self.cmd, [], decorator_mode=DecoratorMode.CREATE)
+            AKSContext(
+                self.cmd, [], self.models, decorator_mode=DecoratorMode.CREATE
+            )
         # fail on not passing decorator_mode with Enum type DecoratorMode
         with self.assertRaises(CLIInternalError):
-            AKSContext(self.cmd, {}, decorator_mode=1)
+            AKSContext(self.cmd, {}, self.models, decorator_mode=1)
 
     def test_attach_mc(self):
-        ctx_1 = AKSContext(self.cmd, {}, decorator_mode=DecoratorMode.CREATE)
+        ctx_1 = AKSContext(
+            self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
+        )
         mc = self.models.ManagedCluster(location="test_location")
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.mc, mc)
@@ -308,14 +313,18 @@ class AKSContextTestCase(unittest.TestCase):
             ctx_1.attach_mc(mc)
 
     def test_get_intermediate(self):
-        ctx_1 = AKSContext(self.cmd, {}, decorator_mode=DecoratorMode.CREATE)
+        ctx_1 = AKSContext(
+            self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
+        )
         self.assertEqual(
             ctx_1.get_intermediate("fake-intermediate", "not found"),
             "not found",
         )
 
     def test_set_intermediate(self):
-        ctx_1 = AKSContext(self.cmd, {}, decorator_mode=DecoratorMode.CREATE)
+        ctx_1 = AKSContext(
+            self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
+        )
         ctx_1.set_intermediate("test-intermediate", "test-intermediate-value")
         self.assertEqual(
             ctx_1.get_intermediate("test-intermediate"),
@@ -339,7 +348,9 @@ class AKSContextTestCase(unittest.TestCase):
         )
 
     def test_remove_intermediate(self):
-        ctx_1 = AKSContext(self.cmd, {}, decorator_mode=DecoratorMode.CREATE)
+        ctx_1 = AKSContext(
+            self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
+        )
         ctx_1.set_intermediate("test-intermediate", "test-intermediate-value")
         self.assertEqual(
             ctx_1.get_intermediate("test-intermediate"),
@@ -349,7 +360,9 @@ class AKSContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_intermediate("test-intermediate"), None)
 
     def test_get_subscription_id(self):
-        ctx_1 = AKSContext(self.cmd, {}, decorator_mode=DecoratorMode.CREATE)
+        ctx_1 = AKSContext(
+            self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
+        )
         ctx_1.set_intermediate("subscription_id", "test_subscription_id")
         self.assertEqual(
             ctx_1.get_subscription_id(),
@@ -375,6 +388,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"resource_group_name": "test_rg_name"},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_resource_group_name(), "test_rg_name")
@@ -382,14 +396,20 @@ class AKSContextTestCase(unittest.TestCase):
     def test_get_name(self):
         # default
         ctx_1 = AKSContext(
-            self.cmd, {"name": "test_name"}, decorator_mode=DecoratorMode.CREATE
+            self.cmd,
+            {"name": "test_name"},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_name(), "test_name")
 
     def test_get_location(self):
         # default & dynamic completion
         ctx_1 = AKSContext(
-            self.cmd, {"location": None}, decorator_mode=DecoratorMode.CREATE
+            self.cmd,
+            {"location": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
         )
         with patch(
             "azure.cli.command_modules.acs.decorator._get_rg_location",
@@ -410,6 +430,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"ssh_key_value": public_key, "no_ssh_key": False},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -440,6 +461,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {"ssh_key_value": "fake-key", "no_ssh_key": False},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid key
@@ -450,6 +472,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_3 = AKSContext(
             self.cmd,
             {"ssh_key_value": "fake-key", "no_ssh_key": True},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -486,6 +509,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "name": "1234_test_name",
                 "resource_group_name": "test_rg_name",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         ctx_1.set_intermediate("subscription_id", "1234-5678")
@@ -506,6 +530,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "dns_name_prefix": "test_dns_name_prefix",
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive dns_name_prefix and fqdn_subdomain
@@ -517,6 +542,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"kubernetes_version": ""},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_kubernetes_version(), "")
@@ -534,6 +560,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"vm_set_type": None, "kubernetes_version": ""},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1._get_vm_set_type(read_only=True), None)
@@ -551,6 +578,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {"vm_set_type": "availabilityset", "kubernetes_version": ""},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_2.get_vm_set_type(), "AvailabilitySet")
@@ -567,6 +595,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_3 = AKSContext(
             self.cmd,
             {"vm_set_type": None, "kubernetes_version": "1.12.8"},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_3.get_vm_set_type(), "AvailabilitySet")
@@ -576,6 +605,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"nodepool_name": "nodepool1"},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_nodepool_name(), "nodepool1")
@@ -592,6 +622,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {"nodepool_name": "test_nodepool_name"},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_2.get_nodepool_name(), "test_nodepoo")
@@ -608,6 +639,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_3 = AKSContext(
             self.cmd,
             {"nodepool_name": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_3.get_nodepool_name(), "nodepool1")
@@ -617,6 +649,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"nodepool_tags": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_nodepool_tags(), None)
@@ -634,6 +667,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"nodepool_labels": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_nodepool_labels(), None)
@@ -654,6 +688,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"node_vm_size": "Standard_DS2_v2"},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_node_vm_size(), "Standard_DS2_v2")
@@ -666,11 +701,30 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD_v2")
 
+    def test_get_os_sku(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"os_sku": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_os_sku(), None)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", os_sku="test_mc_os_sku"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_os_sku(), "test_mc_os_sku")
+
     def test_get_vnet_subnet_id(self):
         # default
         ctx_1 = AKSContext(
             self.cmd,
             {"vnet_subnet_id": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_vnet_subnet_id(), None)
@@ -686,7 +740,10 @@ class AKSContextTestCase(unittest.TestCase):
     def test_get_ppg(self):
         # default
         ctx_1 = AKSContext(
-            self.cmd, {"ppg": None}, decorator_mode=DecoratorMode.CREATE
+            self.cmd,
+            {"ppg": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_ppg(), None)
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
@@ -702,7 +759,10 @@ class AKSContextTestCase(unittest.TestCase):
     def test_get_zones(self):
         # default
         ctx_1 = AKSContext(
-            self.cmd, {"zones": None}, decorator_mode=DecoratorMode.CREATE
+            self.cmd,
+            {"zones": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_zones(), None)
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
@@ -722,6 +782,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"enable_node_public_ip": False},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_node_public_ip(), False)
@@ -739,6 +800,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"node_public_ip_prefix_id": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -763,6 +825,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"enable_encryption_at_host": False},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_encryption_at_host(), False)
@@ -780,6 +843,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"enable_ultra_ssd": False},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_ultra_ssd(), False)
@@ -795,7 +859,10 @@ class AKSContextTestCase(unittest.TestCase):
     def test_get_max_pods(self):
         # default
         ctx_1 = AKSContext(
-            self.cmd, {"max_pods": 0}, decorator_mode=DecoratorMode.CREATE
+            self.cmd,
+            {"max_pods": 0},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_max_pods(), None)
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
@@ -812,6 +879,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"node_osdisk_size": 0},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_node_osdisk_size(), None)
@@ -829,6 +897,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"node_osdisk_type": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_node_osdisk_type(), None)
@@ -855,6 +924,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "min_count": None,
                 "max_count": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -890,6 +960,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "min_count": None,
                 "max_count": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
@@ -915,6 +986,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "min_count": None,
                 "max_count": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         agent_pool_profile_2 = self.models.ManagedClusterAgentPoolProfile(
@@ -940,6 +1012,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "min_count": None,
                 "max_count": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         agent_pool_profile_3 = self.models.ManagedClusterAgentPoolProfile(
@@ -964,6 +1037,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "min_count": 1,
                 "max_count": 5,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         agent_pool_profile_4 = self.models.ManagedClusterAgentPoolProfile(
@@ -989,6 +1063,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "min_count": 1,
                 "max_count": 5,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         agent_pool_profile_5 = self.models.ManagedClusterAgentPoolProfile(
@@ -1014,6 +1089,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "min_count": None,
                 "max_count": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
 
@@ -1035,6 +1111,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"admin_username": "azureuser"},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_admin_username(), "azureuser")
@@ -1055,6 +1132,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"windows_admin_username": None, "windows_admin_password": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -1082,6 +1160,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "windows_admin_username": None,
                 "windows_admin_password": "test_win_admin_pd",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on no tty
@@ -1123,6 +1202,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "windows_admin_username": "test_win_admin_name",
                 "windows_admin_password": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on no tty
@@ -1145,6 +1225,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"enable_ahub": False},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_ahub(), False)
@@ -1171,6 +1252,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "service_principal": None,
                 "client_secret": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -1188,6 +1270,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "service_principal": "test_service_principal",
                 "client_secret": "test_client_secret",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         ctx_2.set_intermediate(
@@ -1215,6 +1298,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "service_principal": None,
                 "client_secret": "test_client_secret",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         ctx_3.set_intermediate(
@@ -1261,6 +1345,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "service_principal": "test_service_principal",
                 "client_secret": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         ctx_4.set_intermediate(
@@ -1286,6 +1371,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "service_principal": None,
                 "client_secret": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_managed_identity(), True)
@@ -1304,6 +1390,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "service_principal": "test_service_principal",
                 "client_secret": "test_client_secret",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_2.get_enable_managed_identity(), False)
@@ -1315,6 +1402,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_managed_identity": False,
                 "assign_identity": "test_assign_identity",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on enable_managed_identity not specified
@@ -1326,6 +1414,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"skip_subnet_role_assignment": False},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_skip_subnet_role_assignment(), False)
@@ -1335,6 +1424,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"assign_identity": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_assign_identity(), None)
@@ -1357,6 +1447,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_managed_identity": False,
                 "assign_identity": "test_assign_identity",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on enable_managed_identity not specified
@@ -1370,6 +1461,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "assign_identity": None,
                 "assign_kubelet_identity": "test_assign_kubelet_identity",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on assign_identity not specified
@@ -1384,6 +1476,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "assign_identity": "/subscriptions/1234/resourcegroups/test_rg/providers/microsoft.managedidentity/userassignedidentities/5678",
                 "enable_managed_identity": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         identity_obj = Mock(client_id="1234-5678", principal_id="8765-4321")
@@ -1408,6 +1501,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"assign_identity": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on assign_identity not provided
@@ -1428,6 +1522,7 @@ class AKSContextTestCase(unittest.TestCase):
                     "assign_identity": "test_assign_identity",
                     "enable_managed_identity": True,
                 },
+                self.models,
                 decorator_mode=DecoratorMode.CREATE,
             )
             self.assertEqual(
@@ -1438,6 +1533,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"assign_identity": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on assign_identity not provided
@@ -1458,6 +1554,7 @@ class AKSContextTestCase(unittest.TestCase):
                     "assign_identity": "test_assign_identity",
                     "enable_managed_identity": True,
                 },
+                self.models,
                 decorator_mode=DecoratorMode.CREATE,
             )
             self.assertEqual(
@@ -1468,21 +1565,30 @@ class AKSContextTestCase(unittest.TestCase):
     def test_get_yes(self):
         # default
         ctx_1 = AKSContext(
-            self.cmd, {"yes": False}, decorator_mode=DecoratorMode.CREATE
+            self.cmd,
+            {"yes": False},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_yes(), False)
 
     def test_get_no_wait(self):
         # default
         ctx_1 = AKSContext(
-            self.cmd, {"no_wait": False}, decorator_mode=DecoratorMode.CREATE
+            self.cmd,
+            {"no_wait": False},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_no_wait(), False)
 
     def test_get_attach_acr(self):
         # default
         ctx_1 = AKSContext(
-            self.cmd, {"attach_acr": None}, decorator_mode=DecoratorMode.CREATE
+            self.cmd,
+            {"attach_acr": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_attach_acr(), None)
 
@@ -1494,6 +1600,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_managed_identity": True,
                 "no_wait": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive enable_managed_identity and no_wait
@@ -1507,6 +1614,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "attach_acr": "test_attach_acr",
                 "enable_managed_identity": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on service_principal/client_secret not specified
@@ -1521,6 +1629,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_managed_identity": True,
                 "no_wait": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         ctx_4.get_attach_acr()
@@ -1528,7 +1637,10 @@ class AKSContextTestCase(unittest.TestCase):
     def test_get_detach_acr(self):
         # default
         ctx_1 = AKSContext(
-            self.cmd, {"detach_acr": None}, decorator_mode=DecoratorMode.UPDATE
+            self.cmd,
+            {"detach_acr": None},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1.get_detach_acr(), None)
 
@@ -1537,6 +1649,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"load_balancer_sku": None, "kubernetes_version": ""},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1._get_load_balancer_sku(read_only=True), None)
@@ -1556,6 +1669,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {"load_balancer_sku": None, "kubernetes_version": "1.12.0"},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_2.get_load_balancer_sku(), "basic")
@@ -1577,6 +1691,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "load_balancer_sku": "basic",
                 "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid load_balancer_sku (basic) when api_server_authorized_ip_ranges is assigned
@@ -1590,6 +1705,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "load_balancer_sku": "basic",
                 "enable_private_cluster": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid load_balancer_sku (basic) when enable_private_cluster is specified
@@ -1600,6 +1716,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_5 = AKSContext(
             self.cmd,
             {"load_balancer_sku": "STANDARD"},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_5.get_load_balancer_sku(), "standard")
@@ -1611,6 +1728,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_managed_outbound_ip_count": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -1634,6 +1752,33 @@ class AKSContextTestCase(unittest.TestCase):
             ctx_1.get_load_balancer_managed_outbound_ip_count(), 10
         )
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_managed_outbound_ip_count": None,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            managed_outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            )(count=10)
+        )
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(
+            ctx_2.get_load_balancer_managed_outbound_ip_count(), None
+        )
+
     def test_get_load_balancer_outbound_ips(self):
         # default
         ctx_1 = AKSContext(
@@ -1641,6 +1786,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_outbound_ips": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_outbound_ips(), None)
@@ -1673,6 +1819,37 @@ class AKSContextTestCase(unittest.TestCase):
             ],
         )
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_outbound_ips": None,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            )(
+                public_i_ps=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_public_ip"
+                    )
+                ]
+            )
+        )
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ips(), None)
+
     def test_get_load_balancer_outbound_ip_prefixes(self):
         # default
         ctx_1 = AKSContext(
@@ -1680,6 +1857,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_outbound_ip_prefixes": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_outbound_ip_prefixes(), None)
@@ -1712,6 +1890,38 @@ class AKSContextTestCase(unittest.TestCase):
             ],
         )
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_outbound_ip_prefixes": None,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ip_prefixes(), None)
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            outbound_ip_prefixes=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+            )(
+                public_ip_prefixes=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_public_ip_prefix"
+                    )
+                ]
+            )
+        )
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ip_prefixes(), None)
+
     def test_get_load_balancer_outbound_ports(self):
         # default
         ctx_1 = AKSContext(
@@ -1719,6 +1929,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_outbound_ports": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_outbound_ports(), None)
@@ -1734,6 +1945,28 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_load_balancer_outbound_ports(), 10)
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_outbound_ports": None,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ports(), None)
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(allocated_outbound_ports=10)
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_load_balancer_outbound_ports(), None)
+
     def test_get_load_balancer_idle_timeout(self):
         # default
         ctx_1 = AKSContext(
@@ -1741,6 +1974,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "load_balancer_idle_timeout": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_idle_timeout(), None)
@@ -1756,6 +1990,28 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_load_balancer_idle_timeout(), 10)
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "load_balancer_idle_timeout": None,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_load_balancer_idle_timeout(), None)
+        load_balancer_profile_2 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(idle_timeout_in_minutes=10)
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_2
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", network_profile=network_profile_2
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_load_balancer_idle_timeout(), None)
+
     def test_get_outbound_type(self):
         # default
         ctx_1 = AKSContext(
@@ -1763,6 +2019,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "outbound_type": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1._get_outbound_type(read_only=True), None)
@@ -1783,6 +2040,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
                 "load_balancer_sku": "basic",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid load_balancer_sku (basic) when outbound_type is CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
@@ -1795,6 +2053,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on vnet_subnet_id not specified
@@ -1809,6 +2068,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "load_balancer_managed_outbound_ip_count": 10,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive outbound_type and managed_outbound_ip_count/outbound_ips/outbound_ip_prefixes of
@@ -1823,6 +2083,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
                 "vnet_subnet_id": "test_vnet_subnet_id",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         load_balancer_profile = self.models.lb_models.get(
@@ -1852,6 +2113,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "network_plugin": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_network_plugin(), None)
@@ -1871,6 +2133,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "network_plugin": "azure",
                 "pod_cidr": "test_pod_cidr",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid network_plugin (azure) when pod_cidr is specified
@@ -1883,6 +2146,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "pod_cidr": "test_pod_cidr",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on network_plugin not specified
@@ -1902,6 +2166,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "docker_bridge_address": None,
                 "network_policy": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -1937,6 +2202,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "network_plugin": "azure",
                 "pod_cidr": "test_pod_cidr",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid network_plugin (azure) when pod_cidr is specified
@@ -1949,6 +2215,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "pod_cidr": "test_pod_cidr",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on network_plugin not specified
@@ -1964,6 +2231,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "docker_bridge_address": "test_docker_bridge_address",
                 "network_policy": "test_network_policy",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on network_plugin not specified
@@ -1977,6 +2245,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_addons": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_addons(), [])
@@ -1987,6 +2256,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_addons": "http_application_routing,monitoring",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -2000,6 +2270,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_addons": "test_addon_1,test_addon_2",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid enable_addons
@@ -2012,6 +2283,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_addons": "test_addon_1,test_addon_2,test_addon_1,test_addon_2",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid/duplicate enable_addons
@@ -2025,6 +2297,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "workspace_resource_id": "/test_workspace_resource_id",
                 "enable_addons": "",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on enable_addons (monitoring) not specified
@@ -2037,6 +2310,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_addons": "virtual-node",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on aci_subnet_name/vnet_subnet_id not specified
@@ -2050,6 +2324,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "workspace_resource_id": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1._get_workspace_resource_id(read_only=True), None)
@@ -2076,6 +2351,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_addons": "monitoring",
                 "workspace_resource_id": "test_workspace_resource_id/",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -2090,6 +2366,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "resource_group_name": "test_rg_name",
                 "workspace_resource_id": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         ctx_3.set_intermediate("subscription_id", "test_subscription_id")
@@ -2134,7 +2411,9 @@ class AKSContextTestCase(unittest.TestCase):
 
     def test_get_virtual_node_addon_os_type(self):
         # default
-        ctx_1 = AKSContext(self.cmd, {}, decorator_mode=DecoratorMode.CREATE)
+        ctx_1 = AKSContext(
+            self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
+        )
         self.assertEqual(ctx_1.get_virtual_node_addon_os_type(), "Linux")
 
     def test_get_aci_subnet_name(self):
@@ -2144,6 +2423,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "aci_subnet_name": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_aci_subnet_name(), None)
@@ -2167,6 +2447,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "appgw_name": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_appgw_name(), None)
@@ -2191,6 +2472,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "appgw_subnet_cidr": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_appgw_subnet_cidr(), None)
@@ -2217,6 +2499,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "appgw_id": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_appgw_id(), None)
@@ -2241,6 +2524,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "appgw_subnet_id": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_appgw_subnet_id(), None)
@@ -2263,6 +2547,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "appgw_watch_namespace": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_appgw_watch_namespace(), None)
@@ -2289,6 +2574,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_sgxquotehelper": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_sgxquotehelper(), False)
@@ -2311,6 +2597,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_aad": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_aad(), False)
@@ -2330,6 +2617,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_aad": True,
                 "aad_client_app_id": "test_aad_client_app_id",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive enable_aad and aad_client_app_id/aad_server_app_id/aad_server_app_secret
@@ -2343,6 +2631,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_aad": False,
                 "enable_azure_rbac": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on enable_aad not specified
@@ -2360,6 +2649,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "aad_server_app_id": None,
                 "aad_server_app_secret": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -2393,6 +2683,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "aad_server_app_id": "test_aad_server_app_id",
                 "aad_server_app_secret": "test_aad_server_app_secret",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive enable_aad and aad_client_app_id/aad_server_app_id/aad_server_app_secret
@@ -2406,6 +2697,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "aad_tenant_id": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1._get_aad_tenant_id(read_only=True), None)
@@ -2426,6 +2718,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_aad": False,
                 "aad_client_app_id": "test_aad_client_app_id",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         profile = Mock(
@@ -2446,6 +2739,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "aad_admin_group_object_ids": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_aad_admin_group_object_ids(), None)
@@ -2467,6 +2761,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "aad_admin_group_object_ids": "test_value_1,test_value_2",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -2481,6 +2776,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "disable_rbac": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_disable_rbac(), None)
@@ -2497,6 +2793,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "disable_rbac": True,
                 "enable_azure_rbac": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive disable_rbac and enable_azure_rbac
@@ -2510,6 +2807,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "disable_rbac": True,
                 "enable_rbac": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive disable_rbac and enable_rbac
@@ -2523,6 +2821,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_rbac": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_rbac(), None)
@@ -2540,6 +2839,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_rbac": True,
                 "disable_rbac": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive disable_rbac and enable_rbac
@@ -2553,6 +2853,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_azure_rbac": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_azure_rbac(), False)
@@ -2570,6 +2871,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         aad_profile_2 = self.models.ManagedClusterAADProfile(
@@ -2592,6 +2894,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_azure_rbac": True,
                 "enable_aad": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on enable_aad not specified
@@ -2603,6 +2906,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"api_server_authorized_ip_ranges": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -2631,6 +2935,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "load_balancer_sku": "standard",
                 "api_server_authorized_ip_ranges": "test_ip_range_1 , test_ip_range_2",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
@@ -2645,6 +2950,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "load_balancer_sku": "basic",
                 "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid load_balancer_sku (basic) when api_server_authorized_ip_ranges is assigned
@@ -2658,6 +2964,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_private_cluster": True,
                 "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive enable_private_cluster and api_server_authorized_ip_ranges
@@ -2670,6 +2977,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "api_server_authorized_ip_ranges": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_5.get_api_server_authorized_ip_ranges(), None)
@@ -2680,6 +2988,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "api_server_authorized_ip_ranges": "",
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_6.get_api_server_authorized_ip_ranges(), [])
@@ -2689,6 +2998,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {"fqdn_subdomain": None},
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_fqdn_subdomain(), None)
@@ -2705,6 +3015,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "dns_name_prefix": "test_dns_name_prefix",
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutually exclusive dns_name_prefix and fqdn_subdomain
@@ -2719,6 +3030,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "fqdn_subdomain": "test_fqdn_subdomain",
                 "private_dns_zone": "system",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on fqdn_subdomain specified and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_SYSTEM
@@ -2733,6 +3045,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "fqdn_subdomain": "test_fqdn_subdomain",
                 "private_dns_zone": "test_private_dns_zone",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid private_dns_zone when fqdn_subdomain is specified
@@ -2746,6 +3059,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "enable_private_cluster": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_enable_private_cluster(), False)
@@ -2768,6 +3082,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_private_cluster": True,
                 "load_balancer_sku": "basic",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid load_balancer_sku (basic) when enable_private_cluster is specified
@@ -2781,6 +3096,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_private_cluster": True,
                 "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on mutially exclusive enable_private_cluster and api_server_authorized_ip_ranges
@@ -2794,6 +3110,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_private_cluster": False,
                 "disable_public_fqdn": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on disable_public_fqdn specified when enable_private_cluster is not specified
@@ -2807,6 +3124,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_private_cluster": False,
                 "private_dns_zone": "system",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on private_dns_zone specified when enable_private_cluster is not specified
@@ -2820,6 +3138,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "disable_public_fqdn": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_disable_public_fqdn(), False)
@@ -2844,6 +3163,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "private_dns_zone": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_private_dns_zone(), None)
@@ -2870,6 +3190,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_private_cluster": True,
                 "private_dns_zone": "test_private_dns_zone",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid private_dns_zone
@@ -2886,6 +3207,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "private_dns_zone": CONST_PRIVATE_DNS_ZONE_SYSTEM,
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on invalid private_dns_zone when fqdn_subdomain is specified
@@ -2902,6 +3224,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "assign_identity": "test_assign_identity",
                 "assign_kubelet_identity": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_assign_kubelet_identity(), None)
@@ -2926,6 +3249,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "assign_identity": None,
                 "assign_kubelet_identity": "test_assign_kubelet_identity",
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         # fail on assign_identity not specified
@@ -2942,6 +3266,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "auto_upgrade_channel": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_auto_upgrade_channel(), None)
@@ -2964,6 +3289,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "node_osdisk_diskencryptionset_id": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_node_osdisk_diskencryptionset_id(), None)
@@ -2984,6 +3310,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "cluster_autoscaler_profile": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_cluster_autoscaler_profile(), None)
@@ -3006,6 +3333,7 @@ class AKSContextTestCase(unittest.TestCase):
                     "expander": "least-waste",
                 },
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         auto_scaler_profile_2 = (
@@ -3043,6 +3371,39 @@ class AKSContextTestCase(unittest.TestCase):
             },
         )
 
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {"cluster_autoscaler_profile": []},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on invalid type of cluster_autoscaler_profile (should be dict)
+        with self.assertRaises(CLIInternalError):
+            ctx_3.get_cluster_autoscaler_profile()
+
+        # custom value
+        ctx_4 = AKSContext(
+            self.cmd,
+            {"cluster_autoscaler_profile": {"": "xyz"}},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on empty key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_4.get_cluster_autoscaler_profile()
+
+        # custom value
+        ctx_5 = AKSContext(
+            self.cmd,
+            {"cluster_autoscaler_profile": {"xyz": "123"}},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on invalid key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_5.get_cluster_autoscaler_profile()
+
     def test_get_uptime_sla(self):
         # default
         ctx_1 = AKSContext(
@@ -3050,6 +3411,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "uptime_sla": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_uptime_sla(), False)
@@ -3070,6 +3432,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "uptime_sla": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         sku_2 = self.models.ManagedClusterSKU(
@@ -3090,6 +3453,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "uptime_sla": True,
                 "no_uptime_sla": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         sku_3 = self.models.ManagedClusterSKU(
@@ -3110,6 +3474,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "no_uptime_sla": False,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1.get_no_uptime_sla(), False)
@@ -3131,6 +3496,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "uptime_sla": True,
                 "no_uptime_sla": True,
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         sku_2 = self.models.ManagedClusterSKU(
@@ -3156,6 +3522,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "tags": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_tags(), None)
@@ -3172,6 +3539,7 @@ class AKSContextTestCase(unittest.TestCase):
             {
                 "tags": {"xyz": "100"},
             },
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         mc_2 = self.models.ManagedCluster(
@@ -3186,8 +3554,9 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1 = AKSContext(
             self.cmd,
             {
-                "tags": None,
+                "edge_zone": None,
             },
+            self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_edge_zone(), None)
@@ -3202,11 +3571,118 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_edge_zone(), "test_edge_zone")
 
+    def test_get_aks_custom_headers(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {
+                "aks_custom_headers": None,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_aks_custom_headers(), {})
+        service_principal_profile_1 = (
+            self.models.ManagedClusterServicePrincipalProfile(
+                client_id="test_service_principal", secret="test_client_secret"
+            )
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=service_principal_profile_1,
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_aks_custom_headers(), {"Ocp-Aad-Session-Key": None})
+        ctx_1.set_intermediate("aad_session_key", "test_aad_session_key")
+        self.assertEqual(ctx_1.get_aks_custom_headers(), {"Ocp-Aad-Session-Key": "test_aad_session_key"})
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "aks_custom_headers": "abc=def,xyz=123",
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_aks_custom_headers(), {"abc": "def", "xyz": "123"})
+        service_principal_profile_2 = (
+            self.models.ManagedClusterServicePrincipalProfile(
+                client_id="test_service_principal", secret="test_client_secret"
+            )
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=service_principal_profile_2,
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_aks_custom_headers(), {"abc": "def", "xyz": "123"})
+        ctx_2.set_intermediate("aad_session_key", "test_aad_session_key")
+        self.assertEqual(ctx_2.get_aks_custom_headers(), {"abc": "def", "xyz": "123"})
+
+    def test_get_disable_local_accounts(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": False},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_disable_local_accounts(), False)
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        ctx_1.attach_mc(mc_1)
+        self.assertEqual(ctx_1.get_disable_local_accounts(), True)
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": True, "enable_local_accounts": True},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {"disable_local_accounts": True, "enable_local_accounts": True},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on mutually exclusive disable_local_accounts and enable_local_accounts
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_disable_local_accounts()
+
+    def test_get_enable_local_accounts(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"enable_local_accounts": False},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_enable_local_accounts(), False)
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"enable_local_accounts": True, "disable_local_accounts": True},
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on mutually exclusive disable_local_accounts and enable_local_accounts
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_enable_local_accounts()
+
     def test_get_client_id_from_identity_or_sp_profile(self):
         # default
         ctx_1 = AKSContext(
             self.cmd,
             {},
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         # fail on no mc attached and no client id found
@@ -3217,6 +3693,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2 = AKSContext(
             self.cmd,
             {},
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         mc_2 = self.models.ManagedCluster(
@@ -3232,6 +3709,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_3 = AKSContext(
             self.cmd,
             {},
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         mc_3 = self.models.ManagedCluster(
@@ -3252,6 +3730,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_4 = AKSContext(
             self.cmd,
             {},
+            self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
         mc_4 = self.models.ManagedCluster(
@@ -3270,7 +3749,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
-        self.models = AKSModels(self.cmd)
+        self.models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
         self.client = MockClient()
 
     def test_init_mc(self):
@@ -3284,12 +3763,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             dec_1 = AKSCreateDecorator(
                 self.cmd,
                 self.client,
-                self.models,
                 {
                     "name": "test_cluster",
                     "resource_group_name": "test_rg_name",
                     "location": "test_location",
                 },
+                ResourceType.MGMT_CONTAINERSERVICE,
             )
             dec_mc = dec_1.init_mc()
             ground_truth_mc = self.models.ManagedCluster(
@@ -3305,13 +3784,13 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "nodepool_name": "nodepool1",
                 "nodepool_tags": None,
                 "nodepool_labels": None,
                 "node_count": 3,
                 "node_vm_size": "Standard_DS2_v2",
+                "os_sku": None,
                 "vnet_subnet_id": None,
                 "ppg": None,
                 "zones": None,
@@ -3326,6 +3805,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "min_count": None,
                 "max_count": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         # fail on passing the wrong mc object
@@ -3340,6 +3820,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             count=3,
             vm_size="Standard_DS2_v2",
             os_type="Linux",
+            os_sku=None,
             vnet_subnet_id=None,
             proximity_placement_group_id=None,
             availability_zones=None,
@@ -3364,13 +3845,13 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "nodepool_name": "test_np_name1234",
                 "nodepool_tags": {"k1": "v1"},
                 "nodepool_labels": {"k1": "v1", "k2": "v2"},
                 "node_count": 10,
                 "node_vm_size": "Standard_DSx_vy",
+                "os_sku": "CBLMariner",
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "ppg": "test_ppg_id",
                 "zones": ["tz1", "tz2"],
@@ -3385,6 +3866,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "min_count": 5,
                 "max_count": 20,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_agent_pool_profiles(mc_2)
@@ -3396,6 +3878,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             count=10,
             vm_size="Standard_DSx_vy",
             os_type="Linux",
+            os_sku="CBLMariner",
             vnet_subnet_id="test_vnet_subnet_id",
             proximity_placement_group_id="test_ppg_id",
             availability_zones=["tz1", "tz2"],
@@ -3425,12 +3908,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "admin_username": "azureuser",
                 "no_ssh_key": False,
                 "ssh_key_value": public_key,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         # fail on passing the wrong mc object
@@ -3455,12 +3938,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "admin_username": "test_user",
                 "no_ssh_key": True,
                 "ssh_key_value": "test_key",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_linux_profile(mc_2)
@@ -3473,12 +3956,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "windows_admin_username": None,
                 "windows_admin_password": None,
                 "enable_ahub": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         # fail on passing the wrong mc object
@@ -3493,12 +3976,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "windows_admin_username": "test_win_admin_name",
                 "windows_admin_password": None,
                 "enable_ahub": True,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         with patch(
@@ -3524,12 +4007,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_managed_identity": True,
                 "service_principal": None,
                 "client_secret": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         # fail on passing the wrong mc object
@@ -3544,7 +4027,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "name": "test_name",
                 "resource_group_name": "test_rg_name",
@@ -3552,6 +4034,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "service_principal": "test_service_principal",
                 "client_secret": "test_client_secret",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_2.context.set_intermediate(
@@ -3582,11 +4065,11 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "vnet_subnet_id": None,
                 "skip_subnet_role_assignment": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         # fail on passing the wrong mc object
@@ -3604,13 +4087,13 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "skip_subnet_role_assignment": False,
                 "assign_identity": None,
                 "yes": True,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         with patch(
@@ -3629,13 +4112,13 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "skip_subnet_role_assignment": False,
                 "assign_identity": None,
                 "yes": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
         with patch(
@@ -3657,12 +4140,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_4 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "skip_subnet_role_assignment": False,
                 "assign_identity": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         service_principal_profile_4 = (
             self.models.ManagedClusterServicePrincipalProfile(
@@ -3705,13 +4188,13 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             dec_5 = AKSCreateDecorator(
                 self.cmd,
                 self.client,
-                self.models,
                 {
                     "enable_managed_identity": True,
                     "vnet_subnet_id": "test_vnet_subnet_id",
                     "skip_subnet_role_assignment": False,
                     "assign_identity": "test_assign_identity",
                 },
+                ResourceType.MGMT_CONTAINERSERVICE,
             )
             mc_5 = self.models.ManagedCluster(
                 location="test_location",
@@ -3742,10 +4225,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "attach_acr": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         # fail on passing the wrong mc object
@@ -3757,12 +4240,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "attach_acr": "test_attach_acr",
                 "enable_managed_identity": True,
                 "no_wait": True,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         # fail on mutually exclusive attach_acr, enable_managed_identity and no_wait
@@ -3773,11 +4256,11 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "attach_acr": "test_attach_acr",
                 "enable_managed_identity": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
         # fail on service_principal/client_secret not specified
@@ -3810,7 +4293,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "load_balancer_sku": None,
                 "load_balancer_managed_outbound_ip_count": None,
@@ -3826,6 +4308,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "docker_bridge_cidr": None,
                 "network_policy": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -3852,7 +4335,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "load_balancer_sku": None,
                 "load_balancer_managed_outbound_ip_count": 3,
@@ -3868,6 +4350,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "docker_bridge_cidr": None,
                 "network_policy": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_network_profile(mc_2)
@@ -3912,7 +4395,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "load_balancer_sku": "basic",
                 "load_balancer_managed_outbound_ip_count": 5,
@@ -3928,6 +4410,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "docker_bridge_cidr": None,
                 "network_policy": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
         dec_mc_3 = dec_3.set_up_network_profile(mc_3)
@@ -3952,7 +4435,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_addons": None,
                 "workspace_resource_id": None,
@@ -3964,6 +4446,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_watch_namespace": None,
                 "enable_sgxquotehelper": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -3987,10 +4470,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
-                "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom",
+                "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom,open-service-mesh",
                 "workspace_resource_id": "test_workspace_resource_id",
                 "aci_subnet_name": "test_aci_subnet_name",
                 "appgw_name": "test_appgw_name",
@@ -4000,6 +4482,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_watch_namespace": "test_appgw_watch_namespace",
                 "enable_sgxquotehelper": True,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         with patch(
@@ -4043,6 +4526,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "true"},
             ),
+            CONST_OPEN_SERVICE_MESH_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={},
+            ),
         }
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location", addon_profiles=addon_profiles_2
@@ -4060,7 +4547,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_addons": "test_enable_addons",
                 "workspace_resource_id": None,
@@ -4072,6 +4558,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_watch_namespace": None,
                 "enable_sgxquotehelper": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
         # fail on invalid enable_addons
@@ -4082,7 +4569,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_4 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_addons": "",
                 "workspace_resource_id": "test_workspace_resource_id",
@@ -4094,6 +4580,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_watch_namespace": None,
                 "enable_sgxquotehelper": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_4 = self.models.ManagedCluster(location="test_location")
         # fail on enable_addons (monitoring) not specified
@@ -4104,7 +4591,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_5 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_addons": "virtual-node",
                 "workspace_resource_id": None,
@@ -4116,6 +4602,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_watch_namespace": None,
                 "enable_sgxquotehelper": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_5 = self.models.ManagedCluster(location="test_location")
         # fail on aci_subnet_name/vnet_subnet_id not specified
@@ -4127,7 +4614,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_aad": False,
                 "aad_client_app_id": None,
@@ -4138,6 +4624,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_azure_rbac": False,
                 "disable_rbac": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -4154,7 +4641,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_aad": True,
                 "aad_client_app_id": None,
@@ -4165,6 +4651,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_azure_rbac": True,
                 "disable_rbac": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_aad_profile(mc_2)
@@ -4183,7 +4670,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_aad": False,
                 "aad_client_app_id": "test_aad_client_app_id",
@@ -4194,6 +4680,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_azure_rbac": False,
                 "disable_rbac": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
         profile = Mock(
@@ -4220,7 +4707,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_4 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_aad": True,
                 "aad_client_app_id": None,
@@ -4231,6 +4717,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_azure_rbac": True,
                 "disable_rbac": True,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_4 = self.models.ManagedCluster(location="test_location")
         # fail on mutually exclusive enable_azure_rbac and disable_rbac
@@ -4242,7 +4729,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "api_server_authorized_ip_ranges": None,
                 "enable_private_cluster": False,
@@ -4250,6 +4736,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "private_dns_zone": None,
                 "fqdn_subdomain": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -4266,7 +4753,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "api_server_authorized_ip_ranges": "test_ip_1, test_ip_2",
                 "enable_private_cluster": False,
@@ -4274,6 +4760,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "private_dns_zone": None,
                 "fqdn_subdomain": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_api_server_access_profile(mc_2)
@@ -4294,7 +4781,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "api_server_authorized_ip_ranges": None,
                 "enable_private_cluster": True,
@@ -4302,6 +4788,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "private_dns_zone": None,
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
         dec_mc_3 = dec_3.set_up_api_server_access_profile(mc_3)
@@ -4324,7 +4811,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_4 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
                 "enable_private_cluster": True,
@@ -4332,6 +4818,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "private_dns_zone": None,
                 "fqdn_subdomain": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_4 = self.models.ManagedCluster(location="test_location")
         # fail on mutually exclusive enable_private_cluster and api_server_authorized_ip_ranges
@@ -4342,7 +4829,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_5 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "api_server_authorized_ip_ranges": None,
                 "enable_private_cluster": True,
@@ -4350,6 +4836,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "private_dns_zone": CONST_PRIVATE_DNS_ZONE_SYSTEM,
                 "fqdn_subdomain": "test_fqdn_subdomain",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_5 = self.models.ManagedCluster(location="test_location")
         # fail on invalid private_dns_zone when fqdn_subdomain is specified
@@ -4361,11 +4848,11 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_managed_identity": False,
                 "assign_identity": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -4382,11 +4869,11 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_managed_identity": True,
                 "assign_identity": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_identity(mc_2)
@@ -4404,11 +4891,11 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_managed_identity": True,
                 "assign_identity": "test_assign_identity",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_3 = self.models.ManagedCluster(location="test_location")
         dec_mc_3 = dec_3.set_up_identity(mc_3)
@@ -4430,11 +4917,11 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_4 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "enable_managed_identity": False,
                 "assign_identity": "test_assign_identity",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_4 = self.models.ManagedCluster(location="test_location")
         # fail on enable_managed_identity not specified
@@ -4446,11 +4933,11 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "assign_identity": None,
                 "assign_kubelet_identity": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -4482,12 +4969,12 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             dec_2 = AKSCreateDecorator(
                 self.cmd,
                 self.client,
-                self.models,
                 {
                     "enable_managed_identity": True,
                     "assign_identity": "test_assign_identity",
                     "assign_kubelet_identity": "test_assign_kubelet_identity",
                 },
+                ResourceType.MGMT_CONTAINERSERVICE,
             )
             mc_2 = self.models.ManagedCluster(location="test_location")
             dec_mc_2 = dec_2.set_up_identity_profile(mc_2)
@@ -4515,10 +5002,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "auto_upgrade_channel": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -4535,10 +5022,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "auto_upgrade_channel": "test_auto_upgrade_channel",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_auto_upgrade_profile(mc_2)
@@ -4557,10 +5044,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "cluster_autoscaler_profile": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -4577,16 +5064,16 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
-                "cluster_autoscaler_profile": "test_cluster_autoscaler_profile",
+                "cluster_autoscaler_profile": {"expander": "random"},
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_auto_scaler_profile(mc_2)
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location",
-            auto_scaler_profile="test_cluster_autoscaler_profile",
+            auto_scaler_profile={"expander": "random"},
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
@@ -4595,10 +5082,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "uptime_sla": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -4615,10 +5102,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "uptime_sla": True,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_sku(mc_2)
@@ -4637,10 +5124,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "edge_zone": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mc_1 = self.models.ManagedCluster(location="test_location")
@@ -4657,10 +5144,10 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "edge_zone": "test_edge_zone",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_mc_2 = dec_2.set_up_extended_location(mc_2)
@@ -4674,52 +5161,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
-    def test_build_custom_headers(self):
-        # default value in `aks_create`
-        dec_1 = AKSCreateDecorator(
-            self.cmd,
-            self.client,
-            self.models,
-            {
-                "service_principal": None,
-                "client_secret": None,
-            },
-        )
-        mc_1 = self.models.ManagedCluster(location="test_location")
-        # fail on passing the wrong mc object
-        with self.assertRaises(CLIInternalError):
-            dec_1.build_custom_headers(None)
-        dec_1.build_custom_headers(mc_1)
-        self.assertEqual(
-            dec_1.context.get_intermediate("custom_headers"),
-            None,
-        )
-
-        # custom value
-        dec_2 = AKSCreateDecorator(
-            self.cmd,
-            self.client,
-            self.models,
-            {
-                "name": "test_name",
-                "resource_group_name": "test_rg_name",
-                "location": "test_location",
-                "service_principal": "test_service_principal",
-                "client_secret": "test_client_secret",
-            },
-        )
-        dec_2.context.set_intermediate("subscription_id", "1234-5678")
-        mc_2 = self.models.ManagedCluster(location="test_location")
-        with patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client"
-        ):
-            mc_2 = dec_2.set_up_service_principal_profile(mc_2)
-        dec_2.build_custom_headers(mc_2)
-        self.assertEqual(
-            dec_2.context.get_intermediate("custom_headers"),
-            {"Ocp-Aad-Session-Key": None},
-        )
-
     def test_construct_default_mc_profile(self):
         import paramiko
 
@@ -4729,7 +5170,6 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSCreateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "resource_group_name": "test_rg_name",
                 "name": "test_name",
@@ -4815,7 +5255,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "no_wait": False,
                 "yes": False,
                 "enable_azure_rbac": False,
+                "aks_custom_headers": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
 
         mock_profile = Mock(
@@ -4874,7 +5316,17 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
     def test_create_mc(self):
         # default value in `aks_create`
         mc_1 = self.models.ManagedCluster(location="test_location")
-        dec_1 = AKSCreateDecorator(self.cmd, self.client, self.models, {})
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_managed_identity": True,
+                "no_wait": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
         # fail on passing the wrong mc object
         with self.assertRaises(CLIInternalError):
             dec_1.create_mc(None)
@@ -4892,29 +5344,32 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         ), patch(
             "azure.cli.command_modules.acs.decorator._put_managed_cluster_ensuring_permission",
             side_effect=err,
-        ):
+        ) as put_mc:
             dec_1.create_mc(mc_1)
-
-    def test_get_disable_local_accounts(self):
-        ctx_1 = AKSContext(
+        put_mc.assert_called_with(
             self.cmd,
-            {"disable_local_accounts": False},
-            decorator_mode=DecoratorMode.CREATE,
+            self.client,
+            "test_subscription_id",
+            "test_rg_name",
+            "test_name",
+            mc_1,
+            None,
+            None,
+            None,
+            None,
+            None,
+            True,
+            None,
+            {},
+            False,
         )
-        self.assertEqual(ctx_1.get_disable_local_accounts(), False)
-        ctx_2 = AKSContext(
-            self.cmd,
-            {"disable_local_accounts": True},
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
 
 
 class AKSUpdateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
-        self.models = AKSModels(self.cmd)
+        self.models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
         self.client = MockClient()
 
     def test_check_raw_parameters(self):
@@ -4922,8 +5377,8 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {},
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         # fail on no updated parameter provided
         with self.assertRaises(RequiredArgumentMissingError):
@@ -4933,11 +5388,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
-                "cluster_autoscaler_profile": "",
+                "cluster_autoscaler_profile": {},
                 "api_server_authorized_ip_ranges": "",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         dec_2.check_raw_parameters()
 
@@ -4949,11 +5404,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "name": "test_cluster",
                 "resource_group_name": "test_rg_name",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         dec_mc = dec_1.fetch_mc()
         ground_truth_mc = self.models.ManagedCluster(
@@ -4968,10 +5423,10 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "tags": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -4992,10 +5447,10 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "tags": {},
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -5017,7 +5472,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "update_cluster_autoscaler": False,
                 "enable_cluster_autoscaler": False,
@@ -5026,6 +5480,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 "max_count": None,
                 "cluster_autoscaler_profile": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -5050,7 +5505,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "update_cluster_autoscaler": True,
                 "enable_cluster_autoscaler": False,
@@ -5059,6 +5513,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 "max_count": 10,
                 "cluster_autoscaler_profile": {},
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         agent_pool_profile_2 = self.models.ManagedClusterAgentPoolProfile(
             name="nodepool1",
@@ -5096,7 +5551,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "update_cluster_autoscaler": False,
                 "enable_cluster_autoscaler": False,
@@ -5105,6 +5559,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 "max_count": None,
                 "cluster_autoscaler_profile": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         agent_pool_profile_3 = self.models.ManagedClusterAgentPoolProfile(
             name="nodepool1",
@@ -5145,11 +5600,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "attach_acr": None,
                 "detach_acr": None,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(
             location="test_location",
@@ -5173,11 +5628,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "attach_acr": "test_attach_acr",
                 "detach_acr": "test_detach_acr",
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -5210,7 +5665,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                         acr_name_or_id="test_detach_acr",
                         subscription_id="test_subscription_id",
                         detach=True,
-                    )
+                    ),
                 ]
             )
 
@@ -5219,18 +5674,18 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "uptime_sla": False,
                 "no_uptime_sla": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         dec_1.context.attach_mc(mc_1)
         # fail on passing the wrong mc object
@@ -5242,7 +5697,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -5250,18 +5705,18 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "uptime_sla": True,
                 "no_uptime_sla": True,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         dec_2.context.attach_mc(mc_2)
         # fail on mutually exclusive uptime_sla and no_uptime_sla
@@ -5272,18 +5727,18 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_3 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "uptime_sla": False,
                 "no_uptime_sla": True,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_3 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid",
-            )
+            ),
         )
         dec_3.context.attach_mc(mc_3)
         dec_mc_3 = dec_3.update_sku(mc_3)
@@ -5292,7 +5747,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
@@ -5300,18 +5755,18 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_4 = AKSUpdateDecorator(
             self.cmd,
             self.client,
-            self.models,
             {
                 "uptime_sla": True,
                 "no_uptime_sla": False,
             },
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_4 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free",
-            )
+            ),
         )
         dec_4.context.attach_mc(mc_4)
         dec_mc_4 = dec_4.update_sku(mc_4)
@@ -5320,9 +5775,166 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             sku=self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid",
-            )
+            ),
         )
         self.assertEqual(dec_mc_4, ground_truth_mc_4)
+
+    def test_update_load_balancer_profile(self):
+        # default value in `aks_update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "load_balancer_sku": None,
+                "load_balancer_managed_outbound_ip_count": None,
+                "load_balancer_outbound_ips": None,
+                "load_balancer_outbound_ip_prefixes": None,
+                "load_balancer_outbound_ports": None,
+                "load_balancer_idle_timeout": None,
+            },
+            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_load_balancer_profile(None)
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        # fail on incomplete mc object (no network profile)
+        with self.assertRaises(UnknownError):
+            dec_1.update_load_balancer_profile(mc_0)
+
+        load_balancer_profile_1 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            managed_outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            )(count=3),
+            outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            )(
+                public_i_ps=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_1"
+                    ),
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_2"
+                    ),
+                ]
+            ),
+            allocated_outbound_ports=5,
+        )
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_profile=load_balancer_profile_1,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile_1,
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_load_balancer_profile(mc_1)
+
+        ground_truth_load_balancer_profile_1 = self.models.lb_models.get(
+            "ManagedClusterLoadBalancerProfile"
+        )(
+            managed_outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            )(count=3),
+            outbound_i_ps=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            )(
+                public_i_ps=[
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_1"
+                    ),
+                    self.models.lb_models.get("ResourceReference")(
+                        id="test_ip_2"
+                    ),
+                ]
+            ),
+            allocated_outbound_ports=5,
+        )
+        ground_truth_network_profile_1 = (
+            self.models.ContainerServiceNetworkProfile(
+                load_balancer_profile=ground_truth_load_balancer_profile_1,
+            )
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=ground_truth_network_profile_1,
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_update_disable_local_accounts(self):
+        # default value in `aks_update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_local_accounts": False,
+                "enable_local_accounts": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_disable_local_accounts(None)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_disable_local_accounts(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_local_accounts": True,
+                "enable_local_accounts": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=False,
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_disable_local_accounts(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # custom value
+        dec_3 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_local_accounts": False,
+                "enable_local_accounts": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_disable_local_accounts(mc_3)
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=False,
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
     def test_update_default_mc_profile(self):
         pass

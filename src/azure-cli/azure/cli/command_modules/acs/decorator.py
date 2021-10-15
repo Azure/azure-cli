@@ -24,13 +24,20 @@ from azure.cli.command_modules.acs._consts import (
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
-    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     DecoratorMode,
+)
+from azure.cli.command_modules.acs._loadbalancer import (
+    create_load_balancer_profile,
+    set_load_balancer_sku,
+)
+from azure.cli.command_modules.acs._loadbalancer import (
+    update_load_balancer_profile as _update_load_balancer_profile,
 )
 from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
@@ -42,10 +49,9 @@ from azure.cli.command_modules.acs.custom import (
     _get_rg_location,
     _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
-    create_load_balancer_profile,
-    set_load_balancer_sku,
     subnet_role_assignment_exists,
 )
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -73,6 +79,7 @@ ContainerServiceClient = TypeVar("ContainerServiceClient")
 Identity = TypeVar("Identity")
 ManagedCluster = TypeVar("ManagedCluster")
 ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
+ManagedClusterPropertiesAutoScalerProfile = TypeVar("ManagedClusterPropertiesAutoScalerProfile")
 ResourceReference = TypeVar("ResourceReference")
 
 # TODO
@@ -192,14 +199,14 @@ def validate_counts_in_autoscaler(
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class AKSModels:
-    """Store the models used in aks_create.
+    """Store the models used in aks_create and aks_update.
 
     The api version of the class corresponding to a model is determined by resource_type.
     """
     def __init__(
         self,
         cmd: AzCommandsLoader,
-        resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
+        resource_type: ResourceType,
     ):
         self.__cmd = cmd
         self.resource_type = resource_type
@@ -351,25 +358,35 @@ class AKSModels:
 
 # pylint: disable=too-many-public-methods
 class AKSContext:
-    """Implement getter functions for all parameters in aks_create.
+    """Implement getter functions for all parameters in aks_create and aks_update.
 
-    Note: One of the most basic principles is that when parameters are put into a certain profile (and further
-    decorated into the ManagedCluster object by AKSCreateDecorator), it shouldn't be modified any more, only
-    read-only operations (e.g. validation) can be performed.
+    Each getter function is responsible for obtaining the corresponding one or more parameter values, and perform
+    necessary parameter value completion or normalization and validation checks.
 
     This class also stores a copy of the original function parameters, some intermediate variables (such as the
-    subscription ID) and a reference of the ManagedCluster object.
+    subscription ID), a reference of the ManagedCluster object and an indicator that specifies the current decorator
+    mode (currently supports create and update).
 
-    When adding a new parameter for aks_create, please also provide a "getter" function named `get_xxx`, where `xxx` is
+    In the create mode, the most basic principles is that when parameters are put into a certain profile (and further
+    decorated into the ManagedCluster object by AKSCreateDecorator), it shouldn't be modified any more, only read-only
+    operations (e.g. validation) can be performed. In other words, when we try to get the value of a parameter, we
+    should use its attribute value in the `mc` object as a preference. Only when the value has not been set in the `mc`
+    object, we could return the user input value.
+
+    In the update mode, in contrast to the create mode, we should use the value provided by the user to update the
+    corresponding attribute value in the `mc` object.
+
+    When adding support for a new parameter, you need to provide a "getter" function named `get_xxx`, where `xxx` is
     the parameter name. In this function, the process of obtaining parameter values, dynamic completion (optional),
     and validation (optional) should be followed. The obtaining of parameter values should further follow the order
     of obtaining from the ManagedCluster object or from the original value.
 
-    Attention: In case of checking the validity of parameters, make sure enable_validation is never set to True and
-    read_only is set to True when necessary to avoid loop calls, when using the getter function to obtain the value of
-    other parameters.
+    When checking the validity of parameter values, a pair of parameters checking each other will cause a loop call.
+    To avoid this problem, we can implement a new internal function. In the newly added internal function, we can
+    easily skip the value completion and validation check by setting the `read_only` and `enable_validation` options
+    respectively.
     """
-    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, decorator_mode):
+    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, models: AKSModels, decorator_mode):
         if not isinstance(raw_parameters, dict):
             raise CLIInternalError(
                 "Unexpected raw_parameters object with type '{}'.".format(
@@ -384,6 +401,7 @@ class AKSContext:
             )
         self.cmd = cmd
         self.raw_param = raw_parameters
+        self.models = models
         self.decorator_mode = decorator_mode
         self.intermediates = dict()
         self.mc = None
@@ -894,6 +912,32 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_vm_size
+
+    def get_os_sku(self) -> Union[str, None]:
+        """Obtain the value of os_sku.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("os_sku")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if agent_pool_profile:
+                value_obtained_from_mc = agent_pool_profile.os_sku
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            os_sku = value_obtained_from_mc
+        else:
+            os_sku = raw_value
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return os_sku
 
     def get_vnet_subnet_id(self) -> Union[str, None]:
         """Obtain the value of vnet_subnet_id.
@@ -1933,17 +1977,18 @@ class AKSContext:
         load_balancer_managed_outbound_ip_count = self.raw_param.get(
             "load_balancer_managed_outbound_ip_count"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-            self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count is not None
-        ):
-            load_balancer_managed_outbound_ip_count = (
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
+                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count is not None
+            ):
+                load_balancer_managed_outbound_ip_count = (
+                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1960,17 +2005,18 @@ class AKSContext:
         load_balancer_outbound_ips = self.raw_param.get(
             "load_balancer_outbound_ips"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.outbound_i_ps and
-            self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps is not None
-        ):
-            load_balancer_outbound_ips = (
-                self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.outbound_i_ps and
+                self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps is not None
+            ):
+                load_balancer_outbound_ips = (
+                    self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1985,17 +2031,18 @@ class AKSContext:
         load_balancer_outbound_ip_prefixes = self.raw_param.get(
             "load_balancer_outbound_ip_prefixes"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes and
-            self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes is not None
-        ):
-            load_balancer_outbound_ip_prefixes = (
-                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes and
+                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes is not None
+            ):
+                load_balancer_outbound_ip_prefixes = (
+                    self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -2012,16 +2059,17 @@ class AKSContext:
         load_balancer_outbound_ports = self.raw_param.get(
             "load_balancer_outbound_ports"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.allocated_outbound_ports is not None
-        ):
-            load_balancer_outbound_ports = (
-                self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.allocated_outbound_ports is not None
+            ):
+                load_balancer_outbound_ports = (
+                    self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -2038,16 +2086,17 @@ class AKSContext:
         load_balancer_idle_timeout = self.raw_param.get(
             "load_balancer_idle_timeout"
         )
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.load_balancer_profile and
-            self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes is not None
-        ):
-            load_balancer_idle_timeout = (
-                self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes is not None
+            ):
+                load_balancer_idle_timeout = (
+                    self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -3296,10 +3345,38 @@ class AKSContext:
         (extract the dictionary from the ManagedClusterPropertiesAutoScalerProfile object), and then update the copied
         dictionary with the dictionary of new options.
 
+        This function will verify the parameter by default. If the user input is not empty, take the keys from the
+        attribute map of ManagedClusterPropertiesAutoScalerProfile to verify whether the keys in the key-value pairs
+        provided by the user are valid. If not, raise an InvalidArgumentValueError. The value of the raw parameter
+        should be a dictionary after being processed by the validator. If not, raise a CLIInternalError.
+
         :return: dictionary or None
         """
         # read the original value passed by the command
         cluster_autoscaler_profile = self.raw_param.get("cluster_autoscaler_profile")
+        # validate user input (replace function "_validate_cluster_autoscaler_key" in file "_validators.py")
+        if cluster_autoscaler_profile is not None:
+            if not isinstance(cluster_autoscaler_profile, dict):
+                raise CLIInternalError(
+                    "Unexpected input cluster-autoscaler-profile, value: '{}', type '{}'.".format(
+                        cluster_autoscaler_profile,
+                        type(cluster_autoscaler_profile),
+                    )
+                )
+            # pylint: disable=protected-access
+            valid_keys = list(
+                k.replace("_", "-") for k in self.models.ManagedClusterPropertiesAutoScalerProfile._attribute_map.keys()
+            )
+            for key in cluster_autoscaler_profile.keys():
+                if not key:
+                    raise InvalidArgumentValueError("Empty key specified for cluster-autoscaler-profile")
+                if key not in valid_keys:
+                    raise InvalidArgumentValueError(
+                        "'{}' is an invalid key for cluster-autoscaler-profile. Valid keys are {}.".format(
+                            key, ", ".join(valid_keys)
+                        )
+                    )
+
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.auto_scaler_profile is not None:
@@ -3419,16 +3496,100 @@ class AKSContext:
         # this parameter does not need validation
         return edge_zone
 
+    def get_aks_custom_headers(self) -> Dict[str, str]:
+        """Obtain the value of aks_custom_headers.
+
+        Note: aks_custom_headers will not be decorated into the `mc` object.
+
+        This function will normalize the parameter by default. It will call "extract_comma_separated_string" to extract
+        comma-separated key value pairs from the string.
+
+        :return: dictionary
+        """
+        # read the original value passed by the command
+        aks_custom_headers = self.raw_param.get("aks_custom_headers")
+        # normalize user-provided header
+        # usually the purpose is to enable (preview) features through AKSHTTPCustomFeatures
+        aks_custom_headers = extract_comma_separated_string(
+            aks_custom_headers,
+            enable_strip=True,
+            extract_kv=True,
+            default_value={},
+        )
+
+        # In create mode, add AAD session key to header.
+        # If the service principal is not dynamically generated (this could happen when the cluster enables managed
+        # identity or the user explicitly provides a service principal), we will not have an AAD session key. In this
+        # case, the header is useless and that's OK to not add this header.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.service_principal_profile is not None:
+                aks_custom_headers.update(
+                    {
+                        "Ocp-Aad-Session-Key": self.get_intermediate(
+                            "aad_session_key"
+                        )
+                    }
+                )
+
+        # this parameter does not need validation
+        return aks_custom_headers
+
     def get_disable_local_accounts(self) -> bool:
         """Obtain the value of disable_local_accounts.
+
+        This function will verify the parameter by default. If both disable_local_accounts and enable_local_accounts are
+        specified, raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
         # read the original value passed by the command
         disable_local_accounts = self.raw_param.get("disable_local_accounts")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.disable_local_accounts is not None:
+                disable_local_accounts = self.mc.disable_local_accounts
+
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        # validation
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if disable_local_accounts and self._get_enable_local_accounts(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --disable-local-accounts and "
+                    "--enable-local-accounts at the same time."
+                )
         return disable_local_accounts
+
+    # pylint: disable=unused-argument
+    def _get_enable_local_accounts(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of enable_local_accounts.
+
+        This function supports the option of enable_validation. When enabled, if both disable_local_accounts and
+        enable_local_accounts are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_local_accounts = self.raw_param.get("enable_local_accounts")
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if enable_local_accounts and self.get_disable_local_accounts():
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --disable-local-accounts and "
+                    "--enable-local-accounts at the same time."
+                )
+        return enable_local_accounts
+
+    def get_enable_local_accounts(self) -> bool:
+        """Obtain the value of enable_local_accounts.
+
+        This function will verify the parameter by default. If both disable_local_accounts and enable_local_accounts are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_local_accounts(enable_validation=True)
 
     def get_client_id_from_identity_or_sp_profile(self) -> str:
         """Helper function to obtain the value of client_id from identity_profile or service_principal_profile.
@@ -3462,9 +3623,8 @@ class AKSCreateDecorator:
         self,
         cmd: AzCliCommand,
         client: ContainerServiceClient,
-        models: AKSModels,
         raw_parameters: Dict,
-        resource_type: ResourceType = ResourceType.MGMT_CONTAINERSERVICE,
+        resource_type: ResourceType,
     ):
         """Internal controller of aks_create.
 
@@ -3476,14 +3636,9 @@ class AKSCreateDecorator:
         """
         self.cmd = cmd
         self.client = client
-        self.models = models
+        self.models = AKSModels(cmd, resource_type)
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSContext(cmd, raw_parameters, decorator_mode=DecoratorMode.CREATE)
-        # `resource_type` is used to dynamically find the model (of a specific api version) provided by the
-        # containerservice SDK, most models have been passed through the `models` parameter (instantiatied
-        # from `AKSModels` (or `PreviewAKSModels` in aks-preview), where resource_type (i.e.,
-        # api version) has been specified).
-        self.resource_type = resource_type
+        self.context = AKSContext(cmd, raw_parameters, self.models, decorator_mode=DecoratorMode.CREATE)
 
     def init_mc(self) -> ManagedCluster:
         """Initialize a ManagedCluster object with several parameters and attach it to internal context.
@@ -3535,6 +3690,7 @@ class AKSCreateDecorator:
             count=node_count,
             vm_size=self.context.get_node_vm_size(),
             os_type="Linux",
+            os_sku=self.context.get_os_sku(),
             vnet_subnet_id=self.context.get_vnet_subnet_id(),
             proximity_placement_group_id=self.context.get_ppg(),
             availability_zones=self.context.get_zones(),
@@ -3863,11 +4019,9 @@ class AKSCreateDecorator:
         if 'http_application_routing' in addons:
             addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
-            addons.remove('http_application_routing')
         if 'kube-dashboard' in addons:
             addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
-            addons.remove('kube-dashboard')
         # TODO: can we help the user find a workspace resource ID?
         if 'monitoring' in addons:
             workspace_resource_id = self.context.get_workspace_resource_id()
@@ -3877,11 +4031,9 @@ class AKSCreateDecorator:
             _ensure_container_insights_for_monitoring(self.cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
             # set intermediate
             self.context.set_intermediate("monitoring", True, overwrite_exists=True)
-            addons.remove('monitoring')
         if 'azure-policy' in addons:
             addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
-            addons.remove('azure-policy')
         if 'virtual-node' in addons:
             aci_subnet_name = self.context.get_aci_subnet_name()
             # TODO: how about aciConnectorwindows, what is its addon name?
@@ -3892,7 +4044,6 @@ class AKSCreateDecorator:
             )
             # set intermediate
             self.context.set_intermediate("enable_virtual_node", True, overwrite_exists=True)
-            addons.remove('virtual-node')
         if 'ingress-appgw' in addons:
             addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
             appgw_name = self.context.get_appgw_name()
@@ -3913,18 +4064,15 @@ class AKSCreateDecorator:
             addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
             # set intermediate
             self.context.set_intermediate("ingress_appgw_addon_enabled", True, overwrite_exists=True)
-            addons.remove('ingress-appgw')
         if 'confcom' in addons:
             addon_profile = ManagedClusterAddonProfile(
                 enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
             if self.context.get_enable_sgxquotehelper():
                 addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
             addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
-            addons.remove('confcom')
         if 'open-service-mesh' in addons:
             addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
             addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
-            addons.remove('open-service-mesh')
         mc.addon_profiles = addon_profiles
         return mc
 
@@ -4124,26 +4272,6 @@ class AKSCreateDecorator:
             )
         return mc
 
-    def build_custom_headers(self, mc: ManagedCluster) -> None:
-        """Build a dictionary contains custom headers.
-
-        This function will store an intermediate custom_headers.
-
-        :return: None
-        """
-        if not isinstance(mc, self.models.ManagedCluster):
-            raise CLIInternalError(
-                "Unexpected mc object with type '{}'.".format(type(mc))
-            )
-
-        # Add AAD session key to header.
-        # If principal_obj is None, we will not add this header, this can happen when the cluster enables managed
-        # identity. In this case, the header is useless and that's OK to not add this header.
-        custom_headers = None
-        if mc.service_principal_profile:
-            custom_headers = {'Ocp-Aad-Session-Key': self.context.get_intermediate("aad_session_key")}
-        self.context.set_intermediate("custom_headers", custom_headers, overwrite_exists=True)
-
     def construct_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -4186,8 +4314,6 @@ class AKSCreateDecorator:
         mc = self.set_up_sku(mc)
         # set up extended location
         mc = self.set_up_extended_location(mc)
-        # build custom header
-        self.build_custom_headers(mc)
         return mc
 
     def create_mc(self, mc: ManagedCluster) -> ManagedCluster:
@@ -4223,7 +4349,7 @@ class AKSCreateDecorator:
                     self.context.get_vnet_subnet_id(),
                     self.context.get_enable_managed_identity(),
                     self.context.get_attach_acr(),
-                    self.context.get_intermediate("custom_headers"),
+                    self.context.get_aks_custom_headers(),
                     self.context.get_no_wait())
                 return created_cluster
             except CloudError as ex:
@@ -4240,8 +4366,8 @@ class AKSUpdateDecorator:
         self,
         cmd: AzCliCommand,
         client: ContainerServiceClient,
-        models: AKSModels,
         raw_parameters: Dict,
+        resource_type: ResourceType,
     ):
         """Internal controller of aks_update.
 
@@ -4253,9 +4379,9 @@ class AKSUpdateDecorator:
         """
         self.cmd = cmd
         self.client = client
-        self.models = models
+        self.models = AKSModels(cmd, resource_type)
         # store the context in the process of assemble the ManagedCluster object
-        self.context = AKSContext(cmd, raw_parameters, decorator_mode=DecoratorMode.UPDATE)
+        self.context = AKSContext(cmd, raw_parameters, self.models, decorator_mode=DecoratorMode.UPDATE)
 
     def check_raw_parameters(self):
         """Helper function to check whether any parameters are set.
@@ -4438,6 +4564,57 @@ class AKSUpdateDecorator:
             )
         return mc
 
+    def update_load_balancer_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update load balancer profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        if not mc.network_profile:
+            raise UnknownError(
+                "Encounter an unexpected error while getting network profile from the cluster in the process of "
+                "trying to update the load balancer profile."
+            )
+
+        load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
+        load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
+        load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
+        load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
+        load_balancer_idle_timeout = self.context.get_load_balancer_idle_timeout()
+        # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
+        # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
+        # remain unchanged.
+        mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
+            managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
+            outbound_ips=load_balancer_outbound_ips,
+            outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
+            outbound_ports=load_balancer_outbound_ports,
+            idle_timeout=load_balancer_idle_timeout,
+            profile=mc.network_profile.load_balancer_profile,
+            models=self.models.lb_models)
+        return mc
+
+    def update_disable_local_accounts(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update disable/enable local accounts for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        if self.context.get_disable_local_accounts():
+            mc.disable_local_accounts = True
+
+        if self.context.get_enable_local_accounts():
+            mc.disable_local_accounts = False
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -4453,12 +4630,18 @@ class AKSUpdateDecorator:
         self.check_raw_parameters()
         # fetch the ManagedCluster object
         mc = self.fetch_mc()
+        # update tags
+        mc = self.update_tags(mc)
         # update auto scaler profile
         mc = self.update_auto_scaler_profile(mc)
         # attach or detach acr (add or delete role assignment for acr)
         self.process_attach_detach_acr(mc)
         # update sku (uptime sla)
         mc = self.update_sku(mc)
+        # update load balancer profile
+        mc = self.update_load_balancer_profile(mc)
+        # update disable/enable local accounts
+        mc = self.update_disable_local_accounts(mc)
 
         return mc
 
