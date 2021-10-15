@@ -738,7 +738,7 @@ class SubscriptionFinder:
         self.cli_ctx = cli_ctx
         self.secret = None
         self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
-        self.authority = self.cli_ctx.cloud.endpoints.active_directory
+        self._authority = self.cli_ctx.cloud.endpoints.active_directory
         self.tenants = []
 
     def find_using_common_tenant(self, username, credential=None):
@@ -764,7 +764,7 @@ class SubscriptionFinder:
 
             logger.info("Finding subscriptions under tenant %s", t.tenant_id_name)
 
-            identity = _create_identity_instance(self.cli_ctx, self.authority, tenant_id=tenant_id)
+            identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=tenant_id)
 
             specific_tenant_credential = identity.get_user_credential(username)
 
