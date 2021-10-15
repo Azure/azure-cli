@@ -1326,11 +1326,11 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     postgres_location = 'eastus2euap'
     mysql_location = 'westus2'
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-    # @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-    # def test_postgres_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
-    #     self._test_flexible_server_existing_private_dns_zone('postgres', server_resource_group, vnet_resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    def test_postgres_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
+        self._test_flexible_server_existing_private_dns_zone('postgres', server_resource_group, vnet_resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -1338,12 +1338,12 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     def test_mysql_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
         self._test_flexible_server_existing_private_dns_zone('mysql', server_resource_group, vnet_resource_group)
     
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-    # @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-    # @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
-    # def test_postgres_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
-    #     self._test_flexible_server_new_private_dns_zone('postgres', server_resource_group, vnet_resource_group, dns_resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
+    def test_postgres_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
+        self._test_flexible_server_new_private_dns_zone('postgres', server_resource_group, vnet_resource_group, dns_resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
