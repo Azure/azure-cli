@@ -16,8 +16,7 @@ from copy import deepcopy
 
 from azure.core.credentials import AccessToken
 
-from azure.cli.core._profile import (Profile, SubscriptionFinder,
-                                     _detect_adfs_authority, _attach_token_tenant,
+from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_tenant,
                                      _transform_subscription_for_multiapi)
 
 from azure.mgmt.resource.subscriptions.models import \
@@ -1486,29 +1485,6 @@ class TenantStub(object):  # pylint: disable=too-few-public-methods
 
 
 class TestUtils(unittest.TestCase):
-    def test_detect_adfs_authority(self):
-        # Public cloud
-        # Default tenant
-        self.assertEqual(_detect_adfs_authority('https://login.microsoftonline.com', None),
-                         ('https://login.microsoftonline.com', None))
-        # Trailing slash is stripped
-        self.assertEqual(_detect_adfs_authority('https://login.microsoftonline.com/', None),
-                         ('https://login.microsoftonline.com', None))
-        # Custom tenant
-        self.assertEqual(_detect_adfs_authority('https://login.microsoftonline.com', '601d729d-0000-0000-0000-000000000000'),
-                         ('https://login.microsoftonline.com', '601d729d-0000-0000-0000-000000000000'))
-
-        # ADFS
-        # Default tenant
-        self.assertEqual(_detect_adfs_authority('https://adfs.redmond.azurestack.corp.microsoft.com/adfs', None),
-                         ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs'))
-        # Trailing slash is stripped
-        self.assertEqual(_detect_adfs_authority('https://adfs.redmond.azurestack.corp.microsoft.com/adfs/', None),
-                         ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs'))
-        # Tenant ID is discarded
-        self.assertEqual(_detect_adfs_authority('https://adfs.redmond.azurestack.corp.microsoft.com/adfs', '601d729d-0000-0000-0000-000000000000'),
-                         ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs'))
-
     def test_attach_token_tenant(self):
         from azure.mgmt.resource.subscriptions.v2016_06_01.models import Subscription \
             as Subscription_v2016_06_01

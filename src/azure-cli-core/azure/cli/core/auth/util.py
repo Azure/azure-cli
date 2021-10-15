@@ -123,11 +123,11 @@ def check_result(result, **kwargs):
 
     # For user authentication
     if 'id_token_claims' in result:
-        idt = result['id_token_claims']
+        id_token = result['id_token_claims']
         return {
             # AAD returns "preferred_username", ADFS returns "upn"
-            'username': idt.get("preferred_username") or idt["upn"],
-            'tenant_id': idt['tid']
+            'username': id_token.get("preferred_username") or id_token["upn"],
+            'tenant_id': id_token['tid']
         }
 
     return None
