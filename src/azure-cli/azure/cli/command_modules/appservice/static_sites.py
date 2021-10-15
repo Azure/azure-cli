@@ -66,7 +66,7 @@ def delete_staticsite_environment(cmd, name, environment_name='default', resourc
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return sdk_no_wait(no_wait, client.delete_static_site_build,
+    return sdk_no_wait(no_wait, client.begin_delete_static_site_build,
                        resource_group_name, name, environment_name)
 
 
@@ -86,13 +86,12 @@ def list_staticsite_domains(cmd, name, resource_group_name=None):
     return client.list_static_site_custom_domains(resource_group_name, name)
 
 
-def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False):
+def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False,
+                          validation_method="cname-delegation"):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    # TODO check if validation method is right
-    validation_method = "dns-txt-token"
     domain_envelope = StaticSiteCustomDomainRequestPropertiesARMResource(validation_method=validation_method)
 
     client.begin_validate_custom_domain_can_be_added_to_static_site(resource_group_name,
