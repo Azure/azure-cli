@@ -112,6 +112,10 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         self.assertEqual(dim.operator, operator)
         self.assertEqual(dim.values, values)
 
+    def check_skip_metric_validation(self, ns, skip_metric_validation):
+        prop = ns.condition[0]
+        self.assertEqual(prop.skip_metric_validation, skip_metric_validation)
+
     def test_monitor_metric_alert_condition_action(self):
 
         from knack.util import CLIError
@@ -153,6 +157,14 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         self.call_condition(ns, 'avg SuccessE2ELatenc,|y > 250 where ApiName includes Get|,%_Blob or PutB,_lob')
         self.check_condition(ns, 'Average', None, 'SuccessE2ELatenc,|y', 'GreaterThan', '250')
         self.check_dimension(ns, 0, 'ApiName', 'Include', ['Get|,%_Blob', 'PutB,_lob'])
+
+        ns = self._build_namespace()
+        self.call_condition(ns, 'avg ns.foo/bar_doo > 90')
+        self.check_skip_metric_validation(ns, None)
+
+        ns = self._build_namespace()
+        self.call_condition(ns, 'avg ! ns.foo/bar_doo > 90')
+        self.check_skip_metric_validation(ns, True)
 
 
 class MonitorAutoscaleActionTest(unittest.TestCase):

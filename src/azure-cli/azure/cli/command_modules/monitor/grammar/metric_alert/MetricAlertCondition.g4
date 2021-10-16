@@ -4,7 +4,7 @@ grammar MetricAlertCondition ;
 
 /* Main Rules */
 
-expression          : aggregation (namespace '.')* (QUOTE metric QUOTE WHITESPACE | metric) operator (threshold | dynamics) (WHITESPACE dimensions)* NEWLINE* ;
+expression          : aggregation validation_flag? (namespace '.')* (QUOTE metric QUOTE WHITESPACE | metric) operator (threshold | dynamics) (WHITESPACE dimensions)* NEWLINE* ;
 
 aggregation         : WORD WHITESPACE ;
 
@@ -13,6 +13,8 @@ namespace           : (NUMBER | WORD | '/' | '.')+;
 metric              : (NUMBER | WORD | WHITESPACE | '.' | '/' | '_' | '\\' | ':' | '%' | '-' | ',' | '|')+;
 
 operator            : OPERATOR WHITESPACE ;
+
+validation_flag     : '!' WHITESPACE ;
 
 /* Statics */
 

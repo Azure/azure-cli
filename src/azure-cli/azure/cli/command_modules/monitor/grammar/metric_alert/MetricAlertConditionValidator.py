@@ -49,6 +49,11 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
         aggregation = agg_conversion[ctx.getText().strip()]
         self.parameters['time_aggregation'] = aggregation
 
+    # Exit a parse tree produced by MetricAlertConditionParser#validation_flag.
+    def exitValidation_flag(self, ctx):
+        if (ctx.getText().strip() == '!'):
+            self.parameters['skip_metric_validation'] = True
+
     # Exit a parse tree produced by MetricAlertConditionParser#namespace.
     def exitNamespace(self, ctx):
         self.parameters['metric_namespace'] = ctx.getText().strip()

@@ -55,6 +55,15 @@ class MetricAlertConditionListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MetricAlertConditionParser#validation_flag.
+    def enterValidation_flag(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#validation_flag.
+    def exitValidation_flag(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by MetricAlertConditionParser#threshold.
     def enterThreshold(self, ctx):
         pass

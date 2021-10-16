@@ -123,10 +123,13 @@ def create_metric_alert_dimension(dimension_name, value_list, operator=None):
 def create_metric_alert_condition(condition_type, aggregation, metric_name, operator, metric_namespace='',
                                   dimension_list=None, threshold=None, alert_sensitivity=None,
                                   number_of_evaluation_periods=None, min_failing_periods_to_alert=None,
-                                  ignore_data_before=None):
+                                  ignore_data_before=None, skip_metric_validation=None):
     if metric_namespace:
         metric_namespace += '.'
-    condition = "{} {}'{}' {} ".format(aggregation, metric_namespace, metric_name, operator)
+    validation_flag = ''
+    if skip_metric_validation:
+        validation_flag = '! '
+    condition = "{} {}{}'{}' {} ".format(aggregation, validation_flag, metric_namespace, metric_name, operator)
     if condition_type == 'static':
         condition += '{} '.format(threshold)
     elif condition_type == 'dynamic':
