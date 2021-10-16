@@ -50,7 +50,7 @@ DEPENDENCIES = [
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack~=0.8.2',
-    'msal-extensions>=0.3.0',
+    'msal-extensions>=0.3.0,<0.4',
     'msal>=1.15.0,<2.0.0',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
