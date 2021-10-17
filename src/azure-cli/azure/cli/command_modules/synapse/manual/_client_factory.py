@@ -98,6 +98,14 @@ def cf_synapse_client_operations_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).operations
 
 
+def cf_kusto_pool(cli_ctx, *_):
+    return cf_synapse(cli_ctx).kusto_pool
+
+
+def cf_kusto_pool(cli_ctx, *_):
+    return cf_synapse(cli_ctx).kusto_pools
+
+
 def synapse_spark_factory(cli_ctx, workspace_name, sparkpool_name):
     from azure.synapse.spark import SparkClient
     from azure.cli.core._profile import Profile

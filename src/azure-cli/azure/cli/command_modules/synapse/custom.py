@@ -10,11 +10,11 @@
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
 
-from .generated.action import *  # noqa: F403
+from .generated.custom import *  # noqa: F403
 try:
-    from .manual.action import *  # noqa: F403
+    from .manual.custom import *  # noqa: F403
 except ImportError as e:
-    if e.name.endswith('manual.action'):
+    if e.name.endswith('manual.custom'):
         pass
     else:
         raise e
