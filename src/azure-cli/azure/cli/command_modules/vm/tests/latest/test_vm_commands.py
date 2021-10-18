@@ -6056,7 +6056,7 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('source.id', '{vm_id}')
         ])
 
-        self.cmd('restore-point collection delete -g {rg} -n {collection_name} -y')
+        self.cmd('restore-point collection delete -g {rg} -n {point_name} --collection-name {collection_name} -y')
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collection', location='westus')

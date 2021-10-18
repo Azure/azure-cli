@@ -3382,7 +3382,7 @@ helps['restore-point'] = """
 
 helps['restore-point show'] = """
     type: command
-    short-summary: "The operation to get the restore point."
+    short-summary: "Get the restore point."
     examples:
       - name: Get a restore point
         text: |-
@@ -3391,8 +3391,7 @@ helps['restore-point show'] = """
 
 helps['restore-point create'] = """
     type: command
-    short-summary: "The operation to create the restore point. Updating properties of an existing restore point is not \
-allowed."
+    short-summary: "Create the restore point. Updating properties of an existing restore point is not allowed."
     parameters:
       - name: --exclude-disks
         short-summary: "List of disk resource ids that the customer wishes to exclude from the restore point. If no \
@@ -3414,7 +3413,7 @@ disks are specified, all disks will be included."
 
 helps['restore-point delete'] = """
     type: command
-    short-summary: "The operation to delete the restore point."
+    short-summary: "Delete the restore point."
 """
 
 helps['restore-point wait'] = """
@@ -3447,7 +3446,7 @@ helps['restore-point collection list'] = """
 
 helps['restore-point collection show'] = """
     type: command
-    short-summary: "The operation to get the restore point collection."
+    short-summary: "Get the restore point collection."
     examples:
       - name: Get a restore point collection (but not the restore points contained in the restore point collection)
         text: |-
@@ -3459,7 +3458,7 @@ helps['restore-point collection show'] = """
 
 helps['restore-point collection create'] = """
     type: command
-    short-summary: "The operation to Create the restore point collection. Please refer to https://aka.ms/RestorePoints \
+    short-summary: "Create the restore point collection. Please refer to https://aka.ms/RestorePoints \
 for more details. When updating a restore point collection, only tags may be modified."
     examples:
       - name: Create or update a restore point collection.
@@ -3471,12 +3470,12 @@ for more details. When updating a restore point collection, only tags may be mod
 
 helps['restore-point collection update'] = """
     type: command
-    short-summary: "The operation to update the restore point collection."
+    short-summary: "Update the restore point collection."
 """
 
 helps['restore-point collection delete'] = """
     type: command
-    short-summary: "The operation to delete the restore point collection. This operation will also delete all the \
+    short-summary: "Delete the restore point collection. This operation will also delete all the \
 contained restore points."
 """
 

@@ -1198,70 +1198,31 @@ def load_arguments(self, _):
     # endRegion
 
     # region Restore point
-    with self.argument_context('restore-point show') as c:
-        c.argument('resource_group_name', resource_group_name_type)
+    with self.argument_context('restore-point') as c:
         c.argument('restore_point_collection_name', options_list=['--collection-name'],
-                   type=str, help='The name of the restore point collection.', id_part='name')
+                   help='The name of the restore point collection.', id_part='name')
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'], type=str, help='The '
                    'name of the restore point.', id_part='child_name_1')
 
     with self.argument_context('restore-point create') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('restore_point_collection_name', options_list=['--collection-name'],
-                   type=str, help='The name of the restore point collection.')
-        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'], type=str, help='The '
-                   'name of the restore point.')
         c.argument('exclude_disks', nargs='+', help='List of disk resource ids that the '
                    'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
                    'included.')
-
-    with self.argument_context('restore-point delete') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('restore_point_collection_name', options_list=['--collection-name'],
-                   type=str, help='The name of the Restore Point Collection.', id_part='name')
-        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'], type=str, help='The '
-                   'name of the restore point.', id_part='child_name_1')
-
-    with self.argument_context('restore-point wait') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('restore_point_collection_name', options_list=['--collection-name'],
-                   type=str, help='The name of the restore point collection.', id_part='name')
-        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'], type=str, help='The '
-                   'name of the restore point.', id_part='child_name_1')
     # endRegion
 
     # region Restore point collection
-    with self.argument_context('restore-point collection list') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-
-    with self.argument_context('restore-point collection show') as c:
-        c.argument('resource_group_name', resource_group_name_type)
+    with self.argument_context('restore-point collection') as c:
         c.argument('restore_point_collection_name', options_list=['--name', '-n', '--collection-name'],
-                   type=str, help='The name of the restore point collection.', id_part='name')
+                   help='The name of the restore point collection.', id_part='name')
 
     with self.argument_context('restore-point collection create') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('restore_point_collection_name', options_list=['--name', '-n', '--collection-name'],
-                   type=str, help='The name of the restore point collection.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
                    validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
-        c.argument('source_id', options_list=['--source-id'], type=str, help='Resource Id of the source resource '
-                   'used to create this restore point collection', arg_group='Source')
+        c.argument('source_id', help='Resource Id of the source resource used to create this restore point collection',
+                   arg_group='Source')
 
     with self.argument_context('restore-point collection update') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('restore_point_collection_name', options_list=['--name', '-n', '---collection-name'],
-                   type=str, help='The name of the restore point collection.', id_part='name')
         c.argument('tags', tags_type)
 
-    with self.argument_context('restore-point collection delete') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('restore_point_collection_name', options_list=['--name', '-n', '--collection-name'],
-                   type=str, help='The name of the Restore Point Collection.', id_part='name')
-
-    with self.argument_context('restore-point collection wait') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('restore_point_collection_name', options_list=['--name', '-n', '--collection-name'],
-                   type=str, help='The name of the restore point collection.', id_part='name')
     # endRegion
