@@ -373,6 +373,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
 
         __write_configuration_setting_to_config_store(azconfig_client, set_kv)
 
+
 def __is_feature_flag(kv):
     if kv and kv.key and kv.content_type:
         return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
