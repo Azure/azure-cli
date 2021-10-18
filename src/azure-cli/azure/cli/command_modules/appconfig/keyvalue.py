@@ -33,7 +33,8 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
                           __read_kv_from_app_service, __write_kv_to_app_service, __print_restore_preview,
                           __serialize_kv_list_to_comparable_json_object, __print_preview,
                           __serialize_features_from_kv_list_to_comparable_json_object, __print_preview_and_export_kvset,
-                          __serialize_feature_list_to_comparable_json_object, __print_features_preview)
+                          __serialize_feature_list_to_comparable_json_object, __print_features_preview,
+                          __import_kvset_from_file)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -55,6 +56,7 @@ def import_config(cmd,
                   format_=None,
                   separator=None,
                   depth=None,
+                  profile='appconfig/default',
                   # from-configstore parameters
                   src_name=None,
                   src_connection_string=None,
@@ -69,10 +71,33 @@ def import_config(cmd,
     dest_features = []
     dest_kvs = []
     source = source.lower()
+    profile = profile.lower()
     format_ = format_.lower() if format_ else None
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # validate the input command
+    if profile == 'appconfig/kvset':
+        if source != 'file':
+            raise CLIError('Import profile \'appconfig/kvset\' can only be used when importing from a JSON file.')
+        if format_ and format_ != 'json':
+            raise CLIError('Import profile \'appconfig/kvset\' can only be used when importing from a JSON format.')
+        if content_type:
+            raise CLIError('The option \'content-type\' is not supported when importing using \'appconfig/kvset\' profile')
+        if label:
+            raise CLIError('The option \'label\' is not supported when importing using \'appconfig/kvset\' profile')
+        if src_label:
+            raise CLIError('The option \'src-label\' is not supported when importing using \'appconfig/kvset\' profile')
+        if src_key:
+            raise CLIError('The option \'src-key\' is not supported when importing using \'appconfig/kvset\' profile')
+        if separator:
+            raise CLIError('Flattening the JSON is not supported when importing using \'appconfig/kvset\' profile')
+        if depth:
+            raise CLIError('Flattening the JSON is not supported when importing using \'appconfig/kvset\' profile')
+        if prefix:
+            raise CLIError('The option \'prefix\' is not supported when importing using \'appconfig/kvset\' profile')
+        __import_kvset_from_file(client=azconfig_client, path=path, skip_features=skip_features, yes=yes)
+        return
     # fetch key values from source
     if source == 'file':
         if format_ and content_type:

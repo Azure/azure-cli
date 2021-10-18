@@ -121,8 +121,9 @@ def load_arguments(self, _):
         c.argument('path', help='Local configuration file path. Required for file arguments.')
         c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='Imported file format. Required for file arguments. Currently, feature flags are not supported in properties format.')
         c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default if --separator is provided. Not applicable for property files or feature flags.")
-        # bypass cli allowed values limition
+        # bypass cli allowed values limitation
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
+        c.argument('profile', arg_type=get_enum_type(['appconfig/default', 'appconfig/kvset']), help='Import profile to be used for importing the key-values.')
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
         c.argument('src_name', help='The name of the source App Configuration.')

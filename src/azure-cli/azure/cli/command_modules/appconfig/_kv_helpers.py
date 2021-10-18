@@ -7,6 +7,7 @@
 
 import io
 import json
+from difflib import Differ
 
 import chardet
 import javaproperties
@@ -14,11 +15,11 @@ import yaml
 from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.appconfiguration import ResourceReadOnlyError
+from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions)
 from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
@@ -370,15 +371,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
         if content_type and not __is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
-        try:
-            azconfig_client.set_configuration_setting(set_kv)
-        except ResourceReadOnlyError:
-            logger.warning("Failed to set read only key-value with key '%s' and label '%s'. Unlock the key-value before updating it.", set_kv.key, set_kv.label)
-        except HttpResponseError as exception:
-            logger.warning("Failed to set key-value with key '%s' and label '%s'. %s", set_kv.key, set_kv.label, str(exception))
-        except Exception as exception:
-            raise CLIError(str(exception))
-
+        __write_configuration_setting_to_config_store(azconfig_client, set_kv)
 
 def __is_feature_flag(kv):
     if kv and kv.key and kv.content_type:
@@ -1022,6 +1015,96 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
     except Exception as exception:
         raise CLIError(str(exception))
+
+
+def __import_kvset_from_file(client, path, skip_features, yes):
+    new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
+    if 'items' not in new_kvset:
+        raise CLIError("file '{}' is not in a valid appconfig/kvset format.".format(path))
+
+    kvset_to_import = [ConfigurationSetting(key=kv['key'],
+                                            label=kv['label'],
+                                            content_type=kv['content_type'],
+                                            value=kv['value'],
+                                            tags=kv['tags'])
+                       for kv in new_kvset['items']]
+
+    if skip_features:
+        kvset_to_import[:] = [kv for kv in kvset_to_import if not __is_feature_flag(kv)]
+
+    if not yes:
+        existing_kvset = __read_kv_from_config_store(client,
+                                                     key=SearchFilterOptions.ANY_KEY,
+                                                     label=SearchFilterOptions.ANY_LABEL)
+        # we don't delete configurations if they are missing from the import file, so don't need to show them in the
+        # diff, so omit them from existing kvset
+        existing_kvset = list(filter(lambda kv:
+                                     any(kv_import.key == kv.key and kv_import.label == kv.label
+                                         for kv_import in kvset_to_import), existing_kvset))
+
+        existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, 'appconfig/kvset')
+        kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, 'appconfig/kvset')
+
+        differ = Differ()
+        diff = list(differ.compare(json.dumps(existing_kvset_list, indent=2, ensure_ascii=False).splitlines(True),
+                                   json.dumps(kvset_to_import_list, indent=2, ensure_ascii=False).splitlines(True)))
+
+        if not any(line.startswith('-') or line.startswith('+') for line in diff):
+            logger.warning('Target configuration store already contains all configuration settings'
+                           ' in source. No changes will be made.')
+            return
+
+        # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
+        logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
+        # print newline for readability
+        logger.warning('\n')
+
+        user_confirmation('Do you want to continue?\n')
+
+    for config_setting in kvset_to_import:
+        if __is_key_vault_ref(kv=config_setting):
+            __validate_import_keyvault_ref(kv=config_setting)
+        elif __is_feature_flag(kv=config_setting):
+            if not __validate_import_feature_flag(kv=config_setting):
+                continue
+        elif not validate_import_key(config_setting.key):
+            continue
+
+        # All validations successful
+        __write_configuration_setting_to_config_store(client, config_setting)
+
+
+def __validate_import_keyvault_ref(kv):
+    if kv:
+        value = json.loads(kv.value)
+        if 'uri' not in value:
+            logger.warning("Keyvault reference with key '{}' is not a valid keyvault reference."
+                           "Importing as normal key-value pair".format(kv.key))
+
+
+def __validate_import_feature_flag(kv):
+    if kv and validate_import_feature(kv.key):
+        ff = json.loads(kv.value)
+        if ff['id'] and ff['description'] and ff['enabled'] and ff['conditions']:
+            return True
+    logger.warning("Feature flag with key '{}' is not a valid feature flag. It will not be imported.".format(kv.key))
+    return False
+
+
+def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting):
+    try:
+        azconfig_client.set_configuration_setting(configuration_setting)
+    except ResourceReadOnlyError:
+        logger.warning(
+            "Failed to set read only key-value with key '%s' and label '%s'. Unlock the key-value before updating it.",
+            configuration_setting.key, configuration_setting.label)
+    except HttpResponseError as exception:
+        logger.warning(
+            "Failed to set key-value with key '%s' and label '%s'. %s",
+            configuration_setting.key, configuration_setting.label, str(exception))
+    except Exception as exception:
+        raise CLIError(str(exception))
+
 
 class Undef:  # pylint: disable=too-few-public-methods
     '''
