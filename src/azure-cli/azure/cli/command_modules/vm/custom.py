@@ -2184,23 +2184,23 @@ def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts
 
 
 def vm_run_command_create(client,
-                       resource_group_name,
-                       vm_name,
-                       run_command_name,
-                       location,
-                       tags=None,
-                       script=None,
-                       script_uri=None,
-                       command_id=None,
-                       parameters=None,
-                       protected_parameters=None,
-                       async_execution=None,
-                       run_as_user=None,
-                       run_as_password=None,
-                       timeout_in_seconds=None,
-                       output_blob_uri=None,
-                       error_blob_uri=None,
-                       no_wait=False):
+                          resource_group_name,
+                          vm_name,
+                          run_command_name,
+                          location,
+                          tags=None,
+                          script=None,
+                          script_uri=None,
+                          command_id=None,
+                          parameters=None,
+                          protected_parameters=None,
+                          async_execution=None,
+                          run_as_user=None,
+                          run_as_password=None,
+                          timeout_in_seconds=None,
+                          output_blob_uri=None,
+                          error_blob_uri=None,
+                          no_wait=False):
     run_command = {}
     run_command['location'] = location
     if tags is not None:

@@ -9,7 +9,7 @@ from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.commands.parameters import get_datetime_type, resource_group_name_type
+from azure.cli.core.commands.parameters import get_datetime_type
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
