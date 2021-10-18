@@ -8,9 +8,7 @@
 # pylint: disable=line-too-long, too-many-lines
 aladdin_helps = {}
 
-aladdin_helps[
-    "acr credential renew"
-] = """
+aladdin_helps['acr credential renew'] = """
 type: command
 short-summary: Regenerate login credentials for an Azure Container Registry.
 examples:
@@ -19,9 +17,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "acr replication create"
-] = """
+aladdin_helps['acr replication create'] = """
 type: command
 short-summary: Create a replicated region for an Azure Container Registry.
 examples:
@@ -30,9 +26,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "acr replication update"
-] = """
+aladdin_helps['acr replication update'] = """
 type: command
 short-summary: Updates a replication.
 examples:
@@ -41,9 +35,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "acr show"
-] = """
+aladdin_helps['acr show'] = """
 type: command
 short-summary: Get the details of an Azure Container Registry.
 examples:
@@ -52,9 +44,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "acr task update"
-] = """
+aladdin_helps['acr task update'] = """
 type: command
 short-summary: Update a task for an Azure Container Registry.
 examples:
@@ -65,9 +55,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "acs browse"
-] = """
+aladdin_helps['acs browse'] = """
 type: command
 short-summary: Show the dashboard for a service container's orchestrator in a web browser.
 examples:
@@ -76,9 +64,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "acs delete"
-] = """
+aladdin_helps['acs delete'] = """
 type: command
 short-summary: Delete a container service.
 examples:
@@ -87,9 +73,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "acs kubernetes get-credentials"
-] = """
+aladdin_helps['acs kubernetes get-credentials'] = """
 type: command
 short-summary: Download and install credentials to access a cluster.  This command requires the same private-key used to create the cluster.
 parameters:
@@ -102,9 +86,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "acs scale"
-] = """
+aladdin_helps['acs scale'] = """
 type: command
 short-summary: Change the private agent count of a container service.
 parameters:
@@ -117,9 +99,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "acs show"
-] = """
+aladdin_helps['acs show'] = """
 type: command
 short-summary: Show the details for a container service.
 examples:
@@ -128,9 +108,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks browse"
-] = """
+aladdin_helps['aks browse'] = """
 type: command
 short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
 parameters:
@@ -150,9 +128,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks check-acr"
-] = """
+aladdin_helps['aks check-acr'] = """
 type: command
 short-summary: Validate an ACR is accessible from an AKS cluster.
 parameters:
@@ -164,9 +140,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks delete"
-] = """
+aladdin_helps['aks delete'] = """
 type: command
 short-summary: Delete a managed Kubernetes cluster.
 examples:
@@ -175,9 +149,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks disable-addons"
-] = """
+aladdin_helps['aks disable-addons'] = """
 type: command
 short-summary: Disable Kubernetes addons.
 parameters:
@@ -190,20 +162,19 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks enable-addons"
-] = """
+aladdin_helps['aks enable-addons'] = """
 type: command
 short-summary: Enable Kubernetes addons.
 long-summary: |-
     These addons are available:
-        http_application_routing - configure ingress with automatic public DNS name creation.
-        monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
-                     If monitoring addon is enabled --no-wait argument will have no effect
-        virtual-node - enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-        azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
-                     Learn more at aka.ms/aks/policy.
-        ingress-appgw - enable Application Gateway Ingress Controller addon.
+        - http_application_routing : configure ingress with automatic public DNS name creation.
+        - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+                                     If monitoring addon is enabled --no-wait argument will have no effect
+        - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+        - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                                     Learn more at aka.ms/aks/policy.
+        - ingress-appgw            : enable Application Gateway Ingress Controller addon.
+        - open-service-mesh        : enable Open Service Mesh addon.
 parameters:
   - name: --addons -a
     type: string
@@ -236,11 +207,12 @@ examples:
   - name: Enable ingress-appgw addon with subnet prefix.
     text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.2.0.0/16 --appgw-name gateway
     crafted: true
+  - name: Enable open-service-mesh addon.
+    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons open-service-mesh
+    crafted: true
 """
 
-aladdin_helps[
-    "aks get-credentials"
-] = """
+aladdin_helps['aks get-credentials'] = """
 type: command
 short-summary: Get access credentials for a managed Kubernetes cluster.
 long-summary: By default, the credentials are merged into the .kube/config file so kubectl can use them.  See -f parameter for details.
@@ -267,9 +239,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks get-upgrades"
-] = """
+aladdin_helps['aks get-upgrades'] = """
 type: command
 short-summary: Get the upgrade versions available for a managed Kubernetes cluster.
 examples:
@@ -278,9 +248,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks get-versions"
-] = """
+aladdin_helps['aks get-versions'] = """
 type: command
 short-summary: Get the versions available for creating a managed Kubernetes cluster.
 examples:
@@ -289,9 +257,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks nodepool get-upgrades"
-] = """
+aladdin_helps['aks nodepool get-upgrades'] = """
 type: command
 short-summary: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
 examples:
@@ -304,9 +270,7 @@ parameters:
     short-summary: name of the node pool.
 """
 
-aladdin_helps[
-    "aks scale"
-] = """
+aladdin_helps['aks scale'] = """
 type: command
 short-summary: Scale the node pool in a managed Kubernetes cluster.
 parameters:
@@ -319,9 +283,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks show"
-] = """
+aladdin_helps['aks show'] = """
 type: command
 short-summary: Show the details for a managed Kubernetes cluster.
 examples:
@@ -330,9 +292,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks upgrade"
-] = """
+aladdin_helps['aks upgrade'] = """
 type: command
 short-summary: Upgrade a managed Kubernetes cluster to a newer version.
 long-summary: "Kubernetes will be unavailable during cluster upgrades."
@@ -354,9 +314,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "aks wait"
-] = """
+aladdin_helps['aks wait'] = """
 type: command
 short-summary: Wait for a managed Kubernetes cluster to reach a desired state.
 long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
@@ -366,9 +324,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "openshift delete"
-] = """
+aladdin_helps['openshift delete'] = """
 type: command
 short-summary: Delete an Azure Red Hat OpenShift 3.11 cluster.
 long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
@@ -378,9 +334,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "openshift scale"
-] = """
+aladdin_helps['openshift scale'] = """
 type: command
 short-summary: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
 long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
@@ -394,9 +348,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "openshift show"
-] = """
+aladdin_helps['openshift show'] = """
 type: command
 short-summary: Show the details for an Azure Red Hat OpenShift 3.11 cluster.
 long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
@@ -406,9 +358,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "advisor configuration update"
-] = """
+aladdin_helps['advisor configuration update'] = """
 type: command
 short-summary: Update Azure Advisor configuration.
 examples:
@@ -417,9 +367,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "advisor recommendation enable"
-] = """
+aladdin_helps['advisor recommendation enable'] = """
 type: command
 short-summary: Enable Azure Advisor recommendations.
 examples:
@@ -429,9 +377,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "apim api wait"
-] = """
+
+aladdin_helps['apim api wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of an apim api is met.
 examples:
@@ -441,9 +388,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "apim product wait"
-] = """
+aladdin_helps['apim product wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of an apim product is met.
 examples:
@@ -453,9 +398,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "apim wait"
-] = """
+aladdin_helps['apim wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of an apim is met.
 examples:
@@ -466,9 +409,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "appservice list-locations"
-] = """
+
+aladdin_helps['appservice list-locations'] = """
 type: command
 short-summary: List regions where a plan sku is available.
 examples:
@@ -477,9 +419,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "appservice plan delete"
-] = """
+aladdin_helps['appservice plan delete'] = """
 type: command
 short-summary: Delete an app service plan.
 examples:
@@ -488,9 +428,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "appservice plan show"
-] = """
+aladdin_helps['appservice plan show'] = """
 type: command
 short-summary: Get the app service plans for a resource group or a set of resource groups.
 examples:
@@ -499,9 +437,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "appservice plan update"
-] = """
+aladdin_helps['appservice plan update'] = """
 type: command
 short-summary: Update an app service plan.
 long-summary: See https:///go.microsoft.com/fwlink/?linkid=2133856 to learn more.
@@ -511,9 +447,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config appsettings delete"
-] = """
+aladdin_helps['functionapp config appsettings delete'] = """
 type: command
 short-summary: Delete a function app's settings.
 examples:
@@ -522,9 +456,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config appsettings list"
-] = """
+aladdin_helps['functionapp config appsettings list'] = """
 type: command
 short-summary: Show settings for a function app.
 examples:
@@ -533,9 +465,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config container set"
-] = """
+aladdin_helps['functionapp config container set'] = """
 type: command
 short-summary: Set an existing function app's container settings.
 examples:
@@ -544,9 +474,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config container show"
-] = """
+aladdin_helps['functionapp config container show'] = """
 type: command
 short-summary: Get details of a function app's container settings.
 examples:
@@ -555,9 +483,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config hostname add"
-] = """
+aladdin_helps['functionapp config hostname add'] = """
 type: command
 short-summary: Bind a hostname to a function app.
 examples:
@@ -566,9 +492,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config hostname get-external-ip"
-] = """
+aladdin_helps['functionapp config hostname get-external-ip'] = """
 type: command
 short-summary: Get the external-facing IP address for a function app.
 examples:
@@ -577,9 +501,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config hostname list"
-] = """
+aladdin_helps['functionapp config hostname list'] = """
 type: command
 short-summary: List all hostname bindings for a function app.
 examples:
@@ -588,9 +510,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config set"
-] = """
+aladdin_helps['functionapp config set'] = """
 type: command
 short-summary: Set an existing function app's configuration.
 examples:
@@ -599,9 +519,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config show"
-] = """
+aladdin_helps['functionapp config show'] = """
 type: command
 short-summary: Get the details of an existing function app's configuration.
 examples:
@@ -610,9 +528,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config ssl bind"
-] = """
+aladdin_helps['functionapp config ssl bind'] = """
 type: command
 short-summary: Bind an SSL certificate to a function app.
 examples:
@@ -621,9 +537,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config ssl list"
-] = """
+aladdin_helps['functionapp config ssl list'] = """
 type: command
 short-summary: List SSL certificates for a function app.
 examples:
@@ -632,9 +546,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config ssl show"
-] = """
+aladdin_helps['functionapp config ssl show'] = """
 type: command
 short-summary: Show the details of an SSL certificate for a function app.
 examples:
@@ -643,9 +555,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp config ssl upload"
-] = """
+aladdin_helps['functionapp config ssl upload'] = """
 type: command
 short-summary: Upload an SSL certificate to a function app.
 examples:
@@ -654,9 +564,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp cors show"
-] = """
+aladdin_helps['functionapp cors show'] = """
 type: command
 short-summary: show allowed origins
 examples:
@@ -665,9 +573,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp create"
-] = """
+aladdin_helps['functionapp create'] = """
 type: command
 short-summary: Create a function app.
 long-summary: The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
@@ -677,9 +583,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp delete"
-] = """
+aladdin_helps['functionapp delete'] = """
 type: command
 short-summary: Delete a function app.
 examples:
@@ -688,9 +592,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment container config"
-] = """
+aladdin_helps['functionapp deployment container config'] = """
 type: command
 short-summary: Configure continuous deployment via containers.
 examples:
@@ -699,9 +601,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment container show-cd-url"
-] = """
+aladdin_helps['functionapp deployment container show-cd-url'] = """
 type: command
 short-summary: Get the URL which can be used to configure webhooks for continuous deployment.
 examples:
@@ -713,9 +613,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment list-publishing-credentials"
-] = """
+aladdin_helps['functionapp deployment list-publishing-credentials'] = """
 type: command
 short-summary: Get the details for available function app publishing credentials.
 examples:
@@ -724,9 +622,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment list-publishing-profiles"
-] = """
+aladdin_helps['functionapp deployment list-publishing-profiles'] = """
 type: command
 short-summary: Get the details for available function app deployment profiles.
 examples:
@@ -735,9 +631,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment slot create"
-] = """
+aladdin_helps['functionapp deployment slot create'] = """
 type: command
 short-summary: Create a deployment slot.
 examples:
@@ -746,9 +640,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment slot delete"
-] = """
+aladdin_helps['functionapp deployment slot delete'] = """
 type: command
 short-summary: Delete a deployment slot.
 examples:
@@ -757,9 +649,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment slot list"
-] = """
+aladdin_helps['functionapp deployment slot list'] = """
 type: command
 short-summary: List all deployment slots.
 examples:
@@ -768,9 +658,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment source config"
-] = """
+aladdin_helps['functionapp deployment source config'] = """
 type: command
 short-summary: Manage deployment from git or Mercurial repositories.
 examples:
@@ -779,9 +667,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment source delete"
-] = """
+aladdin_helps['functionapp deployment source delete'] = """
 type: command
 short-summary: Delete a source control deployment configuration.
 examples:
@@ -790,9 +676,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment source show"
-] = """
+aladdin_helps['functionapp deployment source show'] = """
 type: command
 short-summary: Get the details of a source control deployment configuration.
 examples:
@@ -801,9 +685,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp deployment source sync"
-] = """
+aladdin_helps['functionapp deployment source sync'] = """
 type: command
 short-summary: Synchronize from the repository. Only needed under manual integration mode.
 examples:
@@ -812,9 +694,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp function delete"
-] = """
+aladdin_helps['functionapp function delete'] = """
 type: command
 short-summary: Delete a function.
 examples:
@@ -824,9 +704,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp function keys delete"
-] = """
+aladdin_helps['functionapp function keys delete'] = """
 type: command
 short-summary: Delete a function key.
 examples:
@@ -836,9 +714,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp function keys list"
-] = """
+aladdin_helps['functionapp function keys list'] = """
 type: command
 short-summary: List all function keys.
 examples:
@@ -848,9 +724,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp function keys set"
-] = """
+aladdin_helps['functionapp function keys set'] = """
 type: command
 short-summary: Create or update a function key.
 examples:
@@ -860,9 +734,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp function show"
-] = """
+aladdin_helps['functionapp function show'] = """
 type: command
 short-summary: Get the details of a function.
 examples:
@@ -872,9 +744,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp identity remove"
-] = """
+aladdin_helps['functionapp identity remove'] = """
 type: command
 short-summary: Disable web app's managed service identity
 examples:
@@ -883,9 +753,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp identity show"
-] = """
+aladdin_helps['functionapp identity show'] = """
 type: command
 short-summary: display web app's managed service identity
 examples:
@@ -894,9 +762,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp keys delete"
-] = """
+aladdin_helps['functionapp keys delete'] = """
 type: command
 short-summary: Delete a function app key.
 examples:
@@ -906,9 +772,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp keys list"
-] = """
+aladdin_helps['functionapp keys list'] = """
 type: command
 short-summary: List all function app keys.
 examples:
@@ -918,9 +782,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp keys set"
-] = """
+aladdin_helps['functionapp keys set'] = """
 type: command
 short-summary: Create or update a function app key.
 examples:
@@ -930,9 +792,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp plan create"
-] = """
+aladdin_helps['functionapp plan create'] = """
 type: command
 short-summary: Create an App Service Plan for an Azure Function.
 examples:
@@ -941,9 +801,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp plan show"
-] = """
+aladdin_helps['functionapp plan show'] = """
 type: command
 short-summary: Get the App Service Plans for a resource group or a set of resource groups.
 examples:
@@ -952,9 +810,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp restart"
-] = """
+aladdin_helps['functionapp restart'] = """
 type: command
 short-summary: Restart a function app.
 examples:
@@ -963,9 +819,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp show"
-] = """
+aladdin_helps['functionapp show'] = """
 type: command
 short-summary: Get the details of a function app.
 examples:
@@ -974,9 +828,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp start"
-] = """
+aladdin_helps['functionapp start'] = """
 type: command
 short-summary: Start a function app.
 examples:
@@ -985,9 +837,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp stop"
-] = """
+aladdin_helps['functionapp stop'] = """
 type: command
 short-summary: Stop a function app.
 examples:
@@ -996,9 +846,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "functionapp update"
-] = """
+aladdin_helps['functionapp update'] = """
 type: command
 short-summary: Update a function app.
 examples:
@@ -1007,9 +855,34 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp auth show"
-] = """
+aladdin_helps['logicapp restart'] = """
+type: command
+short-summary: Restart a logic app.
+examples:
+  - name: Restart a logic app.
+    text: az logicapp restart --name MyLogicApp --resource-group MyResourceGroup
+    crafted: true
+"""
+
+aladdin_helps['logicapp start'] = """
+type: command
+short-summary: Start a logic app.
+examples:
+  - name: Start a logic app
+    text: az logicapp start --name MyLogicApp --resource-group MyResourceGroup
+    crafted: true
+"""
+
+aladdin_helps['logicapp stop'] = """
+type: command
+short-summary: Stop a logic app.
+examples:
+  - name: Stop a logic app.
+    text: az logicapp stop --name MyLogicApp --resource-group MyResourceGroup
+    crafted: true
+"""
+
+aladdin_helps['webapp auth show'] = """
 type: command
 short-summary: Show the authentification settings for the webapp.
 examples:
@@ -1018,9 +891,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp browse"
-] = """
+aladdin_helps['webapp browse'] = """
 type: command
 short-summary: Open a web app in a browser.
 examples:
@@ -1029,9 +900,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config appsettings delete"
-] = """
+aladdin_helps['webapp config appsettings delete'] = """
 type: command
 short-summary: Delete web app settings.
 examples:
@@ -1040,9 +909,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config appsettings list"
-] = """
+aladdin_helps['webapp config appsettings list'] = """
 type: command
 short-summary: Get the details of a web app's settings.
 examples:
@@ -1051,9 +918,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config backup create"
-] = """
+aladdin_helps['webapp config backup create'] = """
 type: command
 short-summary: Create a backup of a web app.
 examples:
@@ -1062,9 +927,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config backup list"
-] = """
+aladdin_helps['webapp config backup list'] = """
 type: command
 short-summary: List backups of a web app.
 examples:
@@ -1073,9 +936,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config backup show"
-] = """
+aladdin_helps['webapp config backup show'] = """
 type: command
 short-summary: Show the backup schedule for a web app.
 examples:
@@ -1084,9 +945,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config connection-string delete"
-] = """
+aladdin_helps['webapp config connection-string delete'] = """
 type: command
 short-summary: Delete a web app's connection strings.
 examples:
@@ -1095,9 +954,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config connection-string list"
-] = """
+aladdin_helps['webapp config connection-string list'] = """
 type: command
 short-summary: Get a web app's connection strings.
 examples:
@@ -1106,9 +963,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config container delete"
-] = """
+aladdin_helps['webapp config container delete'] = """
 type: command
 short-summary: Delete an existing web app's container settings.
 examples:
@@ -1117,9 +972,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config container set"
-] = """
+aladdin_helps['webapp config container set'] = """
 type: command
 short-summary: Set an existing web app's container settings.
 examples:
@@ -1128,9 +981,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config container show"
-] = """
+aladdin_helps['webapp config container show'] = """
 type: command
 short-summary: Get details of a web app's container settings.
 examples:
@@ -1139,9 +990,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config hostname add"
-] = """
+aladdin_helps['webapp config hostname add'] = """
 type: command
 short-summary: Bind a hostname to a web app.
 examples:
@@ -1150,9 +999,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config hostname get-external-ip"
-] = """
+aladdin_helps['webapp config hostname get-external-ip'] = """
 type: command
 short-summary: Get the external-facing IP address for a web app.
 examples:
@@ -1161,9 +1008,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config hostname list"
-] = """
+aladdin_helps['webapp config hostname list'] = """
 type: command
 short-summary: List all hostname bindings for a web app.
 examples:
@@ -1172,9 +1017,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config show"
-] = """
+aladdin_helps['webapp config show'] = """
 type: command
 short-summary: Get the details of a web app's configuration.
 examples:
@@ -1183,9 +1026,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config snapshot list"
-] = """
+aladdin_helps['webapp config snapshot list'] = """
 type: command
 short-summary: List the restorable snapshots for a web app.
 examples:
@@ -1194,9 +1035,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config ssl bind"
-] = """
+aladdin_helps['webapp config ssl bind'] = """
 type: command
 short-summary: Bind an SSL certificate to a web app.
 examples:
@@ -1205,9 +1044,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config ssl delete"
-] = """
+aladdin_helps['webapp config ssl delete'] = """
 type: command
 short-summary: Delete an SSL certificate from a web app.
 examples:
@@ -1216,9 +1053,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config ssl list"
-] = """
+aladdin_helps['webapp config ssl list'] = """
 type: command
 short-summary: List SSL certificates for a web app.
 examples:
@@ -1227,9 +1062,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config ssl show"
-] = """
+aladdin_helps['webapp config ssl show'] = """
 type: command
 short-summary: Show the details of an SSL certificate for a web app.
 examples:
@@ -1238,9 +1071,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config ssl upload"
-] = """
+aladdin_helps['webapp config ssl upload'] = """
 type: command
 short-summary: Upload an SSL certificate to a web app.
 examples:
@@ -1249,9 +1080,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config storage-account delete"
-] = """
+aladdin_helps['webapp config storage-account delete'] = """
 type: command
 short-summary: Delete a web app's Azure storage account configuration. (Linux Web Apps and Windows Containers Web Apps Only)
 examples:
@@ -1260,9 +1089,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config storage-account list"
-] = """
+aladdin_helps['webapp config storage-account list'] = """
 type: command
 short-summary: Get a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
 examples:
@@ -1271,9 +1098,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp config storage-account update"
-] = """
+aladdin_helps['webapp config storage-account update'] = """
 type: command
 short-summary: Update an existing Azure storage account configuration on a web app. (Linux Web Apps and Windows Containers Web Apps Only)
 examples:
@@ -1282,9 +1107,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp cors add"
-] = """
+aladdin_helps['webapp cors add'] = """
 type: command
 short-summary: Add allowed origins
 examples:
@@ -1293,9 +1116,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp cors show"
-] = """
+aladdin_helps['webapp cors show'] = """
 type: command
 short-summary: show allowed origins
 examples:
@@ -1304,9 +1125,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp delete"
-] = """
+aladdin_helps['webapp delete'] = """
 type: command
 short-summary: Delete a web app.
 examples:
@@ -1315,9 +1134,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deleted restore"
-] = """
+aladdin_helps['webapp deleted restore'] = """
 type: command
 short-summary: Restore a deleted web app.
 long-summary: Restores the files and settings of a deleted web app to the specified web app.
@@ -1327,9 +1144,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment container config"
-] = """
+aladdin_helps['webapp deployment container config'] = """
 type: command
 short-summary: Configure continuous deployment via containers.
 examples:
@@ -1338,9 +1153,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment container show-cd-url"
-] = """
+aladdin_helps['webapp deployment container show-cd-url'] = """
 type: command
 short-summary: Get the URL which can be used to configure webhooks for continuous deployment.
 examples:
@@ -1349,9 +1162,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment list-publishing-credentials"
-] = """
+aladdin_helps['webapp deployment list-publishing-credentials'] = """
 type: command
 short-summary: Get the details for available web app publishing credentials
 examples:
@@ -1360,9 +1171,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment list-publishing-profiles"
-] = """
+aladdin_helps['webapp deployment list-publishing-profiles'] = """
 type: command
 short-summary: Get the details for available web app deployment profiles.
 examples:
@@ -1371,9 +1180,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment slot auto-swap"
-] = """
+aladdin_helps['webapp deployment slot auto-swap'] = """
 type: command
 short-summary: Configure deployment slot auto swap.
 examples:
@@ -1382,9 +1189,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment slot create"
-] = """
+aladdin_helps['webapp deployment slot create'] = """
 type: command
 short-summary: Create a deployment slot.
 examples:
@@ -1393,9 +1198,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment slot delete"
-] = """
+aladdin_helps['webapp deployment slot delete'] = """
 type: command
 short-summary: Delete a deployment slot.
 examples:
@@ -1404,9 +1207,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment slot list"
-] = """
+aladdin_helps['webapp deployment slot list'] = """
 type: command
 short-summary: List all deployment slots.
 examples:
@@ -1415,9 +1216,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment source config"
-] = """
+aladdin_helps['webapp deployment source config'] = """
 type: command
 short-summary: Manage deployment from git or Mercurial repositories.
 examples:
@@ -1426,9 +1225,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment source delete"
-] = """
+aladdin_helps['webapp deployment source delete'] = """
 type: command
 short-summary: Delete a source control deployment configuration.
 examples:
@@ -1437,9 +1234,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment source show"
-] = """
+aladdin_helps['webapp deployment source show'] = """
 type: command
 short-summary: Get the details of a source control deployment configuration.
 examples:
@@ -1448,9 +1243,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp deployment source sync"
-] = """
+aladdin_helps['webapp deployment source sync'] = """
 type: command
 short-summary: Synchronize from the repository. Only needed under manual integration mode.
 examples:
@@ -1459,9 +1252,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp identity remove"
-] = """
+aladdin_helps['webapp identity remove'] = """
 type: command
 short-summary: Disable web app's managed service identity
 examples:
@@ -1470,9 +1261,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp identity show"
-] = """
+aladdin_helps['webapp identity show'] = """
 type: command
 short-summary: display web app's managed service identity
 examples:
@@ -1481,9 +1270,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp log config"
-] = """
+aladdin_helps['webapp log config'] = """
 type: command
 short-summary: Configure logging for a web app.
 examples:
@@ -1495,9 +1282,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp log download"
-] = """
+aladdin_helps['webapp log download'] = """
 type: command
 short-summary: Download a web app's log history as a zip file.
 long-summary: This command may not work with web apps running on Linux.
@@ -1507,9 +1292,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp log show"
-] = """
+aladdin_helps['webapp log show'] = """
 type: command
 short-summary: Get the details of a web app's logging configuration.
 examples:
@@ -1518,9 +1301,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp restart"
-] = """
+aladdin_helps['webapp restart'] = """
 type: command
 short-summary: Restart a web app.
 examples:
@@ -1529,9 +1310,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp show"
-] = """
+aladdin_helps['webapp show'] = """
 type: command
 short-summary: Get the details of a web app.
 examples:
@@ -1540,9 +1319,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp start"
-] = """
+aladdin_helps['webapp start'] = """
 type: command
 short-summary: Start a web app.
 examples:
@@ -1551,9 +1328,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp stop"
-] = """
+aladdin_helps['webapp stop'] = """
 type: command
 short-summary: Stop a web app.
 examples:
@@ -1562,9 +1337,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp traffic-routing clear"
-] = """
+aladdin_helps['webapp traffic-routing clear'] = """
 type: command
 short-summary: Clear the routing rules and send all traffic to production.
 examples:
@@ -1573,9 +1346,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp traffic-routing set"
-] = """
+aladdin_helps['webapp traffic-routing set'] = """
 type: command
 short-summary: Configure routing traffic to deployment slots.
 examples:
@@ -1584,9 +1355,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp traffic-routing show"
-] = """
+aladdin_helps['webapp traffic-routing show'] = """
 type: command
 short-summary: Display the current distribution of traffic across slots.
 examples:
@@ -1595,9 +1364,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp update"
-] = """
+aladdin_helps['webapp update'] = """
 type: command
 short-summary: Update an existing web app.
 examples:
@@ -1606,9 +1373,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp webjob continuous list"
-] = """
+aladdin_helps['webapp webjob continuous list'] = """
 type: command
 short-summary: List all continuous webjobs on a selected web app.
 examples:
@@ -1617,9 +1382,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp webjob continuous remove"
-] = """
+aladdin_helps['webapp webjob continuous remove'] = """
 type: command
 short-summary: Delete a specific continuous webjob.
 examples:
@@ -1628,9 +1391,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp webjob continuous start"
-] = """
+aladdin_helps['webapp webjob continuous start'] = """
 type: command
 short-summary: Start a specific continuous webjob on a selected web app.
 examples:
@@ -1639,9 +1400,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp webjob continuous stop"
-] = """
+aladdin_helps['webapp webjob continuous stop'] = """
 type: command
 short-summary: Stop a specific continuous webjob.
 examples:
@@ -1650,9 +1409,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp webjob triggered list"
-] = """
+aladdin_helps['webapp webjob triggered list'] = """
 type: command
 short-summary: List all triggered webjobs hosted on a web app.
 examples:
@@ -1661,9 +1418,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp webjob triggered log"
-] = """
+aladdin_helps['webapp webjob triggered log'] = """
 type: command
 short-summary: Get history of a specific triggered webjob hosted on a web app.
 examples:
@@ -1672,9 +1427,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp webjob triggered remove"
-] = """
+aladdin_helps['webapp webjob triggered remove'] = """
 type: command
 short-summary: Delete a specific triggered webjob hosted on a web app.
 examples:
@@ -1683,9 +1436,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "webapp webjob triggered run"
-] = """
+aladdin_helps['webapp webjob triggered run'] = """
 type: command
 short-summary: Run a specific triggered webjob hosted on a web app.
 examples:
@@ -1695,9 +1446,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "backup container list"
-] = """
+
+aladdin_helps['backup container list'] = """
 type: command
 short-summary: List containers registered to a Recovery services vault.
 examples:
@@ -1706,9 +1456,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup container show"
-] = """
+aladdin_helps['backup container show'] = """
 type: command
 short-summary: Show details of a container registered to a Recovery services vault.
 examples:
@@ -1717,9 +1465,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup item list"
-] = """
+aladdin_helps['backup item list'] = """
 type: command
 short-summary: List all backed up items within a container.
 examples:
@@ -1728,9 +1474,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup item show"
-] = """
+aladdin_helps['backup item show'] = """
 type: command
 short-summary: Show details of a particular backed up item.
 examples:
@@ -1739,9 +1483,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup job list"
-] = """
+aladdin_helps['backup job list'] = """
 type: command
 short-summary: List all backup jobs of a Recovery Services vault.
 examples:
@@ -1750,9 +1492,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup job show"
-] = """
+aladdin_helps['backup job show'] = """
 type: command
 short-summary: Show details of a particular job.
 examples:
@@ -1761,9 +1501,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup job stop"
-] = """
+aladdin_helps['backup job stop'] = """
 type: command
 short-summary: Suspend or terminate a currently running job.
 examples:
@@ -1772,9 +1510,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup job wait"
-] = """
+aladdin_helps['backup job wait'] = """
 type: command
 short-summary: Wait until either the job completes or the specified timeout value is reached.
 examples:
@@ -1783,9 +1519,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup policy get-default-for-vm"
-] = """
+aladdin_helps['backup policy get-default-for-vm'] = """
 type: command
 short-summary: Get the default policy with default values to backup a VM.
 examples:
@@ -1794,9 +1528,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup policy list"
-] = """
+aladdin_helps['backup policy list'] = """
 type: command
 short-summary: List all policies for a Recovery services vault.
 examples:
@@ -1805,9 +1537,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup policy list-associated-items"
-] = """
+aladdin_helps['backup policy list-associated-items'] = """
 type: command
 short-summary: List all items protected by a backup policy.
 examples:
@@ -1816,9 +1546,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup policy set"
-] = """
+aladdin_helps['backup policy set'] = """
 type: command
 short-summary: Update the existing policy with the provided details.
 examples:
@@ -1827,9 +1555,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup policy show"
-] = """
+aladdin_helps['backup policy show'] = """
 type: command
 short-summary: Show details of a particular policy.
 examples:
@@ -1838,20 +1564,16 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup protection backup-now"
-] = """
+aladdin_helps['backup protection backup-now'] = """
 type: command
 short-summary: Perform an on-demand backup of a backed up item.
 examples:
   - name: Perform an on-demand backup of a backed up item. (autogenerated)
-    text: az backup protection backup-now --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --retain-until 01-02-2018 --vault-name MyVault
+    text: az backup protection backup-now --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --retain-until 01-02-2018 --vault-name MyVault --backup-management-type AzureIaasVM
     crafted: true
 """
 
-aladdin_helps[
-    "backup protection check-vm"
-] = """
+aladdin_helps['backup protection check-vm'] = """
 type: command
 short-summary: Find out whether the virtual machine is protected or not. If protected, it returns the recovery services vault ID, otherwise it returns empty.
 examples:
@@ -1860,20 +1582,16 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup protection disable"
-] = """
+aladdin_helps['backup protection disable'] = """
 type: command
 short-summary: Stop protecting a backed up item. Can retain the backed up data forever or choose to delete it.
 examples:
   - name: Stop protecting a backed up item. Can retain the backed up data forever or choose to delete it. (autogenerated)
-    text: az backup protection disable --container-name MyContainer --delete-backup-data false --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --yes
+    text: az backup protection disable --container-name MyContainer --backup-management-type AzureIaasVM --delete-backup-data false --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --yes
     crafted: true
 """
 
-aladdin_helps[
-    "backup protection enable-for-vm"
-] = """
+aladdin_helps['backup protection enable-for-vm'] = """
 type: command
 short-summary: Start protecting a previously unprotected Azure VM as per the specified policy to a Recovery services vault.
 examples:
@@ -1882,31 +1600,25 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup recoverypoint list"
-] = """
+aladdin_helps['backup recoverypoint list'] = """
 type: command
 short-summary: List all recovery points of a backed up item.
 examples:
   - name: List all recovery points of a backed up item. (autogenerated)
-    text: az backup recoverypoint list --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault
+    text: az backup recoverypoint list --container-name MyContainer --backup-management-type AzureIaasVM --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault
     crafted: true
 """
 
-aladdin_helps[
-    "backup recoverypoint show"
-] = """
+aladdin_helps['backup recoverypoint show'] = """
 type: command
 short-summary: Shows details of a particular recovery point.
 examples:
   - name: Shows details of a particular recovery point. (autogenerated)
-    text: az backup recoverypoint show --container-name MyContainer --item-name MyItem --name MyRecoveryPoint --resource-group MyResourceGroup --vault-name MyVault
+    text: az backup recoverypoint show --container-name MyContainer --backup-management-type AzureIaasVM --item-name MyItem --name MyRecoveryPoint --resource-group MyResourceGroup --vault-name MyVault
     crafted: true
 """
 
-aladdin_helps[
-    "backup restore files mount-rp"
-] = """
+aladdin_helps['backup restore files mount-rp'] = """
 type: command
 short-summary: Download a script which mounts files of a recovery point.
 examples:
@@ -1915,9 +1627,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup restore files unmount-rp"
-] = """
+aladdin_helps['backup restore files unmount-rp'] = """
 type: command
 short-summary: Close access to the recovery point.
 examples:
@@ -1926,9 +1636,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup restore restore-disks"
-] = """
+aladdin_helps['backup restore restore-disks'] = """
 type: command
 short-summary: Restore disks of the backed VM from the specified recovery point.
 examples:
@@ -1937,9 +1645,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup vault backup-properties set"
-] = """
+aladdin_helps['backup vault backup-properties set'] = """
 type: command
 short-summary: Sets backup related properties of the Recovery Services vault.
 examples:
@@ -1948,9 +1654,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup vault backup-properties show"
-] = """
+aladdin_helps['backup vault backup-properties show'] = """
 type: command
 short-summary: Gets backup related properties of the Recovery Services vault.
 examples:
@@ -1959,9 +1663,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup vault create"
-] = """
+aladdin_helps['backup vault create'] = """
 type: command
 short-summary: Create a new Recovery Services vault.
 examples:
@@ -1970,9 +1672,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup vault delete"
-] = """
+aladdin_helps['backup vault delete'] = """
 type: command
 short-summary: Delete an existing Recovery services vault.
 examples:
@@ -1981,9 +1681,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup vault identity assign"
-] = """
+aladdin_helps['backup vault identity assign'] = """
 type: command
 short-summary: Assign Identities to Recovery Services vault.
 examples:
@@ -1992,9 +1690,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup vault identity remove"
-] = """
+aladdin_helps['backup vault identity remove'] = """
 type: command
 short-summary: Remove Identities of Recovery Services vault.
 examples:
@@ -2003,9 +1699,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup vault identity show"
-] = """
+aladdin_helps['backup vault identity show'] = """
 type: command
 short-summary: Show Identities of Recovery Services vault.
 examples:
@@ -2014,9 +1708,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "backup vault show"
-] = """
+aladdin_helps['backup vault show'] = """
 type: command
 short-summary: Show details of a particular Recovery service vault.
 examples:
@@ -2025,9 +1717,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "batch account set"
-] = """
+aladdin_helps['batch account set'] = """
 type: command
 short-summary: Update properties for a Batch account.
 examples:
@@ -2036,9 +1726,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "batch account show"
-] = """
+aladdin_helps['batch account show'] = """
 type: command
 short-summary: Get a specified Batch account or the currently set account.
 examples:
@@ -2047,9 +1735,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "batchai job create"
-] = """
+aladdin_helps['batchai job create'] = """
 type: command
 short-summary: Create a job.
 examples:
@@ -2061,9 +1747,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "batchai list-usages"
-] = """
+aladdin_helps['batchai list-usages'] = """
 type: command
 short-summary: Gets the current usage information as well as limits for Batch AI resources for given location.
 examples:
@@ -2073,9 +1757,10 @@ examples:
 """
 
 
-aladdin_helps[
-    "cdn profile create"
-] = """
+
+
+
+aladdin_helps['cdn profile create'] = """
 type: command
 short-summary: Create a new CDN profile.
 parameters:
@@ -2090,9 +1775,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cdn profile update"
-] = """
+aladdin_helps['cdn profile update'] = """
 type: command
 short-summary: Update a CDN profile.
 examples:
@@ -2101,9 +1784,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cloud set"
-] = """
+aladdin_helps['cloud set'] = """
 type: command
 short-summary: Set the active cloud.
 examples:
@@ -2113,9 +1794,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cloud unregister"
-] = """
+aladdin_helps['cloud unregister'] = """
 type: command
 short-summary: Unregister a cloud.
 examples:
@@ -2125,9 +1804,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cloud update"
-] = """
+aladdin_helps['cloud update'] = """
 type: command
 short-summary: Update the configuration of a cloud.
 examples:
@@ -2137,9 +1814,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cognitiveservices account create"
-] = """
+aladdin_helps['cognitiveservices account create'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
 long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
@@ -2156,9 +1831,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cognitiveservices account keys list"
-] = """
+aladdin_helps['cognitiveservices account keys list'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
 long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
@@ -2168,9 +1841,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cognitiveservices account network-rule list"
-] = """
+aladdin_helps['cognitiveservices account network-rule list'] = """
 type: command
 short-summary: List network rules.
 examples:
@@ -2179,9 +1850,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cognitiveservices account network-rule remove"
-] = """
+aladdin_helps['cognitiveservices account network-rule remove'] = """
 type: command
 short-summary: Remove a network rule.
 examples:
@@ -2194,9 +1863,10 @@ examples:
 """
 
 
-aladdin_helps[
-    "consumption budget delete"
-] = """
+
+
+
+aladdin_helps['consumption budget delete'] = """
 type: command
 short-summary: Delete a budget for an Azure subscription.
 examples:
@@ -2205,9 +1875,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "consumption budget show"
-] = """
+aladdin_helps['consumption budget show'] = """
 type: command
 short-summary: Show budget for an Azure subscription.
 examples:
@@ -2216,9 +1884,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "container attach"
-] = """
+aladdin_helps['container attach'] = """
 type: command
 short-summary: Attach local standard output and error streams to a container in a container group.
 examples:
@@ -2227,9 +1893,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "container delete"
-] = """
+aladdin_helps['container delete'] = """
 type: command
 short-summary: Delete a container group.
 examples:
@@ -2238,9 +1902,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "container logs"
-] = """
+aladdin_helps['container logs'] = """
 type: command
 short-summary: Examine the logs for a container in a container group.
 examples:
@@ -2249,9 +1911,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "container show"
-] = """
+aladdin_helps['container show'] = """
 type: command
 short-summary: Get the details of a container group.
 examples:
@@ -2260,9 +1920,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb cassandra keyspace delete"
-] = """
+aladdin_helps['cosmosdb cassandra keyspace delete'] = """
 type: command
 short-summary: Delete the Cassandra keyspace under an Azure Cosmos DB account.
 examples:
@@ -2271,9 +1929,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb cassandra keyspace list"
-] = """
+aladdin_helps['cosmosdb cassandra keyspace list'] = """
 type: command
 short-summary: List the Cassandra keyspaces under an Azure Cosmos DB account.
 examples:
@@ -2282,9 +1938,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb cassandra table create"
-] = """
+aladdin_helps['cosmosdb cassandra table create'] = """
 type: command
 short-summary: Create an Cassandra table under an Azure Cosmos DB Cassandra keyspace.
 examples:
@@ -2293,9 +1947,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb cassandra table list"
-] = """
+aladdin_helps['cosmosdb cassandra table list'] = """
 type: command
 short-summary: List the Cassandra tables under an Azure Cosmos DB Cassandra keyspace.
 examples:
@@ -2304,9 +1956,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb cassandra table throughput show"
-] = """
+aladdin_helps['cosmosdb cassandra table throughput show'] = """
 type: command
 short-summary: Get the throughput of the Cassandra table under an Azure Cosmos DB Cassandra keyspace.
 examples:
@@ -2315,9 +1965,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb cassandra table throughput update"
-] = """
+aladdin_helps['cosmosdb cassandra table throughput update'] = """
 type: command
 short-summary: Update the throughput of the Cassandra table under an Azure Cosmos DB Cassandra keyspace.
 examples:
@@ -2327,9 +1975,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb cassandra table update"
-] = """
+aladdin_helps['cosmosdb cassandra table update'] = """
 type: command
 short-summary: Update an Cassandra table under an Azure Cosmos DB Cassandra keyspace.
 examples:
@@ -2338,9 +1984,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb check-name-exists"
-] = """
+aladdin_helps['cosmosdb check-name-exists'] = """
 type: command
 short-summary: Checks if an Azure Cosmos DB account name exists.
 examples:
@@ -2349,9 +1993,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb create"
-] = """
+aladdin_helps['cosmosdb create'] = """
 type: command
 short-summary: Creates a new Azure Cosmos DB database account.
 parameters:
@@ -2374,9 +2016,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb database create"
-] = """
+aladdin_helps['cosmosdb database create'] = """
 type: command
 short-summary: Creates an Azure Cosmos DB database
 examples:
@@ -2385,9 +2025,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb database delete"
-] = """
+aladdin_helps['cosmosdb database delete'] = """
 type: command
 short-summary: Deletes an Azure Cosmos DB database
 examples:
@@ -2396,9 +2034,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb database exists"
-] = """
+aladdin_helps['cosmosdb database exists'] = """
 type: command
 short-summary: Returns a boolean indicating whether the database exists
 examples:
@@ -2407,9 +2043,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb database list"
-] = """
+aladdin_helps['cosmosdb database list'] = """
 type: command
 short-summary: Lists all Azure Cosmos DB databases
 examples:
@@ -2418,9 +2052,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb database show"
-] = """
+aladdin_helps['cosmosdb database show'] = """
 type: command
 short-summary: Shows an Azure Cosmos DB database
 examples:
@@ -2429,9 +2061,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb delete"
-] = """
+aladdin_helps['cosmosdb delete'] = """
 type: command
 short-summary: Deletes an Azure Cosmos DB database account.
 examples:
@@ -2440,9 +2070,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb failover-priority-change"
-] = """
+aladdin_helps['cosmosdb failover-priority-change'] = """
 type: command
 short-summary: Changes the failover priority for the Azure Cosmos DB database account.
 examples:
@@ -2451,9 +2079,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb gremlin graph create"
-] = """
+aladdin_helps['cosmosdb gremlin graph create'] = """
 type: command
 short-summary: Create an Gremlin graph under an Azure Cosmos DB Gremlin database.
 examples:
@@ -2462,9 +2088,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb keys list"
-] = """
+aladdin_helps['cosmosdb keys list'] = """
 type: command
 short-summary: List the access keys or connection strings for a Azure Cosmos DB database account.
 examples:
@@ -2473,9 +2097,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb list-connection-strings"
-] = """
+aladdin_helps['cosmosdb list-connection-strings'] = """
 type: command
 short-summary: List the connection strings for a Azure Cosmos DB database account.
 examples:
@@ -2484,9 +2106,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb list-keys"
-] = """
+aladdin_helps['cosmosdb list-keys'] = """
 type: command
 short-summary: List the access keys for a Azure Cosmos DB database account.
 examples:
@@ -2495,9 +2115,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb list-read-only-keys"
-] = """
+aladdin_helps['cosmosdb list-read-only-keys'] = """
 type: command
 short-summary: List the read-only access keys for a Azure Cosmos DB database account.
 examples:
@@ -2506,9 +2124,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb mongodb collection create"
-] = """
+aladdin_helps['cosmosdb mongodb collection create'] = """
 type: command
 short-summary: Create an MongoDB collection under an Azure Cosmos DB MongoDB database.
 examples:
@@ -2517,9 +2133,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb mongodb database delete"
-] = """
+aladdin_helps['cosmosdb mongodb database delete'] = """
 type: command
 short-summary: Delete the MongoDB database under an Azure Cosmos DB account.
 examples:
@@ -2528,9 +2142,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb mongodb database list"
-] = """
+aladdin_helps['cosmosdb mongodb database list'] = """
 type: command
 short-summary: List the MongoDB databases under an Azure Cosmos DB account.
 examples:
@@ -2539,9 +2151,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb mongodb database throughput update"
-] = """
+aladdin_helps['cosmosdb mongodb database throughput update'] = """
 type: command
 short-summary: Update the throughput of the MongoDB database under an Azure Cosmos DB account.
 examples:
@@ -2551,9 +2161,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb regenerate-key"
-] = """
+aladdin_helps['cosmosdb regenerate-key'] = """
 type: command
 short-summary: Regenerate an access key for a Azure Cosmos DB database account.
 examples:
@@ -2562,9 +2170,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb show"
-] = """
+aladdin_helps['cosmosdb show'] = """
 type: command
 short-summary: Get the details of an Azure Cosmos DB database account.
 examples:
@@ -2573,9 +2179,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb sql container create"
-] = """
+aladdin_helps['cosmosdb sql container create'] = """
 type: command
 short-summary: Create an SQL container under an Azure Cosmos DB SQL database.
 examples:
@@ -2584,9 +2188,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb sql database list"
-] = """
+aladdin_helps['cosmosdb sql database list'] = """
 type: command
 short-summary: List the SQL databases under an Azure Cosmos DB account.
 examples:
@@ -2595,9 +2197,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb sql stored-procedure create"
-] = """
+aladdin_helps['cosmosdb sql stored-procedure create'] = """
 type: command
 short-summary: Create an SQL stored procedure under an Azure Cosmos DB SQL container.
 examples:
@@ -2606,9 +2206,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb sql trigger create"
-] = """
+aladdin_helps['cosmosdb sql trigger create'] = """
 type: command
 short-summary: Create an SQL trigger under an Azure Cosmos DB SQL container.
 examples:
@@ -2617,9 +2215,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb sql user-defined-function create"
-] = """
+aladdin_helps['cosmosdb sql user-defined-function create'] = """
 type: command
 short-summary: Create an SQL user defined function under an Azure Cosmos DB SQL container.
 examples:
@@ -2628,9 +2224,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "cosmosdb update"
-] = """
+aladdin_helps['cosmosdb update'] = """
 type: command
 short-summary: Update an Azure Cosmos DB database account.
 parameters:
@@ -2650,9 +2244,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "deploymentmanager service-unit update"
-] = """
+
+aladdin_helps['deploymentmanager service-unit update'] = """
 type: command
 short-summary: Updates the service unit.
 examples:
@@ -2662,9 +2255,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "dls account create"
-] = """
+
+aladdin_helps['dls account create'] = """
 type: command
 short-summary: Creates a Data Lake Store account.
 parameters:
@@ -2680,9 +2272,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls account delete"
-] = """
+aladdin_helps['dls account delete'] = """
 type: command
 short-summary: Delete a Data Lake Store account.
 examples:
@@ -2691,9 +2281,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls account enable-key-vault"
-] = """
+aladdin_helps['dls account enable-key-vault'] = """
 type: command
 short-summary: Enable the use of Azure Key Vault for encryption of a Data Lake Store account.
 examples:
@@ -2702,9 +2290,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls account firewall list"
-] = """
+aladdin_helps['dls account firewall list'] = """
 type: command
 short-summary: Lists firewall rules in a Data Lake Store account.
 examples:
@@ -2713,9 +2299,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls account list"
-] = """
+aladdin_helps['dls account list'] = """
 type: command
 short-summary: Lists available Data Lake Store accounts.
 examples:
@@ -2724,9 +2308,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls account show"
-] = """
+aladdin_helps['dls account show'] = """
 type: command
 short-summary: Get the details of a Data Lake Store account.
 examples:
@@ -2735,9 +2317,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls account update"
-] = """
+aladdin_helps['dls account update'] = """
 type: command
 short-summary: Updates a Data Lake Store account.
 examples:
@@ -2746,9 +2326,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs access remove-all"
-] = """
+aladdin_helps['dls fs access remove-all'] = """
 type: command
 short-summary: Remove the access control list for a file or folder.
 examples:
@@ -2757,9 +2335,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs access remove-entry"
-] = """
+aladdin_helps['dls fs access remove-entry'] = """
 type: command
 short-summary: Remove entries for the access control list of a file or folder.
 examples:
@@ -2768,9 +2344,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs access set"
-] = """
+aladdin_helps['dls fs access set'] = """
 type: command
 short-summary: Replace the existing access control list for a file or folder.
 examples:
@@ -2779,9 +2353,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs access set-entry"
-] = """
+aladdin_helps['dls fs access set-entry'] = """
 type: command
 short-summary: Update the access control list for a file or folder.
 examples:
@@ -2790,9 +2362,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs access set-permission"
-] = """
+aladdin_helps['dls fs access set-permission'] = """
 type: command
 short-summary: Set the permissions for a file or folder in a Data Lake Store account.
 parameters:
@@ -2808,9 +2378,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs access show"
-] = """
+aladdin_helps['dls fs access show'] = """
 type: command
 short-summary: Display the access control list (ACL).
 examples:
@@ -2819,9 +2387,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs create"
-] = """
+aladdin_helps['dls fs create'] = """
 type: command
 short-summary: Creates a file or folder in a Data Lake Store account.
 parameters:
@@ -2834,9 +2400,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs delete"
-] = """
+aladdin_helps['dls fs delete'] = """
 type: command
 short-summary: Delete a file or folder in a Data Lake Store account.
 examples:
@@ -2845,9 +2409,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs download"
-] = """
+aladdin_helps['dls fs download'] = """
 type: command
 short-summary: Download a file or folder from a Data Lake Store account to the local machine.
 parameters:
@@ -2878,9 +2440,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs list"
-] = """
+aladdin_helps['dls fs list'] = """
 type: command
 short-summary: List the files and folders in a Data Lake Store account.
 examples:
@@ -2889,9 +2449,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs move"
-] = """
+aladdin_helps['dls fs move'] = """
 type: command
 short-summary: Move a file or folder in a Data Lake Store account.
 parameters:
@@ -2907,9 +2465,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs show"
-] = """
+aladdin_helps['dls fs show'] = """
 type: command
 short-summary: Get file or folder information in a Data Lake Store account.
 examples:
@@ -2918,9 +2474,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs test"
-] = """
+aladdin_helps['dls fs test'] = """
 type: command
 short-summary: Test for the existence of a file or folder in a Data Lake Store account.
 examples:
@@ -2929,9 +2483,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dls fs upload"
-] = """
+aladdin_helps['dls fs upload'] = """
 type: command
 short-summary: Upload a file or folder to a Data Lake Store account.
 parameters:
@@ -2962,9 +2514,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dms check-name"
-] = """
+aladdin_helps['dms check-name'] = """
 type: command
 short-summary: Check if a given DMS instance name is available in a given region as well as the name's validity.
 parameters:
@@ -2978,9 +2528,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dms check-status"
-] = """
+aladdin_helps['dms check-status'] = """
 type: command
 short-summary: Perform a health check and return the status of the service and virtual machine size.
 examples:
@@ -2989,9 +2537,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dms delete"
-] = """
+aladdin_helps['dms delete'] = """
 type: command
 short-summary: Delete an instance of the Data Migration Service.
 parameters:
@@ -3005,9 +2551,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dms project delete"
-] = """
+aladdin_helps['dms project delete'] = """
 type: command
 short-summary: Delete a project.
 parameters:
@@ -3021,9 +2565,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dms project list"
-] = """
+aladdin_helps['dms project list'] = """
 type: command
 short-summary: List the projects within an instance of DMS.
 examples:
@@ -3032,9 +2574,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dms project show"
-] = """
+aladdin_helps['dms project show'] = """
 type: command
 short-summary: Show the details of a migration project.
 examples:
@@ -3043,9 +2583,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dms project task delete"
-] = """
+aladdin_helps['dms project task delete'] = """
 type: command
 short-summary: Delete a migration task.
 parameters:
@@ -3059,9 +2597,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dms project task show"
-] = """
+aladdin_helps['dms project task show'] = """
 type: command
 short-summary: Show the details of a migration task. Use the "--expand" to get more details.
 parameters:
@@ -3076,9 +2612,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "dms start"
-] = """
+aladdin_helps['dms start'] = """
 type: command
 short-summary: Start an instance of the Data Migration Service. It can then be used to run data migrations.
 examples:
@@ -3087,9 +2621,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "eventgrid domain key list"
-] = """
+aladdin_helps['eventgrid domain key list'] = """
 type: command
 short-summary: List shared access keys of a domain.
 examples:
@@ -3098,9 +2630,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "eventgrid domain show"
-] = """
+aladdin_helps['eventgrid domain show'] = """
 type: command
 short-summary: Get the details of a domain.
 examples:
@@ -3109,9 +2639,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "eventgrid partner namespace key list"
-] = """
+aladdin_helps['eventgrid partner namespace key list'] = """
 type: command
 short-summary: List shared access keys of a partner namespace.
 examples:
@@ -3120,9 +2648,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "eventgrid topic key list"
-] = """
+aladdin_helps['eventgrid topic key list'] = """
 type: command
 short-summary: List shared access keys of a topic.
 examples:
@@ -3131,9 +2657,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "eventhubs eventhub update"
-] = """
+aladdin_helps['eventhubs eventhub update'] = """
 type: command
 short-summary: Updates the EventHubs Eventhub
 examples:
@@ -3145,9 +2669,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "eventhubs georecovery-alias set"
-] = """
+aladdin_helps['eventhubs georecovery-alias set'] = """
 type: command
 short-summary: Sets a Geo-Disaster Recovery Configuration Alias for the give Namespace
 examples:
@@ -3156,9 +2678,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "eventhubs namespace exists"
-] = """
+aladdin_helps['eventhubs namespace exists'] = """
 type: command
 short-summary: check for the availability of the given name for the Namespace
 examples:
@@ -3167,9 +2687,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "eventhubs namespace network-rule add"
-] = """
+aladdin_helps['eventhubs namespace network-rule add'] = """
 type: command
 short-summary: Add a network rule for a namespace.
 examples:
@@ -3178,9 +2696,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "extension remove"
-] = """
+aladdin_helps['extension remove'] = """
 type: command
 short-summary: Remove an extension.
 examples:
@@ -3189,9 +2705,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "extension show"
-] = """
+aladdin_helps['extension show'] = """
 type: command
 short-summary: Show an extension.
 examples:
@@ -3201,9 +2715,14 @@ examples:
 """
 
 
-aladdin_helps[
-    "iot dps certificate show"
-] = """
+
+
+
+
+
+
+
+aladdin_helps['iot dps certificate show'] = """
 type: command
 short-summary: Show information about a particular Azure IoT Hub Device Provisioning Service certificate.
 examples:
@@ -3212,9 +2731,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub certificate create"
-] = """
+aladdin_helps['iot hub certificate create'] = """
 type: command
 short-summary: Create/upload an Azure IoT Hub certificate.
 long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
@@ -3224,9 +2741,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub certificate generate-verification-code"
-] = """
+aladdin_helps['iot hub certificate generate-verification-code'] = """
 type: command
 short-summary: Generates a verification code for an Azure IoT Hub certificate.
 long-summary: This verification code is used to complete the proof of possession step for a certificate. Use this verification code as the CN of a new certificate signed with the root certificates private key. For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
@@ -3236,9 +2751,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub certificate show"
-] = """
+aladdin_helps['iot hub certificate show'] = """
 type: command
 short-summary: Shows information about a particular Azure IoT Hub certificate.
 long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
@@ -3248,9 +2761,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub certificate verify"
-] = """
+aladdin_helps['iot hub certificate verify'] = """
 type: command
 short-summary: Verifies an Azure IoT Hub certificate.
 long-summary: Verifies a certificate by uploading a verification certificate containing the verification code obtained by calling generate-verification-code. This is the last step in the proof of possession process. For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
@@ -3260,9 +2771,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub consumer-group list"
-] = """
+aladdin_helps['iot hub consumer-group list'] = """
 type: command
 short-summary: List event hub consumer groups.
 examples:
@@ -3271,9 +2780,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub consumer-group show"
-] = """
+aladdin_helps['iot hub consumer-group show'] = """
 type: command
 short-summary: Get the details for an event hub consumer group.
 examples:
@@ -3282,9 +2789,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub delete"
-] = """
+aladdin_helps['iot hub delete'] = """
 type: command
 short-summary: Delete an IoT hub.
 examples:
@@ -3293,9 +2798,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub list-skus"
-] = """
+aladdin_helps['iot hub list-skus'] = """
 type: command
 short-summary: List available pricing tiers.
 examples:
@@ -3304,9 +2807,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub policy delete"
-] = """
+aladdin_helps['iot hub policy delete'] = """
 type: command
 short-summary: Delete a shared access policy from an IoT hub.
 examples:
@@ -3315,9 +2816,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub policy list"
-] = """
+aladdin_helps['iot hub policy list'] = """
 type: command
 short-summary: List shared access policies of an IoT hub.
 examples:
@@ -3326,9 +2825,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub policy renew-key"
-] = """
+aladdin_helps['iot hub policy renew-key'] = """
 type: command
 short-summary: Regenerate keys of a shared access policy of an IoT hub.
 examples:
@@ -3337,9 +2834,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub policy show"
-] = """
+aladdin_helps['iot hub policy show'] = """
 type: command
 short-summary: Get the details of a shared access policy of an IoT hub.
 examples:
@@ -3348,9 +2843,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub show"
-] = """
+aladdin_helps['iot hub show'] = """
 type: command
 short-summary: Get the details of an IoT hub.
 examples:
@@ -3359,9 +2852,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub show-connection-string"
-] = """
+aladdin_helps['iot hub show-connection-string'] = """
 type: command
 short-summary: Show the connection strings for an IoT hub.
 examples:
@@ -3370,9 +2861,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub show-quota-metrics"
-] = """
+aladdin_helps['iot hub show-quota-metrics'] = """
 type: command
 short-summary: Get the quota metrics for an IoT hub.
 examples:
@@ -3384,9 +2873,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub show-stats"
-] = """
+aladdin_helps['iot hub show-stats'] = """
 type: command
 short-summary: Get the statistics for an IoT hub.
 examples:
@@ -3395,9 +2882,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "iot hub update"
-] = """
+aladdin_helps['iot hub update'] = """
 type: command
 short-summary: Update metadata for an IoT hub.
 examples:
@@ -3407,9 +2892,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "keyvault create"
-] = """
+aladdin_helps['keyvault create'] = """
 type: command
 short-summary: Create a Vault or HSM.
 long-summary: If `--enable-rbac-authorization` is not specified, then default permissions are created for the current user or service principal unless the `--no-self-perms` flag is specified.
@@ -3420,9 +2903,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "keyvault delete"
-] = """
+aladdin_helps['keyvault delete'] = """
 type: command
 short-summary: Delete a Vault or HSM.
 examples:
@@ -3432,9 +2913,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "keyvault recover"
-] = """
+aladdin_helps['keyvault recover'] = """
 type: command
 short-summary: Recover a Vault or HSM.
 long-summary: Recover a previously deleted Vault or HSM for which soft delete was enabled.
@@ -3445,9 +2924,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "keyvault show"
-] = """
+aladdin_helps['keyvault show'] = """
 type: command
 short-summary: Show details of a Vault or HSM.
 examples:
@@ -3457,9 +2934,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "keyvault storage remove"
-] = """
+aladdin_helps['keyvault storage remove'] = """
 type: command
 short-summary: Remove a Key Vault managed Azure Storage Account and all associated SAS definitions. This operation requires the storage/delete permission.
 examples:
@@ -3473,9 +2948,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "keyvault update"
-] = """
+aladdin_helps['keyvault update'] = """
 type: command
 short-summary: Update the properties of a Vault.
 examples:
@@ -3485,9 +2958,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "keyvault update-hsm"
-] = """
+aladdin_helps['keyvault update-hsm'] = """
 type: command
 short-summary: Update the properties of a HSM.
 examples:
@@ -3497,9 +2968,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "kusto cluster list"
-] = """
+aladdin_helps['kusto cluster list'] = """
 type: command
 short-summary: List a Kusto cluster.
 examples:
@@ -3508,9 +2977,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "kusto cluster show"
-] = """
+aladdin_helps['kusto cluster show'] = """
 type: command
 short-summary: Get a Kusto cluster.
 examples:
@@ -3519,9 +2986,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "kusto database list"
-] = """
+aladdin_helps['kusto database list'] = """
 type: command
 short-summary: List a Kusto database.
 examples:
@@ -3530,9 +2995,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "kusto database show"
-] = """
+aladdin_helps['kusto database show'] = """
 type: command
 short-summary: Get a Kusto database.
 examples:
@@ -3541,9 +3004,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "lab environment list"
-] = """
+aladdin_helps['lab environment list'] = """
 type: command
 short-summary: List environments in a lab.
 examples:
@@ -3552,9 +3013,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "lab formula export-artifacts"
-] = """
+aladdin_helps['lab formula export-artifacts'] = """
 type: command
 short-summary: Export artifacts from a formula.
 parameters:
@@ -3568,9 +3027,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "lab formula show"
-] = """
+aladdin_helps['lab formula show'] = """
 type: command
 short-summary: Show formulae from an Azure DevTest Lab.
 parameters:
@@ -3584,9 +3041,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "lab vm apply-artifacts"
-] = """
+aladdin_helps['lab vm apply-artifacts'] = """
 type: command
 short-summary: Apply artifacts to a virtual machine in Azure DevTest Lab.
 parameters:
@@ -3604,9 +3059,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "lab vm list"
-] = """
+aladdin_helps['lab vm list'] = """
 type: command
 short-summary: List the VMs in an Azure DevTest Lab.
 parameters:
@@ -3635,9 +3088,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "maps account show"
-] = """
+
+aladdin_helps['maps account show'] = """
 type: command
 short-summary: Show the details of a maps account.
 examples:
@@ -3647,9 +3099,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "monitor action-group create"
-] = """
+
+aladdin_helps['monitor action-group create'] = """
 type: command
 short-summary: Create a new action group
 parameters:
@@ -3699,9 +3150,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor action-group show"
-] = """
+aladdin_helps['monitor action-group show'] = """
 type: command
 short-summary: Show the details of an action group
 examples:
@@ -3711,9 +3160,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor action-group update"
-] = """
+aladdin_helps['monitor action-group update'] = """
 type: command
 short-summary: Update an action group
 parameters:
@@ -3765,9 +3212,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor activity-log alert scope add"
-] = """
+aladdin_helps['monitor activity-log alert scope add'] = """
 type: command
 short-summary: Add scopes to this activity log alert.
 parameters:
@@ -3784,9 +3229,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor activity-log alert update"
-] = """
+aladdin_helps['monitor activity-log alert update'] = """
 type: command
 short-summary: Update the details of this activity log alert
 parameters:
@@ -3808,9 +3251,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor alert delete"
-] = """
+aladdin_helps['monitor alert delete'] = """
 type: command
 short-summary: Delete an alert rule.
 examples:
@@ -3820,9 +3261,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor alert list"
-] = """
+aladdin_helps['monitor alert list'] = """
 type: command
 short-summary: List alert rules in a resource group.
 examples:
@@ -3832,9 +3271,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor alert list-incidents"
-] = """
+aladdin_helps['monitor alert list-incidents'] = """
 type: command
 short-summary: List all incidents for an alert rule.
 examples:
@@ -3844,9 +3281,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor alert show"
-] = """
+aladdin_helps['monitor alert show'] = """
 type: command
 short-summary: Show an alert rule.
 examples:
@@ -3856,9 +3291,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor alert update"
-] = """
+aladdin_helps['monitor alert update'] = """
 type: command
 short-summary: Update a classic metric-based alert rule.
 parameters:
@@ -3914,9 +3347,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor autoscale create"
-] = """
+aladdin_helps['monitor autoscale create'] = """
 type: command
 short-summary: Create new autoscale settings.
 long-summary: >
@@ -3937,9 +3368,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor autoscale profile create"
-] = """
+aladdin_helps['monitor autoscale profile create'] = """
 type: command
 short-summary: Create a fixed or recurring autoscale profile.
 long-summary: >
@@ -3975,9 +3404,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor autoscale profile delete"
-] = """
+aladdin_helps['monitor autoscale profile delete'] = """
 type: command
 short-summary: Delete an autoscale profile.
 examples:
@@ -3987,9 +3414,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor autoscale profile list"
-] = """
+aladdin_helps['monitor autoscale profile list'] = """
 type: command
 short-summary: List autoscale profiles.
 examples:
@@ -3999,9 +3424,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor autoscale rule list"
-] = """
+aladdin_helps['monitor autoscale rule list'] = """
 type: command
 short-summary: List autoscale rules for a profile.
 examples:
@@ -4011,9 +3434,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor autoscale show"
-] = """
+aladdin_helps['monitor autoscale show'] = """
 type: command
 short-summary: Show autoscale setting details.
 examples:
@@ -4023,9 +3444,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor autoscale update"
-] = """
+aladdin_helps['monitor autoscale update'] = """
 type: command
 short-summary: Update autoscale settings.
 long-summary: >
@@ -4052,9 +3471,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor autoscale-settings update"
-] = """
+aladdin_helps['monitor autoscale-settings update'] = """
 type: command
 short-summary: Updates an autoscale setting.
 examples:
@@ -4064,9 +3481,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor diagnostic-settings update"
-] = """
+aladdin_helps['monitor diagnostic-settings update'] = """
 type: command
 short-summary: Update diagnostic settings.
 examples:
@@ -4076,9 +3491,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace delete"
-] = """
+aladdin_helps['monitor log-analytics workspace delete'] = """
 type: command
 short-summary: Delete a workspace instance.
 examples:
@@ -4088,9 +3501,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace get-schema"
-] = """
+aladdin_helps['monitor log-analytics workspace get-schema'] = """
 type: command
 short-summary: Get the schema for a given workspace.
 long-summary: >
@@ -4103,9 +3514,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace get-shared-keys"
-] = """
+aladdin_helps['monitor log-analytics workspace get-shared-keys'] = """
 type: command
 short-summary: Get the shared keys for a workspace.
 examples:
@@ -4115,9 +3524,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace linked-storage create"
-] = """
+aladdin_helps['monitor log-analytics workspace linked-storage create'] = """
 type: command
 short-summary: Create some linked storage accounts for log analytics workspace.
 examples:
@@ -4127,9 +3534,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace linked-storage list"
-] = """
+aladdin_helps['monitor log-analytics workspace linked-storage list'] = """
 type: command
 short-summary: List all linked storage accounts for a log analytics workspace.
 examples:
@@ -4139,9 +3544,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace list-management-groups"
-] = """
+aladdin_helps['monitor log-analytics workspace list-management-groups'] = """
 type: command
 short-summary: Get a list of management groups connected to a workspace.
 examples:
@@ -4151,9 +3554,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace list-usages"
-] = """
+aladdin_helps['monitor log-analytics workspace list-usages'] = """
 type: command
 short-summary: Get a list of usage metrics for a workspace.
 examples:
@@ -4163,9 +3564,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace pack enable"
-] = """
+aladdin_helps['monitor log-analytics workspace pack enable'] = """
 type: command
 short-summary: Enable an intelligence pack for a given workspace.
 examples:
@@ -4175,9 +3574,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace pack list"
-] = """
+aladdin_helps['monitor log-analytics workspace pack list'] = """
 type: command
 short-summary: List all the intelligence packs possible and whether they are enabled or disabled for a given workspace.
 examples:
@@ -4187,9 +3584,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace show"
-] = """
+aladdin_helps['monitor log-analytics workspace show'] = """
 type: command
 short-summary: Show a workspace instance.
 examples:
@@ -4199,9 +3594,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-analytics workspace update"
-] = """
+aladdin_helps['monitor log-analytics workspace update'] = """
 type: command
 short-summary: Update a workspace instance
 examples:
@@ -4211,9 +3604,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-profiles create"
-] = """
+aladdin_helps['monitor log-profiles create'] = """
 type: command
 short-summary: Create a log profile.
 parameters:
@@ -4238,9 +3629,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor log-profiles update"
-] = """
+aladdin_helps['monitor log-profiles update'] = """
 type: command
 short-summary: Update a log profile.
 examples:
@@ -4250,9 +3639,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor metrics alert delete"
-] = """
+aladdin_helps['monitor metrics alert delete'] = """
 type: command
 short-summary: Delete a metrics-based alert rule.
 examples:
@@ -4262,9 +3649,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor metrics alert list"
-] = """
+aladdin_helps['monitor metrics alert list'] = """
 type: command
 short-summary: List metric-based alert rules.
 examples:
@@ -4274,9 +3659,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor metrics alert show"
-] = """
+aladdin_helps['monitor metrics alert show'] = """
 type: command
 short-summary: Show a metrics-based alert rule.
 examples:
@@ -4286,9 +3669,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor metrics list-definitions"
-] = """
+aladdin_helps['monitor metrics list-definitions'] = """
 type: command
 short-summary: List the metric definitions for the resource.
 parameters:
@@ -4303,9 +3684,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor private-link-scope create"
-] = """
+aladdin_helps['monitor private-link-scope create'] = """
 type: command
 short-summary: Create a private link scope resource.
 examples:
@@ -4315,9 +3694,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor private-link-scope private-endpoint-connection approve"
-] = """
+aladdin_helps['monitor private-link-scope private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve a private endpoint connection of a private link scope resource.
 parameters:
@@ -4335,9 +3712,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "monitor private-link-scope private-endpoint-connection reject"
-] = """
+aladdin_helps['monitor private-link-scope private-endpoint-connection reject'] = """
 type: command
 parameters:
   - name: --name -n
@@ -4353,9 +3728,10 @@ examples:
 """
 
 
-aladdin_helps[
-    "network application-gateway create"
-] = """
+
+
+
+aladdin_helps['network application-gateway create'] = """
 type: command
 short-summary: Create an application gateway.
 parameters:
@@ -4390,9 +3766,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway frontend-ip create"
-] = """
+aladdin_helps['network application-gateway frontend-ip create'] = """
 type: command
 short-summary: Create a frontend IP address.
 examples:
@@ -4402,9 +3776,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway frontend-ip update"
-] = """
+aladdin_helps['network application-gateway frontend-ip update'] = """
 type: command
 short-summary: Update a frontend IP address.
 examples:
@@ -4414,9 +3786,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway http-settings create"
-] = """
+aladdin_helps['network application-gateway http-settings create'] = """
 type: command
 short-summary: Create HTTP settings.
 examples:
@@ -4426,9 +3796,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway http-settings update"
-] = """
+aladdin_helps['network application-gateway http-settings update'] = """
 type: command
 short-summary: Update HTTP settings.
 examples:
@@ -4442,9 +3810,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway probe delete"
-] = """
+aladdin_helps['network application-gateway probe delete'] = """
 type: command
 short-summary: Delete a probe.
 examples:
@@ -4454,9 +3820,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway probe update"
-] = """
+aladdin_helps['network application-gateway probe update'] = """
 type: command
 short-summary: Update a probe.
 examples:
@@ -4466,9 +3830,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway redirect-config update"
-] = """
+aladdin_helps['network application-gateway redirect-config update'] = """
 type: command
 short-summary: Update a redirect configuration.
 examples:
@@ -4478,9 +3840,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rewrite-rule condition list"
-] = """
+aladdin_helps['network application-gateway rewrite-rule condition list'] = """
 short-summary: List rewrite rule conditions.
 type: command
 examples:
@@ -4490,9 +3850,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rewrite-rule delete"
-] = """
+aladdin_helps['network application-gateway rewrite-rule delete'] = """
 short-summary: Delete a rewrite rule.
 type: command
 examples:
@@ -4502,9 +3860,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rewrite-rule list"
-] = """
+aladdin_helps['network application-gateway rewrite-rule list'] = """
 short-summary: List rewrite rules.
 type: command
 examples:
@@ -4514,9 +3870,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rewrite-rule set create"
-] = """
+aladdin_helps['network application-gateway rewrite-rule set create'] = """
 short-summary: Create a rewrite rule set.
 type: command
 examples:
@@ -4526,9 +3880,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rewrite-rule set list"
-] = """
+aladdin_helps['network application-gateway rewrite-rule set list'] = """
 short-summary: List rewrite rule sets.
 type: command
 examples:
@@ -4538,9 +3890,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rewrite-rule set show"
-] = """
+aladdin_helps['network application-gateway rewrite-rule set show'] = """
 short-summary: Get the details of a rewrite rule set.
 type: command
 examples:
@@ -4550,9 +3900,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rewrite-rule set update"
-] = """
+aladdin_helps['network application-gateway rewrite-rule set update'] = """
 short-summary: Update a rewrite rule set.
 type: command
 examples:
@@ -4562,9 +3910,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rewrite-rule show"
-] = """
+aladdin_helps['network application-gateway rewrite-rule show'] = """
 short-summary: Get the details of a rewrite rule.
 type: command
 examples:
@@ -4574,9 +3920,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rewrite-rule update"
-] = """
+aladdin_helps['network application-gateway rewrite-rule update'] = """
 short-summary: Update a rewrite rule.
 type: command
 parameters:
@@ -4593,9 +3937,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway root-cert create"
-] = """
+aladdin_helps['network application-gateway root-cert create'] = """
 type: command
 short-summary: Upload a trusted root certificate.
 examples:
@@ -4605,9 +3947,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway root-cert update"
-] = """
+aladdin_helps['network application-gateway root-cert update'] = """
 type: command
 short-summary: Update a trusted root certificate.
 examples:
@@ -4617,9 +3957,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway rule update"
-] = """
+aladdin_helps['network application-gateway rule update'] = """
 type: command
 short-summary: Update a rule.
 examples:
@@ -4629,9 +3967,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway update"
-] = """
+aladdin_helps['network application-gateway update'] = """
 type: command
 short-summary: Update an application gateway.
 examples:
@@ -4641,9 +3977,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway url-path-map update"
-] = """
+aladdin_helps['network application-gateway url-path-map update'] = """
 type: command
 short-summary: Update a URL path map.
 examples:
@@ -4653,9 +3987,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy create"
-] = """
+aladdin_helps['network application-gateway waf-policy create'] = """
 type: command
 short-summary: Create an application gateway WAF policy.
 examples:
@@ -4665,9 +3997,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy custom-rule create"
-] = """
+aladdin_helps['network application-gateway waf-policy custom-rule create'] = """
 type: command
 short-summary: Create an application gateway WAF policy custom rule.
 examples:
@@ -4677,9 +4007,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy custom-rule delete"
-] = """
+aladdin_helps['network application-gateway waf-policy custom-rule delete'] = """
 type: command
 short-summary: Delete an application gateway WAF policy custom rule.
 examples:
@@ -4689,9 +4017,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy custom-rule list"
-] = """
+aladdin_helps['network application-gateway waf-policy custom-rule list'] = """
 type: command
 short-summary: List application gateway WAF policy custom rules.
 examples:
@@ -4701,9 +4027,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy custom-rule match-condition list"
-] = """
+aladdin_helps['network application-gateway waf-policy custom-rule match-condition list'] = """
 type: command
 short-summary: List application gateway WAF policy custom rule match conditions.
 examples:
@@ -4713,9 +4037,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy custom-rule show"
-] = """
+aladdin_helps['network application-gateway waf-policy custom-rule show'] = """
 type: command
 short-summary: Get the details of an application gateway WAF policy custom rule.
 examples:
@@ -4725,9 +4047,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy custom-rule update"
-] = """
+aladdin_helps['network application-gateway waf-policy custom-rule update'] = """
 type: command
 short-summary: Update an application gateway WAF policy custom rule.
 examples:
@@ -4741,9 +4061,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy delete"
-] = """
+aladdin_helps['network application-gateway waf-policy delete'] = """
 type: command
 short-summary: Delete an application gateway WAF policy.
 examples:
@@ -4753,9 +4071,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy list"
-] = """
+aladdin_helps['network application-gateway waf-policy list'] = """
 type: command
 short-summary: List application gateway WAF policies.
 examples:
@@ -4765,9 +4081,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy managed-rule rule-set add"
-] = """
+aladdin_helps['network application-gateway waf-policy managed-rule rule-set add'] = """
 type: command
 short-summary: >
     Add managed rule set to the WAF policy managed rules. For rule set and rules, please visit:
@@ -4779,9 +4093,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy managed-rule rule-set list"
-] = """
+aladdin_helps['network application-gateway waf-policy managed-rule rule-set list'] = """
 type: command
 short-summary: List all managed rule set.
 examples:
@@ -4791,9 +4103,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy policy-setting list"
-] = """
+aladdin_helps['network application-gateway waf-policy policy-setting list'] = """
 type: command
 short-summary: List properties of a web application firewall global configuration.
 examples:
@@ -4803,9 +4113,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy policy-setting update"
-] = """
+aladdin_helps['network application-gateway waf-policy policy-setting update'] = """
 type: command
 short-summary: Update properties of a web application firewall global configuration.
 examples:
@@ -4815,9 +4123,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy show"
-] = """
+aladdin_helps['network application-gateway waf-policy show'] = """
 type: command
 short-summary: Get the details of an application gateway WAF policy.
 examples:
@@ -4827,9 +4133,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network application-gateway waf-policy update"
-] = """
+aladdin_helps['network application-gateway waf-policy update'] = """
 type: command
 short-summary: Update an application gateway WAF policy.
 examples:
@@ -4843,9 +4147,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network bastion create"
-] = """
+aladdin_helps['network bastion create'] = """
 type: command
 short-summary: Create a Azure bastion host machine.
 examples:
@@ -4855,9 +4157,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network bastion delete"
-] = """
+aladdin_helps['network bastion delete'] = """
 type: command
 short-summary: Delete a Azure bastion host machine.
 examples:
@@ -4867,9 +4167,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network bastion show"
-] = """
+aladdin_helps['network bastion show'] = """
 type: command
 short-summary: Show a Azure bastion host machine.
 examples:
@@ -4879,9 +4177,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network ddos-protection create"
-] = """
+aladdin_helps['network ddos-protection create'] = """
 type: command
 short-summary: Create a DDoS protection plan.
 parameters:
@@ -4897,9 +4193,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network ddos-protection update"
-] = """
+aladdin_helps['network ddos-protection update'] = """
 type: command
 short-summary: Update a DDoS protection plan.
 parameters:
@@ -4915,9 +4209,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set a create"
-] = """
+aladdin_helps['network dns record-set a create'] = """
 type: command
 short-summary: Create an empty A record set.
 examples:
@@ -4927,9 +4219,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set a update"
-] = """
+aladdin_helps['network dns record-set a update'] = """
 type: command
 short-summary: Update an A record set.
 examples:
@@ -4939,9 +4229,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set aaaa list"
-] = """
+aladdin_helps['network dns record-set aaaa list'] = """
 type: command
 short-summary: List all AAAA record sets in a zone.
 examples:
@@ -4951,9 +4239,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set caa create"
-] = """
+aladdin_helps['network dns record-set caa create'] = """
 type: command
 short-summary: Create an empty CAA record set.
 examples:
@@ -4963,9 +4249,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set caa delete"
-] = """
+aladdin_helps['network dns record-set caa delete'] = """
 type: command
 short-summary: Delete a CAA record set and all associated records.
 examples:
@@ -4975,9 +4259,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set cname create"
-] = """
+aladdin_helps['network dns record-set cname create'] = """
 type: command
 short-summary: Create an empty CNAME record set.
 examples:
@@ -4987,9 +4269,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set mx create"
-] = """
+aladdin_helps['network dns record-set mx create'] = """
 type: command
 short-summary: Create an empty MX record set.
 examples:
@@ -4999,9 +4279,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set mx list"
-] = """
+aladdin_helps['network dns record-set mx list'] = """
 type: command
 short-summary: List all MX record sets in a zone.
 examples:
@@ -5011,9 +4289,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set mx update"
-] = """
+aladdin_helps['network dns record-set mx update'] = """
 type: command
 short-summary: Update an MX record set.
 examples:
@@ -5023,9 +4299,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set ns create"
-] = """
+aladdin_helps['network dns record-set ns create'] = """
 type: command
 short-summary: Create an empty NS record set.
 examples:
@@ -5035,9 +4309,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set ns delete"
-] = """
+aladdin_helps['network dns record-set ns delete'] = """
 type: command
 short-summary: Delete an NS record set and all associated records.
 examples:
@@ -5047,9 +4319,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set ns remove-record"
-] = """
+aladdin_helps['network dns record-set ns remove-record'] = """
 type: command
 short-summary: Remove an NS record from its record set.
 long-summary: >
@@ -5062,9 +4332,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set ns update"
-] = """
+aladdin_helps['network dns record-set ns update'] = """
 type: command
 short-summary: Update an NS record set.
 examples:
@@ -5074,9 +4342,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set ptr create"
-] = """
+aladdin_helps['network dns record-set ptr create'] = """
 type: command
 short-summary: Create an empty PTR record set.
 examples:
@@ -5086,9 +4352,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set ptr delete"
-] = """
+aladdin_helps['network dns record-set ptr delete'] = """
 type: command
 short-summary: Delete a PTR record set and all associated records.
 examples:
@@ -5098,9 +4362,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set ptr list"
-] = """
+aladdin_helps['network dns record-set ptr list'] = """
 type: command
 short-summary: List all PTR record sets in a zone.
 examples:
@@ -5110,9 +4372,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set soa show"
-] = """
+aladdin_helps['network dns record-set soa show'] = """
 type: command
 short-summary: Get the details of an SOA record.
 examples:
@@ -5122,9 +4382,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set soa update"
-] = """
+aladdin_helps['network dns record-set soa update'] = """
 type: command
 short-summary: Update properties of an SOA record.
 examples:
@@ -5134,9 +4392,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set srv create"
-] = """
+aladdin_helps['network dns record-set srv create'] = """
 type: command
 short-summary: Create an empty SRV record set.
 examples:
@@ -5146,9 +4402,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set txt create"
-] = """
+aladdin_helps['network dns record-set txt create'] = """
 type: command
 short-summary: Create an empty TXT record set.
 examples:
@@ -5158,9 +4412,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set txt show"
-] = """
+aladdin_helps['network dns record-set txt show'] = """
 type: command
 short-summary: Get the details of a TXT record set.
 examples:
@@ -5170,9 +4422,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns record-set txt update"
-] = """
+aladdin_helps['network dns record-set txt update'] = """
 type: command
 short-summary: Update a TXT record set.
 examples:
@@ -5182,9 +4432,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network dns zone update"
-] = """
+aladdin_helps['network dns zone update'] = """
 type: command
 short-summary: Update a DNS zone properties. Does not modify DNS records within the zone.
 parameters:
@@ -5197,9 +4445,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route auth list"
-] = """
+aladdin_helps['network express-route auth list'] = """
 type: command
 short-summary: List link authorizations of an ExpressRoute circuit.
 examples:
@@ -5209,9 +4455,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route delete"
-] = """
+aladdin_helps['network express-route delete'] = """
 type: command
 short-summary: Delete an ExpressRoute circuit.
 examples:
@@ -5221,9 +4465,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route gateway connection create"
-] = """
+aladdin_helps['network express-route gateway connection create'] = """
 type: command
 short-summary: Create an ExpressRoute gateway connection.
 examples:
@@ -5233,9 +4475,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route gateway connection delete"
-] = """
+aladdin_helps['network express-route gateway connection delete'] = """
 type: command
 short-summary: Delete an ExpressRoute gateway connection.
 examples:
@@ -5245,9 +4485,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route gateway connection list"
-] = """
+aladdin_helps['network express-route gateway connection list'] = """
 type: command
 short-summary: List ExpressRoute gateway connections.
 examples:
@@ -5257,9 +4495,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route gateway connection show"
-] = """
+aladdin_helps['network express-route gateway connection show'] = """
 type: command
 short-summary: Get the details of an ExpressRoute gateway connection.
 examples:
@@ -5269,9 +4505,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route gateway delete"
-] = """
+aladdin_helps['network express-route gateway delete'] = """
 type: command
 short-summary: Delete an ExpressRoute gateway.
 examples:
@@ -5281,9 +4515,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route gateway list"
-] = """
+aladdin_helps['network express-route gateway list'] = """
 type: command
 short-summary: List ExpressRoute gateways.
 examples:
@@ -5293,9 +4525,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route gateway show"
-] = """
+aladdin_helps['network express-route gateway show'] = """
 type: command
 short-summary: Get the details of an ExpressRoute gateway.
 examples:
@@ -5305,9 +4535,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route peering connection delete"
-] = """
+aladdin_helps['network express-route peering connection delete'] = """
 type: command
 short-summary: Delete an ExpressRoute circuit connection.
 examples:
@@ -5317,9 +4545,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route peering create"
-] = """
+aladdin_helps['network express-route peering create'] = """
 type: command
 short-summary: Create peering settings for an ExpressRoute circuit.
 examples:
@@ -5329,9 +4555,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route peering update"
-] = """
+aladdin_helps['network express-route peering update'] = """
 type: command
 short-summary: Update peering settings of an ExpressRoute circuit.
 examples:
@@ -5341,9 +4565,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route port create"
-] = """
+aladdin_helps['network express-route port create'] = """
 type: command
 short-summary: Create an ExpressRoute port.
 examples:
@@ -5353,9 +4575,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route port delete"
-] = """
+aladdin_helps['network express-route port delete'] = """
 type: command
 short-summary: Delete an ExpressRoute port.
 examples:
@@ -5365,9 +4585,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route port link list"
-] = """
+aladdin_helps['network express-route port link list'] = """
 type: command
 short-summary: List ExpressRoute links.
 examples:
@@ -5377,9 +4595,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route port link show"
-] = """
+aladdin_helps['network express-route port link show'] = """
 type: command
 short-summary: Get the details of an ExpressRoute link.
 examples:
@@ -5389,9 +4605,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route port list"
-] = """
+aladdin_helps['network express-route port list'] = """
 type: command
 short-summary: List ExpressRoute ports.
 examples:
@@ -5401,9 +4615,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route port location show"
-] = """
+aladdin_helps['network express-route port location show'] = """
 type: command
 short-summary: Get the details of an ExpressRoute port location.
 examples:
@@ -5413,9 +4625,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route port show"
-] = """
+aladdin_helps['network express-route port show'] = """
 type: command
 short-summary: Get the details of an ExpressRoute port.
 examples:
@@ -5425,9 +4635,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network express-route port update"
-] = """
+aladdin_helps['network express-route port update'] = """
 type: command
 short-summary: Update settings of an ExpressRoute port.
 examples:
@@ -5437,9 +4645,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb frontend-ip show"
-] = """
+aladdin_helps['network lb frontend-ip show'] = """
 type: command
 short-summary: Get the details of a frontend IP address.
 examples:
@@ -5449,9 +4655,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb frontend-ip update"
-] = """
+aladdin_helps['network lb frontend-ip update'] = """
 type: command
 short-summary: Update a frontend IP address.
 examples:
@@ -5461,9 +4665,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb inbound-nat-pool update"
-] = """
+aladdin_helps['network lb inbound-nat-pool update'] = """
 type: command
 short-summary: Update an inbound NAT address pool.
 examples:
@@ -5481,9 +4683,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb inbound-nat-rule update"
-] = """
+aladdin_helps['network lb inbound-nat-rule update'] = """
 type: command
 short-summary: Update an inbound NAT rule.
 examples:
@@ -5497,9 +4697,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb outbound-rule create"
-] = """
+aladdin_helps['network lb outbound-rule create'] = """
 type: command
 short-summary: Create an outbound-rule.
 examples:
@@ -5509,9 +4707,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb outbound-rule delete"
-] = """
+aladdin_helps['network lb outbound-rule delete'] = """
 type: command
 short-summary: Delete an outbound-rule.
 examples:
@@ -5521,9 +4717,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb outbound-rule list"
-] = """
+aladdin_helps['network lb outbound-rule list'] = """
 type: command
 short-summary: List outbound rules.
 examples:
@@ -5533,9 +4727,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb outbound-rule show"
-] = """
+aladdin_helps['network lb outbound-rule show'] = """
 type: command
 short-summary: Get the details of an outbound rule.
 examples:
@@ -5545,9 +4737,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb outbound-rule update"
-] = """
+aladdin_helps['network lb outbound-rule update'] = """
 type: command
 short-summary: Update an outbound-rule.
 examples:
@@ -5557,9 +4747,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb probe update"
-] = """
+aladdin_helps['network lb probe update'] = """
 type: command
 short-summary: Update a probe.
 examples:
@@ -5569,9 +4757,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network lb rule update"
-] = """
+aladdin_helps['network lb rule update'] = """
 type: command
 short-summary: Update a load balancing rule.
 examples:
@@ -5585,9 +4771,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network list-service-aliases"
-] = """
+aladdin_helps['network list-service-aliases'] = """
 type: command
 short-summary: List available service aliases in the region which can be used for Service Endpoint Policies.
 examples:
@@ -5597,9 +4781,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network list-service-tags"
-] = """
+aladdin_helps['network list-service-tags'] = """
 type: command
 short-summary: List all service tags which are below to different resources
 long-summary: >
@@ -5614,9 +4796,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network local-gateway delete"
-] = """
+aladdin_helps['network local-gateway delete'] = """
 type: command
 short-summary: Delete a local VPN gateway.
 long-summary: >
@@ -5630,9 +4810,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network local-gateway update"
-] = """
+aladdin_helps['network local-gateway update'] = """
 type: command
 short-summary: Update a local VPN gateway.
 examples:
@@ -5642,9 +4820,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nic ip-config address-pool add"
-] = """
+aladdin_helps['network nic ip-config address-pool add'] = """
 type: command
 short-summary: Add an address pool to an IP configuration.
 examples:
@@ -5654,9 +4830,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nic ip-config address-pool remove"
-] = """
+aladdin_helps['network nic ip-config address-pool remove'] = """
 type: command
 short-summary: Remove an address pool of an IP configuration.
 examples:
@@ -5666,9 +4840,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nic ip-config create"
-] = """
+aladdin_helps['network nic ip-config create'] = """
 type: command
 short-summary: Create an IP configuration.
 long-summary: >
@@ -5681,9 +4853,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nic ip-config inbound-nat-rule add"
-] = """
+aladdin_helps['network nic ip-config inbound-nat-rule add'] = """
 type: command
 short-summary: Add an inbound NAT rule to an IP configuration.
 examples:
@@ -5693,9 +4863,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nic ip-config inbound-nat-rule remove"
-] = """
+aladdin_helps['network nic ip-config inbound-nat-rule remove'] = """
 type: command
 short-summary: Remove an inbound NAT rule of an IP configuration.
 examples:
@@ -5705,9 +4873,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nic ip-config update"
-] = """
+aladdin_helps['network nic ip-config update'] = """
 type: command
 short-summary: Update an IP configuration.
 examples:
@@ -5717,9 +4883,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nic update"
-] = """
+aladdin_helps['network nic update'] = """
 type: command
 short-summary: Update a network interface.
 examples:
@@ -5729,9 +4893,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nic wait"
-] = """
+aladdin_helps['network nic wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the network interface is met.
 examples:
@@ -5741,9 +4903,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nsg rule update"
-] = """
+aladdin_helps['network nsg rule update'] = """
 type: command
 short-summary: Update a network security group rule.
 examples:
@@ -5753,9 +4913,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network nsg update"
-] = """
+aladdin_helps['network nsg update'] = """
 type: command
 short-summary: Update a network security group.
 long-summary: >
@@ -5767,9 +4925,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-endpoint delete"
-] = """
+aladdin_helps['network private-endpoint delete'] = """
 type: command
 short-summary: Delete a private endpoint.
 examples:
@@ -5779,9 +4935,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-endpoint dns-zone-group delete"
-] = """
+aladdin_helps['network private-endpoint dns-zone-group delete'] = """
 type: command
 short-summary: Delete a private endpoint dns zone group.
 examples:
@@ -5791,9 +4945,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-endpoint dns-zone-group list"
-] = """
+aladdin_helps['network private-endpoint dns-zone-group list'] = """
 type: command
 short-summary: List all private endpoint dns zone groups.
 examples:
@@ -5803,9 +4955,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-endpoint dns-zone-group show"
-] = """
+aladdin_helps['network private-endpoint dns-zone-group show'] = """
 type: command
 short-summary: Show a private endpoint dns zone group.
 examples:
@@ -5815,9 +4965,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-endpoint show"
-] = """
+aladdin_helps['network private-endpoint show'] = """
 type: command
 short-summary: Get the details of a private endpoint.
 examples:
@@ -5827,9 +4975,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-endpoint update"
-] = """
+aladdin_helps['network private-endpoint update'] = """
 type: command
 short-summary: Update a private endpoint.
 examples:
@@ -5839,9 +4985,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-link-service connection delete"
-] = """
+aladdin_helps['network private-link-service connection delete'] = """
 type: command
 short-summary: Delete a private link service endpoint connection.
 examples:
@@ -5851,9 +4995,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-link-service delete"
-] = """
+aladdin_helps['network private-link-service delete'] = """
 type: command
 short-summary: Delete a private link service.
 examples:
@@ -5863,9 +5005,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-link-service show"
-] = """
+aladdin_helps['network private-link-service show'] = """
 type: command
 short-summary: Get the details of a private link service.
 examples:
@@ -5875,9 +5015,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network profile delete"
-] = """
+aladdin_helps['network profile delete'] = """
 type: command
 short-summary: Delete a network profile.
 examples:
@@ -5887,9 +5025,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network profile list"
-] = """
+aladdin_helps['network profile list'] = """
 type: command
 short-summary: List network profiles.
 examples:
@@ -5899,9 +5035,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network profile show"
-] = """
+aladdin_helps['network profile show'] = """
 type: command
 short-summary: Get the details of a network profile.
 examples:
@@ -5911,9 +5045,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network public-ip prefix create"
-] = """
+aladdin_helps['network public-ip prefix create'] = """
 type: command
 short-summary: Create a public IP prefix resource.
 examples:
@@ -5923,9 +5055,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network public-ip prefix delete"
-] = """
+aladdin_helps['network public-ip prefix delete'] = """
 type: command
 short-summary: Delete a public IP prefix resource.
 examples:
@@ -5935,9 +5065,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network public-ip prefix show"
-] = """
+aladdin_helps['network public-ip prefix show'] = """
 type: command
 short-summary: Get the details of a public IP prefix resource.
 examples:
@@ -5947,9 +5075,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network public-ip prefix update"
-] = """
+aladdin_helps['network public-ip prefix update'] = """
 type: command
 short-summary: Update a public IP prefix resource.
 examples:
@@ -5959,9 +5085,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network route-filter create"
-] = """
+aladdin_helps['network route-filter create'] = """
 type: command
 short-summary: Create a route filter.
 examples:
@@ -5971,9 +5095,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network route-filter show"
-] = """
+aladdin_helps['network route-filter show'] = """
 type: command
 short-summary: Get the details of a route filter.
 examples:
@@ -5983,9 +5105,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network route-table route update"
-] = """
+aladdin_helps['network route-table route update'] = """
 type: command
 short-summary: Update a route in a route table.
 examples:
@@ -5995,9 +5115,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network routeserver update"
-] = """
+aladdin_helps['network routeserver update'] = """
 type: command
 short-summary: Update a route server.
 examples:
@@ -6007,9 +5125,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network service-endpoint policy create"
-] = """
+aladdin_helps['network service-endpoint policy create'] = """
 type: command
 short-summary: Create a service endpoint policy.
 examples:
@@ -6019,9 +5135,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network service-endpoint policy list"
-] = """
+aladdin_helps['network service-endpoint policy list'] = """
 type: command
 short-summary: List service endpoint policies.
 examples:
@@ -6031,9 +5145,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network service-endpoint policy show"
-] = """
+aladdin_helps['network service-endpoint policy show'] = """
 type: command
 short-summary: Get the details of a service endpoint policy.
 examples:
@@ -6043,9 +5155,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network service-endpoint policy-definition delete"
-] = """
+aladdin_helps['network service-endpoint policy-definition delete'] = """
 type: command
 short-summary: Delete a service endpoint policy definition.
 examples:
@@ -6055,9 +5165,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network service-endpoint policy-definition list"
-] = """
+aladdin_helps['network service-endpoint policy-definition list'] = """
 type: command
 short-summary: List service endpoint policy definitions.
 examples:
@@ -6067,9 +5175,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network service-endpoint policy-definition show"
-] = """
+aladdin_helps['network service-endpoint policy-definition show'] = """
 type: command
 short-summary: Get the details of a service endpoint policy definition.
 examples:
@@ -6079,9 +5185,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network service-endpoint policy-definition update"
-] = """
+aladdin_helps['network service-endpoint policy-definition update'] = """
 type: command
 short-summary: Update a service endpoint policy definition.
 examples:
@@ -6091,9 +5195,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network traffic-manager endpoint delete"
-] = """
+aladdin_helps['network traffic-manager endpoint delete'] = """
 type: command
 short-summary: Delete a traffic manager endpoint.
 examples:
@@ -6103,9 +5205,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network traffic-manager endpoint update"
-] = """
+aladdin_helps['network traffic-manager endpoint update'] = """
 type: command
 short-summary: Update a traffic manager endpoint.
 examples:
@@ -6119,9 +5219,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network traffic-manager profile delete"
-] = """
+aladdin_helps['network traffic-manager profile delete'] = """
 type: command
 short-summary: Delete a traffic manager profile.
 examples:
@@ -6131,9 +5229,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network traffic-manager profile update"
-] = """
+aladdin_helps['network traffic-manager profile update'] = """
 type: command
 short-summary: Update a traffic manager profile.
 examples:
@@ -6143,9 +5239,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet create"
-] = """
+aladdin_helps['network vnet create'] = """
 type: command
 short-summary: Create a virtual network.
 long-summary: >
@@ -6158,9 +5252,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet subnet delete"
-] = """
+aladdin_helps['network vnet subnet delete'] = """
 type: command
 short-summary: Delete a subnet.
 examples:
@@ -6170,9 +5262,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet subnet list-available-delegations"
-] = """
+aladdin_helps['network vnet subnet list-available-delegations'] = """
 type: command
 short-summary: List the services available for subnet delegation.
 examples:
@@ -6182,9 +5272,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet update"
-] = """
+aladdin_helps['network vnet update'] = """
 type: command
 short-summary: Update a virtual network.
 examples:
@@ -6194,9 +5282,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet-gateway create"
-] = """
+aladdin_helps['network vnet-gateway create'] = """
 type: command
 short-summary: Create a virtual network gateway.
 parameters:
@@ -6220,9 +5306,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet-gateway revoked-cert delete"
-] = """
+aladdin_helps['network vnet-gateway revoked-cert delete'] = """
 type: command
 short-summary: Delete a revoked certificate.
 examples:
@@ -6232,9 +5316,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet-gateway root-cert delete"
-] = """
+aladdin_helps['network vnet-gateway root-cert delete'] = """
 type: command
 short-summary: Delete a root certificate.
 examples:
@@ -6244,9 +5326,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet-gateway update"
-] = """
+aladdin_helps['network vnet-gateway update'] = """
 type: command
 short-summary: Update a virtual network gateway.
 examples:
@@ -6256,9 +5336,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet-gateway vpn-client generate"
-] = """
+aladdin_helps['network vnet-gateway vpn-client generate'] = """
 type: command
 short-summary: Generate VPN client configuration.
 long-summary: The command outputs a URL to a zip file for the generated VPN client configuration.
@@ -6269,9 +5347,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vnet-gateway wait"
-] = """
+aladdin_helps['network vnet-gateway wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.
 examples:
@@ -6281,9 +5357,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vpn-connection create"
-] = """
+aladdin_helps['network vpn-connection create'] = """
 type: command
 short-summary: Create a VPN connection.
 long-summary: The VPN Gateway and Local Network Gateway must be provisioned before creating the connection between them.
@@ -6317,9 +5391,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vpn-connection shared-key reset"
-] = """
+aladdin_helps['network vpn-connection shared-key reset'] = """
 type: command
 short-summary: Reset a VPN connection shared key.
 examples:
@@ -6329,9 +5401,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vpn-connection shared-key show"
-] = """
+aladdin_helps['network vpn-connection shared-key show'] = """
 type: command
 short-summary: Retrieve a VPN connection shared key.
 examples:
@@ -6341,9 +5411,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vpn-connection shared-key update"
-] = """
+aladdin_helps['network vpn-connection shared-key update'] = """
 type: command
 short-summary: Update a VPN connection shared key.
 examples:
@@ -6353,9 +5421,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vpn-connection update"
-] = """
+aladdin_helps['network vpn-connection update'] = """
 type: command
 short-summary: Update a VPN connection.
 examples:
@@ -6365,9 +5431,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network vrouter update"
-] = """
+aladdin_helps['network vrouter update'] = """
 type: command
 short-summary: Update a virtual router.
 examples:
@@ -6377,9 +5441,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher connection-monitor create"
-] = """
+aladdin_helps['network watcher connection-monitor create'] = """
 type: command
 short-summary: Create a connection monitor.
 long-summary: |
@@ -6400,9 +5462,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher connection-monitor endpoint list"
-] = """
+aladdin_helps['network watcher connection-monitor endpoint list'] = """
 type: command
 short-summary: List all endpoints form a connection monitor
 examples:
@@ -6412,9 +5472,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher connection-monitor endpoint show"
-] = """
+aladdin_helps['network watcher connection-monitor endpoint show'] = """
 type: command
 short-summary: Show an endpoint from a connection monitor
 examples:
@@ -6424,9 +5482,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher connection-monitor list"
-] = """
+aladdin_helps['network watcher connection-monitor list'] = """
 type: command
 short-summary: List connection monitors for the given region.
 examples:
@@ -6436,9 +5492,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher connection-monitor test-configuration list"
-] = """
+aladdin_helps['network watcher connection-monitor test-configuration list'] = """
 type: command
 short-summary: List all test configurations of a connection monitor
 examples:
@@ -6448,9 +5502,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher connection-monitor test-configuration show"
-] = """
+aladdin_helps['network watcher connection-monitor test-configuration show'] = """
 type: command
 short-summary: Show a test configuration from a connection monitor
 examples:
@@ -6460,9 +5512,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher connection-monitor test-group list"
-] = """
+aladdin_helps['network watcher connection-monitor test-group list'] = """
 type: command
 short-summary: List all test groups of a connection monitor
 examples:
@@ -6472,9 +5522,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher connection-monitor test-group remove"
-] = """
+aladdin_helps['network watcher connection-monitor test-group remove'] = """
 type: command
 short-summary: Remove test group from a connection monitor
 examples:
@@ -6484,9 +5532,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher connection-monitor test-group show"
-] = """
+aladdin_helps['network watcher connection-monitor test-group show'] = """
 type: command
 short-summary: Show a test group of a connection monitor
 examples:
@@ -6496,9 +5542,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher flow-log delete"
-] = """
+aladdin_helps['network watcher flow-log delete'] = """
 type: command
 short-summary: Delete the specified flow log resource.
 examples:
@@ -6508,9 +5552,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher flow-log list"
-] = """
+aladdin_helps['network watcher flow-log list'] = """
 type: command
 short-summary: List all flow log resources for the specified Network Watcher
 examples:
@@ -6520,9 +5562,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher packet-capture delete"
-] = """
+aladdin_helps['network watcher packet-capture delete'] = """
 type: command
 short-summary: Delete a packet capture session.
 examples:
@@ -6532,9 +5572,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network watcher packet-capture list"
-] = """
+aladdin_helps['network watcher packet-capture list'] = """
 type: command
 short-summary: List all packet capture sessions within a resource group.
 examples:
@@ -6545,9 +5583,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "network private-dns link vnet create"
-] = """
+
+aladdin_helps['network private-dns link vnet create'] = """
 type: command
 short-summary: Create a virtual network link to the specified Private DNS zone.
 parameters:
@@ -6560,9 +5597,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-dns link vnet update"
-] = """
+aladdin_helps['network private-dns link vnet update'] = """
 type: command
 short-summary: Update a virtual network link's properties. Does not modify virtual network within the link.
 parameters:
@@ -6578,9 +5613,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-dns record-set a update"
-] = """
+aladdin_helps['network private-dns record-set a update'] = """
 type: command
 short-summary: Update an A record set.
 examples:
@@ -6590,9 +5623,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-dns record-set cname create"
-] = """
+aladdin_helps['network private-dns record-set cname create'] = """
 type: command
 short-summary: Create an empty CNAME record set.
 examples:
@@ -6602,9 +5633,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-dns record-set cname delete"
-] = """
+aladdin_helps['network private-dns record-set cname delete'] = """
 type: command
 short-summary: Delete a CNAME record set and its associated record.
 examples:
@@ -6614,9 +5643,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-dns record-set cname show"
-] = """
+aladdin_helps['network private-dns record-set cname show'] = """
 type: command
 short-summary: Get the details of a CNAME record set.
 examples:
@@ -6626,9 +5653,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "network private-dns record-set srv create"
-] = """
+aladdin_helps['network private-dns record-set srv create'] = """
 type: command
 short-summary: Create an empty SRV record set.
 examples:
@@ -6639,9 +5664,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "ad app credential delete"
-] = """
+
+aladdin_helps['ad app credential delete'] = """
 type: command
 short-summary: delete an application's password or certificate credentials
 examples:
@@ -6650,9 +5674,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad app credential list"
-] = """
+aladdin_helps['ad app credential list'] = """
 type: command
 short-summary: List an application's password or certificate credential metadata. (The content of the password or certificate credential is not retrievable.)
 examples:
@@ -6661,9 +5683,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad app credential reset"
-] = """
+aladdin_helps['ad app credential reset'] = """
 type: command
 short-summary: Append or overwrite an application's password or certificate credentials
 long-summary: >-
@@ -6676,9 +5696,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad app delete"
-] = """
+aladdin_helps['ad app delete'] = """
 type: command
 short-summary: Delete an application.
 examples:
@@ -6687,9 +5705,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad app owner add"
-] = """
+aladdin_helps['ad app owner add'] = """
 type: command
 short-summary: Add an application owner.
 examples:
@@ -6698,9 +5714,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad app owner list"
-] = """
+aladdin_helps['ad app owner list'] = """
 type: command
 short-summary: List application owners.
 examples:
@@ -6709,9 +5723,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad app permission admin-consent"
-] = """
+aladdin_helps['ad app permission admin-consent'] = """
 type: command
 short-summary: Grant Application & Delegated permissions through admin-consent.
 long-summary: You must login as a directory administrator
@@ -6721,9 +5733,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad app show"
-] = """
+aladdin_helps['ad app show'] = """
 type: command
 short-summary: Get the details of an application.
 examples:
@@ -6732,9 +5742,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad group create"
-] = """
+aladdin_helps['ad group create'] = """
 type: command
 short-summary: Create a group in the directory.
 examples:
@@ -6743,9 +5751,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad group member check"
-] = """
+aladdin_helps['ad group member check'] = """
 type: command
 short-summary: Check if a member is in a group.
 examples:
@@ -6754,9 +5760,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad group owner add"
-] = """
+aladdin_helps['ad group owner add'] = """
 type: command
 short-summary: Add a group owner.
 examples:
@@ -6765,9 +5769,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad group owner list"
-] = """
+aladdin_helps['ad group owner list'] = """
 type: command
 short-summary: List group owners.
 examples:
@@ -6776,9 +5778,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad group owner remove"
-] = """
+aladdin_helps['ad group owner remove'] = """
 type: command
 short-summary: Remove a group owner.
 examples:
@@ -6787,9 +5787,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad sp create"
-] = """
+aladdin_helps['ad sp create'] = """
 type: command
 short-summary: Create a service principal.
 examples:
@@ -6798,9 +5796,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad sp credential delete"
-] = """
+aladdin_helps['ad sp credential delete'] = """
 type: command
 short-summary: Delete a service principal's credential.
 examples:
@@ -6809,9 +5805,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad sp credential list"
-] = """
+aladdin_helps['ad sp credential list'] = """
 type: command
 short-summary: List a service principal's credentials.
 examples:
@@ -6820,9 +5814,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad sp credential reset"
-] = """
+aladdin_helps['ad sp credential reset'] = """
 type: command
 short-summary: Reset a service principal credential.
 long-summary: >-
@@ -6854,9 +5846,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad sp delete"
-] = """
+aladdin_helps['ad sp delete'] = """
 type: command
 short-summary: Delete a service principal and its role assignments.
 examples:
@@ -6865,9 +5855,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad sp owner list"
-] = """
+aladdin_helps['ad sp owner list'] = """
 type: command
 short-summary: List service principal owners.
 examples:
@@ -6876,9 +5864,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad sp show"
-] = """
+aladdin_helps['ad sp show'] = """
 type: command
 short-summary: Get the details of a service principal.
 examples:
@@ -6887,9 +5873,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad sp update"
-] = """
+aladdin_helps['ad sp update'] = """
 type: command
 short-summary: Update a service principal
 examples:
@@ -6898,9 +5882,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad user get-member-groups"
-] = """
+aladdin_helps['ad user get-member-groups'] = """
 type: command
 short-summary: Get groups of which the user is a member
 examples:
@@ -6909,9 +5891,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ad user update"
-] = """
+aladdin_helps['ad user update'] = """
 type: command
 short-summary: Update Azure Active Directory users.
 examples:
@@ -6920,9 +5900,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mariadb server configuration list"
-] = """
+aladdin_helps['mariadb server configuration list'] = """
 type: command
 short-summary: List the configuration values for a server.
 examples:
@@ -6931,9 +5909,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mariadb server configuration show"
-] = """
+aladdin_helps['mariadb server configuration show'] = """
 type: command
 short-summary: Get the configuration for a server."
 examples:
@@ -6942,9 +5918,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mariadb server firewall-rule delete"
-] = """
+aladdin_helps['mariadb server firewall-rule delete'] = """
 type: command
 short-summary: Delete a firewall rule.
 examples:
@@ -6953,9 +5927,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mariadb server firewall-rule list"
-] = """
+aladdin_helps['mariadb server firewall-rule list'] = """
 type: command
 short-summary: List all firewall rules for a server.
 examples:
@@ -6964,9 +5936,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mariadb server show"
-] = """
+aladdin_helps['mariadb server show'] = """
 type: command
 short-summary: Get the details of a server.
 examples:
@@ -6975,9 +5945,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mariadb server start"
-] = """
+aladdin_helps['mariadb server start'] = """
 type: command
 short-summary: Start a stopped server.
 examples:
@@ -6986,9 +5954,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mariadb server stop"
-] = """
+aladdin_helps['mariadb server stop'] = """
 type: command
 short-summary: Stop a running server.
 examples:
@@ -6997,9 +5963,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mariadb server update"
-] = """
+aladdin_helps['mariadb server update'] = """
 type: command
 short-summary: Update a server.
 examples:
@@ -7011,9 +5975,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server firewall-rule delete"
-] = """
+aladdin_helps['mysql flexible-server firewall-rule delete'] = """
 type: command
 short-summary: Delete a firewall rule.
 examples:
@@ -7022,9 +5984,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server firewall-rule show"
-] = """
+aladdin_helps['mysql flexible-server firewall-rule show'] = """
 type: command
 short-summary: Get the details of a firewall rule.
 examples:
@@ -7033,9 +5993,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server parameter list"
-] = """
+aladdin_helps['mysql flexible-server parameter list'] = """
 type: command
 short-summary: List the parameter values for a flexible server.
 examples:
@@ -7044,9 +6002,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server parameter show"
-] = """
+aladdin_helps['mysql flexible-server parameter show'] = """
 type: command
 short-summary: Get the parameter for a flexible server."
 examples:
@@ -7055,9 +6011,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server restart"
-] = """
+aladdin_helps['mysql flexible-server restart'] = """
 type: command
 short-summary: Restart a flexible server.
 examples:
@@ -7066,9 +6020,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server show"
-] = """
+aladdin_helps['mysql flexible-server show'] = """
 type: command
 short-summary: Get the details of a flexible server.
 examples:
@@ -7077,9 +6029,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server start"
-] = """
+aladdin_helps['mysql flexible-server start'] = """
 type: command
 short-summary: Start a flexible server.
 examples:
@@ -7088,9 +6038,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server stop"
-] = """
+aladdin_helps['mysql flexible-server stop'] = """
 type: command
 short-summary: Stop a flexible server.
 examples:
@@ -7099,9 +6047,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server update"
-] = """
+aladdin_helps['mysql flexible-server update'] = """
 type: command
 short-summary: Update a flexible server.
 examples:
@@ -7110,9 +6056,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql flexible-server wait"
-] = """
+aladdin_helps['mysql flexible-server wait'] = """
 type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
 examples:
@@ -7121,9 +6065,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server configuration list"
-] = """
+aladdin_helps['mysql server configuration list'] = """
 type: command
 short-summary: List the configuration values for a server.
 examples:
@@ -7132,9 +6074,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server configuration show"
-] = """
+aladdin_helps['mysql server configuration show'] = """
 type: command
 short-summary: Get the configuration for a server."
 examples:
@@ -7143,9 +6083,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server firewall-rule delete"
-] = """
+aladdin_helps['mysql server firewall-rule delete'] = """
 type: command
 short-summary: Delete a firewall rule.
 examples:
@@ -7154,9 +6092,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server firewall-rule list"
-] = """
+aladdin_helps['mysql server firewall-rule list'] = """
 type: command
 short-summary: List all firewall rules for a server.
 examples:
@@ -7165,9 +6101,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server firewall-rule show"
-] = """
+aladdin_helps['mysql server firewall-rule show'] = """
 type: command
 short-summary: Get the details of a firewall rule.
 examples:
@@ -7176,9 +6110,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server restart"
-] = """
+aladdin_helps['mysql server restart'] = """
 type: command
 short-summary: Restart a server.
 examples:
@@ -7187,9 +6119,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server show"
-] = """
+aladdin_helps['mysql server show'] = """
 type: command
 short-summary: Get the details of a server.
 examples:
@@ -7198,9 +6128,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server start"
-] = """
+aladdin_helps['mysql server start'] = """
 type: command
 short-summary: Start a stopped server.
 examples:
@@ -7209,9 +6137,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server stop"
-] = """
+aladdin_helps['mysql server stop'] = """
 type: command
 short-summary: Stop a running server.
 examples:
@@ -7220,9 +6146,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server update"
-] = """
+aladdin_helps['mysql server update'] = """
 type: command
 short-summary: Update a server.
 examples:
@@ -7231,9 +6155,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "mysql server wait"
-] = """
+aladdin_helps['mysql server wait'] = """
 type: command
 short-summary: Wait for server to satisfy certain conditions.
 examples:
@@ -7242,9 +6164,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres flexible-server firewall-rule delete"
-] = """
+aladdin_helps['postgres flexible-server firewall-rule delete'] = """
 type: command
 short-summary: Delete a firewall rule.
 examples:
@@ -7253,9 +6173,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres flexible-server firewall-rule show"
-] = """
+aladdin_helps['postgres flexible-server firewall-rule show'] = """
 type: command
 short-summary: Get the details of a firewall rule.
 examples:
@@ -7264,9 +6182,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres flexible-server parameter list"
-] = """
+aladdin_helps['postgres flexible-server parameter list'] = """
 type: command
 short-summary: List the parameter values for a flexible server.
 examples:
@@ -7275,9 +6191,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres flexible-server parameter show"
-] = """
+aladdin_helps['postgres flexible-server parameter show'] = """
 type: command
 short-summary: Get the parameter for a flexible server."
 examples:
@@ -7286,9 +6200,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres flexible-server restart"
-] = """
+aladdin_helps['postgres flexible-server restart'] = """
 type: command
 short-summary: Restart a flexible server.
 examples:
@@ -7297,9 +6209,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres flexible-server show"
-] = """
+aladdin_helps['postgres flexible-server show'] = """
 type: command
 short-summary: Get the details of a flexible server.
 examples:
@@ -7308,9 +6218,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres flexible-server start"
-] = """
+aladdin_helps['postgres flexible-server start'] = """
 type: command
 short-summary: Start a flexible server.
 examples:
@@ -7319,9 +6227,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres flexible-server stop"
-] = """
+aladdin_helps['postgres flexible-server stop'] = """
 type: command
 short-summary: Stop a flexible server.
 examples:
@@ -7330,9 +6236,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres flexible-server update"
-] = """
+aladdin_helps['postgres flexible-server update'] = """
 type: command
 short-summary: Update a flexible server.
 examples:
@@ -7341,9 +6245,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres server configuration list"
-] = """
+aladdin_helps['postgres server configuration list'] = """
 type: command
 short-summary: List the configuration values for a server.
 examples:
@@ -7352,9 +6254,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres server configuration show"
-] = """
+aladdin_helps['postgres server configuration show'] = """
 type: command
 short-summary: Get the configuration for a server."
 examples:
@@ -7363,9 +6263,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres server firewall-rule delete"
-] = """
+aladdin_helps['postgres server firewall-rule delete'] = """
 type: command
 short-summary: Delete a firewall rule.
 examples:
@@ -7374,9 +6272,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres server firewall-rule list"
-] = """
+aladdin_helps['postgres server firewall-rule list'] = """
 type: command
 short-summary: List all firewall rules for a server.
 examples:
@@ -7385,9 +6281,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres server firewall-rule show"
-] = """
+aladdin_helps['postgres server firewall-rule show'] = """
 type: command
 short-summary: Get the details of a firewall rule.
 examples:
@@ -7396,9 +6290,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres server show"
-] = """
+aladdin_helps['postgres server show'] = """
 type: command
 short-summary: Get the details of a server.
 examples:
@@ -7407,9 +6299,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "postgres server update"
-] = """
+aladdin_helps['postgres server update'] = """
 type: command
 short-summary: Update a server.
 examples:
@@ -7418,9 +6308,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "role assignment create"
-] = """
+aladdin_helps['role assignment create'] = """
 type: command
 short-summary: Create a new role assignment for a user, group, or service principal.
 examples:
@@ -7430,9 +6318,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "role assignment delete"
-] = """
+aladdin_helps['role assignment delete'] = """
 type: command
 short-summary: Delete role assignments.
 examples:
@@ -7442,9 +6328,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "role definition delete"
-] = """
+aladdin_helps['role definition delete'] = """
 type: command
 short-summary: Delete a role definition.
 examples:
@@ -7453,9 +6337,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "redis create"
-] = """
+aladdin_helps['redis create'] = """
 type: command
 short-summary: Create new Redis Cache instance.
 examples:
@@ -7464,9 +6346,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "relay hyco authorization-rule keys list"
-] = """
+aladdin_helps['relay hyco authorization-rule keys list'] = """
 type: command
 short-summary: List the keys and connection strings of Authorization Rule for Relay Service Hybrid Connection.
 examples:
@@ -7475,9 +6355,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "relay namespace authorization-rule keys list"
-] = """
+aladdin_helps['relay namespace authorization-rule keys list'] = """
 type: command
 short-summary: List the keys and connection strings of Authorization Rule for Relay Service Namespace
 examples:
@@ -7487,9 +6365,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "deployment group validate"
-] = """
+
+aladdin_helps['deployment group validate'] = """
 type: command
 short-summary: Validate whether a template is valid at resource group.
 parameters:
@@ -7517,9 +6394,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment group wait"
-] = """
+aladdin_helps['deployment group wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a deployment condition is met.
 examples:
@@ -7529,9 +6404,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment mg validate"
-] = """
+aladdin_helps['deployment mg validate'] = """
 type: command
 short-summary: Validate whether a template is valid at management group.
 parameters:
@@ -7559,9 +6432,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment operation group list"
-] = """
+aladdin_helps['deployment operation group list'] = """
 type: command
 short-summary: List deployment operations at resource group.
 examples:
@@ -7571,9 +6442,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment operation list"
-] = """
+aladdin_helps['deployment operation list'] = """
 type: command
 short-summary: List deployment operations at subscription scope.
 examples:
@@ -7583,9 +6452,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment operation sub list"
-] = """
+aladdin_helps['deployment operation sub list'] = """
 type: command
 short-summary: List deployment operations at subscription scope.
 examples:
@@ -7595,9 +6462,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment sub validate"
-] = """
+aladdin_helps['deployment sub validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
 parameters:
@@ -7623,9 +6488,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment sub wait"
-] = """
+aladdin_helps['deployment sub wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a deployment condition is met.
 examples:
@@ -7635,9 +6498,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment tenant validate"
-] = """
+aladdin_helps['deployment tenant validate'] = """
 type: command
 short-summary: Validate whether a template is valid at tenant scope.
 parameters:
@@ -7663,9 +6524,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment tenant wait"
-] = """
+aladdin_helps['deployment tenant wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a deployment condition is met.
 examples:
@@ -7675,9 +6534,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "deployment wait"
-] = """
+aladdin_helps['deployment wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a deployment condition is met.
 examples:
@@ -7687,9 +6544,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "group deployment export"
-] = """
+aladdin_helps['group deployment export'] = """
 type: command
 short-summary: Export the template used for a deployment.
 examples:
@@ -7699,9 +6554,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "group deployment validate"
-] = """
+aladdin_helps['group deployment validate'] = """
 type: command
 short-summary: Validate whether a template is syntactically correct.
 parameters:
@@ -7718,9 +6571,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "group deployment wait"
-] = """
+aladdin_helps['group deployment wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a deployment condition is met.
 examples:
@@ -7734,9 +6585,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "group update"
-] = """
+aladdin_helps['group update'] = """
 type: command
 short-summary: Update a resource group.
 examples:
@@ -7746,9 +6595,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "group wait"
-] = """
+aladdin_helps['group wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the resource group is met.
 examples:
@@ -7762,9 +6609,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "lock show"
-] = """
+aladdin_helps['lock show'] = """
 type: command
 short-summary: Show the properties of a lock
 examples:
@@ -7774,9 +6619,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "managedapp definition delete"
-] = """
+aladdin_helps['managedapp definition delete'] = """
 type: command
 short-summary: Delete a managed application definition.
 examples:
@@ -7786,9 +6629,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "managedapp definition list"
-] = """
+aladdin_helps['managedapp definition list'] = """
 type: command
 short-summary: List managed application definitions.
 examples:
@@ -7798,9 +6639,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "managedapp delete"
-] = """
+aladdin_helps['managedapp delete'] = """
 type: command
 short-summary: Delete a managed application.
 examples:
@@ -7810,9 +6649,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "managedapp list"
-] = """
+aladdin_helps['managedapp list'] = """
 type: command
 short-summary: List managed applications.
 examples:
@@ -7822,9 +6659,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy assignment delete"
-] = """
+aladdin_helps['policy assignment delete'] = """
 type: command
 short-summary: Delete a resource policy assignment.
 examples:
@@ -7834,9 +6669,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy assignment identity show"
-] = """
+aladdin_helps['policy assignment identity show'] = """
 type: command
 short-summary: Show a policy assignment's managed identity.
 examples:
@@ -7846,9 +6679,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy assignment show"
-] = """
+aladdin_helps['policy assignment show'] = """
 type: command
 short-summary: Show a resource policy assignment.
 examples:
@@ -7858,9 +6689,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy definition delete"
-] = """
+aladdin_helps['policy definition delete'] = """
 type: command
 short-summary: Delete a policy definition.
 examples:
@@ -7870,9 +6699,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy definition show"
-] = """
+aladdin_helps['policy definition show'] = """
 type: command
 short-summary: Show a policy definition.
 examples:
@@ -7882,9 +6709,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy definition update"
-] = """
+aladdin_helps['policy definition update'] = """
 type: command
 short-summary: Update a policy definition.
 examples:
@@ -7894,9 +6719,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy exemption delete"
-] = """
+aladdin_helps['policy exemption delete'] = """
 type: command
 short-summary: Delete a policy exemption.
 examples:
@@ -7906,9 +6729,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy exemption show"
-] = """
+aladdin_helps['policy exemption show'] = """
 type: command
 short-summary: Show a policy exemption.
 examples:
@@ -7918,9 +6739,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy set-definition delete"
-] = """
+aladdin_helps['policy set-definition delete'] = """
 type: command
 short-summary: Delete a policy set definition.
 examples:
@@ -7930,9 +6749,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "policy set-definition show"
-] = """
+aladdin_helps['policy set-definition show'] = """
 type: command
 short-summary: Show a policy set definition.
 examples:
@@ -7942,9 +6759,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "provider operation show"
-] = """
+aladdin_helps['provider operation show'] = """
 type: command
 short-summary: Get an individual provider's operations.
 examples:
@@ -7954,9 +6769,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "provider register"
-] = """
+aladdin_helps['provider register'] = """
 type: command
 short-summary: Register a provider.
 examples:
@@ -7966,9 +6779,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "provider unregister"
-] = """
+aladdin_helps['provider unregister'] = """
 type: command
 short-summary: Unregister a provider.
 examples:
@@ -7978,9 +6789,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "resource invoke-action"
-] = """
+aladdin_helps['resource invoke-action'] = """
 type: command
 short-summary: Invoke an action on the resource.
 long-summary: >
@@ -7994,9 +6803,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "resource lock delete"
-] = """
+aladdin_helps['resource lock delete'] = """
 type: command
 short-summary: Delete a resource-level lock.
 examples:
@@ -8006,9 +6813,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "resource lock update"
-] = """
+aladdin_helps['resource lock update'] = """
 type: command
 short-summary: Update a resource-level lock.
 examples:
@@ -8018,9 +6823,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "resource update"
-] = """
+aladdin_helps['resource update'] = """
 type: command
 short-summary: Update a resource.
 examples:
@@ -8034,9 +6837,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "resource wait"
-] = """
+aladdin_helps['resource wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a resources is met.
 examples:
@@ -8055,9 +6856,10 @@ examples:
 """
 
 
-aladdin_helps[
-    "security auto-provisioning-setting update"
-] = """
+
+
+
+aladdin_helps['security auto-provisioning-setting update'] = """
 type: command
 short-summary: Updates your automatic provisioning settings on the subscription.
 examples:
@@ -8067,9 +6869,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "security pricing create"
-] = """
+aladdin_helps['security pricing create'] = """
 type: command
 short-summary: Updates the Azure defender plan for the subscription.
 examples:
@@ -8078,9 +6878,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "servicebus georecovery-alias set"
-] = """
+aladdin_helps['servicebus georecovery-alias set'] = """
 type: command
 short-summary: Sets Service Bus Geo-Disaster Recovery Configuration Alias for the give Namespace
 examples:
@@ -8089,9 +6887,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "servicebus georecovery-alias show"
-] = """
+aladdin_helps['servicebus georecovery-alias show'] = """
 type: command
 short-summary: shows properties of Service Bus Geo-Disaster Recovery Configuration Alias for Primay/Secondary Namespace
 examples:
@@ -8100,9 +6896,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "servicebus namespace authorization-rule keys renew"
-] = """
+aladdin_helps['servicebus namespace authorization-rule keys renew'] = """
 type: command
 short-summary: Regenerate keys of Authorization Rule for the Service Bus Namespace.
 examples:
@@ -8111,9 +6905,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "servicebus namespace update"
-] = """
+aladdin_helps['servicebus namespace update'] = """
 type: command
 short-summary: Updates a Service Bus Namespace
 examples:
@@ -8122,9 +6914,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "servicebus topic subscription update"
-] = """
+aladdin_helps['servicebus topic subscription update'] = """
 type: command
 short-summary: Updates the ServiceBus Subscription
 examples:
@@ -8133,9 +6923,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "servicebus topic update"
-] = """
+aladdin_helps['servicebus topic update'] = """
 type: command
 short-summary: Updates the Service Bus Topic
 examples:
@@ -8148,9 +6936,10 @@ examples:
 """
 
 
-aladdin_helps[
-    "sql db delete"
-] = """
+
+
+
+aladdin_helps['sql db delete'] = """
 type: command
 short-summary: Delete a database.
 examples:
@@ -8159,9 +6948,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql db list"
-] = """
+aladdin_helps['sql db list'] = """
 type: command
 short-summary: List databases a server or elastic pool.
 examples:
@@ -8170,9 +6957,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql db rename"
-] = """
+aladdin_helps['sql db rename'] = """
 type: command
 short-summary: Rename a database.
 examples:
@@ -8181,9 +6966,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql db replica list-links"
-] = """
+aladdin_helps['sql db replica list-links'] = """
 type: command
 short-summary: List the replicas of a database and their replication status.
 examples:
@@ -8192,9 +6975,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql db replica set-primary"
-] = """
+aladdin_helps['sql db replica set-primary'] = """
 type: command
 short-summary: Set the primary replica database by failing over from the current primary replica database.
 examples:
@@ -8203,9 +6984,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql db restore"
-] = """
+aladdin_helps['sql db restore'] = """
 type: command
 short-summary: Create a new database by restoring from a backup.
 examples:
@@ -8215,9 +6994,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql db show"
-] = """
+aladdin_helps['sql db show'] = """
 type: command
 short-summary: Get the details for a database.
 examples:
@@ -8226,9 +7003,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql db tde set"
-] = """
+aladdin_helps['sql db tde set'] = """
 type: command
 short-summary: Sets a database's transparent data encryption configuration.
 examples:
@@ -8237,9 +7012,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql dw create"
-] = """
+aladdin_helps['sql dw create'] = """
 type: command
 short-summary: Create a data warehouse.
 examples:
@@ -8248,9 +7021,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql dw delete"
-] = """
+aladdin_helps['sql dw delete'] = """
 type: command
 short-summary: Delete a data warehouse.
 examples:
@@ -8259,9 +7030,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql dw list"
-] = """
+aladdin_helps['sql dw list'] = """
 type: command
 short-summary: List data warehouses for a server.
 examples:
@@ -8270,9 +7039,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql dw show"
-] = """
+aladdin_helps['sql dw show'] = """
 type: command
 short-summary: Get the details for a data warehouse.
 examples:
@@ -8281,9 +7048,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql dw update"
-] = """
+aladdin_helps['sql dw update'] = """
 type: command
 short-summary: Update a data warehouse.
 examples:
@@ -8292,9 +7057,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql failover-group create"
-] = """
+aladdin_helps['sql failover-group create'] = """
 type: command
 short-summary: Creates a failover group.
 examples:
@@ -8303,9 +7066,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql failover-group set-primary"
-] = """
+aladdin_helps['sql failover-group set-primary'] = """
 type: command
 short-summary: Set the primary of the failover group by failing over all databases from the current primary server.
 examples:
@@ -8314,9 +7075,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql mi update"
-] = """
+aladdin_helps['sql mi update'] = """
 type: command
 short-summary: Update a managed instance.
 examples:
@@ -8328,9 +7087,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql server conn-policy show"
-] = """
+aladdin_helps['sql server conn-policy show'] = """
 type: command
 short-summary: Gets a server's secure connection policy.
 examples:
@@ -8339,9 +7096,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql server conn-policy update"
-] = """
+aladdin_helps['sql server conn-policy update'] = """
 type: command
 short-summary: Updates a server's secure connection policy.
 examples:
@@ -8350,9 +7105,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sql server update"
-] = """
+aladdin_helps['sql server update'] = """
 type: command
 short-summary: Update a server.
 examples:
@@ -8362,9 +7115,8 @@ examples:
 """
 
 
-aladdin_helps[
-    "storage account encryption-scope create"
-] = """
+
+aladdin_helps['storage account encryption-scope create'] = """
 type: command
 short-summary: Create an encryption scope within storage account.
 examples:
@@ -8374,9 +7126,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage account generate-sas"
-] = """
+aladdin_helps['storage account generate-sas'] = """
 type: command
 short-summary: Generate a shared access signature for the storage account.
 parameters:
@@ -8397,9 +7147,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage account management-policy create"
-] = """
+aladdin_helps['storage account management-policy create'] = """
 type: command
 short-summary: Create the data policy rules associated with the specified storage account.
 examples:
@@ -8409,9 +7157,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage account network-rule list"
-] = """
+aladdin_helps['storage account network-rule list'] = """
 type: command
 short-summary: List network rules.
 examples:
@@ -8421,9 +7167,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage account network-rule remove"
-] = """
+aladdin_helps['storage account network-rule remove'] = """
 type: command
 short-summary: Remove a network rule.
 examples:
@@ -8437,9 +7181,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage account show-connection-string"
-] = """
+aladdin_helps['storage account show-connection-string'] = """
 type: command
 short-summary: Get the connection string for a storage account.
 examples:
@@ -8449,9 +7191,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage account show-usage"
-] = """
+aladdin_helps['storage account show-usage'] = """
 type: command
 short-summary: Show the current count and limit of the storage accounts under the subscription.
 examples:
@@ -8461,9 +7201,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage account update"
-] = """
+aladdin_helps['storage account update'] = """
 type: command
 short-summary: Update the properties of a storage account.
 examples:
@@ -8473,9 +7211,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob copy start-batch"
-] = """
+aladdin_helps['storage blob copy start-batch'] = """
 type: command
 short-summary: Copy multiple blobs to a blob container. Use `az storage blob show` to check the status of the blobs.
 parameters:
@@ -8515,9 +7251,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob exists"
-] = """
+aladdin_helps['storage blob exists'] = """
 type: command
 short-summary: Check for the existence of a blob in a container.
 parameters:
@@ -8530,9 +7264,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob generate-sas"
-] = """
+aladdin_helps['storage blob generate-sas'] = """
 type: command
 short-summary: Generate a shared access signature for the blob.
 examples:
@@ -8542,9 +7274,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob incremental-copy start"
-] = """
+aladdin_helps['storage blob incremental-copy start'] = """
 type: command
 short-summary: Copies an incremental copy of a blob asynchronously.
 long-summary: This operation returns a copy operation properties object, including a copy ID you can use to check or abort the copy operation. The Blob service copies blobs on a best-effort basis. The source blob for an incremental copy operation must be a page blob. Call get_blob_properties on the destination blob to check the status of the copy operation. The final blob will be committed when the copy completes.
@@ -8567,9 +7297,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob service-properties delete-policy show"
-] = """
+aladdin_helps['storage blob service-properties delete-policy show'] = """
 type: command
 short-summary: Show the storage blob delete-policy.
 examples:
@@ -8583,9 +7311,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob service-properties delete-policy update"
-] = """
+aladdin_helps['storage blob service-properties delete-policy update'] = """
 type: command
 short-summary: Update the storage blob delete-policy.
 examples:
@@ -8595,9 +7321,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob service-properties update"
-] = """
+aladdin_helps['storage blob service-properties update'] = """
 type: command
 short-summary: Update storage blob service properties.
 examples:
@@ -8607,9 +7331,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob set-tier"
-] = """
+aladdin_helps['storage blob set-tier'] = """
 type: command
 short-summary: Set the block or page tiers on the blob.
 parameters:
@@ -8629,9 +7351,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob show"
-] = """
+aladdin_helps['storage blob show'] = """
 type: command
 short-summary: Get the details of a blob.
 examples:
@@ -8641,9 +7361,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob upload"
-] = """
+aladdin_helps['storage blob upload'] = """
 type: command
 short-summary: Upload a file to a storage blob.
 long-summary: Creates a new blob from a file path, or updates the content of an existing blob with automatic chunking and progress notifications.
@@ -8663,9 +7381,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage blob url"
-] = """
+aladdin_helps['storage blob url'] = """
 type: command
 short-summary: Create the url to access a blob.
 examples:
@@ -8679,9 +7395,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage container delete"
-] = """
+aladdin_helps['storage container delete'] = """
 type: command
 short-summary: Marks the specified container for deletion.
 long-summary: >
@@ -8693,9 +7407,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage container exists"
-] = """
+aladdin_helps['storage container exists'] = """
 type: command
 short-summary: Check for the existence of a storage container.
 examples:
@@ -8705,9 +7417,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage container generate-sas"
-] = """
+aladdin_helps['storage container generate-sas'] = """
 type: command
 short-summary: Generate a SAS token for a storage container.
 examples:
@@ -8721,9 +7431,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage container legal-hold show"
-] = """
+aladdin_helps['storage container legal-hold show'] = """
 type: command
 short-summary: Get the legal hold properties of a container.
 examples:
@@ -8733,9 +7441,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage cors clear"
-] = """
+aladdin_helps['storage cors clear'] = """
 type: command
 short-summary: Remove all CORS rules from a storage account.
 parameters:
@@ -8750,9 +7456,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage cors list"
-] = """
+aladdin_helps['storage cors list'] = """
 type: command
 short-summary: List all CORS rules for a storage account.
 parameters:
@@ -8767,9 +7471,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage directory exists"
-] = """
+aladdin_helps['storage directory exists'] = """
 type: command
 short-summary: Check for the existence of a storage directory.
 examples:
@@ -8779,9 +7481,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage directory list"
-] = """
+aladdin_helps['storage directory list'] = """
 type: command
 short-summary: List directories in a share.
 examples:
@@ -8791,9 +7491,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage entity insert"
-] = """
+aladdin_helps['storage entity insert'] = """
 type: command
 short-summary: Insert an entity into a table.
 parameters:
@@ -8816,9 +7514,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage entity query"
-] = """
+aladdin_helps['storage entity query'] = """
 type: command
 short-summary: List entities which satisfy a query.
 parameters:
@@ -8833,9 +7529,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage file delete-batch"
-] = """
+aladdin_helps['storage file delete-batch'] = """
 type: command
 short-summary: Delete files from an Azure Storage File Share.
 parameters:
@@ -8860,9 +7554,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage file download-batch"
-] = """
+aladdin_helps['storage file download-batch'] = """
 type: command
 short-summary: Download files from an Azure Storage File Share to a local directory in a batch operation.
 parameters:
@@ -8898,9 +7590,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage file exists"
-] = """
+aladdin_helps['storage file exists'] = """
 type: command
 short-summary: Check for the existence of a file.
 examples:
@@ -8914,9 +7604,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage file generate-sas"
-] = """
+aladdin_helps['storage file generate-sas'] = """
 type: command
 examples:
   - name: Generate a shared access signature for the file. (autogenerated)
@@ -8929,9 +7617,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage file list"
-] = """
+aladdin_helps['storage file list'] = """
 type: command
 short-summary: List files and directories in a share.
 parameters:
@@ -8945,9 +7631,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage file upload"
-] = """
+aladdin_helps['storage file upload'] = """
 type: command
 short-summary: Upload a file to a share that uses the SMB 3.0 protocol.
 long-summary: Creates or updates an Azure file from a source path with automatic chunking and progress notifications.
@@ -8958,9 +7642,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage file url"
-] = """
+aladdin_helps['storage file url'] = """
 type: command
 short-summary: Create the url to access a file.
 examples:
@@ -8970,9 +7652,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage fs create"
-] = """
+aladdin_helps['storage fs create'] = """
 type: command
 short-summary: Create file system for Azure Data Lake Storage Gen2 account.
 examples:
@@ -8982,9 +7662,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage fs directory delete"
-] = """
+aladdin_helps['storage fs directory delete'] = """
 type: command
 short-summary: Delete a directory in ADLS Gen2 file system.
 examples:
@@ -8994,9 +7672,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage fs directory exists"
-] = """
+aladdin_helps['storage fs directory exists'] = """
 type: command
 short-summary: Check for the existence of a directory in ADLS Gen2 file system.
 examples:
@@ -9006,9 +7682,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage fs directory move"
-] = """
+aladdin_helps['storage fs directory move'] = """
 type: command
 short-summary: Move a directory in ADLS Gen2 file system.
 examples:
@@ -9018,9 +7692,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage fs directory show"
-] = """
+aladdin_helps['storage fs directory show'] = """
 type: command
 short-summary: Show properties of a directory in ADLS Gen2 file system.
 examples:
@@ -9030,9 +7702,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage fs file show"
-] = """
+aladdin_helps['storage fs file show'] = """
 type: command
 short-summary: Show properties of file in ADLS Gen2 file system.
 examples:
@@ -9042,9 +7712,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage fs show"
-] = """
+aladdin_helps['storage fs show'] = """
 type: command
 short-summary: Show properties of file system in ADLS Gen2 account.
 examples:
@@ -9054,9 +7722,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage logging show"
-] = """
+aladdin_helps['storage logging show'] = """
 type: command
 short-summary: Show logging settings for a storage account.
 parameters:
@@ -9069,9 +7735,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage metrics show"
-] = """
+aladdin_helps['storage metrics show'] = """
 type: command
 short-summary: Show metrics settings for a storage account.
 parameters:
@@ -9086,9 +7750,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage metrics update"
-] = """
+aladdin_helps['storage metrics update'] = """
 type: command
 short-summary: Update metrics settings for a storage account.
 parameters:
@@ -9113,9 +7775,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage share create"
-] = """
+aladdin_helps['storage share create'] = """
 type: command
 short-summary: Creates a new share under the specified account.
 examples:
@@ -9125,9 +7785,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage share exists"
-] = """
+aladdin_helps['storage share exists'] = """
 type: command
 short-summary: Check for the existence of a file share.
 examples:
@@ -9141,9 +7799,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage share generate-sas"
-] = """
+aladdin_helps['storage share generate-sas'] = """
 type: command
 examples:
   - name: Generate a shared access signature for the share. (autogenerated)
@@ -9156,9 +7812,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "storage share url"
-] = """
+aladdin_helps['storage share url'] = """
 type: command
 short-summary: Create a URI to access a file share.
 examples:
@@ -9169,9 +7823,10 @@ examples:
 """
 
 
-aladdin_helps[
-    "disk delete"
-] = """
+
+
+
+aladdin_helps['disk delete'] = """
 type: command
 short-summary: Delete a managed disk.
 examples:
@@ -9181,9 +7836,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "disk grant-access"
-] = """
+aladdin_helps['disk grant-access'] = """
 type: command
 short-summary: Grant a resource access to a managed disk.
 examples:
@@ -9193,9 +7846,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "disk revoke-access"
-] = """
+aladdin_helps['disk revoke-access'] = """
 type: command
 short-summary: Revoke a resource's read access to a managed disk.
 examples:
@@ -9209,9 +7860,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "disk update"
-] = """
+aladdin_helps['disk update'] = """
 type: command
 short-summary: Update a managed disk.
 examples:
@@ -9221,9 +7870,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "disk wait"
-] = """
+aladdin_helps['disk wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a managed disk is met.
 examples:
@@ -9237,9 +7884,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "disk-encryption-set delete"
-] = """
+aladdin_helps['disk-encryption-set delete'] = """
 type: command
 short-summary: Delete a disk encryption set.
 examples:
@@ -9249,9 +7894,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "disk-encryption-set show"
-] = """
+aladdin_helps['disk-encryption-set show'] = """
 type: command
 short-summary: Get information of a disk encryption sets.
 examples:
@@ -9261,9 +7904,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "disk-encryption-set update"
-] = """
+aladdin_helps['disk-encryption-set update'] = """
 type: command
 short-summary: Update a disk encryption set.
 examples:
@@ -9273,9 +7914,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "image builder delete"
-] = """
+aladdin_helps['image builder delete'] = """
 type: command
 short-summary: Delete image builder template.
 examples:
@@ -9285,9 +7924,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "image builder show"
-] = """
+aladdin_helps['image builder show'] = """
 type: command
 short-summary: Show an image builder template.
 examples:
@@ -9297,9 +7934,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ppg create"
-] = """
+aladdin_helps['ppg create'] = """
 type: command
 short-summary: Create a proximity placement group
 examples:
@@ -9309,9 +7944,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ppg list"
-] = """
+aladdin_helps['ppg list'] = """
 type: command
 short-summary: List proximity placement groups
 examples:
@@ -9321,9 +7954,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "ppg show"
-] = """
+aladdin_helps['ppg show'] = """
 type: command
 short-summary: Get a proximity placement group
 examples:
@@ -9333,9 +7964,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "sig image-version wait"
-] = """
+aladdin_helps['sig image-version wait'] = """
 type: command
 short-summary: wait for image version related operation
 examples:
@@ -9347,9 +7976,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "snapshot grant-access"
-] = """
+aladdin_helps['snapshot grant-access'] = """
 type: command
 short-summary: Grant read access to a snapshot.
 examples:
@@ -9359,9 +7986,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "snapshot revoke-access"
-] = """
+aladdin_helps['snapshot revoke-access'] = """
 type: command
 short-summary: Revoke read access to a snapshot.
 examples:
@@ -9371,9 +7996,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "snapshot update"
-] = """
+aladdin_helps['snapshot update'] = """
 type: command
 short-summary: Update a snapshot.
 examples:
@@ -9383,9 +8006,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "snapshot wait"
-] = """
+aladdin_helps['snapshot wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a snapshot is met.
 examples:
@@ -9399,9 +8020,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm boot-diagnostics enable"
-] = """
+aladdin_helps['vm boot-diagnostics enable'] = """
 type: command
 short-summary: Enable the boot diagnostics on a VM.
 parameters:
@@ -9414,9 +8033,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm boot-diagnostics get-boot-log"
-] = """
+aladdin_helps['vm boot-diagnostics get-boot-log'] = """
 type: command
 short-summary: Get the boot diagnostics log from a VM.
 examples:
@@ -9426,9 +8043,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm deallocate"
-] = """
+aladdin_helps['vm deallocate'] = """
 type: command
 short-summary: Deallocate a VM.
 long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
@@ -9439,9 +8054,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm disk attach"
-] = """
+aladdin_helps['vm disk attach'] = """
 type: command
 short-summary: Attach a managed persistent disk to a VM. Please note that --ids only supports one disk.
 long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
@@ -9452,9 +8065,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm encryption disable"
-] = """
+aladdin_helps['vm encryption disable'] = """
 type: command
 short-summary: Disable disk encryption on the OS disk and/or data disks. Decrypt mounted disks.
 long-summary: |
@@ -9467,15 +8078,13 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm encryption enable"
-] = """
+aladdin_helps['vm encryption enable'] = """
 type: command
 short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt mounted disks."
 long-summary: |
     Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
     For more information, see:
-    https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
+    ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
 parameters:
   - name: --aad-client-id
     short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -9490,9 +8099,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm encryption show"
-] = """
+aladdin_helps['vm encryption show'] = """
 type: command
 short-summary: Show encryption status.
 examples:
@@ -9502,9 +8109,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm extension wait"
-] = """
+aladdin_helps['vm extension wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a virtual machine extension is met.
 examples:
@@ -9522,9 +8127,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm host create"
-] = """
+aladdin_helps['vm host create'] = """
 type: command
 short-summary: Create a dedicated host.
 examples:
@@ -9534,9 +8137,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm host group create"
-] = """
+aladdin_helps['vm host group create'] = """
 type: command
 short-summary: Create a dedicated host group.
 examples:
@@ -9546,9 +8147,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm host group show"
-] = """
+aladdin_helps['vm host group show'] = """
 type: command
 short-summary: Get the details of a dedicated host group.
 examples:
@@ -9558,9 +8157,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm host list"
-] = """
+aladdin_helps['vm host list'] = """
 type: command
 short-summary: List dedicated hosts.
 examples:
@@ -9570,9 +8167,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm host show"
-] = """
+aladdin_helps['vm host show'] = """
 type: command
 short-summary: Get the details of a dedicated host.
 examples:
@@ -9582,9 +8177,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm identity show"
-] = """
+aladdin_helps['vm identity show'] = """
 type: command
 short-summary: display VM's managed identity info.
 examples:
@@ -9594,9 +8187,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm image accept-terms"
-] = """
+aladdin_helps['vm image accept-terms'] = """
 type: command
 short-summary: Accept Azure Marketplace term so that the image can be used to create VMs
 examples:
@@ -9606,9 +8197,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm image show"
-] = """
+aladdin_helps['vm image show'] = """
 type: command
 short-summary: Get the details for a VM image available in the Azure Marketplace.
 examples:
@@ -9618,9 +8207,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm image terms cancel"
-] = """
+aladdin_helps['vm image terms cancel'] = """
 type: command
 short-summary: Cancel Azure Marketplace image terms.
 examples:
@@ -9630,9 +8217,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm monitor metrics list-definitions"
-] = """
+aladdin_helps['vm monitor metrics list-definitions'] = """
 type: command
 short-summary: List the metric definitions for a VM.
 examples:
@@ -9642,9 +8227,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm nic set"
-] = """
+aladdin_helps['vm nic set'] = """
 type: command
 short-summary: Configure settings of a NIC attached to a VM.
 examples:
@@ -9654,9 +8237,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm run-command show"
-] = """
+aladdin_helps['vm run-command show'] = """
 type: command
 parameters:
   - name: --command-id
@@ -9671,9 +8252,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm secret add"
-] = """
+aladdin_helps['vm secret add'] = """
 type: command
 short-summary: Add a secret to a VM.
 long-summary: 'To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-windows) instead of `az vm secret add`.'
@@ -9684,9 +8263,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm secret list"
-] = """
+aladdin_helps['vm secret list'] = """
 type: command
 short-summary: List secrets on a VM.
 examples:
@@ -9696,9 +8273,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm start"
-] = """
+aladdin_helps['vm start'] = """
 type: command
 short-summary: Start a stopped VM.
 examples:
@@ -9708,9 +8283,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vm unmanaged-disk attach"
-] = """
+aladdin_helps['vm unmanaged-disk attach'] = """
 type: command
 short-summary: Attach an unmanaged persistent disk to a VM.
 long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
@@ -9721,9 +8294,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss deallocate"
-] = """
+aladdin_helps['vmss deallocate'] = """
 type: command
 short-summary: Deallocate VMs within a VMSS.
 examples:
@@ -9733,9 +8304,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss delete-instances"
-] = """
+aladdin_helps['vmss delete-instances'] = """
 type: command
 short-summary: Delete VMs within a VMSS.
 examples:
@@ -9745,9 +8314,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss diagnostics set"
-] = """
+aladdin_helps['vmss diagnostics set'] = """
 type: command
 short-summary: Enable diagnostics on a VMSS.
 examples:
@@ -9757,9 +8324,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss disk attach"
-] = """
+aladdin_helps['vmss disk attach'] = """
 type: command
 short-summary: Attach managed data disks to a scale set or its instances.
 examples:
@@ -9773,9 +8338,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss disk detach"
-] = """
+aladdin_helps['vmss disk detach'] = """
 type: command
 short-summary: Detach managed data disks from a scale set or its instances.
 examples:
@@ -9785,12 +8348,10 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss encryption enable"
-] = """
+aladdin_helps['vmss encryption enable'] = """
 type: command
 short-summary: "Encrypt a VMSS with managed disks."
-long-summary: "For more information, see: For more information, see: https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
+long-summary: "For more information, see: For more information, see: ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
 examples:
   - name: Encrypt a VMSS with managed disks. (autogenerated)
     text: |
@@ -9798,9 +8359,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss encryption show"
-] = """
+aladdin_helps['vmss encryption show'] = """
 type: command
 short-summary: Show encryption status.
 examples:
@@ -9810,9 +8369,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss extension delete"
-] = """
+aladdin_helps['vmss extension delete'] = """
 type: command
 short-summary: Delete an extension from a VMSS.
 examples:
@@ -9822,9 +8379,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss extension list"
-] = """
+aladdin_helps['vmss extension list'] = """
 type: command
 short-summary: List extensions associated with a VMSS.
 examples:
@@ -9834,9 +8389,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss extension show"
-] = """
+aladdin_helps['vmss extension show'] = """
 type: command
 short-summary: Show details on a VMSS extension.
 examples:
@@ -9846,9 +8399,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss get-instance-view"
-] = """
+aladdin_helps['vmss get-instance-view'] = """
 type: command
 short-summary: View an instance of a VMSS.
 parameters:
@@ -9861,9 +8412,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss identity assign"
-] = """
+aladdin_helps['vmss identity assign'] = """
 type: command
 short-summary: Enable managed service identity on a VMSS.
 long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
@@ -9874,9 +8423,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss identity show"
-] = """
+aladdin_helps['vmss identity show'] = """
 type: command
 short-summary: display VM scaleset's managed identity info.
 examples:
@@ -9886,9 +8433,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss list"
-] = """
+aladdin_helps['vmss list'] = """
 type: command
 short-summary: List VMSS.
 examples:
@@ -9898,9 +8443,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss list-instance-connection-info"
-] = """
+aladdin_helps['vmss list-instance-connection-info'] = """
 type: command
 short-summary: Get the IP address and port number used to connect to individual VM instances within a set.
 examples:
@@ -9910,9 +8453,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss list-instance-public-ips"
-] = """
+aladdin_helps['vmss list-instance-public-ips'] = """
 type: command
 short-summary: List public IP addresses of VM instances within a set.
 examples:
@@ -9922,9 +8463,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss reimage"
-] = """
+aladdin_helps['vmss reimage'] = """
 type: command
 short-summary: Reimage VMs within a VMSS.
 parameters:
@@ -9937,9 +8476,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss restart"
-] = """
+aladdin_helps['vmss restart'] = """
 type: command
 short-summary: Restart VMs within a VMSS.
 examples:
@@ -9949,9 +8486,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss run-command show"
-] = """
+aladdin_helps['vmss run-command show'] = """
 type: command
 parameters:
   - name: --command-id
@@ -9966,9 +8501,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss scale"
-] = """
+aladdin_helps['vmss scale'] = """
 type: command
 short-summary: Change the number of VMs within a VMSS.
 parameters:
@@ -9981,9 +8514,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss show"
-] = """
+aladdin_helps['vmss show'] = """
 type: command
 short-summary: Get details on VMs within a VMSS.
 parameters:
@@ -9996,9 +8527,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss start"
-] = """
+aladdin_helps['vmss start'] = """
 type: command
 short-summary: Start VMs within a VMSS.
 examples:
@@ -10008,9 +8537,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss stop"
-] = """
+aladdin_helps['vmss stop'] = """
 type: command
 short-summary: Power off (stop) VMs within a VMSS.
 long-summary: The VMs will continue to be billed. To avoid this, you can deallocate VM instances within a VMSS through "az vmss deallocate"
@@ -10021,9 +8548,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss update-instances"
-] = """
+aladdin_helps['vmss update-instances'] = """
 type: command
 short-summary: Upgrade VMs within a VMSS.
 examples:
@@ -10033,9 +8558,7 @@ examples:
     crafted: true
 """
 
-aladdin_helps[
-    "vmss wait"
-] = """
+aladdin_helps['vmss wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a scale set is met.
 examples:
