@@ -14,7 +14,7 @@ from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
     get_location_type, get_resource_name_completion_list, tags_type, get_three_state_flag,
-    file_type, get_enum_type, zone_type, zones_type, resource_group_name_type)
+    file_type, get_enum_type, zone_type, zones_type)
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
