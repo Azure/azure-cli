@@ -1,0 +1,92 @@
+interactions:
+- request:
+    body: '{"location":"eastus"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - rest
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '21'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --method --url --body
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.29.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rmpl_plr000001/providers/Microsoft.Authorization/resourceManagementPrivateLinks/cli_test_rmpl_plr-000002?api-version=2020-05-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpointConnections":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rmpl_plr000001/providers/Microsoft.Authorization/resourceManagementPrivateLinks/cli_test_rmpl_plr-000002","name":"cli_test_rmpl_plr-000002","type":"Microsoft.Authorization/resourceManagementPrivateLinks","location":"eastus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '414'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 14:06:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1191'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --type
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.29.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rmpl_plr000001/providers/Microsoft.Authorization/resourceManagementPrivateLinks/cli_test_rmpl_plr-000002/privateLinkResources?api-version=2020-05-01
+  response:
+    body:
+      string: '{"value":[{"properties":{"groupId":"ResourceManagement","requiredMembers":["ResourceManagement"],"requiredZoneNames":["privatelink.azure.com"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rmpl_plr000001/providers/Microsoft.Authorization/resourceManagementPrivateLinks/cli_test_rmpl_plr-000002/privateLinkResources/ResourceManagement","name":"ResourceManagement","type":"Microsoft.Authorization/resourceManagementPrivateLinks/privateLinkResources"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '543'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Oct 2021 14:06:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

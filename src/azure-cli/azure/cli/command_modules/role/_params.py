@@ -90,7 +90,8 @@ def load_arguments(self, _):
                    help='Skip creating the default assignment, which allows the service principal to access resources under the current subscription. '
                         'When specified, --scopes will be ignored. You may use `az role assignment create` to create '
                         'role assignments for this service principal later.')
-        c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
+        c.argument('show_auth_for_sdk', options_list='--sdk-auth', deprecate_info=c.deprecate(target='--sdk-auth'),
+                   help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')

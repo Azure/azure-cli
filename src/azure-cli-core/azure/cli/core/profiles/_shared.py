@@ -143,7 +143,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2021-06-01',
-        ResourceType.MGMT_NETWORK: '2021-02-01',
+        ResourceType.MGMT_NETWORK: '2021-03-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2021-07-01', {
             'resource_skus': '2019-04-01',
             'disks': '2020-12-01',
@@ -152,7 +152,7 @@ AZURE_API_PROFILES = {
             'snapshots': '2020-12-01',
             'galleries': '2021-07-01',
             'gallery_images': '2020-09-30',
-            'gallery_image_versions': '2020-09-30',
+            'gallery_image_versions': '2021-07-01',
             'shared_galleries': '2020-09-30',
             'virtual_machine_scale_sets': '2021-04-01',
         }),
@@ -185,12 +185,12 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2020-04-08',
+        ResourceType.DATA_STORAGE_BLOB: '2020-06-12',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2020-02-10',
         ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'activity_log_alerts': '2017-04-01',
             'activity_logs': '2015-04-01',
@@ -273,7 +273,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_QUEUE: '2019-07-07',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
@@ -317,7 +317,7 @@ AZURE_API_PROFILES = {
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },

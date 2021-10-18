@@ -407,7 +407,7 @@ parameters:
   - name: --private-dns-zone
     type: string
     short-summary: Private dns zone mode for private cluster.
-    long-summary: Allowed values are "system" or custom private dns zone resource id. If not set, defaults to type system. Requires --enable-private-cluster to be used.
+    long-summary: Allowed values are "system", "none" or custom private dns zone resource id. If not set, defaults to type system. Requires --enable-private-cluster to be used.
   - name: --fqdn-subdomain
     type: string
     short-summary: Prefix for FQDN that is created for private cluster with custom private dns zone scenario.
@@ -465,6 +465,12 @@ parameters:
   - name: --disable-local-accounts
     type: bool
     short-summary: If set to true, getting static credential will be disabled for this cluster.
+  - name: --tags
+    type: string
+    short-summary: The tags of the managed cluster. The managed cluster instance and all resources managed by the cloud provider will be tagged.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -514,6 +520,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --location <location> --kubernetes-version 1.20.7 --edge-zone <edge-zone-name>
   - name: Create a kubernetes cluster with a specific OS SKU
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu
+  - name: Create a kubernetes cluster with custom tags
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --tags "foo=bar" "baz=qux"
+  - name: Create a kubernetes cluster with custom headers
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
 """
 
 helps['aks update'] = """
@@ -626,6 +636,12 @@ parameters:
   - name: --enable-local-accounts
     type: bool
     short-summary: If set to true, will enable getting static credential for this cluster.
+  - name: --tags
+    type: string
+    short-summary: The tags of the managed cluster. The managed cluster instance and all resources managed by the cloud provider will be tagged.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -663,6 +679,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-rbac
   - name: Disable Azure RBAC in a managed AAD AKS cluster
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-rbac
+  - name: Update the tags of a kubernetes cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --tags "foo=bar" "baz=qux"
+  - name: Update a kubernetes cluster with custom headers
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
 """
 
 helps['aks delete'] = """

@@ -8,13 +8,13 @@ import logging
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
-                                            NotebookResource)
+                                            NotebookResource, SparkJobDefinition)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
                                cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool,
-                               cf_synapse_library)
+                               cf_synapse_spark_job_definition, cf_synapse_library)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
@@ -437,3 +437,27 @@ def test_workspace_package(client, package_name):
 def delete_workspace_package(cmd, workspace_name, package_name, no_wait=False):
     client = cf_synapse_library(cmd.cli_ctx, workspace_name)
     return sdk_no_wait(no_wait, client.begin_delete, package_name)
+
+
+# Spark job definition
+def list_spark_job_definition(cmd, workspace_name):
+    client = cf_synapse_spark_job_definition(cmd.cli_ctx, workspace_name)
+    return client.get_spark_job_definitions_by_workspace()
+
+
+def get_spark_job_definition(cmd, workspace_name, spark_job_definition_name):
+    client = cf_synapse_spark_job_definition(cmd.cli_ctx, workspace_name)
+    return client.get_spark_job_definition(spark_job_definition_name)
+
+
+def delete_spark_job_definition(cmd, workspace_name, spark_job_definition_name, no_wait=False):
+    client = cf_synapse_spark_job_definition(cmd.cli_ctx, workspace_name)
+    return sdk_no_wait(no_wait, client.begin_delete_spark_job_definition, spark_job_definition_name, polling=True)
+
+
+def create_or_update_spark_job_definition(cmd, workspace_name, spark_job_definition_name, definition_file,
+                                          no_wait=False):
+    client = cf_synapse_spark_job_definition(cmd.cli_ctx, workspace_name)
+    properties = SparkJobDefinition.from_dict(definition_file)
+    return sdk_no_wait(no_wait, client.begin_create_or_update_spark_job_definition,
+                       spark_job_definition_name, properties, polling=True)
