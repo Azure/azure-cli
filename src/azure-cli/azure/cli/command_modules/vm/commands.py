@@ -378,7 +378,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_nic')
         g.custom_command('list', 'list_vm_nics')
 
-    with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands, operation_group='virtual_machine_run_commands', min_api='2021-07-01') as g:
+    with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
         g.custom_command('invoke', 'vm_run_command_invoke')
         g.custom_command('list', 'vm_run_command_list')
         g.custom_show_command('show', 'vm_run_command_show')
@@ -480,7 +480,7 @@ def load_command_table(self, _):
         g.command('list-vm-nics', 'list_virtual_machine_scale_set_vm_network_interfaces')
         g.show_command('show', 'get_virtual_machine_scale_set_network_interface')
 
-    with self.command_group('vmss run-command', compute_vmss_run_sdk, client_factory=cf_vmss_run_commands, min_api='2021-07-01') as g:
+    with self.command_group('vmss run-command', compute_vmss_run_sdk, client_factory=cf_vmss_run_commands, min_api='2018-04-01') as g:
         g.custom_command('invoke', 'vmss_run_command_invoke')
         g.custom_command('list', 'vmss_run_command_list')
         g.custom_show_command('show', 'vmss_run_command_show')
