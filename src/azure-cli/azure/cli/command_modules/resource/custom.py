@@ -3560,6 +3560,7 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
         return
     run_bicep_command(args)
 
+
 def publish_bicep_file(cmd, file, target):
     if supports_bicep_publish():
         run_bicep_command(["publish", file, "--target", target])
@@ -3573,6 +3574,7 @@ def decompile_bicep_file(cmd, file):
 
 def show_bicep_cli_version(cmd):
     print(run_bicep_command(["--version"], auto_install=False))
+
 
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
