@@ -6,7 +6,7 @@
 import os
 import azure.batch.models
 from azure.cli.core.util import get_file_json
-from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
+from urllib.parse import urlsplit
 
 
 # TYPES VALIDATORS

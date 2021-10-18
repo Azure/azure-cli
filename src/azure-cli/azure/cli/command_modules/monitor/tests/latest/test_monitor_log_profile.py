@@ -14,7 +14,8 @@ class TestLogProfileScenarios(ScenarioTest):
         self.kwargs.update({
             'name': self.create_random_name('clitest', 20)
         })
-        self.kwargs['storage'] = self.cmd('storage account show -n {sa} -g {rg} --query id -otsv').output.strip()
+        self.kwargs['storage'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'\
+            .format(self.get_subscription_id(), resource_group, storage_account)
         self.cmd("monitor log-profiles create --categories 'Write' --enabled false --days 1095 --location southcentralus --locations westus southcentralus --name {name} --storage-account-id {storage}", checks=[
             self.check('storageAccountId', '{storage}'),
             self.check('serviceBusRuleId', None),

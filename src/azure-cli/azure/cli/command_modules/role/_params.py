@@ -50,7 +50,7 @@ def load_arguments(self, _):
         c.argument('app_roles', type=validate_file_or_dict,
                    help="declare the roles you want to associate with your application. Should be in manifest json format. See examples below for details")
         c.argument('optional_claims', type=validate_file_or_dict,
-                   help="declare the optional claims for the application. Should be in manifest json format. See examples below for details. Please reference https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims#optionalclaim-type for optional claim properties.")
+                   help="declare the optional claims for the application. Should be in manifest json format. See examples below for details. Please reference https://docs.microsoft.com/azure/active-directory/develop/active-directory-optional-claims#optionalclaim-type for optional claim properties.")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
         c.argument('credential_description', help="the description of the password")
 
@@ -90,7 +90,8 @@ def load_arguments(self, _):
                    help='Skip creating the default assignment, which allows the service principal to access resources under the current subscription. '
                         'When specified, --scopes will be ignored. You may use `az role assignment create` to create '
                         'role assignments for this service principal later.')
-        c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
+        c.argument('show_auth_for_sdk', options_list='--sdk-auth', deprecate_info=c.deprecate(target='--sdk-auth'),
+                   help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')

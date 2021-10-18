@@ -74,14 +74,13 @@ class TunnelServer:
 
     def _get_auth_token(self):
         profile = Profile(cli_ctx=self.cli_ctx)
-        user = profile.get_current_account_user()
         # Generate an Azure token with the VSTS resource app id
-        auth_token = profile.get_access_token_for_resource(user, None, None)
+        auth_token, _, _ = profile.get_raw_token()
         content = {
             'resourceId': self.remote_host,
             'protocol': 'tcptunnel',
             'workloadHostPort': self.remote_port,
-            'aztoken': auth_token,
+            'aztoken': auth_token[1],
             'token': self.last_token,
         }
         if self.node_id:

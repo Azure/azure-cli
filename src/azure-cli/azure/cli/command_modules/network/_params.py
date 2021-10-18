@@ -6,8 +6,6 @@
 # pylint: disable=line-too-long, too-many-lines
 from argcomplete.completers import FilesCompleter
 
-import six
-
 from knack.arguments import CLIArgumentType, ignore_type
 
 from azure.cli.core.commands.parameters import (get_location_type, get_resource_name_completion_list,
@@ -274,6 +272,7 @@ def load_arguments(self, _):
         c.argument('host_name', help='Host name to use for multisite gateways.')
         c.argument('host_names', nargs='+', is_preview=True, help='Space-separated list of host names that allows special wildcard characters as well.', min_api='2019-11-01')
         c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
+        c.argument('ssl_profile', min_api='2020-06-01', help='SSL profile resource of the application gateway.', completer=get_ag_subresource_completion_list('ssl_profiles'))
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
@@ -457,6 +456,9 @@ def load_arguments(self, _):
         c.argument('client_cert_name', options_list='--name', help='Name of the trusted client certificate that is unique within an Application Gateway')
 
     with self.argument_context('network application-gateway client-cert add', min_api='2020-06-01') as c:
+        c.argument('client_cert_data', options_list='--data', type=file_type, completer=FilesCompleter(), help='Certificate public data.', validator=validate_trusted_client_cert)
+
+    with self.argument_context('network application-gateway client-cert update', min_api='2020-06-01') as c:
         c.argument('client_cert_data', options_list='--data', type=file_type, completer=FilesCompleter(), help='Certificate public data.', validator=validate_trusted_client_cert)
 
     with self.argument_context('network application-gateway ssl-profile', min_api='2020-06-01', id_part=None) as c:
@@ -762,8 +764,7 @@ def load_arguments(self, _):
         c.extra('cmd')
 
     with self.argument_context('network express-route peering') as c:
-        # Using six.integer_types so we get int for Py3 and long for Py2
-        c.argument('peer_asn', help='Autonomous system number of the customer/connectivity provider.', type=six.integer_types[-1])
+        c.argument('peer_asn', help='Autonomous system number of the customer/connectivity provider.', type=int)
         c.argument('vlan_id', help='Identifier used to identify the customer.')
         c.argument('circuit_name', circuit_name_type)
         c.argument('peering_name', name_arg_type, id_part='child_name_1')
@@ -1725,6 +1726,8 @@ def load_arguments(self, _):
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
         c.argument('cidr', help='The prefix range in CIDR notation. Should include the start address and the prefix length.')
 
+    with self.argument_context('network custom-ip prefix update') as c:
+        c.argument('commissioned_state', options_list='--state', help='Commissioned State of the custom ip prefix.', arg_type=get_enum_type(['commission', 'decommission', 'deprovision', 'provision']))
     # endregion
 
     # region PublicIPAddresses

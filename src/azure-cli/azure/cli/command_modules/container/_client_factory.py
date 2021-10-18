@@ -15,7 +15,7 @@ def cf_container_groups(cli_ctx, *_):
 
 
 def cf_container(cli_ctx, *_):
-    return _container_instance_client_factory(cli_ctx).container
+    return _container_instance_client_factory(cli_ctx).containers
 
 
 def _log_analytics_client_factory(cli_ctx, *_):
@@ -58,3 +58,9 @@ def cf_network(cli_ctx):
     return get_mgmt_service_client(cli_ctx, NetworkManagementClient,
                                    api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]
                                    ['container_network'])
+
+
+def cf_msi(cli_ctx):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient)

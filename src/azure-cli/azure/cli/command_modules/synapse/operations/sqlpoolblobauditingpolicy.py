@@ -369,8 +369,7 @@ def _get_storage_account_name(storage_endpoint):
     Determines storage account name from endpoint url string.
     e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
     """
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+    from urllib.parse import urlparse
 
     return urlparse(storage_endpoint).netloc.split('.')[0]
 
