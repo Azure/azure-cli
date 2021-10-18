@@ -4141,14 +4141,6 @@ def list_capacity_reservation(client, resource_group_name, capacity_reservation_
 
 
 # region Restore point collection
-def restore_point_show(client,
-                       resource_group_name,
-                       restore_point_collection_name,
-                       restore_point_name):
-    return client.get(resource_group_name=resource_group_name,
-                      restore_point_collection_name=restore_point_collection_name,
-                      restore_point_name=restore_point_name)
-
 
 def restore_point_create(client,
                          resource_group_name,
@@ -4168,26 +4160,10 @@ def restore_point_create(client,
                        restore_point_name=restore_point_name,
                        parameters=parameters)
 
-
-def restore_point_delete(client,
-                         resource_group_name,
-                         restore_point_name,
-                         restore_point_collection_name,
-                         no_wait=False):
-    return sdk_no_wait(no_wait,
-                       client.begin_delete,
-                       resource_group_name=resource_group_name,
-                       restore_point_collection_name=restore_point_collection_name,
-                       restore_point_name=restore_point_name)
 # endRegion
 
 
 # region Restore point collection
-def restore_point_collection_list(client,
-                                  resource_group_name):
-    return client.list(resource_group_name=resource_group_name)
-
-
 def restore_point_collection_show(client,
                                   resource_group_name,
                                   restore_point_collection_name):
@@ -4224,19 +4200,5 @@ def restore_point_collection_update(client,
     return client.update(resource_group_name=resource_group_name,
                          restore_point_collection_name=restore_point_collection_name,
                          parameters=parameters)
-
-
-def restore_point_collection_delete(client,
-                                    resource_group_name,
-                                    restore_point_collection_name,
-                                    no_wait=False):
-    return sdk_no_wait(no_wait,
-                       client.begin_delete,
-                       resource_group_name=resource_group_name,
-                       restore_point_collection_name=restore_point_collection_name)
-
-
-def restore_point_collection_list_all(client):
-    return client.list_all()
 
 # endRegion

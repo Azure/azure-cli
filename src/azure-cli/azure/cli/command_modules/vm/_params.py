@@ -1211,26 +1211,26 @@ def load_arguments(self, _):
     # region Restore point
     with self.argument_context('restore-point') as c:
         c.argument('restore_point_collection_name', options_list=['--collection-name'],
-                   help='The name of the restore point collection.', id_part='name')
+                   help='The name of the restore point collection.')
 
     with self.argument_context('restore-point create') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
-                   help='The name of the restore point.', id_part='child_name_1')
+                   help='The name of the restore point.')
         c.argument('exclude_disks', nargs='+', help='List of disk resource ids that the '
                    'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
                    'included.')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
-                   help='The name of the restore point.', id_part='child_name_1')
+                   help='The name of the restore point.')
 
     with self.argument_context('restore-point delete') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
-                   help='The name of the restore point.', id_part='child_name_1')
+                   help='The name of the restore point.')
 
     with self.argument_context('restore-point wait') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
-                   help='The name of the restore point.', id_part='child_name_1')
+                   help='The name of the restore point.')
     # endRegion
 
     # region Restore point collection
