@@ -130,7 +130,7 @@ class TestServicePrincipalAuth(unittest.TestCase):
             'client_secret': 'test_secret'
         }
 
-    def test_service_principal_auth_client_cert(self):
+    def test_service_principal_auth_certificate(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
         sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1', {'certificate': test_cert_file})
@@ -143,6 +143,34 @@ class TestServicePrincipalAuth(unittest.TestCase):
             'client_id': 'sp_id1',
             'tenant': 'tenant1',
             'certificate': test_cert_file
+        }
+
+    def test_service_principal_auth_certificate_sn_issuer(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
+
+        with open(test_cert_file) as cert_file:
+            cert_file_string = cert_file.read()
+        match = re.search(r'-+BEGIN CERTIFICATE-+(?P<public>[^-]+)-+END CERTIFICATE-+', cert_file_string, re.I)
+        public_certificate = match.group().strip()
+
+        sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1',
+                                                             {
+                                                                 'certificate': test_cert_file,
+                                                                 'use_cert_sn_issuer': True,
+                                                             })
+
+        result = sp_auth.get_entry_to_persist()
+        # To compute the thumb print:
+        #   openssl x509 -in sp_cert.pem -noout -fingerprint
+        assert sp_auth.thumbprint == 'F06A53848BBE714A4290D69D335279C1D01073FD'
+        assert sp_auth.public_certificate == public_certificate
+
+        assert result == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'certificate': test_cert_file,
+            'use_cert_sn_issuer': True,
         }
 
     def test_build_credential(self):
