@@ -1667,10 +1667,10 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise CLIError(usage_error)
             # autodetect copy_start for `az snapshot create`
-            if namespace.source_snapshot and hasattr(namespace, 'copy_start') and namespace.copy_start is None:
+            if 'snapshot create' in cmd.name and hasattr(namespace, 'copy_start') and namespace.copy_start is None:
                 if not source_info:
                     from azure.cli.core.util import parse_proxy_resource_id
-                    result = parse_proxy_resource_id(namespace.source_snapshot)
+                    result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
                     source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx, result['resource_group'], result['name'])
                 source_location = source_info.location
                 target_location = namespace.location if namespace.location \
