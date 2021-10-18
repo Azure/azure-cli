@@ -367,7 +367,7 @@ class TestProfile(unittest.TestCase):
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subs = profile.login(False, 'my app', 'my secret', True, self.tenant_id, use_device_code=True,
+        subs = profile.login(False, 'my app', {'secret': 'very_secret'}, True, self.tenant_id, use_device_code=True,
                              allow_no_subscriptions=False)
         output = [{'environmentName': 'AzureCloud',
                    'homeTenantId': 'microsoft.com',
@@ -381,34 +381,9 @@ class TestProfile(unittest.TestCase):
                    'user': {
                        'name': 'my app',
                        'type': 'servicePrincipal'}}]
-        self.assertEqual(output, subs)
 
-    @unittest.skip("Not supported by Azure Identity.")
-    def test_login_with_service_principal_cert_sn_issuer(self, get_token_mock):
-        cli = DummyCli()
-        mock_arm_client = mock.MagicMock()
-        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        subs = profile.login(False, 'my app', test_cert_file, True, self.tenant_id, use_device_code=True,
-                             allow_no_subscriptions=False, subscription_finder=finder, use_cert_sn_issuer=True)
-        output = [{'environmentName': 'AzureCloud',
-                   'homeTenantId': 'microsoft.com',
-                   'id': '1',
-                   'isDefault': True,
-                   'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
-                                        {'tenantId': '00000004-0000-0000-0000-000000000000'}],
-                   'name': 'foo account',
-                   'state': 'Enabled',
-                   'tenantId': 'microsoft.com',
-                   'user': {
-                       'name': 'my app',
-                       'type': 'servicePrincipal',
-                       'useCertSNIssuerAuth': True}}]
-        # assert
+        login_with_service_principal_mock.assert_called_with(mock.ANY, 'my app', {'secret': 'very_secret'},
+                                                             ['https://management.core.windows.net//.default'])
         self.assertEqual(output, subs)
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)

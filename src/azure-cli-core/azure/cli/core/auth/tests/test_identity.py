@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import re
 import unittest
 from unittest import mock
 
@@ -14,6 +15,98 @@ from knack.util import CLIError
 
 class TestIdentity(unittest.TestCase):
 
+    @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
+    @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__")
+    def test_login_with_service_principal_secret(self, init_mock, acquire_token_for_client_mock,
+                                                 save_entry_mock):
+        acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
+
+        identity = Identity('https://login.microsoftonline.com', tenant_id='my-tenant')
+
+        identity.login_with_service_principal("00000000-0000-0000-0000-000000000000",
+                                              {"client_secret": "test_secret"}, "openid")
+
+        assert init_mock.call_args[0][0] == '00000000-0000-0000-0000-000000000000'
+        assert init_mock.call_args[1]['client_credential'] == 'test_secret'
+        assert init_mock.call_args[1]['authority'] == 'https://login.microsoftonline.com/my-tenant'
+
+        assert save_entry_mock.call_args[0][0] == {
+            'tenant': 'my-tenant',
+            'client_id': '00000000-0000-0000-0000-000000000000',
+            'client_secret': 'test_secret'
+        }
+
+    @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
+    @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__")
+    def test_login_with_service_principal_certificate(self, init_mock, acquire_token_for_client_mock,
+                                                      save_entry_mock):
+        acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
+
+        identity = Identity('https://login.microsoftonline.com', tenant_id='my-tenant')
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
+
+        with open(test_cert_file) as cert_file:
+            cert_file_string = cert_file.read()
+
+        identity.login_with_service_principal("00000000-0000-0000-0000-000000000000",
+                                              {'certificate': test_cert_file}, 'openid')
+
+        assert init_mock.call_args[0][0] == '00000000-0000-0000-0000-000000000000'
+        assert init_mock.call_args[1]['client_credential'] == {
+                'private_key': cert_file_string,
+                'thumbprint': 'F06A53848BBE714A4290D69D335279C1D01073FD'
+            }
+        assert init_mock.call_args[1]['authority'] == 'https://login.microsoftonline.com/my-tenant'
+
+        assert save_entry_mock.call_args[0][0] == {
+            'tenant': 'my-tenant',
+            'client_id': '00000000-0000-0000-0000-000000000000',
+            'certificate': test_cert_file
+        }
+
+    @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
+    @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__")
+    def test_login_with_service_principal_certificate_sn_issuer(self, init_mock, acquire_token_for_client_mock,
+                                                      save_entry_mock):
+        acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
+
+        identity = Identity('https://login.microsoftonline.com', tenant_id='my-tenant')
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
+
+        with open(test_cert_file) as cert_file:
+            cert_file_string = cert_file.read()
+
+        match = re.search(r'-+BEGIN CERTIFICATE-+(?P<public>[^-]+)-+END CERTIFICATE-+', cert_file_string, re.I)
+        public_certificate = match.group().strip()
+
+        identity.login_with_service_principal("00000000-0000-0000-0000-000000000000",
+                                              {
+                                                  'certificate': test_cert_file,
+                                                  'use_cert_sn_issuer': True,
+                                              }, "openid")
+
+        assert init_mock.call_args[0][0] == '00000000-0000-0000-0000-000000000000'
+        assert init_mock.call_args[1]['client_credential'] == {
+            "private_key": cert_file_string,
+            "thumbprint": 'F06A53848BBE714A4290D69D335279C1D01073FD',
+            "public_certificate": public_certificate
+        }
+        assert init_mock.call_args[1]['authority'] == 'https://login.microsoftonline.com/my-tenant'
+
+        assert save_entry_mock.call_args[0][0] == {
+            'tenant': 'my-tenant',
+            'client_id': '00000000-0000-0000-0000-000000000000',
+            'certificate': test_cert_file,
+            'use_cert_sn_issuer': True
+        }
+
     def test_login_with_service_principal_certificate_cert_err(self):
         import os
         identity = Identity('https://login.microsoftonline.com')
@@ -22,7 +115,7 @@ class TestIdentity(unittest.TestCase):
 
         with self.assertRaisesRegex(CLIError, "Invalid certificate"):
             identity.login_with_service_principal("00000000-0000-0000-0000-000000000000",
-                                                  {"certificate": test_cert_file})
+                                                  {"certificate": test_cert_file}, "openid")
 
 
 class TestServicePrincipalAuth(unittest.TestCase):
