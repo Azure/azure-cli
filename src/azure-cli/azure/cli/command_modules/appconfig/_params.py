@@ -155,7 +155,7 @@ def load_arguments(self, _):
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the key-value pairs to json or yaml file. Required for exporting hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('naming_convention', arg_type=get_enum_type(['pascal', 'camel', 'underscore', 'hyphen']), help='Naming convention to be used for "Feature Management" section of file. Example: pascal = FeatureManagement, camel = featureManagement, underscore = feature_management, hyphen = feature-management.')
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), validator=validate_resolve_keyvault, help="Resolve the content of key vault reference.")
-        c.argument('profile', arg_type=get_enum_type(['appconfig/default', 'appconfig/kvset']), help='Export profile to be used for exporting the key-values. appconfig/kvset includes the metadata of the configuration settings while appconfig/default doesn\'t')
+        c.argument('profile', arg_type=get_enum_type(['appconfig/default', 'appconfig/kvset']), help='Export profile to be used for exporting the key-values.')
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
         c.argument('dest_name', help='The name of the destination App Configuration.')

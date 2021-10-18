@@ -685,7 +685,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_kvset(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='KVSetImportTest', length=19)
+        config_store_name = self.create_random_name(prefix='KVSetImportTest', length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -699,27 +699,39 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
         # File <--> AppConfig tests
 
-        initial_import_path = os.path.join(TEST_DIR, 'import.json')
         imported_file_path = os.path.join(TEST_DIR, 'kvset_import.json')
         exported_file_path = os.path.join(TEST_DIR, 'kvset_export.json')
 
         self.kwargs.update({
             'import_source': 'file',
             'imported_format': 'json',
-            'separator': '/',
+            'profile': 'appconfig/kvset',
             'imported_file_path': imported_file_path,
-            'exported_file_path': exported_file_path,
-            'initial_import_path': initial_import_path
+            'exported_file_path': exported_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{initial_import_path}" --format {imported_format} --separator {separator} -y')
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --profile appconfig/kvset -y')
+            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
         with open(imported_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
+        # export kvset with --skip-features option
+        no_features_file_path = os.path.join(TEST_DIR, 'kvset_no_features.json')
+
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} --skip-features -y')
+
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        with open(no_features_file_path) as json_file:
+            expected_kvs = json.load(json_file)
+        assert exported_kvs == expected_kvs
 
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
