@@ -166,6 +166,22 @@ class WheelExtension(Extension):
 
                 if self.name == ext_whl_metadata.name:
                     metadata.update(vars(ext_whl_metadata))
+                # Parse out the extras for readability - Q: would we want this?
+                # if metadata.get("requires_dist"):
+                #     extras = {}
+                #     required = []
+                #     for ext in metadata["requires_dist"]:
+                #         print(ext)
+                #         if "; extra == " in ext:
+                #             props = ext[:ext.find("; extra")]
+                #             key = ext[ext.find("'") + 1: ext.rfind("'")]
+                #             extras[key] = props
+                #             print(key, props)
+                #         else:
+                #             required.append(ext)
+                #     if len(extras) > 0:
+                #         metadata["extras_dist"] = extras
+                #         metadata["requires_dist"] = required
             except ValueError:
                 logger.warning('extension %s contains invalid metadata for Python Package', self.name)
 
@@ -183,6 +199,24 @@ class WheelExtension(Extension):
             with open(azext_metadata_filepath) as f:
                 azext_metadata = json.load(f)
         return azext_metadata
+
+    @staticmethod
+    def get_metadata_extras(ext_file):
+        metadata_extras = []
+        extra_const = "; extra == "
+        try:
+            if ext_file.endswith('.whl'):
+                ext_whl_metadata = pkginfo.Wheel(ext_file)
+            else:
+                raise ValueError()
+            # Parse out the extras for readability
+            for ext in ext_whl_metadata.requires_dist:
+                if extra_const in ext:
+                    key = ext[ext.find(extra_const) + len(extra_const) + 1: ext.rfind("'")]
+                    metadata_extras.append(key)
+        except ValueError:
+            logger.warning('Could not parse metadata to get setup extras. Will install without extras.')
+        return metadata_extras
 
     @staticmethod
     def get_all():

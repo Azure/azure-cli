@@ -96,7 +96,15 @@ def _get_extension_info_from_source(source):
     return extension_name, extension_version
 
 
-def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
+def _add_whl_ext(
+    cli_ctx,
+    source,
+    ext_sha256=None,
+    pip_extra_index_urls=None,
+    install_setup_extras=None,
+    pip_proxy=None,
+    system=None
+):  # pylint: disable=too-many-statements
     cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
@@ -156,7 +164,21 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     cli_ctx.get_progress_controller().add(message='Installing')
     # Install with pip
     extension_path = build_extension_path(extension_name, system)
-    pip_args = ['install', '--target', extension_path, ext_file]
+    # Check the extras keywords
+    extras = ""
+    if install_setup_extras:
+        # Q: could pretty print the avaliable extras here - should we do this?
+        extras = WheelExtension.get_metadata_extras(ext_file)
+        for ext in install_setup_extras:
+            if ext not in extras:
+                raise CLIError(
+                    "The setup extras keyword {} is invalid. The extension {} currently supports "
+                    "these keywords: {}.".format(ext, extension_name, extras)
+                )
+
+        extras = "[{}]".format(",".join(install_setup_extras))
+
+    pip_args = ['install', '--target', extension_path, ext_file + extras]
 
     if pip_proxy:
         pip_args = pip_args + ['--proxy', pip_proxy]
@@ -298,7 +320,7 @@ def check_version_compatibility(azext_metadata):
 
 
 def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument, too-many-statements
-                  pip_extra_index_urls=None, pip_proxy=None, system=None,
+                  pip_extra_index_urls=None, install_setup_extras=None, pip_proxy=None, system=None,
                   version=None, cli_ctx=None, upgrade=None):
     ext_sha256 = None
 
@@ -314,14 +336,19 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
             pass
         if ext:
             if isinstance(ext, WheelExtension):
-                if not upgrade:
+                if not upgrade and not install_setup_extras:
                     logger.warning("Extension '%s' is already installed.", extension_name)
                     return
                 logger.warning("Extension '%s' %s is already installed.", extension_name, ext.get_version())
-                if version and version == ext.get_version():
+                update_msg = "It will be "
+                if install_setup_extras:
+                    update_msg += "reinstalled with the specified setup_extras and "
+                elif version and version == ext.get_version():
                     return
-                logger.warning("It will be overridden with version {}.".format(version) if version else "It will be updated if available.")
-                update_extension(cmd=cmd, extension_name=extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, cli_ctx=cli_ctx, version=version)
+                update_msg += ("overridden with version {}.".format(version) if version else "updated if available.")
+                logger.warning(update_msg)
+                update_extension(cmd=cmd, extension_name=extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls,
+                                 install_setup_extras=install_setup_extras, pip_proxy=pip_proxy, cli_ctx=cli_ctx, version=version)
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
@@ -337,7 +364,8 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
     ext_name, ext_version = _get_extension_info_from_source(source)
     set_extension_management_detail(extension_name if extension_name else ext_name, ext_version)
     extension_name = _add_whl_ext(cli_ctx=cmd_cli_ctx, source=source, ext_sha256=ext_sha256,
-                                  pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
+                                  pip_extra_index_urls=pip_extra_index_urls, install_setup_extras=install_setup_extras,
+                                   pip_proxy=pip_proxy, system=system)
     try:
         ext = get_extension(extension_name)
         if extension_name and ext.experimental:
@@ -384,7 +412,7 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None, version=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, install_setup_extras=None, pip_proxy=None, cli_ctx=None, version=None):
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
@@ -408,7 +436,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         # Install newer version
         try:
             _add_whl_ext(cli_ctx=cmd_cli_ctx, source=download_url, ext_sha256=ext_sha256,
-                         pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
+                         pip_extra_index_urls=pip_extra_index_urls, install_setup_extras=install_setup_extras, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             rmtree_with_retry(backup_dir)
         except Exception as err:

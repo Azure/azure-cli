@@ -399,6 +399,39 @@ class TestExtensionCommands(unittest.TestCase):
 
     def test_add_list_show_remove_extension_extra_index_url(self):
         """
+        Tests extension addition while specifying --install-setup-extras parameter.
+        :return:
+        """
+        extra_index_urls = ['BAR', 'FOO']
+
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, install_setup_extras=extra_index_urls)
+        actual = list_extensions()
+        self.assertEqual(len(actual), 1)
+        ext = show_extension(MY_EXT_NAME)
+        self.assertEqual(ext[OUT_KEY_NAME], MY_EXT_NAME)
+        remove_extension(MY_EXT_NAME)
+        num_exts = len(list_extensions())
+        self.assertEqual(num_exts, 0)
+
+    def test_update_extension_extra_index_url(self):
+        """
+        Tests extension update while specifying --install-setup-extras parameter.
+        :return:
+        """
+        extra_index_urls = ['BAR', 'FOO']
+
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, install_setup_extras=extra_index_urls)
+        ext = show_extension(MY_EXT_NAME)
+        self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
+        newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
+        computed_extension_sha256 = _compute_file_hash(newer_extension)
+        with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(newer_extension, computed_extension_sha256)):
+            update_extension(self.cmd, MY_EXT_NAME, install_setup_extras=extra_index_urls)
+        ext = show_extension(MY_EXT_NAME)
+        self.assertEqual(ext[OUT_KEY_VERSION], '0.0.4+dev')
+
+    def test_add_list_show_remove_extension_extra_index_url(self):
+        """
         Tests extension addition while specifying --extra-index-url parameter.
         :return:
         """
