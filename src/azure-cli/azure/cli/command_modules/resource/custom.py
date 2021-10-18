@@ -54,7 +54,8 @@ from ._bicep import (
     remove_bicep_installation,
     get_bicep_latest_release_tag,
     get_bicep_available_release_tags,
-    validate_bicep_target_scope
+    validate_bicep_target_scope,
+    supports_bicep_publish
 )
 
 logger = get_logger(__name__)
@@ -3559,6 +3560,12 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
         return
     run_bicep_command(args)
 
+def publish_bicep_file(cmd, file, target):
+    if supports_bicep_publish():
+        run_bicep_command(["publish", file, "--target", target])
+    else:
+        logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v0.4.1008 or later.")
+
 
 def decompile_bicep_file(cmd, file):
     run_bicep_command(["decompile", file])
@@ -3566,7 +3573,6 @@ def decompile_bicep_file(cmd, file):
 
 def show_bicep_cli_version(cmd):
     print(run_bicep_command(["--version"], auto_install=False))
-
 
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
