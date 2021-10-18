@@ -3260,7 +3260,7 @@ class AKSContext:
             if self.decorator_mode == DecoratorMode.UPDATE:
                 if disable_public_fqdn:
                     private_dns_zone = self._get_private_dns_zone(enable_validation=False)
-                    if not private_dns_zone or private_dns_zone.lower() == CONST_PRIVATE_DNS_ZONE_NONE:
+                    if safe_lower(private_dns_zone) == CONST_PRIVATE_DNS_ZONE_NONE:
                         raise InvalidArgumentValueError(
                             "--disable-public-fqdn cannot be applied for none mode private dns zone cluster"
                         )
@@ -3377,7 +3377,7 @@ class AKSContext:
                             "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
                         )
             if self.decorator_mode == DecoratorMode.UPDATE:
-                if not private_dns_zone or private_dns_zone.lower() == CONST_PRIVATE_DNS_ZONE_NONE:
+                if safe_lower(private_dns_zone) == CONST_PRIVATE_DNS_ZONE_NONE:
                     if self._get_disable_public_fqdn(enable_validation=False):
                         raise InvalidArgumentValueError(
                             "--disable-public-fqdn cannot be applied for none mode private dns zone cluster"
