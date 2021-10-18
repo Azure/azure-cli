@@ -550,7 +550,9 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     if source_blob_uri:
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
-        option = DiskCreateOption.copy_start if copy_start else DiskCreateOption.copy
+        option = DiskCreateOption.copy
+        if cmd.supported_api_version(min_api='2021-04-01', operation_group='snapshots'):
+            option = DiskCreateOption.copy_start if copy_start else DiskCreateOption.copy
     elif for_upload:
         option = DiskCreateOption.upload
     else:
