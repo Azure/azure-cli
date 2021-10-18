@@ -3224,7 +3224,7 @@ class AKSContext:
 
         This function supports the option of enable_validation. When enabled, if enable_private_cluster is not specified
         and disable_public_fqdn is assigned, raise an InvalidArgumentValueError. If both disable_public_fqdn and
-        enable_private_cluster are assigned, raise a MutuallyExclusiveArgumentError. In update mode, if
+        enable_public_fqdn are assigned, raise a MutuallyExclusiveArgumentError. In update mode, if
         disable_public_fqdn is assigned and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_NONE, raise an
         InvalidArgumentValueError.
 
@@ -3271,7 +3271,7 @@ class AKSContext:
 
         This function will verify the parameter by default. If enable_private_cluster is not specified and
         disable_public_fqdn is assigned, raise an InvalidArgumentValueError. If both disable_public_fqdn and
-        enable_private_cluster are assigned, raise a MutuallyExclusiveArgumentError. In update mode, if
+        enable_public_fqdn are assigned, raise a MutuallyExclusiveArgumentError. In update mode, if
         disable_public_fqdn is assigned and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_NONE, raise an
         InvalidArgumentValueError.
 
@@ -3285,7 +3285,7 @@ class AKSContext:
 
         This function supports the option of enable_validation. When enabled, if private cluster is not enabled and
         enable_public_fqdn is assigned, raise an InvalidArgumentValueError. If both disable_public_fqdn and
-        enable_private_cluster are assigned, raise a MutuallyExclusiveArgumentError.
+        enable_public_fqdn are assigned, raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
