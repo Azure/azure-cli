@@ -8,19 +8,9 @@ import logging
 import os
 import time
 
-try:
-    import collections.abc as collections
-except ImportError:
-    import collections
-
-from codecs import open as codecs_open
+import collections.abc as collections
 
 from knack.log import get_logger
-
-try:
-    t_JSONDecodeError = json.JSONDecodeError
-except AttributeError:  # in Python 2.7
-    t_JSONDecodeError = ValueError
 
 
 class Session(collections.MutableMapping):
@@ -45,14 +35,14 @@ class Session(collections.MutableMapping):
                 st = os.stat(self.filename)
                 if st.st_mtime + max_age < time.time():
                     self.save()
-            with codecs_open(self.filename, 'r', encoding=self._encoding) as f:
+            with open(self.filename, 'r', encoding=self._encoding) as f:
                 self.data = json.load(f)
-        except (OSError, IOError, t_JSONDecodeError) as load_exception:
+        except (OSError, IOError, json.JSONDecodeError) as load_exception:
             # OSError / IOError should imply file not found issues which are expected on fresh runs (e.g. on build
             # agents or new systems). A parse error indicates invalid/bad data in the file. We do not wish to warn
             # on missing files since we expect that, but do if the data isn't parsing as expected.
             log_level = logging.INFO
-            if isinstance(load_exception, t_JSONDecodeError):
+            if isinstance(load_exception, json.JSONDecodeError):
                 log_level = logging.WARNING
 
             get_logger(__name__).log(log_level,
@@ -62,7 +52,7 @@ class Session(collections.MutableMapping):
 
     def save(self):
         if self.filename:
-            with codecs_open(self.filename, 'w', encoding=self._encoding) as f:
+            with open(self.filename, 'w', encoding=self._encoding) as f:
                 json.dump(self.data, f)
 
     def save_with_retry(self, retries=5):

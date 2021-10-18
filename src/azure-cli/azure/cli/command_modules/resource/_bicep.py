@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 import requests
 import semver
 
-from six.moves.urllib.request import urlopen
+from urllib.request import urlopen
 from knack.log import get_logger
 from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (
