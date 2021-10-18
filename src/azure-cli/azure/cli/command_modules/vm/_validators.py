@@ -1278,6 +1278,7 @@ def process_vm_create_namespace(cmd, namespace):
 
 
 def process_vm_update_namespace(cmd, namespace):
+    _validate_vm_create_dedicated_host(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
 
 

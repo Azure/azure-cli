@@ -35,14 +35,12 @@ class ProfileCommandTest(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
 
-        # arrange
         get_raw_token_mock.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], 'sub123', 'tenant123')
 
-        # action
         result = get_access_token(cmd)
 
         # assert
-        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, None)
+        get_raw_token_mock.assert_called_with(mock.ANY, None, None, None, None)
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
@@ -58,51 +56,25 @@ class ProfileCommandTest(unittest.TestCase):
         get_raw_token_mock.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], subscription_id,
                                            'tenant123')
         result = get_access_token(cmd, subscription=subscription_id, resource=resource)
-        get_raw_token_mock.assert_called_with(mock.ANY, resource, subscription_id, None)
-        expected_result = {
-            'tokenType': 'bearer',
-            'accessToken': 'token123',
-            'expiresOn': '2100-01-01',
-            'subscription': subscription_id,
-            'tenant': 'tenant123'
-        }
-        self.assertEqual(result, expected_result)
+        get_raw_token_mock.assert_called_with(mock.ANY, resource, None, subscription_id, None)
+
+        # assert it takes customized scopes
+        get_access_token(cmd, scopes='https://graph.microsoft.com/.default')
+        get_raw_token_mock.assert_called_with(mock.ANY, None, scopes='https://graph.microsoft.com/.default',
+                                              subscription=None, tenant=None)
 
         # test get token with tenant
         tenant_id = '00000000-0000-0000-0000-000000000000'
         get_raw_token_mock.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], None, tenant_id)
         result = get_access_token(cmd, tenant=tenant_id)
-        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, tenant_id)
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
-            'expiresOn': '2100-01-01',  # subscription shouldn't be present
+            'expiresOn': '2100-01-01',
             'tenant': tenant_id
         }
         self.assertEqual(result, expected_result)
-
-    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
-    def test_get_raw_token_managed_identity(self, get_raw_token_mock):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
-
-        # test get token with Managed Identity
-        tenant_id = '00000000-0000-0000-0000-000000000000'
-        get_raw_token_mock.return_value = (['bearer', 'token123', {'expires_on': '1593497681'}], None, tenant_id)
-
-        import datetime
-        # Force POSIX timestamp to be converted to datetime in UTC during testing.
-        with mock.patch('azure.cli.command_modules.profile.custom._fromtimestamp', datetime.datetime.utcfromtimestamp):
-            result = get_access_token(cmd)
-
-        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, None)
-        expected_result = {
-            'tokenType': 'bearer',
-            'accessToken': 'token123',
-            'expiresOn': '2020-06-30 06:14:41.000000',
-            'tenant': tenant_id
-        }
-        self.assertEqual(result, expected_result)
+        get_raw_token_mock.assert_called_with(mock.ANY, None, None, None, tenant_id)
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
     def test_get_login(self, profile_mock):
@@ -113,7 +85,7 @@ class ProfileCommandTest(unittest.TestCase):
 
         # mock the instance
         profile_instance = mock.MagicMock()
-        profile_instance.find_subscriptions_in_vm_with_msi = test_login
+        profile_instance.login_with_managed_identity = test_login
         # mock the constructor
         profile_mock.return_value = profile_instance
 

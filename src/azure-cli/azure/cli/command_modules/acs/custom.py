@@ -2505,7 +2505,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                             "It should always be empty for public cluster")
         mc.api_server_access_profile.private_dns_zone = private_dns_zone
         from msrestazure.tools import is_valid_resource_id
-        if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
+        # pylint: disable=line-too-long
+        if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM and private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_NONE:
             if is_valid_resource_id(private_dns_zone):
                 use_custom_private_dns_zone = True
             else:
@@ -3385,17 +3386,7 @@ def _get_command_context(command_files):
 
 def _get_dataplane_aad_token(cli_ctx, serverAppId):
     # this function is mostly copied from keyvault cli
-    import adal
-    try:
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=serverAppId)[0][2].get('accessToken')
-    except adal.AdalError as err:
-        # pylint: disable=no-member
-        if (hasattr(err, 'error_response') and
-                ('error_description' in err.error_response) and
-                ('AADSTS70008:' in err.error_response['error_description'])):
-            raise CLIError(
-                "Credentials have expired due to inactivity. Please run 'az login'")
-        raise CLIError(err)
+    return Profile(cli_ctx=cli_ctx).get_raw_token(resource=serverAppId)[0][2].get('accessToken')
 
 
 DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
