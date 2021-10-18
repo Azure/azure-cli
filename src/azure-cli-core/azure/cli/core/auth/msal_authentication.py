@@ -31,7 +31,14 @@ logger = get_logger(__name__)
 class UserCredential(PublicClientApplication):
 
     def __init__(self, client_id, username=None, **kwargs):
+        """Use credential implementing get_token interface.
+
+        :param client_id: Client ID of the CLI.
+        :param username: The username for user credential.
+        """
         super().__init__(client_id, **kwargs)
+
+        self._username = username
         if username:
             accounts = self.get_accounts(username)
 
@@ -54,14 +61,44 @@ class UserCredential(PublicClientApplication):
         logger.debug("UserCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
         result = self.acquire_token_silent_with_error(list(scopes), self.account, **kwargs)
-        check_result(result, scopes=scopes)
+
+        from azure.cli.core.azclierror import AuthenticationError
+        try:
+            # Check if an access token is returned.
+            check_result(result, scopes=scopes)
+        except AuthenticationError as ex:
+            # For VM SSH ('data' is passed), if getting access token fails because
+            # Conditional Access MFA step-up or compliance check is required, re-launch
+            # web browser and do auth code flow again.
+            # We assume the `az ssh` command is run on a system with GUI where a web
+            # browser is available.
+            if 'data' in kwargs:
+                logger.warning(ex)
+                logger.warning("\nThe default web browser has been opened for scope '%s'. "
+                               "Please continue the login in the web browser.", ' '.join(scopes))
+
+                from .util import read_response_templates
+                success_template, error_template = read_response_templates()
+
+                result = self.acquire_token_interactive(
+                    list(scopes), login_hint=self._username,
+                    success_template=success_template, error_template=error_template, **kwargs)
+                check_result(result)
+
+            # For other scenarios like Storage Conditional Access MFA step-up, do not
+            # launch browser, but show the error message and `az login` command instead.
+            else:
+                raise
         return _build_sdk_access_token(result)
 
 
 class ServicePrincipalCredential(ConfidentialClientApplication):
 
     def __init__(self, service_principal_auth, **kwargs):
+        """Service principal credential implementing get_token interface.
 
+        :param service_principal_auth: An instance of ServicePrincipalAuth.
+        """
         client_credential = None
 
         # client_secret
