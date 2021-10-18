@@ -3460,10 +3460,10 @@ helps['restore-point collection show'] = """
     examples:
       - name: Get a restore point collection (but not the restore points contained in the restore point collection)
         text: |-
-               az restore-point collection show --resource-group "myResourceGroup" --name "myRpc"
+               az restore-point collection show --resource-group "myResourceGroup" --collection-name "myRpc"
       - name: Get a restore point collection, including the restore points contained in the restore point collection
         text: |-
-               az restore-point collection show --resource-group "myResourceGroup" --name "rpcName"
+               az restore-point collection show --resource-group "myResourceGroup" --collection-name "rpcName"
 """
 
 helps['restore-point collection create'] = """
@@ -3475,7 +3475,7 @@ for more details. When updating a restore point collection, only tags may be mod
         text: |-
                az restore-point collection create --location "norwayeast" --source-id "/subscriptions/{subscription-id}\
 /resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM" --tags myTag1="tagValue1" \
---resource-group "myResourceGroup" --name "myRpc"
+--resource-group "myResourceGroup" --collection-name "myRpc"
 """
 
 helps['restore-point collection update'] = """
@@ -3506,5 +3506,5 @@ helps['restore-point collection wait'] = """
     examples:
       - name: Pause executing next line of CLI script until the restore-point-collection is successfully deleted.
         text: |-
-               az restore-point collection wait --resource-group "myResourceGroup" --name "rpcName" --deleted
+               az restore-point collection wait --resource-group "myResourceGroup" --collection-name "rpcName" --deleted
 """

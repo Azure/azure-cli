@@ -1212,20 +1212,28 @@ def load_arguments(self, _):
     with self.argument_context('restore-point') as c:
         c.argument('restore_point_collection_name', options_list=['--collection-name'],
                    help='The name of the restore point collection.', id_part='name')
-        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'], type=str, help='The '
-                   'name of the restore point.', id_part='child_name_1')
 
     with self.argument_context('restore-point create') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.', id_part='child_name_1')
         c.argument('exclude_disks', nargs='+', help='List of disk resource ids that the '
                    'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
                    'included.')
+
+    with self.argument_context('restore-point show') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.', id_part='child_name_1')
+
+    with self.argument_context('restore-point delete') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.', id_part='child_name_1')
+
+    with self.argument_context('restore-point wait') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.', id_part='child_name_1')
     # endRegion
 
     # region Restore point collection
-    with self.argument_context('restore-point collection') as c:
-        c.argument('restore_point_collection_name', options_list=['--name', '-n', '--collection-name'],
-                   help='The name of the restore point collection.', id_part='name')
-
     with self.argument_context('restore-point collection create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
                    validator=get_default_location_from_resource_group)

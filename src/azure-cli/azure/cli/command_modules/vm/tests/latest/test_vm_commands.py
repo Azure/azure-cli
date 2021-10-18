@@ -6342,7 +6342,7 @@ class RestorePointScenarioTest(ScenarioTest):
             'vm_id': vm['id']
         })
 
-        self.cmd('restore-point collection create -g {rg} -n {collection_name} --source-id {vm_id}', checks=[
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
             self.check('location', 'westus'),
             self.check('name', '{collection_name}'),
             self.check('resourceGroup', '{rg}')
@@ -6363,7 +6363,7 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}')
         ])
 
-        self.cmd('restore-point collection show -g {rg} -n {collection_name}', checks=[
+        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name}', checks=[
             self.check('location', 'westus'),
             self.check('name', '{collection_name}'),
             self.check('restorePoints[0].id', '{point_id}'),
@@ -6372,7 +6372,7 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('source.id', '{vm_id}')
         ])
 
-        self.cmd('restore-point collection delete -g {rg} -n {point_name} --collection-name {collection_name} -y')
+        self.cmd('restore-point delete -g {rg} -n {point_name} --collection-name {collection_name} -y')
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collection', location='westus')
@@ -6388,7 +6388,7 @@ class RestorePointScenarioTest(ScenarioTest):
             'vm_id': vm['id']
         })
 
-        self.cmd('restore-point collection create -g {rg} -n {collection_name} --source-id {vm_id}', checks=[
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
             self.check('location', 'westus'),
             self.check('name', '{collection_name}'),
             self.check('resourceGroup', '{rg}'),
@@ -6397,11 +6397,11 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('type', 'Microsoft.Compute/restorePointCollections')
         ])
 
-        self.cmd('restore-point collection update -g {rg} -n {collection_name} --tags tag=test', checks=[
+        self.cmd('restore-point collection update -g {rg} --collection-name {collection_name} --tags tag=test', checks=[
             self.check('tags', {'tag': 'test'})
         ])
 
-        self.cmd('restore-point collection show -g {rg} -n {collection_name}', checks=[
+        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name}', checks=[
             self.check('location', 'westus'),
             self.check('name', '{collection_name}'),
             self.check('resourceGroup', '{rg}'),
@@ -6423,7 +6423,7 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('type(@)', 'array')
         ])
 
-        self.cmd('restore-point collection delete -g {rg} -n {collection_name} -y')
+        self.cmd('restore-point collection delete -g {rg} --collection-name {collection_name} -y')
 
 
 if __name__ == '__main__':

@@ -599,7 +599,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'restore_point_show')
         g.custom_command('create', 'restore_point_create', supports_no_wait=True)
         g.custom_command('delete', 'restore_point_delete', supports_no_wait=True, confirmation=True)
-        g.wait_command('wait')
+        g.custom_wait_command('wait', 'restore_point_show')
 
     with self.command_group('restore-point collection', restore_point_collection, min_api='2021-03-01',
                             client_factory=cf_restore_point_collection) as g:
@@ -609,4 +609,4 @@ def load_command_table(self, _):
         g.custom_command('update', 'restore_point_collection_update')
         g.custom_command('delete', 'restore_point_collection_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('list-all', 'restore_point_collection_list_all')
-        g.wait_command('wait')
+        g.custom_wait_command('wait', 'restore_point_collection_show')
