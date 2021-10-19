@@ -4161,7 +4161,6 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
         # check if the length of application_configuration_overrides is as same as application_version_ids
         for i in range(len(application_configuration_overrides)): 
             vm.application_profile.gallery_applications[i].configuration_reference = application_configuration_overrides[i]
-    
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
 
@@ -4196,7 +4195,6 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         for i in range(len(application_configuration_overrides)): 
             if application_configuration_overrides[i] or application_configuration_overrides[i].lower() != 'null':
                 vmss.application_profile.gallery_applications[i].configuration_reference = application_configuration_overrides[i]
-    
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vmss_name, vmss)
 
 
