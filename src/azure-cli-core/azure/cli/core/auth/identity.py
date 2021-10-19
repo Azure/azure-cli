@@ -111,7 +111,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # Only show the path part of the URL and hide the query string.
         logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
-                       "with `az login --use-device-code`.", self._msal_authority)
+                       "with `az login --use-device-code`.", self.msal_app.authority.authorization_endpoint)
 
         from .util import read_response_templates
         success_template, error_template = read_response_templates()

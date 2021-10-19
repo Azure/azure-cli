@@ -31,7 +31,7 @@ logger = get_logger(__name__)
 class UserCredential(PublicClientApplication):
 
     def __init__(self, client_id, username=None, **kwargs):
-        """Use credential implementing get_token interface.
+        """User credential implementing get_token interface.
 
         :param client_id: Client ID of the CLI.
         :param username: The username for user credential.
@@ -74,14 +74,15 @@ class UserCredential(PublicClientApplication):
             # browser is available.
             if 'data' in kwargs:
                 logger.warning(ex)
-                logger.warning("\nThe default web browser has been opened for scope '%s'. "
-                               "Please continue the login in the web browser.", ' '.join(scopes))
+                logger.warning("\nThe default web browser has been opened at %s for scope '%s'. "
+                               "Please continue the login in the web browser.",
+                               self.authority.authorization_endpoint, ' '.join(scopes))
 
                 from .util import read_response_templates
                 success_template, error_template = read_response_templates()
 
                 result = self.acquire_token_interactive(
-                    list(scopes), login_hint=self._username,
+                    list(scopes), login_hint=self._username, port=8400 if self.authority.is_adfs else None,
                     success_template=success_template, error_template=error_template, **kwargs)
                 check_result(result)
 
