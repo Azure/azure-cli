@@ -1433,8 +1433,10 @@ def update_key_rotation_policy(cmd, client, key_name=None, expires_in=None,
                                notify_after_creation=None, notify_before_expiry=None,
                                rotate_after_creation=None, rotate_before_expiry=None):
     lifetime_actions = []
-    KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
-    KeyRotationPolicyAction = cmd.loader.get_sdk('KeyRotationPolicyAction', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
+    KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction',
+                                                   resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
+    KeyRotationPolicyAction = cmd.loader.get_sdk('KeyRotationPolicyAction',
+                                                 resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     if notify_after_creation or notify_before_expiry:
         lifetime_action = KeyRotationLifetimeAction(KeyRotationPolicyAction.notify,
                                                     time_after_create=notify_after_creation,

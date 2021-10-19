@@ -340,9 +340,9 @@ type: command
 short-summary: Update the rotation policy of a Key Vault key.
 examples:
   - name: Set notify trigger to notify 7 days before expiry
-    text: az keyvault key rotation-policy -n mykey --vault-name mykeyvault --notify-before-expiry P7D --expires-in P30D
+    text: az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --notify-before-expiry P7D --expires-in P30D
   - name: Set rotate trigger to rotate 15 days after creation
-    text: az keyvault key rotation-policy -n mykey --vault-name mykeyvault --rotate-after-creation P15D
+    text: az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --rotate-after-creation P15D
 """
 
 helps['keyvault key rotation-policy show'] = """
