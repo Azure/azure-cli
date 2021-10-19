@@ -1034,3 +1034,13 @@ def load_arguments(self, _):
         c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
                    'the Kusto pool.')
         c.argument('resource_group_name', resource_group_name_type)
+
+    with self.argument_context('synapse kusto pool detach-follower-database') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
+        c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
+                   'the Kusto pool.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('kusto_pool_resource_id', type=str, help='Resource id of the cluster that follows a database owned '
+                   'by this cluster.')
+        c.argument('attached_database_configuration_name', type=str, help='Resource name of the attached database '
+                   'configuration in the follower cluster.')

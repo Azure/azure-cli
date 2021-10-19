@@ -25,7 +25,6 @@ def synapse_kusto_pool_create(cmd,
     workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
     workspace_object = workspace_client.get(resource_group_name, workspace_name)
     workspace_uid = workspace_object.workspace_uid
-    print(" the workspaceUid is : ", workspace_uid)
     parameters = {}
     if tags is not None:
         parameters['tags'] = tags
@@ -43,12 +42,6 @@ def synapse_kusto_pool_create(cmd,
         parameters['enable_purge'] = False
     if workspace_uid is not None:
         parameters['workspace_uid'] = workspace_uid
-    print("===============")
-    print("workspace_name : ", workspace_name)
-    print("resource_group_name : ", resource_group_name)
-    print("kusto_pool_name : ", kusto_pool_name)
-    print("location : ", location)
-    print("parameters : ", parameters)
     return sdk_no_wait(no_wait,
                        client.begin_create_or_update,
                        workspace_name=workspace_name,
@@ -123,8 +116,6 @@ def synapse_kusto_pool_add_language_extension(client,
                                               no_wait=False):
     language_extensions_to_add = {}
     language_extensions_to_add['value'] = value
-    print(value)
-    print(language_extensions_to_add)
     return sdk_no_wait(no_wait,
                        client.begin_add_language_extensions,
                        workspace_name=workspace_name,

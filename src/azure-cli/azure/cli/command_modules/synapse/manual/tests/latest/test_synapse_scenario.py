@@ -25,8 +25,6 @@ class SynapseScenarioTests(ScenarioTest):
             'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
             'database': self.create_random_name(prefix='testdtabase', length=15),
             'dataConnectionName': self.create_random_name(prefix='dataConName', length=15),
-            'principalAssignmentName': self.create_random_name(prefix='prinasgname', length=15),
-            'principalId': '9c527a58-9c1d-4c4f-970f-61feb236b74a',
             "eventhub_name": self.create_random_name("ehsrv", 20),
             "eventhub_namespace": self.create_random_name("ehnamespace", 20),
         })
@@ -157,8 +155,6 @@ class SynapseScenarioTests(ScenarioTest):
             'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
             'database': self.create_random_name(prefix='testdtabase', length=15),
             'dataConnectionName':  self.create_random_name(prefix='dataConName', length=15),
-            'principalAssignmentName':  self.create_random_name(prefix='prinasgname', length=15),
-            'principalId': '9c527a58-9c1d-4c4f-970f-61feb236b74a',
             'iotHubName': self.create_random_name(prefix='testiothub', length=15),
             'iotHubSharedAccessPolicyName': 'registryRead'
         })
@@ -282,8 +278,6 @@ class SynapseScenarioTests(ScenarioTest):
             'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
             'database': self.create_random_name(prefix='testdtabase', length=15),
             'dataConnectionName': self.create_random_name(prefix='dataConName', length=15),
-            'principalAssignmentName': self.create_random_name(prefix='prinasgname', length=15),
-            'principalId': '9c527a58-9c1d-4c4f-970f-61feb236b74a',
             "eventhub_name": self.create_random_name("ehsrv", 20),
             "eventhub_namespace": self.create_random_name("ehnamespace", 20),
         })
@@ -410,8 +404,7 @@ class SynapseScenarioTests(ScenarioTest):
             'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
             'database': self.create_random_name(prefix='testdtabase', length=15),
             'principalAssignmentName': self.create_random_name(prefix='kstprinpal', length=15),
-            'principalId': '9c527a58-9c1d-4c4f-970f-61feb236b74a',
-            'tenant-id': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'principalId': '9c527a58-9c1d-4c4f-970f-61feb236b74a'
         })
 
         # create a workspace
@@ -458,7 +451,6 @@ class SynapseScenarioTests(ScenarioTest):
                  '--principal-id "{principalId}" '
                  '--principal-type "App" '
                  '--role "Admin" '
-                 '--tenant-id "{tenant-id}" '
                  '--principal-assignment-name "{principalAssignmentName}" '
                  '--resource-group "{rg}" '
                  '--workspace-name "{workspace}"',
@@ -495,7 +487,6 @@ class SynapseScenarioTests(ScenarioTest):
                  '--principal-id "{principalId}" '
                  '--principal-type "App" '
                  '--role "Admin" '
-                 '--tenant-id "{tenant-id}" '
                  '--principal-assignment-name "{principalAssignmentName}" '
                  '--resource-group "{rg}" '
                  '--workspace-name "{workspace}"',
@@ -528,8 +519,7 @@ class SynapseScenarioTests(ScenarioTest):
             'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
             'database': self.create_random_name(prefix='testdtabase', length=15),
             'principalAssignmentName': self.create_random_name(prefix='kstprinpal', length=15),
-            'principalId': '9c527a58-9c1d-4c4f-970f-61feb236b74a',
-            'tenant-id': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'principalId': '9c527a58-9c1d-4c4f-970f-61feb236b74a'
         })
 
 
@@ -576,7 +566,6 @@ class SynapseScenarioTests(ScenarioTest):
                  '--principal-id "{principalId}" '
                  '--principal-type "App" '
                  '--role "AllDatabasesAdmin" '
-                 '--tenant-id "{tenant-id}" '
                  '--principal-assignment-name "{principalAssignmentName}" '
                  '--resource-group "{rg}" '
                  '--workspace-name "{workspace}"',
@@ -610,7 +599,6 @@ class SynapseScenarioTests(ScenarioTest):
                  '--principal-id "{principalId}" '
                  '--principal-type "App" '
                  '--role "AllDatabasesAdmin" '
-                 '--tenant-id "{tenant-id}" '
                  '--principal-assignment-name "{principalAssignmentName}" '
                  '--resource-group "{rg}" '
                  '--workspace-name "{workspace}"',
@@ -796,7 +784,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         self.cmd('az synapse kusto attached-database-configuration show '
                  '--attached-database-configuration-name "{database-configuration-name}" '
-                 '--kusto-pool-name "{kustoPool}" '
+                 '--kusto-pool-name "{leaderkustoPool}" '
                  '--resource-group "{rg}" '
                  '--workspace-name "{workspace}"',
                 expect_failure=True)

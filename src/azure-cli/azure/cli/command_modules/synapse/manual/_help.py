@@ -2010,3 +2010,123 @@ helps['synapse spark-job-definition wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a spark job definition is met.
 """
+
+helps['synapse kusto pool add-language-extension'] = """
+    type: command
+    short-summary: "Add a list of language extensions that can run within KQL queries."
+    parameters:
+      - name: --value
+        short-summary: "The list of language extensions."
+        long-summary: |
+            Usage: --value language-extension-name=XX
+
+            language-extension-name: The language extension name.
+
+            Multiple actions can be specified by using more than one --value argument.
+    examples:
+      - name: KustoPoolAddLanguageExtensions
+        text: |-
+               az synapse kusto pool add-language-extension --name "kustoclusterrptest4" --value \
+language-extension-name="PYTHON" --value language-extension-name="R" --resource-group "kustorptest" --workspace-name \
+"kustorptest"
+"""
+
+helps['synapse kusto pool detach-follower-database'] = """
+    type: command
+    short-summary: "Detaches all followers of a database owned by this Kusto Pool."
+    examples:
+      - name: KustoPoolDetachFollowerDatabases
+        text: |-
+               az synapse kusto pool detach-follower-database --attached-database-configuration-name \
+"myAttachedDatabaseConfiguration" --kusto-pool-resource-id "/subscriptions/12345678-1234-1234-1234-123456789098/resourc\
+eGroups/kustorptest/providers/Microsoft.Synapse/workspaces/kustorptest/kustoPools/leader4" --name \
+"kustoclusterrptest4" --resource-group "kustorptest" --workspace-name "kustorptest"
+"""
+
+helps['synapse kusto pool remove-language-extension'] = """
+    type: command
+    short-summary: "Remove a list of language extensions that can run within KQL queries."
+    parameters:
+      - name: --value
+        short-summary: "The list of language extensions."
+        long-summary: |
+            Usage: --value language-extension-name=XX
+
+            language-extension-name: The language extension name.
+
+            Multiple actions can be specified by using more than one --value argument.
+    examples:
+      - name: KustoPoolRemoveLanguageExtensions
+        text: |-
+               az synapse kusto pool remove-language-extension --name "kustoclusterrptest4" --value \
+language-extension-name="PYTHON" --value language-extension-name="R" --resource-group "kustorptest" --workspace-name \
+"kustorptest"
+"""
+
+helps['synapse kusto pool list-language-extension'] = """
+    type: command
+    short-summary: "Returns a list of language extensions that can run within KQL queries."
+    examples:
+      - name: KustoPoolListLanguageExtensions
+        text: |-
+               az synapse kusto pool list-language-extension --name "kustoclusterrptest4" --resource-group \
+"kustorptest" --workspace-name "kustorptest"
+"""
+
+helps['synapse kusto pool create'] = """
+    type: command
+    short-summary: "Create a Kusto pool."
+    parameters:
+      - name: --sku
+        short-summary: "The SKU of the kusto pool."
+        long-summary: |
+            Usage: --sku name=XX capacity=XX size=XX
+
+            name: Required. SKU name.
+            capacity: The number of instances of the cluster.
+            size: Required. SKU size.
+      - name: --optimized-autoscale
+        short-summary: "Optimized auto scale definition."
+        long-summary: |
+            Usage: --optimized-autoscale version=XX is-enabled=XX minimum=XX maximum=XX
+
+            version: Required. The version of the template defined, for instance 1.
+            is-enabled: Required. A boolean value that indicate if the optimized autoscale feature is enabled or not.
+            minimum: Required. Minimum allowed instances count.
+            maximum: Required. Maximum allowed instances count.
+    examples:
+      - name: kustoPoolsCreateOrUpdate
+        text: |-
+               az synapse kusto pool create --name "kustoclusterrptest4" --location "westus" --enable-purge true \
+--enable-streaming-ingest true --workspace-uid "11111111-2222-3333-444444444444" --sku name="Storage optimized" \
+capacity=2 size="Medium" --resource-group "kustorptest" --workspace-name "synapseWorkspaceName"
+"""
+
+helps['synapse kusto pool update'] = """
+    type: command
+    short-summary: "Update a Kusto Kusto Pool."
+    parameters:
+      - name: --sku
+        short-summary: "The SKU of the kusto pool."
+        long-summary: |
+            Usage: --sku name=XX capacity=XX size=XX
+
+            name: Required. SKU name.
+            capacity: The number of instances of the cluster.
+            size: Required. SKU size.
+      - name: --optimized-autoscale
+        short-summary: "Optimized auto scale definition."
+        long-summary: |
+            Usage: --optimized-autoscale version=XX is-enabled=XX minimum=XX maximum=XX
+
+            version: Required. The version of the template defined, for instance 1.
+            is-enabled: Required. A boolean value that indicate if the optimized autoscale feature is enabled or not.
+            minimum: Required. Minimum allowed instances count.
+            maximum: Required. Maximum allowed instances count.
+    examples:
+      - name: kustoPoolsUpdate
+        text: |-
+               az synapse kusto pool update --name "kustoclusterrptest4" --enable-purge true --enable-streaming-ingest \
+true --workspace-uid "11111111-2222-3333-444444444444" --sku name="Storage optimized" capacity=2 size="Medium" \
+--resource-group "kustorptest" --workspace-name "synapseWorkspaceName"
+"""
