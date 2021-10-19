@@ -638,7 +638,9 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
-    def test_login_with_auth_code_adfs(self, login_with_auth_code_mock, get_user_credential_mock,
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_login_with_auth_code_adfs(self, can_launch_browser_mock,
+                                       login_with_auth_code_mock, get_user_credential_mock,
                                        create_subscription_client_mock):
         cli = DummyCli()
         TEST_ADFS_AUTH_URL = 'https://adfs.local.azurestack.external/adfs'
