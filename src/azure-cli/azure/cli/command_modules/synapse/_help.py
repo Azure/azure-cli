@@ -2032,7 +2032,7 @@ examples:
   - name: Get a SQL script.
     text: |-
         az synapse sql-script show --workspace-name testsynapseworkspace \\
-          --sql-script-name testsqlscriptname
+          --name testsqlscriptname
 """
 
 helps['synapse sql-script delete'] = """
@@ -2042,7 +2042,7 @@ examples:
   - name: Delete a SQL script.
     text: |-
         az synapse sql-script delete --workspace-name testsynapseworkspace \\
-          --sql-script-name testsqlscriptname
+          --name testsqlscriptname
 """
 
 helps['synapse sql-script create'] = """
@@ -2052,7 +2052,7 @@ examples:
   - name: Create a SQL script.
     text: |-
         az synapse sql-script create --workspace-name testsynapseworkspace \\
-          --sql-script-name testsqlscriptname \\
+          --name testsqlscriptname \\
           --query-file @'path/test.sql'
 """
 
@@ -2063,7 +2063,7 @@ examples:
   - name: Update a SQL script.
     text: |-
         az synapse sql-script update --workspace-name testsynapseworkspace \\
-          --sql-script-name testsqlscriptname \\
+          --name testsqlscriptname \\
           --query-file queryfilename
 """
 
@@ -2074,7 +2074,7 @@ examples:
   - name: Rename a SQL script.
     text: |-
         az synapse sql-script rename --workspace-name testsynapseworkspace \\
-          --sql-script-name testsqlscriptname
+          --name testsqlscriptname
 """
 
 helps['synapse sql-script wait'] = """

@@ -955,8 +955,8 @@ def load_arguments(self, _):
             c.argument('definition_file', arg_type=definition_file_arg_type)
 
     # synapse artifacts sql script
-    for scope in ['create', 'update','show', 'wait', 'delete', 'rename']:
-        with self.argument_context('synapse sql-script' + scope) as c:
+    for scope in ['create', 'update', 'show', 'wait', 'delete', 'rename']:
+        with self.argument_context('synapse sql-script ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('sql_script_name', options_list=['--name', '-n'], help='The SQL script name')
 
@@ -964,8 +964,8 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     for scope in ['create', 'update']:
-        with self.argument_context('synapse sql-script' + scope) as c:
-            c.argument('query_file', help='The SQL query file path', arg_type=definition_file_arg_type)
+        with self.argument_context('synapse sql-script ' + scope) as c:
+            c.argument('query_file', help='The SQL query file path')
             c.argument('result_limit', arg_type=get_enum_type([5000, -1]), help="The SQL query results limit. Default is 5000. '-1' is no limit.")
             c.argument('folder_name', help='The SQL script folder name, eg: folder/subfolder1')
             c.argument('description', help='The SQL script description')

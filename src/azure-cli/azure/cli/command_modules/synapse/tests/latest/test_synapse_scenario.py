@@ -1793,7 +1793,6 @@ class SynapseScenarioTests(ScenarioTest):
             'folder_name':'folder1/subfolder1',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sqlscript.sql')
         })
-        print(self.kwargs['file'])
 
         # create a workspace
         self._create_workspace()
@@ -1808,7 +1807,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create sqlscript
         self.cmd(
-            'az synapse sql-script create --workspace-name {workspace} --sql-script-name {name} --query-file @"{file}" '
+            'az synapse sql-script create --workspace-name {workspace} --name {name} --query-file "{file}" '
             '--sqlpool-name {sqlpool_name} --database-name {database_name} --folder-name {folder_name}',
             checks=[
                 self.check('name', self.kwargs['name'])
@@ -1816,7 +1815,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get sqlscript
         self.cmd(
-            'az synapse sql-script show --workspace-name {workspace} --sql-script-name {name}',
+            'az synapse sql-script show --workspace-name {workspace} --name {name}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -1830,8 +1829,8 @@ class SynapseScenarioTests(ScenarioTest):
 
         # delete sqlscript
         self.cmd(
-            'az synapse sql-script delete --workspace-name {workspace} --sql-script-name {name}')
+            'az synapse sql-script delete --workspace-name {workspace} --name {name}')
         self.cmd(
-            'az synapse sql-script show --workspace-name {workspace} --sql-script-name {name}',
+            'az synapse sql-script show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
