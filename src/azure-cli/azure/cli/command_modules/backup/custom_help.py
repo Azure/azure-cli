@@ -8,7 +8,7 @@ import json
 import re
 import os
 from datetime import datetime, timedelta
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
 from knack.log import get_logger
 

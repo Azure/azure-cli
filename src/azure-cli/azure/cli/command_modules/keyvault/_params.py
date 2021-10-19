@@ -27,7 +27,7 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
-    process_hsm_name, KeyEncryptionDataType)
+    process_hsm_name, KeyEncryptionDataType, process_key_release_policy)
 
 # CUSTOM CHOICE LISTS
 
@@ -364,6 +364,13 @@ def load_arguments(self, _):
                        type=datetime_type)
             c.argument('not_before', default=None, type=datetime_type,
                        help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+            c.argument('exportable', arg_type=get_three_state_flag(), is_preview=True,
+                       help='Whether the private key can be exported. To create key with release policy, '
+                            '"exportable" must be true and caller must have "export" permission.')
+            c.argument('release_policy', options_list=['--policy'], type=file_type, completer=FilesCompleter(),
+                       validator=process_key_release_policy, is_preview=True,
+                       help='The policy rules under which the key can be exported. '
+                            'Policy definition as JSON, or a path to a file containing JSON policy definition.')
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
@@ -458,6 +465,10 @@ def load_arguments(self, _):
                 help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
         c.extra('key_operations', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*',
                 help='Space-separated list of permitted JSON web key operations.')
+        c.extra('release_policy', options_list=['--policy'], type=file_type, completer=FilesCompleter(),
+                validator=process_key_release_policy, is_preview=True,
+                help='The policy rules under which the key can be exported. '
+                     'Policy definition as JSON, or a path to a file containing JSON policy definition.')
         c.extra('tags', tags_type)
     # endregion
 
