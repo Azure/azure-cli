@@ -9,7 +9,8 @@ import json
 import re
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
+    MutuallyExclusiveArgumentError
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
@@ -247,3 +248,60 @@ def validate_feature_key(namespace):
             raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
         if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
             raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+
+
+def validate_import_profile(namespace):
+    if namespace.profile == 'appconfig/kvset':
+        if namespace.source != 'file':
+            raise InvalidArgumentValueError(
+                "Import profile 'appconfig/kvset' can only be used when importing from a JSON file.",
+                "Replace --source {0} with --source file OR replace --profile appconfig/kvset with --profile appconfig/default".format(namespace.source))
+        if namespace.format_ is not None and namespace.format_ != 'json':
+            raise InvalidArgumentValueError(
+                "Import profile 'appconfig/kvset' can only be used when importing from a JSON format.",
+                "Replace --format {0} with --format json OR replace --profile appconfig/kvset with --profile appconfig/default".format(namespace.format_))
+        if namespace.content_type is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='content-type')
+        if namespace.label is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='label')
+        if namespace.src_label is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='src-label')
+        if namespace.src_key is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='src-key')
+        if namespace.separator is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='separator')
+        if namespace.depth is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='depth')
+        if namespace.prefix is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='prefix')
+        if namespace.skip_features:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='skip-features')
+
+
+def validate_export_profile(namespace):
+    if namespace.profile == 'appconfig/kvset':
+        if namespace.destination != 'file':
+            raise InvalidArgumentValueError(
+                "The profile 'appconfig/kvset' only supports exporting to a file.",
+                "Replace --destination {} with --destination file OR replace --profile appconfig/kvset with --profile appconfig/default".format(namespace.destination))
+        if namespace.format_ is not None and namespace.format_ != 'json':
+            raise CLIError(
+                "The profile 'appconfig/kvset' only supports exporting in the JSON format",
+                "Replace --format {0} with --format json OR replace --profile appconfig/kvset with --profile appconfig/default".format(namespace.format_))
+        if namespace.prefix is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='prefix')
+        if namespace.dest_label is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='dest-label')
+        if namespace.resolve_keyvault:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='resolve-keyvault')
+        if namespace.separator is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='separator')
+        if namespace.naming_convention is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='naming-convention')
+
+
+def __construct_kvset_invalid_argument_error(is_exporting, argument):
+    action = 'exporting' if is_exporting else 'importing'
+    return InvalidArgumentValueError(
+        "The option '{0}' is not supported when {1} using 'appconfig/kvset' profile".format(argument, action),
+        "Try removing '{}' from the command or use --profile appconfig/default".format(argument))

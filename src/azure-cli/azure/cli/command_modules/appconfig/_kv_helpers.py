@@ -7,6 +7,7 @@
 
 import io
 import json
+import re
 from difflib import Differ
 
 import chardet
@@ -19,17 +20,25 @@ from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants)
 from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from._featuremodels import (map_keyvalue_to_featureflag,
                             map_featureflag_to_keyvalue,
                             FeatureFlagValue)
+from ...core.azclierror import FileOperationError, AzureInternalError
 
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
+
+URL_VALIDATOR_REGEX = re.compile(
+        r'^(?:http)s?://'  # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
 
 class FeatureManagementReservedKeywords:
@@ -663,9 +672,10 @@ def __print_preview(old_json, new_json):
     logger.warning("")  # printing an empty line for formatting purpose
     return True
 
+
 def __print_preview_and_export_kvset(file_path, keyvalues, yes):
     kvset = __serialize_kv_list_to_comparable_json_list(keyvalues, 'appconfig/kvset')
-    obj = dict(items=kvset)
+    obj = {KVSetConstants.KVSETRootElementName: kvset}
     json_string = json.dumps(obj, indent=2, ensure_ascii=False)
     if not yes:
         logger.warning('\n---------------- Key Values Preview (Beta) ----------------')
@@ -679,7 +689,7 @@ def __print_preview_and_export_kvset(file_path, keyvalues, yes):
         with open(file_path, 'w', encoding='utf-8') as fp:
             fp.write(json_string)
     except Exception as exception:
-        raise CLIError("Failed to export key-values to file. " + str(exception))
+        raise FileOperationError("Failed to export key-values to file. " + str(exception))
 
 
 def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
@@ -1018,20 +1028,17 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError(str(exception))
 
 
-def __import_kvset_from_file(client, path, skip_features, yes):
+def __import_kvset_from_file(client, path, yes):
     new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
-    if 'items' not in new_kvset:
-        raise CLIError("file '{}' is not in a valid appconfig/kvset format.".format(path))
+    if KVSetConstants.KVSETRootElementName not in new_kvset:
+        raise FileOperationError("file '{}' is not in a valid appconfig/kvset format.".format(path))
 
     kvset_to_import = [ConfigurationSetting(key=kv['key'],
                                             label=kv['label'],
                                             content_type=kv['content_type'],
                                             value=kv['value'],
                                             tags=kv['tags'])
-                       for kv in new_kvset['items']]
-
-    if skip_features:
-        kvset_to_import[:] = [kv for kv in kvset_to_import if not __is_feature_flag(kv)]
+                       for kv in new_kvset[KVSetConstants.KVSETRootElementName]]
 
     if not yes:
         existing_kvset = __read_kv_from_config_store(client,
@@ -1063,11 +1070,10 @@ def __import_kvset_from_file(client, path, skip_features, yes):
         user_confirmation('Do you want to continue?\n')
 
     for config_setting in kvset_to_import:
-        if __is_key_vault_ref(kv=config_setting):
-            __validate_import_keyvault_ref(kv=config_setting)
-        elif __is_feature_flag(kv=config_setting):
-            if not __validate_import_feature_flag(kv=config_setting):
-                continue
+        if __is_key_vault_ref(kv=config_setting) and not __validate_import_keyvault_ref(kv=config_setting):
+            continue
+        elif __is_feature_flag(kv=config_setting) and not __validate_import_feature_flag(kv=config_setting):
+            continue
         elif not validate_import_key(config_setting.key):
             continue
 
@@ -1077,18 +1083,29 @@ def __import_kvset_from_file(client, path, skip_features, yes):
 
 def __validate_import_keyvault_ref(kv):
     if kv:
-        value = json.loads(kv.value)
-        if 'uri' not in value:
-            logger.warning("Keyvault reference with key '{}' is not a valid keyvault reference."
-                           "Importing as normal key-value pair".format(kv.key))
+        try:
+            value = json.loads(kv.value)
+            if 'uri' in value and re.match(URL_VALIDATOR_REGEX, value['uri']) is not None:
+                return True
+            else:
+                logger.warning("Keyvault reference with key '{}' is not a valid keyvault reference."
+                               "It will not be imported.".format(kv.key))
+        except Exception as exception:
+            logger.warning('An error occurred while importing keyvault reference with key {0}\n{1}'.format(kv.key, str(exception)))
+    return False
 
 
 def __validate_import_feature_flag(kv):
     if kv and validate_import_feature(kv.key):
-        ff = json.loads(kv.value)
-        if ff['id'] and ff['description'] and ff['enabled'] and ff['conditions']:
-            return True
-    logger.warning("Feature flag with key '{}' is not a valid feature flag. It will not be imported.".format(kv.key))
+        try:
+            ff = json.loads(kv.value)
+            if ff['id'] and ff['description'] and ff['enabled'] and ff['conditions']:
+                return True
+            else:
+                logger.warning(
+                    "Feature flag with key '{}' is not a valid feature flag. It will not be imported.".format(kv.key))
+        except Exception as exception:
+            logger.warning('An error occurred while importing feature flag with key {0}\n{1}'.format(kv.id, str(exception)))
     return False
 
 
@@ -1104,7 +1121,7 @@ def __write_configuration_setting_to_config_store(azconfig_client, configuration
             "Failed to set key-value with key '%s' and label '%s'. %s",
             configuration_setting.key, configuration_setting.label, str(exception))
     except Exception as exception:
-        raise CLIError(str(exception))
+        raise AzureInternalError(str(exception))
 
 
 class Undef:  # pylint: disable=too-few-public-methods

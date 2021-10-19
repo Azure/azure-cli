@@ -76,28 +76,10 @@ def import_config(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    # validate the input command
     if profile == 'appconfig/kvset':
-        if source != 'file':
-            raise CLIError('Import profile \'appconfig/kvset\' can only be used when importing from a JSON file.')
-        if format_ and format_ != 'json':
-            raise CLIError('Import profile \'appconfig/kvset\' can only be used when importing from a JSON format.')
-        if content_type:
-            raise CLIError('The option \'content-type\' is not supported when importing using \'appconfig/kvset\' profile')
-        if label:
-            raise CLIError('The option \'label\' is not supported when importing using \'appconfig/kvset\' profile')
-        if src_label:
-            raise CLIError('The option \'src-label\' is not supported when importing using \'appconfig/kvset\' profile')
-        if src_key:
-            raise CLIError('The option \'src-key\' is not supported when importing using \'appconfig/kvset\' profile')
-        if separator:
-            raise CLIError('Flattening the JSON is not supported when importing using \'appconfig/kvset\' profile')
-        if depth:
-            raise CLIError('Flattening the JSON is not supported when importing using \'appconfig/kvset\' profile')
-        if prefix:
-            raise CLIError('The option \'prefix\' is not supported when importing using \'appconfig/kvset\' profile')
-        __import_kvset_from_file(client=azconfig_client, path=path, skip_features=skip_features, yes=yes)
+        __import_kvset_from_file(client=azconfig_client, path=path, yes=yes)
         return
+
     # fetch key values from source
     if source == 'file':
         if format_ and content_type:
@@ -233,20 +215,6 @@ def export_config(cmd,
     profile = profile.lower()
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
-
-    if profile == 'appconfig/kvset':
-        if destination != 'file':
-            raise CLIError('The export profile \'appconfig/kvset\' only be used when exporting to the file.')
-        if prefix != '':
-            raise CLIError('\'--prefix\' option is not supported when using \'appconfig/kvset\' export profile.')
-        if format_ is not None and format_ != 'json':
-            raise CLIError('The export profile \'appconfig/kvset\' only supports exporting in the json format')
-        if dest_label is not None:
-            raise CLIError('\'--dest-label\' option is not supported when using \'appconfig/kvset\' export profile.')
-        if resolve_keyvault:
-            raise CLIError('Keyvault references are not resolved when exporting using \'appconfig/kvset\' export profile.')
-        if separator is not None:
-            raise CLIError('\'--separator\' option is not supported when using \'appconfig/kvset\' export profile.')
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     dest_azconfig_client = None
