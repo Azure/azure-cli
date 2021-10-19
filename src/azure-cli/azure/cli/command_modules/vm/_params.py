@@ -177,6 +177,8 @@ def load_arguments(self, _):
         c.argument('incremental', arg_type=get_three_state_flag(), min_api='2019-03-01',
                    help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed')
         c.argument('edge_zone', edge_zone_type)
+        c.argument('copy_start', arg_type=get_three_state_flag(), min_api='2021-04-01',
+                   help='Create snapshot by using a deep copy process, where the resource creation is considered complete only after all data has been copied from the source.')
     # endregion
 
     # region Images

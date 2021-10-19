@@ -122,7 +122,7 @@ examples:
 
 helps['netappfiles account list'] = """
 type: command
-short-summary: List ANF accounts.
+short-summary: List ANF accounts by subscription or by resource group name.
 examples:
   - name: List ANF accounts within a resource group
     text: >
@@ -224,8 +224,6 @@ parameters:
     short-summary: Weekly backups count to keep
   - name: --monthly-backups -m
     short-summary: Monthly backups count to keep
-  - name: --yearly-backups -y
-    short-summary: Yearly backups count to keep, not in use at the moment
   - name: --enabled -e
     short-summary: The property to decide policy is enabled or not
   - name: --tags
@@ -290,8 +288,6 @@ parameters:
     short-summary: Weekly backups count to keep
   - name: --monthly-backups -m
     short-summary: Monthly backups count to keep
-  - name: --yearly-backups -y
-    short-summary: Yearly backups count to keep, not in use at the moment
   - name: --enabled -e
     short-summary: The property to decide policy is enabled or not
 examples:
@@ -324,6 +320,8 @@ parameters:
     short-summary: Space-separated tags in `key[=value]` format
   - name: --cool-access
     short-summary: If enabled (true) the pool can contain cool Access enabled volumes.
+  - name: --encryption-type
+    short-summary: Encryption type of the capacity pool, set encryption type for data at rest for this pool and all volumes in it. This value can only be set when creating new pool. Possible values are Single or Double. Default value is Single.
 examples:
   - name: Create an ANF pool
     text: >
@@ -564,6 +562,16 @@ parameters:
     short-summary: Specifies the number of days after which data that is not accessed by clients will be tiered.
   - name: --unix-permissions
     short-summary: UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file- read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users.
+  - name: --is-def-quota-enabled
+    short-summary: Specifies if default quota is enabled for the volume.
+  - name: --default-user-quota
+    short-summary: Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
+  - name: --default-group-quota
+    short-summary: Default group quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
+  - name: --avs-data-store
+    short-summary: Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purpose. Possible values are Enabled and Disabled. Default value is Disabled.
+  - name: --network-features
+    short-summary: Basic network, or Standard features available to the volume. Possible values are Basic and Standard. Default value is Basic.
 examples:
   - name: Create an ANF volume
     text: >
@@ -835,6 +843,12 @@ parameters:
     short-summary: Vault Resource ID
   - name: --snapshot-policy-id
     short-summary: Snapshot Policy ResourceId
+  - name: --is-def-quota-enabled
+    short-summary: Specifies if default quota is enabled for the volume.
+  - name: --default-user-quota
+    short-summary: Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
+  - name: --default-group-quota
+    short-summary: Default group quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
 examples:
   - name: Update an ANF volume
     text: >
@@ -1015,7 +1029,7 @@ parameters:
 examples:
   - name: Create an ANF snapshot policy
     text: >
-        az netappfiles snapshot policy create -g mygroup --account-name myaccountname --snapshot-policy-name mysnapshotpolicyname -l westus2 --hourly-snapshots 1 --enabled true
+        az netappfiles snapshot policy create -g mygroup --account-name myaccountname --snapshot-policy-name mysnapshotpolicyname -l westus2 --hourly-snapshots 1 --hourly-minute 5 --enabled true
 """
 
 helps['netappfiles snapshot policy delete'] = """
