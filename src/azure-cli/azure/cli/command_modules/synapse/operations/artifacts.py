@@ -488,19 +488,25 @@ def create_or_update_sql_script(cmd, workspace_name, sql_script_name, query_file
                                 folder_name=None, description=None, sqlpool_name=None,
                                 database_name=None, additional_properties=None, no_wait=False):
     client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
-    with open(query_file, 'rb') as stream:
+    with open(query_file, 'r') as stream:
         query = stream.read()
-    if sqlpool_name.lower() == 'build-in':
-        sqlpool_type = 'SqlOnDemand'
+    if sqlpool_name:
+        if sqlpool_name.lower() == 'build-in':
+            sqlpool_type = 'SqlOnDemand'
+            current_connection = SqlConnection(type=sqlpool_type,
+                                               database_name=database_name)
+        else:
+            sqlpool_type = 'SqlPool'
+            current_connection = SqlConnection(type=sqlpool_type,
+                                               pool_name=sqlpool_name,
+                                               database_name=database_name)
     else:
-        sqlpool_type = 'SqlPool'
-    current_connection = SqlConnection(type=sqlpool_type,
-                                       pool_name=sqlpool_name,
-                                       database_name=database_name)
+        current_connection = SqlConnection(type = 'SqlOnDemand',
+                                           database_name = 'master')
     SqlScriptContentinfo = SqlScriptContent(query=query,
-                                        current_connection=current_connection,
-                                        result_limit=result_limit,
-                                        metadata=SqlScriptMetadata(language='sql'))
+                                            current_connection=current_connection,
+                                            result_limit=result_limit,
+                                            metadata=SqlScriptMetadata(language='sql'))
     SqlScriptFolderinfo = SqlScriptFolder(name=folder_name)
     properties = SqlScript(additional_properties=additional_properties,
                            description=description,
