@@ -24,6 +24,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
@@ -3156,6 +3157,109 @@ class AKSContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(ctx_1.get_disable_public_fqdn(), True)
 
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "disable_public_fqdn": True,
+                "enable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on mutially exclusive disable_public_fqdn and enable_public_fqdn
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            self.assertEqual(ctx_2.get_disable_public_fqdn(), True)
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {
+                "disable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on private cluster not enabled in update mode
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_3.get_disable_public_fqdn(), True)
+
+        # custom value
+        ctx_4 = AKSContext(
+            self.cmd,
+            {
+                "disable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_4 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+                private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
+            )
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_4,
+        )
+        ctx_4.attach_mc(mc_4)
+        # fail on invalid private_dns_zone (none) when disable_public_fqdn is specified
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_4.get_disable_public_fqdn(), True)
+
+    def test_get_enable_public_fqdn(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {
+                "enable_public_fqdn": False,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_public_fqdn(), False)
+        api_server_access_profile = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster_public_fqdn=True,
+            )
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile,
+        )
+        ctx_1.attach_mc(mc)
+        # In fact, there is currently no such option in the create command
+        # fail on enable_public_fqdn specified when enable_private_cluster is not specified
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_1.get_enable_public_fqdn(), True)
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {
+                "disable_public_fqdn": True,
+                "enable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            self.assertEqual(ctx_2.get_enable_public_fqdn(), True)
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {
+                "enable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on private cluster not enabled in update mode
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_3.get_enable_public_fqdn(), True)
+
     def test_get_private_dns_zone(self):
         # default
         ctx_1 = AKSContext(
@@ -3215,6 +3319,28 @@ class AKSContextTestCase(unittest.TestCase):
             self.assertEqual(
                 ctx_3.get_private_dns_zone(), CONST_PRIVATE_DNS_ZONE_SYSTEM
             )
+
+        # custom value
+        ctx_4 = AKSContext(
+            self.cmd,
+            {
+                "private_dns_zone": CONST_PRIVATE_DNS_ZONE_NONE,
+                "disable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_4 = self.models.ManagedClusterAPIServerAccessProfile(
+            enable_private_cluster=True,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_4,
+        )
+        ctx_4.attach_mc(mc_4)
+        # fail on invalid private_dns_zone (none) when disable_public_fqdn is specified
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_4.get_private_dns_zone(), CONST_PRIVATE_DNS_ZONE_NONE)
 
     def test_get_assign_kubelet_identity(self):
         # default
@@ -5396,6 +5522,21 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_2.check_raw_parameters()
 
+    def test_ensure_mc(self):
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1._ensure_mc(None)
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        # fail on inconsistent mc with internal context
+        with self.assertRaises(CLIInternalError):
+            dec_1._ensure_mc(mc_1)
+
     def test_fetch_mc(self):
         mock_mc = self.models.ManagedCluster(
             location="test_location",
@@ -5594,6 +5735,19 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        # custom value
+        dec_4 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(location="test_location")
+        dec_4.context.attach_mc(mc_4)
+        # fail on incomplete mc object (no agent pool profiles)
+        with self.assertRaises(UnknownError):
+            dec_4.update_auto_scaler_profile(mc_4)
 
     def test_process_attach_detach_acr(self):
         # default value in `aks_update`
@@ -5797,10 +5951,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         # fail on passing the wrong mc object
         with self.assertRaises(CLIInternalError):
             dec_1.update_load_balancer_profile(None)
-        mc_0 = self.models.ManagedCluster(location="test_location")
-        # fail on incomplete mc object (no network profile)
-        with self.assertRaises(UnknownError):
-            dec_1.update_load_balancer_profile(mc_0)
 
         load_balancer_profile_1 = self.models.lb_models.get(
             "ManagedClusterLoadBalancerProfile"
@@ -5862,6 +6012,19 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             network_profile=ground_truth_network_profile_1,
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        # fail on incomplete mc object (no network profile)
+        with self.assertRaises(UnknownError):
+            dec_2.update_load_balancer_profile(mc_2)
 
     def test_update_disable_local_accounts(self):
         # default value in `aks_update`
@@ -5933,6 +6096,102 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_3 = self.models.ManagedCluster(
             location="test_location",
             disable_local_accounts=False,
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+    def test_update_api_server_access_profile(self):
+        # default value in `aks_update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "api_server_authorized_ip_ranges": None,
+                "disable_public_fqdn": False,
+                "enable_public_fqdn": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_api_server_access_profile(None)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_api_server_access_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "api_server_authorized_ip_ranges": "",
+                "disable_public_fqdn": True,
+                "enable_public_fqdn": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        api_server_access_profile_2 = self.models.ManagedClusterAPIServerAccessProfile(
+            authorized_ip_ranges=["test_ip_1", "test_ip_2"],
+            enable_private_cluster=True,
+            enable_private_cluster_public_fqdn=True,
+            private_dns_zone=CONST_PRIVATE_DNS_ZONE_SYSTEM,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_2,
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_api_server_access_profile(mc_2)
+        ground_truth_api_server_access_profile_2 = self.models.ManagedClusterAPIServerAccessProfile(
+            authorized_ip_ranges=[],
+            enable_private_cluster=True,
+            enable_private_cluster_public_fqdn=False,
+            private_dns_zone=CONST_PRIVATE_DNS_ZONE_SYSTEM,
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=ground_truth_api_server_access_profile_2,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # custom value
+        dec_3 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "api_server_authorized_ip_ranges": None,
+                "disable_public_fqdn": False,
+                "enable_public_fqdn": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        api_server_access_profile_3 = self.models.ManagedClusterAPIServerAccessProfile(
+            enable_private_cluster=True,
+            enable_private_cluster_public_fqdn=False,
+            private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_3,
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_api_server_access_profile(mc_3)
+        ground_truth_api_server_access_profile_3 = self.models.ManagedClusterAPIServerAccessProfile(
+            enable_private_cluster=True,
+            enable_private_cluster_public_fqdn=True,
+            private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
+        )
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=ground_truth_api_server_access_profile_3,
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
