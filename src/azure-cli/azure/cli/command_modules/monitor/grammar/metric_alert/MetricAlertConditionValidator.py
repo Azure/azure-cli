@@ -51,7 +51,7 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
 
     # Exit a parse tree produced by MetricAlertConditionParser#validation_flag.
     def exitValidation_flag(self, ctx):
-        if (ctx.getText().strip() == '!'):
+        if ctx.getText().strip() == '!':
             self.parameters['skip_metric_validation'] = True
 
     # Exit a parse tree produced by MetricAlertConditionParser#namespace.
