@@ -30,7 +30,7 @@ logger = get_logger(__name__)
 
 class UserCredential(PublicClientApplication):
 
-    def __init__(self, client_id, username=None, **kwargs):
+    def __init__(self, client_id, username, **kwargs):
         """User credential implementing get_token interface.
 
         :param client_id: Client ID of the CLI.
@@ -38,29 +38,25 @@ class UserCredential(PublicClientApplication):
         """
         super().__init__(client_id, **kwargs)
 
-        self._username = username
-        if username:
-            accounts = self.get_accounts(username)
+        accounts = self.get_accounts(username)
 
-            if not accounts:
-                raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
-                               "another application that uses Single Sign-On. "
-                               "Please run `az login` to re-login.".format(username))
+        if not accounts:
+            raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
+                           "another application that uses Single Sign-On. "
+                           "Please run `az login` to re-login.".format(username))
 
-            if len(accounts) > 1:
-                raise CLIError("Found multiple accounts with the same username. Please report to us via Github: "
-                               "https://github.com/Azure/azure-cli/issues/new")
+        if len(accounts) > 1:
+            raise CLIError("Found multiple accounts with the same username. Please report to us via Github: "
+                           "https://github.com/Azure/azure-cli/issues/new")
 
-            account = accounts[0]
-            self.account = account
-        else:
-            self.account = None
+        account = accounts[0]
+        self._account = account
 
     def get_token(self, *scopes, **kwargs):
         # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
         logger.debug("UserCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
-        result = self.acquire_token_silent_with_error(list(scopes), self.account, **kwargs)
+        result = self.acquire_token_silent_with_error(list(scopes), self._account, **kwargs)
 
         from azure.cli.core.azclierror import AuthenticationError
         try:
@@ -82,7 +78,7 @@ class UserCredential(PublicClientApplication):
                 success_template, error_template = read_response_templates()
 
                 result = self.acquire_token_interactive(
-                    list(scopes), login_hint=self._username, port=8400 if self.authority.is_adfs else None,
+                    list(scopes), login_hint=self._account['username'], port=8400 if self.authority.is_adfs else None,
                     success_template=success_template, error_template=error_template, **kwargs)
                 check_result(result)
 
