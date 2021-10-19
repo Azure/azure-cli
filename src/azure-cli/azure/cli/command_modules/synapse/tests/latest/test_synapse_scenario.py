@@ -1781,4 +1781,57 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
             expect_failure=True)
+        
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_sqlscript(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
+            'name': 'test_sqlscript1',
+            'sqlpool_name': 'built-in',
+            'database_name': 'master',
+            'folder_name':'folder1/subfolder1',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sqlscript.sql')
+        })
+        print(self.kwargs['file'])
+
+        # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        # create sqlscript
+        self.cmd(
+            'az synapse sql-script create --workspace-name {workspace} --sql-script-name {name} --query-file @"{file}" '
+            '--sqlpool-name {sqlpool_name} --database-name {database_name} --folder-name {folder_name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get sqlscript
+        self.cmd(
+            'az synapse sql-script show --workspace-name {workspace} --sql-script-name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list sqlscript
+        self.cmd(
+            'az synapse sql-script list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/sqlscripts')
+            ])
+
+        # delete sqlscript
+        self.cmd(
+            'az synapse sql-script delete --workspace-name {workspace} --sql-script-name {name}')
+        self.cmd(
+            'az synapse sql-script show --workspace-name {workspace} --sql-script-name {name}',
+            expect_failure=True)
 

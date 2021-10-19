@@ -2016,13 +2016,13 @@ type: group
 short-summary: Manage SQL scripts in a synapse workspace.
 """
 
-helps['synapse sql-script show'] = """
+helps['synapse sql-script list'] = """
 type: command
-short-summary: Get a SQL scripts.
+short-summary: list SQL scripts in a synapse workspace.
 examples:
-  - name: Get a SQL scripts.
+  - name: list SQL scripts.
     text: |-
-        az synapse sql-script show --workspace-name testsynapseworkspace
+        az synapse sql-script list --workspace-name testsynapseworkspace
 """
 
 helps['synapse sql-script show'] = """
@@ -2053,7 +2053,7 @@ examples:
     text: |-
         az synapse sql-script create --workspace-name testsynapseworkspace \\
           --sql-script-name testsqlscriptname \\
-          --query-file queryfilename
+          --query-file @'path/test.sql'
 """
 
 helps['synapse sql-script update'] = """
@@ -2075,4 +2075,9 @@ examples:
     text: |-
         az synapse sql-script rename --workspace-name testsynapseworkspace \\
           --sql-script-name testsqlscriptname
+"""
+
+helps['synapse sql-script wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a sql script is met.
 """

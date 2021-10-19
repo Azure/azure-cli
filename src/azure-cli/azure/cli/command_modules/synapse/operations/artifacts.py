@@ -484,12 +484,40 @@ def rename_sql_script(cmd, workspace_name, sql_script_name, new_name=None, no_wa
     return sdk_no_wait(no_wait, client.begin_rename_sql_script, sql_script_name, new_name, polling=True)
 
 
-def create_or_update_sql_script(cmd, workspace_name, sql_script_name, query_file, result_limit=-1,
+def create_sql_script(cmd, workspace_name, sql_script_name, query_file, result_limit=5000,
                                 folder_name=None, description=None, sqlpool_name=None,
                                 database_name=None, additional_properties=None, no_wait=False):
     client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
-    with open(query_file, 'r') as stream:
-        query = stream.read()
+    if sqlpool_name:
+        if sqlpool_name.lower() == 'build-in':
+            current_connection = SqlConnection(type='SqlOnDemand',
+                                               database_name=database_name)
+        else:
+            current_connection = SqlConnection(type='SqlPool',
+                                               pool_name=sqlpool_name,
+                                               database_name=database_name)
+    else:
+        current_connection = SqlConnection(type = 'SqlOnDemand',
+                                           database_name = 'master')
+
+    SqlScriptContentinfo = SqlScriptContent(query=query_file,
+                                            current_connection=current_connection,
+                                            result_limit=result_limit,
+                                            metadata=SqlScriptMetadata(language='sql'))
+    SqlScriptFolderinfo = SqlScriptFolder(name=folder_name)
+    properties = SqlScript(additional_properties=additional_properties,
+                           description=description,
+                           type='SqlQuery',
+                           content=SqlScriptContentinfo,
+                           folder=SqlScriptFolderinfo)
+    sql_script = SqlScriptResource(name=sql_script_name, properties=properties)
+    return sdk_no_wait(no_wait, client.begin_create_or_update_sql_script,
+                       sql_script_name, sql_script, polling=True)
+
+def update_sql_script(cmd, workspace_name, sql_script_name, query_file, result_limit=None,
+                                folder_name=None, description=None, sqlpool_name=None,
+                                database_name=None, additional_properties=None, no_wait=False):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
     if sqlpool_name:
         if sqlpool_name.lower() == 'build-in':
             sqlpool_type = 'SqlOnDemand'
@@ -501,9 +529,9 @@ def create_or_update_sql_script(cmd, workspace_name, sql_script_name, query_file
                                                pool_name=sqlpool_name,
                                                database_name=database_name)
     else:
-        current_connection = SqlConnection(type = 'SqlOnDemand',
-                                           database_name = 'master')
-    SqlScriptContentinfo = SqlScriptContent(query=query,
+        current_connection = None
+
+    SqlScriptContentinfo = SqlScriptContent(query=query_file,
                                             current_connection=current_connection,
                                             result_limit=result_limit,
                                             metadata=SqlScriptMetadata(language='sql'))
