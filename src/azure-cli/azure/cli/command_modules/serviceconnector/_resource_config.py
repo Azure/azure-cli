@@ -69,7 +69,9 @@ SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud]
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
-    RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}'
+    # HACK: only for bugbash
+    # RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}'
+    RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}'
 }
 
 
@@ -131,11 +133,12 @@ SOURCE_RESOURCES_PARAMS = {
             'help': 'Name of the spring-cloud app',
             'placeholder': 'MyApp'
         },
-        'deployment': {
-            'options': ['--deployment'],
-            'help': 'The deployment name of the app',
-            'placeholder': 'MyDeployment'
-        }
+        # HACK: only for bugbash
+        # 'deployment': {
+        #     'options': ['--deployment'],
+        #     'help': 'The deployment name of the app',
+        #     'placeholder': 'MyDeployment'
+        # }
     }
 }
 
