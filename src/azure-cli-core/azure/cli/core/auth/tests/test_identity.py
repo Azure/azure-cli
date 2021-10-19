@@ -72,7 +72,7 @@ class TestIdentity(unittest.TestCase):
     @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
     @mock.patch("msal.application.ConfidentialClientApplication.__init__")
     def test_login_with_service_principal_certificate_sn_issuer(self, init_mock, acquire_token_for_client_mock,
-                                                      save_entry_mock):
+                                                                save_entry_mock):
         acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
 
         identity = Identity('https://login.microsoftonline.com', tenant_id='my-tenant')
