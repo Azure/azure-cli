@@ -4,9 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
+from knack.prompting import prompt
 from knack.util import CLIError
 
 from azure.cli.core.util import ScopedConfig
+from azure.cli.core.config_defaults import config
 
 import azure.cli.core.telemetry as telemetry
 
@@ -17,6 +19,74 @@ def _normalize_config_value(value):
     if value:
         value = '' if value in ["''", '""'] else value
     return value
+
+
+def print_all_configs():
+    print(f"\nDefault configuration sections: {[key for key in config]}\n")
+    for section in config:
+        print(f"\n{section}: ")
+        for key in config[section].keys():
+            print(f"\t {key}: {config[section][key]['description']}")
+
+
+def list_available(cmd, key=None):
+    selection_is_valid = False
+    has_shown_configs = False
+
+    if not key:
+        print_all_configs()
+        has_shown_configs = True
+        key = prompt('\nEnter one of the above configuration keys (i.e. disable_confirmation_prompt)'
+                     'to see its current, default, and available values.\nUse the form of <section>.<key> '
+                     ' e.g. cloud.name. Leave blank to exit: ')
+
+    # prompt user for input until valid
+    while not selection_is_valid:
+        if not key:
+            # exit if empty string is entered
+            raise CLIError('Operation cancelled.')
+
+        key_arr = key.strip().split('.')
+
+        if len(key_arr) != 2:
+            key = prompt(f'\nInvalid entry <{key}>. \nEnter in the form of '
+                         '<section>.<key> e.g. cloud.name. Leave blank to exit: ')
+        else:
+            selected_section = key_arr[0]
+            selected_key = key_arr[1]
+            if selected_section in config and selected_key in config[selected_section]:
+                selection_is_valid = True
+            else:
+                # if we haven't already show all of the configs, do so now
+                if not has_shown_configs:
+                    print_all_configs()
+                    has_shown_configs = True
+
+                key = prompt(f'\nConfig default not found: {selected_section}.{selected_key}. '
+                             '\nEnter in the form of <section>.<key> e.g. cloud.name. '
+                             'Leave blank to exit:  ')
+
+    config_value = config[selected_section][selected_key]
+    current_value = {}
+    try:
+        current_value = config_get(cmd, f"{selected_section}.{selected_key}")
+    except CLIError:
+        # value not set in config, treat it as default
+        current_value['value'] = config_value['default']
+
+    if config_value["allowed"]:
+        allowed_values = [elem['value'] for elem in config_value['allowed']]
+    else:
+        # for options that are limited by type i.e. string/integer
+        allowed_values = config_value['type']
+
+    return {
+        "Key": selected_key,
+        "Current": current_value['value'],
+        "Default": config_value['default'],
+        "Allowed": allowed_values,
+        "Section": selected_section
+    }
 
 
 def config_set(cmd, key_value=None, local=False):
