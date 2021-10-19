@@ -2001,5 +2001,5 @@ def _validate_vm_vmss_create_ephemeral_placement(namespace):
     ephemeral_os_disk = getattr(namespace, 'ephemeral_os_disk', None)
     ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
     if ephemeral_os_disk_placement and not ephemeral_os_disk:
-        raise CLIError('usage error: --ephemeral-os-disk-placement is only configurable when '
-                       '--ephemeral-os-disk is specified.')
+        raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                 '--ephemeral-os-disk is specified.')
