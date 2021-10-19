@@ -1070,10 +1070,12 @@ def __import_kvset_from_file(client, path, yes):
         user_confirmation('Do you want to continue?\n')
 
     for config_setting in kvset_to_import:
-        if __is_key_vault_ref(kv=config_setting) and not __validate_import_keyvault_ref(kv=config_setting):
-            continue
-        elif __is_feature_flag(kv=config_setting) and not __validate_import_feature_flag(kv=config_setting):
-            continue
+        if __is_key_vault_ref(kv=config_setting):
+            if not __validate_import_keyvault_ref(kv=config_setting):
+                continue
+        elif __is_feature_flag(kv=config_setting):
+            if not __validate_import_feature_flag(kv=config_setting):
+                continue
         elif not validate_import_key(config_setting.key):
             continue
 

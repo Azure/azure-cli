@@ -272,7 +272,7 @@ def validate_import_profile(namespace):
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='separator')
         if namespace.depth is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='depth')
-        if namespace.prefix is not None:
+        if namespace.prefix is not None and namespace.prefix != '':
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='prefix')
         if namespace.skip_features:
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='skip-features')
@@ -288,7 +288,7 @@ def validate_export_profile(namespace):
             raise CLIError(
                 "The profile 'appconfig/kvset' only supports exporting in the JSON format",
                 "Replace --format {0} with --format json OR replace --profile appconfig/kvset with --profile appconfig/default".format(namespace.format_))
-        if namespace.prefix is not None:
+        if namespace.prefix is not None and namespace.prefix != '':
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='prefix')
         if namespace.dest_label is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='dest-label')
@@ -296,8 +296,6 @@ def validate_export_profile(namespace):
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='resolve-keyvault')
         if namespace.separator is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='separator')
-        if namespace.naming_convention is not None:
-            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='naming-convention')
 
 
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
