@@ -772,6 +772,22 @@ def load_arguments(self, _):
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
+    for scope in ['vm application set', 'vmss application set']:
+        with self.argument_context(scope) as c:
+            c.argument('vm', existing_vm_name)
+            c.argument('vmss_name', vmss_name_type)
+            c.argument('application_version_ids', options_list=['--app-version-ids'], nargs='*', help="Space-separated application version ids to set to vm.")
+            c.argument('order_applications', action='store_true', help='Whether set order index at each galleryApplications. It starts from 1.')
+            c.argument('application_configuration_overrides', options_list=['--app-config-overrides'], nargs='*',
+                       help='Space-separated application configuration overrides for each application version ids. '
+                       'It should have the same number of items as the appliation version ids. Null is available for a application '
+                       'which does not have a configuraiton override.')
+
+    for scope in ['vm application list', 'vmss application list']:
+        with self.argument_context(scope) as c:
+            c.argument('vm_name', options_list=['--vm-name', '--name', '-n'], arg_type=existing_vm_name, id_part=None)
+            c.argument('virtual_machine_scale_set_name', arg_type=vmss_name_type, options_list=['--vmss-name'], id_part=None)
+
     for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope) as c:
             c.argument('location', get_location_type(self.cli_ctx), help='Location in which to create VM and related resources. If default location is not configured, will default to the resource group\'s location')

@@ -1973,6 +1973,32 @@ examples:
     crafted: true
 """
 
+helps['vm application'] = """
+type: group
+short-summary: manage appliations of a VM
+"""
+
+helps['vm application set'] = """
+type: command
+short-summary: Set appliations of a VM.
+examples:
+  - name: Set applications of a vm
+    text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1
+  - name: Set applications of a vm with config
+    text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1 \
+app-config-overrides https://mystorageaccount.blob.core.windows.net/configurations/settings.config null
+"""
+
+helps['vm application list'] = """
+type: command
+short-summary: List applications of a VM
+examples:
+  - name: List applications of a vm
+    text: az vm application list -g MyResourceGroup -n MyVm
+"""
+
 helps['vm image'] = """
 type: group
 short-summary: Information on available virtual machine images.
@@ -2933,6 +2959,32 @@ examples:
     text: |
         az vmss identity show --name MyVirtualMachine --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['vmss application'] = """
+type: group
+short-summary: manage applications of a VM scaleset.
+"""
+
+helps['vmss application set'] = """
+type: command
+short-summary: Set applications of a VMSS.
+examples:
+  - name: Set applications of a vmss
+    text: az vmss application set -g MyResourceGroup -n MyVmss --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1
+  - name: Set applications of a vmss with config
+    text: az vmss application set -g MyResourceGroup -n MyVmss --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1 \
+app-config-overrides https://mystorageaccount.blob.core.windows.net/configurations/settings.config null
+"""
+
+helps['vmss application list'] = """
+type: command
+short-summary: List applications of a VMSS
+examples:
+  - name: List applications of a vmss
+    text: az vmss application list -g MyResourceGroup -n MyVmss
 """
 
 helps['vmss list'] = """
