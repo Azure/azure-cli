@@ -179,6 +179,11 @@ def load_command_table(self, _):
         g.keyvault_command('show', 'get_key', transform=transform_key_output)
         g.keyvault_custom('import', 'import_key', transform=transform_key_output)
         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
+        g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output, is_preview=True)
+
+    with self.command_group('keyvault key rotation-policy', data_key_entity.command_type, is_preview=True) as g:
+        g.keyvault_command('show', 'get_key_rotation_policy')
+        g.keyvault_custom('update', 'update_key_rotation_policy', is_preview=True)
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_secrets',

@@ -325,6 +325,31 @@ type: command
 short-summary: Return policy template as JSON encoded policy definition.
 """
 
+helps['keyvault key rotate'] = """
+type: command
+short-summary: Rotate the key based on the key policy by generating a new version of the key.
+"""
+
+helps['keyvault key rotation-policy'] = """
+type: group
+short-summary: Manage key's rotation policy.
+"""
+
+helps['keyvault key rotation-policy update'] = """
+type: command
+short-summary: Update the rotation policy of a Key Vault key.
+examples:
+  - name: Set notify trigger to notify 7 days before expiry
+    text: az keyvault key rotation-policy -n mykey --vault-name mykeyvault --notify-before-expiry P7D --expires-in P30D
+  - name: Set rotate trigger to rotate 15 days after creation
+    text: az keyvault key rotation-policy -n mykey --vault-name mykeyvault --rotate-after-creation P15D
+"""
+
+helps['keyvault key rotation-policy show'] = """
+type: command
+short-summary: Get the rotation policy of a Key Vault key.
+"""
+
 helps['keyvault list'] = """
 type: command
 short-summary: List Vaults and/or HSMs.
