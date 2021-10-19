@@ -10,7 +10,7 @@ jobs:
   displayName: Extract Metadata
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
     displayName: 'Extract Version'
@@ -27,7 +27,7 @@ jobs:
   displayName: Build Deb Packages
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Bionic:
@@ -53,7 +53,7 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Bionic:
@@ -80,7 +80,7 @@ jobs:
    - BuildDebPackages
    - BuildPyinstallerDebPackages
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Build Artifacts'
@@ -122,7 +122,7 @@ jobs:
       vm:
         Target: vm
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python 3.7'
