@@ -955,7 +955,7 @@ def load_arguments(self, _):
             c.argument('definition_file', arg_type=definition_file_arg_type)
 
     # synapse artifacts sql script
-    for scope in ['create', 'update', 'show', 'wait', 'delete']:
+    for scope in ['create', 'update', 'show', 'wait', 'delete', 'export']:
         with self.argument_context('synapse sql-script ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('sql_script_name', options_list=['--name', '-n'], help='The SQL script name')
@@ -972,3 +972,6 @@ def load_arguments(self, _):
             c.argument('sql_pool_name', help='The SQL pool name')
             c.argument('data_base_name', help='The SQL database name')
             c.argument('additional_properties', help='The SQL script additional properties')
+
+    with self.argument_context('synapse sql-script export') as c:
+        c.argument('output_folder', help='The SQL script export path')

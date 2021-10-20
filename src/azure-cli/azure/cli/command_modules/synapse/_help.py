@@ -2053,7 +2053,7 @@ examples:
     text: |-
         az synapse sql-script create --workspace-name testsynapseworkspace \\
           --name testsqlscriptname \\
-          --query-file 'path/test.sql'
+          --definition-file 'path/test.sql'
 """
 
 helps['synapse sql-script update'] = """
@@ -2064,7 +2064,18 @@ examples:
     text: |-
         az synapse sql-script update --workspace-name testsynapseworkspace \\
           --name testsqlscriptname \\
-          --query-file 'path/test.sql'
+          --definition-file 'path/test.sql'
+"""
+
+helps['synapse sql-script export'] = """
+type: command
+short-summary: export a SQL script.
+examples:
+  - name: Update a SQL script.
+    text: |-
+        az synapse sql-script export --workspace-name testsynapseworkspace \\
+          --name testsqlscriptname \\
+          --output-folder 'path/folder'
 """
 
 helps['synapse sql-script wait'] = """

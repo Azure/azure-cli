@@ -544,7 +544,8 @@ def update_sql_script(cmd, workspace_name, sql_script_name, definition_file, res
                                                pool_name=sql_pool_name,
                                                database_name=data_base_name)
     else:
-        current_connection = None
+        current_connection = SqlConnection(type='SqlOnDemand',
+                                           database_name='master')
 
     SqlScriptContentinfo = SqlScriptContent(query=query,
                                             current_connection=current_connection,
@@ -560,6 +561,7 @@ def update_sql_script(cmd, workspace_name, sql_script_name, definition_file, res
     return sdk_no_wait(no_wait, client.begin_create_or_update_sql_script,
                        sql_script_name, sql_script, polling=True)
 
+
 def export_sql_script(cmd, workspace_name, output_folder, sql_script_name=None):
     client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
     if sql_script_name is not None:
@@ -568,8 +570,10 @@ def export_sql_script(cmd, workspace_name, output_folder, sql_script_name=None):
         try:
             with open(path, 'w') as f:
                 f.write(sqlscriptquery)
-        except IOError:
-            raise CLIError('Unable to export to file: {}'.format(path))
+        except:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            err_msg = 'Unable to export to file: {}'.format(path)
+            raise InvalidArgumentValueError(err_msg)
     else:
         sqlscripts = client.get_sql_scripts_by_workspace()
         for sqlscript in sqlscripts:
@@ -578,5 +582,7 @@ def export_sql_script(cmd, workspace_name, output_folder, sql_script_name=None):
             try:
                 with open(path, 'w') as f:
                     f.write(sqlscriptquery)
-            except IOError:
-                raise CLIError('Unable to export to file: {}'.format(path))
+            except:
+                from azure.cli.core.azclierror import InvalidArgumentValueError
+                err_msg = 'Unable to export to file: {}'.format(path)
+                raise InvalidArgumentValueError(err_msg)

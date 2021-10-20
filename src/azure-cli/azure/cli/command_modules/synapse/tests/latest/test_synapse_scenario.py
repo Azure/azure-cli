@@ -1787,8 +1787,9 @@ class SynapseScenarioTests(ScenarioTest):
     def test_sqlscript(self):
         self.kwargs.update({
             'name': 'test_sqlscript1',
-            'sqlpool_name': 'built-in',
-            'database_name': 'master',
+            'sqlpool_name': 'testsqlpool',
+            'performance_level': 'DW100c',
+            'database_name': 'testsqlpool',
             'folder_name':'folder1/subfolder1',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sqlscript.sql')
         })
@@ -1804,10 +1805,15 @@ class SynapseScenarioTests(ScenarioTest):
             ]
         )
 
+        # create sql pool
+        self.cmd(
+            'az synapse sql pool create --name {sqlpool_name} --performance-level {performance_level} '
+            '--workspace {workspace} --resource-group {rg}')
+        
         # create sqlscript
         self.cmd(
-            'az synapse sql-script create --workspace-name {workspace} --name {name} --query-file "{file}" '
-            '--sqlpool-name {sqlpool_name} --database-name {database_name} --folder-name {folder_name}',
+            'az synapse sql-script create --workspace-name {workspace} --name {name} --definition-file "{file}" '
+            ' --folder-name {folder_name}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -1825,6 +1831,23 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('[0].type', 'Microsoft.Synapse/workspaces/sqlscripts')
             ])
+        
+        # update sqlscript
+        self.cmd(
+            'az synapse sql-script update --workspace-name {workspace} --name {name} --definition-file "{file}" '
+            '--sql-pool-name {sqlpool_name} --data-base-name {database_name} --folder-name {folder_name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # export sqlscript
+        self.kwargs['output_folder'] = os.getcwd()
+        self.cmd(
+            'az synapse sql-script export --workspace-name {workspace} --name {name} '
+            '--output-folder "{output_folder}"')
+        file_path = os.path.join(self.kwargs['output_folder'], self.kwargs['name'] + '.sql')
+        self.assertTrue(os.path.isfile(file_path))
+        os.remove(file_path)
 
         # delete sqlscript
         self.cmd(
