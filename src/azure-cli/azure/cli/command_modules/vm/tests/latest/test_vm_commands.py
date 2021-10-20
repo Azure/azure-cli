@@ -6329,35 +6329,41 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
-    @unittest.skip('Need Application version')
     @ResourceGroupPreparer()
     def test_vm_add_application(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
-            'vid1': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/galleries/galleryname/applications/applicationname/versions/1.0.0'.format(
-                sub=self.get_subscription_id(),
-                rg=resource_group
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
             ),
-            'vid2': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/galleries/galleryname/applications/applicationname/versions/1.0.1'.format(
-                sub=self.get_subscription_id(),
-                rg=resource_group
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
             ),
         })
         # Prepare VM
-        self.cmd('vm create -g {rg} -l westus -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password @PasswordPassword1! --public-ip-address-allocation dynamic --authentication-type password --nsg-rule NONE')
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
 
-        # Prepare application
-        # self.cmd('vm gallery')
-
-        self.cmd('vm application set -g {rg} -n {vm} --application-version-ids {vid1} {vid2}')
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2}')
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
     @unittest.skip('Need Application version')
     @ResourceGroupPreparer()
     def test_vmss_add_application(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+        })
 
-        self.cmd('vmss application set -g {rg} -n {vmss} --application-version-ids {vid1} {vid2}')
+        # Prepare VMSS
+        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications')
 
         self.cmd('vmss application list -g {rg} -n {vmss}')
 
