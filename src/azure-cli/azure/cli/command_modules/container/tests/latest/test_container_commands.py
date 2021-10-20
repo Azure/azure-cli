@@ -550,3 +550,48 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
 
         # Test exec
         self.cmd('container exec -g {rg} -n {container_group_name} --exec-command \"ls\"')
+
+
+    # Test container create with a zone specified
+    @ResourceGroupPreparer()
+    def test_container_create_with_zone(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        cpu = 1
+        memory = 1
+        command = '"/bin/sh -c \'while true; do echo hello; sleep 20; done\'"'
+        restart_policy = 'Never'
+        zone = '1'
+        location = "eastus"
+
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'location': location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'cpu': cpu,
+            'memory': memory,
+            'command': command,
+            'restart_policy': restart_policy,
+            'zone': zone
+        })
+
+        # Test create
+        self.cmd('container create -g {rg} -n {container_group_name} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --cpu {cpu} --memory {memory} --zone {zone} '
+                 '--command-line {command} --restart-policy {restart_policy} --location {location}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory),
+                         self.check('zones[0]', zone)])

@@ -17,6 +17,11 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     # This method is exposed for Azure Core. Add *scopes, **kwargs to fit azure.core requirement
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         logger.debug("MSIAuthenticationWrapper.get_token invoked by Track 2 SDK with scopes=%s", scopes)
+
+        if 'data' in kwargs:
+            from azure.cli.core.azclierror import AuthenticationError
+            raise AuthenticationError("VM SSH currently doesn't support managed identity or Cloud Shell.")
+
         resource = scopes_to_resource(_normalize_scopes(scopes))
         if resource:
             # If available, use resource provided by SDK

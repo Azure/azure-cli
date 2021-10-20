@@ -37,7 +37,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
                         (account_name, pool_name, volume_name, LOCATION, vnet_name, subnet_name, volume_name,
                          VOLUME_DEFAULT, snapshot)).get_output_in_json()
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_snapshot_policies(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -133,7 +133,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
                                         account_name).get_output_in_json()
         assert len(snapshot_policy_list) == 0
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_', additional_tags={'owner': 'cli_test'})
     def test_list_snapshot_policy(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -164,7 +164,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
                                         account_name).get_output_in_json()
         assert len(snapshot_policy_list) == 0
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_', additional_tags={'owner': 'cli_test'})
     def test_get_snapshot_policy_by_name(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -191,7 +191,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         assert snapshot_policy['hourlySchedule']['snapshotsToKeep'] == hourly_snapshots
         assert snapshot_policy['hourlySchedule']['minute'] == hourly_minute
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_', additional_tags={'owner': 'cli_test'})
     def test_update_snapshot_policy(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -265,7 +265,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         assert snapshot_policy['enabled'] == enabled
         assert snapshot_policy['tags']['Tag1'] == 'Value1'
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_', additional_tags={'owner': 'cli_test'})
     def test_snapshot_policy_list_volumes(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -302,7 +302,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
 
         assert len(list_volumes['value']) == 2
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_', additional_tags={'owner': 'cli_test'})
     def test_assign_snapshot_policy_to_volume(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)

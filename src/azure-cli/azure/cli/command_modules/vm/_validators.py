@@ -1012,6 +1012,19 @@ def _validate_vm_create_nics(cmd, namespace):
     logger.debug('existing NIC(s) will be used')
 
 
+def _validate_vm_nic_delete_option(namespace):
+    if not namespace.nics and namespace.nic_delete_option:
+        if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
+            namespace.nic_delete_option = namespace.nic_delete_option[0]
+        elif len(namespace.nic_delete_option) > 1 or any((len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option)):  # pylint: disable=line-too-long
+            from azure.cli.core.parser import InvalidArgumentValueError
+            raise InvalidArgumentValueError("incorrect usage: Cannot specify individual delete option when no nic is "
+                                            "specified. Either specify a list of nics and their delete option like: "
+                                            "--nics nic1 nic2 --nic-delete-option nic1=Delete nic2=Detach or specify "
+                                            "delete option for all: --nics nic1 nic2 --nic-delete-option Delete or "
+                                            "specify delete option for the new nic created: --nic-delete-option Delete")
+
+
 def _validate_vm_vmss_create_auth(namespace, cmd=None):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
@@ -1273,6 +1286,7 @@ def process_vm_create_namespace(cmd, namespace):
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_nic_delete_option(namespace)
 
 # endregion
 
@@ -1662,10 +1676,21 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
-            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot = _figure_out_storage_source(
-                cmd.cli_ctx, namespace.resource_group_name, namespace.source)
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, source_info = \
+                _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise CLIError(usage_error)
+            # autodetect copy_start for `az snapshot create`
+            if 'snapshot create' in cmd.name and hasattr(namespace, 'copy_start') and namespace.copy_start is None:
+                if not source_info:
+                    from azure.cli.core.util import parse_proxy_resource_id
+                    result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
+                    source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx, result['resource_group'], result['name'])
+                source_location = source_info.location
+                target_location = namespace.location if namespace.location \
+                    else get_default_location_from_resource_group(cmd, namespace)
+                # if the source location differs from target location, then it's copy_start scenario
+                namespace.copy_start = source_location != target_location
         except CloudError:
             raise CLIError(usage_error)
 
@@ -1695,13 +1720,13 @@ def process_image_create_namespace(cmd, namespace):
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
     else:
-        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
         if namespace.data_disk_sources:
             for data_disk_source in namespace.data_disk_sources:
-                source_blob_uri, source_disk, source_snapshot = _figure_out_storage_source(
+                source_blob_uri, source_disk, source_snapshot, _ = _figure_out_storage_source(
                     cmd.cli_ctx, namespace.resource_group_name, data_disk_source)
                 if source_blob_uri:
                     namespace.data_blob_uris.append(source_blob_uri)
@@ -1718,6 +1743,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
+    source_info = None
     if urlparse(source).scheme:  # a uri?
         source_blob_uri = source
     elif '/disks/' in source.lower():
@@ -1725,16 +1751,26 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     elif '/snapshots/' in source.lower():
         source_snapshot = source
     else:
-        compute_client = _compute_client_factory(cli_ctx)
-        # pylint: disable=no-member
-        try:
-            info = compute_client.snapshots.get(resource_group_name, source)
-            source_snapshot = info.id
-        except ResourceNotFoundError:
-            info = compute_client.disks.get(resource_group_name, source)
-            source_disk = info.id
+        source_info, is_snapshot = _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source)
+        if is_snapshot:
+            source_snapshot = source_info.id
+        else:
+            source_disk = source_info.id
 
-    return (source_blob_uri, source_disk, source_snapshot)
+    return (source_blob_uri, source_disk, source_snapshot, source_info)
+
+
+def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
+    compute_client = _compute_client_factory(cli_ctx)
+    is_snapshot = True
+
+    try:
+        info = compute_client.snapshots.get(resource_group_name, source)
+    except ResourceNotFoundError:
+        is_snapshot = False
+        info = compute_client.disks.get(resource_group_name, source)
+
+    return info, is_snapshot
 
 
 def process_disk_encryption_namespace(cmd, namespace):
