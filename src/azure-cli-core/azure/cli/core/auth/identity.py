@@ -106,7 +106,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._msal_app_instance = self._build_persistent_msal_app()
         return self._msal_app_instance
 
-    def login_with_auth_code(self, scopes=None, **kwargs):
+    def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
         logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
@@ -122,7 +122,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             success_template=success_template, error_template=error_template, **kwargs)
         return check_result(result)
 
-    def login_with_device_code(self, scopes=None, **kwargs):
+    def login_with_device_code(self, scopes, **kwargs):
         flow = self.msal_app.initiate_device_flow(scopes, **kwargs)
         if "user_code" not in flow:
             raise ValueError(
@@ -131,11 +131,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         result = self.msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
         return check_result(result)
 
-    def login_with_username_password(self, username, password, scopes=None, **kwargs):
+    def login_with_username_password(self, username, password, scopes, **kwargs):
         result = self.msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
         return check_result(result)
 
-    def login_with_service_principal(self, client_id, credential, scopes=None):
+    def login_with_service_principal(self, client_id, credential, scopes):
         """
         `credential` is a dict returned by ServicePrincipalAuth.build_credential
         """
