@@ -4,6 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 
+import unittest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
@@ -49,6 +50,8 @@ class CredentialReplacer(RecordingProcessor):
         # hide token in header
         if 'x-ms-cupertino-test-token' in request.headers:
             request.headers['x-ms-cupertino-test-token'] = 'hidden'
+        if 'x-ms-serviceconnector-user-token' in request.headers:
+            request.headers['x-ms-serviceconnector-user-token'] = 'hidden'
         
         return request
 
@@ -621,6 +624,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('sql is removed from supported target resources')
     def test_webapp_sql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
