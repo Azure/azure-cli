@@ -7816,7 +7816,9 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     t.start()
     command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
     logger.debug("Running rdp command %s", ' '.join(command))
-    subprocess.call(command, shell=platform.system() == 'Windows')
+
+    from ._process_helper import launch_and_wait
+    launch_and_wait(command)
     tunnel_server.cleanup()
 
 
