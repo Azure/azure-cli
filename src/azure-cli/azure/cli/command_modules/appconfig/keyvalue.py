@@ -76,12 +76,11 @@ def import_config(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    if profile == 'appconfig/kvset':
-        __import_kvset_from_file(client=azconfig_client, path=path, yes=yes)
-        return
-
     # fetch key values from source
     if source == 'file':
+        if profile == 'appconfig/kvset':
+            __import_kvset_from_file(client=azconfig_client, path=path, yes=yes)
+            return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
             # Error out if user has provided JSON content type with any other format.
@@ -243,6 +242,10 @@ def export_config(cmd,
     if profile == 'appconfig/default' or (profile == 'appconfig/kvset' and skip_features):
         __discard_features_from_retrieved_kv(src_kvs)
 
+    if profile == 'appconfig/kvset':
+        __print_preview_and_export_kvset(file_path=path, keyvalues=src_kvs, yes=yes)
+        return
+
     if not skip_features:
         # Get all Feature flags with matching label
         if (destination == 'file' and format_ == 'properties') or destination == 'appservice':
@@ -258,10 +261,6 @@ def export_config(cmd,
                                         all_=True,
                                         auth_mode=auth_mode,
                                         endpoint=endpoint)
-
-    if profile == 'appconfig/kvset':
-        __print_preview_and_export_kvset(file_path=path, keyvalues=src_kvs, yes=yes)
-        return
 
     # if customer needs preview & confirmation
     if not yes:

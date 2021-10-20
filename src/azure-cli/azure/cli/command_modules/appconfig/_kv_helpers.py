@@ -9,6 +9,7 @@ import io
 import json
 import re
 from difflib import Differ
+from urllib.parse import urlparse
 
 import chardet
 import javaproperties
@@ -19,6 +20,7 @@ from knack.util import CLIError
 from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
+from azure.cli.core.azclierror import FileOperationError, AzureInternalError
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants)
 from ._utils import prep_label_filter_for_url_encoding
@@ -27,18 +29,10 @@ from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
 from._featuremodels import (map_keyvalue_to_featureflag,
                             map_featureflag_to_keyvalue,
                             FeatureFlagValue)
-from ...core.azclierror import FileOperationError, AzureInternalError
 
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
-
-URL_VALIDATOR_REGEX = re.compile(
-        r'^(?:http)s?://'  # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-        r'(?::\d+)?'  # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
 
 class FeatureManagementReservedKeywords:
@@ -557,11 +551,11 @@ def __serialize_feature_list_to_comparable_json_object(features):
     return res
 
 
-def __serialize_kv_list_to_comparable_json_list(keyvalues, profile='appconfig/default'):
+def __serialize_kv_list_to_comparable_json_list(keyvalues, profile):
     res = []
     for kv in keyvalues:
         # value
-        if profile == 'appconfig/kvset':
+        if profile is not None and profile == 'appconfig/kvset':
             kv_json = {'key': kv.key,
                        'value': kv.value,
                        'label': kv.label,
@@ -1053,19 +1047,7 @@ def __import_kvset_from_file(client, path, yes):
         existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, 'appconfig/kvset')
         kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, 'appconfig/kvset')
 
-        differ = Differ()
-        diff = list(differ.compare(json.dumps(existing_kvset_list, indent=2, ensure_ascii=False).splitlines(True),
-                                   json.dumps(kvset_to_import_list, indent=2, ensure_ascii=False).splitlines(True)))
-
-        if not any(line.startswith('-') or line.startswith('+') for line in diff):
-            logger.warning('Target configuration store already contains all configuration settings'
-                           ' in source. No changes will be made.')
-            return
-
-        # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
-        logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
-        # print newline for readability
-        logger.warning('\n')
+        __print_preview_json_diff(existing_kvset_list, kvset_to_import_list)
 
         user_confirmation('Do you want to continue?\n')
 
@@ -1087,11 +1069,15 @@ def __validate_import_keyvault_ref(kv):
     if kv:
         try:
             value = json.loads(kv.value)
-            if 'uri' in value and re.match(URL_VALIDATOR_REGEX, value['uri']) is not None:
-                return True
-            else:
-                logger.warning("Keyvault reference with key '{}' is not a valid keyvault reference."
-                               "It will not be imported.".format(kv.key))
+            if 'uri' in value:
+                parsed_url = urlparse(value['uri'])
+                # URL with a valid scheme and netloc is a valid url, but keyvault ref has path as well, so validate it
+                if parsed_url.scheme != '' and parsed_url.netloc != '' and parsed_url.path != '':
+                    return True
+
+            logger.warning("Keyvault reference with key '{}' is not a valid keyvault reference."
+                           "It will not be imported.".format(kv.key))
+
         except Exception as exception:
             logger.warning('An error occurred while importing keyvault reference with key {0}\n{1}'.format(kv.key, str(exception)))
     return False
@@ -1124,6 +1110,21 @@ def __write_configuration_setting_to_config_store(azconfig_client, configuration
             configuration_setting.key, configuration_setting.label, str(exception))
     except Exception as exception:
         raise AzureInternalError(str(exception))
+
+
+def __print_preview_json_diff(old_obj, new_obj):
+    differ = Differ()
+    diff = list(differ.compare(json.dumps(old_obj, indent=2, ensure_ascii=False).splitlines(True),
+                               json.dumps(new_obj, indent=2, ensure_ascii=False).splitlines(True)))
+
+    if not any(line.startswith('-') or line.startswith('+') for line in diff):
+        logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
+        return
+
+    # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
+    logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
+    # print newline for readability
+    logger.warning('\n')
 
 
 class Undef:  # pylint: disable=too-few-public-methods

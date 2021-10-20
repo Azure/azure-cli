@@ -253,21 +253,13 @@ def validate_feature_key(namespace):
 def validate_import_profile(namespace):
     if namespace.profile == 'appconfig/kvset':
         if namespace.source != 'file':
-            raise InvalidArgumentValueError(
-                "Import profile 'appconfig/kvset' can only be used when importing from a JSON file.",
-                "Replace --source {0} with --source file OR replace --profile appconfig/kvset with --profile appconfig/default".format(namespace.source))
-        if namespace.format_ is not None and namespace.format_ != 'json':
-            raise InvalidArgumentValueError(
-                "Import profile 'appconfig/kvset' can only be used when importing from a JSON format.",
-                "Replace --format {0} with --format json OR replace --profile appconfig/kvset with --profile appconfig/default".format(namespace.format_))
+            raise InvalidArgumentValueError("Import profile 'appconfig/kvset' can only be used when importing from a JSON file.")
+        if namespace.format_ != 'json':
+            raise InvalidArgumentValueError("Import profile 'appconfig/kvset' can only be used when importing from a JSON format.")
         if namespace.content_type is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='content-type')
         if namespace.label is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='label')
-        if namespace.src_label is not None:
-            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='src-label')
-        if namespace.src_key is not None:
-            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='src-key')
         if namespace.separator is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='separator')
         if namespace.depth is not None:
@@ -281,13 +273,9 @@ def validate_import_profile(namespace):
 def validate_export_profile(namespace):
     if namespace.profile == 'appconfig/kvset':
         if namespace.destination != 'file':
-            raise InvalidArgumentValueError(
-                "The profile 'appconfig/kvset' only supports exporting to a file.",
-                "Replace --destination {} with --destination file OR replace --profile appconfig/kvset with --profile appconfig/default".format(namespace.destination))
-        if namespace.format_ is not None and namespace.format_ != 'json':
-            raise CLIError(
-                "The profile 'appconfig/kvset' only supports exporting in the JSON format",
-                "Replace --format {0} with --format json OR replace --profile appconfig/kvset with --profile appconfig/default".format(namespace.format_))
+            raise InvalidArgumentValueError("The profile 'appconfig/kvset' only supports exporting to a file.")
+        if namespace.format_ != 'json':
+            raise CLIError("The profile 'appconfig/kvset' only supports exporting in the JSON format")
         if namespace.prefix is not None and namespace.prefix != '':
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='prefix')
         if namespace.dest_label is not None:
@@ -300,6 +288,4 @@ def validate_export_profile(namespace):
 
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
     action = 'exporting' if is_exporting else 'importing'
-    return InvalidArgumentValueError(
-        "The option '{0}' is not supported when {1} using 'appconfig/kvset' profile".format(argument, action),
-        "Try removing '{}' from the command or use --profile appconfig/default".format(argument))
+    return InvalidArgumentValueError("The option '{0}' is not supported when {1} using 'appconfig/kvset' profile".format(argument, action))
