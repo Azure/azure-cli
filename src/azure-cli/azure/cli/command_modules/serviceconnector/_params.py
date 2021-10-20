@@ -84,7 +84,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                          help='Name of the {} connection.'.format(source.value), validator=validate_params)
 
     def add_client_type_argument(context, source, target):
-        client_types = SUPPORTED_CLIENT_TYPE.get(source).get(target)
+        client_types = SUPPORTED_CLIENT_TYPE.get(source).get(target, [])
         client_types = [item.value for item in client_types]
         context.argument('client_type', options_list=['--client-type'], arg_type=get_enum_type(client_types),
                          help='The client type used on the {}'.format(source.value))

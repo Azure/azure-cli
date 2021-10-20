@@ -385,6 +385,135 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    def test_webapp_servicebus_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-servicebus-app',
+            'namespace': 'servicelinkertestservicebus' 
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.ServiceBus).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create servicebus --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    def test_webapp_signalr_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-signalr-app',
+            'signalr': 'servicelinker-signalr' 
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.SignalR).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create signalr --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type dotnet'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'dotnet')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    def test_webapp_keyvault_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-keyvault-app',
+            'vault': 'servicelinker-test-kv'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create keyvault --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
     def test_webapp_postgresflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -434,30 +563,75 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
-    def test_webapp_keyvault_e2e(self):
+    def test_webapp_redis_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-keyvault-app',
-            'vault': 'servicelinker-test-kv'
+            'site': 'servicelinker-redis-app',
+            'server': 'servicelinker-redis',
+            'database': '0'
         })
 
         # prepare params
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
-        target_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.Redis).format(**self.kwargs)
 
         # create connection
-        self.cmd('webapp connection create keyvault --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+        self.cmd('webapp connection create redis --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
             checks = [
                 self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    def test_webapp_redisenterprise_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-redis-enterprise-app',
+            'server': 'servicelinker-redis-enterprise',
+            'database': 'default'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.RedisEnterprise).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create redis-enterprise --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
                 self.check('[0].clientType', 'python')
             ]
         ).get_output_in_json()

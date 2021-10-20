@@ -11,7 +11,7 @@ from ._transformers import (
 from ._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,
-    TARGET_RESOURCES,
+    SUPPORTED_AUTH_TYPE
 )
 from ._utils import should_load_source
 
@@ -44,7 +44,10 @@ def load_command_table(self, _):
                                   table_transformer=transform_support_types)
                 og.custom_wait_command('wait', 'connection_show')
 
-            for target in TARGET_RESOURCES:
+            # use SUPPORTED_AUTH_TYPE to decide target resource, as some
+            # target resources are not avialable for certain source resource
+            supported_target_resources = SUPPORTED_AUTH_TYPE.get(source).keys()
+            for target in supported_target_resources:
                 _type, _factory = connection_type, cf_linker
                 if target in [RESOURCE.KeyVault]:
                     _type, _factory = connection_type_user_token, cf_linker_user_token

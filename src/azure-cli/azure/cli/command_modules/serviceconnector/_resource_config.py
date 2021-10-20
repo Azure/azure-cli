@@ -33,10 +33,13 @@ class RESOURCE(Enum):
     Mysql = 'mysql'
     MysqlFlexible = 'mysql-flexible'
     Sql = 'sql'
+    Redis = 'redis'
+    RedisEnterprise = 'redis-enterprise'
     KeyVault = 'keyvault'
     EventHub = 'eventhub'
     AppConfig = 'appconfig'
     ServiceBus = 'servicebus'
+    SignalR = 'signalr'
 
 
 # The dict defines the auth types
@@ -82,6 +85,9 @@ TARGET_RESOURCES = {
     RESOURCE.MysqlFlexible: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DBforMySQL/flexibleServers/{server}/databases/{database}',
     RESOURCE.Mysql: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DBForMySQL/servers/{server}/databases/{database}',
     # RESOURCE.Sql: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Sql/servers/{server}/databases/{database}',
+    RESOURCE.Redis: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Cache/redis/{server}/databases/{database}',
+    RESOURCE.RedisEnterprise: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Cache/redisEnterprise/{server}/databases/{database}',
+
 
     RESOURCE.CosmosCassandra: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DocumentDB/databaseAccounts/{account}/cassandraKeyspaces/{key_space}',
     RESOURCE.CosmosGremlin: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DocumentDB/databaseAccounts/{account}/gremlinDatabases/{database}/graphs/{graph}',
@@ -97,7 +103,8 @@ TARGET_RESOURCES = {
     RESOURCE.KeyVault: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.KeyVault/vaults/{vault}',
     RESOURCE.AppConfig: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.AppConfiguration/configurationStores/{config_store}',
     RESOURCE.EventHub: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.EventHub/namespaces/{namespace}',
-    RESOURCE.ServiceBus: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.ServiceBus/namespaces/{namespace}'
+    RESOURCE.ServiceBus: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.ServiceBus/namespaces/{namespace}',
+    RESOURCE.SignalR: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.SignalRService/SignalR/{signalr}'
 }
 
 
@@ -160,7 +167,7 @@ TARGET_RESOURCES_PARAMS = {
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of database',
+            'help': 'Name of postgres database',
             'placeholder': 'MyDB'
         }
     },
@@ -172,12 +179,12 @@ TARGET_RESOURCES_PARAMS = {
         },
         'server': {
             'options': ['--server'],
-            'help': 'Name of flexible postgres server',
+            'help': 'Name of postgres flexible server',
             'placeholder': 'MyServer'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of database',
+            'help': 'Name of postgres flexible database',
             'placeholder': 'MyDB'
         }
     },
@@ -189,12 +196,12 @@ TARGET_RESOURCES_PARAMS = {
         },
         'server': {
             'options': ['--server'],
-            'help': 'Name of the server',
+            'help': 'Name of the mysql flexible server',
             'placeholder': 'MyServer'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of the database',
+            'help': 'Name of the mysql flexible database',
             'placeholder': 'MyDB'
         }
     },
@@ -206,12 +213,12 @@ TARGET_RESOURCES_PARAMS = {
         },
         'server': {
             'options': ['--server'],
-            'help': 'Name of the server',
+            'help': 'Name of the mysql server',
             'placeholder': 'MyServer'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of the database',
+            'help': 'Name of the mysql database',
             'placeholder': 'MyDB'
         }
     },
@@ -223,12 +230,46 @@ TARGET_RESOURCES_PARAMS = {
         },
         'server': {
             'options': ['--server'],
-            'help': 'Name of the server',
+            'help': 'Name of the sql server',
             'placeholder': 'MyServer'
         },
         'database': {
             'options': ['--database'],
-            'help': 'Name of the database',
+            'help': 'Name of the sql database',
+            'placeholder': 'MyDB'
+        }
+    },
+    RESOURCE.Redis: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the redis server',
+            'placeholder': 'RedisRG'
+        },
+        'server': {
+            'options': ['--server'],
+            'help': 'Name of the redis server',
+            'placeholder': 'MyServer'
+        },
+        'database': {
+            'options': ['--database'],
+            'help': 'Name of the redis database',
+            'placeholder': 'MyDB'
+        }
+    },
+    RESOURCE.RedisEnterprise: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the redis server',
+            'placeholder': 'RedisRG'
+        },
+        'server': {
+            'options': ['--server'],
+            'help': 'Name of the redis enterprise server',
+            'placeholder': 'MyServer'
+        },
+        'database': {
+            'options': ['--database'],
+            'help': 'Name of the redis enterprise database',
             'placeholder': 'MyDB'
         }
     },
@@ -418,6 +459,18 @@ TARGET_RESOURCES_PARAMS = {
             'placeholder': 'MyNamespace'
         }
     },
+    RESOURCE.SignalR: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the signalr',
+            'placeholder': 'SignalrRG'
+        },
+        'signalr': {
+            'options': ['--signalr'],
+            'help': 'Name of the signalr service',
+            'placeholder': 'MySignalR'
+        }
+    }
 }
 
 
@@ -470,6 +523,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosGremlin: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -486,6 +541,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
     },
     RESOURCE.SpringCloud: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret],
@@ -493,6 +549,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosGremlin: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
@@ -508,7 +566,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
     }
 }
 
@@ -570,6 +628,22 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Php,
             CLIENT_TYPE.Ruby,
             CLIENT_TYPE.Django,
+            CLIENT_TYPE.SpringBoot
+        ],
+        RESOURCE.Redis: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.SpringBoot
+        ],
+        RESOURCE.RedisEnterprise: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
             CLIENT_TYPE.SpringBoot
         ],
         RESOURCE.CosmosCassandra: [
@@ -665,6 +739,9 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Go,
             CLIENT_TYPE.SpringBoot
         ],
+        RESOURCE.SignalR: [
+            CLIENT_TYPE.Dotnet
+        ]
     },
     RESOURCE.SpringCloud: {
         RESOURCE.Postgres: [
@@ -688,6 +765,16 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.SpringBoot
         ],
         RESOURCE.Sql: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.SpringBoot
+        ],
+        RESOURCE.Redis: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.SpringBoot
+        ],
+        RESOURCE.RedisEnterprise: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot

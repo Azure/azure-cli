@@ -173,7 +173,10 @@ for source in SOURCE_RESOURCES:
       short-summary: Update a {source} connection
     """.format(source=source.value)
 
-    for target in TARGET_RESOURCES:
+    # use SUPPORTED_AUTH_TYPE to decide target resource, as some
+    # target resources are not avialable for certain source resource
+    supported_target_resources = SUPPORTED_AUTH_TYPE.get(source).keys()
+    for target in supported_target_resources:
         target_id = TARGET_RESOURCES.get(target)
 
         # target resource params

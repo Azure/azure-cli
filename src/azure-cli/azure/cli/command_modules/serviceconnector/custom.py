@@ -53,7 +53,10 @@ def connection_list_support_types(cmd, client,
                 targets.append(resource)
                 break
 
-    for target in targets:
+    # use SUPPORTED_AUTH_TYPE to decide target resource, as some
+    # target resources are not avialable for certain source resource
+    supported_target_resources = SUPPORTED_AUTH_TYPE.get(source).keys()
+    for target in supported_target_resources:
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
         client_types = SUPPORTED_CLIENT_TYPE.get(source).get(target)
         auth_types = [item.value for item in auth_types]
@@ -148,6 +151,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       vault=None,                                            # Resource.KeyVault
                       account=None, key_space=None, graph=None, table=None,  # Resource.Cosmos*, Resource.Storage*
                       config_store=None,                                     # Resource.AppConfig
+                      signalr=None,                                          # Resource.SignalR
                       namespace=None):                                       # Resource.EventHub
 
     if not source_id:
