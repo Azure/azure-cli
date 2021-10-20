@@ -2378,8 +2378,85 @@ class AKSContext:
                 )
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
 
+    def _get_addon_consts(self) -> Dict[str, str]:
+        """Helper function to obtain the constants used by addons.
+
+        Note: This is not a parameter of aks commands.
+
+        :return: dict
+        """
+        from azure.cli.command_modules.acs._consts import (
+            ADDONS,
+            CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+            CONST_AZURE_POLICY_ADDON_NAME,
+            CONST_CONFCOM_ADDON_NAME,
+            CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+            CONST_INGRESS_APPGW_ADDON_NAME,
+            CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+            CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+            CONST_INGRESS_APPGW_SUBNET_CIDR,
+            CONST_INGRESS_APPGW_SUBNET_ID,
+            CONST_INGRESS_APPGW_WATCH_NAMESPACE,
+            CONST_KUBE_DASHBOARD_ADDON_NAME,
+            CONST_MONITORING_ADDON_NAME,
+            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+            CONST_OPEN_SERVICE_MESH_ADDON_NAME,
+            CONST_VIRTUAL_NODE_ADDON_NAME,
+            CONST_VIRTUAL_NODE_SUBNET_NAME,
+        )
+
+        addon_consts = {}
+        addon_consts["ADDONS"] = ADDONS
+        addon_consts[
+            "CONST_ACC_SGX_QUOTE_HELPER_ENABLED"
+        ] = CONST_ACC_SGX_QUOTE_HELPER_ENABLED
+        addon_consts[
+            "CONST_AZURE_POLICY_ADDON_NAME"
+        ] = CONST_AZURE_POLICY_ADDON_NAME
+        addon_consts["CONST_CONFCOM_ADDON_NAME"] = CONST_CONFCOM_ADDON_NAME
+        addon_consts[
+            "CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME"
+        ] = CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
+        addon_consts[
+            "CONST_INGRESS_APPGW_ADDON_NAME"
+        ] = CONST_INGRESS_APPGW_ADDON_NAME
+        addon_consts[
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID"
+        ] = CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID
+        addon_consts[
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME"
+        ] = CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME
+        addon_consts[
+            "CONST_INGRESS_APPGW_SUBNET_CIDR"
+        ] = CONST_INGRESS_APPGW_SUBNET_CIDR
+        addon_consts[
+            "CONST_INGRESS_APPGW_SUBNET_ID"
+        ] = CONST_INGRESS_APPGW_SUBNET_ID
+        addon_consts[
+            "CONST_INGRESS_APPGW_WATCH_NAMESPACE"
+        ] = CONST_INGRESS_APPGW_WATCH_NAMESPACE
+        addon_consts[
+            "CONST_KUBE_DASHBOARD_ADDON_NAME"
+        ] = CONST_KUBE_DASHBOARD_ADDON_NAME
+        addon_consts[
+            "CONST_MONITORING_ADDON_NAME"
+        ] = CONST_MONITORING_ADDON_NAME
+        addon_consts[
+            "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
+        ] = CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
+        addon_consts[
+            "CONST_OPEN_SERVICE_MESH_ADDON_NAME"
+        ] = CONST_OPEN_SERVICE_MESH_ADDON_NAME
+        addon_consts[
+            "CONST_VIRTUAL_NODE_ADDON_NAME"
+        ] = CONST_VIRTUAL_NODE_ADDON_NAME
+        addon_consts[
+            "CONST_VIRTUAL_NODE_SUBNET_NAME"
+        ] = CONST_VIRTUAL_NODE_SUBNET_NAME
+        return addon_consts
+
     # pylint: disable=unused-argument
-    def _get_enable_addons(self, enable_validation: bool = False, consts: dict = None, **kwargs) -> List[str]:
+    def _get_enable_addons(self, enable_validation: bool = False, **kwargs) -> List[str]:
         """Internal function to obtain the value of enable_addons.
 
         Note: enable_addons will not be directly decorated into the `mc` object and we do not support to fetch it from
@@ -2390,17 +2467,14 @@ class AKSContext:
         have duplicate or invalid values, and raise an InvalidArgumentValueError if found. Besides, if monitoring is
         specified in enable_addons but workspace_resource_id is not assigned, or virtual-node is specified but
         aci_subnet_name or vnet_subnet_id is not, a RequiredArgumentMissingError will be raised.
-        This function supports the option of consts. When specified, will use the value it provides to replace the
-        value of the corresponding global constant.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
         :return: empty list or list of strings
         """
         # determine the value of constants
-        valid_addon_keys = ADDONS.keys()
-        if consts and consts.get("ADDONS"):
-            valid_addon_keys = consts.get("ADDONS").keys()
+        addon_consts = self._get_addon_consts()
+        valid_addon_keys = addon_consts.get("ADDONS").keys()
 
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
@@ -2469,7 +2543,7 @@ class AKSContext:
 
     # pylint: disable=unused-argument
     def _get_workspace_resource_id(
-        self, enable_validation: bool = False, read_only: bool = False, consts: dict = None, **kwargs
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
     ) -> Union[str, None]:
         """Internal function to dynamically obtain the value of workspace_resource_id according to the context.
 
@@ -2480,27 +2554,15 @@ class AKSContext:
         This function supports the option of enable_validation. When enabled, it will check if workspace_resource_id is
         assigned but 'monitoring' is not specified in enable_addons, if so, raise a RequiredArgumentMissingError.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
-        This function supports the option of consts. When specified, will use the value it provides to replace the
-        value of the corresponding global constant.
 
         :return: string or None
         """
         # determine the value of constants
-        monitoring_addon_name = CONST_MONITORING_ADDON_NAME
-        monitoring_log_analytics_workspace_resource_id = (
-            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
+        addon_consts = self._get_addon_consts()
+        monitoring_addon_name = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+        monitoring_log_analytics_workspace_resource_id = addon_consts.get(
+            "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
         )
-        if consts:
-            if consts.get("CONST_MONITORING_ADDON_NAME"):
-                monitoring_addon_name = consts.get(
-                    "CONST_MONITORING_ADDON_NAME"
-                )
-            if consts.get(
-                "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
-            ):
-                monitoring_log_analytics_workspace_resource_id = consts.get(
-                    "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
-                )
 
         # read the original value passed by the command
         workspace_resource_id = self.raw_param.get("workspace_resource_id")
@@ -2569,27 +2631,15 @@ class AKSContext:
         """
         return "Linux"
 
-    # pylint: disable=unused-argument
-    def _get_aci_subnet_name(self, consts: dict = None, **kwargs) -> Union[str, None]:
-        """Internal function to obtain the value of aci_subnet_name.
-
-        This function supports the option of consts. When specified, will use the value it provides to replace the
-        value of the corresponding global constant.
+    def get_aci_subnet_name(self) -> Union[str, None]:
+        """Obtain the value of aci_subnet_name.
 
         :return: string or None
         """
         # determine the value of constants
-        virtual_node_addon_name = CONST_VIRTUAL_NODE_ADDON_NAME
-        virtual_node_subnet_name = CONST_VIRTUAL_NODE_SUBNET_NAME
-        if consts:
-            if consts.get("CONST_VIRTUAL_NODE_ADDON_NAME"):
-                virtual_node_addon_name = consts.get(
-                    "CONST_VIRTUAL_NODE_ADDON_NAME"
-                )
-            if consts.get("CONST_VIRTUAL_NODE_SUBNET_NAME"):
-                virtual_node_subnet_name = consts.get(
-                    "CONST_VIRTUAL_NODE_SUBNET_NAME"
-                )
+        addon_consts = self._get_addon_consts()
+        virtual_node_addon_name = addon_consts.get("CONST_VIRTUAL_NODE_ADDON_NAME")
+        virtual_node_subnet_name = addon_consts.get("CONST_VIRTUAL_NODE_SUBNET_NAME")
 
         # read the original value passed by the command
         aci_subnet_name = self.raw_param.get("aci_subnet_name")
@@ -2613,13 +2663,6 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return aci_subnet_name
-
-    def get_aci_subnet_name(self) -> Union[str, None]:
-        """Obtain the value of aci_subnet_name.
-
-        :return: string or None
-        """
-        return self._get_aci_subnet_name()
 
     def get_appgw_name(self) -> Union[str, None]:
         """Obtain the value of appgw_name.

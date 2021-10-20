@@ -9,6 +9,7 @@ from unittest.mock import Mock, call, patch
 
 import requests
 from azure.cli.command_modules.acs._consts import (
+    ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
     CONST_AZURE_POLICY_ADDON_NAME,
     CONST_CONFCOM_ADDON_NAME,
@@ -2239,6 +2240,36 @@ class AKSContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_4.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
 
+    def test_get_addon_consts(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        addon_consts = ctx_1._get_addon_consts()
+        ground_truth_addon_consts = {
+            "ADDONS": ADDONS,
+            "CONST_ACC_SGX_QUOTE_HELPER_ENABLED": CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+            "CONST_AZURE_POLICY_ADDON_NAME": CONST_AZURE_POLICY_ADDON_NAME,
+            "CONST_CONFCOM_ADDON_NAME": CONST_CONFCOM_ADDON_NAME,
+            "CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME": CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+            "CONST_INGRESS_APPGW_ADDON_NAME": CONST_INGRESS_APPGW_ADDON_NAME,
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID": CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME": CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+            "CONST_INGRESS_APPGW_SUBNET_CIDR": CONST_INGRESS_APPGW_SUBNET_CIDR,
+            "CONST_INGRESS_APPGW_SUBNET_ID": CONST_INGRESS_APPGW_SUBNET_ID,
+            "CONST_INGRESS_APPGW_WATCH_NAMESPACE": CONST_INGRESS_APPGW_WATCH_NAMESPACE,
+            "CONST_KUBE_DASHBOARD_ADDON_NAME": CONST_KUBE_DASHBOARD_ADDON_NAME,
+            "CONST_MONITORING_ADDON_NAME": CONST_MONITORING_ADDON_NAME,
+            "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID": CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+            "CONST_OPEN_SERVICE_MESH_ADDON_NAME": CONST_OPEN_SERVICE_MESH_ADDON_NAME,
+            "CONST_VIRTUAL_NODE_ADDON_NAME": CONST_VIRTUAL_NODE_ADDON_NAME,
+            "CONST_VIRTUAL_NODE_SUBNET_NAME": CONST_VIRTUAL_NODE_SUBNET_NAME,
+        }
+        self.assertEqual(addon_consts, ground_truth_addon_consts)
+
     def test_get_enable_addons(self):
         # default
         ctx_1 = AKSContext(
@@ -2317,20 +2348,6 @@ class AKSContextTestCase(unittest.TestCase):
         # fail on aci_subnet_name/vnet_subnet_id not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_6.get_enable_addons()
-
-        # custom value
-        ctx_7 = AKSContext(
-            self.cmd,
-            {
-                "enable_addons": "abc,xyz",
-            },
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        consts_dict = {"ADDONS": {"abc": "def", "xyz": 123}}
-        self.assertEqual(
-            ctx_7._get_enable_addons(consts=consts_dict), ["abc", "xyz"]
-        )
 
     def test_get_workspace_resource_id(self):
         # default
@@ -2424,34 +2441,6 @@ class AKSContextTestCase(unittest.TestCase):
             args[:2], (default_workspace_resource_id, "2015-11-01-preview")
         )
 
-        # custom value
-        ctx_4 = AKSContext(
-            self.cmd,
-            {
-                "enable_addons": "monitoring",
-            },
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        addon_profiles_4 = {
-            "test_monitor_addon": self.models.ManagedClusterAddonProfile(
-                enabled=True,
-                config={"test_workspace_id_key": "test_workspace_resource_id"},
-            )
-        }
-        mc_4 = self.models.ManagedCluster(
-            location="test_location", addon_profiles=addon_profiles_4
-        )
-        ctx_4.attach_mc(mc_4)
-        consts_dict = {
-            "CONST_MONITORING_ADDON_NAME": "test_monitor_addon",
-            "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID": "test_workspace_id_key",
-        }
-        self.assertEqual(
-            ctx_4._get_workspace_resource_id(consts=consts_dict),
-            "test_workspace_resource_id",
-        )
-
     def test_get_virtual_node_addon_os_type(self):
         # default
         ctx_1 = AKSContext(
@@ -2482,33 +2471,6 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_aci_subnet_name(), "test_aci_subnet_name")
-
-        # custom value
-        ctx_2 = AKSContext(
-            self.cmd,
-            {},
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        addon_profiles_2 = {
-            "test_virtual_node_addon" +
-            ctx_1.get_virtual_node_addon_os_type(): self.models.ManagedClusterAddonProfile(
-                enabled=True,
-                config={"test_virtual_node_subnet_key": "test_aci_subnet_name"},
-            )
-        }
-        mc_2 = self.models.ManagedCluster(
-            location="test_location", addon_profiles=addon_profiles_2
-        )
-        ctx_2.attach_mc(mc_2)
-        consts_dict = {
-            "CONST_VIRTUAL_NODE_ADDON_NAME": "test_virtual_node_addon",
-            "CONST_VIRTUAL_NODE_SUBNET_NAME": "test_virtual_node_subnet_key",
-        }
-        self.assertEqual(
-            ctx_2._get_aci_subnet_name(consts=consts_dict),
-            "test_aci_subnet_name",
-        )
 
     def test_get_appgw_name(self):
         # default
