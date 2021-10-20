@@ -4192,7 +4192,7 @@ class AKSCreateDecorator:
         return mc
 
     # pylint: disable=too-many-statements
-    def set_up_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
+    def set_up_addon_profiles(self, mc: ManagedCluster, skip_addons: List = []) -> ManagedCluster:
         """Set up addon profiles for the ManagedCluster object.
 
         This function will store following intermediates: monitoring, enable_virtual_node and
@@ -4202,6 +4202,9 @@ class AKSCreateDecorator:
         the Container Insights solution to the Log Analytics workspace.
         When workspace_resource_id is not assigned, function "_ensure_default_log_analytics_workspace_for_monitoring"
         will be called to create a workspace, which internally used ResourceManagementClient to send the request.
+
+        This function supports the option of skip_addons. When provided, it will skip processing specified addons
+        (will be handled by aks-preview).
 
         :return: the ManagedCluster object
         """
@@ -4216,6 +4219,8 @@ class AKSCreateDecorator:
         # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
         # error out if '--enable-addons=virtual-node' is set but aci_subnet_name and vnet_subnet_id are not
         addons = self.context.get_enable_addons()
+        # skip processing specified addons (will be handled by aks-preview)
+        addons = [x for x in addons if x not in skip_addons]
         if 'http_application_routing' in addons:
             addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
