@@ -4860,6 +4860,7 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             'subnet1': 'AzureBastionSubnet',
             'subnet2': 'vmSubnet',
             'ip1': 'ip1',
+            'num': 29,
             'bastion': 'clibastion'
 
         })
@@ -4868,9 +4869,11 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
                  '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password --nsg-rule None')
-        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --tags a=b', checks=[
+        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --scale-units {num} --tags a=b', checks=[
             self.check('type', 'Microsoft.Network/bastionHosts'),
             self.check('name', '{bastion}'),
+            self.check('scaleUnits', '{num}'),
+            self.check('sku.name', 'Standard'),
             self.check('tags.a', 'b')
         ])
         self.cmd('network bastion list')
