@@ -2385,26 +2385,6 @@ class AKSContext:
 
         :return: dict
         """
-        from azure.cli.command_modules.acs._consts import (
-            ADDONS,
-            CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
-            CONST_AZURE_POLICY_ADDON_NAME,
-            CONST_CONFCOM_ADDON_NAME,
-            CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
-            CONST_INGRESS_APPGW_ADDON_NAME,
-            CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
-            CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
-            CONST_INGRESS_APPGW_SUBNET_CIDR,
-            CONST_INGRESS_APPGW_SUBNET_ID,
-            CONST_INGRESS_APPGW_WATCH_NAMESPACE,
-            CONST_KUBE_DASHBOARD_ADDON_NAME,
-            CONST_MONITORING_ADDON_NAME,
-            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
-            CONST_OPEN_SERVICE_MESH_ADDON_NAME,
-            CONST_VIRTUAL_NODE_ADDON_NAME,
-            CONST_VIRTUAL_NODE_SUBNET_NAME,
-        )
-
         addon_consts = {}
         addon_consts["ADDONS"] = ADDONS
         addon_consts[
