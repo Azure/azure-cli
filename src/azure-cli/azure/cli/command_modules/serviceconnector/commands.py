@@ -9,6 +9,7 @@ from ._transformers import (
     transform_linker_properties
 )
 from ._resource_config import (
+    RESOURCE,
     SOURCE_RESOURCES,
     TARGET_RESOURCES,
 )
@@ -17,10 +18,16 @@ from ._utils import should_load_source
 
 def load_command_table(self, _):
 
-    from azure.cli.command_modules.serviceconnector._client_factory import cf_linker
+    from azure.cli.command_modules.serviceconnector._client_factory import (
+        cf_linker,
+        cf_linker_user_token
+    )
     connection_type = CliCommandType(
         operations_tmpl='azure.mgmt.servicelinker.operations._linker_operations#LinkerOperations.{}',
         client_factory=cf_linker)
+    connection_type_user_token = CliCommandType(
+        operations_tmpl='azure.mgmt.servicelinker.operations._linker_operations#LinkerOperations.{}',
+        client_factory=cf_linker_user_token)
 
     for source in SOURCE_RESOURCES:
         # if source resource is released as an extension, load our command groups
@@ -38,11 +45,15 @@ def load_command_table(self, _):
                 og.custom_wait_command('wait', 'connection_show')
 
             for target in TARGET_RESOURCES:
+                _type, _factory = connection_type, cf_linker
+                if target in [RESOURCE.KeyVault]:
+                    _type, _factory = connection_type_user_token, cf_linker_user_token
+
                 with self.command_group('{} connection create'.format(source.value),
-                                        connection_type, client_factory=cf_linker) as ig:
+                                        _type, client_factory=_factory) as ig:
                     ig.custom_command(target.value, 'connection_create',
                                       supports_no_wait=True, transform=transform_linker_properties)
                 with self.command_group('{} connection update'.format(source.value),
-                                        connection_type, client_factory=cf_linker) as ig:
+                                        _type, client_factory=_factory) as ig:
                     ig.custom_command(target.value, 'connection_update',
                                       supports_no_wait=True, transform=transform_linker_properties)

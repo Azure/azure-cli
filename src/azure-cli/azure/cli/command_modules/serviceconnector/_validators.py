@@ -35,8 +35,9 @@ def get_source_resource_name(cmd):
     e.g, az webapp connection list: => RESOURCE.WebApp
     '''
     source = None
+    source_name = cmd.name.split(' ')[0]
     for item in SOURCE_RESOURCES:
-        if item.value in cmd.name:
+        if item.value.lower() == source_name.lower():
             source = item
     return source
 
@@ -46,8 +47,9 @@ def get_target_resource_name(cmd):
     e.g, az webapp connection create postgres: => RESOURCE.Postgres
     '''
     target = None
+    target_name = cmd.name.split(' ')[-1]
     for item in TARGET_RESOURCES:
-        if item.value in cmd.name:
+        if item.value.lower() == target_name.lower():
             target = item
     return target
 
