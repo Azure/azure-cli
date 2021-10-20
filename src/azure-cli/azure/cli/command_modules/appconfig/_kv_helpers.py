@@ -1074,11 +1074,11 @@ def __validate_import_keyvault_ref(kv):
                 if parsed_url.scheme != '' and parsed_url.netloc != '' and parsed_url.path != '':
                     return True
 
-            logger.warning("Keyvault reference with key '{}' is not a valid keyvault reference."
-                           "It will not be imported.".format(kv.key))
+            logger.warning("Keyvault reference with key '{%s}' is not a valid keyvault reference."
+                           "It will not be imported.", kv.key)
 
-        except Exception as exception:
-            logger.warning('An error occurred while importing keyvault reference with key {0}\n{1}'.format(kv.key, str(exception)))
+        except Exception as exception:  # pylint: disable=broad-except
+            logger.warning("An error occurred while importing keyvault reference with key '{%s}'\n{%s}", kv.key, str(exception))
     return False
 
 
@@ -1088,11 +1088,9 @@ def __validate_import_feature_flag(kv):
             ff = json.loads(kv.value)
             if ff['id'] and ff['description'] and ff['enabled'] and ff['conditions']:
                 return True
-            else:
-                logger.warning(
-                    "Feature flag with key '{}' is not a valid feature flag. It will not be imported.".format(kv.key))
-        except Exception as exception:
-            logger.warning('An error occurred while importing feature flag with key {0}\n{1}'.format(kv.id, str(exception)))
+            logger.warning("Feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
+        except Exception as exception:  # pylint: disable=broad-except
+            logger.warning("An error occurred while importing feature flag with key '{%s}'\n{%s}", kv.id, str(exception))
     return False
 
 

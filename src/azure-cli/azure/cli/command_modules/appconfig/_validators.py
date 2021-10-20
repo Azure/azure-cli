@@ -9,8 +9,7 @@ import json
 import re
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
-    MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
