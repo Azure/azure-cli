@@ -2009,7 +2009,7 @@ class DeploymentScriptsTest(ScenarioTest):
 
 class DeploymentStacksTest(ScenarioTest):
     global location
-    location = "eastus2euap"
+    location = "westus2"
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_create_deployment_stack_subscription(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -2029,7 +2029,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         # create template spec
         basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location "westus2" --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
-        template_spec_id = basic_template_spec['id'] + "/versions/v1"
+        template_spec_id = basic_template_spec['id']
 
         self.kwargs.update({'template-spec-id': template_spec_id})
 
@@ -2071,7 +2071,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup 
         self.cmd('stacks sub delete --name {name}')
         
-    
     #test again
     @AllowLargeResponse(4096)
     def test_list_deployment_stack_subscription(self):
@@ -2157,7 +2156,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         # create templete spec
         basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location {location} --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
-        template_spec_id = basic_template_spec['id'] + "/versions/v1"
+        template_spec_id = basic_template_spec['id']
 
         self.kwargs.update({'template-spec-id': template_spec_id})
 
@@ -2359,6 +2358,10 @@ class DeploymentStacksTest(ScenarioTest):
 
         # create stack
         created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+
+        snapshot_name = created_deployment_stack['snapshotId'].split('/')[-1]
+
+        self.kwargs.update({'snapshot-name': snapshot_name})
         
         #create stack again
         self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
