@@ -1787,9 +1787,9 @@ class SynapseScenarioTests(ScenarioTest):
     def test_sqlscript(self):
         self.kwargs.update({
             'name': 'test_sqlscript1',
-            'sqlpool_name': 'testsqlpool',
+            'sql_pool_name': 'testsqlpool',
             'performance_level': 'DW100c',
-            'database_name': 'testsqlpool',
+            'data_base_name': 'testsqlpool',
             'folder_name':'folder1/subfolder1',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sqlscript.sql')
         })
@@ -1807,7 +1807,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create sql pool
         self.cmd(
-            'az synapse sql pool create --name {sqlpool_name} --performance-level {performance_level} '
+            'az synapse sql pool create --name {sql_pool_name} --performance-level {performance_level} '
             '--workspace {workspace} --resource-group {rg}')
         
         # create sqlscript
@@ -1835,7 +1835,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update sqlscript
         self.cmd(
             'az synapse sql-script update --workspace-name {workspace} --name {name} --definition-file "{file}" '
-            '--sql-pool-name {sqlpool_name} --data-base-name {database_name} --folder-name {folder_name}',
+            '--sql-pool-name {sql_pool_name} --data-base-name {data_base_name} --folder-name {folder_name}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])

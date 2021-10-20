@@ -497,14 +497,18 @@ def create_sql_script(cmd, workspace_name, sql_script_name, definition_file, res
         raise InvalidArgumentValueError(err_msg)
     if sql_pool_name:
         if sql_pool_name.lower() == 'build-in':
-            current_connection = SqlConnection(type='SqlOnDemand',
+            sqlpool_type = 'SqlOnDemand'
+            current_connection = SqlConnection(type=sqlpool_type,
+                                               pool_name='Built-in',
                                                database_name=data_base_name)
         else:
-            current_connection = SqlConnection(type='SqlPool',
+            sqlpool_type = 'SqlPool'
+            current_connection = SqlConnection(type=sqlpool_type,
                                                pool_name=sql_pool_name,
                                                database_name=data_base_name)
     else:
         current_connection = SqlConnection(type='SqlOnDemand',
+                                           pool_name='Built-in',
                                            database_name='master')
 
     SqlScriptContentinfo = SqlScriptContent(query=query,
@@ -537,6 +541,7 @@ def update_sql_script(cmd, workspace_name, sql_script_name, definition_file, res
         if sql_pool_name.lower() == 'build-in':
             sqlpool_type = 'SqlOnDemand'
             current_connection = SqlConnection(type=sqlpool_type,
+                                               pool_name='Built-in',
                                                database_name=data_base_name)
         else:
             sqlpool_type = 'SqlPool'
@@ -545,6 +550,7 @@ def update_sql_script(cmd, workspace_name, sql_script_name, definition_file, res
                                                database_name=data_base_name)
     else:
         current_connection = SqlConnection(type='SqlOnDemand',
+                                           pool_name='Built-in',
                                            database_name='master')
 
     SqlScriptContentinfo = SqlScriptContent(query=query,
