@@ -2018,7 +2018,7 @@ short-summary: Manage SQL scripts in a synapse workspace.
 
 helps['synapse sql-script list'] = """
 type: command
-short-summary: list SQL scripts in a synapse workspace.
+short-summary: List SQL scripts in a synapse workspace.
 examples:
   - name: list SQL scripts.
     text: |-
@@ -2053,7 +2053,7 @@ examples:
     text: |-
         az synapse sql-script create --workspace-name testsynapseworkspace \\
           --name testsqlscriptname \\
-          --query-file @'path/test.sql'
+          --query-file 'path/test.sql'
 """
 
 helps['synapse sql-script update'] = """
@@ -2064,17 +2064,7 @@ examples:
     text: |-
         az synapse sql-script update --workspace-name testsynapseworkspace \\
           --name testsqlscriptname \\
-          --query-file queryfilename
-"""
-
-helps['synapse sql-script rename'] = """
-type: command
-short-summary: Rename a SQL script.
-examples:
-  - name: Rename a SQL script.
-    text: |-
-        az synapse sql-script rename --workspace-name testsynapseworkspace \\
-          --name testsqlscriptname
+          --query-file 'path/test.sql'
 """
 
 helps['synapse sql-script wait'] = """

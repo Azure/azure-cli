@@ -955,7 +955,7 @@ def load_arguments(self, _):
             c.argument('definition_file', arg_type=definition_file_arg_type)
 
     # synapse artifacts sql script
-    for scope in ['create', 'update', 'show', 'wait', 'delete', 'rename']:
+    for scope in ['create', 'update', 'show', 'wait', 'delete']:
         with self.argument_context('synapse sql-script ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('sql_script_name', options_list=['--name', '-n'], help='The SQL script name')
@@ -965,13 +965,10 @@ def load_arguments(self, _):
 
     for scope in ['create', 'update']:
         with self.argument_context('synapse sql-script ' + scope) as c:
-            c.argument('query_file', help='The SQL query file path')
+            c.argument('definition_file', help='The SQL query file path')
             c.argument('result_limit', arg_type=get_enum_type([5000, -1]), help="The SQL query results limit. Default is 5000. '-1' is no limit.")
-            c.argument('folder_name', help='The SQL script folder name, eg: folder/subfolder1')
+            c.argument('folder_name', help='The folder that this SQL script is in. If not specified, this SQL script will appear at the root level. Eg: folder/subfolder1')
             c.argument('description', help='The SQL script description')
-            c.argument('sqlpool_name', help='The SQL pool name')
-            c.argument('database_name', help='The SQL database name')
+            c.argument('sql_pool_name', help='The SQL pool name')
+            c.argument('data_base_name', help='The SQL database name')
             c.argument('additional_properties', help='The SQL script additional properties')
-
-    with self.argument_context('synapse sql-script rename') as c:
-        c.argument('new_name', help='The SQL script new name')

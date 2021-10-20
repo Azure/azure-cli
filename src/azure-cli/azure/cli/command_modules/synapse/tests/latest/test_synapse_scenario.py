@@ -1786,7 +1786,6 @@ class SynapseScenarioTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sqlscript(self):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspace',
             'name': 'test_sqlscript1',
             'sqlpool_name': 'built-in',
             'database_name': 'master',

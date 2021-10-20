@@ -484,20 +484,25 @@ def rename_sql_script(cmd, workspace_name, sql_script_name, new_name=None, no_wa
     return sdk_no_wait(no_wait, client.begin_rename_sql_script, sql_script_name, new_name, polling=True)
 
 
-def create_sql_script(cmd, workspace_name, sql_script_name, query_file, result_limit=5000,
-                      folder_name=None, description=None, sqlpool_name=None,
-                      database_name=None, additional_properties=None, no_wait=False):
+def create_sql_script(cmd, workspace_name, sql_script_name, definition_file, result_limit=5000,
+                      folder_name=None, description=None, sql_pool_name=None,
+                      data_base_name=None, additional_properties=None, no_wait=False):
     client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
-    with open(query_file, 'r') as stream:
-        query = stream.read()
-    if sqlpool_name:
-        if sqlpool_name.lower() == 'build-in':
+    try:
+        with open(definition_file, 'r') as stream:
+            query = stream.read()
+    except:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        err_msg = 'Definition file path is invalid'
+        raise InvalidArgumentValueError(err_msg)
+    if sql_pool_name:
+        if sql_pool_name.lower() == 'build-in':
             current_connection = SqlConnection(type='SqlOnDemand',
-                                               database_name=database_name)
+                                               database_name=data_base_name)
         else:
             current_connection = SqlConnection(type='SqlPool',
-                                               pool_name=sqlpool_name,
-                                               database_name=database_name)
+                                               pool_name=sql_pool_name,
+                                               database_name=data_base_name)
     else:
         current_connection = SqlConnection(type='SqlOnDemand',
                                            database_name='master')
@@ -517,22 +522,27 @@ def create_sql_script(cmd, workspace_name, sql_script_name, query_file, result_l
                        sql_script_name, sql_script, polling=True)
 
 
-def update_sql_script(cmd, workspace_name, sql_script_name, query_file, result_limit=None,
-                      folder_name=None, description=None, sqlpool_name=None,
-                      database_name=None, additional_properties=None, no_wait=False):
+def update_sql_script(cmd, workspace_name, sql_script_name, definition_file, result_limit=None,
+                      folder_name=None, description=None, sql_pool_name=None,
+                      data_base_name=None, additional_properties=None, no_wait=False):
     client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
-    with open(query_file, 'r') as stream:
-        query = stream.read()
-    if sqlpool_name:
-        if sqlpool_name.lower() == 'build-in':
+    try:
+        with open(definition_file, 'r') as stream:
+            query = stream.read()
+    except:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        err_msg = 'Definition file path is invalid'
+        raise InvalidArgumentValueError(err_msg)
+    if sql_pool_name:
+        if sql_pool_name.lower() == 'build-in':
             sqlpool_type = 'SqlOnDemand'
             current_connection = SqlConnection(type=sqlpool_type,
-                                               database_name=database_name)
+                                               database_name=data_base_name)
         else:
             sqlpool_type = 'SqlPool'
             current_connection = SqlConnection(type=sqlpool_type,
-                                               pool_name=sqlpool_name,
-                                               database_name=database_name)
+                                               pool_name=sql_pool_name,
+                                               database_name=data_base_name)
     else:
         current_connection = None
 
@@ -549,3 +559,24 @@ def update_sql_script(cmd, workspace_name, sql_script_name, query_file, result_l
     sql_script = SqlScriptResource(name=sql_script_name, properties=properties)
     return sdk_no_wait(no_wait, client.begin_create_or_update_sql_script,
                        sql_script_name, sql_script, polling=True)
+
+def export_sql_script(cmd, workspace_name, output_folder, sql_script_name=None):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    if sql_script_name is not None:
+        sqlscriptquery = client.get_sql_script(sql_script_name).properties.content.query
+        path = os.path.join(output_folder, sql_script_name + '.sql')
+        try:
+            with open(path, 'w') as f:
+                f.write(sqlscriptquery)
+        except IOError:
+            raise CLIError('Unable to export to file: {}'.format(path))
+    else:
+        sqlscripts = client.get_sql_scripts_by_workspace()
+        for sqlscript in sqlscripts:
+            sqlscriptquery = client.get_sql_script(sqlscript.name).properties.content.query
+            path = os.path.join(output_folder, sqlscript.name + '.sql')
+            try:
+                with open(path, 'w') as f:
+                    f.write(sqlscriptquery)
+            except IOError:
+                raise CLIError('Unable to export to file: {}'.format(path))
