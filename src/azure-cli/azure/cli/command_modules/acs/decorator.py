@@ -2378,6 +2378,7 @@ class AKSContext:
                 )
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
 
+    # pylint: disable=no-self-use
     def _get_addon_consts(self) -> Dict[str, str]:
         """Helper function to obtain the constants used by addons.
 
@@ -2539,8 +2540,8 @@ class AKSContext:
         """
         # determine the value of constants
         addon_consts = self._get_addon_consts()
-        monitoring_addon_name = addon_consts.get("CONST_MONITORING_ADDON_NAME")
-        monitoring_log_analytics_workspace_resource_id = addon_consts.get(
+        const_monitoring_addon_name = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+        const_monitoring_log_analytics_workspace_resource_id = addon_consts.get(
             "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
         )
 
@@ -2551,14 +2552,14 @@ class AKSContext:
         if (
             self.mc and
             self.mc.addon_profiles and
-            monitoring_addon_name in self.mc.addon_profiles and
+            const_monitoring_addon_name in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
-                monitoring_addon_name
-            ).config.get(monitoring_log_analytics_workspace_resource_id) is not None
+                const_monitoring_addon_name
+            ).config.get(const_monitoring_log_analytics_workspace_resource_id) is not None
         ):
             workspace_resource_id = self.mc.addon_profiles.get(
-                monitoring_addon_name
-            ).config.get(monitoring_log_analytics_workspace_resource_id)
+                const_monitoring_addon_name
+            ).config.get(const_monitoring_log_analytics_workspace_resource_id)
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
@@ -2618,8 +2619,8 @@ class AKSContext:
         """
         # determine the value of constants
         addon_consts = self._get_addon_consts()
-        virtual_node_addon_name = addon_consts.get("CONST_VIRTUAL_NODE_ADDON_NAME")
-        virtual_node_subnet_name = addon_consts.get("CONST_VIRTUAL_NODE_SUBNET_NAME")
+        const_virtual_node_addon_name = addon_consts.get("CONST_VIRTUAL_NODE_ADDON_NAME")
+        const_virtual_node_subnet_name = addon_consts.get("CONST_VIRTUAL_NODE_SUBNET_NAME")
 
         # read the original value passed by the command
         aci_subnet_name = self.raw_param.get("aci_subnet_name")
@@ -2627,18 +2628,18 @@ class AKSContext:
         if (
             self.mc and
             self.mc.addon_profiles and
-            virtual_node_addon_name +
+            const_virtual_node_addon_name +
             self.get_virtual_node_addon_os_type()
             in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
-                virtual_node_addon_name +
+                const_virtual_node_addon_name +
                 self.get_virtual_node_addon_os_type()
-            ).config.get(virtual_node_subnet_name) is not None
+            ).config.get(const_virtual_node_subnet_name) is not None
         ):
             aci_subnet_name = self.mc.addon_profiles.get(
-                virtual_node_addon_name +
+                const_virtual_node_addon_name +
                 self.get_virtual_node_addon_os_type()
-            ).config.get(virtual_node_subnet_name)
+            ).config.get(const_virtual_node_subnet_name)
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
