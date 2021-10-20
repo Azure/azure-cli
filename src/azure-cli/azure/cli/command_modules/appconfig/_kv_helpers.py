@@ -7,7 +7,6 @@
 
 import io
 import json
-import re
 from difflib import Differ
 from urllib.parse import urlparse
 
