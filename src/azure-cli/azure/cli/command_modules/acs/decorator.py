@@ -2379,7 +2379,7 @@ class AKSContext:
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
 
     # pylint: disable=unused-argument
-    def _get_enable_addons(self, enable_validation: bool = False, **kwargs) -> List[str]:
+    def _get_enable_addons(self, enable_validation: bool = False, consts: dict = None, **kwargs) -> List[str]:
         """Internal function to obtain the value of enable_addons.
 
         Note: enable_addons will not be directly decorated into the `mc` object and we do not support to fetch it from
@@ -2390,11 +2390,18 @@ class AKSContext:
         have duplicate or invalid values, and raise an InvalidArgumentValueError if found. Besides, if monitoring is
         specified in enable_addons but workspace_resource_id is not assigned, or virtual-node is specified but
         aci_subnet_name or vnet_subnet_id is not, a RequiredArgumentMissingError will be raised.
+        This function supports the option of consts. When specified, will use the value it provides to replace the
+        value of the corresponding global constant.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
         :return: empty list or list of strings
         """
+        # determine the value of constants
+        valid_addon_keys = ADDONS.keys()
+        if consts and consts.get("ADDONS"):
+            valid_addon_keys = consts.get("ADDONS").keys()
+
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
 
@@ -2417,7 +2424,7 @@ class AKSContext:
 
             # check unrecognized addons
             enable_addons_set = set(enable_addons)
-            invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
+            invalid_addons_set = enable_addons_set.difference(valid_addon_keys)
             if len(invalid_addons_set) != 0:
                 raise InvalidArgumentValueError(
                     "'{}' {} not recognized by the --enable-addons argument.".format(
@@ -2462,7 +2469,7 @@ class AKSContext:
 
     # pylint: disable=unused-argument
     def _get_workspace_resource_id(
-        self, enable_validation: bool = False, read_only: bool = False, **kwargs
+        self, enable_validation: bool = False, read_only: bool = False, consts: dict = None, **kwargs
     ) -> Union[str, None]:
         """Internal function to dynamically obtain the value of workspace_resource_id according to the context.
 
@@ -2473,9 +2480,28 @@ class AKSContext:
         This function supports the option of enable_validation. When enabled, it will check if workspace_resource_id is
         assigned but 'monitoring' is not specified in enable_addons, if so, raise a RequiredArgumentMissingError.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+        This function supports the option of consts. When specified, will use the value it provides to replace the
+        value of the corresponding global constant.
 
         :return: string or None
         """
+        # determine the value of constants
+        monitoring_addon_name = CONST_MONITORING_ADDON_NAME
+        monitoring_log_analytics_workspace_resource_id = (
+            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
+        )
+        if consts:
+            if consts.get("CONST_MONITORING_ADDON_NAME"):
+                monitoring_addon_name = consts.get(
+                    "CONST_MONITORING_ADDON_NAME"
+                )
+            if consts.get(
+                "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
+            ):
+                monitoring_log_analytics_workspace_resource_id = consts.get(
+                    "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
+                )
+
         # read the original value passed by the command
         workspace_resource_id = self.raw_param.get("workspace_resource_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2483,14 +2509,14 @@ class AKSContext:
         if (
             self.mc and
             self.mc.addon_profiles and
-            CONST_MONITORING_ADDON_NAME in self.mc.addon_profiles and
+            monitoring_addon_name in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
-                CONST_MONITORING_ADDON_NAME
-            ).config.get(CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID) is not None
+                monitoring_addon_name
+            ).config.get(monitoring_log_analytics_workspace_resource_id) is not None
         ):
             workspace_resource_id = self.mc.addon_profiles.get(
-                CONST_MONITORING_ADDON_NAME
-            ).config.get(CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID)
+                monitoring_addon_name
+            ).config.get(monitoring_log_analytics_workspace_resource_id)
             read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
@@ -2543,33 +2569,57 @@ class AKSContext:
         """
         return "Linux"
 
-    def get_aci_subnet_name(self) -> Union[str, None]:
-        """Obtain the value of aci_subnet_name.
+    # pylint: disable=unused-argument
+    def _get_aci_subnet_name(self, consts: dict = None, **kwargs) -> Union[str, None]:
+        """Internal function to obtain the value of aci_subnet_name.
+
+        This function supports the option of consts. When specified, will use the value it provides to replace the
+        value of the corresponding global constant.
 
         :return: string or None
         """
+        # determine the value of constants
+        virtual_node_addon_name = CONST_VIRTUAL_NODE_ADDON_NAME
+        virtual_node_subnet_name = CONST_VIRTUAL_NODE_SUBNET_NAME
+        if consts:
+            if consts.get("CONST_VIRTUAL_NODE_ADDON_NAME"):
+                virtual_node_addon_name = consts.get(
+                    "CONST_VIRTUAL_NODE_ADDON_NAME"
+                )
+            if consts.get("CONST_VIRTUAL_NODE_SUBNET_NAME"):
+                virtual_node_subnet_name = consts.get(
+                    "CONST_VIRTUAL_NODE_SUBNET_NAME"
+                )
+
         # read the original value passed by the command
         aci_subnet_name = self.raw_param.get("aci_subnet_name")
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
             self.mc.addon_profiles and
-            CONST_VIRTUAL_NODE_ADDON_NAME +
+            virtual_node_addon_name +
             self.get_virtual_node_addon_os_type()
             in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
-                CONST_VIRTUAL_NODE_ADDON_NAME +
+                virtual_node_addon_name +
                 self.get_virtual_node_addon_os_type()
-            ).config.get(CONST_VIRTUAL_NODE_SUBNET_NAME) is not None
+            ).config.get(virtual_node_subnet_name) is not None
         ):
             aci_subnet_name = self.mc.addon_profiles.get(
-                CONST_VIRTUAL_NODE_ADDON_NAME +
+                virtual_node_addon_name +
                 self.get_virtual_node_addon_os_type()
-            ).config.get(CONST_VIRTUAL_NODE_SUBNET_NAME)
+            ).config.get(virtual_node_subnet_name)
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return aci_subnet_name
+
+    def get_aci_subnet_name(self) -> Union[str, None]:
+        """Obtain the value of aci_subnet_name.
+
+        :return: string or None
+        """
+        return self._get_aci_subnet_name()
 
     def get_appgw_name(self) -> Union[str, None]:
         """Obtain the value of appgw_name.
