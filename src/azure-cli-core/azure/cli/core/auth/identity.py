@@ -111,9 +111,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # Only show the path part of the URL and hide the query string.
         logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
-                       "with `az login --use-device-code`.", self._msal_authority)
+                       "with `az login --use-device-code`.", self.msal_app.authority.authorization_endpoint)
 
-        success_template, error_template = _read_response_templates()
+        from .util import read_response_templates
+        success_template, error_template = read_response_templates()
 
         # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
         # on port 8400 from the old design. However, ADFS only allows port 8400.
@@ -313,19 +314,6 @@ class ServicePrincipalStore:
 
     def _load_persistence(self):
         self._entries = self._secret_store.load()
-
-
-def _read_response_templates():
-    """Read from success.html and error.html to strings and pass them to MSAL. """
-    success_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'success.html')
-    with open(success_file) as f:
-        success_template = f.read()
-
-    error_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'error.html')
-    with open(error_file) as f:
-        error_template = f.read()
-
-    return success_template, error_template
 
 
 def _get_authority_url(authority_endpoint, tenant):
