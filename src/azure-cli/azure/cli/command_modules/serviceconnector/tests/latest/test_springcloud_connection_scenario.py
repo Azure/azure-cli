@@ -70,7 +70,7 @@ class CredentialReplacer(RecordingProcessor):
         return response
 
 
-# @unittest.skip('Need spring-cloud extension installed')
+@unittest.skip('Need spring-cloud extension installed')
 class SpringCloudConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
