@@ -7,7 +7,7 @@ import re
 import sys
 import time
 from distutils.version import StrictVersion
-from typing import Any, Dict, List, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._consts import (
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
@@ -4195,7 +4195,7 @@ class AKSCreateDecorator:
         return mc
 
     # pylint: disable=too-many-statements
-    def set_up_addon_profiles(self, mc: ManagedCluster, skip_addons: List = []) -> ManagedCluster:
+    def set_up_addon_profiles(self, mc: ManagedCluster, skip_addons: Optional[List[str]] = None) -> ManagedCluster:
         """Set up addon profiles for the ManagedCluster object.
 
         This function will store following intermediates: monitoring, enable_virtual_node and
@@ -4211,6 +4211,9 @@ class AKSCreateDecorator:
 
         :return: the ManagedCluster object
         """
+        # replace empty default value
+        if skip_addons is None:
+            skip_addons = []
         if not isinstance(mc, self.models.ManagedCluster):
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
