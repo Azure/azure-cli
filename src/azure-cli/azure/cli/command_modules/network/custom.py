@@ -7824,7 +7824,6 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     else:
         raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
-    
 
 def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
     from .tunnel import TunnelServer
