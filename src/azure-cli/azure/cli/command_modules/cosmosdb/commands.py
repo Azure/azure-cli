@@ -24,7 +24,12 @@ from azure.cli.command_modules.cosmosdb._client_factory import (
     cf_restorable_mongodb_databases,
     cf_restorable_mongodb_collections,
     cf_restorable_mongodb_resources,
+<<<<<<< HEAD
     cf_db_locations
+=======
+    cf_cassandra_cluster,
+    cf_cassandra_data_center
+>>>>>>> 071c1687d (managed-cassandra initial commit)
 )
 
 from azure.cli.command_modules.cosmosdb._format import (
@@ -112,9 +117,19 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableMongodbResourcesOperations.{}',
         client_factory=cf_restorable_mongodb_resources)
 
+<<<<<<< HEAD
     cosmosdb_locations_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#LocationsOperations.{}',
         client_factory=cf_db_locations)
+=======
+    cosmosdb_managed_cassandra_cluster_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#CassandraClustersOperations.{}',
+        client_factory=cf_cassandra_cluster)
+
+    cosmosdb_managed_cassandra_datacenter_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#CassandraDataCentersOperations.{}',
+        client_factory=cf_cassandra_data_center)
+>>>>>>> 071c1687d (managed-cassandra initial commit)
 
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.show_command('show', 'get', transform=transform_db_account_json_output)
@@ -380,3 +395,25 @@ def load_command_table(self, _):
     # Retrieve backup info for mongodb
     with self.command_group('cosmosdb mongodb', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
         g.custom_command('retrieve-latest-backup-time', 'cli_mongo_db_retrieve_latest_backup_time')
+
+    # managed cassandra cluster
+    with self.command_group('managed-cassandra cluster', cosmosdb_managed_cassandra_cluster_sdk, client_factory=cf_cassandra_cluster) as g:
+        g.custom_command('create', 'cli_cosmosdb_managed_cassandra_cluster_create', supports_no_wait=True)
+        g.custom_command('update', 'cli_cosmosdb_managed_cassandra_cluster_update', supports_no_wait=True)
+        g.custom_command('backup list', 'cli_cosmosdb_managed_cassandra_cluster_list_backup', is_preview=True)
+        g.custom_command('backup show', 'cli_cosmosdb_managed_cassandra_cluster_show_backup', is_preview=True)
+        g.custom_command('deallocate', 'cli_cosmosdb_managed_cassandra_cluster_deallocate', supports_no_wait=True)
+        g.custom_command('command', 'cli_cosmosdb_managed_cassandra_cluster_invoke_command', supports_no_wait=True)
+        g.custom_command('start', 'cli_cosmosdb_managed_cassandra_cluster_start', supports_no_wait=True)
+        g.custom_command('status', 'cli_cosmosdb_managed_cassandra_cluster_status')
+        g.custom_command('list', 'cli_cosmosdb_managed_cassandra_cluster_list')
+        g.show_command('show', 'get')
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+
+    # managed cassandra datacenter
+    with self.command_group('managed-cassandra datacenter', cosmosdb_managed_cassandra_datacenter_sdk, client_factory=cf_cassandra_data_center) as g:
+        g.custom_command('create', 'cli_cosmosdb_managed_cassandra_datacenter_create', supports_no_wait=True)
+        g.custom_command('update', 'cli_cosmosdb_managed_cassandra_datacenter_update', supports_no_wait=True)
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
