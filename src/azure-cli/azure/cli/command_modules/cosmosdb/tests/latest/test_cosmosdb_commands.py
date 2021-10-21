@@ -2075,3 +2075,17 @@ class CosmosDBTests(ScenarioTest):
         new_backup_time2 = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
         assert new_backup_time2 >= backup_time
         assert new_backup_time2 >= new_backup_time
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_locations', parameter_name_for_location='location')
+    def test_cosmosdb_locations(self, resource_group, location):
+        self.kwargs.update({
+            'loc': location
+        })
+
+        locations_list = self.cmd('az cosmosdb locations list').get_output_in_json()
+        assert len(locations_list) > 0
+
+        locations_show = self.cmd('az cosmosdb locations show --location {loc}').get_output_in_json()
+        assert locations_show['properties']['backupStorageRedundancies'] != None
+        assert locations_show['properties']['isResidencyRestricted'] != None
+        assert locations_show['properties']['supportsAvailabilityZone'] != None

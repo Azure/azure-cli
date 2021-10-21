@@ -418,3 +418,6 @@ def load_arguments(self, _):
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
         c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+
+    with self.argument_context('cosmosdb locations show') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Name of the location", required=True)
