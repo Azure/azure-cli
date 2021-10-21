@@ -3549,6 +3549,23 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('length(@)', 5)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_bgp_community')
+    def test_network_vnet_with_bgp_community(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+        })
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default --bgp-community "12076:20000"', checks=[
+            self.check('newVNet.bgpCommunities.regionalCommunity', '12076:50006'),
+            self.check('newVNet.bgpCommunities.virtualNetworkCommunity', '12076:20000')
+        ])
+
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --bgp-community "12076:20001"', checks=[
+            self.check('bgpCommunities.regionalCommunity', '12076:50006'),
+            self.check('bgpCommunities.virtualNetworkCommunity', '12076:20001')
+        ])
+
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
