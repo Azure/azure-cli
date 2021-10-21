@@ -4184,11 +4184,11 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
 
     # check if application_version_ids is empty
-    vmss.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+    vmss.virtual_machine_profile.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
 
     if order_applications:
         index = 1
-        for app in vmss.application_profile.gallery_applications:
+        for app in vmss.virtual_machine_profile.application_profile.gallery_applications:
             app.order = index
             index += 1
 
@@ -4196,7 +4196,7 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         # check if the length of application_configuration_overrides is as same as application_version_ids
         for i in range(len(application_configuration_overrides)): 
             if application_configuration_overrides[i] or application_configuration_overrides[i].lower() != 'null':
-                vmss.application_profile.gallery_applications[i].configuration_reference = application_configuration_overrides[i]
+                vmss.virtual_machine_profile.application_profile.gallery_applications[i].configuration_reference = application_configuration_overrides[i]
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vmss_name, vmss)
 
 

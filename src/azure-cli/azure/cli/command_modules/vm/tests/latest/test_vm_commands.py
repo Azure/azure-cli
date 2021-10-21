@@ -6347,7 +6347,6 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
-    @unittest.skip('Need Application version')
     @ResourceGroupPreparer()
     def test_vmss_add_application(self, resource_group):
         self.kwargs.update({
