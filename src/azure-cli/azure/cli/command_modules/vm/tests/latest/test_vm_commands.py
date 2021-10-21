@@ -5990,15 +5990,18 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
         health_extension_file = os.path.join(curr_dir, 'health_extension.json').replace('\\', '\\\\')
         self.kwargs['extension_file'] = health_extension_file
 
+        # Health extension is required for the patch mode "AutomaticByPlatform".
         self.cmd('vmss extension set --name ApplicationHealthLinux --publisher Microsoft.ManagedServices --version 1.0 --resource-group {rg} --vmss-name {vmss} --settings {extension_file}')
 
         self.cmd('vmss update --name {vmss} --resource-group {rg} --set virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.patchMode=AutomaticByPlatform')
 
+        # Create a new VM to apply the new patch mode "AutomaticByPlatform".
         self.cmd('vmss scale --name {vmss} --new-capacity 1 --resource-group {rg}')
 
         vm = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['name']
         self.kwargs['vm'] = vm
 
+        # Due to the service bug that patch mode is not returned in response body, we need verify the patch mode of virtual machines inside the VMSS as a workaround.
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('osProfile.linuxConfiguration.patchSettings.patchMode', 'AutomaticByPlatform')
         ])
