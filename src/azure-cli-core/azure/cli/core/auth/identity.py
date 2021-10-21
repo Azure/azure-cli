@@ -266,7 +266,7 @@ class ServicePrincipalStore:
         matched = [x for x in self._entries if sp_id == x[_CLIENT_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
-                           "Please run `az login` for this service principal."
+                           "Run `az login` for this service principal."
                            .format(sp_id))
         matched_with_tenant = [x for x in matched if tenant == x[_TENANT]]
         if matched_with_tenant:
