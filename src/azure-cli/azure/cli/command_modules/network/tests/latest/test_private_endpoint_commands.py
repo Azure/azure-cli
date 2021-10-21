@@ -2452,7 +2452,7 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         self.kwargs['pe_id'] = pe['id']
         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 
-        # Test get connection details of private endpoint
+        # Test get details of private endpoint
         results = self.kwargs['pe_id'].split('/')
         self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/privateEndpoints/{2}'.format(results[2], results[4], results[-1])
         
@@ -2462,9 +2462,23 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         self.cmd(
             'az network private-endpoint show --resource-group {rg} --name {pe_name}',
             checks=self.check('name', '{pe_name}'))
+
+    
+        # Show the connection at azure cache for redis
+
+        redis = self.cmd('az redis show -n {cache_name} -g {rg}').get_output_in_json()
+        self.assertIn('privateEndpointConnections', redis)
+        self.assertEqual(len(redis['privateEndpointConnections']), 1)
+        self.assertEqual(redis['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+
+        self.kwargs['red_pec_id'] = redis['privateEndpointConnections'][0]['id']
+        
+        self.cmd('az network private-endpoint-connection show --id {red_pec_id}', checks=self.check('id', '{red_pec_id}'))
+
+        self.cmd('az network private-endpoint-connection reject --id {red_pec_id}', checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
         
         # Test delete
-        self.cmd('az network private-endpoint delete --id {pec_id}')
+        self.cmd('az network private-endpoint-connection delete --id {red_pec_id} -y')
 
 if __name__ == '__main__':
     unittest.main()
