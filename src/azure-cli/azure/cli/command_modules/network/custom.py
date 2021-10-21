@@ -7723,7 +7723,7 @@ def _get_ssh_path(ssh_command="ssh"):
         if not os.path.isfile(ssh_path):
             raise CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
     return ssh_path
 
@@ -7745,7 +7745,7 @@ def _get_rdp_path(rdp_command="mstsc"):
         if not os.path.isfile(rdp_path):
             raise CLIError("Could not find " + rdp_command + ".exe. Is the rdp client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
     return rdp_path
 
@@ -7810,17 +7810,21 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
 
-    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
-    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
-    t.daemon = True
-    t.start()
-    command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
-    logger.debug("Running rdp command %s", ' '.join(command))
+    if platform.system() == 'Windows':
+        tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
+        t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+        t.daemon = True
+        t.start()
+        command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
+        logger.debug("Running rdp command %s", ' '.join(command))
 
-    from ._process_helper import launch_and_wait
-    launch_and_wait(command)
-    tunnel_server.cleanup()
+        from ._process_helper import launch_and_wait
+        launch_and_wait(command)
+        tunnel_server.cleanup()
+    else:
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
+    
 
 def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
     from .tunnel import TunnelServer
