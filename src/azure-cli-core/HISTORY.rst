@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.29.1
+++++++
+* No changes
+
 2.29.0
 ++++++
 * Add a global config `core.disable_progress_bar` by `az config` to allow users to disable progress bar globally in the automation scenario. (#19464)
