@@ -3549,6 +3549,18 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('length(@)', 5)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_bgp_community')
+    def test_network_vnet_with_bgp_community(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+        })
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default --bgp-community "12076:20000"', checks=[
+            self.check('newVNet.provisioningState', 'Succeeded'),
+            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
+        ])
+
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
