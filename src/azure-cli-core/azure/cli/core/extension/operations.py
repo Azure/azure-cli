@@ -164,21 +164,9 @@ def _add_whl_ext(
     cli_ctx.get_progress_controller().add(message='Installing')
     # Install with pip
     extension_path = build_extension_path(extension_name, system)
-    # Check the extras keywords
-    extras = ""
-    if install_setup_extras:
-        # Q: could pretty print the avaliable extras here - should we do this?
-        extras = WheelExtension.get_metadata_extras(ext_file)
-        for ext in install_setup_extras:
-            if ext not in extras:
-                raise CLIError(
-                    "The setup extras keyword {} is invalid. The extension {} currently supports "
-                    "these keywords: {}.".format(ext, extension_name, extras)
-                )
 
-        extras = "[{}]".format(",".join(install_setup_extras))
-
-    pip_args = ['install', '--target', extension_path, ext_file + extras]
+    pip_args = ['install', '--target', extension_path,
+                ext_file + _check_setup_extras(install_setup_extras, ext_file, extension_name)]
 
     if pip_proxy:
         pip_args = pip_args + ['--proxy', pip_proxy]
@@ -200,6 +188,27 @@ def _add_whl_ext(
     logger.debug('Saved the whl to %s', dst)
 
     return extension_name
+
+def _check_setup_extras(install_setup_extras, ext_file, extension_name):
+    # Check the setup extras keywords
+    extras = ""
+    if install_setup_extras:
+        extras = WheelExtension.get_metadata_extras(ext_file)
+        if not extras:
+            raise CLIError(
+                "The specified version of extension '{}' does not support setup "
+                "extras.".format(extension_name)
+            )
+        for ext in install_setup_extras:
+            if ext not in extras:
+                raise CLIError(
+                    "The setup extras keyword {} is invalid. The extension {} currently supports "
+                    "these keywords: {}.".format(ext, extension_name, extras)
+                )
+
+        extras = "[{}]".format(",".join(install_setup_extras))
+
+    return extras
 
 
 def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
@@ -365,7 +374,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
     set_extension_management_detail(extension_name if extension_name else ext_name, ext_version)
     extension_name = _add_whl_ext(cli_ctx=cmd_cli_ctx, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, install_setup_extras=install_setup_extras,
-                                   pip_proxy=pip_proxy, system=system)
+                                  pip_proxy=pip_proxy, system=system)
     try:
         ext = get_extension(extension_name)
         if extension_name and ext.experimental:
@@ -418,7 +427,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
-            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
+            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, reinstall=not(install_setup_extras is None))
             _, ext_version = _get_extension_info_from_source(download_url)
             set_extension_management_detail(extension_name, ext_version)
         except NoExtensionCandidatesError as err:

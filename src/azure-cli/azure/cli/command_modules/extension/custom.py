@@ -35,7 +35,7 @@ def update_extension_cmd(cmd, extension_name, index_url=None, pip_extra_index_ur
                          pip_proxy=None):
     return update_extension(cli_ctx=cmd.cli_ctx, extension_name=extension_name, index_url=index_url,
                             pip_extra_index_urls=pip_extra_index_urls, install_setup_extras=install_setup_extras,
-                             pip_proxy=pip_proxy)
+                            pip_proxy=pip_proxy)
 
 
 def list_available_extensions_cmd(cmd, index_url=None, show_details=False):
