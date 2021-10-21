@@ -32,7 +32,7 @@ class ConfigTest(ScenarioTest):
         local_test_args = {"source": os.path.join(tempdir, '.azure', 'config'), "flag": " --local"}
 
         for args in (global_test_args, local_test_args):
-            print("Testing for {}")
+            print("Testing for {}".format(args))
 
             test_option1_expected = {'name': 'test_option1', 'source': args["source"], 'value': 'test_value1'}
             test_option21_expected = {'name': 'test_option21', 'source': args["source"], 'value': 'test_value21'}
