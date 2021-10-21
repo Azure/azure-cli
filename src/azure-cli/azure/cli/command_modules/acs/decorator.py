@@ -2374,7 +2374,7 @@ class AKSContext:
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
 
     # pylint: disable=no-self-use
-    def _get_addon_consts(self) -> Dict[str, str]:
+    def get_addon_consts(self) -> Dict[str, str]:
         """Helper function to obtain the constants used by addons.
 
         Note: This is not a parameter of aks commands.
@@ -2457,7 +2457,7 @@ class AKSContext:
         :return: empty list or list of strings
         """
         # determine the value of constants
-        addon_consts = self._get_addon_consts()
+        addon_consts = self.get_addon_consts()
         valid_addon_keys = addon_consts.get("ADDONS").keys()
 
         # read the original value passed by the command
@@ -2542,7 +2542,7 @@ class AKSContext:
         :return: string or None
         """
         # determine the value of constants
-        addon_consts = self._get_addon_consts()
+        addon_consts = self.get_addon_consts()
         CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
         CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = addon_consts.get(
             "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
@@ -2621,7 +2621,7 @@ class AKSContext:
         :return: string or None
         """
         # determine the value of constants
-        addon_consts = self._get_addon_consts()
+        addon_consts = self.get_addon_consts()
         CONST_VIRTUAL_NODE_ADDON_NAME = addon_consts.get("CONST_VIRTUAL_NODE_ADDON_NAME")
         CONST_VIRTUAL_NODE_SUBNET_NAME = addon_consts.get("CONST_VIRTUAL_NODE_SUBNET_NAME")
 
@@ -4220,7 +4220,7 @@ class AKSCreateDecorator:
             )
 
         # determine the value of constants
-        addon_consts = self.context._get_addon_consts()
+        addon_consts = self.context.get_addon_consts()
         CONST_MONITORING_ADDON_NAME = addon_consts.get(
             "CONST_MONITORING_ADDON_NAME"
         )

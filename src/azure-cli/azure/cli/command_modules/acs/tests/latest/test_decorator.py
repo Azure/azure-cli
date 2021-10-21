@@ -2248,7 +2248,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        addon_consts = ctx_1._get_addon_consts()
+        addon_consts = ctx_1.get_addon_consts()
         ground_truth_addon_consts = {
             "ADDONS": ADDONS,
             "CONST_ACC_SGX_QUOTE_HELPER_ENABLED": CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
