@@ -7,21 +7,9 @@ import re
 import sys
 import time
 from distutils.version import StrictVersion
-from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._consts import (
-    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
-    CONST_AZURE_POLICY_ADDON_NAME,
-    CONST_CONFCOM_ADDON_NAME,
-    CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
-    CONST_INGRESS_APPGW_ADDON_NAME,
-    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
-    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
-    CONST_INGRESS_APPGW_SUBNET_CIDR,
-    CONST_INGRESS_APPGW_SUBNET_ID,
-    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
-    CONST_KUBE_DASHBOARD_ADDON_NAME,
-    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_PRIVATE_DNS_ZONE_NONE,
@@ -77,9 +65,9 @@ ManagedCluster = TypeVar("ManagedCluster")
 ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
 ManagedClusterPropertiesAutoScalerProfile = TypeVar("ManagedClusterPropertiesAutoScalerProfile")
 ResourceReference = TypeVar("ResourceReference")
+ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 
 # TODO
-# remove model loading for cluster_autoscaler_profile in _validators
 # add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
 
 
@@ -2383,8 +2371,20 @@ class AKSContext:
         """
         from azure.cli.command_modules.acs._consts import (
             ADDONS,
+            CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+            CONST_AZURE_POLICY_ADDON_NAME,
+            CONST_CONFCOM_ADDON_NAME,
+            CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+            CONST_INGRESS_APPGW_ADDON_NAME,
+            CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+            CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+            CONST_INGRESS_APPGW_SUBNET_CIDR,
+            CONST_INGRESS_APPGW_SUBNET_ID,
+            CONST_INGRESS_APPGW_WATCH_NAMESPACE,
+            CONST_KUBE_DASHBOARD_ADDON_NAME,
             CONST_MONITORING_ADDON_NAME,
             CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+            CONST_OPEN_SERVICE_MESH_ADDON_NAME,
             CONST_VIRTUAL_NODE_ADDON_NAME,
             CONST_VIRTUAL_NODE_SUBNET_NAME,
         )
@@ -2653,6 +2653,13 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME = addon_consts.get(
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME"
+        )
+
         # read the original value passed by the command
         appgw_name = self.raw_param.get("appgw_name")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2677,6 +2684,11 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_SUBNET_CIDR = addon_consts.get("CONST_INGRESS_APPGW_SUBNET_CIDR")
+
         # read the original value passed by the command
         appgw_subnet_cidr = self.raw_param.get("appgw_subnet_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2701,6 +2713,11 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID = addon_consts.get("CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID")
+
         # read the original value passed by the command
         appgw_id = self.raw_param.get("appgw_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2725,6 +2742,11 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_SUBNET_ID = addon_consts.get("CONST_INGRESS_APPGW_SUBNET_ID")
+
         # read the original value passed by the command
         appgw_subnet_id = self.raw_param.get("appgw_subnet_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2749,6 +2771,11 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_WATCH_NAMESPACE = addon_consts.get("CONST_INGRESS_APPGW_WATCH_NAMESPACE")
+
         # read the original value passed by the command
         appgw_watch_namespace = self.raw_param.get("appgw_watch_namespace")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2773,6 +2800,11 @@ class AKSContext:
 
         :return: bool
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_CONFCOM_ADDON_NAME = addon_consts.get("CONST_CONFCOM_ADDON_NAME")
+        CONST_ACC_SGX_QUOTE_HELPER_ENABLED = addon_consts.get("CONST_ACC_SGX_QUOTE_HELPER_ENABLED")
+
         # read the original value passed by the command
         enable_sgxquotehelper = self.raw_param.get("enable_sgxquotehelper")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -4194,26 +4226,45 @@ class AKSCreateDecorator:
         mc.network_profile = network_profile
         return mc
 
-    # pylint: disable=too-many-statements
-    def set_up_addon_profiles(self, mc: ManagedCluster, skip_addons: Optional[List[str]] = None) -> ManagedCluster:
-        """Set up addon profiles for the ManagedCluster object.
-
-        This function will store following intermediates: monitoring, enable_virtual_node and
-        ingress_appgw_addon_enabled.
+    def set_up_monitoring_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Set up monitoring addon profile.
 
         The function "_ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
         the Container Insights solution to the Log Analytics workspace.
         When workspace_resource_id is not assigned, function "_ensure_default_log_analytics_workspace_for_monitoring"
         will be called to create a workspace, which internally used ResourceManagementClient to send the request.
 
-        This function supports the option of skip_addons. When provided, it will skip processing specified addons
-        (will be handled by aks-preview).
+        :return: a ManagedClusterAddonProfile object
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = addon_consts.get(
+            "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
+        )
+
+        monitoring_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={
+                CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id()
+            },
+        )
+        # post-process, create a deployment
+        _ensure_container_insights_for_monitoring(
+            self.cmd, monitoring_addon_profile
+        )
+        # set intermediate
+        self.context.set_intermediate("monitoring", True, overwrite_exists=True)
+        return monitoring_addon_profile
+
+    # pylint: disable=too-many-statements
+    def set_up_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up addon profiles for the ManagedCluster object.
+
+        This function will store following intermediates: monitoring, enable_virtual_node and
+        ingress_appgw_addon_enabled.
 
         :return: the ManagedCluster object
         """
-        # replace empty default value
-        if skip_addons is None:
-            skip_addons = []
         if not isinstance(mc, self.models.ManagedCluster):
             raise CLIInternalError(
                 "Unexpected mc object with type '{}'.".format(type(mc))
@@ -4224,14 +4275,45 @@ class AKSCreateDecorator:
         CONST_MONITORING_ADDON_NAME = addon_consts.get(
             "CONST_MONITORING_ADDON_NAME"
         )
-        CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = addon_consts.get(
-            "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
-        )
         CONST_VIRTUAL_NODE_ADDON_NAME = addon_consts.get(
             "CONST_VIRTUAL_NODE_ADDON_NAME"
         )
         CONST_VIRTUAL_NODE_SUBNET_NAME = addon_consts.get(
             "CONST_VIRTUAL_NODE_SUBNET_NAME"
+        )
+        CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = addon_consts.get(
+            "CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME"
+        )
+        CONST_KUBE_DASHBOARD_ADDON_NAME = addon_consts.get(
+            "CONST_KUBE_DASHBOARD_ADDON_NAME"
+        )
+        CONST_AZURE_POLICY_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_POLICY_ADDON_NAME"
+        )
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME = addon_consts.get(
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME"
+        )
+        CONST_INGRESS_APPGW_SUBNET_CIDR = addon_consts.get(
+            "CONST_INGRESS_APPGW_SUBNET_CIDR"
+        )
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID = addon_consts.get(
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID"
+        )
+        CONST_INGRESS_APPGW_SUBNET_ID = addon_consts.get(
+            "CONST_INGRESS_APPGW_SUBNET_ID"
+        )
+        CONST_INGRESS_APPGW_WATCH_NAMESPACE = addon_consts.get(
+            "CONST_INGRESS_APPGW_WATCH_NAMESPACE"
+        )
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get(
+            "CONST_INGRESS_APPGW_ADDON_NAME"
+        )
+        CONST_ACC_SGX_QUOTE_HELPER_ENABLED = addon_consts.get(
+            "CONST_ACC_SGX_QUOTE_HELPER_ENABLED"
+        )
+        CONST_CONFCOM_ADDON_NAME = addon_consts.get("CONST_CONFCOM_ADDON_NAME")
+        CONST_OPEN_SERVICE_MESH_ADDON_NAME = addon_consts.get(
+            "CONST_OPEN_SERVICE_MESH_ADDON_NAME"
         )
 
         ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
@@ -4240,8 +4322,6 @@ class AKSCreateDecorator:
         # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
         # error out if '--enable-addons=virtual-node' is set but aci_subnet_name and vnet_subnet_id are not
         addons = self.context.get_enable_addons()
-        # skip processing specified addons (will be handled by aks-preview)
-        addons = [x for x in addons if x not in skip_addons]
         if 'http_application_routing' in addons:
             addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
@@ -4250,13 +4330,7 @@ class AKSCreateDecorator:
                 enabled=True)
         # TODO: can we help the user find a workspace resource ID?
         if 'monitoring' in addons:
-            workspace_resource_id = self.context.get_workspace_resource_id()
-            addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
-                enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
-            # post-process, create a deployment
-            _ensure_container_insights_for_monitoring(self.cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
-            # set intermediate
-            self.context.set_intermediate("monitoring", True, overwrite_exists=True)
+            addon_profiles[CONST_MONITORING_ADDON_NAME] = self.set_up_monitoring_addon_profile()
         if 'azure-policy' in addons:
             addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
                 enabled=True)
