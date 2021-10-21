@@ -30,7 +30,6 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_integrationruntimeconnectioninfos_factory
     from ._client_factory import cf_synapse_client_integrationruntimestatus_factory
     from ._client_factory import cf_kusto_pool
-    from ._client_factory import cf_kusto_pool
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -191,11 +190,6 @@ def load_command_table(self, _):
     synapse_spark_job_definition_sdk = CliCommandType(
         operations_tmpl='azure.synapse.artifacts.operations#SparkJobDefinitionOperations.{}',
         client_factory=None)
-
-    synapse_kusto_pool_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.synapse.operations._kusto_pool_operations#KustoPoolOperations.{}',
-        client_factory=cf_kusto_pool,
-    )
 
     synapse_kusto_pool_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations._kusto_pools_operations#KustoPoolsOperations.{}',
