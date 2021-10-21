@@ -337,7 +337,7 @@ def load_arguments(self, _):
             c.argument('vnet_route_all_enabled', help="Configure regional VNet integration to route all traffic to the VNet.",
                        arg_type=get_three_state_flag(return_label=True))
             c.argument('generic_configurations', nargs='+',
-                       help='Provide site configuration list in a format of either `key=value` pair or `@<json_file>`. To avoid compatibility issues, it is recommended to use a JSON file to provide these configurations. If using a key=value pair, PowerShell and Windows Command Prompt users should be sure to use escape characters like so: {\\"key\\": value}, instead of: `{"key": value}`.')
+                       help='Provide site configuration list in a format of either `key=value` pair or `@<json_file>`. PowerShell and Windows Command Prompt users should use a JSON file to provide these configurations to avoid compatibility issues with escape characters.')
 
         with self.argument_context(scope + ' config container') as c:
             c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
