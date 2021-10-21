@@ -8,7 +8,7 @@ from enum import Enum
 
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, InvalidArgumentValueError
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1012,7 +1012,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     # Windows patch settings
     if patch_mode is not None and os_type.lower() == 'windows':
         if patch_mode.lower() not in ['automaticbyos', 'automaticbyplatform', 'manual']:
-            raise ValidationError(
+            raise InvalidArgumentValueError(
                 'Invalid value of --patch-mode for Windows VMSS. Valid values are AutomaticByOS, '
                 'AutomaticByPlatform, Manual.')
         os_profile['windowsConfiguration']['patchSettings'] = {
@@ -1022,7 +1022,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     # Linux patch settings
     if patch_mode is not None and os_type.lower() == 'linux':
         if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
-            raise ValidationError(
+            raise InvalidArgumentValueError(
                 'Invalid value of --patch-mode for Linux VMSS. Valid values are AutomaticByPlatform, ImageDefault.')
         os_profile['linuxConfiguration']['patchSettings'] = {
             'patchMode': patch_mode
