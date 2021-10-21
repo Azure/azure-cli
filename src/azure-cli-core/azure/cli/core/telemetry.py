@@ -45,7 +45,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.module_correlation = None
         self.extension_name = None
         self.extension_version = None
-        self.event_id = 'None'
+        self.event_id = None
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
@@ -594,7 +594,7 @@ def _get_stack_trace():
 def _get_or_create_event_id():
     # Some CLI scenarios can use the Event ID to correlate events on the server and client. Such as matching errors.
     # This can be used to improve the CLI experience. Though it should only shared when telemetry is enabled.
-    if _session.event_id == "None":
+    if _session.event_id == None:
         _session.event_id = str(uuid.uuid4())
     return _session.event_id
 
