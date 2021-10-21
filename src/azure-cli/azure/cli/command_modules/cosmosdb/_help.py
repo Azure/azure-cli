@@ -1256,7 +1256,7 @@ short-summary: Invoke a command like nodetool for cassandra maintenance.
 examples:
   - name: This command runs nodetool status in a host node of the cluster.
     text: |
-      az managed-cassandra cluster command --resource-group MyResourceGroup --cluster-name MyCluster --command "nodetool status" --host "10.0.1.12"
+      az managed-cassandra cluster command --resource-group MyResourceGroup --cluster-name MyCluster --command-name "nodetool status" --host "10.0.1.12"
 """
 
 helps['managed-cassandra cluster deallocate'] = """

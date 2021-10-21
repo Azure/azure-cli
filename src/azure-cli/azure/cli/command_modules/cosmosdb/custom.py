@@ -2407,12 +2407,14 @@ def cli_cosmosdb_managed_cassandra_datacenter_create(client,
     return client.begin_create_update(resource_group_name, cluster_name, data_center_name, data_center_resource)
 
 
-def cli_cosmosdb_managed_cassandra_datacenter_update(client, resource_group_name,
+def cli_cosmosdb_managed_cassandra_datacenter_update(client,
+                                                     resource_group_name,
                                                      cluster_name,
                                                      data_center_name,
                                                      node_count=None,
                                                      base64_encoded_cassandra_yaml_fragment=None,
-                                                     managed_disk_customer_key_uri=None):
+                                                     managed_disk_customer_key_uri=None,
+                                                     backup_storage_customer_key_uri=None):
 
     """Updates an Azure Managed Cassandra Datacenter"""
 
@@ -2430,7 +2432,8 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client, resource_group_name
         node_count=node_count,
         seed_nodes=data_center_resource.properties.seed_nodes,
         base64_encoded_cassandra_yaml_fragment=base64_encoded_cassandra_yaml_fragment,
-        managed_disk_customer_key_uri=managed_disk_customer_key_uri
+        managed_disk_customer_key_uri=managed_disk_customer_key_uri,
+        backup_storage_customer_key_uri=backup_storage_customer_key_uri
     )
 
     data_center_resource = DataCenterResource(
