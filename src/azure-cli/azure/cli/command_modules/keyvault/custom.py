@@ -1125,7 +1125,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
 # region KeyVault Key
 def create_key(client, key_name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None):
+               not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None):
 
     return client.create_key(name=key_name,
                              key_type=kty,
@@ -1135,7 +1135,9 @@ def create_key(client, key_name=None, protection=None,  # pylint: disable=unused
                              not_before=not_before,
                              expires_on=expires,
                              tags=tags,
-                             curve=curve)
+                             curve=curve,
+                             exportable=exportable,
+                             release_policy=release_policy)
 
 
 def backup_key(client, file_path, vault_base_url=None,
@@ -1244,7 +1246,7 @@ def _private_ec_key_to_jwk(ec_key, jwk):
 def import_key(cmd, client, key_name=None,  # pylint: disable=too-many-locals
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, kty='RSA', curve=None):
+               byok_string=None, kty='RSA', curve=None, exportable=None, release_policy=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     JsonWebKey = cmd.loader.get_sdk('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
@@ -1291,7 +1293,8 @@ def import_key(cmd, client, key_name=None,  # pylint: disable=too-many-locals
     return client.import_key(name=key_name, key=key_obj,
                              hardware_protected=(protection == 'hsm'),
                              enabled=not disabled, tags=tags,
-                             not_before=not_before, expires_on=expires)
+                             not_before=not_before, expires_on=expires,
+                             exportable=exportable, release_policy=release_policy)
 
 
 def _bytes_to_int(b):
@@ -1424,13 +1427,12 @@ def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: d
 
 def get_policy_template():
     policy = {
-        'version': '0.2',
+        'version': '1.0.0',
         'anyOf': [{
             'authority': '<issuer>',
             'allOf': [{
                 'claim': '<claim name>',
-                'condition': 'equals',
-                'value': '<value to match>'
+                'equals': '<value to match>'
             }]
         }]
     }
