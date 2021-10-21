@@ -6020,7 +6020,7 @@ def update_custom_ip_prefix(instance,
     if authorization_message is not None:
         instance.authorization_message = authorization_message
     if commissioned_state is not None:
-        instance.commissioned_state = commissioned_state
+        instance.commissioned_state = commissioned_state[0].upper() + commissioned_state[1:] + 'ing'
     return instance
 # endregion
 
@@ -6399,7 +6399,7 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 # pylint: disable=too-many-locals
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
-                location=None, tags=None, vm_protection=None, ddos_protection=None,
+                location=None, tags=None, vm_protection=None, ddos_protection=None, bgp_community=None,
                 ddos_protection_plan=None, network_security_group=None, edge_zone=None, flowtimeout=None):
     AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
         cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
@@ -6429,11 +6429,14 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         vnet.extended_location = _edge_zone_model(cmd, edge_zone)
     if flowtimeout is not None:
         vnet.flow_timeout_in_minutes = flowtimeout
+    if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
+        VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
+        vnet.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
     return cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name)
 
 
 def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None,
-                ddos_protection_plan=None, flowtimeout=None):
+                ddos_protection_plan=None, flowtimeout=None, bgp_community=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     AddressSpace, DhcpOptions, SubResource = cmd.get_models('AddressSpace', 'DhcpOptions', 'SubResource')
@@ -6459,6 +6462,9 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
         instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)
     if flowtimeout is not None:
         instance.flow_timeout_in_minutes = flowtimeout
+    if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
+        VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
+        instance.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
     return instance
 
 
@@ -7652,7 +7658,7 @@ def list_service_aliases(cmd, location, resource_group_name=None):
 
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
-                        public_ip_address, location=None, subnet='AzureBastionSubnet', tags=None):
+                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -7667,6 +7673,15 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
     bastion_host = BastionHost(ip_configurations=[ip_configuration],
                                location=location,
                                tags=tags)
+
+    if cmd.supported_api_version(min_api='2021-03-01'):
+        sku_type = cmd.get_models('Sku')
+        sku = sku_type(name=sku)
+        bastion_host = BastionHost(ip_configurations=[ip_configuration],
+                                   location=location,
+                                   scale_units=scale_units,
+                                   sku=sku,
+                                   tags=tags)
     return client.begin_create_or_update(resource_group_name=resource_group_name,
                                          bastion_host_name=bastion_host_name,
                                          parameters=bastion_host)

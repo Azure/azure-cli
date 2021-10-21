@@ -6,7 +6,6 @@
 import time
 import os
 from datetime import datetime, timedelta, timezone
-# pylint: disable=import-error
 # pylint: disable=too-many-lines
 from knack.log import get_logger
 
@@ -1293,7 +1292,7 @@ def _run_client_script_for_windows(client_scripts):
     file_name, password = _get_script_file_name_and_password(windows_script)
 
     # Create File
-    from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+    from urllib.request import urlopen
     import shutil
     with urlopen(windows_script.url) as response, open(file_name, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)

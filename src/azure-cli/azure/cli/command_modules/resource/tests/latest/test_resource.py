@@ -335,6 +335,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
     def test_tag_update_by_patch(self, resource_group, resource_group_location):
 

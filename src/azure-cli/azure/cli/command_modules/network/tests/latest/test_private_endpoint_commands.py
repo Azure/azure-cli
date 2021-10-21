@@ -326,6 +326,95 @@ class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
 
         self.cmd('network private-endpoint-connection delete --id {sa_pec_id} -y')
 
+class NetworkPrivateLinkAMLScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_aml_plr')
+    def test_private_link_resource_aml(self):
+        self.kwargs.update({
+            'workspace_name': self.create_random_name('testaml', 20)
+        })
+        self.cmd('extension add -n azure-cli-ml')
+        result = self.cmd('ml workspace create --workspace-name {workspace_name} --resource-group {rg}').get_output_in_json()
+        self.kwargs['workspace_id'] = result['id']
+        self.cmd('network private-link-resource list --id {workspace_id}', checks=[
+            self.check('length(@)', 1)])
+
+    @live_only()
+    @ResourceGroupPreparer(location='centraluseuap')
+    def test_private_endpoint_connection_aml(self):
+        self.kwargs.update({
+            'workspace_name': self.create_random_name('testaml', 20),
+            'vnet_name': self.create_random_name('testvnet', 20),
+            'subnet_name': self.create_random_name('testsubnet', 20),
+            'endpoint_name': self.create_random_name('priv_endpoint', 25),
+            'endpoint_conn_name': self.create_random_name('priv_endpointconn', 25),
+            'second_endpoint_name': self.create_random_name('priv_endpoint', 25),
+            'second_endpoint_conn_name': self.create_random_name('priv_endpointconn', 25),
+            'description_msg': 'somedescription'
+        })
+
+        # create subnet with disabled endpoint network policies
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
+
+        self.cmd('extension add -n azure-cli-ml')
+        result = self.cmd('ml workspace create --workspace-name {workspace_name} --resource-group {rg}').get_output_in_json()
+        self.kwargs['workspace_id'] = result['id']
+
+        # add an endpoint and approve it
+        result = self.cmd(
+            'network private-endpoint create -n {endpoint_name} -g {rg} --subnet {subnet_name} --vnet-name {vnet_name}  '
+            '--private-connection-resource-id {workspace_id} --group-id amlworkspace --connection-name {endpoint_conn_name} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
+
+        result = self.cmd(
+            'network private-endpoint-connection list -g {rg} --name {workspace_name} --type Microsoft.MachineLearningServices/workspaces').get_output_in_json()
+        self.kwargs['endpoint_request'] = result[0]['name']
+
+        self.cmd(
+            'network private-endpoint-connection approve -g {rg} --resource-name {workspace_name} -n {endpoint_request} --description {description_msg} --type Microsoft.MachineLearningServices/workspaces',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('properties.privateLinkServiceConnectionState.description', '{description_msg}')
+            ])
+
+        # add an endpoint and then reject it
+        self.cmd(
+            'network private-endpoint create -n {second_endpoint_name} -g {rg} --subnet {subnet_name} --vnet-name {vnet_name} --private-connection-resource-id {workspace_id} --group-id amlworkspace --connection-name {second_endpoint_conn_name} --manual-request')
+        result = self.cmd('network private-endpoint-connection list -g {rg} --name {workspace_name} --type Microsoft.MachineLearningServices/workspaces').get_output_in_json()
+
+        # the connection request name starts with the workspaces name
+        self.kwargs['second_endpoint_request'] = [conn['name'] for conn in result if
+                                                  self.kwargs['second_endpoint_name'].lower() in
+                                                  conn['properties']['privateEndpoint']['id'].lower()][0]
+
+        self.cmd(
+            'network private-endpoint-connection reject -g {rg} --resource-name {workspace_name} -n {second_endpoint_request} --description {description_msg} --type Microsoft.MachineLearningServices/workspaces',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                self.check('properties.privateLinkServiceConnectionState.description', '{description_msg}')
+            ])
+
+        # list endpoints
+        self.cmd('network private-endpoint-connection list -g {rg} -n {workspace_name} --type Microsoft.MachineLearningServices/workspaces', checks=[
+            self.check('length(@)', '2'),
+        ])
+
+        # remove endpoints
+        self.cmd(
+            'network private-endpoint-connection delete -g {rg} --resource-name {workspace_name} -n {second_endpoint_request} --type Microsoft.MachineLearningServices/workspaces -y')
+        time.sleep(30)
+        self.cmd('network private-endpoint-connection list -g {rg} -n {workspace_name} --type Microsoft.MachineLearningServices/workspaces', checks=[
+            self.check('length(@)', '1'),
+        ])
+        self.cmd('network private-endpoint-connection show -g {rg} --resource-name {workspace_name} -n {endpoint_request} --type Microsoft.MachineLearningServices/workspaces', checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{description_msg}'),
+            self.check('name', '{endpoint_request}')
+        ])
+
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {workspace_name} -n {endpoint_request} --type Microsoft.MachineLearningServices/workspaces -y')
+
 
 class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
@@ -720,6 +809,76 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
         self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
         return filepath
+
+class NetworkResourceManagementPrivateLinksTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_rmpl_plr')
+    def test_private_link_resource_resourcemanagementprivatelink(self, resource_group):
+        self.kwargs.update({
+            'rmplname': self.create_random_name('cli_test_rmpl_plr-', 28),
+            'loc': 'eastus',
+            'rg': resource_group,
+            'sub': self.get_subscription_id(),
+            'body': '{\\"location\\":\\"eastus\\"}'
+        })
+
+        self.cmd('az rest --method PUT \
+                 --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{rmplname}?api-version=2020-05-01" \
+                 --body {body}')
+
+        self.cmd('az network private-link-resource list --name {rmplname} --resource-group {rg} --type Microsoft.Authorization/resourceManagementPrivateLinks',
+                 checks=[self.check('length(@)', 1)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_rmpl_pe')
+    def test_private_endpoint_connection_resourcemanagementprivatelink(self, resource_group):
+        self.kwargs.update({
+            'rmplname': self.create_random_name('cli-test-rmpl-pe-', 28),
+            'loc': 'eastus',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pename': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'rg': resource_group,
+            'sub': self.get_subscription_id(),
+            'body': '{\\"location\\":\\"eastus\\"}'
+        })
+
+        # prepare network
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # create resource management private link
+        rmpl = self.cmd('az rest --method "PUT" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{rmplname}?api-version=2020-05-01" \
+                        --body "{body}"').get_output_in_json()
+        self.kwargs['rmpl_id'] = rmpl['id']
+
+        # Create a private endpoint connection
+        result = self.cmd('az network private-endpoint create -g {rg} -n {pename} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+                      '--connection-name {pe_connection} --private-connection-resource-id {rmpl_id} '
+                      '--group-id ResourceManagement').get_output_in_json()
+        self.kwargs['pe_id'] = result['id']
+
+        result = self.cmd('az network private-endpoint-connection list -g {rg} -n {rmplname} --type Microsoft.Authorization/resourceManagementPrivateLinks', checks=[
+                          self.check('length(@)', 1)]).get_output_in_json()
+        self.kwargs['pe'] = result[0]['name']
+
+        # Show
+        self.cmd('az network private-endpoint-connection show --resource-name {rmplname} --name {pe} --resource-group {rg} --type Microsoft.Authorization/resourceManagementPrivateLinks',
+                 checks=self.check('name', '{pe}'))
+
+        # Approve
+        self.cmd('az network private-endpoint-connection approve -g {rg} --resource-name {rmplname} --name {pe} --type Microsoft.Authorization/resourceManagementPrivateLinks',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+
+        # Reject
+        self.cmd('az network private-endpoint-connection reject -g {rg} --resource-name {rmplname} --name {pe} --type Microsoft.Authorization/resourceManagementPrivateLinks',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+
+        # Delete
+        self.cmd('az network private-endpoint-connection delete -g {rg} --resource-name {rmplname} -n {pe} --type Microsoft.Authorization/resourceManagementPrivateLinks -y')
 
 class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_plr')
