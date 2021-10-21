@@ -4421,24 +4421,40 @@ class AKSCreateDecorator:
         # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
         # error out if '--enable-addons=virtual-node' is set but aci_subnet_name and vnet_subnet_id are not
         addons = self.context.get_enable_addons()
-        if 'http_application_routing' in addons:
-            addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = self.set_up_http_application_routing_addon_profile()
-        if 'kube-dashboard' in addons:
-            addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = self.set_up_kube_dashboard_addon_profile()
-        if 'monitoring' in addons:
-            addon_profiles[CONST_MONITORING_ADDON_NAME] = self.set_up_monitoring_addon_profile()
-        if 'azure-policy' in addons:
-            addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = self.set_up_azure_policy_addon_profile()
-        if 'virtual-node' in addons:
+        if "http_application_routing" in addons:
+            addon_profiles[
+                CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
+            ] = self.set_up_http_application_routing_addon_profile()
+        if "kube-dashboard" in addons:
+            addon_profiles[
+                CONST_KUBE_DASHBOARD_ADDON_NAME
+            ] = self.set_up_kube_dashboard_addon_profile()
+        if "monitoring" in addons:
+            addon_profiles[
+                CONST_MONITORING_ADDON_NAME
+            ] = self.set_up_monitoring_addon_profile()
+        if "azure-policy" in addons:
+            addon_profiles[
+                CONST_AZURE_POLICY_ADDON_NAME
+            ] = self.set_up_azure_policy_addon_profile()
+        if "virtual-node" in addons:
             # TODO: how about aciConnectorwindows, what is its addon name?
             os_type = self.context.get_virtual_node_addon_os_type()
-            addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = self.set_up_virtual_node_addon_profile()
-        if 'ingress-appgw' in addons:
-            addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = self.set_up_ingress_appgw_addon_profile()
-        if 'confcom' in addons:
-            addon_profiles[CONST_CONFCOM_ADDON_NAME] = self.set_up_confcom_addon_profile()
-        if 'open-service-mesh' in addons:
-            addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = self.set_up_open_service_mesh_profile()
+            addon_profiles[
+                CONST_VIRTUAL_NODE_ADDON_NAME + os_type
+            ] = self.set_up_virtual_node_addon_profile()
+        if "ingress-appgw" in addons:
+            addon_profiles[
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ] = self.set_up_ingress_appgw_addon_profile()
+        if "confcom" in addons:
+            addon_profiles[
+                CONST_CONFCOM_ADDON_NAME
+            ] = self.set_up_confcom_addon_profile()
+        if "open-service-mesh" in addons:
+            addon_profiles[
+                CONST_OPEN_SERVICE_MESH_ADDON_NAME
+            ] = self.set_up_open_service_mesh_profile()
         mc.addon_profiles = addon_profiles
         return mc
 
