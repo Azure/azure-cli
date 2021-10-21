@@ -17,7 +17,7 @@ serial_test_modules = ['botservice', 'network', 'cloud', 'appservice']
 for mod_name in mod_list:
     cmd = '{} --junit-xml /azure_cli_test_result/{}.xml --pyargs azure.cli.command_modules.{}'.format(
         pytest_base_cmd if mod_name in serial_test_modules else pytest_parallel_cmd, mod_name, mod_name)
-    print('Running:', cmd)
+    print('Running:', cmd, flush=True)
     exit_code = subprocess.call(cmd, shell=True)
     if exit_code == 5:
         print('No tests found for {}'.format(mod_name))
