@@ -2502,7 +2502,7 @@ class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
             'loc': 'eastus2euap'
         })
         self.cmd('keyvault create -g {rg} -n {kv} -l {loc}',
-                 checks=[self.check('properties.publicNetworkAccess', None)])
+                 checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
         self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --public-network-access Enabled',
                  checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
         self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --public-network-access Disabled',

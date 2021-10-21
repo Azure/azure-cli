@@ -165,7 +165,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: '2021-04-01-preview',
+        ResourceType.MGMT_KEYVAULT: SDKProfile('2021-04-01-preview', {
+            'vaults': '2021-06-01-preview'
+        }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',
