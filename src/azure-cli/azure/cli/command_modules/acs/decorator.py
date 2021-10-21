@@ -4226,6 +4226,26 @@ class AKSCreateDecorator:
         mc.network_profile = network_profile
         return mc
 
+    def set_up_http_application_routing_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Set up http application routing addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        http_application_routing_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+        )
+        return http_application_routing_addon_profile
+
+    def set_up_kube_dashboard_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Set up kube dashboard addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        kube_dashboard_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+        )
+        return kube_dashboard_addon_profile
+
     def set_up_monitoring_addon_profile(self) -> ManagedClusterAddonProfile:
         """Set up monitoring addon profile.
 
@@ -4242,6 +4262,7 @@ class AKSCreateDecorator:
             "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
         )
 
+        # TODO: can we help the user find a workspace resource ID?
         monitoring_addon_profile = self.models.ManagedClusterAddonProfile(
             enabled=True,
             config={
@@ -4255,6 +4276,106 @@ class AKSCreateDecorator:
         # set intermediate
         self.context.set_intermediate("monitoring", True, overwrite_exists=True)
         return monitoring_addon_profile
+
+    def set_up_azure_policy_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Set up azure policy addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        azure_policy_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+        )
+        return azure_policy_addon_profile
+
+    def set_up_virtual_node_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Set up virtual node addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_VIRTUAL_NODE_SUBNET_NAME = addon_consts.get(
+            "CONST_VIRTUAL_NODE_SUBNET_NAME"
+        )
+
+        virtual_node_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={CONST_VIRTUAL_NODE_SUBNET_NAME: self.context.get_aci_subnet_name()}
+        )
+        # set intermediate
+        self.context.set_intermediate("enable_virtual_node", True, overwrite_exists=True)
+        return virtual_node_addon_profile
+
+    def set_up_ingress_appgw_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Set up ingress appgw addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME = addon_consts.get(
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME"
+        )
+        CONST_INGRESS_APPGW_SUBNET_CIDR = addon_consts.get(
+            "CONST_INGRESS_APPGW_SUBNET_CIDR"
+        )
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID = addon_consts.get(
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID"
+        )
+        CONST_INGRESS_APPGW_SUBNET_ID = addon_consts.get(
+            "CONST_INGRESS_APPGW_SUBNET_ID"
+        )
+        CONST_INGRESS_APPGW_WATCH_NAMESPACE = addon_consts.get(
+            "CONST_INGRESS_APPGW_WATCH_NAMESPACE"
+        )
+
+        ingress_appgw_addon_profile = self.models.ManagedClusterAddonProfile(enabled=True, config={})
+        appgw_name = self.context.get_appgw_name()
+        appgw_subnet_cidr = self.context.get_appgw_subnet_cidr()
+        appgw_id = self.context.get_appgw_id()
+        appgw_subnet_id = self.context.get_appgw_subnet_id()
+        appgw_watch_namespace = self.context.get_appgw_watch_namespace()
+        if appgw_name is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
+        if appgw_subnet_cidr is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
+        if appgw_id is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
+        if appgw_subnet_id is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
+        if appgw_watch_namespace is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
+        # set intermediate
+        self.context.set_intermediate("ingress_appgw_addon_enabled", True, overwrite_exists=True)
+        return ingress_appgw_addon_profile
+
+    def set_up_confcom_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Set up confcom addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_ACC_SGX_QUOTE_HELPER_ENABLED = addon_consts.get(
+            "CONST_ACC_SGX_QUOTE_HELPER_ENABLED"
+        )
+
+        confcom_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
+        if self.context.get_enable_sgxquotehelper():
+            confcom_addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+        return confcom_addon_profile
+
+    def set_up_open_service_mesh_profile(self) -> ManagedClusterAddonProfile:
+        """Set up open service mesh addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        open_service_mesh_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={},
+        )
+        return open_service_mesh_profile
 
     # pylint: disable=too-many-statements
     def set_up_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
@@ -4278,9 +4399,6 @@ class AKSCreateDecorator:
         CONST_VIRTUAL_NODE_ADDON_NAME = addon_consts.get(
             "CONST_VIRTUAL_NODE_ADDON_NAME"
         )
-        CONST_VIRTUAL_NODE_SUBNET_NAME = addon_consts.get(
-            "CONST_VIRTUAL_NODE_SUBNET_NAME"
-        )
         CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = addon_consts.get(
             "CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME"
         )
@@ -4290,89 +4408,37 @@ class AKSCreateDecorator:
         CONST_AZURE_POLICY_ADDON_NAME = addon_consts.get(
             "CONST_AZURE_POLICY_ADDON_NAME"
         )
-        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME = addon_consts.get(
-            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME"
-        )
-        CONST_INGRESS_APPGW_SUBNET_CIDR = addon_consts.get(
-            "CONST_INGRESS_APPGW_SUBNET_CIDR"
-        )
-        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID = addon_consts.get(
-            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID"
-        )
-        CONST_INGRESS_APPGW_SUBNET_ID = addon_consts.get(
-            "CONST_INGRESS_APPGW_SUBNET_ID"
-        )
-        CONST_INGRESS_APPGW_WATCH_NAMESPACE = addon_consts.get(
-            "CONST_INGRESS_APPGW_WATCH_NAMESPACE"
-        )
         CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get(
             "CONST_INGRESS_APPGW_ADDON_NAME"
-        )
-        CONST_ACC_SGX_QUOTE_HELPER_ENABLED = addon_consts.get(
-            "CONST_ACC_SGX_QUOTE_HELPER_ENABLED"
         )
         CONST_CONFCOM_ADDON_NAME = addon_consts.get("CONST_CONFCOM_ADDON_NAME")
         CONST_OPEN_SERVICE_MESH_ADDON_NAME = addon_consts.get(
             "CONST_OPEN_SERVICE_MESH_ADDON_NAME"
         )
 
-        ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
         addon_profiles = {}
         # error out if any unrecognized or duplicate addon provided
         # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
         # error out if '--enable-addons=virtual-node' is set but aci_subnet_name and vnet_subnet_id are not
         addons = self.context.get_enable_addons()
         if 'http_application_routing' in addons:
-            addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
-                enabled=True)
+            addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = self.set_up_http_application_routing_addon_profile()
         if 'kube-dashboard' in addons:
-            addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(
-                enabled=True)
-        # TODO: can we help the user find a workspace resource ID?
+            addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = self.set_up_kube_dashboard_addon_profile()
         if 'monitoring' in addons:
             addon_profiles[CONST_MONITORING_ADDON_NAME] = self.set_up_monitoring_addon_profile()
         if 'azure-policy' in addons:
-            addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
-                enabled=True)
+            addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = self.set_up_azure_policy_addon_profile()
         if 'virtual-node' in addons:
-            aci_subnet_name = self.context.get_aci_subnet_name()
             # TODO: how about aciConnectorwindows, what is its addon name?
             os_type = self.context.get_virtual_node_addon_os_type()
-            addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(
-                enabled=True,
-                config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
-            )
-            # set intermediate
-            self.context.set_intermediate("enable_virtual_node", True, overwrite_exists=True)
+            addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = self.set_up_virtual_node_addon_profile()
         if 'ingress-appgw' in addons:
-            addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
-            appgw_name = self.context.get_appgw_name()
-            appgw_subnet_cidr = self.context.get_appgw_subnet_cidr()
-            appgw_id = self.context.get_appgw_id()
-            appgw_subnet_id = self.context.get_appgw_subnet_id()
-            appgw_watch_namespace = self.context.get_appgw_watch_namespace()
-            if appgw_name is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
-            if appgw_subnet_cidr is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
-            if appgw_id is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
-            if appgw_subnet_id is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
-            if appgw_watch_namespace is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
-            addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
-            # set intermediate
-            self.context.set_intermediate("ingress_appgw_addon_enabled", True, overwrite_exists=True)
+            addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = self.set_up_ingress_appgw_addon_profile()
         if 'confcom' in addons:
-            addon_profile = ManagedClusterAddonProfile(
-                enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
-            if self.context.get_enable_sgxquotehelper():
-                addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
-            addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
+            addon_profiles[CONST_CONFCOM_ADDON_NAME] = self.set_up_confcom_addon_profile()
         if 'open-service-mesh' in addons:
-            addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
-            addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
+            addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = self.set_up_open_service_mesh_profile()
         mc.addon_profiles = addon_profiles
         return mc
 
