@@ -1344,7 +1344,7 @@ helps['acr connected-registry permissions show'] = """
 type: command
 short-summary: Shows the connected registry sync scope map information.
 examples:
-  - name: Show details and attributes of a sync scope map for an Connected Registry.
+  - name: Show details and attributes of a sync scope map for a connected registry.
     text: >
         az acr connected-registry permissions show -r mycloudregistry -n myconnectedregistry
 """
