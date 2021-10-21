@@ -463,6 +463,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{gitrepo_mount_path}')])
 
+    # Changing to live only because of intermittent test failures: https://github.com/Azure/azure-cli/issues/19804
+    @live_only()
     @ResourceGroupPreparer()
     def test_container_attach(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)
