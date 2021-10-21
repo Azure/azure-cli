@@ -143,7 +143,7 @@ DEPENDENCIES = [
     'packaging~=20.9',
     'PyGithub~=1.38',
     'PyNaCl~=1.4.0',
-    'pytz==2019.1',
+    'pytz==2021.3',
     'scp~=0.13.2',
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions
