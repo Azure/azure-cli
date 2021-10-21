@@ -8,6 +8,8 @@
 from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse
+from datetime import datetime, timedelta, timezone
+from dateutil import parser
 
 class CosmosDBTests(ScenarioTest):
 
@@ -76,9 +78,12 @@ class CosmosDBTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_update_database_account(self, resource_group):
-
+        from azure.mgmt.cosmosdb.models import BackupStorageRedundancy
         self.kwargs.update({
-            'acc': self.create_random_name(prefix='cli', length=40)
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'geo': BackupStorageRedundancy.Geo.value,
+            'lrs': BackupStorageRedundancy.Local.value,
+            'zrs': BackupStorageRedundancy.Zone.value
         })
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-range-filter "20.10.10.10,12.12.122.122,12.22.11.11" --server-version 3.2 --enable-analytical-storage true --enable-free-tier false')
@@ -108,7 +113,22 @@ class CosmosDBTests(ScenarioTest):
             self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '120'),
             self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
             self.check('backupPolicy.type', 'Periodic'),
-        ])
+        ]).get_output_in_json()
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --backup-interval 120 --backup-retention 8 --backup-redundancy {geo}', checks=[
+            self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '120'),
+            self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
+            self.check('backupPolicy.periodicModeProperties.backupStorageRedundancy', BackupStorageRedundancy.Geo.value),
+            self.check('backupPolicy.type', 'Periodic'),
+        ]).get_output_in_json()
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --backup-interval 120 --backup-retention 8 --backup-redundancy {lrs}', checks=[
+            self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '120'),
+            self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
+            self.check('backupPolicy.periodicModeProperties.backupStorageRedundancy', BackupStorageRedundancy.Local.value),
+            self.check('backupPolicy.type', 'Periodic')
+        ]).get_output_in_json()
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_delete_database_account(self, resource_group):
@@ -1953,8 +1973,9 @@ class CosmosDBTests(ScenarioTest):
         assert backup_info is not None
         assert backup_info['continuousBackupInformation'] is not None
 
-        backup_time = int(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
-        assert backup_time > 0
+        oldTime = datetime.now() - timedelta(hours=1, minutes=00)
+        backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert backup_time > oldTime
 
         # Update container
         # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl1}').get_output_in_json()
@@ -1966,7 +1987,7 @@ class CosmosDBTests(ScenarioTest):
         assert backup_info is not None
         assert backup_info['continuousBackupInformation'] is not None
 
-        new_backup_time = int(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        new_backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
         assert new_backup_time >= backup_time
 
         # Update container again
@@ -1979,6 +2000,78 @@ class CosmosDBTests(ScenarioTest):
         assert backup_info is not None
         assert backup_info['continuousBackupInformation'] is not None
 
-        new_backup_time2 = int(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        new_backup_time2 = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert new_backup_time2 >= backup_time
+        assert new_backup_time2 >= new_backup_time
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_container_backupinfo', parameter_name_for_location='location')
+    def test_cosmosdb_mongodb_container_backupinfo(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+        db_name = self.create_random_name(prefix='cli', length=15)
+        new_default_ttl1 = 2000
+        new_default_ttl2 = 5000
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'col': col,
+            'loc': location,
+            'nttl1': new_default_ttl1,
+            'nttl2': new_default_ttl2,
+        })
+
+        # This should fail as account doesn't exist
+        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+
+        # This should fail as database doesn't exist
+        self.assertRaises(CLIError, lambda: self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        # Create database
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        # This should fail as container doesn't exist
+        self.assertRaises(CLIError, lambda: self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        # Create container
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+
+        backup_info = self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        oldTime = datetime.now() - timedelta(hours=1, minutes=00)
+        backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert backup_time > oldTime
+
+        # Update container
+        # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl1}').get_output_in_json()
+        # assert container_update["resource"]["defaultTtl"] == 2000
+
+        backup_info = self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        new_backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert new_backup_time >= backup_time
+
+        # Update container again
+        # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl2}').get_output_in_json()
+        # assert container_update["resource"]["defaultTtl"] == 3000
+
+        backup_info = self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        new_backup_time2 = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
         assert new_backup_time2 >= backup_time
         assert new_backup_time2 >= new_backup_time

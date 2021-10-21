@@ -1152,3 +1152,8 @@ helps['cosmosdb sql retrieve-latest-backup-time'] = """
 type: command
 short-summary: Retrieves latest restorable timestamp for the given sql container in given region.
 """
+
+helps['cosmosdb mongodb retrieve-latest-backup-time'] = """
+type: command
+short-summary: Retrieves latest restorable timestamp for the given mongodb collection in given region.
+"""
