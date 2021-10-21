@@ -70,6 +70,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # Disable Protection with delete data
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --delete-backup-data true --yes')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
@@ -204,7 +205,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
-            self.check("length(@)", 4),
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1)
@@ -234,7 +234,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
-            self.check("length(@)", 5),
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1),
@@ -244,7 +243,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup policy delete -g {rg} -v {vault} -n {policy3}')
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
-            self.check("length(@)", 4),
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1)

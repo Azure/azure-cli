@@ -4,23 +4,20 @@
 # --------------------------------------------------------------------------------------------
 
 import time
-import json
-import re
 import os
 from datetime import datetime, timedelta, timezone
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+# pylint: disable=import-error
 # pylint: disable=too-many-lines
 from knack.log import get_logger
 
-from msrest.paging import Paged
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
+from msrestazure.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity
 from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
     AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
-    IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
-    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
+    IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
+    ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
     CrossRegionRestoreRequest, BackupStatusRequest
@@ -32,12 +29,10 @@ from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgum
     MutuallyExclusiveArgumentError, ArgumentUsageError, ValidationError
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
-    protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
-    job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
+    protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_protection_containers_cf,
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
-    cross_region_restore_cf, backup_crr_job_details_cf, crr_operation_status_cf, backup_crr_jobs_cf,
-    backup_protected_items_crr_cf, protection_container_operation_results_cf, _backup_client_factory,
-    recovery_points_recommended_cf, backup_resource_encryption_config_cf, backup_status_cf)
+    cross_region_restore_cf, backup_crr_job_details_cf, backup_crr_jobs_cf, backup_protected_items_crr_cf,
+    _backup_client_factory, recovery_points_recommended_cf, backup_resource_encryption_config_cf, backup_status_cf)
 
 import azure.cli.command_modules.backup.custom_common as common
 import azure.cli.command_modules.backup.custom_help as cust_help
@@ -486,7 +481,8 @@ def delete_policy(client, resource_group_name, vault_name, name):
 
 
 def show_container(client, name, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
-    return cust_help.get_none_one_or_many(_get_containers(client, container_type, status, resource_group_name, vault_name, name))
+    return cust_help.get_none_one_or_many(_get_containers(client, container_type, status, resource_group_name,
+                                                          vault_name, name))
 
 
 def list_containers(client, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
@@ -1328,4 +1324,3 @@ def _run_client_script_for_linux(client_scripts):
 def _validate_restore_disk_parameters(restore_only_osdisk, diskslist):
     if restore_only_osdisk and diskslist is not None:
         logger.warning("Value of diskslist parameter will be ignored as restore-only-osdisk is set to be true.")
-

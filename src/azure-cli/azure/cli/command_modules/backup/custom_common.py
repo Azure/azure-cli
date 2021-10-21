@@ -9,6 +9,7 @@ from azure.cli.command_modules.backup._client_factory import backup_protected_it
     protection_containers_cf, protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.mgmt.recoveryservicesbackup.models import RecoveryPointTierStatus, RecoveryPointTierType
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -146,18 +147,19 @@ def fetch_tier(paged_recovery_points):
             continue
 
         for i in range(len(rp.properties.recovery_point_tier_details)):
-            if (rp.properties.recovery_point_tier_details[i].type == "ArchivedRP" and
-                    rp.properties.recovery_point_tier_details[i].status == "Rehydrated"):
+            currRpTierDetails = rp.properties.recovery_point_tier_details[i]
+            if (currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP") and
+                    currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Rehydrated")):
                 isRehydrated = True
 
-            if rp.properties.recovery_point_tier_details[i].status == "Valid":
-                if rp.properties.recovery_point_tier_details[i].type == "InstantRP":
+            if currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Valid"):
+                if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "InstantRP"):
                     isInstantRecoverable = True
 
-                if rp.properties.recovery_point_tier_details[i].type == "HardenedRP":
+                if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "HardenedRP"):
                     isHardenedRP = True
 
-                if rp.properties.recovery_point_tier_details[i].type == "ArchivedRP":
+                if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP"):
                     isArchived = True
 
         if (isHardenedRP and isArchived) or (isRehydrated):
@@ -304,3 +306,15 @@ def _check_map(item_type, item_type_map):
     az_error = InvalidArgumentValueError(error_text)
     az_error.set_recommendation(recommendation_text)
     raise az_error
+
+
+def _get_enum_position(enum, value):
+    enum_len = len(enum)
+    count = 0
+    for val in enum:
+        if val == value:
+            break
+        count += 1
+    if count == enum_len:
+        raise CLIError("enum value not present.")
+    return str(count)

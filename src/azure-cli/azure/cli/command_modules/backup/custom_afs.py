@@ -188,6 +188,11 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     restore_file_specs = None
 
     if source_file_path is not None:
+        if len(source_file_path) > 99:
+            raise ArgumentUsageError("""
+            You can only recover a maximum of 99 Files/Folder.
+            Please ensure you have provided less than 100 source file paths.
+            """)
         restore_file_specs = []
         for filepath in source_file_path:
             restore_file_specs.append(RestoreFileSpecs(path=filepath, file_spec_type=source_file_type,

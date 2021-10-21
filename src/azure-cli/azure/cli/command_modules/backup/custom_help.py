@@ -185,9 +185,12 @@ def track_backup_crr_operation(cli_ctx, result, azure_region):
 
     operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
+    # print("tracking started", operation_status.__dict__)
     while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(5)
         operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
+        # print("tracking continues", operation_status.__dict__)
+    # print("tracking completed", operation_status.__dict__)
     return operation_status
 
 
