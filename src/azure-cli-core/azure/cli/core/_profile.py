@@ -10,8 +10,6 @@ from copy import deepcopy
 from enum import Enum
 
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.auth.identity import Identity, AZURE_CLI_CLIENT_ID
-from azure.cli.core.auth.util import resource_to_scopes
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 from azure.cli.core.util import in_cloud_console, can_launch_browser
@@ -121,12 +119,9 @@ class Profile:
         self.cli_ctx = cli_ctx or get_default_cli()
         self._storage = storage or ACCOUNT
         self._authority = self.cli_ctx.cloud.endpoints.active_directory
-        self._arm_scope = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
-        # Only enable token cache encryption for Windows (for now)
-        token_encryption_fallback = sys.platform.startswith('win32')
-        Identity.token_encryption = self.cli_ctx.config.getboolean('core', 'token_encryption',
-                                                                   fallback=token_encryption_fallback)
+        from .auth.util import resource_to_scopes
+        self._arm_scope = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
     # pylint: disable=too-many-branches,too-many-statements,too-many-locals
     def login(self,
@@ -136,7 +131,6 @@ class Profile:
               is_service_principal,
               tenant,
               scopes=None,
-              client_id=AZURE_CLI_CLIENT_ID,
               use_device_code=False,
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
@@ -147,10 +141,7 @@ class Profile:
         if not scopes:
             scopes = self._arm_scope
 
-        # For ADFS, auth_tenant is 'adfs'
-        # https://github.com/Azure/azure-sdk-for-python/blob/661cd524e88f480c14220ed1f86de06aaff9a977/sdk/identity/azure-identity/CHANGELOG.md#L19
-        authority, auth_tenant = _detect_adfs_authority(self.cli_ctx.cloud.endpoints.active_directory, tenant)
-        identity = Identity(authority=authority, tenant_id=auth_tenant, client_id=client_id)
+        identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=tenant)
 
         user_identity = None
         if interactive:
@@ -295,14 +286,14 @@ class Profile:
         subscriptions = [x for x in subscriptions if x not in result]
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
-        identity = Identity(self._authority)
+        identity = _create_identity_instance(self.cli_ctx, self._authority)
         identity.logout_user(user_or_sp)
         identity.logout_service_principal(user_or_sp)
 
     def logout_all(self):
         self._storage[_SUBSCRIPTIONS] = []
 
-        identity = Identity(self._authority)
+        identity = _create_identity_instance(self.cli_ctx, self._authority)
         identity.logout_all_users()
         identity.logout_all_service_principal()
 
@@ -359,11 +350,12 @@ class Profile:
     def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None):
         # Convert resource to scopes
         if resource and not scopes:
+            from .auth.util import resource_to_scopes
             scopes = resource_to_scopes(resource)
 
         # Use ARM as the default scopes
         if not scopes:
-            scopes = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
+            scopes = self._arm_scope
 
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
@@ -589,7 +581,7 @@ class Profile:
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         tenant_id = tenant_id if tenant_id else account[_TENANT_ID]
-        identity = Identity(client_id=client_id, authority=self._authority, tenant_id=tenant_id)
+        identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=tenant_id, client_id=client_id)
 
         # User
         if user_type == _USER:
@@ -643,6 +635,58 @@ class Profile:
 
         self._set_subscriptions(result, merge=False)
 
+    def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
+        """Generate a JSON for --sdk-auth argument when used in:
+            - az ad sp create-for-rbac --sdk-auth
+            - az account show --sdk-auth
+        """
+        from collections import OrderedDict
+        account = self.get_subscription(subscription_id)
+
+        # is the credential created through command like 'create-for-rbac'?
+        result = OrderedDict()
+        if name and (password or cert_file):
+            result['clientId'] = name
+            if password:
+                result['clientSecret'] = password
+            else:
+                result['clientCertificate'] = cert_file
+            result['subscriptionId'] = subscription_id or account[_SUBSCRIPTION_ID]
+        else:  # has logged in through cli
+            user_type = account[_USER_ENTITY].get(_USER_TYPE)
+            if user_type == _SERVICE_PRINCIPAL:
+                client_id = account[_USER_ENTITY][_USER_NAME]
+                result['clientId'] = client_id
+                identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=account[_TENANT_ID])
+                sp_entry = identity.get_service_principal_entry(client_id)
+
+                from .auth.msal_authentication import _CLIENT_SECRET, _CERTIFICATE
+                secret = sp_entry.get(_CLIENT_SECRET)
+                if secret:
+                    result['clientSecret'] = secret
+                else:
+                    # we can output 'clientCertificateThumbprint' if asked
+                    result['clientCertificate'] = sp_entry.get(_CERTIFICATE)
+                result['subscriptionId'] = account[_SUBSCRIPTION_ID]
+            else:
+                raise CLIError('SDK Auth file is only applicable when authenticated using a service principal')
+
+        result[_TENANT_ID] = account[_TENANT_ID]
+        endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
+        endpoint_mappings['active_directory'] = 'activeDirectoryEndpointUrl'
+        endpoint_mappings['resource_manager'] = 'resourceManagerEndpointUrl'
+        endpoint_mappings['active_directory_graph_resource_id'] = 'activeDirectoryGraphResourceId'
+        endpoint_mappings['sql_management'] = 'sqlManagementEndpointUrl'
+        endpoint_mappings['gallery'] = 'galleryEndpointUrl'
+        endpoint_mappings['management'] = 'managementEndpointUrl'
+        from azure.cli.core.cloud import CloudEndpointNotSetException
+        for e in endpoint_mappings:
+            try:
+                result[endpoint_mappings[e]] = getattr(get_active_cloud(self.cli_ctx).endpoints, e)
+            except CloudEndpointNotSetException:
+                result[endpoint_mappings[e]] = None
+        return result
+
     def get_installation_id(self):
         installation_id = self._storage.get(_INSTALLATION_ID)
         if not installation_id:
@@ -694,7 +738,7 @@ class SubscriptionFinder:
         self.cli_ctx = cli_ctx
         self.secret = None
         self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
-        self.authority = self.cli_ctx.cloud.endpoints.active_directory
+        self._authority = self.cli_ctx.cloud.endpoints.active_directory
         self.tenants = []
 
     def find_using_common_tenant(self, username, credential=None):
@@ -720,7 +764,7 @@ class SubscriptionFinder:
 
             logger.info("Finding subscriptions under tenant %s", t.tenant_id_name)
 
-            identity = Identity(self.authority, tenant_id)
+            identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=tenant_id)
 
             specific_tenant_credential = identity.get_user_credential(username)
 
@@ -814,3 +858,14 @@ def _transform_subscription_for_multiapi(s, s_dict):
             s_dict[_MANAGED_BY_TENANTS] = None
         else:
             s_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
+
+
+def _create_identity_instance(cli_ctx, *args, **kwargs):
+    """Lazily import and create Identity instance to avoid unnecessary imports."""
+    from .auth.identity import Identity
+
+    # Only enable encryption for Windows (for now).
+    fallback = sys.platform.startswith('win32')
+    encrypt = cli_ctx.config.getboolean('core', 'token_encryption', fallback=fallback)
+
+    return Identity(*args, encrypt=encrypt, **kwargs)

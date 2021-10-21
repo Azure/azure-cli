@@ -2529,6 +2529,16 @@ examples:
     text: az vm update -n name -g group --add networkProfile.networkInterfaces primary=false id={NIC_ID}
   - name: Remove the fourth NIC from a VM.
     text: az vm update -n name -g group --remove networkProfile.networkInterfaces 3
+  - name: Add an existing VM to a dedicated host
+    text: |-
+        az vm deallocate -n name -g group
+        az vm update -n name -g group --host my-host
+        az vm start -n name -g group
+  - name: Add an existing VM to a dedicated host group
+    text: |-
+        az vm deallocate -n name -g group
+        az vm update -n name -g group --host-group my-host-group
+        az vm start -n name -g group
 """
 
 helps['vm user'] = """

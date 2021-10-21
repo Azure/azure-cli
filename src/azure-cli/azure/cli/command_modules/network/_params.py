@@ -36,7 +36,7 @@ from azure.cli.command_modules.network._validators import (
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
     validate_vpn_connection_name_or_id,
-    process_vnet_name_or_id, validate_trusted_client_cert)
+    process_vnet_name_or_id, validate_trusted_client_cert, validate_scale_unit_ranges)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -2176,6 +2176,11 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
         c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
         c.argument('target_resource_id', help='ResourceId of the target Virtual Machine.', options_list=['--target-resource-id'])
+        c.argument('scale_units', type=int, min_api='2021-03-01', options_list=['--scale-units'],
+                   validator=validate_scale_unit_ranges,
+                   help='The scale units for the Bastion Host resource, which minimum is 2 and maximum is 50.')
+        c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), default='Standard', min_api='2021-03-01',
+                   options_list=['--sku'], help='The SKU of this Bastion Host.')
         c.ignore('subnet')
     for item in ['ssh', 'rdp']:
         with self.argument_context('network bastion {}'.format(item)) as c:

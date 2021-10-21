@@ -10,7 +10,6 @@ These credentials implements azure.core.credentials.TokenCredential by exposing 
 SDK invocation.
 """
 
-from azure.core.credentials import AccessToken
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
@@ -31,38 +30,70 @@ logger = get_logger(__name__)
 
 class UserCredential(PublicClientApplication):
 
-    def __init__(self, client_id, username=None, **kwargs):
+    def __init__(self, client_id, username, **kwargs):
+        """User credential implementing get_token interface.
+
+        :param client_id: Client ID of the CLI.
+        :param username: The username for user credential.
+        """
         super().__init__(client_id, **kwargs)
-        if username:
-            accounts = self.get_accounts(username)
 
-            if not accounts:
-                raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
-                               "another application that uses Single Sign-On. "
-                               "Please run `az login` to re-login.".format(username))
+        accounts = self.get_accounts(username)
 
-            if len(accounts) > 1:
-                raise CLIError("Found multiple accounts with the same username. Please report to us via Github: "
-                               "https://github.com/Azure/azure-cli/issues/new")
+        if not accounts:
+            raise CLIError("User {} does not exist in the MSAL token cache. Please run `az login`.".format(username))
 
-            account = accounts[0]
-            self.account = account
-        else:
-            self.account = None
+        if len(accounts) > 1:
+            raise CLIError("Found multiple accounts with the same username. Please report to us via Github: "
+                           "https://github.com/Azure/azure-cli/issues/new")
+
+        account = accounts[0]
+        self._account = account
 
     def get_token(self, *scopes, **kwargs):
         # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
         logger.debug("UserCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
-        result = self.acquire_token_silent_with_error(list(scopes), self.account, **kwargs)
-        check_result(result, scopes=scopes)
+        result = self.acquire_token_silent_with_error(list(scopes), self._account, **kwargs)
+
+        from azure.cli.core.azclierror import AuthenticationError
+        try:
+            # Check if an access token is returned.
+            check_result(result, scopes=scopes)
+        except AuthenticationError as ex:
+            # For VM SSH ('data' is passed), if getting access token fails because
+            # Conditional Access MFA step-up or compliance check is required, re-launch
+            # web browser and do auth code flow again.
+            # We assume the `az ssh` command is run on a system with GUI where a web
+            # browser is available.
+            if 'data' in kwargs:
+                logger.warning(ex)
+                logger.warning("\nThe default web browser has been opened at %s for scope '%s'. "
+                               "Please continue the login in the web browser.",
+                               self.authority.authorization_endpoint, ' '.join(scopes))
+
+                from .util import read_response_templates
+                success_template, error_template = read_response_templates()
+
+                result = self.acquire_token_interactive(
+                    list(scopes), login_hint=self._account['username'], port=8400 if self.authority.is_adfs else None,
+                    success_template=success_template, error_template=error_template, **kwargs)
+                check_result(result)
+
+            # For other scenarios like Storage Conditional Access MFA step-up, do not
+            # launch browser, but show the error message and `az login` command instead.
+            else:
+                raise
         return _build_sdk_access_token(result)
 
 
 class ServicePrincipalCredential(ConfidentialClientApplication):
 
     def __init__(self, service_principal_auth, **kwargs):
+        """Service principal credential implementing get_token interface.
 
+        :param service_principal_auth: An instance of ServicePrincipalAuth.
+        """
         client_credential = None
 
         # client_secret
@@ -103,4 +134,9 @@ def _build_sdk_access_token(token_entry):
     import time
     request_time = int(time.time())
 
+    # Importing azure.core.credentials.AccessToken is expensive.
+    # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
+    # So We define our own AccessToken.
+    from collections import namedtuple
+    AccessToken = namedtuple("AccessToken", ["token", "expires_on"])
     return AccessToken(token_entry["access_token"], request_time + token_entry["expires_in"])

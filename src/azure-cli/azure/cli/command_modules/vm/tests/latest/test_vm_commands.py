@@ -4651,6 +4651,220 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm delete --name vm1 -g {rg2} --yes')
         self.cmd('vm delete --name vm2 -g {rg2} --yes')
         self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg2} --yes')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westus2')
+    def test_update_dedicated_host_e2e(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'host-group': 'my-host-group',
+            'host-name': 'my-host',
+            'host2-group': 'my-host2-group',
+            'host2-name': 'my-host2',
+            'vm-name': 'ded-host-vm',
+        })
+
+        # create resources
+        self.cmd('vm host group create -n {host-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
+            self.check('name', '{host-group}'),
+            self.check('platformFaultDomainCount', 3),
+            self.check('tags.foo', 'bar')
+        ])
+
+        self.cmd('vm host group create -n {host2-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
+            self.check('name', '{host2-group}'),
+            self.check('platformFaultDomainCount', 3),
+            self.check('tags.foo', 'bar')
+        ])
+
+        try:
+            self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
+                     '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
+                self.check('name', '{host-name}'),
+                self.check('platformFaultDomain', 2),
+                self.check('sku.name', 'DSv3-Type1'),
+                self.check('autoReplaceOnFailure', False),
+                self.check('tags.bar', 'baz')
+            ])
+
+        except CLIError as e:
+            if 'capacity' in str(e):
+                return
+
+        try:
+            self.cmd('vm host create -n {host2-name} --host-group {host2-group} -d 2 -g {rg} '
+                     '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
+                self.check('name', '{host2-name}'),
+                self.check('platformFaultDomain', 2),
+                self.check('sku.name', 'DSv3-Type1'),
+                self.check('autoReplaceOnFailure', False),
+                self.check('tags.bar', 'baz')
+            ])
+
+        except CLIError as e:
+            if 'capacity' in str(e):
+                return
+
+        result = self.cmd('vm host get-instance-view --host-group {host-group} --name {host-name} -g {rg}', checks=[
+            self.check('name', '{host-name}'),
+        ]).get_output_in_json()
+        instance_view = result["instanceView"]
+        self.assertTrue(instance_view["assetId"])
+        self.assertTrue(instance_view["availableCapacity"])
+
+        result = self.cmd('vm host get-instance-view --host-group {host2-group} --name {host2-name} -g {rg}', checks=[
+            self.check('name', '{host2-name}'),
+        ]).get_output_in_json()
+        instance_view = result["instanceView"]
+        self.assertTrue(instance_view["assetId"])
+        self.assertTrue(instance_view["availableCapacity"])
+
+        self.cmd('vm host group get-instance-view -g {rg} -n {host-group}', checks=[
+            self.exists('instanceView')
+        ])
+
+        self.cmd('vm host group get-instance-view -g {rg} -n {host2-group}', checks=[
+            self.exists('instanceView')
+        ])
+
+        host_id = self.cmd('vm host show -g {rg} -n {host-name} --host-group {host-group}').get_output_in_json()['id']
+        host2_id = self.cmd('vm host show -g {rg} -n {host2-name} --host-group {host2-group}').get_output_in_json()['id']
+        self.kwargs.update({
+            'host_id': host_id,
+            'host2_id': host2_id
+        })
+
+        self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
+                 '--generate-ssh-keys --admin-username azureuser --nsg-rule NONE')
+
+        # validate resources created successfully
+        vm_json = self.cmd('vm show -n {vm-name} -g {rg}', checks=[
+            self.check('name', '{vm-name}'),
+            self.check('provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+        self.assertEqual(vm_json['host'], None)
+
+        # validate none host to host
+        self.cmd('vm deallocate -n {vm-name} -g {rg}')
+        self.cmd('vm update -n {vm-name} -g {rg} --host {host_id} --set tags.tagName=tagValue')
+        self.cmd('vm start -n {vm-name} -g {rg}')
+
+        self.cmd('vm show -n {vm-name} -g {rg}', checks=[
+            self.check('name', '{vm-name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check_pattern('host.id', '.*/{host-name}$'),
+            # Test --update multiple arguments
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # validate host to host2
+        self.cmd('vm deallocate -n {vm-name} -g {rg}')
+        self.cmd('vm update -n {vm-name} -g {rg} --host {host2_id} --set tags.tagName=tagValue')
+        self.cmd('vm start -n {vm-name} -g {rg}')
+
+        self.cmd('vm show -n {vm-name} -g {rg}', checks=[
+            self.check('name', '{vm-name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check_pattern('host.id', '.*/{host2-name}$'),
+            # Test --update multiple arguments
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # delete resources (test vm host delete commands)
+        # Service has problem. It is not deleted yet but it returns.
+        self.cmd('vm delete --name {vm-name} -g {rg} --yes')
+        time.sleep(30)
+        self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg} --yes')
+        time.sleep(30)
+        self.cmd('vm host delete --name {host2-name} --host-group {host2-group} -g {rg} --yes')
+        time.sleep(30)
+        self.cmd('vm host group delete --name {host-group} -g {rg} --yes')
+        time.sleep(30)
+        self.cmd('vm host group delete --name {host2-group} -g {rg} --yes')
+        time.sleep(30)
+
+        # Test --automatic-placement
+        self.cmd('vm host group create -n {host-group} -c 1 -g {rg} --automatic-placement', checks=[
+            self.check('supportAutomaticPlacement', True),
+        ])
+        self.cmd('vm host group create -n {host2-group} -c 1 -g {rg} --automatic-placement', checks=[
+            self.check('supportAutomaticPlacement', True),
+        ])
+        host_id = self.cmd('vm host create -n {host-name} --host-group {host-group} -d 0 -g {rg} --sku DSv3-Type1').get_output_in_json()['id']
+        host2_id = self.cmd('vm host create -n {host2-name} --host-group {host2-group} -d 0 -g {rg} --sku DSv3-Type1').get_output_in_json()['id']
+        self.kwargs.update({
+            'host_id': host_id,
+            'host2_id': host2_id
+        })
+        self.cmd('vm create -g {rg} -n vm1 --image centos --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm create -g {rg} -n vm2 --image centos --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm show -g {rg} -n vm1', checks=[
+            self.check('host', None)
+        ])
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check('hostGroup', None)
+        ])
+
+        # validate none host to host
+        self.cmd('vm deallocate -n vm1 -g {rg}')
+        self.cmd('vm update -n vm1 -g {rg} --host {host_id}')
+        self.cmd('vm start -n vm1 -g {rg}')
+        self.cmd('vm show -g {rg} -n vm1', checks=[
+            self.check_pattern('host.id', '.*/{host-name}$')
+        ])
+
+        # validate host to host2
+        self.cmd('vm deallocate -n vm1 -g {rg}')
+        self.cmd('vm update -n vm1 -g {rg} --host {host2_id}')
+        self.cmd('vm start -n vm1 -g {rg}')
+        self.cmd('vm show -g {rg} -n vm1', checks=[
+            self.check_pattern('host.id', '.*/{host2-name}$')
+        ])
+
+        # validate none group to group
+        self.cmd('vm deallocate -n vm2 -g {rg}')
+        self.cmd('vm update -n vm2 -g {rg} --host-group {host-group}')
+        self.cmd('vm start -n vm2 -g {rg}')
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check_pattern('hostGroup.id', '.*/{host-group}$')
+        ])
+
+        # validate group to group2
+        self.cmd('vm deallocate -n vm2 -g {rg}')
+        self.cmd('vm update -n vm2 -g {rg} --host-group {host2-group}')
+        self.cmd('vm start -n vm2 -g {rg}')
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check_pattern('hostGroup.id', '.*/{host2-group}$')
+        ])
+
+        # validate group2 to host
+        self.cmd('vm deallocate -n vm2 -g {rg}')
+        self.cmd('vm update -n vm2 -g {rg} --host {host_id}')
+        self.cmd('vm start -n vm2 -g {rg}')
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check_pattern('host.id', '.*/{host-name}$')
+        ])
+
+        # validate host to group2
+        self.cmd('vm deallocate -n vm2 -g {rg}')
+        self.cmd('vm update -n vm2 -g {rg} --host-group {host2-group}')
+        self.cmd('vm start -n vm2 -g {rg}')
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check_pattern('hostGroup.id', '.*/{host2-group}$')
+        ])
+
+        # delete resources (test vm host delete commands)
+        # Service has problem. It is not deleted yet but it returns.
+        self.cmd('vm delete --name vm1 -g {rg} --yes')
+        time.sleep(30)
+        self.cmd('vm delete --name vm2 -g {rg} --yes')
+        time.sleep(30)
+        self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg} --yes')
+        time.sleep(30)
+        self.cmd('vm host delete --name {host2-name} --host-group {host2-group} -g {rg} --yes')
+        time.sleep(30)
+        self.cmd('vm host group delete --name {host-group} -g {rg} --yes')
+        time.sleep(30)
+        self.cmd('vm host group delete --name {host2-group} -g {rg} --yes')
+        time.sleep(30)
 # endregion
 
 
@@ -5841,6 +6055,7 @@ class DiskHibernationScenarioTest(ScenarioTest):
 
 
 class VMCreateCountScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_count_', location='eastus')
     def test_vm_create_count(self, resource_group):
         self.cmd('az network vnet create -g {rg} -n vnet --address-prefix 10.0.0.0/16')

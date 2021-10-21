@@ -177,6 +177,8 @@ def load_arguments(self, _):
         c.argument('incremental', arg_type=get_three_state_flag(), min_api='2019-03-01',
                    help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed')
         c.argument('edge_zone', edge_zone_type)
+        c.argument('copy_start', arg_type=get_three_state_flag(), min_api='2021-04-01',
+                   help='Create snapshot by using a deep copy process, where the resource creation is considered complete only after all data has been copied from the source.')
     # endregion
 
     # region Images
@@ -389,6 +391,10 @@ def load_arguments(self, _):
     with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
         c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name or ID of the dedicated host group that the VM will reside in. --host and --host-group can't be used together.")
         c.argument('dedicated_host', options_list=['--host'], is_preview=True, help="ID of the dedicated host that the VM will reside in. --host and --host-group can't be used together.")
+
+    with self.argument_context('vm update', arg_group='Dedicated Host', min_api='2019-03-01') as c:
+        c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name or ID of the dedicated host group that the VM will reside in. --host and --host-group can't be used together. You should deallocate the VM before update, and start the VM after update. Please check out help for more examples.")
+        c.argument('dedicated_host', options_list=['--host'], is_preview=True, help="ID of the dedicated host that the VM will reside in. --host and --host-group can't be used together. You should deallocate the VM before update, and start the VM after update. Please check out help for more examples.")
 
     with self.argument_context('vm open-port') as c:
         c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
