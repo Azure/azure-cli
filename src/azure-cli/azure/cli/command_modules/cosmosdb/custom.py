@@ -405,7 +405,7 @@ def cli_cosmosdb_update(client,
             backup_policy.periodic_mode_properties = periodic_mode_properties
         else:
             raise CLIError(
-                'backup-interval, backup-retention and backup_redundancy can only be set for accounts with periodic backup policy.')
+                'backup-interval, backup-retention and backup-redundancy can only be set for accounts with periodic backup policy.')
     elif backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
             backup_policy = ContinuousModeBackupPolicy()
