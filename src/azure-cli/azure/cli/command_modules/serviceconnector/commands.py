@@ -46,7 +46,8 @@ def load_command_table(self, _):
 
             # use SUPPORTED_AUTH_TYPE to decide target resource, as some
             # target resources are not avialable for certain source resource
-            supported_target_resources = SUPPORTED_AUTH_TYPE.get(source).keys()
+            supported_target_resources = list(SUPPORTED_AUTH_TYPE.get(source).keys())
+            supported_target_resources.remove(RESOURCE.ConfluentKafka)
             for target in supported_target_resources:
                 _type, _factory = connection_type, cf_linker
                 if target in [RESOURCE.KeyVault]:
@@ -60,3 +61,12 @@ def load_command_table(self, _):
                                         _type, client_factory=_factory) as ig:
                     ig.custom_command(target.value, 'connection_update',
                                       supports_no_wait=True, transform=transform_linker_properties)
+
+            # special target resource, independent implementation
+            target = RESOURCE.ConfluentKafka
+            with self.command_group('{} connection create'.format(source.value),
+                                    connection_type, client_factory=_factory) as ig:
+                ig.custom_command(target.value, 'connection_create_kafka', supports_no_wait=True)
+            with self.command_group('{} connection update'.format(source.value),
+                                    connection_type, client_factory=_factory) as ig:
+                ig.custom_command(target.value, 'connection_update_kafka', supports_no_wait=True)

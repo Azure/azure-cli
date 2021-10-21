@@ -6,6 +6,7 @@
 from knack.help_files import helps
 from ._resource_config import (
     AUTH_TYPE,
+    RESOURCE,
     SOURCE_RESOURCES,
     SOURCE_RESOURCES_PARAMS,
     TARGET_RESOURCES,
@@ -175,7 +176,8 @@ for source in SOURCE_RESOURCES:
 
     # use SUPPORTED_AUTH_TYPE to decide target resource, as some
     # target resources are not avialable for certain source resource
-    supported_target_resources = SUPPORTED_AUTH_TYPE.get(source).keys()
+    supported_target_resources = list(SUPPORTED_AUTH_TYPE.get(source).keys())
+    supported_target_resources.remove(RESOURCE.ConfluentKafka)
     for target in supported_target_resources:
         target_id = TARGET_RESOURCES.get(target)
 
@@ -301,3 +303,45 @@ for source in SOURCE_RESOURCES:
             service_principal_param=service_principal_param,
             source_params=source_params,
             connection_id=connection_id)
+
+    # special target resource, independent implementation
+    target = RESOURCE.ConfluentKafka
+    server_params = ('--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 '
+                     '--kafka-key Name --kafka-secret Secret ')
+    registry_params = ('--schema-registry https://xxx.eastus.azure.confluent.cloud '
+                       '--schema-key Name --schema-secret Secret')
+
+    helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
+      type: command
+      short-summary: Create a {source} connection to {target}.
+      examples:
+        - name: Create a connection between {source} and {target}
+          text: |-
+                  az {source} connection create {target} {source_params} {server_params} {registry_params}
+    """.format(source=source.value,
+               target=target.value,
+               source_params=source_params,
+               server_params=server_params,
+               registry_params=registry_params)
+
+    helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """
+      type: command
+      short-summary: Update a {source} to {target} connection.
+      examples:
+        - name: Update the client-type of a bootstrap server connection
+          text: |-
+                  az {source} connection update {target} {source_params} --connection MyConnection --client python
+        - name: Update the auth configurations of a bootstrap server connection
+          text: |-
+                  az {source} connection update {target} {source_params} --connection MyConnection {server_params}
+        - name: Update the client-type of a schema registry connection
+          text: |-
+                  az {source} connection update {target} {source_params} --connection MyConnection_schema --client python
+        - name: Update the auth configurations of a schema registry connection
+          text: |-
+                  az {source} connection update {target} {source_params} --connection MyConnection_schema {registry_params}
+    """.format(source=source.value,
+               target=target.value,
+               source_params=source_params,
+               server_params=server_params,
+               registry_params=registry_params)

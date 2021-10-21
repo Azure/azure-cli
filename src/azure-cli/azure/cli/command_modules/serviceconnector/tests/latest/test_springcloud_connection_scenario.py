@@ -70,7 +70,7 @@ class CredentialReplacer(RecordingProcessor):
         return response
 
 
-@unittest.skip('Need spring-cloud extension installed')
+# @unittest.skip('Need spring-cloud extension installed')
 class SpringCloudConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
@@ -606,7 +606,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         target_id = TARGET_RESOURCES.get(RESOURCE.RedisEnterprise).format(**self.kwargs)
 
         # create connection
-        self.cmd('webapp connection create redis-enterprise --connection {} --source-id {} --target-id {} '
+        self.cmd('spring-cloud connection create redis-enterprise --connection {} --source-id {} --target-id {} '
                  '--secret --client-type java'.format(name, source_id, target_id))
         
         # list connection
@@ -1000,6 +1000,50 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'java')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('spring-cloud connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('spring-cloud connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('spring-cloud connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('spring-cloud connection delete --id {} --yes'.format(connection_id))
+
+
+        # @record_only()
+    def test_springcloud_confluentkafka_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'spring': 'servicelinker-springcloud',
+            'app': 'kafka',
+            'deployment': 'default',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
+
+        # create connection
+        self.cmd('spring-cloud connection create confluent-kafka --connection {} --source-id {} '
+                 '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
+                 '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
+                 '--client-type java'.format(name, source_id))
+
+        # list connection
+        connections = self.cmd(
+            'spring-cloud connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
                 self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()

@@ -1017,3 +1017,45 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    def test_webapp_confluentkafka_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-kafka-app',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create confluent-kafka --connection {} --source-id {} '
+                 '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
+                 '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
+                 '--client-type python'.format(name, source_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))

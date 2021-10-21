@@ -9,9 +9,11 @@ from azure.cli.core.commands.parameters import (
 )
 
 from ._validators import (
-    validate_params
+    validate_params,
+    validate_kafka_params
 )
 from ._resource_config import (
+    RESOURCE,
     SOURCE_RESOURCES_PARAMS,
     TARGET_RESOURCES_PARAMS,
     AUTH_TYPE_PARAMS,
@@ -102,6 +104,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         else:
             context.ignore('new_addon')
 
+    def add_confluent_kafka_argument(context):
+        context.argument('bootstrap_server', options_list=['--bootstrap-server'], help='Kafka bootstrap server url')
+        context.argument('kafka_key', options_list=['--kafka-key'], help='Kafka API-Key (key)')
+        context.argument('kafka_secret', options_list=['--kafka-secret'], help='Kafka API-Key (secret)')
+        context.argument('schema_registry', options_list=['--schema-registry'], help='Schema registry url')
+        context.argument('schema_key', options_list=['--schema-key'], help='Schema registry API-Key (key)')
+        context.argument('schema_secret', options_list=['--schema-secret'], help='Schema registry API-Key (secret)')
+        context.argument('connection_name', options_list=['--connection'],
+                         help='Name of the connection', validator=validate_kafka_params)
+
     for source in SOURCE_RESOURCES_PARAMS:
 
         with self.argument_context('{} connection list'.format(source.value)) as c:
@@ -142,3 +154,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_connection_name_argument(c, source)
                 add_source_resource_block(c, source)
                 add_auth_block(c, source, target)
+
+        # special target resource: independent implementation
+        target = RESOURCE.ConfluentKafka
+        with self.argument_context('{} connection create {}'.format(source.value, target.value)) as c:
+            add_client_type_argument(c, source, target)
+            add_source_resource_block(c, source, enable_id=False)
+            add_confluent_kafka_argument(c)
+        with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
+            add_client_type_argument(c, source, target)
+            add_source_resource_block(c, source, enable_id=False)
+            add_confluent_kafka_argument(c)

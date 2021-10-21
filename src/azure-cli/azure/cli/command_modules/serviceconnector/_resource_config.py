@@ -40,6 +40,7 @@ class RESOURCE(Enum):
     AppConfig = 'appconfig'
     ServiceBus = 'servicebus'
     SignalR = 'signalr'
+    ConfluentKafka = 'confluent-kafka'
 
 
 # The dict defines the auth types
@@ -104,7 +105,8 @@ TARGET_RESOURCES = {
     RESOURCE.AppConfig: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.AppConfiguration/configurationStores/{config_store}',
     RESOURCE.EventHub: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.EventHub/namespaces/{namespace}',
     RESOURCE.ServiceBus: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.ServiceBus/namespaces/{namespace}',
-    RESOURCE.SignalR: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.SignalRService/SignalR/{signalr}'
+    RESOURCE.SignalR: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.SignalRService/SignalR/{signalr}',
+    RESOURCE.ConfluentKafka: '#',  # special target resource, no arm resource id
 }
 
 
@@ -522,7 +524,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
-        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        # RESOURCE.Sql: [AUTH_TYPE.Secret],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -541,14 +543,15 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
     RESOURCE.SpringCloud: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret],
         RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
-        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        # RESOURCE.Sql: [AUTH_TYPE.Secret],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -566,7 +569,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     }
 }
 
@@ -741,6 +745,13 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.SignalR: [
             CLIENT_TYPE.Dotnet
+        ],
+        RESOURCE.ConfluentKafka: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.SpringBoot
         ]
     },
     RESOURCE.SpringCloud: {
@@ -836,6 +847,11 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.SpringBoot
         ],
         RESOURCE.ServiceBus: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.SpringBoot
+        ],
+        RESOURCE.ConfluentKafka: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot

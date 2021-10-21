@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import random
+import string
 from knack.log import get_logger
 from knack.prompting import prompt
 from msrestazure.tools import (
@@ -18,6 +20,7 @@ from azure.cli.core.azclierror import (
 
 from ._resource_config import (
     CLIENT_TYPE,
+    RESOURCE,
     SOURCE_RESOURCES,
     TARGET_RESOURCES,
     SOURCE_RESOURCES_PARAMS,
@@ -77,12 +80,9 @@ def check_required_args(resource, cmd_arg_values):
 def generate_connection_name(cmd):
     '''Generate connection name for users if not provided
     '''
-    import random
-    import string
-    source = get_source_resource_name(cmd).value.replace('-', '')
     target = get_target_resource_name(cmd).value.replace('-', '')
     randstr = ''.join(random.sample(string.ascii_lowercase + string.digits, 5))
-    name = '{}_{}_{}'.format(source, target, randstr)
+    name = '{}_{}'.format(target, randstr)
 
     logger.warning('Connection name is not specified, use generated one: --connection %s', name)
     return name
@@ -554,7 +554,7 @@ def validate_params(cmd, namespace):
             apply(cmd, namespace, arg_values)
 
     # for command: 'list'
-    if cmd.name.endswith('list'):
+    if cmd.name.endswith(' list'):
         _validate_and_apply(validate_list_params, apply_list_params)
     # for command: 'add'
     elif 'create' in cmd.name:
@@ -573,3 +573,22 @@ def validate_params(cmd, namespace):
     # for command: all others
     else:
         _validate_and_apply(validate_default_params, apply_default_params)
+
+
+def validate_kafka_params(cmd, namespace):
+    def _validate_and_apply(validate, apply):
+        missing_args = validate(cmd, namespace)
+        if missing_args:
+            arg_values = intelligent_experience(cmd, namespace, missing_args)
+            apply(cmd, namespace, arg_values)
+
+    _validate_and_apply(validate_list_params, apply_list_params)
+    if 'create {}'.format(RESOURCE.ConfluentKafka.value) in cmd.name:
+        if getattr(namespace, 'connection_name', None) is None:
+            namespace.connection_name = generate_connection_name(cmd)
+        elif namespace.connection_name.endswith('_schema'):
+            raise InvalidArgumentValueError("Connection name of {} can not end with "
+                                            "'_schema'".format(RESOURCE.ConfluentKafka.value))
+
+        if getattr(namespace, 'client_type', None) is None:
+            namespace.client_type = get_client_type(cmd, namespace)
