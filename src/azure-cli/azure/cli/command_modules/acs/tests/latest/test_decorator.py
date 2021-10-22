@@ -2460,8 +2460,8 @@ class AKSContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_aci_subnet_name(), None)
         addon_profiles_1 = {
-            CONST_VIRTUAL_NODE_ADDON_NAME +
-            ctx_1.get_virtual_node_addon_os_type(): self.models.ManagedClusterAddonProfile(
+            CONST_VIRTUAL_NODE_ADDON_NAME
+            + ctx_1.get_virtual_node_addon_os_type(): self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={CONST_VIRTUAL_NODE_SUBNET_NAME: "test_aci_subnet_name"},
             )
@@ -3361,8 +3361,10 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        api_server_access_profile_4 = self.models.ManagedClusterAPIServerAccessProfile(
-            enable_private_cluster=True,
+        api_server_access_profile_4 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+            )
         )
         mc_4 = self.models.ManagedCluster(
             location="test_location",
@@ -3371,7 +3373,9 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_4.attach_mc(mc_4)
         # fail on invalid private_dns_zone (none) when disable_public_fqdn is specified
         with self.assertRaises(InvalidArgumentValueError):
-            self.assertEqual(ctx_4.get_private_dns_zone(), CONST_PRIVATE_DNS_ZONE_NONE)
+            self.assertEqual(
+                ctx_4.get_private_dns_zone(), CONST_PRIVATE_DNS_ZONE_NONE
+            )
 
     def test_get_assign_kubelet_identity(self):
         # default
@@ -3749,9 +3753,14 @@ class AKSContextTestCase(unittest.TestCase):
             service_principal_profile=service_principal_profile_1,
         )
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_aks_custom_headers(), {"Ocp-Aad-Session-Key": None})
+        self.assertEqual(
+            ctx_1.get_aks_custom_headers(), {"Ocp-Aad-Session-Key": None}
+        )
         ctx_1.set_intermediate("aad_session_key", "test_aad_session_key")
-        self.assertEqual(ctx_1.get_aks_custom_headers(), {"Ocp-Aad-Session-Key": "test_aad_session_key"})
+        self.assertEqual(
+            ctx_1.get_aks_custom_headers(),
+            {"Ocp-Aad-Session-Key": "test_aad_session_key"},
+        )
 
         # custom value
         ctx_2 = AKSContext(
@@ -3762,7 +3771,9 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_2.get_aks_custom_headers(), {"abc": "def", "xyz": "123"})
+        self.assertEqual(
+            ctx_2.get_aks_custom_headers(), {"abc": "def", "xyz": "123"}
+        )
         service_principal_profile_2 = (
             self.models.ManagedClusterServicePrincipalProfile(
                 client_id="test_service_principal", secret="test_client_secret"
@@ -3773,9 +3784,13 @@ class AKSContextTestCase(unittest.TestCase):
             service_principal_profile=service_principal_profile_2,
         )
         ctx_2.attach_mc(mc)
-        self.assertEqual(ctx_2.get_aks_custom_headers(), {"abc": "def", "xyz": "123"})
+        self.assertEqual(
+            ctx_2.get_aks_custom_headers(), {"abc": "def", "xyz": "123"}
+        )
         ctx_2.set_intermediate("aad_session_key", "test_aad_session_key")
-        self.assertEqual(ctx_2.get_aks_custom_headers(), {"abc": "def", "xyz": "123"})
+        self.assertEqual(
+            ctx_2.get_aks_custom_headers(), {"abc": "def", "xyz": "123"}
+        )
 
     def test_get_disable_local_accounts(self):
         # default
@@ -4587,6 +4602,260 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
+    def test_build_http_application_routing_addon_profile(self):
+        # default
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        http_application_routing_addon_profile = (
+            dec_1.build_http_application_routing_addon_profile()
+        )
+        ground_truth_http_application_routing_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+            )
+        )
+        self.assertEqual(
+            http_application_routing_addon_profile,
+            ground_truth_http_application_routing_addon_profile,
+        )
+
+    def test_build_kube_dashboard_addon_profile(self):
+        # default
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        kube_dashboard_addon_profile = (
+            dec_1.build_kube_dashboard_addon_profile()
+        )
+        ground_truth_kube_dashboard_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+            )
+        )
+        self.assertEqual(
+            kube_dashboard_addon_profile,
+            ground_truth_kube_dashboard_addon_profile,
+        )
+
+    def test_build_monitoring_addon_profile(self):
+        # default
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_addons": "monitoring",
+                "workspace_resource_id": "test_workspace_resource_id",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        with patch(
+            "azure.cli.command_modules.acs.decorator._ensure_container_insights_for_monitoring",
+            return_value=None,
+        ):
+            self.assertEqual(dec_1.context.get_intermediate("monitoring"), None)
+            monitoring_addon_profile = dec_1.build_monitoring_addon_profile()
+            ground_truth_monitoring_addon_profile = self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id"
+                },
+            )
+            self.assertEqual(
+                monitoring_addon_profile, ground_truth_monitoring_addon_profile
+            )
+            self.assertEqual(dec_1.context.get_intermediate("monitoring"), True)
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_addons": "",
+                "workspace_resource_id": "test_workspace_resource_id",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on enable_addons (monitoring) not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_2.build_monitoring_addon_profile()
+
+    def test_build_azure_policy_addon_profile(self):
+        # default
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        azure_policy_addon_profile = dec_1.build_azure_policy_addon_profile()
+        ground_truth_azure_policy_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+            )
+        )
+        self.assertEqual(
+            azure_policy_addon_profile, ground_truth_azure_policy_addon_profile
+        )
+
+    def test_build_virtual_node_addon_profile(self):
+        # default
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {"aci_subnet_name": "test_aci_subnet_name"},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        self.assertEqual(
+            dec_1.context.get_intermediate("enable_virtual_node"), None
+        )
+        virtual_node_addon_profile = dec_1.build_virtual_node_addon_profile()
+        ground_truth_virtual_node_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_VIRTUAL_NODE_SUBNET_NAME: "test_aci_subnet_name"},
+            )
+        )
+        self.assertEqual(
+            virtual_node_addon_profile, ground_truth_virtual_node_addon_profile
+        )
+        self.assertEqual(
+            dec_1.context.get_intermediate("enable_virtual_node"), True
+        )
+
+    def test_build_ingress_appgw_addon_profile(self):
+        # default
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        self.assertEqual(
+            dec_1.context.get_intermediate("ingress_appgw_addon_enabled"), None
+        )
+        ingress_appgw_addon_profile = dec_1.build_ingress_appgw_addon_profile()
+        ground_truth_ingress_appgw_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={},
+            )
+        )
+        self.assertEqual(
+            ingress_appgw_addon_profile,
+            ground_truth_ingress_appgw_addon_profile,
+        )
+        self.assertEqual(
+            dec_1.context.get_intermediate("ingress_appgw_addon_enabled"), True
+        )
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "appgw_name": "test_appgw_name",
+                "appgw_subnet_cidr": "test_appgw_subnet_cidr",
+                "appgw_id": "test_appgw_id",
+                "appgw_subnet_id": "test_appgw_subnet_id",
+                "appgw_watch_namespace": "test_appgw_watch_namespace",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        self.assertEqual(
+            dec_2.context.get_intermediate("ingress_appgw_addon_enabled"), None
+        )
+        ingress_appgw_addon_profile = dec_2.build_ingress_appgw_addon_profile()
+        ground_truth_ingress_appgw_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={
+                CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME: "test_appgw_name",
+                CONST_INGRESS_APPGW_SUBNET_CIDR: "test_appgw_subnet_cidr",
+                CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID: "test_appgw_id",
+                CONST_INGRESS_APPGW_SUBNET_ID: "test_appgw_subnet_id",
+                CONST_INGRESS_APPGW_WATCH_NAMESPACE: "test_appgw_watch_namespace",
+            },
+        )
+        self.assertEqual(
+            ingress_appgw_addon_profile,
+            ground_truth_ingress_appgw_addon_profile,
+        )
+        self.assertEqual(
+            dec_2.context.get_intermediate("ingress_appgw_addon_enabled"), True
+        )
+
+    def test_build_confcom_addon_profile(self):
+        # default
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        confcom_addon_profile = dec_1.build_confcom_addon_profile()
+        ground_truth_confcom_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"},
+            )
+        )
+        self.assertEqual(
+            confcom_addon_profile, ground_truth_confcom_addon_profile
+        )
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_sgxquotehelper": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        confcom_addon_profile = dec_2.build_confcom_addon_profile()
+        ground_truth_confcom_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "true"},
+            )
+        )
+        self.assertEqual(
+            confcom_addon_profile, ground_truth_confcom_addon_profile
+        )
+
+    def test_build_open_service_mesh_profile(self):
+        # default
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        open_service_mesh_profile = dec_1.build_open_service_mesh_profile()
+        ground_truth_open_service_mesh_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={},
+            )
+        )
+        self.assertEqual(
+            open_service_mesh_profile, ground_truth_open_service_mesh_profile
+        )
+
     def test_set_up_addon_profiles(self):
         # default value in `aks_create`
         dec_1 = AKSCreateDecorator(
@@ -4727,44 +4996,14 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "enable_addons": "",
-                "workspace_resource_id": "test_workspace_resource_id",
-                "aci_subnet_name": None,
-                "appgw_name": None,
-                "appgw_subnet_cidr": None,
-                "appgw_id": None,
-                "appgw_subnet_id": None,
-                "appgw_watch_namespace": None,
-                "enable_sgxquotehelper": False,
+                "enable_addons": "virtual-node",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_4 = self.models.ManagedCluster(location="test_location")
-        # fail on enable_addons (monitoring) not specified
-        with self.assertRaises(RequiredArgumentMissingError):
-            dec_4.set_up_addon_profiles(mc_4)
-
-        # custom value
-        dec_5 = AKSCreateDecorator(
-            self.cmd,
-            self.client,
-            {
-                "enable_addons": "virtual-node",
-                "workspace_resource_id": None,
-                "aci_subnet_name": None,
-                "appgw_name": None,
-                "appgw_subnet_cidr": None,
-                "appgw_id": None,
-                "appgw_subnet_id": None,
-                "appgw_watch_namespace": None,
-                "enable_sgxquotehelper": False,
-            },
-            ResourceType.MGMT_CONTAINERSERVICE,
-        )
-        mc_5 = self.models.ManagedCluster(location="test_location")
         # fail on aci_subnet_name/vnet_subnet_id not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            dec_5.set_up_addon_profiles(mc_5)
+            dec_4.set_up_addon_profiles(mc_4)
 
     def test_set_up_aad_profile(self):
         # default value in `aks_create`
@@ -6168,11 +6407,13 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             ResourceType.MGMT_CONTAINERSERVICE,
         )
 
-        api_server_access_profile_2 = self.models.ManagedClusterAPIServerAccessProfile(
-            authorized_ip_ranges=["test_ip_1", "test_ip_2"],
-            enable_private_cluster=True,
-            enable_private_cluster_public_fqdn=True,
-            private_dns_zone=CONST_PRIVATE_DNS_ZONE_SYSTEM,
+        api_server_access_profile_2 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                authorized_ip_ranges=["test_ip_1", "test_ip_2"],
+                enable_private_cluster=True,
+                enable_private_cluster_public_fqdn=True,
+                private_dns_zone=CONST_PRIVATE_DNS_ZONE_SYSTEM,
+            )
         )
         mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -6180,11 +6421,13 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_2.context.attach_mc(mc_2)
         dec_mc_2 = dec_2.update_api_server_access_profile(mc_2)
-        ground_truth_api_server_access_profile_2 = self.models.ManagedClusterAPIServerAccessProfile(
-            authorized_ip_ranges=[],
-            enable_private_cluster=True,
-            enable_private_cluster_public_fqdn=False,
-            private_dns_zone=CONST_PRIVATE_DNS_ZONE_SYSTEM,
+        ground_truth_api_server_access_profile_2 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                authorized_ip_ranges=[],
+                enable_private_cluster=True,
+                enable_private_cluster_public_fqdn=False,
+                private_dns_zone=CONST_PRIVATE_DNS_ZONE_SYSTEM,
+            )
         )
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -6204,10 +6447,12 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             ResourceType.MGMT_CONTAINERSERVICE,
         )
 
-        api_server_access_profile_3 = self.models.ManagedClusterAPIServerAccessProfile(
-            enable_private_cluster=True,
-            enable_private_cluster_public_fqdn=False,
-            private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
+        api_server_access_profile_3 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+                enable_private_cluster_public_fqdn=False,
+                private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
+            )
         )
         mc_3 = self.models.ManagedCluster(
             location="test_location",
@@ -6215,10 +6460,12 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_3.context.attach_mc(mc_3)
         dec_mc_3 = dec_3.update_api_server_access_profile(mc_3)
-        ground_truth_api_server_access_profile_3 = self.models.ManagedClusterAPIServerAccessProfile(
-            enable_private_cluster=True,
-            enable_private_cluster_public_fqdn=True,
-            private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
+        ground_truth_api_server_access_profile_3 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+                enable_private_cluster_public_fqdn=True,
+                private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
+            )
         )
         ground_truth_mc_3 = self.models.ManagedCluster(
             location="test_location",

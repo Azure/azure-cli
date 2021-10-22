@@ -4226,8 +4226,8 @@ class AKSCreateDecorator:
         mc.network_profile = network_profile
         return mc
 
-    def set_up_http_application_routing_addon_profile(self) -> ManagedClusterAddonProfile:
-        """Set up http application routing addon profile.
+    def build_http_application_routing_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build http application routing addon profile.
 
         :return: a ManagedClusterAddonProfile object
         """
@@ -4236,8 +4236,8 @@ class AKSCreateDecorator:
         )
         return http_application_routing_addon_profile
 
-    def set_up_kube_dashboard_addon_profile(self) -> ManagedClusterAddonProfile:
-        """Set up kube dashboard addon profile.
+    def build_kube_dashboard_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build kube dashboard addon profile.
 
         :return: a ManagedClusterAddonProfile object
         """
@@ -4246,8 +4246,8 @@ class AKSCreateDecorator:
         )
         return kube_dashboard_addon_profile
 
-    def set_up_monitoring_addon_profile(self) -> ManagedClusterAddonProfile:
-        """Set up monitoring addon profile.
+    def build_monitoring_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build monitoring addon profile.
 
         The function "_ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
         the Container Insights solution to the Log Analytics workspace.
@@ -4277,8 +4277,8 @@ class AKSCreateDecorator:
         self.context.set_intermediate("monitoring", True, overwrite_exists=True)
         return monitoring_addon_profile
 
-    def set_up_azure_policy_addon_profile(self) -> ManagedClusterAddonProfile:
-        """Set up azure policy addon profile.
+    def build_azure_policy_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build azure policy addon profile.
 
         :return: a ManagedClusterAddonProfile object
         """
@@ -4287,8 +4287,8 @@ class AKSCreateDecorator:
         )
         return azure_policy_addon_profile
 
-    def set_up_virtual_node_addon_profile(self) -> ManagedClusterAddonProfile:
-        """Set up virtual node addon profile.
+    def build_virtual_node_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build virtual node addon profile.
 
         :return: a ManagedClusterAddonProfile object
         """
@@ -4306,8 +4306,8 @@ class AKSCreateDecorator:
         self.context.set_intermediate("enable_virtual_node", True, overwrite_exists=True)
         return virtual_node_addon_profile
 
-    def set_up_ingress_appgw_addon_profile(self) -> ManagedClusterAddonProfile:
-        """Set up ingress appgw addon profile.
+    def build_ingress_appgw_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build ingress appgw addon profile.
 
         :return: a ManagedClusterAddonProfile object
         """
@@ -4349,8 +4349,8 @@ class AKSCreateDecorator:
         self.context.set_intermediate("ingress_appgw_addon_enabled", True, overwrite_exists=True)
         return ingress_appgw_addon_profile
 
-    def set_up_confcom_addon_profile(self) -> ManagedClusterAddonProfile:
-        """Set up confcom addon profile.
+    def build_confcom_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build confcom addon profile.
 
         :return: a ManagedClusterAddonProfile object
         """
@@ -4366,8 +4366,8 @@ class AKSCreateDecorator:
             confcom_addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
         return confcom_addon_profile
 
-    def set_up_open_service_mesh_profile(self) -> ManagedClusterAddonProfile:
-        """Set up open service mesh addon profile.
+    def build_open_service_mesh_profile(self) -> ManagedClusterAddonProfile:
+        """Build open service mesh addon profile.
 
         :return: a ManagedClusterAddonProfile object
         """
@@ -4424,37 +4424,37 @@ class AKSCreateDecorator:
         if "http_application_routing" in addons:
             addon_profiles[
                 CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
-            ] = self.set_up_http_application_routing_addon_profile()
+            ] = self.build_http_application_routing_addon_profile()
         if "kube-dashboard" in addons:
             addon_profiles[
                 CONST_KUBE_DASHBOARD_ADDON_NAME
-            ] = self.set_up_kube_dashboard_addon_profile()
+            ] = self.build_kube_dashboard_addon_profile()
         if "monitoring" in addons:
             addon_profiles[
                 CONST_MONITORING_ADDON_NAME
-            ] = self.set_up_monitoring_addon_profile()
+            ] = self.build_monitoring_addon_profile()
         if "azure-policy" in addons:
             addon_profiles[
                 CONST_AZURE_POLICY_ADDON_NAME
-            ] = self.set_up_azure_policy_addon_profile()
+            ] = self.build_azure_policy_addon_profile()
         if "virtual-node" in addons:
             # TODO: how about aciConnectorwindows, what is its addon name?
             os_type = self.context.get_virtual_node_addon_os_type()
             addon_profiles[
                 CONST_VIRTUAL_NODE_ADDON_NAME + os_type
-            ] = self.set_up_virtual_node_addon_profile()
+            ] = self.build_virtual_node_addon_profile()
         if "ingress-appgw" in addons:
             addon_profiles[
                 CONST_INGRESS_APPGW_ADDON_NAME
-            ] = self.set_up_ingress_appgw_addon_profile()
+            ] = self.build_ingress_appgw_addon_profile()
         if "confcom" in addons:
             addon_profiles[
                 CONST_CONFCOM_ADDON_NAME
-            ] = self.set_up_confcom_addon_profile()
+            ] = self.build_confcom_addon_profile()
         if "open-service-mesh" in addons:
             addon_profiles[
                 CONST_OPEN_SERVICE_MESH_ADDON_NAME
-            ] = self.set_up_open_service_mesh_profile()
+            ] = self.build_open_service_mesh_profile()
         mc.addon_profiles = addon_profiles
         return mc
 
