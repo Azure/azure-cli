@@ -108,12 +108,12 @@ examples:
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "sku.capacity"="2"
     crafted: true
   - name: Scale an Azure Cache for Redis Instance - Update to different tier (From Basic to Standard or Standard to Premium).
-    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "sku.name"="Premium" "sku.capacity"="1" "sku.family"="P" 
+    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "sku.name"="Premium" "sku.capacity"="1" "sku.family"="P"
     crafted: true
   - name: Scale an Azure Cache for Redis Instance - Enable Clustering.
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "shardCount"="1"
     crafted: true
-  -- name: Scale an Azure Cache for Redis Instance in/out using Redis Cluster.
+  - name: Scale an Azure Cache for Redis Instance in/out using Redis Cluster.
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "shardCount"="2"
     crafted: true
 """
