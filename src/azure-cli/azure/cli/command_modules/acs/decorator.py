@@ -1735,7 +1735,7 @@ class AKSContext:
                         "--assign-identity can only be specified when --enable-managed-identity is specified"
                     )
             else:
-                if self.get_assign_kubelet_identity():
+                if self._get_assign_kubelet_identity(enable_validation=False):
                     raise RequiredArgumentMissingError(
                         "--assign-kubelet-identity can only be specified when --assign-identity is specified"
                     )
@@ -1921,7 +1921,7 @@ class AKSContext:
         # validation
         if enable_validation:
             if load_balancer_sku == "basic":
-                if self.get_api_server_authorized_ip_ranges():
+                if self._get_api_server_authorized_ip_ranges(enable_validation=False):
                     raise InvalidArgumentValueError(
                         "--api-server-authorized-ip-ranges can only be used with standard load balancer"
                     )
@@ -2928,10 +2928,10 @@ class AKSContext:
     def _get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
         self, enable_validation: bool = False, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
-        """Obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
+        """Internal function to obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
 
-        This function will verify the parameters by default. If the value of enable_aad is True and any of
-        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
+        This function supports the option of enable_validation. When enabled, if the value of enable_aad is True and any
+        of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
         will be raised.
 
         :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
@@ -3188,12 +3188,13 @@ class AKSContext:
 
         return self._get_enable_azure_rbac(enable_validation=True)
 
-    def get_api_server_authorized_ip_ranges(self) -> List[str]:
-        """Obtain the value of api_server_authorized_ip_ranges.
+    # pylint: disable=unused-argument
+    def _get_api_server_authorized_ip_ranges(self, enable_validation: bool = False, **kwargs) -> List[str]:
+        """Internal function to obtain the value of api_server_authorized_ip_ranges.
 
-        This function will verify the parameter by default. When api_server_authorized_ip_ranges is assigned, if
-        load_balancer_sku equals to "basic", raise an InvalidArgumentValueError; if enable_private_cluster is specified,
-        raise a MutuallyExclusiveArgumentError.
+        This function supports the option of enable_validation. When enabled and api_server_authorized_ip_ranges is
+        assigned, if load_balancer_sku equals to "basic", raise an InvalidArgumentValueError; if enable_private_cluster
+        is specified, raise a MutuallyExclusiveArgumentError.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
@@ -3239,16 +3240,30 @@ class AKSContext:
                 ]
 
         # validation
-        if api_server_authorized_ip_ranges:
-            if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
-                raise InvalidArgumentValueError(
-                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-                )
-            if self._get_enable_private_cluster(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    "--api-server-authorized-ip-ranges is not supported for private cluster"
-                )
+        if enable_validation:
+            if api_server_authorized_ip_ranges:
+                if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
+                    raise InvalidArgumentValueError(
+                        "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+                    )
+                if self._get_enable_private_cluster(enable_validation=False):
+                    raise MutuallyExclusiveArgumentError(
+                        "--api-server-authorized-ip-ranges is not supported for private cluster"
+                    )
         return api_server_authorized_ip_ranges
+
+    def get_api_server_authorized_ip_ranges(self) -> List[str]:
+        """Obtain the value of api_server_authorized_ip_ranges.
+
+        This function will verify the parameter by default. When api_server_authorized_ip_ranges is assigned, if
+        load_balancer_sku equals to "basic", raise an InvalidArgumentValueError; if enable_private_cluster is specified,
+        raise a MutuallyExclusiveArgumentError.
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
+
+        :return: empty list or list of strings
+        """
+        return self._get_api_server_authorized_ip_ranges(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
@@ -3340,7 +3355,7 @@ class AKSContext:
                     raise InvalidArgumentValueError(
                         "Please use standard load balancer for private cluster"
                     )
-                if self.get_api_server_authorized_ip_ranges():
+                if self._get_api_server_authorized_ip_ranges(enable_validation=False):
                     raise MutuallyExclusiveArgumentError(
                         "--api-server-authorized-ip-ranges is not supported for private cluster"
                     )
@@ -3560,10 +3575,11 @@ class AKSContext:
         """
         return self._get_private_dns_zone(enable_validation=True)
 
-    def get_assign_kubelet_identity(self) -> Union[str, None]:
-        """Obtain the value of assign_kubelet_identity.
+    # pylint: disable=unused-argument
+    def _get_assign_kubelet_identity(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to obtain the value of assign_kubelet_identity.
 
-        This function will verify the parameter by default. If assign_identity is not assigned but
+        This function supports the option of enable_validation. When enabled, if assign_identity is not assigned but
         assign_kubelet_identity is, a RequiredArgumentMissingError will be raised.
 
         :return: string or None
@@ -3582,11 +3598,22 @@ class AKSContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if assign_kubelet_identity and not self._get_assign_identity(enable_validation=False):
-            raise RequiredArgumentMissingError(
-                "--assign-kubelet-identity can only be specified when --assign-identity is specified"
-            )
+        if enable_validation:
+            if assign_kubelet_identity and not self._get_assign_identity(enable_validation=False):
+                raise RequiredArgumentMissingError(
+                    "--assign-kubelet-identity can only be specified when --assign-identity is specified"
+                )
         return assign_kubelet_identity
+
+    def get_assign_kubelet_identity(self) -> Union[str, None]:
+        """Obtain the value of assign_kubelet_identity.
+
+        This function will verify the parameter by default. If assign_identity is not assigned but
+        assign_kubelet_identity is, a RequiredArgumentMissingError will be raised.
+
+        :return: string or None
+        """
+        return self._get_assign_kubelet_identity(enable_validation=True)
 
     def get_auto_upgrade_channel(self) -> Union[str, None]:
         """Obtain the value of auto_upgrade_channel.
