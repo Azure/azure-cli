@@ -109,7 +109,8 @@ def create_container(cmd,
                      identity_scope=None,
                      identity_role='Contributor',
                      no_wait=False,
-                     acr_identity=None):
+                     acr_identity=None,
+                     zone=None):
     """Create a container group. """
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
@@ -199,6 +200,11 @@ def create_container(cmd,
 
     cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id)
 
+    # Setup zones, validation done in control plane so check is not needed here
+    zones = None
+    if zone:
+        zones = [zone]
+
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
@@ -218,7 +224,8 @@ def create_container(cmd,
                             volumes=volumes or None,
                             subnet_ids=cgroup_subnet,
                             diagnostics=diagnostics,
-                            tags=tags)
+                            tags=tags,
+                            zones=zones)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
@@ -314,6 +321,7 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
                                                         vnet_name,
                                                         VirtualNetwork(name=vnet_name,
                                                                        location=location,
+                                                                       polling=False,
                                                                        address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
         subnet = Subnet(
             name=subnet_name,

@@ -16,13 +16,9 @@ import os
 
 import requests
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
-
+from urllib.parse import urlparse
 # the urlopen is imported for automation purpose
-from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
+from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -454,10 +450,11 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.encryption.type = encryption_type
     if network_access_policy is not None:
         instance.network_access_policy = network_access_policy
-    if disk_access is not None and not is_valid_resource_id(disk_access):
-        disk_access = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
+    if disk_access is not None:
+        if not is_valid_resource_id(disk_access):
+            disk_access = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
         instance.disk_access_id = disk_access
     if enable_bursting is not None:
         instance.bursting_enabled = enable_bursting
@@ -538,7 +535,7 @@ def list_images(cmd, resource_group_name=None):
 # region Snapshots
 # pylint: disable=unused-argument,too-many-locals
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
-                    source=None, for_upload=None, incremental=None,
+                    source=None, for_upload=None, copy_start=None, incremental=None,
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
@@ -554,6 +551,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
+        if cmd.supported_api_version(min_api='2021-04-01', operation_group='snapshots'):
+            option = DiskCreateOption.copy_start if copy_start else DiskCreateOption.copy
     elif for_upload:
         option = DiskCreateOption.upload
     else:
@@ -1374,7 +1373,8 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
-              enable_vtpm=None, user_data=None, capacity_reservation_group=None, **kwargs):
+              enable_vtpm=None, user_data=None, capacity_reservation_group=None,
+              dedicated_host=None, dedicated_host_group=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1410,6 +1410,24 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         sub_resource = SubResource(id=capacity_reservation_group)
         capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
         vm.capacity_reservation = capacity_reservation
+
+    if dedicated_host is not None:
+        if vm.host is None:
+            DedicatedHost = cmd.get_models('SubResource')
+            vm.host = DedicatedHost(additional_properties={}, id=dedicated_host)
+        else:
+            vm.host.id = dedicated_host
+        if vm.host_group is not None:
+            vm.host_group = None
+
+    if dedicated_host_group is not None:
+        if vm.host_group is None:
+            DedicatedHostGroup = cmd.get_models('SubResource')
+            vm.host_group = DedicatedHostGroup(additional_properties={}, id=dedicated_host_group)
+        else:
+            vm.host_group.id = dedicated_host_group
+        if vm.host is not None:
+            vm.host = None
 
     if ultra_ssd_enabled is not None:
         if vm.additional_capabilities is None:
@@ -2529,7 +2547,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
-                capacity_reservation_group=None):
+                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2790,7 +2808,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
-            capacity_reservation_group=capacity_reservation_group)
+            capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
+            patch_mode=patch_mode, enable_agent=enable_agent)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
