@@ -14,6 +14,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
+    DecoratorEarlyExitException,
     DecoratorMode,
 )
 from azure.cli.command_modules.acs._loadbalancer import (
@@ -1342,7 +1343,7 @@ class AKSContext:
                 'Please run "az aks --update-cluster-autoscaler" '
                 "if you want to update min-count or max-count."
             )
-            sys.exit(0)
+            raise DecoratorEarlyExitException()
 
         if update_cluster_autoscaler and not agent_pool_profile.enable_auto_scaling:
             raise InvalidArgumentValueError(
@@ -1355,7 +1356,7 @@ class AKSContext:
             logger.warning(
                 "Cluster autoscaler is already disabled for this node pool."
             )
-            sys.exit(0)
+            raise DecoratorEarlyExitException()
 
         return update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler, min_count, max_count
 
@@ -4088,7 +4089,7 @@ class AKSCreateDecorator:
                 if not self.context.get_yes() and not prompt_y_n(
                     msg, default="n"
                 ):
-                    return None
+                    raise DecoratorEarlyExitException()
                 need_post_creation_vnet_permission_granting = True
             else:
                 scope = vnet_subnet_id
