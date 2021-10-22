@@ -7,10 +7,9 @@ import threading
 import time
 import ast
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
+from urllib.request import urlopen
+
 from binascii import hexlify
 from os import urandom
 import datetime
@@ -21,7 +20,6 @@ import uuid
 from functools import reduce
 from nacl import encoding, public
 
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
 from fabric import Connection
 
