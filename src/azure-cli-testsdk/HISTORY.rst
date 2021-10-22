@@ -3,7 +3,11 @@
 Release History
 ===============
 
-* Add resource group name prefix validator in resource group preparer
+0.3.0
++++++
+* Patch authentication for MSAL-based ``azure-cli-core`` (#19853)
+* Drop support for ADAL-based ``azure-cli-core`` (#19853)
+* Add resource group name prefix validator in resource group preparer (#10800)
 
 0.2.4
 +++++
