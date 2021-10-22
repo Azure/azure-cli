@@ -850,7 +850,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = self.create_random_name('kubeconfig', 24) + '.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -1985,7 +1986,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -2495,7 +2497,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -3191,7 +3194,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = self.create_random_name('kubeconfig', 24) + '.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -5690,7 +5694,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys()
         })
 
+        # use AKSHTTPCustomFeatures header to enable preview addon AKS-OpenServiceMesh
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-OpenServiceMesh ' \
                      '-a open-service-mesh --ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -5707,13 +5713,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys()
         })
 
+        # use AKSHTTPCustomFeatures header to enable preview addon AKS-OpenServiceMesh
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-OpenServiceMesh ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.openServiceMesh', None),
         ])
 
+        # TODO: add support for option --aks-custom-headers to `aks enable-addons` command
         enable_cmd = 'aks enable-addons --addons open-service-mesh --resource-group={resource_group} --name={name} -o json'
         self.cmd(enable_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -5730,13 +5739,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys()
         })
 
+        # use AKSHTTPCustomFeatures header to enable preview addon AKS-OpenServiceMesh
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-OpenServiceMesh ' \
                      '-a open-service-mesh --ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.openServiceMesh.enabled', True),
         ])
 
+        # TODO: add support for option --aks-custom-headers to `aks disable-addons` command
         disable_cmd = 'aks disable-addons --addons open-service-mesh --resource-group={resource_group} --name={name} -o json'
         self.cmd(disable_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),

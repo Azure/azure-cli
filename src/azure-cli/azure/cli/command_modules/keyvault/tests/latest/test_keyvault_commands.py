@@ -34,6 +34,10 @@ def _asn1_to_iso8601(asn1_date):
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
+# for hsm scenario tests
+TEST_HSM_NAME = 'ystesthsm'
+TEST_HSM_URL = 'https://{}.managedhsm.azure.net'.format(TEST_HSM_NAME)
+
 # for other HSM operations live/playback
 ACTIVE_HSM_NAME = 'clitest-1102'
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
@@ -1222,6 +1226,18 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
         self.cmd('keyvault key create --hsm-name {hsm_name} -n key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+
+    def test_keyvault_hsm_key_random(self):
+        self.kwargs.update({
+            'hsm_name': TEST_HSM_NAME,
+            'hsm_url': TEST_HSM_URL
+        })
+
+        result = self.cmd('keyvault key random --count 4 --hsm-name {hsm_name}').get_output_in_json()
+        self.assertIsNotNone(result['value'])
+
+        result = self.cmd('keyvault key random --count 1 --id {hsm_url}').get_output_in_json()
+        self.assertIsNotNone(result['value'])
 
 
 class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):

@@ -61,37 +61,29 @@ def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     return profile.get_subscription(subscription)
 
 
-def get_access_token(cmd, subscription=None, resource=None, resource_type=None, tenant=None):
+def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None):
     """
-    get AAD token to access to a specified resource
-    :param resource: Azure resource endpoints. Default to Azure Resource Manager
-    :param resource-type: Name of Azure resource endpoints. Can be used instead of resource.
+    get AAD token to access to a specified resource.
     Use 'az cloud show' command for other Azure resources
     """
-    if resource is None and resource_type is not None:
+    if resource is None and resource_type:
         endpoints_attr_name = cloud_resource_type_mappings[resource_type]
         resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)
-    else:
-        resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, tenant=tenant)
 
-    token_entry = creds[2]
-    # MSIAuthentication's token entry has `expires_on`, while ADAL's token entry has `expiresOn`
-    # Unify to ISO `expiresOn`, like "2020-06-30 06:14:41"
-    if 'expires_on' in token_entry:
-        # https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
-        token_entry['expiresOn'] = _fromtimestamp(int(token_entry['expires_on']))\
-            .strftime("%Y-%m-%d %H:%M:%S.%f")
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,
+                                                        tenant=tenant)
 
     result = {
         'tokenType': creds[0],
         'accessToken': creds[1],
-        'expiresOn': creds[2].get('expiresOn', 'N/A'),
+        # 'expires_on': creds[2].get('expires_on', None),
+        'expiresOn': creds[2].get('expiresOn', None),
         'tenant': tenant
     }
     if subscription:
         result['subscription'] = subscription
+
     return result
 
 
@@ -111,12 +103,10 @@ def account_clear(cmd):
     profile.logout_all()
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
     """Log in to access Azure subscriptions"""
-    from adal.adal_error import AdalError
-    import requests
 
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:
@@ -130,17 +120,17 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     interactive = False
 
-    profile = Profile(cli_ctx=cmd.cli_ctx, async_persist=False)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
 
     if identity:
         if in_cloud_console():
-            return profile.find_subscriptions_in_cloud_console()
-        return profile.find_subscriptions_in_vm_with_msi(username, allow_no_subscriptions)
+            return profile.login_in_cloud_shell()
+        return profile.login_with_managed_identity(username, allow_no_subscriptions)
     if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not password:
+        if not (password or client_assertion):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -148,38 +138,20 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     else:
         interactive = True
 
-    try:
-        subscriptions = profile.find_subscriptions_on_login(
-            interactive,
-            username,
-            password,
-            service_principal,
-            tenant,
-            scopes=scopes,
-            use_device_code=use_device_code,
-            allow_no_subscriptions=allow_no_subscriptions,
-            use_cert_sn_issuer=use_cert_sn_issuer)
-    except AdalError as err:
-        # try polish unfriendly server errors
-        if username:
-            msg = str(err)
-            suggestion = "For cross-check, try 'az login' to authenticate through browser."
-            if ('ID3242:' in msg) or ('Server returned an unknown AccountType' in msg):
-                raise CLIError("The user name might be invalid. " + suggestion)
-            if 'Server returned error in RSTR - ErrorCode' in msg:
-                raise CLIError("Logging in through command line is not supported. " + suggestion)
-            if 'wstrust' in msg:
-                raise CLIError("Authentication failed due to error of '" + msg + "' "
-                               "This typically happens when attempting a Microsoft account, which requires "
-                               "interactive login. Please invoke 'az login' to cross check. "
-                               # pylint: disable=line-too-long
-                               "More details are available at https://github.com/AzureAD/microsoft-authentication-library-for-python/wiki/Username-Password-Authentication")
-        raise CLIError(err)
-    except requests.exceptions.SSLError as err:
-        from azure.cli.core.util import SSLERROR_TEMPLATE
-        raise CLIError(SSLERROR_TEMPLATE + " Error detail: {}".format(str(err)))
-    except requests.exceptions.ConnectionError as err:
-        raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
+    if service_principal:
+        from azure.cli.core.auth.identity import ServicePrincipalAuth
+        password = ServicePrincipalAuth.build_credential(password, client_assertion, use_cert_sn_issuer)
+
+    subscriptions = profile.login(
+        interactive,
+        username,
+        password,
+        service_principal,
+        tenant,
+        scopes=scopes,
+        use_device_code=use_device_code,
+        allow_no_subscriptions=allow_no_subscriptions,
+        use_cert_sn_issuer=use_cert_sn_issuer)
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
@@ -232,13 +204,3 @@ def check_cli(cmd):
         print('CLI self-test completed: OK')
     else:
         raise CLIError(exceptions)
-
-
-def _fromtimestamp(t):
-    # datetime.datetime can't be patched:
-    #   TypeError: can't set attributes of built-in/extension type 'datetime.datetime'
-    # So we wrap datetime.datetime.fromtimestamp with this function.
-    # https://docs.python.org/3/library/unittest.mock-examples.html#partial-mocking
-    # https://williambert.online/2011/07/how-to-unit-testing-in-django-with-mocking-and-patching/
-    from datetime import datetime
-    return datetime.fromtimestamp(t)
