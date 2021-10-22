@@ -41,7 +41,7 @@ class UserCredential(PublicClientApplication):
         accounts = self.get_accounts(username)
 
         if not accounts:
-            raise CLIError("User {} does not exist in the MSAL token cache. Please run `az login`.".format(username))
+            raise CLIError("User {} does not exist in MSAL token cache. Run `az login`.".format(username))
 
         if len(accounts) > 1:
             raise CLIError("Found multiple accounts with the same username. Please report to us via Github: "

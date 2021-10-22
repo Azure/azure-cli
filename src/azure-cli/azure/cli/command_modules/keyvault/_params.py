@@ -464,6 +464,12 @@ def load_arguments(self, _):
                     help='Id of the key. If specified all other \'Id\' arguments should be omitted.',
                     validator=validate_keyvault_resource_id('key'))
 
+    with self.argument_context('keyvault key random') as c:
+        c.extra('hsm_name', hsm_url_type, arg_group='Id', required=False)
+        c.extra('identifier', options_list=['--id'], arg_group='Id',
+                help='Id of the HSM.', validator=validate_vault_or_hsm)
+        c.argument('count', type=int, help='The requested number of random bytes.')
+
     with self.argument_context('keyvault key set-attributes') as c:
         c.extra('enabled', help='Enable the key.', arg_type=get_three_state_flag())
         c.extra('expires_on', options_list=['--expires'], default=None, type=datetime_type,
