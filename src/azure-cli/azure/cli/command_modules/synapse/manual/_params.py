@@ -982,7 +982,8 @@ def load_arguments(self, _):
         c.argument('sku', action=AddSku, nargs='+', help='The SKU of the kusto pool.')
         c.argument('optimized_autoscale', action=AddOptimizedAutoscale, nargs='+', help='Optimized auto scale '
                    'definition.')
-        c.argument('enable_streaming_ingest', arg_type=get_three_state_flag(), help='A boolean value that indicates if '
+        c.argument('enable_streaming_ingest', options_list=['--enable-streaming-ingest', '--esig'],
+                   arg_type=get_three_state_flag(), help='A boolean value that indicates if '
                    'the streaming ingest is enabled.')
         c.argument('enable_purge', arg_type=get_three_state_flag(), help='A boolean value that indicates if the purge '
                    'operations are enabled.')
@@ -1000,7 +1001,8 @@ def load_arguments(self, _):
         c.argument('sku', action=AddSku, nargs='+', help='The SKU of the kusto pool.')
         c.argument('optimized_autoscale', action=AddOptimizedAutoscale, nargs='+', help='Optimized auto scale '
                    'definition.')
-        c.argument('enable_streaming_ingest', arg_type=get_three_state_flag(), help='A boolean value that indicates if '
+        c.argument('enable_streaming_ingest', options_list=['--enable-streaming-ingest', '--esig'],
+                   arg_type=get_three_state_flag(), help='A boolean value that indicates if '
                    'the streaming ingest is enabled.')
         c.argument('enable_purge', arg_type=get_three_state_flag(), help='A boolean value that indicates if the purge '
                    'operations are enabled.')
