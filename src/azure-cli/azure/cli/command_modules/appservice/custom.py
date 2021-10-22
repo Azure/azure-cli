@@ -59,7 +59,7 @@ from .utils import (_normalize_sku,
                     _get_location_from_resource_group,
                     _list_app,
                     _rename_server_farm_props,
-                    _get_location_from_webapp)
+                    _get_location_from_webapp, _normalize_location)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -83,9 +83,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None):
-    SiteConfig, SkuDescription, Site, NameValuePair = cmd.get_models(
-        'SiteConfig', 'SkuDescription', 'Site', 'NameValuePair')
+                  role='Contributor', scope=None, vnet=None, subnet=None):
+    from azure.mgmt.web.models import Site
+    SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
+        'SiteConfig', 'SkuDescription', 'NameValuePair')
+
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
@@ -128,8 +130,28 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name.upper() not in ['F1', 'FREE', 'SHARED', 'D1',
                                                                                         'B1', 'B2', 'B3', 'BASIC']:
         site_config.always_on = True
+
+    if subnet or vnet:
+        if not subnet:
+            raise CLIError("Cannot use --vnet without --subnet")
+        if not is_valid_resource_id(subnet) and not vnet:
+            raise CLIError("Must either specify subnet by resource ID or include --vnet argument")
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=resource_group_name,
+                                       subnet=subnet,
+                                       vnet=vnet)
+        _validate_webapp_create_vnet(cmd, subnet_info, plan_info)
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        site_config.vnet_route_all_enabled = True
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+    else:
+        subnet_resource_id = None
+
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
-                      https_only=using_webapp_up)
+                      https_only=using_webapp_up, virtual_network_subnet_id=subnet_resource_id)
     helper = _StackRuntimeHelper(cmd, client, linux=is_linux)
     if runtime:
         runtime = helper.remove_delimiters(runtime)
@@ -228,6 +250,66 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         webapp.identity = identity
 
     return webapp
+
+
+def _validate_webapp_create_vnet(cmd, subnet_info, plan_info):
+    allowed_skus = {'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3'}
+    if plan_info.sku.name.upper() not in allowed_skus:
+        raise CLIError("App Service Plan has invalid sku for vnet integration: {}."
+                       "Plan sku must be one of: {}.".format(plan_info.sku.name, allowed_skus))
+
+    vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
+    vnet_location = vnet_client.get(resource_group_name=subnet_info["resource_group_name"],
+                                    virtual_network_name=subnet_info["vnet_name"]).location
+
+    vnet_location = _normalize_location(cmd, vnet_location)
+    asp_location = _normalize_location(cmd, plan_info.location)
+    if vnet_location != asp_location:
+        raise CLIError("Unable to create webapp: vnet and App Service Plan must be in the same location"
+                       "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
+
+
+def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subnet_info = {"vnet_name": None,
+                   "subnet_name": None,
+                   "resource_group_name": None,
+                   "subnet_resource_id": None,
+                   "subnet_subscription_id": None}
+
+    if is_valid_resource_id(subnet):
+        if vnet:
+            logger.warning("--subnet argument is a resource ID. Ignoring --vnet argument.")
+        parsed_sub_rid = parse_resource_id(subnet)
+        subnet_info["vnet_name"] = parsed_sub_rid["name"]
+        subnet_info["subnet_name"] = parsed_sub_rid["resource_name"]
+        subnet_info["resource_group_name"] = parsed_sub_rid["resource_group"]
+        subnet_info["subnet_resource_id"] = subnet
+        subnet_info["subnet_subscription_id"] = parsed_sub_rid["subscription"]
+        return subnet_info
+    subnet_name = subnet
+
+    if is_valid_resource_id(vnet):
+        parsed_vnet = parse_resource_id(vnet)
+        subnet_rg = parsed_vnet["resource_group"]
+        vnet_name = parsed_vnet["name"]
+        subscription_id = parsed_vnet["subscription"]
+    else:
+        logger.warning("Assuming subnet resource group is the same as webapp. "
+                       "Use a resource ID for --subnet or --vnet to use a different resource group.")
+        subnet_rg = resource_group_name
+        vnet_name = vnet
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    subnet_id_fmt = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}"
+    subnet_rid = subnet_id_fmt.format(subscription_id, subnet_rg, vnet_name, subnet_name)
+
+    subnet_info["vnet_name"] = vnet_name
+    subnet_info["subnet_name"] = subnet_name
+    subnet_info["resource_group_name"] = subnet_rg
+    subnet_info["subnet_resource_id"] = subnet_rid
+    subnet_info["subnet_subscription_id"] = subscription_id
+    return subnet_info
 
 
 def validate_container_app_create_options(runtime=None, deployment_container_image_name=None,
@@ -3567,9 +3649,8 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
 
 def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
     SwiftVirtualNetwork = cmd.get_models('SwiftVirtualNetwork')
-    Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
+
     client = web_client_factory(cmd.cli_ctx)
-    vnet_client = network_client_factory(cmd.cli_ctx)
 
     subnet_resource_id = _validate_subnet(cmd.cli_ctx, subnet, vnet, resource_group_name)
 
@@ -3594,22 +3675,10 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
         logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
                        ' Missing delegation can cause "Bad Request" error.')
     else:
-        from azure.cli.core.commands.client_factory import get_subscription_id
-        if get_subscription_id(cmd.cli_ctx).lower() != subnet_subscription_id.lower():
-            logger.warning('Cannot validate subnet in other subscription for delegation to Microsoft.Web/serverFarms.'
-                           ' Missing delegation can cause "Bad Request" error.')
-        else:
-            subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-            delegations = subnetObj.delegations
-            delegated = False
-            for d in delegations:
-                if d.service_name.lower() == "microsoft.web/serverfarms".lower():
-                    delegated = True
-
-            if not delegated:
-                subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-                vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
-                                                           subnet_parameters=subnetObj)
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_subscription_id,
+                               vnet_resource_group=vnet_resource_group,
+                               vnet_name=vnet_name,
+                               subnet_name=subnet_name)
 
     swiftVnet = SwiftVirtualNetwork(subnet_resource_id=subnet_resource_id,
                                     swift_supported=True)
@@ -3633,6 +3702,33 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     }
 
     return mod_vnet
+
+
+def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
+    vnet_client = network_client_factory(cmd.cli_ctx)
+
+    if get_subscription_id(cmd.cli_ctx).lower() != subnet_subscription_id.lower():
+        logger.warning('Cannot validate subnet in other subscription for delegation to Microsoft.Web/serverFarms.'
+                       ' Missing delegation can cause "Bad Request" error.')
+        logger.warning('To manually add a delegation, use the command: az network vnet subnet update '
+                       '--resource-group %s '
+                       '--name %s '
+                       '--vnet-name %s '
+                       '--delegations Microsoft.Web/serverFarms', vnet_resource_group, subnet_name, vnet_name)
+    else:
+        subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
+        delegations = subnetObj.delegations
+        delegated = False
+        for d in delegations:
+            if d.service_name.lower() == "microsoft.web/serverfarms".lower():
+                delegated = True
+
+        if not delegated:
+            subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
+            vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
+                                                       subnet_parameters=subnetObj)
 
 
 def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
