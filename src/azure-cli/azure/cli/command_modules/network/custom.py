@@ -6399,7 +6399,7 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 # pylint: disable=too-many-locals
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
-                location=None, tags=None, vm_protection=None, ddos_protection=None,
+                location=None, tags=None, vm_protection=None, ddos_protection=None, bgp_community=None,
                 ddos_protection_plan=None, network_security_group=None, edge_zone=None, flowtimeout=None):
     AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
         cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
@@ -6429,11 +6429,14 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         vnet.extended_location = _edge_zone_model(cmd, edge_zone)
     if flowtimeout is not None:
         vnet.flow_timeout_in_minutes = flowtimeout
+    if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
+        VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
+        vnet.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
     return cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name)
 
 
 def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None,
-                ddos_protection_plan=None, flowtimeout=None):
+                ddos_protection_plan=None, flowtimeout=None, bgp_community=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     AddressSpace, DhcpOptions, SubResource = cmd.get_models('AddressSpace', 'DhcpOptions', 'SubResource')
@@ -6459,6 +6462,9 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
         instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)
     if flowtimeout is not None:
         instance.flow_timeout_in_minutes = flowtimeout
+    if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
+        VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
+        instance.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
     return instance
 
 
@@ -7732,7 +7738,7 @@ def _get_ssh_path(ssh_command="ssh"):
         if not os.path.isfile(ssh_path):
             raise CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
     return ssh_path
 
@@ -7754,7 +7760,7 @@ def _get_rdp_path(rdp_command="mstsc"):
         if not os.path.isfile(rdp_path):
             raise CLIError("Could not find " + rdp_command + ".exe. Is the rdp client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
     return rdp_path
 
@@ -7819,14 +7825,19 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
 
-    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
-    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
-    t.daemon = True
-    t.start()
-    command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
-    logger.debug("Running rdp command %s", ' '.join(command))
-    subprocess.call(command, shell=platform.system() == 'Windows')
-    tunnel_server.cleanup()
+    if platform.system() == 'Windows':
+        tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
+        t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+        t.daemon = True
+        t.start()
+        command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
+        logger.debug("Running rdp command %s", ' '.join(command))
+
+        from ._process_helper import launch_and_wait
+        launch_and_wait(command)
+        tunnel_server.cleanup()
+    else:
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
 
 def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
