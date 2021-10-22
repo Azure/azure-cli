@@ -4197,7 +4197,7 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         for i in range(len(application_configuration_overrides)): 
             if application_configuration_overrides[i] or application_configuration_overrides[i].lower() != 'null':
                 vmss.virtual_machine_profile.application_profile.gallery_applications[i].configuration_reference = application_configuration_overrides[i]
-    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vmss_name, vmss)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
 
 
 def list_vmss_applications(cmd, vmss_name, resource_group_name):
@@ -4206,4 +4206,4 @@ def list_vmss_applications(cmd, vmss_name, resource_group_name):
         vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
-    return vmss.application_profile
+    return vmss.virtual_machine_profile.application_profile

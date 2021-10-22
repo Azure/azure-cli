@@ -6329,6 +6329,8 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
+    # Need prepare app versions
+    @record_only()
     @ResourceGroupPreparer()
     def test_vm_add_application(self, resource_group):
         self.kwargs.update({
@@ -6347,6 +6349,8 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
+    # Need prepare app versions
+    @record_only()
     @ResourceGroupPreparer()
     def test_vmss_add_application(self, resource_group):
         self.kwargs.update({
@@ -6360,11 +6364,11 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications')
 
-        self.cmd('vmss application list -g {rg} -n {vmss}')
+        self.cmd('vmss application list -g {rg} --vmss-name {vmss}')
 
 
 if __name__ == '__main__':
