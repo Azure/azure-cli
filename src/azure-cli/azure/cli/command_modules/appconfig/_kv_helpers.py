@@ -550,7 +550,7 @@ def __serialize_feature_list_to_comparable_json_object(features):
     return res
 
 
-def __serialize_kv_list_to_comparable_json_list(keyvalues, profile):
+def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
     res = []
     for kv in keyvalues:
         # value
@@ -1071,7 +1071,7 @@ def __validate_import_keyvault_ref(kv):
             if 'uri' in value:
                 parsed_url = urlparse(value['uri'])
                 # URL with a valid scheme and netloc is a valid url, but keyvault ref has path as well, so validate it
-                if parsed_url.scheme != '' and parsed_url.netloc != '' and parsed_url.path != '':
+                if parsed_url.scheme and parsed_url.netloc and parsed_url.path:
                     return True
 
             logger.warning("Keyvault reference with key '{%s}' is not a valid keyvault reference."
