@@ -2233,8 +2233,8 @@ class AKSContext:
                 dns_service_ip,
                 docker_bridge_address,
                 network_policy,
-            ) = (
-                self.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+                enable_validation=False
             )
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr:
@@ -2269,8 +2269,9 @@ class AKSContext:
 
         return self._get_network_plugin(enable_validation=True)
 
-    def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
-        self,
+    # pylint: disable=unused-argument
+    def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+        self, enable_validation: bool = False, **kwargs
     ) -> Tuple[
         Union[str, None],
         Union[str, None],
@@ -2278,7 +2279,8 @@ class AKSContext:
         Union[str, None],
         Union[str, None],
     ]:
-        """Obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and network_policy.
+        """Internal function to obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and
+        network_policy.
 
         Note: SDK provides default value "10.244.0.0/16" and performs the following validation
         {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for pod_cidr.
@@ -2290,10 +2292,10 @@ class AKSContext:
         Note: SDK provides default value "172.17.0.1/16" and performs the following validation
         {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
 
-        This function will verify the parameters by default. If pod_cidr is assigned and the value of network_plugin
-        is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr, service_cidr,
-        dns_service_ip, docker_bridge_address or network_policy is assigned, a RequiredArgumentMissingError will be
-        raised.
+        This function supports the option of enable_validation. When enabled, if pod_cidr is assigned and the value of
+        network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr,
+        service_cidr, dns_service_ip, docker_bridge_address or network_policy is assigned, a
+        RequiredArgumentMissingError will be raised.
 
         :return: a tuple of five elements: pod_cidr of string type or None, service_cidr of string type or None,
         dns_service_ip of string type or None, docker_bridge_address of string type or None, network_policy of
@@ -2342,24 +2344,59 @@ class AKSContext:
         # these parameters do not need dynamic completion
 
         # validation
-        network_plugin = self._get_network_plugin(enable_validation=False)
-        if network_plugin:
-            if network_plugin == "azure" and pod_cidr:
-                raise InvalidArgumentValueError(
-                    "Please use kubenet as the network plugin type when pod_cidr is specified"
-                )
-        else:
-            if (
-                pod_cidr or
-                service_cidr or
-                dns_service_ip or
-                docker_bridge_address or
-                network_policy
-            ):
-                raise RequiredArgumentMissingError(
-                    "Please explicitly specify the network plugin type"
-                )
+        if enable_validation:
+            network_plugin = self._get_network_plugin(enable_validation=False)
+            if network_plugin:
+                if network_plugin == "azure" and pod_cidr:
+                    raise InvalidArgumentValueError(
+                        "Please use kubenet as the network plugin type when pod_cidr is specified"
+                    )
+            else:
+                if (
+                    pod_cidr or
+                    service_cidr or
+                    dns_service_ip or
+                    docker_bridge_address or
+                    network_policy
+                ):
+                    raise RequiredArgumentMissingError(
+                        "Please explicitly specify the network plugin type"
+                    )
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
+
+    def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+        self,
+    ) -> Tuple[
+        Union[str, None],
+        Union[str, None],
+        Union[str, None],
+        Union[str, None],
+        Union[str, None],
+    ]:
+        """Obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and network_policy.
+
+        Note: SDK provides default value "10.244.0.0/16" and performs the following validation
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for pod_cidr.
+        Note: SDK provides default value "10.0.0.0/16" and performs the following validation
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for service_cidr.
+        Note: SDK provides default value "10.0.0.10" and performs the following validation
+        {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}
+        for dns_service_ip.
+        Note: SDK provides default value "172.17.0.1/16" and performs the following validation
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
+
+        This function will verify the parameters by default. If pod_cidr is assigned and the value of network_plugin
+        is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr, service_cidr,
+        dns_service_ip, docker_bridge_address or network_policy is assigned, a RequiredArgumentMissingError will be
+        raised.
+
+        :return: a tuple of five elements: pod_cidr of string type or None, service_cidr of string type or None,
+        dns_service_ip of string type or None, docker_bridge_address of string type or None, network_policy of
+        string type or None.
+        """
+        return self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+            enable_validation=True
+        )
 
     # pylint: disable=no-self-use
     def get_addon_consts(self) -> Dict[str, str]:
