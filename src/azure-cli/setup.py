@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.29.0"
+VERSION = "2.29.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -60,7 +60,7 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-identity',
     'azure-keyvault-administration==4.0.0b3',
-    'azure-keyvault-keys~=4.4.0',
+    'azure-keyvault-keys~=4.5.0b4',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
@@ -74,16 +74,16 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.3.0',
     'azure-mgmt-cdn==11.0.0',
     'azure-mgmt-cognitiveservices~=12.0.0',
-    'azure-mgmt-compute~=23.0.0',
+    'azure-mgmt-compute~=23.1.0',
     'azure-mgmt-consumption~=2.0',
-    'azure-mgmt-containerinstance~=9.0.0',
+    'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==8.1.0',
     'azure-mgmt-containerservice~=16.1.0',
     'azure-mgmt-cosmosdb~=6.4.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
-    'azure-mgmt-datamigration~=9.0.0',
+    'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
@@ -105,11 +105,11 @@ DEPENDENCIES = [
     'azure-mgmt-media~=7.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=4.0.0',
-    'azure-mgmt-network~=19.0.0',
+    'azure-mgmt-netapp~=5.1.0',
+    'azure-mgmt-network~=19.1.0',
     'azure-mgmt-policyinsights~=1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
-    'azure-mgmt-rdbms~=9.1.0b1',
+    'azure-mgmt-rdbms~=10.0.0',
     'azure-mgmt-recoveryservicesbackup~=0.15.0',
     'azure-mgmt-recoveryservices~=2.0.0',
     'azure-mgmt-redhatopenshift==1.0.0',
@@ -121,6 +121,7 @@ DEPENDENCIES = [
     'azure-mgmt-security~=2.0.0b1',
     'azure-mgmt-servicebus~=6.0.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
+    'azure-mgmt-servicelinker==1.0.0b1',
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=1.0.0b1',
@@ -129,7 +130,7 @@ DEPENDENCIES = [
     'azure-mgmt-synapse~=2.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=4.0.0',
-    'azure-multiapi-storage~=0.6.2',
+    'azure-multiapi-storage~=0.7.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.8.0',

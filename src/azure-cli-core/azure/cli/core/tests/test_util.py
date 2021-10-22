@@ -155,52 +155,58 @@ class TestUtils(unittest.TestCase):
         platform = sys.platform.lower()
         open_page_in_browser('http://foo')
         if is_wsl():
-            subprocess_open_mock.assert_called_once_with(['powershell.exe', '-Command', 'Start-Process "http://foo"'])
+            subprocess_open_mock.assert_called_once_with(['powershell.exe', '-NoProfile',
+                                                          '-Command', 'Start-Process "http://foo"'])
         elif platform == 'darwin':
             subprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
         else:
             webbrowser_open_mock.assert_called_once_with('http://foo', 2)
 
+    @mock.patch('shutil.which', autospec=True)
     @mock.patch('azure.cli.core.util._get_platform_info', autospec=True)
     @mock.patch('webbrowser.get', autospec=True)
-    def test_can_launch_browser(self, webbrowser_get_mock, get_platform_mock):
-        # WSL is always fine
-        get_platform_mock.return_value = ('linux', '4.4.0-17134-microsoft')
-        result = can_launch_browser()
-        self.assertTrue(result)
+    def test_can_launch_browser(self, webbrowser_get_mock, get_platform_mock, which_mock):
+        import webbrowser
 
-        # windows is always fine
+        # Windows is always fine
         get_platform_mock.return_value = ('windows', '10')
-        result = can_launch_browser()
-        self.assertTrue(result)
+        assert can_launch_browser()
 
-        # osx is always fine
+        # MacOS is always fine
         get_platform_mock.return_value = ('darwin', '10')
-        result = can_launch_browser()
-        self.assertTrue(result)
+        assert can_launch_browser()
 
-        # now tests linux
-        with mock.patch('os.environ', autospec=True) as env_mock:
-            # when no GUI, return false
-            get_platform_mock.return_value = ('linux', '4.15.0-1014-azure')
-            env_mock.get.return_value = None
-            result = can_launch_browser()
-            self.assertFalse(result)
+        # Real linux with browser
+        get_platform_mock.return_value = ('linux', '4.15.0-1014-azure')
+        browser_mock = mock.MagicMock()
+        browser_mock.name = 'www-browser'
+        webbrowser_get_mock.return_value = browser_mock
+        assert can_launch_browser()
 
-            # when there is gui, and browser is a good one, return True
-            browser_mock = mock.MagicMock()
-            browser_mock.name = 'goodone'
-            env_mock.get.return_value = 'foo'
-            result = can_launch_browser()
-            self.assertTrue(result)
+        # Real linux without browser
+        get_platform_mock.return_value = ('linux', '4.15.0-1014-azure')
+        webbrowser_get_mock.side_effect = webbrowser.Error
+        assert not can_launch_browser()
 
-            # when there is gui, but the browser is text mode, return False
-            browser_mock = mock.MagicMock()
-            browser_mock.name = 'www-browser'
-            webbrowser_get_mock.return_value = browser_mock
-            env_mock.get.return_value = 'foo'
-            result = can_launch_browser()
-            self.assertFalse(result)
+        # WSL Linux with www-browser
+        get_platform_mock.return_value = ('linux', '5.10.16.3-microsoft-standard-WSL2')
+        browser_mock = mock.MagicMock()
+        browser_mock.name = 'www-browser'
+        webbrowser_get_mock.return_value = browser_mock
+        assert can_launch_browser()
+
+        # WSL Linux without www-browser, but with powershell.exe
+        get_platform_mock.return_value = ('linux', '5.10.16.3-microsoft-standard-WSL2')
+        webbrowser_get_mock.side_effect = webbrowser.Error
+        which_mock.return_value = True
+        assert can_launch_browser()
+
+        # Docker container on WSL 2 can't launch browser
+        get_platform_mock.return_value = ('linux', '5.10.16.3-microsoft-standard-WSL2')
+        import webbrowser
+        webbrowser_get_mock.side_effect = webbrowser.Error
+        which_mock.return_value = False
+        assert not can_launch_browser()
 
     def test_configured_default_setter(self):
         config = mock.MagicMock()
@@ -379,47 +385,6 @@ class TestUtils(unittest.TestCase):
             get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
             request = send_mock.call_args[0][1]
             self.assertEqual(request.headers['User-Agent'], get_az_rest_user_agent() + ' env-ua ARG-UA')
-
-    def test_scopes_to_resource(self):
-        from azure.cli.core.util import scopes_to_resource
-        # scopes as a list
-        self.assertEqual(scopes_to_resource(['https://management.core.windows.net//.default']),
-                         'https://management.core.windows.net/')
-        # scopes as a tuple
-        self.assertEqual(scopes_to_resource(('https://storage.azure.com/.default',)),
-                         'https://storage.azure.com')
-
-        # resource with trailing slash
-        self.assertEqual(scopes_to_resource(('https://management.azure.com//.default',)),
-                         'https://management.azure.com/')
-        self.assertEqual(scopes_to_resource(['https://datalake.azure.net//.default']),
-                         'https://datalake.azure.net/')
-
-        # resource without trailing slash
-        self.assertEqual(scopes_to_resource(('https://managedhsm.azure.com/.default',)),
-                         'https://managedhsm.azure.com')
-
-        # VM SSH
-        self.assertEqual(scopes_to_resource(["https://pas.windows.net/CheckMyAccess/Linux/.default"]),
-                         'https://pas.windows.net/CheckMyAccess/Linux')
-        self.assertEqual(scopes_to_resource(["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]),
-                         'https://pas.windows.net/CheckMyAccess/Linux')
-
-    def test_resource_to_scopes(self):
-        from azure.cli.core.util import resource_to_scopes
-        # resource converted to a scopes list
-        self.assertEqual(resource_to_scopes('https://management.core.windows.net/'),
-                         ['https://management.core.windows.net//.default'])
-
-        # resource with trailing slash
-        self.assertEqual(resource_to_scopes('https://management.azure.com/'),
-                         ['https://management.azure.com//.default'])
-        self.assertEqual(resource_to_scopes('https://datalake.azure.net/'),
-                         ['https://datalake.azure.net//.default'])
-
-        # resource without trailing slash
-        self.assertEqual(resource_to_scopes('https://managedhsm.azure.com'),
-                         ['https://managedhsm.azure.com/.default'])
 
     @mock.patch("psutil.Process")
     def test_get_parent_proc_name(self, mock_process_type):
