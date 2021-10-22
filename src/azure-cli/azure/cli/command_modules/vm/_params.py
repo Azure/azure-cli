@@ -794,8 +794,7 @@ def load_arguments(self, _):
     for scope in ['vm application list', 'vmss application list']:
         with self.argument_context(scope) as c:
             c.argument('vm_name', options_list=['--vm-name', '--name', '-n'], arg_type=existing_vm_name, id_part=None)
-            c.argument('virtual_machine_scale_set_name', arg_type=vmss_name_type, options_list=['--vmss-name'], id_part=None,
-                       help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`")
+            c.argument('vmss_name', vmss_name_type, id_part=None)
 
     for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope) as c:

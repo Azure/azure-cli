@@ -2987,7 +2987,7 @@ type: command
 short-summary: List applications of a VMSS
 examples:
   - name: List applications of a vmss
-    text: az vmss application list -g MyResourceGroup --vmss-name MyVmss
+    text: az vmss application list -g MyResourceGroup --name MyVmss
 """
 
 helps['vmss list'] = """

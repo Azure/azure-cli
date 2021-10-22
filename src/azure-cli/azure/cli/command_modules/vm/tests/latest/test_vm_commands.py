@@ -6417,7 +6417,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications')
 
-        self.cmd('vmss application list -g {rg} --vmss-name {vmss}')
+        self.cmd('vmss application list -g {rg} --name {vmss}')
 
 
 if __name__ == '__main__':
