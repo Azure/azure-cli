@@ -1165,7 +1165,7 @@ short-summary: Retrieves the list of cosmosdb account locations and their proper
 
 helps['cosmosdb locations get'] = """
 type: command
-short-summary: Show the properties of a SQL role assignment under an Azure Cosmos DB account.
+short-summary: Show the properties of Azure Cosmos DB accounts in given location.
 examples:
   - name: Show the properties of Azure Cosmos DB accounts in given location.
     text: az cosmosdb locations get --location 'East US'

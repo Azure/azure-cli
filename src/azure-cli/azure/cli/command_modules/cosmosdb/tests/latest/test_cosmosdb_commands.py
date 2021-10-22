@@ -2003,8 +2003,8 @@ class CosmosDBTests(ScenarioTest):
         assert new_backup_time2 >= backup_time
         assert new_backup_time2 >= new_backup_time
 
-    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_container_backupinfo', parameter_name_for_location='location')
-    def test_cosmosdb_mongodb_container_backupinfo(self, resource_group, location):
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_collection_backupinfo', parameter_name_for_location='location')
+    def test_cosmosdb_mongodb_collection_backupinfo(self, resource_group, location):
         col = self.create_random_name(prefix='cli', length=15)
         db_name = self.create_random_name(prefix='cli', length=15)
         new_default_ttl1 = 2000
@@ -2018,25 +2018,27 @@ class CosmosDBTests(ScenarioTest):
             'loc': location,
             'nttl1': new_default_ttl1,
             'nttl2': new_default_ttl2,
+            'shard_key': "theShardKey",
+            'throughput': "1000"
         })
 
         # This should fail as account doesn't exist
         self.assertRaises(Exception, lambda: self.cmd('az cosmosdb mongodb collection retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind MongoDB')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
 
         # This should fail as database doesn't exist
         self.assertRaises(CLIError, lambda: self.cmd('az cosmosdb mongodb collection retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
 
         # Create database
-        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name}')
 
         # This should fail as collection doesn't exist
         self.assertRaises(CLIError, lambda: self.cmd('az cosmosdb mongodb collection retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
 
-        # Create container
-        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+        # Create collection
+        self.cmd('az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col} --shard {shard_key} --throughput {throughput}').get_output_in_json()
 
         backup_info = self.cmd('az cosmosdb mongodb collection retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
         print(backup_info)
@@ -2048,9 +2050,9 @@ class CosmosDBTests(ScenarioTest):
         backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
         assert backup_time > oldTime
 
-        # Update container
-        # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl1}').get_output_in_json()
-        # assert container_update["resource"]["defaultTtl"] == 2000
+        # Update collection
+        # collection_update = self.cmd('az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl1}').get_output_in_json()
+        # assert collection_update["resource"]["defaultTtl"] == 2000
 
         backup_info = self.cmd('az cosmosdb mongodb collection retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
         print(backup_info)
@@ -2061,9 +2063,9 @@ class CosmosDBTests(ScenarioTest):
         new_backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
         assert new_backup_time >= backup_time
 
-        # Update container again
-        # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl2}').get_output_in_json()
-        # assert container_update["resource"]["defaultTtl"] == 3000
+        # Update collection again
+        # collection_update = self.cmd('az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl2}').get_output_in_json()
+        # assert collection_update["resource"]["defaultTtl"] == 3000
 
         backup_info = self.cmd('az cosmosdb mongodb collection retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
         print(backup_info)
@@ -2083,6 +2085,10 @@ class CosmosDBTests(ScenarioTest):
 
         locations_list = self.cmd('az cosmosdb locations list').get_output_in_json()
         assert len(locations_list) > 0
+        for location_val in locations_list:
+            assert location_val['properties']['backupStorageRedundancies'] != None
+            assert location_val['properties']['isResidencyRestricted'] != None
+            assert location_val['properties']['supportsAvailabilityZone'] != None
 
         locations_show = self.cmd('az cosmosdb locations show --location {loc}').get_output_in_json()
         assert locations_show['properties']['backupStorageRedundancies'] != None
