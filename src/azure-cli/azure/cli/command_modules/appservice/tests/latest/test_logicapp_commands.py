@@ -29,10 +29,10 @@ class LogicappBasicE2ETest(ScenarioTest):
     
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_logicapp_e2e(self, resource_group):
-        logicapp_name = self.create_random_name('logic-e2e', 24)
-        plan = self.create_random_name('logic-e2e-plan', 24)
-        storage = 'logicappplanstorage'
-        plan_id = self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
+        logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
+        plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
+        storage = 'logicpplanstorage1'
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
 
@@ -59,42 +59,42 @@ class LogicappBasicE2ETest(ScenarioTest):
 
         #restarting a running app
         self.cmd('logicapp restart -g {} -n {}'.format(resource_group, logicapp_name))
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+        self.cmd('logicapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', logicapp_name)
         ])
 
         #stopping a running app
         self.cmd('logicapp stop -g {} -n {}'.format(resource_group, logicapp_name))
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+        self.cmd('logicapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
             JMESPathCheck('state', 'Stopped'),
             JMESPathCheck('name', logicapp_name)
         ])
 
         #stopping a stopped app
         self.cmd('logicapp stop -g {} -n {}'.format(resource_group, logicapp_name))
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+        self.cmd('logicapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
             JMESPathCheck('state', 'Stopped'),
             JMESPathCheck('name', logicapp_name)
         ])
 
         #restarting a stopped app
         self.cmd('logicapp restart -g {} -n {}'.format(resource_group, logicapp_name))
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+        self.cmd('logicapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
             JMESPathCheck('state', 'Stopped'),
             JMESPathCheck('name', logicapp_name)
         ])
 
         #starting a stopped app
         self.cmd('logicapp start -g {} -n {}'.format(resource_group, logicapp_name))
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+        self.cmd('logicapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', logicapp_name)
         ])
 
         #starting a running app
         self.cmd('logicapp start -g {} -n {}'.format(resource_group, logicapp_name))
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
+        self.cmd('logicapp show -g {} -n {}'.format(resource_group, logicapp_name), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', logicapp_name)
         ])

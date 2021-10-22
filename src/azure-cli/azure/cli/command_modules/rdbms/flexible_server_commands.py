@@ -21,7 +21,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
-    table_transform_output_list_skus)
+    table_transform_output_list_skus,
+    table_transform_output_parameters)
 
 # from .transformers import table_transform_connection_string
 # from .validators import db_up_namespace_processor
@@ -119,8 +120,8 @@ def load_flexibleserver_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('create', 'firewall_rule_create_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'firewall_rule_delete_func', custom_command_type=flexible_server_custom_common)
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_server')
+        g.custom_show_command('show', 'firewall_rule_get_func', custom_command_type=flexible_server_custom_common)
+        g.custom_command('list', 'firewall_rule_list_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
                                  getter_name='flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
                                  setter_name='flexible_firewall_rule_custom_setter', setter_type=flexible_server_custom_common,
@@ -141,7 +142,7 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_config,
+                            client_factory=cf_postgres_flexible_config, table_transformer=table_transform_output_parameters,
                             is_preview=True) as g:
         g.custom_command('set', 'flexible_parameter_update')
         g.show_command('show', 'get')
@@ -176,6 +177,7 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', 'flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
+        g.custom_command('geo-restore', 'flexible_server_georestore', supports_no_wait=True)
         g.command('start', 'begin_start')
         g.custom_command('stop', 'flexible_server_stop', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'server_delete_func')
@@ -194,8 +196,8 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_mysql_flexible_firewall_rules) as g:
         g.custom_command('create', 'firewall_rule_create_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'firewall_rule_delete_func', custom_command_type=flexible_server_custom_common)
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_server')
+        g.custom_show_command('show', 'firewall_rule_get_func', custom_command_type=flexible_server_custom_common)
+        g.custom_command('list', 'firewall_rule_list_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
                                  getter_name='flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
                                  setter_name='flexible_firewall_rule_custom_setter', setter_type=flexible_server_custom_common,
@@ -205,7 +207,8 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('mysql flexible-server parameter', mysql_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
-                            client_factory=cf_mysql_flexible_config) as g:
+                            client_factory=cf_mysql_flexible_config,
+                            table_transformer=table_transform_output_parameters) as g:
         g.custom_command('set', 'flexible_parameter_update')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')

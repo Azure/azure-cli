@@ -12,8 +12,8 @@ import datetime
 import sys
 import zipfile
 import stat
-from six.moves.urllib.parse import urlparse
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from urllib.parse import urlparse
+from urllib.request import urlopen
 from azure.cli.core._profile import Profile
 from knack.log import get_logger
 from knack.util import CLIError

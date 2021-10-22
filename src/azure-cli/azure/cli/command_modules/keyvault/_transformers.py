@@ -64,6 +64,7 @@ def transform_key_decryption_output(output, **command_args):
 def transform_key_output(result, **command_args):
     from azure.keyvault.keys import KeyVaultKey, JsonWebKey
     import base64
+
     if not isinstance(result, KeyVaultKey):
         return result
 
@@ -77,6 +78,7 @@ def transform_key_output(result, **command_args):
         'attributes': result.properties._attributes,
         'key': result.key,
         'managed': result.properties.managed,
-        'tags': result.properties.tags
+        'tags': result.properties.tags,
+        'releasePolicy': result.properties.release_policy
     }
     return output

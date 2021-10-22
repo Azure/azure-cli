@@ -91,7 +91,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_az_find_message(command, enable_color):
         from colorama import Style
         indent = 0
-        message = 'For more specific examples, use: az find "az {}"'.format(command)
+        message = 'To search AI knowledge base for examples, use: az find "az {}"'.format(command)
         if enable_color:
             message = Style.BRIGHT + message + Style.RESET_ALL
         _print_indent(message + '\n', indent)
