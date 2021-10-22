@@ -1230,7 +1230,8 @@ def _validate_vm_vmss_set_applications(cmd, namespace):
         raise CLIError('usage error: --application-version-ids should not be empty list.')
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
-        raise CLIError('usage error: --app-config-overrides should have the same number of items as --application-version-ids')
+        raise CLIError('usage error: --app-config-overrides should have the same number of items as'
+                       ' --application-version-ids')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
@@ -1810,7 +1811,7 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            'Microsoft.ManagedIdentity')
 
 
-def process_set_applications_namespace(cmd, namespace):
+def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unused-argument
     _validate_vm_vmss_set_applications(cmd, namespace)
 
 

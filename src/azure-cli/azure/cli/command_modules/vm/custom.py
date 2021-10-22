@@ -22,7 +22,12 @@ from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import CLIInternalError, ResourceNotFoundError, ValidationError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import (
+    CLIInternalError,
+    ResourceNotFoundError,
+    ValidationError,
+    RequiredArgumentMissingError
+)
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
@@ -4161,7 +4166,7 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
 
     if application_configuration_overrides:
         # check if the length of application_configuration_overrides is as same as application_version_ids
-        for i in range(len(application_configuration_overrides)): 
+        for i in range(len(application_configuration_overrides)):
             vm.application_profile.gallery_applications[i].configuration_reference = application_configuration_overrides[i]
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
@@ -4194,7 +4199,7 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
 
     if application_configuration_overrides:
         # check if the length of application_configuration_overrides is as same as application_version_ids
-        for i in range(len(application_configuration_overrides)): 
+        for i in range(len(application_configuration_overrides)):
             if application_configuration_overrides[i] or application_configuration_overrides[i].lower() != 'null':
                 vmss.virtual_machine_profile.application_profile.gallery_applications[i].configuration_reference = application_configuration_overrides[i]
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
