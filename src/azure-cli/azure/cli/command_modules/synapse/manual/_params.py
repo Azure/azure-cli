@@ -7,7 +7,7 @@ from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.mgmt.synapse.models import TransparentDataEncryptionStatus, SecurityAlertPolicyState, BlobAuditingPolicyState
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, \
-    get_resource_name_completion_list, get_location_type, file_type
+    get_resource_name_completion_list, get_location_type, file_type, resource_group_name_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import get_json_object, shell_safe_json_parse
 from ._validators import validate_storage_account, validate_statement_language, add_progress_callback, validate_repository_type
@@ -16,14 +16,6 @@ from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnect
     SqlPoolConnectionClientAuthenticationType, ItemType
 from .action import AddFilters, AddOrderBy
 from shlex import split
-from azure.cli.core.commands.parameters import (
-    tags_type,
-    get_three_state_flag,
-    get_enum_type,
-    resource_group_name_type,
-    get_location_type
-)
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from ..action import (
     AddSku,
     AddOptimizedAutoscale,
@@ -165,7 +157,6 @@ def load_arguments(self, _):
         # Environment Configuration
         c.argument('library_requirements', arg_group='Environment Configuration',
                    help='The library requirements file.')
-
 
         # Default Folder
         c.argument('spark_events_folder', arg_group='Default Folder', help='The Spark events folder.')
@@ -1042,5 +1033,7 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('kusto_pool_resource_id', type=str, help='Resource id of the cluster that follows a database owned '
                    'by this cluster.')
-        c.argument('attached_database_configuration_name', type=str, help='Resource name of the attached database '
+        c.argument('attached_database_configuration_name',
+                   options_list=['--attached-database-configuration-name', '--adcn'],
+                   type=str, help='Resource name of the attached database '
                    'configuration in the follower cluster.')

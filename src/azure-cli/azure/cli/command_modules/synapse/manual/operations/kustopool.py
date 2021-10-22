@@ -134,7 +134,7 @@ def synapse_kusto_pool_detach_follower_database(client,
 
     from azure.mgmt.synapse.models import FollowerDatabaseDefinition
     follower_database_to_remove = FollowerDatabaseDefinition(kusto_pool_resource_id=kusto_pool_resource_id,
-                                                             attached_database_configuration_name =
+                                                             attached_database_configuration_name=
                                                              attached_database_configuration_name)
     return sdk_no_wait(no_wait,
                        client.begin_detach_follower_databases,
