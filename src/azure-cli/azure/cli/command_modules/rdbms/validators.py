@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from dateutil import parser
+import re
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
@@ -12,6 +14,9 @@ from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
+from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations \
+    as MySqlFirewallRulesOperations
+from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
                                     get_postgres_list_skus_info, get_postgres_versions,
@@ -123,11 +128,17 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None,
                               server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
                               subnet=None, public_access=None, version=None, auto_grow=None, replication_role=None,
-                              instance=None):
+                              geo_redundant_backup=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
-    sku_info, single_az, _ = get_mysql_list_skus_info(db_context.cmd, location)
+
+    list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
+    sku_info = list_skus_info['sku_info']
+    single_az = list_skus_info['single_az']
+    geo_paired_regions = list_skus_info['geo_paired_regions']
+
     _network_arg_validator(subnet, public_access)
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
+    _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions)
     if tier is None and instance is not None:
         tier = instance.sku.tier
     _mysql_retention_validator(backup_retention, sku_info, tier)
@@ -159,6 +170,11 @@ def _mysql_storage_validator(storage_gb, sku_info, tier, instance):
         if not max(min_mysql_storage, storage_sizes[0]) <= storage_gb <= storage_sizes[1]:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
                            .format(max(min_mysql_storage, storage_sizes[0]), storage_sizes[1]))
+
+
+def _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions):
+    if geo_redundant_backup and geo_redundant_backup.lower() == 'enabled' and len(geo_paired_regions) == 0:
+        raise ArgumentUsageError("The region of the server does not support geo-restore feature.")
 
 
 def _mysql_tier_validator(tier, sku_info):
@@ -217,10 +233,11 @@ def _mysql_high_availability_validator(high_availability, standby_availability_z
                                      "Zone redundant high availability is not supported "
                                      "in a single availability zone region.")
         if auto_grow.lower == 'Disabled':
-            raise ArgumentUsageError("Enabling High Availability requires Auto grow to be turned ON.")
+            raise ArgumentUsageError("Enabling High availability requires auto-grow to be turned ON.")
     if standby_availability_zone:
         if not high_availability or high_availability.lower() != 'zoneredundant':
-            raise ArgumentUsageError("You need to enable high availability to set standby availability zone.")
+            raise ArgumentUsageError("You need to enable zone redundant high availability "
+                                     "to set standby availability zone.")
         if zone == standby_availability_zone:
             raise ArgumentUsageError("Your server is in availability zone {}. "
                                      "The zone of the server cannot be same as the standby zone.".format(zone))
@@ -230,7 +247,9 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    sku_info, single_az = get_postgres_list_skus_info(db_context.cmd, location)
+    list_skus_info = get_postgres_list_skus_info(db_context.cmd, location)
+    sku_info = list_skus_info['sku_info']
+    single_az = list_skus_info['single_az']
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -289,7 +308,7 @@ def _pg_high_availability_validator(high_availability, standby_availability_zone
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
         if single_az:
-            raise ArgumentUsageError("This region is single availability zone."
+            raise ArgumentUsageError("This region is single availability zone. "
                                      "High availability is not supported in a single availability zone region.")
 
     if standby_availability_zone:
@@ -315,7 +334,7 @@ def maintenance_window_validator(ns):
         if len(parsed_input) >= 1 and parsed_input[0] not in options:
             raise CLIError('Incorrect value for --maintenance-window. '
                            'The first value means the scheduled day in a week or '
-                           'can be "Disabled" to reset maintenance window.'
+                           'can be "Disabled" to reset maintenance window. '
                            'Allowed values: {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"}')
         if len(parsed_input) >= 2 and \
            (not parsed_input[1].isdigit() or int(parsed_input[1]) < 0 or int(parsed_input[1]) > 23):
@@ -334,6 +353,8 @@ def ip_address_validator(ns):
        (ns.start_ip_address and not _validate_ip(ns.start_ip_address)):
         raise CLIError('Incorrect value for ip address. '
                        'Ip address should be IPv4 format. Example: 12.12.12.12. ')
+    if ns.start_ip_address and ns.end_ip_address:
+        _validate_start_and_end_ip_address_order(ns.start_ip_address, ns.end_ip_address)
 
 
 def public_access_validator(ns):
@@ -345,6 +366,20 @@ def public_access_validator(ns):
                            'Acceptable values are \'all\', \'none\',\'<startIP>\' and '
                            '\'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from '
                            '0.0.0.0 to 255.255.255.255')
+        if len(val.split('-')) == 2:
+            vals = val.split('-')
+            _validate_start_and_end_ip_address_order(vals[0], vals[1])
+
+
+def _validate_start_and_end_ip_address_order(start_ip, end_ip):
+    start_ip_elements = start_ip.split('.')
+    end_ip_elements = end_ip.split('.')
+
+    for idx in range(4):
+        if start_ip_elements[idx] < end_ip_elements[idx]:
+            break
+        if start_ip_elements[idx] > end_ip_elements[idx]:
+            raise ArgumentUsageError("The end IP address is smaller than the start IP address.")
 
 
 def _validate_ip(ips):
@@ -377,6 +412,12 @@ def _valid_range(addr_range):
     return False
 
 
+def firewall_rule_name_validator(ns):
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
+        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\' "
+                              "and the name cannot exceed 126 characters. ")
+
+
 def validate_server_name(db_context, server_name, type_):
     client = db_context.cf_availability(db_context.cmd.cli_ctx, '_')
 
@@ -387,9 +428,13 @@ def validate_server_name(db_context, server_name, type_):
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
 
     if db_context.command_group == 'mysql':
-        # result = client.execute(db_context.location, name_availability_request={'name': server_name, 'type': type_})
-        return
-    result = client.execute(name_availability_request={'name': server_name, 'type': type_})
+        result = client.execute(db_context.location,
+                                name_availability_request={
+                                    'name': server_name,
+                                    'location_name': db_context.location,
+                                    'type': type_})
+    else:
+        result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 
     if not result.name_available:
         raise ValidationError(result.message)
@@ -425,11 +470,53 @@ def validate_vnet_location(vnet, location):
 def validate_mysql_replica(cmd, server):
     # Tier validation
     if server.sku.tier == 'Burstable':
-        raise ValidationError("Replication for Burstable servers are not supported. "
-                              "Try using GeneralPurpose or MemoryOptimized tiers.")
+        raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
+                              "Scale up the source server to General Purpose or Memory Optimized. ")
 
     # single az validation
-    _, single_az, _ = get_mysql_list_skus_info(cmd, server.location)
+    list_skus_info = get_mysql_list_skus_info(cmd, server.location)
+    single_az = list_skus_info['single_az']
     if single_az:
         raise ValidationError("Replica can only be created for multi-availability zone regions. "
-                              "The location of the source server is in single availability zone region.")
+                              "The location of the source server is in a single availability zone region.")
+
+
+def validate_mysql_tier_update(instance, tier):
+    if instance.sku.tier in ['GeneralPurpose', 'MemoryOptimized'] and tier == 'Burstable':
+        if instance.replication_role == 'Source':
+            raise ValidationError("Read replica is not supported for Burstable Tier")
+        if instance.high_availability.mode != 'Disabled':
+            raise ValidationError("High availability is not supported for Burstable Tier")
+
+
+def validate_georestore_location(db_context, location):
+    list_skus_info = get_mysql_list_skus_info(db_context.cmd, db_context.location)
+    geo_paired_regions = list_skus_info['geo_paired_regions']
+
+    if location not in geo_paired_regions:
+        raise ValidationError("The region is not paired with the region of the source server. ")
+
+
+def validate_georestore_network(source_server_object, public_access, vnet, subnet):
+    if source_server_object.network.public_network_access == 'Disabled' and not any((public_access, vnet, subnet)):
+        raise ValidationError("Please specify network parameters if you are geo-restoring a private access server. "
+                              "Run 'az mysql flexible-server goe-restore --help' command to see examples")
+
+
+def validate_and_format_restore_point_in_time(restore_time):
+    try:
+        return parser.parse(restore_time)
+    except:
+        raise ValidationError("The restore point in time value has incorrect date format. "
+                              "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
+
+
+def validate_public_access_server(cmd, client, resource_group_name, server_name):
+    if isinstance(client, MySqlFirewallRulesOperations):
+        server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
+    else:
+        server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+
+    server = server_operations_client.get(resource_group_name, server_name)
+    if server.network.public_network_access == 'Disabled':
+        raise ValidationError("Firewall rule operations cannot be requested for a private access enabled server.")
