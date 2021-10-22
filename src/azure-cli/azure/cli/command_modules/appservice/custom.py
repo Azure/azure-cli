@@ -140,7 +140,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                        resource_group_name=resource_group_name,
                                        subnet=subnet,
                                        vnet=vnet)
-        _validate_webapp_create_vnet(cmd, subnet_info, plan_info)
+        _validate_webapp_create_vnet(cmd=cmd, sku_name=plan_info.sku.name, webapp_location=plan_info.location,
+                                     subnet_resource_group=subnet_info["resource_group_name"],
+                                     vnet_name=subnet_info["vnet_name"])
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
@@ -252,18 +254,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     return webapp
 
 
-def _validate_webapp_create_vnet(cmd, subnet_info, plan_info):
+def _validate_webapp_create_vnet(cmd, subnet_resource_group, vnet_name, sku_name, webapp_location):
     allowed_skus = {'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3'}
-    if plan_info.sku.name.upper() not in allowed_skus:
+    if sku_name.upper() not in allowed_skus:
         raise CLIError("App Service Plan has invalid sku for vnet integration: {}."
-                       "Plan sku must be one of: {}.".format(plan_info.sku.name, allowed_skus))
+                       "Plan sku must be one of: {}.".format(sku_name, allowed_skus))
 
     vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
-    vnet_location = vnet_client.get(resource_group_name=subnet_info["resource_group_name"],
-                                    virtual_network_name=subnet_info["vnet_name"]).location
+    vnet_location = vnet_client.get(resource_group_name=subnet_resource_group,
+                                    virtual_network_name=vnet_name).location
 
     vnet_location = _normalize_location(cmd, vnet_location)
-    asp_location = _normalize_location(cmd, plan_info.location)
+    asp_location = _normalize_location(cmd, webapp_location)
     if vnet_location != asp_location:
         raise CLIError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
                        "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
@@ -275,17 +277,25 @@ def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
                    "subnet_name": None,
                    "resource_group_name": None,
                    "subnet_resource_id": None,
-                   "subnet_subscription_id": None}
+                   "subnet_subscription_id": None,
+                   "vnet_resource_id": None}
 
     if is_valid_resource_id(subnet):
         if vnet:
             logger.warning("--subnet argument is a resource ID. Ignoring --vnet argument.")
+
         parsed_sub_rid = parse_resource_id(subnet)
+
         subnet_info["vnet_name"] = parsed_sub_rid["name"]
         subnet_info["subnet_name"] = parsed_sub_rid["resource_name"]
         subnet_info["resource_group_name"] = parsed_sub_rid["resource_group"]
         subnet_info["subnet_resource_id"] = subnet
         subnet_info["subnet_subscription_id"] = parsed_sub_rid["subscription"]
+
+        vnet_fmt = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}"
+        subnet_info["vnet_resource_id"] = vnet_fmt.format(parsed_sub_rid["subscription"],
+                                                          parsed_sub_rid["resource_group"],
+                                                          parsed_sub_rid["name"])
         return subnet_info
     subnet_name = subnet
 
@@ -294,12 +304,17 @@ def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
         subnet_rg = parsed_vnet["resource_group"]
         vnet_name = parsed_vnet["name"]
         subscription_id = parsed_vnet["subscription"]
+        subnet_info["vnet_resource_id"] = vnet
     else:
         logger.warning("Assuming subnet resource group is the same as webapp. "
                        "Use a resource ID for --subnet or --vnet to use a different resource group.")
         subnet_rg = resource_group_name
         vnet_name = vnet
         subscription_id = get_subscription_id(cmd.cli_ctx)
+        vnet_fmt = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}"
+        subnet_info["vnet_resource_id"] = vnet_fmt.format(subscription_id,
+                                                          subnet_rg,
+                                                          vnet)
 
     subnet_id_fmt = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}"
     subnet_rid = subnet_id_fmt.format(subscription_id, subnet_rg, vnet_name, subnet_name)
@@ -3648,60 +3663,48 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
 
 
 def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
-    SwiftVirtualNetwork = cmd.get_models('SwiftVirtualNetwork')
+    from azure.mgmt.web.models import SitePatchResource
 
+    subnet_info = _get_subnet_info(cmd=cmd,
+                                   resource_group_name=resource_group_name,
+                                   subnet=subnet,
+                                   vnet=vnet)
     client = web_client_factory(cmd.cli_ctx)
 
-    subnet_resource_id = _validate_subnet(cmd.cli_ctx, subnet, vnet, resource_group_name)
+    webapp = show_webapp(cmd, resource_group_name, name, slot)
+    parsed_plan = parse_resource_id(webapp.app_service_plan_id)
+    plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
 
-    if slot is None:
-        swift_connection_info = client.web_apps.get_swift_virtual_network_connection(resource_group_name, name)
-    else:
-        swift_connection_info = client.web_apps.get_swift_virtual_network_connection_slot(resource_group_name,
-                                                                                          name, slot)
-    # check to see if the connection would be supported
-    if swift_connection_info.swift_supported is not True:
-        return logger.warning("""Your app must be in an Azure App Service deployment that is
-              capable of scaling up to Premium v2\nLearn more:
-              https://go.microsoft.com/fwlink/?linkid=2060115&clcid=0x409""")
-
-    subnet_id_parts = parse_resource_id(subnet_resource_id)
-    subnet_subscription_id = subnet_id_parts['subscription']
-    vnet_name = subnet_id_parts['name']
-    vnet_resource_group = subnet_id_parts['resource_group']
-    subnet_name = subnet_id_parts['child_name_1']
+    _validate_webapp_create_vnet(cmd=cmd, sku_name=plan_info.sku.name, webapp_location=plan_info.location,
+                                 subnet_resource_group=subnet_info["resource_group_name"],
+                                 vnet_name=subnet_info["vnet_name"])
 
     if skip_delegation_check:
         logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
                        ' Missing delegation can cause "Bad Request" error.')
     else:
-        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_subscription_id,
-                               vnet_resource_group=vnet_resource_group,
-                               vnet_name=vnet_name,
-                               subnet_name=subnet_name)
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
 
-    swiftVnet = SwiftVirtualNetwork(subnet_resource_id=subnet_resource_id,
-                                    swift_supported=True)
-    return_vnet = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                          'create_or_update_swift_virtual_network_connection', slot, swiftVnet)
+    subnet_id = subnet_info["subnet_resource_id"]
+    client.web_apps.update(resource_group_name=resource_group_name,
+                           name=name,
+                           site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
 
-    # Enalbe Route All configuration
+    # Enable Route All configuration
     config = get_site_configs(cmd, resource_group_name, name, slot)
     if config.vnet_route_all_enabled is not True:
         config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='true')
 
-    # reformats the vnet entry, removing unnecessary information
-    id_strings = return_vnet.id.split('/')
-    resourceGroup = id_strings[4]
-    mod_vnet = {
-        "id": return_vnet.id,
-        "location": return_vnet.additional_properties["location"],
-        "name": return_vnet.name,
-        "resourceGroup": resourceGroup,
-        "subnetResourceId": return_vnet.subnet_resource_id
+    return {
+        "id": subnet_info["vnet_resource_id"],
+        "location": plan_info.location,  # must be the same as vnet location bc of validation check
+        "name": subnet_info["vnet_name"],
+        "resourceGroup": subnet_info["resource_group_name"],
+        "subnetResourceId": subnet_info["subnet_resource_id"]
     }
-
-    return mod_vnet
 
 
 def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name):
