@@ -109,7 +109,7 @@ DEPENDENCIES = [
     'azure-mgmt-network~=19.1.0',
     'azure-mgmt-policyinsights~=1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
-    'azure-mgmt-rdbms~=9.1.0b1',
+    'azure-mgmt-rdbms~=10.0.0',
     'azure-mgmt-recoveryservicesbackup~=0.15.0',
     'azure-mgmt-recoveryservices~=2.0.0',
     'azure-mgmt-redhatopenshift==1.0.0',
