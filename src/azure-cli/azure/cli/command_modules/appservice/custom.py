@@ -265,7 +265,7 @@ def _validate_webapp_create_vnet(cmd, subnet_info, plan_info):
     vnet_location = _normalize_location(cmd, vnet_location)
     asp_location = _normalize_location(cmd, plan_info.location)
     if vnet_location != asp_location:
-        raise CLIError("Unable to create webapp: vnet and App Service Plan must be in the same location"
+        raise CLIError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
                        "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
 
 
