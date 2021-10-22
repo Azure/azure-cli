@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from dateutil import parser
 import re
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -13,6 +14,9 @@ from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
+from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations \
+    as MySqlFirewallRulesOperations
+from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
                                     get_postgres_list_skus_info, get_postgres_versions,
@@ -497,3 +501,22 @@ def validate_georestore_network(source_server_object, public_access, vnet, subne
     if source_server_object.network.public_network_access == 'Disabled' and not any((public_access, vnet, subnet)):
         raise ValidationError("Please specify network parameters if you are geo-restoring a private access server. "
                               "Run 'az mysql flexible-server goe-restore --help' command to see examples")
+
+
+def validate_and_format_restore_point_in_time(restore_time):
+    try:
+        return parser.parse(restore_time)
+    except:
+        raise ValidationError("The restore point in time value has incorrect date format. "
+                              "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
+
+
+def validate_public_access_server(cmd, client, resource_group_name, server_name):
+    if isinstance(client, MySqlFirewallRulesOperations):
+        server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
+    else:
+        server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+
+    server = server_operations_client.get(resource_group_name, server_name)
+    if server.network.public_network_access == 'Disabled':
+        raise ValidationError("Firewall rule operations cannot be requested for a private access enabled server.")

@@ -498,7 +498,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus2euap'
+    postgres_location = 'eastus'
     mysql_location = 'westus2'
 
     @AllowLargeResponse()
@@ -1544,7 +1544,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus2euap'
+    postgres_location = 'eastus'
     mysql_location = 'westus2'
 
     @AllowLargeResponse()

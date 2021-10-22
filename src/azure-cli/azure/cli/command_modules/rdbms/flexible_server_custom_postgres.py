@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from dateutil import parser
 from importlib import import_module
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
@@ -21,7 +20,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import pg_arguments_validator, validate_server_name
+from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -178,6 +177,8 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
+    restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
+
     try:
         id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
@@ -185,7 +186,7 @@ def flexible_server_restore(cmd, client,
         location = ''.join(source_server_object.location.lower().split())
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
-            point_in_time_utc=parser.parse(restore_point_in_time),
+            point_in_time_utc=restore_point_in_time,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
             availability_zone=zone
