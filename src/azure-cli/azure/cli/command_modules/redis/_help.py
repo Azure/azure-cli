@@ -22,15 +22,6 @@ examples:
   - name: Configure the multiple zones for new Premium Azure Cache for Redis
     text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --zones 1 2
     crafted: true
-  - name: Configure the memory policies for the cache.
-    text: az redis create --resource-group resourceGroupName --name cacheName --location westus2 --sku Standard --vm-size c0 --redis-configuration "{\""maxmemory-policy\"": \""allkeys-lru\""}"
-    crafted: true
-  - name: Configure and enable the RDB back up data persistence for new Premium Azure Cache for Redis.
-    text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --redis-configuration "{\""rdb-storage-connection-string\"": \""DefaultEndpointsProtocol=https;AccountName=mystorageaccount;AccountKey=pJ+jruGKPHDKsEC8kmoybobH3TZx2njBR3ipEsquZFo=;EndpointSuffix=core.windows.net\"", \""rdb-backup-enabled\"": \""true\"", \""rdb-backup-frequency\"": \""15\"", \""rdb-backup-max-snapshot-count\"": \""1\""}"
-    crafted: true
-  - name: Configure and enable the AOF back up data persistence for new Premium Azure Cache for Redis
-    text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --redis-configuration "{\""aof-backup-enabled\"": \""true\"", \""aof-storage-connection-string-0\"": \""DefaultEndpointsProtocol=https;AccountName=mystorageaccount;AccountKey=pJ+jruGKPHDKsEC8kmoybobH3TZx2njBR3ipEsquZFo=;EndpointSuffix=core.windows.net\"", \""aof-storage-connection-string-1\"": \""DefaultEndpointsProtocol=https;AccountName=mystorageaccount;AccountKey=pJ+jruGKPHDKsEC8kmoybobH3TZx2njBR3ipEsquZFo=;EndpointSuffix=core.windows.net\""}"
-    crafted: true
   - name: Create a Premium Azure Cache for Redis with clustering enabled
     text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --shard-count 2
     crafted: true
@@ -111,7 +102,7 @@ examples:
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "redisConfiguration.rdb-backup-enabled"="false"
     crafted: true
   - name: Configure the RDB back up enabled data persistence for already created Premium Azure Cache for Redis
-    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "redisConfiguration.rdb-storage-connection-string"="DefaultEndpointsProtocol=https;AccountName=mystorageaccount;AccountKey=pJ+jruGKPHDKsEC8kmoybobH3TZx2njBR3ipEsquZFo=;EndpointSuffix=core.windows.net" "redisConfiguration.rdb-backup-enabled"="true" "redisConfiguration.rdb-backup-frequency"="15" "redisConfiguration.rdb-backup-max-snapshot-count"="1"
+    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "redisConfiguration.rdb-storage-connection-string"="DefaultEndpointsProtocol=https;AccountName=mystorageaccount;AccountKey=myAccountKey;EndpointSuffix=core.windows.net" "redisConfiguration.rdb-backup-enabled"="true" "redisConfiguration.rdb-backup-frequency"="15" "redisConfiguration.rdb-backup-max-snapshot-count"="1"
     crafted: true
   - name: Scale an Azure Cache for Redis Instance - Update to different size (An example to scale from c0 to c1).
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "sku.capacity"="2"
