@@ -2890,8 +2890,8 @@ class AKSContext:
                 aad_client_app_id,
                 aad_server_app_id,
                 aad_server_app_secret,
-            ) = (
-                self.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
+            ) = self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+                enable_validation=False
             )
             if enable_aad:
                 if any(
@@ -2924,8 +2924,9 @@ class AKSContext:
 
         return self._get_enable_aad(enable_validation=True)
 
-    def get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-        self,
+    # pylint: disable=unused-argument
+    def _get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+        self, enable_validation: bool = False, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
         """Obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
 
@@ -2962,20 +2963,35 @@ class AKSContext:
         # these parameters do not need dynamic completion
 
         # validation
-        enable_aad = self._get_enable_aad(enable_validation=False)
-        if enable_aad:
-            if any(
-                [
-                    aad_client_app_id,
-                    aad_server_app_id,
-                    aad_server_app_secret,
-                ]
-            ):
-                raise MutuallyExclusiveArgumentError(
-                    "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
-                    "--aad-server-app-secret"
-                )
+        if enable_validation:
+            enable_aad = self._get_enable_aad(enable_validation=False)
+            if enable_aad:
+                if any(
+                    [
+                        aad_client_app_id,
+                        aad_server_app_id,
+                        aad_server_app_secret,
+                    ]
+                ):
+                    raise MutuallyExclusiveArgumentError(
+                        "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
+                        "--aad-server-app-secret"
+                    )
         return aad_client_app_id, aad_server_app_id, aad_server_app_secret
+
+    def get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+        self,
+    ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
+        """Obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
+
+        This function will verify the parameters by default. If the value of enable_aad is True and any of
+        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
+        will be raised.
+
+        :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
+        or None and aad_server_app_secret of string type or None.
+        """
+        return self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_aad_tenant_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
@@ -3011,7 +3027,7 @@ class AKSContext:
             enable_validation=False
         ):
             if aad_tenant_id is None and any(
-                self.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
+                self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=False)
             ):
                 profile = Profile(cli_ctx=self.cmd.cli_ctx)
                 _, _, aad_tenant_id = profile.get_login_credentials()
