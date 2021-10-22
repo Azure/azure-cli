@@ -377,14 +377,9 @@ helps['synapse kusto data-connection show'] = """
 "synapseWorkspaceName"
 """
 
-helps['synapse kusto-pool-data-connection event-grid'] = """
-    type: group
-    short-summary: Manage kusto pool data connection with synapse sub group event-grid
-"""
-
 helps['synapse kusto data-connection event-grid'] = """
     type: group
-    short-summary: Manage event-grid with event-grid
+    short-summary: Manage kusto pool data connection with synapse sub group event-grid
 """
 
 helps['synapse kusto data-connection event-grid create'] = """
@@ -392,14 +387,9 @@ helps['synapse kusto data-connection event-grid create'] = """
     short-summary: "Create a data connection."
 """
 
-helps['synapse kusto-pool-data-connection event-hub'] = """
-    type: group
-    short-summary: Manage kusto pool data connection with synapse sub group event-hub
-"""
-
 helps['synapse kusto data-connection event-hub'] = """
     type: group
-    short-summary: Manage event-hub with event-hub
+    short-summary: Manage kusto pool data connection with synapse sub group event-hub
 """
 
 helps['synapse kusto data-connection event-hub create'] = """
@@ -415,14 +405,9 @@ ptest/providers/Microsoft.EventHub/namespaces/eventhubTestns1/eventhubs/eventhub
 --workspace-name "synapseWorkspaceName"
 """
 
-helps['synapse kusto-pool-data-connection iot-hub'] = """
-    type: group
-    short-summary: Manage kusto pool data connection with synapse sub group iot-hub
-"""
-
 helps['synapse kusto data-connection iot-hub'] = """
     type: group
-    short-summary: Manage iot-hub with iot-hub
+    short-summary: Manage kusto pool data connection with synapse sub group iot-hub
 """
 
 helps['synapse kusto data-connection iot-hub create'] = """
@@ -430,19 +415,9 @@ helps['synapse kusto data-connection iot-hub create'] = """
     short-summary: "Create a data connection."
 """
 
-helps['synapse kusto data-connection event-grid'] = """
-    type: group
-    short-summary: Manage iot-hub with event-grid
-"""
-
 helps['synapse kusto data-connection event-grid update'] = """
     type: command
     short-summary: "Updates a data connection."
-"""
-
-helps['synapse kusto data-connection event-hub'] = """
-    type: group
-    short-summary: Manage iot-hub with event-hub
 """
 
 helps['synapse kusto data-connection event-hub update'] = """
@@ -456,11 +431,6 @@ helps['synapse kusto data-connection event-hub update'] = """
 "testConsumerGroup1" --event-hub-resource-id "/subscriptions/12345678-1234-1234-1234-123456789098/resourceGroups/kustor\
 ptest/providers/Microsoft.EventHub/namespaces/eventhubTestns1/eventhubs/eventhubTest1" --resource-group "kustorptest" \
 --workspace-name "synapseWorkspaceName"
-"""
-
-helps['synapse kusto data-connection iot-hub'] = """
-    type: group
-    short-summary: Manage iot-hub with iot-hub
 """
 
 helps['synapse kusto data-connection iot-hub update'] = """

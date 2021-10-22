@@ -21,10 +21,8 @@ def synapse_kusto_pool_create(cmd,
                               optimized_autoscale=None,
                               enable_streaming_ingest=None,
                               enable_purge=None,
+                              workspace_uid=None,
                               no_wait=False):
-    workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
-    workspace_object = workspace_client.get(resource_group_name, workspace_name)
-    workspace_uid = workspace_object.workspace_uid
     parameters = {}
     if tags is not None:
         parameters['tags'] = tags
@@ -42,6 +40,10 @@ def synapse_kusto_pool_create(cmd,
         parameters['enable_purge'] = False
     if workspace_uid is not None:
         parameters['workspace_uid'] = workspace_uid
+    else:
+        workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
+        workspace_object = workspace_client.get(resource_group_name, workspace_name)
+        parameters['workspace_uid'] = workspace_object.workspace_uid
     return sdk_no_wait(no_wait,
                        client.begin_create_or_update,
                        workspace_name=workspace_name,
@@ -63,10 +65,8 @@ def synapse_kusto_pool_update(cmd,
                               optimized_autoscale=None,
                               enable_streaming_ingest=None,
                               enable_purge=None,
+                              workspace_uid=None,
                               no_wait=False):
-    workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
-    workspace_object = workspace_client.get(resource_group_name, workspace_name)
-    workspace_uid = workspace_object.workspace_uid
     parameters = {}
     if tags is not None:
         parameters['tags'] = tags
@@ -84,6 +84,10 @@ def synapse_kusto_pool_update(cmd,
         parameters['enable_purge'] = False
     if workspace_uid is not None:
         parameters['workspace_uid'] = workspace_uid
+    else:
+        workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
+        workspace_object = workspace_client.get(resource_group_name, workspace_name)
+        parameters['workspace_uid'] = workspace_object.workspace_uid
     return sdk_no_wait(no_wait,
                        client.begin_update,
                        workspace_name=workspace_name,
