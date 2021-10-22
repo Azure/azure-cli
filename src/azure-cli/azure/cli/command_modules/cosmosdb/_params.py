@@ -91,7 +91,7 @@ def load_arguments(self, _):
             c.argument('network_acl_bypass_resource_ids', nargs='+', options_list=['--network-acl-bypass-resource-ids', '-i'], help="List of Resource Ids to allow Network Acl Bypass.")
             c.argument('backup_interval', type=int, help="the frequency(in minutes) with which backups are taken (only for accounts with periodic mode backups)", arg_group='Backup Policy')
             c.argument('backup_retention', type=int, help="the time(in hours) for which each backup is retained (only for accounts with periodic mode backups)", arg_group='Backup Policy')
-            c.argument('backup_redundancy', arg_type=get_enum_type(BackupStorageRedundancy), help="The type of Storage account backup redundancy policy", arg_group='Backup Policy')
+            c.argument('backup_redundancy', arg_type=get_enum_type(BackupStorageRedundancy), help="The redundancy type of the backup Storage account", arg_group='Backup Policy')
             c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.", is_preview=True)
             c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more.", is_preview=True)
             c.argument('analytical_storage_schema_type', options_list=['--analytical-storage-schema-type', '--as-schema'], arg_type=get_enum_type(AnalyticalStorageSchemaType), help="Schema type for analytical storage.", arg_group='Analytical Storage Configuration')
@@ -361,17 +361,17 @@ def load_arguments(self, _):
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
 
     # Retrive Sql Container Backup Info
-    with self.argument_context('cosmosdb sql retrieve-latest-backup-time') as c:
-        c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the Cosmos DB database account')
-        c.argument('database_name', database_name_type, required=True, help='Name of the Cosmos DB sql database name')
-        c.argument('container_name', container_name_type, required=True, help='Name of the Cosmos DB sql container name')
+    with self.argument_context('cosmosdb sql container retrieve-latest-backup-time') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the CosmosDB database account')
+        c.argument('database_name', database_name_type, required=True, help='Name of the CosmosDB Sql database name')
+        c.argument('container_name', container_name_type, required=True, help='Name of the CosmosDB Sql container name')
         c.argument('location', options_list=['--location', '-l'], help="Location of the account", required=True)
 
     # Retrive MongoDB Collection Backup Info
-    with self.argument_context('cosmosdb mongodb retrieve-latest-backup-time') as c:
-        c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the Cosmos DB database account')
-        c.argument('database_name', database_name_type, required=True, help='Name of the Cosmos DB mongodb database name')
-        c.argument('collection_name', container_name_type, required=True, help='Name of the Cosmos DB mongodb collection name')
+    with self.argument_context('cosmosdb mongodb collection retrieve-latest-backup-time') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the CosmosDB database account')
+        c.argument('database_name', database_name_type, required=True, help='Name of the CosmosDB MongoDB database name')
+        c.argument('collection_name', options_list=['--collection-name', '-c'], required=True, help='Name of the CosmosDB MongoDB collection name')
         c.argument('location', options_list=['--location', '-l'], help="Location of the account", required=True)
 
     # Restorable Database Accounts
@@ -418,3 +418,7 @@ def load_arguments(self, _):
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
         c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+
+    # Account locations
+    with self.argument_context('cosmosdb locations show') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Name of the location", required=True)

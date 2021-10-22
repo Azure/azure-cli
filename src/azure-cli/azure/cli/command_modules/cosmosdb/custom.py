@@ -1812,20 +1812,24 @@ def cli_cosmosdb_restorable_database_account_list(client,
 
 
 def cli_sql_retrieve_latest_backup_time(client,
-                                    resource_group_name,
-                                    account_name,
-                                    database_name,
-                                    container_name,
-                                    location):
+                                        resource_group_name,
+                                        account_name,
+                                        database_name,
+                                        container_name,
+                                        location):
     try:
         client.get_sql_database(resource_group_name, account_name, database_name)
-    except ResourceNotFoundError:
-        raise CLIError("Cannot find a database with name {}".format(database_name))
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Database with name '{}' could not be found.".format(database_name))
+        raise CLIError("{}".format(str(ex)))
 
     try:
         client.get_sql_container(resource_group_name, account_name, database_name, container_name)
-    except ResourceNotFoundError:
-        raise CLIError("Cannot find a container with name {} under database {}".format(container_name, database_name))
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Container with name '{}' under database '{}' could not be found.".format(container_name, database_name))
+        raise CLIError("{}".format(str(ex)))
 
     restoreLocation = ContinuousBackupRestoreLocation(
         location=location
@@ -1840,20 +1844,24 @@ def cli_sql_retrieve_latest_backup_time(client,
 
 
 def cli_mongo_db_retrieve_latest_backup_time(client,
-                                    resource_group_name,
-                                    account_name,
-                                    database_name,
-                                    collection_name,
-                                    location):
+                                             resource_group_name,
+                                             account_name,
+                                             database_name,
+                                             collection_name,
+                                             location):
     try:
         client.get_mongo_db_database(resource_group_name, account_name, database_name)
-    except ResourceNotFoundError:
-        raise CLIError("Cannot find a database with name {}".format(database_name))
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Database with name '{}' could not be found.".format(database_name))
+        raise CLIError("{}".format(str(ex)))
 
     try:
         client.get_mongo_db_collection(resource_group_name, account_name, database_name, collection_name)
-    except ResourceNotFoundError:
-        raise CLIError("Cannot find a collection with name {} under database {}".format(collection_name, database_name))
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Collection with name '{}' under database '{}' could not be found.".format(collection_name, database_name))
+        raise CLIError("{}".format(str(ex)))
 
     restoreLocation = ContinuousBackupRestoreLocation(
         location=location
