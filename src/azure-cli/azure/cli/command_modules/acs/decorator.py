@@ -136,51 +136,6 @@ def check_is_msi_cluster(mc: ManagedCluster) -> bool:
     return False
 
 
-def validate_counts_in_autoscaler(
-    node_count,
-    enable_cluster_autoscaler,
-    min_count,
-    max_count,
-    decorator_mode,
-) -> None:
-    """Check the validity of serveral count-related parameters in autoscaler.
-
-    On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is enabled,
-    it will check whether both min_count and max_count are  assigned, if not, raise the RequiredArgumentMissingError. If
-    min_count is less than max_count, raise the InvalidArgumentValueError. Only in create mode it will check whether the
-    value of node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
-    enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is not enabled, it will check
-    whether any of min_count or max_count is assigned, if so, raise the RequiredArgumentMissingError.
-
-    :return: None
-    """
-    # validation
-    if enable_cluster_autoscaler:
-        if min_count is None or max_count is None:
-            raise RequiredArgumentMissingError(
-                "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-            )
-        if min_count > max_count:
-            raise InvalidArgumentValueError(
-                "Value of min-count should be less than or equal to value of max-count"
-            )
-        if decorator_mode == DecoratorMode.CREATE:
-            if node_count < min_count or node_count > max_count:
-                raise InvalidArgumentValueError(
-                    "node-count is not in the range of min-count and max-count"
-                )
-    else:
-        if min_count is not None or max_count is not None:
-            option_name = "--enable-cluster-autoscaler"
-            if decorator_mode == DecoratorMode.UPDATE:
-                option_name += " or --update-cluster-autoscaler"
-            raise RequiredArgumentMissingError(
-                "min-count and max-count are required for {}, please use the flag".format(
-                    option_name
-                )
-            )
-
-
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class AKSModels:
     """Store the models used in aks_create and aks_update.
@@ -286,7 +241,6 @@ class AKSModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        # not directly used
         self.ManagedClusterPropertiesAutoScalerProfile = self.__cmd.get_models(
             "ManagedClusterPropertiesAutoScalerProfile",
             resource_type=self.resource_type,
@@ -460,6 +414,52 @@ class AKSContext:
         :return: None
         """
         self.intermediates.pop(variable_name, None)
+
+    # pylint: disable=no-self-use
+    def validate_counts_in_autoscaler(
+        self,
+        node_count,
+        enable_cluster_autoscaler,
+        min_count,
+        max_count,
+        decorator_mode,
+    ) -> None:
+        """Helper function to check the validity of serveral count-related parameters in autoscaler.
+
+        On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is enabled,
+        it will check whether both min_count and max_count are  assigned, if not, raise the RequiredArgumentMissingError. If
+        min_count is less than max_count, raise the InvalidArgumentValueError. Only in create mode it will check whether the
+        value of node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
+        enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is not enabled, it will check
+        whether any of min_count or max_count is assigned, if so, raise the RequiredArgumentMissingError.
+
+        :return: None
+        """
+        # validation
+        if enable_cluster_autoscaler:
+            if min_count is None or max_count is None:
+                raise RequiredArgumentMissingError(
+                    "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                )
+            if min_count > max_count:
+                raise InvalidArgumentValueError(
+                    "Value of min-count should be less than or equal to value of max-count"
+                )
+            if decorator_mode == DecoratorMode.CREATE:
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+        else:
+            if min_count is not None or max_count is not None:
+                option_name = "--enable-cluster-autoscaler"
+                if decorator_mode == DecoratorMode.UPDATE:
+                    option_name += " or --update-cluster-autoscaler"
+                raise RequiredArgumentMissingError(
+                    "min-count and max-count are required for {}, please use the flag".format(
+                        option_name
+                    )
+                )
 
     def get_subscription_id(self):
         """Helper function to obtain the value of subscription_id.
@@ -1256,7 +1256,7 @@ class AKSContext:
         # these parameters do not need dynamic completion
 
         # validation
-        validate_counts_in_autoscaler(
+        self.validate_counts_in_autoscaler(
             node_count,
             enable_cluster_autoscaler,
             min_count,
@@ -1328,7 +1328,7 @@ class AKSContext:
                 "--disable-cluster-autoscaler"
             )
 
-        validate_counts_in_autoscaler(
+        self.validate_counts_in_autoscaler(
             None,
             enable_cluster_autoscaler or update_cluster_autoscaler,
             min_count,
