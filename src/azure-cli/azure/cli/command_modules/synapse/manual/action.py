@@ -64,7 +64,7 @@ class AddSku(argparse.Action):
         action = self.get_action(values, option_string)
         namespace.sku = action
 
-    def get_action(self, values, option_string):
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -100,7 +100,7 @@ class AddOptimizedAutoscale(argparse.Action):
         action = self.get_action(values, option_string)
         namespace.optimized_autoscale = action
 
-    def get_action(self, values, option_string):
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -139,7 +139,7 @@ class AddValue(argparse._AppendAction):
         action = self.get_action(values, option_string)
         super(AddValue, self).__call__(parser, namespace, action, option_string)
 
-    def get_action(self, values, option_string):
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -169,7 +169,7 @@ class AddTableLevelSharingProperties(argparse.Action):
         action = self.get_action(values, option_string)
         namespace.table_level_sharing_properties = action
 
-    def get_action(self, values, option_string):
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -217,7 +217,7 @@ class AddReadWriteDatabase(argparse.Action):
         action = self.get_action(values, option_string)
         namespace.read_write_database = action
 
-    def get_action(self, values, option_string):
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
