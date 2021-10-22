@@ -120,7 +120,7 @@ def load_flexibleserver_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('create', 'firewall_rule_create_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'firewall_rule_delete_func', custom_command_type=flexible_server_custom_common)
-        g.custom_command('show', 'firewall_rule_get_func', custom_command_type=flexible_server_custom_common)
+        g.custom_show_command('show', 'firewall_rule_get_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('list', 'firewall_rule_list_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
                                  getter_name='flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
@@ -198,7 +198,7 @@ def load_flexibleserver_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('create', 'firewall_rule_create_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'firewall_rule_delete_func', custom_command_type=flexible_server_custom_common)
-        g.custom_command('show', 'firewall_rule_get_func', custom_command_type=flexible_server_custom_common)
+        g.custom_show_command('show', 'firewall_rule_get_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('list', 'firewall_rule_list_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
                                  getter_name='flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
