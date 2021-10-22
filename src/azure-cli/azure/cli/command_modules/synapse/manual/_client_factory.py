@@ -99,10 +99,6 @@ def cf_synapse_client_operations_factory(cli_ctx, *_):
 
 
 def cf_kusto_pool(cli_ctx, *_):
-    return cf_synapse(cli_ctx).kusto_pool
-
-
-def cf_kusto_pool(cli_ctx, *_):
     return cf_synapse(cli_ctx).kusto_pools
 
 
