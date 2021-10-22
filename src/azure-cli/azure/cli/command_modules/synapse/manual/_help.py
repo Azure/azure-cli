@@ -2130,3 +2130,8 @@ helps['synapse kusto pool update'] = """
 true --workspace-uid "11111111-2222-3333-444444444444" --sku name="Storage optimized" capacity=2 size="Medium" \
 --resource-group "kustorptest" --workspace-name "synapseWorkspaceName"
 """
+
+helps['synapse kusto'] = """
+    type: command
+    short-summary: "Manage synapse kusto"
+"""

@@ -112,6 +112,7 @@ def synapse_kusto_pool_remove_language_extension(client,
                        resource_group_name=resource_group_name,
                        language_extensions_to_remove=language_extensions_to_remove)
 
+
 def synapse_kusto_pool_add_language_extension(client,
                                               workspace_name,
                                               kusto_pool_name,

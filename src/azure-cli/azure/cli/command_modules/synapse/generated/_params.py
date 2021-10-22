@@ -103,10 +103,13 @@ def load_arguments(self, _):
                    'you want to follow all current and future databases.')
         c.argument('kusto_pool_resource_id', type=str, help='The resource id of the kusto pool where the databases you '
                    'would like to attach reside.')
-        c.argument('default_principals_modification_kind', arg_type=get_enum_type(['Union', 'Replace', 'None']),
+        c.argument('default_principals_modification_kind', options_list=['--default-principals-modification-kind',
+                                                                         '--dpmk'], arg_type=get_enum_type(['Union',
+                                                                                                            'Replace',
+                                                                                                            'None']),
                    help='The default principals modification kind')
-        c.argument('table_level_sharing_properties', action=AddTableLevelSharingProperties, nargs='+', help='Table '
-                   'level sharing specifications')
+        c.argument('table_level_sharing_properties', options_list=['--table-level-sharing-properties', '--tlsp'],
+                   action=AddTableLevelSharingProperties, nargs='+', help='Table level sharing specifications')
 
     with self.argument_context('synapse kusto attached-database-configuration update') as c:
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
@@ -121,10 +124,13 @@ def load_arguments(self, _):
                    'you want to follow all current and future databases.')
         c.argument('kusto_pool_resource_id', type=str, help='The resource id of the kusto pool where the databases you '
                    'would like to attach reside.')
-        c.argument('default_principals_modification_kind', arg_type=get_enum_type(['Union', 'Replace', 'None']),
+        c.argument('default_principals_modification_kind', options_list=['--default-principals-modification-kind',
+                                                                         '--dpmk'], arg_type=get_enum_type(['Union',
+                                                                                                            'Replace',
+                                                                                                            'None']),
                    help='The default principals modification kind')
-        c.argument('table_level_sharing_properties', action=AddTableLevelSharingProperties, nargs='+', help='Table '
-                   'level sharing specifications')
+        c.argument('table_level_sharing_properties', options_list=['--table-level-sharing-properties', '--tlsp'],
+                   action=AddTableLevelSharingProperties, nargs='+', help='Table level sharing specifications')
         c.ignore('parameters')
 
     with self.argument_context('synapse kusto attached-database-configuration delete') as c:
