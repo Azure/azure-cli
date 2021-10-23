@@ -850,7 +850,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = self.create_random_name('kubeconfig', 24) + '.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -1985,7 +1986,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -2495,7 +2497,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -3191,7 +3194,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = self.create_random_name('kubeconfig', 24) + '.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(

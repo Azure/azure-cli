@@ -180,6 +180,10 @@ def load_command_table(self, _):
         g.keyvault_custom('import', 'import_key', transform=transform_key_output)
         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
 
+    if not is_azure_stack_profile(self):
+        with self.command_group('keyvault key', data_key_entity.command_type) as g:
+            g.keyvault_command('random', 'get_random_bytes', is_preview=True)
+
     with self.command_group('keyvault secret', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_secrets',
                            transform=multi_transformers(
