@@ -401,7 +401,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_cosmosdb_managed_cassandra_cluster_create', supports_no_wait=True)
         g.custom_command('update', 'cli_cosmosdb_managed_cassandra_cluster_update', supports_no_wait=True)
         g.custom_command('deallocate', 'cli_cosmosdb_managed_cassandra_cluster_deallocate', supports_no_wait=True)
-        g.custom_command('command', 'cli_cosmosdb_managed_cassandra_cluster_invoke_command', supports_no_wait=True)
+        g.custom_command('invoke-command', 'cli_cosmosdb_managed_cassandra_cluster_invoke_command', supports_no_wait=True)
         g.custom_command('start', 'cli_cosmosdb_managed_cassandra_cluster_start', supports_no_wait=True)
         g.custom_command('status', 'cli_cosmosdb_managed_cassandra_cluster_status')
         g.custom_command('list', 'cli_cosmosdb_managed_cassandra_cluster_list')

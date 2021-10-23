@@ -1250,13 +1250,13 @@ examples:
       az managed-cassandra cluster backups --resource-group MyResourceGroup --cluster-name MyCluster
 """
 
-helps['managed-cassandra cluster command'] = """
+helps['managed-cassandra cluster invoke-command'] = """
 type: command
 short-summary: Invoke a command like nodetool for cassandra maintenance.
 examples:
-  - name: This command runs nodetool status in a host node of the cluster.
+  - name: This command runs nodetool with these arguments in a host node of the cluster.
     text: |
-      az managed-cassandra cluster command --resource-group MyResourceGroup --cluster-name MyCluster --command-name "nodetool status" --host "10.0.1.12"
+      az managed-cassandra cluster invoke-command --resource-group MyResourceGroup --cluster-name MyCluster --host "10.0.1.12" --command-name "nodetool" --arguments arg1="value1" arg2="value2" arg3="value3"
 """
 
 helps['managed-cassandra cluster deallocate'] = """
