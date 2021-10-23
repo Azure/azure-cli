@@ -61,7 +61,7 @@ protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
                              'HANAInstance': 'SAPHanaSystem',
                              'SAPHanaSystem': 'SAPHanaSystem',
                              'SQLInstance': 'SQLInstance',
-                             'SQLAG': 'SQLAG'}
+                             'SQLAG': 'SQLAvailabilityGroupContainer'}
 
 
 def show_wl_policy(client, resource_group_name, vault_name, name):
@@ -268,7 +268,7 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
     filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
 
     # Protectable Item Type filter
-    filtered_items = [item for item in filtered_items if
+    filtered_items = [item for item in filtered_items if item.properties.protectable_item_type is not None and
                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
 
     return cust_help.get_none_one_or_many(filtered_items)
@@ -290,8 +290,7 @@ def show_protectable_instance(items, server_name, protectable_item_type):
 
     protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
     # Protectable Item Type filter
-    filtered_items = [item for item in items if
-                      item.properties.protectable_item_type is not None and
+    filtered_items = [item for item in items if item.properties.protectable_item_type is not None and
                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
     # Server Name filter
     filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
@@ -317,7 +316,7 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
 
     if protectable_item_type is not None:
         # Protectable Item Type filter
-        paged_items = [item for item in paged_items if
+        paged_items = [item for item in paged_items if item.properties.protectable_item_type is not None and
                        item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
     if server_name is not None:
         # Server Name filter

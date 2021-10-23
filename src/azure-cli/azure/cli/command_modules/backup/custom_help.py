@@ -150,13 +150,12 @@ def track_backup_ilr(cli_ctx, result, vault_name, resource_group):
 # pylint: disable=inconsistent-return-statements
 def track_backup_job(cli_ctx, result, vault_name, resource_group):
     job_details_client = job_details_cf(cli_ctx)
-
     operation_status = track_backup_operation(cli_ctx, resource_group, result, vault_name)
-
     if operation_status.properties:
         job_id = operation_status.properties.job_id
         job_details = job_details_client.get(vault_name, resource_group, job_id)
         return job_details
+    return operation_status
 
 
 def track_backup_operation(cli_ctx, resource_group, result, vault_name):

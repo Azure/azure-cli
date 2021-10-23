@@ -316,5 +316,5 @@ def _get_enum_position(enum, value):
             break
         count += 1
     if count == enum_len:
-        raise CLIError("enum value not present.")
+        raise InvalidArgumentValueError("enum value not present.")
     return str(count)

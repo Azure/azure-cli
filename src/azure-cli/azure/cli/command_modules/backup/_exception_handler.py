@@ -6,8 +6,10 @@
 
 def backup_exception_handler(ex):
     from azure.core.exceptions import HttpResponseError
-    if isinstance(ex, HttpResponseError):
-        text = ex.response.text(encoding='utf-8')
-        if len(ex.args) == 1 and isinstance(ex.args[0], str):
-            ex.args = tuple([ex.args[0] + ": \n" + text])
+    from msrest.exceptions import ValidationError
+    from knack.util import CLIError
+    if isinstance(ex, HttpResponseError) and ex.message:
+        raise CLIError(ex.message)
+    if isinstance(ex, (ValidationError, IOError, ValueError)):
+        raise CLIError(ex)
     raise ex
