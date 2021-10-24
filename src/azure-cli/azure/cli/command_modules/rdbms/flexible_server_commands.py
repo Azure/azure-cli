@@ -174,8 +174,7 @@ def load_flexibleserver_command_table(self, _):
     # MySQL commands
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
-                            client_factory=cf_mysql_flexible_servers,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', 'flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
         g.custom_command('geo-restore', 'flexible_server_georestore', supports_no_wait=True)
@@ -194,8 +193,7 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
-                            client_factory=cf_mysql_flexible_firewall_rules,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_firewall_rules) as g:
         g.custom_command('create', 'firewall_rule_create_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'firewall_rule_delete_func', custom_command_type=flexible_server_custom_common)
         g.custom_show_command('show', 'firewall_rule_get_func', custom_command_type=flexible_server_custom_common)
@@ -209,16 +207,15 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('mysql flexible-server parameter', mysql_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
-                            client_factory=cf_mysql_flexible_config, table_transformer=table_transform_output_parameters,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_config,
+                            table_transformer=table_transform_output_parameters) as g:
         g.custom_command('set', 'flexible_parameter_update')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
     with self.command_group('mysql flexible-server db', mysql_flexible_db_sdk,
                             custom_command_type=flexible_server_custom_common,
-                            client_factory=cf_mysql_flexible_db,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_db) as g:
         g.custom_command('create', 'database_create_func', custom_command_type=flexible_servers_custom_mysql)
         g.custom_command('delete', 'database_delete_func')
         g.show_command('show', 'get')
@@ -226,25 +223,21 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('mysql flexible-server', mysql_flexible_location_capabilities_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
-                            client_factory=cf_mysql_flexible_location_capabilities,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_location_capabilities) as g:
         g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_skus)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
-    with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk,
-                            is_preview=True) as g:
+    with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk) as g:
         g.command('list', 'list_by_server')
 
     with self.command_group('mysql flexible-server replica', mysql_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
-                            client_factory=cf_mysql_flexible_servers,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
         g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
 
     with self.command_group('mysql flexible-server deploy', mysql_flexible_servers_sdk,
                             custom_command_type=flexible_server_custom_common,
-                            client_factory=cf_mysql_flexible_servers,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('setup', 'github_actions_setup')
         g.custom_command('run', 'github_actions_run')
