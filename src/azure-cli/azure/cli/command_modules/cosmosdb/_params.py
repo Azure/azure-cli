@@ -470,8 +470,8 @@ def load_arguments(self, _):
             c.argument('command_name', options_list=['--command-name'], help="The command which should be run", required=True)
             c.argument('host', options_list=['--host'], help="IP address of the cassandra host to run the command on", required=True)
             c.argument('arguments', options_list=['--arguments'], action=InvokeCommandArgumentsAddAction, nargs='+', help="The key=\"value\" of arguments for the command.")
-            c.argument('cassandra_stop_start', options_list=['--cassandra-stop-start'], help="If true, stops cassandra before executing the command and then start it again.")
-            c.argument('readwrite', options_list=['--readwrite'], help="If true, allows the command to *write* to the cassandra directory, otherwise read-only.")
+            c.argument('cassandra_stop_start', options_list=['--cassandra-stop-start'], arg_type=get_three_state_flag(), help="If true, stops cassandra before executing the command and then start it again.")
+            c.argument('readwrite', options_list=['--readwrite'], arg_type=get_three_state_flag(), help="If true, allows the command to *write* to the cassandra directory, otherwise read-only.")
 
     # Managed Cassandra Datacenter
     for scope in [
@@ -503,7 +503,7 @@ def load_arguments(self, _):
         c.argument('sku', options_list=['--sku'], help="Virtual Machine SKU used for data centers. Default value is Standard_DS14_v2")
         c.argument('disk_sku', options_list=['--disk-sku'], help="Disk SKU used for data centers. Default value is P30.")
         c.argument('disk_capacity', options_list=['--disk-capacity'], help="Number of disk used for data centers. Default value is 4.")
-        c.argument('availability_zone', options_list=['--availability-zone', '-z'], help="If the data center haves Availability Zone feature, apply it to the Virtual Machine ScaleSet that host the data center virtual machines.")
+        c.argument('availability_zone', options_list=['--availability-zone', '-z'], arg_type=get_three_state_flag(), help="If the data center haves Availability Zone feature, apply it to the Virtual Machine ScaleSet that host the data center virtual machines.")
 
     # Managed Cassandra Datacenter
     with self.argument_context('managed-cassandra datacenter list') as c:

@@ -204,7 +204,7 @@ def validate_client_certificates(ns):
 
 
 def get_certificates(input_certificates):
-    from azext_cosmosdb_preview.vendored_sdks.azure_mgmt_cosmosdb.models import Certificate
+    from azure.mgmt.cosmosdb.models import Certificate
     certificates = []
     for item in input_certificates:
         certificate = get_certificate(item)
@@ -230,7 +230,7 @@ def get_certificate(cert):
 
 def validate_seednodes(ns):
     """ Extracts multiple comma-separated ipaddresses """
-    from azext_cosmosdb_preview.vendored_sdks.azure_mgmt_cosmosdb.models import SeedNode
+    from azure.mgmt.cosmosdb.models import SeedNode
     if ns.external_seed_nodes is not None:
         seed_nodes = []
         for item in ns.external_seed_nodes:

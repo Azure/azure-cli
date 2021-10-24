@@ -134,4 +134,4 @@ class InvokeCommandArgumentsAddAction(argparse._AppendAction):
                 kwargs[key] = value
             except ValueError:
                 raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
-        return kwargs
+        namespace.arguments = kwargs
