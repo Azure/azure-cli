@@ -1086,6 +1086,46 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --vault-name {kv2} --name key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2')
+    def test_keyvault_key_rotation(self, resource_group, key_vault):
+        self.kwargs.update({
+            'loc': 'eastus2',
+            'key': self.create_random_name('key-', 24)
+        })
+        keyvault = self.cmd('keyvault show -n {kv} -g {rg}').get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
+        key_perms.extend(['rotate'])
+        self.kwargs['key_perms'] = ' '.join(key_perms)
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
+
+        # create a key
+        key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
+                       checks=self.check('attributes.enabled', True)).get_output_in_json()
+
+        # update rotation-policy
+        self.cmd('keyvault key rotation-policy update --expires-in P30D --notify-before-expiry P7D '
+                 '--rotate-after-creation P15D --vault-name {kv} -n {key}',
+                 checks=[self.check('expiresIn', 'P30D'),
+                         self.check('length(lifetimeActions)', 2),
+                         self.check('lifetimeActions[0].action', 'Rotate'),
+                         self.check('lifetimeActions[0].timeAfterCreate', 'P15D'),
+                         self.check('lifetimeActions[1].action', 'Notify'),
+                         self.check('lifetimeActions[1].timeBeforeExpiry', 'P7D')])
+
+        # show rotation-policy
+        self.cmd('keyvault key rotation-policy show --vault-name {kv} -n {key}',
+                 checks=[self.check('expiresIn', 'P30D'),
+                         self.check('length(lifetimeActions)', 2),
+                         self.check('lifetimeActions[0].action', 'Rotate'),
+                         self.check('lifetimeActions[0].timeAfterCreate', 'P15D'),
+                         self.check('lifetimeActions[1].action', 'Notify'),
+                         self.check('lifetimeActions[1].timeBeforeExpiry', 'P7D')])
+
+        # rotate key
+        self.cmd('keyvault key rotate --vault-name {kv} -n {key}')
+
 
 class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
     # @record_only()
