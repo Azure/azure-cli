@@ -427,12 +427,13 @@ class AKSContext:
     ) -> None:
         """Helper function to check the validity of serveral count-related parameters in autoscaler.
 
-        On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is enabled,
-        it will check whether both min_count and max_count are  assigned, if not, raise the RequiredArgumentMissingError. If
-        min_count is less than max_count, raise the InvalidArgumentValueError. Only in create mode it will check whether the
-        value of node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
-        enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is not enabled, it will check
-        whether any of min_count or max_count is assigned, if so, raise the RequiredArgumentMissingError.
+        On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is
+        enabled, it will check whether both min_count and max_count are  assigned, if not, raise the
+        RequiredArgumentMissingError. If min_count is less than max_count, raise the InvalidArgumentValueError. Only in
+        create mode it will check whether the value of node_count is between min_count and max_count, if not, raise the
+        InvalidArgumentValueError. If enable_cluster_autoscaler (in update mode, this could be
+        update_cluster_autoscaler) is not enabled, it will check whether any of min_count or max_count is assigned,
+        if so, raise the RequiredArgumentMissingError.
 
         :return: None
         """
