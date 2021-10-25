@@ -301,10 +301,10 @@ examples:
 
 helps['backup protection auto-disable-for-azurewl'] = """
 type: command
-short-summary: Disable auto-protection for the specified item.
+short-summary: Disable auto-protection for the specified protectable item.
 examples:
-  - name: Disable auto-protection for the specified item.
-    text: az backup protection auto-disable-for-azurewl --resource-group MyResourceGroup --vault-name MyVault --item-name MyItemName
+  - name: Disable auto-protection for the specified protectable item.
+    text: az backup protection auto-disable-for-azurewl --resource-group MyResourceGroup --vault-name MyVault  --protectable-item-name ItemName --protectable-item-type SQLInstance --server-name Myserver --workload-type MSSQL
 """
 
 helps['backup protection resume'] = """
