@@ -153,8 +153,8 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one",
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('vnet', options_list=['--vnet'], help="Name or resource ID of the pre-existing virtual network to have the webapp join. Must be in the same location as the webapp's App Service Plan. Provide a resource ID if in a different resource group from the webapp. Must be used with --subnet argument.")
-        c.argument('subnet', options_list=['--subnet'], help="Name or resource ID of the pre-existing subnet to have the webapp join. Provide a resource ID if in a different resource group from the webapp. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('vnet', options_list=['--vnet'], help="Name or resource ID of the pre-existing virtual network to have the webapp join. Must be in the same location as the webapp's App Service Plan. Provide a resource ID if in a different resource group or subscription from the webapp. Must be used with --subnet argument.")
+        c.argument('subnet', options_list=['--subnet'], help="Name or resource ID of the pre-existing subnet to have the webapp join. Provide a resource ID if in a different resource group or subscription from the webapp. The --vnet is argument also needed if specifying subnet by name.")
         c.ignore('language')
         c.ignore('using_webapp_up')
 
