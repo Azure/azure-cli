@@ -17,11 +17,12 @@ import yaml
 from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
+
+from azure.keyvault.key_vault_id import KeyVaultIdentifier
 from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import FileOperationError, AzureInternalError
-from azure.keyvault.key_vault_id import KeyVaultIdentifier
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles)
 from ._utils import prep_label_filter_for_url_encoding
@@ -427,7 +428,6 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                             secret_version = appsvc_value_dict.get('secretversion')
                             secret_identifier = "https://{0}.vault.azure.net/secrets/{1}/{2}".format(vault_name, secret_name, secret_version)
                         try:
-                            from azure.keyvault.key_vault_id import KeyVaultIdentifier
                             # this throws an exception for invalid format of secret identifier
                             KeyVaultIdentifier(uri=secret_identifier)
                             kv = KeyValue(key=key,
