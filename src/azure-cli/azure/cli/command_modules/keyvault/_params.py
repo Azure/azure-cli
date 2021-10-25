@@ -83,7 +83,7 @@ def load_arguments(self, _):
          'NetworkRuleBypassOptions', 'NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
     # Todo: Remove this after azure-mgmt-keyvault bumped to 2021-06-01-preview
-    class KeyPermissions(str, Enum):
+    class CLIKeyPermissions(str, Enum):
         ENCRYPT = "encrypt"
         DECRYPT = "decrypt"
         WRAP_KEY = "wrapKey"
@@ -102,6 +102,8 @@ def load_arguments(self, _):
         PURGE = "purge"
         RELEASE = "release"
         ROTATE = "rotate"
+
+    KeyPermissions = CLIKeyPermissions
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
