@@ -23,6 +23,9 @@ from azure.cli.command_modules.acs._loadbalancer import (
 from azure.cli.command_modules.acs._loadbalancer import (
     update_load_balancer_profile as _update_load_balancer_profile,
 )
+from azure.cli.command_modules.acs._validators import (
+    extract_comma_separated_string,
+)
 from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
     _ensure_aks_acr,
@@ -35,7 +38,6 @@ from azure.cli.command_modules.acs.custom import (
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
 )
-from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -55,7 +57,6 @@ from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id
-
 logger = get_logger(__name__)
 
 # type variables
