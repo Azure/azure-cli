@@ -535,7 +535,7 @@ def list_images(cmd, resource_group_name=None):
 # region Snapshots
 # pylint: disable=unused-argument,too-many-locals
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
-                    source=None, for_upload=None, incremental=None,
+                    source=None, for_upload=None, copy_start=None, incremental=None,
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
@@ -551,6 +551,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
+        if cmd.supported_api_version(min_api='2021-04-01', operation_group='snapshots'):
+            option = DiskCreateOption.copy_start if copy_start else DiskCreateOption.copy
     elif for_upload:
         option = DiskCreateOption.upload
     else:
@@ -2545,7 +2547,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
-                capacity_reservation_group=None):
+                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2806,7 +2808,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
-            capacity_reservation_group=capacity_reservation_group)
+            capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
+            patch_mode=patch_mode, enable_agent=enable_agent)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 

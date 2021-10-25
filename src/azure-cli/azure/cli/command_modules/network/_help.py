@@ -7165,7 +7165,7 @@ examples:
         az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type password --username xyz
   - name: SSH to virtual machine using Azure Bastion using ssh key file.
     text: |
-        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type ssh-key-file --username xyz --ssh-key C:/filepath/sshkey.pem
+        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type ssh-key --username xyz --ssh-key C:/filepath/sshkey.pem
   - name: SSH to virtual machine using Azure Bastion using AAD.
     text: |
         az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type AAD

@@ -69,13 +69,13 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.ignore('_subscription')
 
         with self.argument_context('account list') as c:
-            c.argument('all', help="List all subscriptions, rather than just 'Enabled' ones", action='store_true')
+            c.argument('all', help="List all subscriptions from all clouds, rather than just 'Enabled' ones", action='store_true')
             c.argument('refresh', help="retrieve up-to-date subscriptions from server", action='store_true')
             c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account show') as c:
             c.argument('show_auth_for_sdk', options_list=['--sdk-auth'], action='store_true',
-                       deprecate_info=c.deprecate(target='--sdk-auth', expiration='3.0.0'),
+                       deprecate_info=c.deprecate(target='--sdk-auth'),
                        help='Output result to a file compatible with Azure SDK auth. Only applicable when authenticating with a Service Principal.')
 
         with self.argument_context('account get-access-token') as c:
