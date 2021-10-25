@@ -1726,7 +1726,6 @@ class AKSContext:
             assign_identity = raw_value
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if assign_identity:
@@ -2224,7 +2223,6 @@ class AKSContext:
             network_plugin = self.mc.network_profile.network_plugin
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             (
@@ -2883,7 +2881,6 @@ class AKSContext:
             enable_aad = self.mc.aad_profile.managed
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             (
@@ -3095,7 +3092,6 @@ class AKSContext:
             disable_rbac = not self.mc.enable_rbac
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if disable_rbac and self._get_enable_azure_rbac(enable_validation=False):
@@ -3137,7 +3133,6 @@ class AKSContext:
             enable_rbac = self.mc.enable_rbac
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if enable_rbac and self._get_disable_rbac(enable_validation=False):
@@ -3175,7 +3170,6 @@ class AKSContext:
             enable_azure_rbac = self.mc.aad_profile.enable_azure_rbac
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if enable_azure_rbac and self._get_disable_rbac(enable_validation=False):
@@ -3302,7 +3296,6 @@ class AKSContext:
             fqdn_subdomain = self.mc.fqdn_subdomain
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if fqdn_subdomain:
@@ -3359,7 +3352,6 @@ class AKSContext:
             enable_private_cluster = self.mc.api_server_access_profile.enable_private_cluster
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if enable_private_cluster:
@@ -3544,7 +3536,6 @@ class AKSContext:
             private_dns_zone = self.mc.api_server_access_profile.private_dns_zone
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if private_dns_zone:
@@ -3608,7 +3599,6 @@ class AKSContext:
             assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if assign_kubelet_identity and not self._get_assign_identity(enable_validation=False):
@@ -3745,7 +3735,6 @@ class AKSContext:
                 uptime_sla = self.mc.sku.tier == "Paid"
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if uptime_sla and self._get_no_uptime_sla(enable_validation=False):
@@ -3777,7 +3766,6 @@ class AKSContext:
         no_uptime_sla = self.raw_param.get("no_uptime_sla")
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if no_uptime_sla and self._get_uptime_sla(enable_validation=False):
