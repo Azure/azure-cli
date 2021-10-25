@@ -3542,7 +3542,7 @@ def create_lb_inbound_nat_rule(
     if frontend_port_range_start and cmd.supported_api_version('2021-03-01'):
         new_rule.frontend_port_range_start = frontend_port_range_start
     if backend_address_pool_name and cmd.supported_api_version('2021-03-01'):
-       new_rule.backend_address_pool = get_property(lb.backend_address_pools, backend_address_pool_name)  # pylint: disable=no-member
+        new_rule.backend_address_pool = get_property(lb.backend_address_pools, backend_address_pool_name)  # pylint: disable=no-member
     upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
     return get_property(poller.result().inbound_nat_rules, item_name)
@@ -3579,7 +3579,7 @@ def set_lb_inbound_nat_rule(
     if frontend_port_range_start is not None and cmd.supported_api_version('2021-03-01'):
         instance.frontend_port_range_start = frontend_port_range_start
     if frontend_port_range_end is not None and cmd.supported_api_version('2021-03-01'):
-        instance.frontend_port_range_end = frontend_port_range_end 
+        instance.frontend_port_range_end = frontend_port_range_end
 
     with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
