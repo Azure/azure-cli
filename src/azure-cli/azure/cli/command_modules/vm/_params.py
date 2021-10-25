@@ -784,7 +784,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('vm', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
-            c.argument('application_version_ids', options_list=['--app-version-ids'], nargs='*', help="Space-separated application version ids to set to vm.")
+            c.argument('application_version_ids', options_list=['--app-version-ids'], nargs='*', help="Space-separated application version ids to set to VM.")
             c.argument('order_applications', action='store_true', help='Whether set order index at each galleryApplications. It starts from 1.')
             c.argument('application_configuration_overrides', options_list=['--app-config-overrides'], nargs='*',
                        help='Space-separated application configuration overrides for each application version ids. '
