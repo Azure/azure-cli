@@ -3689,9 +3689,17 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
                                subnet_name=subnet_info["subnet_name"])
 
     subnet_id = subnet_info["subnet_resource_id"]
-    client.web_apps.update(resource_group_name=resource_group_name,
-                           name=name,
-                           site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
+    if not slot:
+        client.web_apps.update(resource_group_name=resource_group_name,
+                               name=name,
+                               site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
+    else:
+        client.web_apps.update_slot(resource_group_name=resource_group_name,
+                                    name=name,
+                                    slot=slot,
+                                    site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
+
+
 
     # Enable Route All configuration
     config = get_site_configs(cmd, resource_group_name, name, slot)
