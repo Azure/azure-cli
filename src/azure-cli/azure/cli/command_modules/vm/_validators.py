@@ -15,7 +15,7 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, ArgumentUsageError
+from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -1231,7 +1231,6 @@ def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unuse
         raise InvalidArgumentValueError('usage error: --application-version-ids should not be empty list.')
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
-        from azure.cli.core.parser import ArgumentUsageError
         raise ArgumentUsageError('usage error: --app-config-overrides should have the same number of items as'
                                  ' --application-version-ids')
 
