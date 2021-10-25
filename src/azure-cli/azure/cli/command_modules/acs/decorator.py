@@ -23,6 +23,9 @@ from azure.cli.command_modules.acs._loadbalancer import (
 from azure.cli.command_modules.acs._loadbalancer import (
     update_load_balancer_profile as _update_load_balancer_profile,
 )
+from azure.cli.command_modules.acs._validators import (
+    extract_comma_separated_string,
+)
 from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
     _ensure_aks_acr,
@@ -35,7 +38,6 @@ from azure.cli.command_modules.acs.custom import (
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
 )
-from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -55,7 +57,6 @@ from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id
-
 logger = get_logger(__name__)
 
 # type variables
@@ -134,51 +135,6 @@ def check_is_msi_cluster(mc: ManagedCluster) -> bool:
         if identity_type in ("systemassigned", "userassigned"):
             return True
     return False
-
-
-def validate_counts_in_autoscaler(
-    node_count,
-    enable_cluster_autoscaler,
-    min_count,
-    max_count,
-    decorator_mode,
-) -> None:
-    """Check the validity of serveral count-related parameters in autoscaler.
-
-    On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is enabled,
-    it will check whether both min_count and max_count are  assigned, if not, raise the RequiredArgumentMissingError. If
-    min_count is less than max_count, raise the InvalidArgumentValueError. Only in create mode it will check whether the
-    value of node_count is between min_count and max_count, if not, raise the InvalidArgumentValueError. If
-    enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is not enabled, it will check
-    whether any of min_count or max_count is assigned, if so, raise the RequiredArgumentMissingError.
-
-    :return: None
-    """
-    # validation
-    if enable_cluster_autoscaler:
-        if min_count is None or max_count is None:
-            raise RequiredArgumentMissingError(
-                "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
-            )
-        if min_count > max_count:
-            raise InvalidArgumentValueError(
-                "Value of min-count should be less than or equal to value of max-count"
-            )
-        if decorator_mode == DecoratorMode.CREATE:
-            if node_count < min_count or node_count > max_count:
-                raise InvalidArgumentValueError(
-                    "node-count is not in the range of min-count and max-count"
-                )
-    else:
-        if min_count is not None or max_count is not None:
-            option_name = "--enable-cluster-autoscaler"
-            if decorator_mode == DecoratorMode.UPDATE:
-                option_name += " or --update-cluster-autoscaler"
-            raise RequiredArgumentMissingError(
-                "min-count and max-count are required for {}, please use the flag".format(
-                    option_name
-                )
-            )
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
@@ -286,7 +242,6 @@ class AKSModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        # not directly used
         self.ManagedClusterPropertiesAutoScalerProfile = self.__cmd.get_models(
             "ManagedClusterPropertiesAutoScalerProfile",
             resource_type=self.resource_type,
@@ -460,6 +415,53 @@ class AKSContext:
         :return: None
         """
         self.intermediates.pop(variable_name, None)
+
+    # pylint: disable=no-self-use
+    def validate_counts_in_autoscaler(
+        self,
+        node_count,
+        enable_cluster_autoscaler,
+        min_count,
+        max_count,
+        decorator_mode,
+    ) -> None:
+        """Helper function to check the validity of serveral count-related parameters in autoscaler.
+
+        On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is
+        enabled, it will check whether both min_count and max_count are  assigned, if not, raise the
+        RequiredArgumentMissingError. If min_count is less than max_count, raise the InvalidArgumentValueError. Only in
+        create mode it will check whether the value of node_count is between min_count and max_count, if not, raise the
+        InvalidArgumentValueError. If enable_cluster_autoscaler (in update mode, this could be
+        update_cluster_autoscaler) is not enabled, it will check whether any of min_count or max_count is assigned,
+        if so, raise the RequiredArgumentMissingError.
+
+        :return: None
+        """
+        # validation
+        if enable_cluster_autoscaler:
+            if min_count is None or max_count is None:
+                raise RequiredArgumentMissingError(
+                    "Please specify both min-count and max-count when --enable-cluster-autoscaler enabled"
+                )
+            if min_count > max_count:
+                raise InvalidArgumentValueError(
+                    "Value of min-count should be less than or equal to value of max-count"
+                )
+            if decorator_mode == DecoratorMode.CREATE:
+                if node_count < min_count or node_count > max_count:
+                    raise InvalidArgumentValueError(
+                        "node-count is not in the range of min-count and max-count"
+                    )
+        else:
+            if min_count is not None or max_count is not None:
+                option_name = "--enable-cluster-autoscaler"
+                if decorator_mode == DecoratorMode.UPDATE:
+                    option_name += " or --update-cluster-autoscaler"
+                raise RequiredArgumentMissingError(
+                    "min-count and max-count are required for {}, please use the flag".format(
+                        option_name
+                    )
+                )
 
     def get_subscription_id(self):
         """Helper function to obtain the value of subscription_id.
@@ -1256,7 +1258,7 @@ class AKSContext:
         # these parameters do not need dynamic completion
 
         # validation
-        validate_counts_in_autoscaler(
+        self.validate_counts_in_autoscaler(
             node_count,
             enable_cluster_autoscaler,
             min_count,
@@ -1328,7 +1330,7 @@ class AKSContext:
                 "--disable-cluster-autoscaler"
             )
 
-        validate_counts_in_autoscaler(
+        self.validate_counts_in_autoscaler(
             None,
             enable_cluster_autoscaler or update_cluster_autoscaler,
             min_count,
@@ -1726,7 +1728,6 @@ class AKSContext:
             assign_identity = raw_value
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if assign_identity:
@@ -1735,7 +1736,7 @@ class AKSContext:
                         "--assign-identity can only be specified when --enable-managed-identity is specified"
                     )
             else:
-                if self.get_assign_kubelet_identity():
+                if self._get_assign_kubelet_identity(enable_validation=False):
                     raise RequiredArgumentMissingError(
                         "--assign-kubelet-identity can only be specified when --assign-identity is specified"
                     )
@@ -1921,11 +1922,11 @@ class AKSContext:
         # validation
         if enable_validation:
             if load_balancer_sku == "basic":
-                if self.get_api_server_authorized_ip_ranges():
+                if self._get_api_server_authorized_ip_ranges(enable_validation=False):
                     raise InvalidArgumentValueError(
                         "--api-server-authorized-ip-ranges can only be used with standard load balancer"
                     )
-                if self.get_enable_private_cluster():
+                if self._get_enable_private_cluster(enable_validation=False):
                     raise InvalidArgumentValueError(
                         "Please use standard load balancer for private cluster"
                     )
@@ -2224,7 +2225,6 @@ class AKSContext:
             network_plugin = self.mc.network_profile.network_plugin
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             (
@@ -2233,8 +2233,8 @@ class AKSContext:
                 dns_service_ip,
                 docker_bridge_address,
                 network_policy,
-            ) = (
-                self.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+                enable_validation=False
             )
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr:
@@ -2269,8 +2269,9 @@ class AKSContext:
 
         return self._get_network_plugin(enable_validation=True)
 
-    def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
-        self,
+    # pylint: disable=unused-argument
+    def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+        self, enable_validation: bool = False, **kwargs
     ) -> Tuple[
         Union[str, None],
         Union[str, None],
@@ -2278,7 +2279,8 @@ class AKSContext:
         Union[str, None],
         Union[str, None],
     ]:
-        """Obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and network_policy.
+        """Internal function to obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and
+        network_policy.
 
         Note: SDK provides default value "10.244.0.0/16" and performs the following validation
         {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for pod_cidr.
@@ -2290,10 +2292,10 @@ class AKSContext:
         Note: SDK provides default value "172.17.0.1/16" and performs the following validation
         {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
 
-        This function will verify the parameters by default. If pod_cidr is assigned and the value of network_plugin
-        is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr, service_cidr,
-        dns_service_ip, docker_bridge_address or network_policy is assigned, a RequiredArgumentMissingError will be
-        raised.
+        This function supports the option of enable_validation. When enabled, if pod_cidr is assigned and the value of
+        network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr,
+        service_cidr, dns_service_ip, docker_bridge_address or network_policy is assigned, a
+        RequiredArgumentMissingError will be raised.
 
         :return: a tuple of five elements: pod_cidr of string type or None, service_cidr of string type or None,
         dns_service_ip of string type or None, docker_bridge_address of string type or None, network_policy of
@@ -2342,24 +2344,59 @@ class AKSContext:
         # these parameters do not need dynamic completion
 
         # validation
-        network_plugin = self._get_network_plugin(enable_validation=False)
-        if network_plugin:
-            if network_plugin == "azure" and pod_cidr:
-                raise InvalidArgumentValueError(
-                    "Please use kubenet as the network plugin type when pod_cidr is specified"
-                )
-        else:
-            if (
-                pod_cidr or
-                service_cidr or
-                dns_service_ip or
-                docker_bridge_address or
-                network_policy
-            ):
-                raise RequiredArgumentMissingError(
-                    "Please explicitly specify the network plugin type"
-                )
+        if enable_validation:
+            network_plugin = self._get_network_plugin(enable_validation=False)
+            if network_plugin:
+                if network_plugin == "azure" and pod_cidr:
+                    raise InvalidArgumentValueError(
+                        "Please use kubenet as the network plugin type when pod_cidr is specified"
+                    )
+            else:
+                if (
+                    pod_cidr or
+                    service_cidr or
+                    dns_service_ip or
+                    docker_bridge_address or
+                    network_policy
+                ):
+                    raise RequiredArgumentMissingError(
+                        "Please explicitly specify the network plugin type"
+                    )
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
+
+    def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+        self,
+    ) -> Tuple[
+        Union[str, None],
+        Union[str, None],
+        Union[str, None],
+        Union[str, None],
+        Union[str, None],
+    ]:
+        """Obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and network_policy.
+
+        Note: SDK provides default value "10.244.0.0/16" and performs the following validation
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for pod_cidr.
+        Note: SDK provides default value "10.0.0.0/16" and performs the following validation
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for service_cidr.
+        Note: SDK provides default value "10.0.0.10" and performs the following validation
+        {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}
+        for dns_service_ip.
+        Note: SDK provides default value "172.17.0.1/16" and performs the following validation
+        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
+
+        This function will verify the parameters by default. If pod_cidr is assigned and the value of network_plugin
+        is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr, service_cidr,
+        dns_service_ip, docker_bridge_address or network_policy is assigned, a RequiredArgumentMissingError will be
+        raised.
+
+        :return: a tuple of five elements: pod_cidr of string type or None, service_cidr of string type or None,
+        dns_service_ip of string type or None, docker_bridge_address of string type or None, network_policy of
+        string type or None.
+        """
+        return self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+            enable_validation=True
+        )
 
     # pylint: disable=no-self-use
     def get_addon_consts(self) -> Dict[str, str]:
@@ -2846,15 +2883,14 @@ class AKSContext:
             enable_aad = self.mc.aad_profile.managed
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             (
                 aad_client_app_id,
                 aad_server_app_id,
                 aad_server_app_secret,
-            ) = (
-                self.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
+            ) = self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+                enable_validation=False
             )
             if enable_aad:
                 if any(
@@ -2887,13 +2923,14 @@ class AKSContext:
 
         return self._get_enable_aad(enable_validation=True)
 
-    def get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-        self,
+    # pylint: disable=unused-argument
+    def _get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+        self, enable_validation: bool = False, **kwargs
     ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
-        """Obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
+        """Internal function to obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
 
-        This function will verify the parameters by default. If the value of enable_aad is True and any of
-        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
+        This function supports the option of enable_validation. When enabled, if the value of enable_aad is True and any
+        of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
         will be raised.
 
         :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
@@ -2925,20 +2962,35 @@ class AKSContext:
         # these parameters do not need dynamic completion
 
         # validation
-        enable_aad = self._get_enable_aad(enable_validation=False)
-        if enable_aad:
-            if any(
-                [
-                    aad_client_app_id,
-                    aad_server_app_id,
-                    aad_server_app_secret,
-                ]
-            ):
-                raise MutuallyExclusiveArgumentError(
-                    "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
-                    "--aad-server-app-secret"
-                )
+        if enable_validation:
+            enable_aad = self._get_enable_aad(enable_validation=False)
+            if enable_aad:
+                if any(
+                    [
+                        aad_client_app_id,
+                        aad_server_app_id,
+                        aad_server_app_secret,
+                    ]
+                ):
+                    raise MutuallyExclusiveArgumentError(
+                        "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
+                        "--aad-server-app-secret"
+                    )
         return aad_client_app_id, aad_server_app_id, aad_server_app_secret
+
+    def get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+        self,
+    ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
+        """Obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
+
+        This function will verify the parameters by default. If the value of enable_aad is True and any of
+        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
+        will be raised.
+
+        :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
+        or None and aad_server_app_secret of string type or None.
+        """
+        return self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_aad_tenant_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
@@ -2974,7 +3026,7 @@ class AKSContext:
             enable_validation=False
         ):
             if aad_tenant_id is None and any(
-                self.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
+                self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=False)
             ):
                 profile = Profile(cli_ctx=self.cmd.cli_ctx)
                 _, _, aad_tenant_id = profile.get_login_credentials()
@@ -3042,14 +3094,13 @@ class AKSContext:
             disable_rbac = not self.mc.enable_rbac
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if disable_rbac and self._get_enable_azure_rbac(enable_validation=False):
                 raise MutuallyExclusiveArgumentError(
                     "--enable-azure-rbac cannot be used together with --disable-rbac"
                 )
-            if disable_rbac and self.get_enable_rbac():
+            if disable_rbac and self._get_enable_rbac(enable_validation=False):
                 raise MutuallyExclusiveArgumentError("specify either '--disable-rbac' or '--enable-rbac', not both.")
         return disable_rbac
 
@@ -3065,11 +3116,12 @@ class AKSContext:
 
         return self._get_disable_rbac(enable_validation=True)
 
-    def get_enable_rbac(self) -> Union[bool, None]:
-        """Obtain the value of enable_rbac.
+    # pylint: disable=unused-argument
+    def _get_enable_rbac(self, enable_validation: bool = False, **kwargs) -> Union[bool, None]:
+        """Internal function to obtain the value of enable_rbac.
 
-        This function will verify the parameter by default. If the values of enable_rbac and disable_rbac are both True,
-        a MutuallyExclusiveArgumentError will be raised.
+        This function supports the option of enable_validation. When enabled, if the values of enable_rbac and
+        disable_rbac are both True, a MutuallyExclusiveArgumentError will be raised.
 
         :return: bool or None
         """
@@ -3083,11 +3135,21 @@ class AKSContext:
             enable_rbac = self.mc.enable_rbac
 
         # this parameter does not need dynamic completion
-
         # validation
-        if enable_rbac and self._get_disable_rbac(enable_validation=False):
-            raise MutuallyExclusiveArgumentError("specify either '--disable-rbac' or '--enable-rbac', not both.")
+        if enable_validation:
+            if enable_rbac and self._get_disable_rbac(enable_validation=False):
+                raise MutuallyExclusiveArgumentError("specify either '--disable-rbac' or '--enable-rbac', not both.")
         return enable_rbac
+
+    def get_enable_rbac(self) -> Union[bool, None]:
+        """Obtain the value of enable_rbac.
+
+        This function will verify the parameter by default. If the values of enable_rbac and disable_rbac are both True,
+        a MutuallyExclusiveArgumentError will be raised.
+
+        :return: bool or None
+        """
+        return self._get_enable_rbac(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_enable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
@@ -3110,7 +3172,6 @@ class AKSContext:
             enable_azure_rbac = self.mc.aad_profile.enable_azure_rbac
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if enable_azure_rbac and self._get_disable_rbac(enable_validation=False):
@@ -3135,12 +3196,13 @@ class AKSContext:
 
         return self._get_enable_azure_rbac(enable_validation=True)
 
-    def get_api_server_authorized_ip_ranges(self) -> List[str]:
-        """Obtain the value of api_server_authorized_ip_ranges.
+    # pylint: disable=unused-argument
+    def _get_api_server_authorized_ip_ranges(self, enable_validation: bool = False, **kwargs) -> List[str]:
+        """Internal function to obtain the value of api_server_authorized_ip_ranges.
 
-        This function will verify the parameter by default. When api_server_authorized_ip_ranges is assigned, if
-        load_balancer_sku equals to "basic", raise an InvalidArgumentValueError; if enable_private_cluster is specified,
-        raise a MutuallyExclusiveArgumentError.
+        This function supports the option of enable_validation. When enabled and api_server_authorized_ip_ranges is
+        assigned, if load_balancer_sku equals to "basic", raise an InvalidArgumentValueError; if enable_private_cluster
+        is specified, raise a MutuallyExclusiveArgumentError.
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
@@ -3186,16 +3248,30 @@ class AKSContext:
                 ]
 
         # validation
-        if api_server_authorized_ip_ranges:
-            if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
-                raise InvalidArgumentValueError(
-                    "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-                )
-            if self._get_enable_private_cluster(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    "--api-server-authorized-ip-ranges is not supported for private cluster"
-                )
+        if enable_validation:
+            if api_server_authorized_ip_ranges:
+                if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
+                    raise InvalidArgumentValueError(
+                        "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+                    )
+                if self._get_enable_private_cluster(enable_validation=False):
+                    raise MutuallyExclusiveArgumentError(
+                        "--api-server-authorized-ip-ranges is not supported for private cluster"
+                    )
         return api_server_authorized_ip_ranges
+
+    def get_api_server_authorized_ip_ranges(self) -> List[str]:
+        """Obtain the value of api_server_authorized_ip_ranges.
+
+        This function will verify the parameter by default. When api_server_authorized_ip_ranges is assigned, if
+        load_balancer_sku equals to "basic", raise an InvalidArgumentValueError; if enable_private_cluster is specified,
+        raise a MutuallyExclusiveArgumentError.
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
+
+        :return: empty list or list of strings
+        """
+        return self._get_api_server_authorized_ip_ranges(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_fqdn_subdomain(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
@@ -3222,7 +3298,6 @@ class AKSContext:
             fqdn_subdomain = self.mc.fqdn_subdomain
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if fqdn_subdomain:
@@ -3279,7 +3354,6 @@ class AKSContext:
             enable_private_cluster = self.mc.api_server_access_profile.enable_private_cluster
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if enable_private_cluster:
@@ -3287,7 +3361,7 @@ class AKSContext:
                     raise InvalidArgumentValueError(
                         "Please use standard load balancer for private cluster"
                     )
-                if self.get_api_server_authorized_ip_ranges():
+                if self._get_api_server_authorized_ip_ranges(enable_validation=False):
                     raise MutuallyExclusiveArgumentError(
                         "--api-server-authorized-ip-ranges is not supported for private cluster"
                     )
@@ -3464,7 +3538,6 @@ class AKSContext:
             private_dns_zone = self.mc.api_server_access_profile.private_dns_zone
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
             if private_dns_zone:
@@ -3507,10 +3580,11 @@ class AKSContext:
         """
         return self._get_private_dns_zone(enable_validation=True)
 
-    def get_assign_kubelet_identity(self) -> Union[str, None]:
-        """Obtain the value of assign_kubelet_identity.
+    # pylint: disable=unused-argument
+    def _get_assign_kubelet_identity(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to obtain the value of assign_kubelet_identity.
 
-        This function will verify the parameter by default. If assign_identity is not assigned but
+        This function supports the option of enable_validation. When enabled, if assign_identity is not assigned but
         assign_kubelet_identity is, a RequiredArgumentMissingError will be raised.
 
         :return: string or None
@@ -3527,13 +3601,23 @@ class AKSContext:
             assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
 
         # this parameter does not need dynamic completion
-
         # validation
-        if assign_kubelet_identity and not self._get_assign_identity(enable_validation=False):
-            raise RequiredArgumentMissingError(
-                "--assign-kubelet-identity can only be specified when --assign-identity is specified"
-            )
+        if enable_validation:
+            if assign_kubelet_identity and not self._get_assign_identity(enable_validation=False):
+                raise RequiredArgumentMissingError(
+                    "--assign-kubelet-identity can only be specified when --assign-identity is specified"
+                )
         return assign_kubelet_identity
+
+    def get_assign_kubelet_identity(self) -> Union[str, None]:
+        """Obtain the value of assign_kubelet_identity.
+
+        This function will verify the parameter by default. If assign_identity is not assigned but
+        assign_kubelet_identity is, a RequiredArgumentMissingError will be raised.
+
+        :return: string or None
+        """
+        return self._get_assign_kubelet_identity(enable_validation=True)
 
     def get_auto_upgrade_channel(self) -> Union[str, None]:
         """Obtain the value of auto_upgrade_channel.
@@ -3632,11 +3716,12 @@ class AKSContext:
         # this parameter does not need validation
         return cluster_autoscaler_profile
 
-    def get_uptime_sla(self) -> bool:
-        """Obtain the value of uptime_sla.
+    # pylint: disable=unused-argument
+    def _get_uptime_sla(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of uptime_sla.
 
-        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
-        a MutuallyExclusiveArgumentError.
+        This function supports the option of enable_validation. When enabled, if both uptime_sla and no_uptime_sla are
+        specified, raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
@@ -3652,13 +3737,23 @@ class AKSContext:
                 uptime_sla = self.mc.sku.tier == "Paid"
 
         # this parameter does not need dynamic completion
-
         # validation
-        if uptime_sla and self._get_no_uptime_sla(enable_validation=False):
-            raise MutuallyExclusiveArgumentError(
-                'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
-            )
+        if enable_validation:
+            if uptime_sla and self._get_no_uptime_sla(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
+                )
         return uptime_sla
+
+    def get_uptime_sla(self) -> bool:
+        """Obtain the value of uptime_sla.
+
+        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
+        a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_uptime_sla(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_no_uptime_sla(self, enable_validation: bool = False, **kwargs) -> bool:
@@ -3673,10 +3768,9 @@ class AKSContext:
         no_uptime_sla = self.raw_param.get("no_uptime_sla")
 
         # this parameter does not need dynamic completion
-
         # validation
         if enable_validation:
-            if no_uptime_sla and self.get_uptime_sla():
+            if no_uptime_sla and self._get_uptime_sla(enable_validation=False):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
@@ -3769,11 +3863,12 @@ class AKSContext:
         # this parameter does not need validation
         return aks_custom_headers
 
-    def get_disable_local_accounts(self) -> bool:
-        """Obtain the value of disable_local_accounts.
+    # pylint: disable=unused-argument
+    def _get_disable_local_accounts(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_local_accounts.
 
-        This function will verify the parameter by default. If both disable_local_accounts and enable_local_accounts are
-        specified, raise a MutuallyExclusiveArgumentError.
+        This function supports the option of enable_validation. When enabled, if both disable_local_accounts and
+        enable_local_accounts are specified, raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
@@ -3786,13 +3881,24 @@ class AKSContext:
 
         # this parameter does not need dynamic completion
         # validation
-        if self.decorator_mode == DecoratorMode.UPDATE:
-            if disable_local_accounts and self._get_enable_local_accounts(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    "Cannot specify --disable-local-accounts and "
-                    "--enable-local-accounts at the same time."
-                )
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if disable_local_accounts and self._get_enable_local_accounts(enable_validation=False):
+                    raise MutuallyExclusiveArgumentError(
+                        "Cannot specify --disable-local-accounts and "
+                        "--enable-local-accounts at the same time."
+                    )
         return disable_local_accounts
+
+    def get_disable_local_accounts(self) -> bool:
+        """Obtain the value of disable_local_accounts.
+
+        This function will verify the parameter by default. If both disable_local_accounts and enable_local_accounts are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_local_accounts(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_enable_local_accounts(self, enable_validation: bool = False, **kwargs) -> bool:
@@ -3809,7 +3915,7 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            if enable_local_accounts and self.get_disable_local_accounts():
+            if enable_local_accounts and self._get_disable_local_accounts(enable_validation=False):
                 raise MutuallyExclusiveArgumentError(
                     "Cannot specify --disable-local-accounts and "
                     "--enable-local-accounts at the same time."
