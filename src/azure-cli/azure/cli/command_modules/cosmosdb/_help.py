@@ -1160,18 +1160,18 @@ short-summary: Retrieves latest restorable timestamp for the given mongodb colle
 
 helps['cosmosdb locations'] = """
 type: group
-short-summary: Manage Azure Cosmos DB accounts location properties.
+short-summary: Manage Azure Cosmos DB location properties.
 """
 
 helps['cosmosdb locations list'] = """
 type: command
-short-summary: Retrieves the list of cosmosdb account locations and their properties.
+short-summary: Retrieves the list of cosmosdb locations and their properties.
 """
 
 helps['cosmosdb locations show'] = """
 type: command
-short-summary: Show the properties of Azure Cosmos DB account in the given location.
+short-summary: Show the Azure CosmosDB location properties in the given location.
 examples:
-  - name: Show the properties of Azure Cosmos DB accounts in given location.
+  - name: Shows the Azure CosmosDB location properties in the given location.
     text: az cosmosdb locations show --location 'East US'
 """
