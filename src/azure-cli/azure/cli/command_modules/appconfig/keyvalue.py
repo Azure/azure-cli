@@ -195,7 +195,7 @@ def export_config(cmd,
                   path=None,
                   format_=None,
                   separator=None,
-                  naming_convention='pascal',
+                  naming_convention=None,
                   resolve_keyvault=False,
                   profile=ImportExportProfiles.DEFAULT,
                   # to-config-store parameters
@@ -213,7 +213,7 @@ def export_config(cmd,
     destination = destination.lower()
     profile = profile.lower()
     format_ = format_.lower() if format_ else None
-    naming_convention = naming_convention.lower()
+    naming_convention = 'pascal' if naming_convention is None else naming_convention.lower()
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     dest_azconfig_client = None

@@ -283,7 +283,7 @@ def validate_export_profile(namespace):
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='resolve-keyvault')
         if namespace.separator is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='separator')
-        if namespace.naming_convention != 'pascal':
+        if namespace.naming_convention is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='naming-convention')
 
 

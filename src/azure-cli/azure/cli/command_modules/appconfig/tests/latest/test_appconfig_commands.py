@@ -1952,7 +1952,6 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             self.cmd('appconfig feature delete -n {config_store_name}')
 
 
-
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
