@@ -3161,6 +3161,49 @@ class AKSContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             ctx_5.get_enable_private_cluster()
 
+        # custom value
+        ctx_6 = AKSContext(
+            self.cmd,
+            {
+                "enable_private_cluster": False,
+                "disable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on disable_public_fqdn specified when enable_private_cluster is not specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_6.get_enable_private_cluster()
+
+        # custom value
+        # In fact, there is currently no such option in the create command
+        ctx_7 = AKSContext(
+            self.cmd,
+            {
+                "enable_private_cluster": False,
+                "enable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        # fail on enable_public_fqdn specified when enable_private_cluster is not specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_7.get_enable_private_cluster()
+
+        # custom value
+        ctx_8 = AKSContext(
+            self.cmd,
+            {
+                "enable_private_cluster": False,
+                "enable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on enable_public_fqdn specified when enable_private_cluster is not specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_8.get_enable_private_cluster()
+
     def test_get_disable_public_fqdn(self):
         # default
         ctx_1 = AKSContext(

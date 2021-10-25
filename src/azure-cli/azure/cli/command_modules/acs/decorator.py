@@ -1925,7 +1925,7 @@ class AKSContext:
                     raise InvalidArgumentValueError(
                         "--api-server-authorized-ip-ranges can only be used with standard load balancer"
                     )
-                if self.get_enable_private_cluster():
+                if self._get_enable_private_cluster(enable_validation=False):
                     raise InvalidArgumentValueError(
                         "Please use standard load balancer for private cluster"
                     )
@@ -3102,7 +3102,7 @@ class AKSContext:
                 raise MutuallyExclusiveArgumentError(
                     "--enable-azure-rbac cannot be used together with --disable-rbac"
                 )
-            if disable_rbac and self.get_enable_rbac():
+            if disable_rbac and self._get_enable_rbac(enable_validation=False):
                 raise MutuallyExclusiveArgumentError("specify either '--disable-rbac' or '--enable-rbac', not both.")
         return disable_rbac
 
@@ -3118,11 +3118,12 @@ class AKSContext:
 
         return self._get_disable_rbac(enable_validation=True)
 
-    def get_enable_rbac(self) -> Union[bool, None]:
-        """Obtain the value of enable_rbac.
+    # pylint: disable=unused-argument
+    def _get_enable_rbac(self, enable_validation: bool = False, **kwargs) -> Union[bool, None]:
+        """Internal function to obtain the value of enable_rbac.
 
-        This function will verify the parameter by default. If the values of enable_rbac and disable_rbac are both True,
-        a MutuallyExclusiveArgumentError will be raised.
+        This function supports the option of enable_validation. When enabled, if the values of enable_rbac and
+        disable_rbac are both True, a MutuallyExclusiveArgumentError will be raised.
 
         :return: bool or None
         """
@@ -3138,9 +3139,20 @@ class AKSContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if enable_rbac and self._get_disable_rbac(enable_validation=False):
-            raise MutuallyExclusiveArgumentError("specify either '--disable-rbac' or '--enable-rbac', not both.")
+        if enable_validation:
+            if enable_rbac and self._get_disable_rbac(enable_validation=False):
+                raise MutuallyExclusiveArgumentError("specify either '--disable-rbac' or '--enable-rbac', not both.")
         return enable_rbac
+
+    def get_enable_rbac(self) -> Union[bool, None]:
+        """Obtain the value of enable_rbac.
+
+        This function will verify the parameter by default. If the values of enable_rbac and disable_rbac are both True,
+        a MutuallyExclusiveArgumentError will be raised.
+
+        :return: bool or None
+        """
+        return self._get_enable_rbac(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_enable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
