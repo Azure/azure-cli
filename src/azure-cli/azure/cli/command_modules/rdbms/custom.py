@@ -707,6 +707,7 @@ def server_ad_admin_set(client, resource_group_name, server_name, login=None, si
     '''
 
     parameters = {
+        'administratorType': 'ActiveDirectory',
         'login': login,
         'sid': sid,
         'tenant_id': _get_tenant_id()

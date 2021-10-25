@@ -3549,6 +3549,23 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('length(@)', 5)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_bgp_community')
+    def test_network_vnet_with_bgp_community(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+        })
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default --bgp-community "12076:20000"', checks=[
+            self.check('newVNet.bgpCommunities.regionalCommunity', '12076:50006'),
+            self.check('newVNet.bgpCommunities.virtualNetworkCommunity', '12076:20000')
+        ])
+
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --bgp-community "12076:20001"', checks=[
+            self.check('bgpCommunities.regionalCommunity', '12076:50006'),
+            self.check('bgpCommunities.virtualNetworkCommunity', '12076:20001')
+        ])
+
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
@@ -4860,6 +4877,7 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             'subnet1': 'AzureBastionSubnet',
             'subnet2': 'vmSubnet',
             'ip1': 'ip1',
+            'num': 29,
             'bastion': 'clibastion'
 
         })
@@ -4868,9 +4886,11 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
                  '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password --nsg-rule None')
-        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --tags a=b', checks=[
+        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --scale-units {num} --tags a=b', checks=[
             self.check('type', 'Microsoft.Network/bastionHosts'),
             self.check('name', '{bastion}'),
+            self.check('scaleUnits', '{num}'),
+            self.check('sku.name', 'Standard'),
             self.check('tags.a', 'b')
         ])
         self.cmd('network bastion list')

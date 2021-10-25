@@ -177,6 +177,8 @@ def load_arguments(self, _):
         c.argument('incremental', arg_type=get_three_state_flag(), min_api='2019-03-01',
                    help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed')
         c.argument('edge_zone', edge_zone_type)
+        c.argument('copy_start', arg_type=get_three_state_flag(), min_api='2021-04-01',
+                   help='Create snapshot by using a deep copy process, where the resource creation is considered complete only after all data has been copied from the source.')
     # endregion
 
     # region Images
@@ -633,6 +635,12 @@ def load_arguments(self, _):
                         "value is 2020-11-01.")
         c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01', help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
         c.argument('spot_restore_timeout', min_api='2021-04-01', help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
+        c.argument('enable_agent', arg_type=get_three_state_flag(), min_api='2018-06-01',
+                   help='Indicate whether virtual machine agent should be provisioned on the virtual machine. When this property is not specified, default behavior is to set it to true. This will ensure that VM Agent is installed on the VM so that extensions can be added to the VM later')
+        c.argument('enable_auto_update', arg_type=get_three_state_flag(), min_api='2020-06-01',
+                   help='Indicate whether Automatic Updates is enabled for the Windows virtual machine')
+        c.argument('patch_mode', arg_type=get_enum_type(['AutomaticByOS', 'AutomaticByPlatform', 'Manual', 'ImageDefault']), min_api='2020-12-01',
+                   help='Mode of in-guest patching to IaaS virtual machine. Allowed values for Windows VM: AutomaticByOS, AutomaticByPlatform, Manual. Allowed values for Linux VM: AutomaticByPlatform, ImageDefault. Manual - You control the application of patches to a virtual machine. You do this by applying patches manually inside the VM. In this mode, automatic updates are disabled; the paramater --enable-auto-update must be false. AutomaticByOS - The virtual machine will automatically be updated by the OS. The parameter --enable-auto-update must be true. AutomaticByPlatform - the virtual machine will automatically updated by the OS. ImageDefault - The virtual machine\'s default patching configuration is used. The parameter --enable-agent and --enable-auto-update must be true')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
