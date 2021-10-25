@@ -65,3 +65,7 @@ CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID = 'f1a07417-d97a-45cb-824c-7a7467783830'
 class DecoratorMode(Enum):
     CREATE = 1
     UPDATE = 2
+
+
+class DecoratorEarlyExitException(Exception):
+    pass

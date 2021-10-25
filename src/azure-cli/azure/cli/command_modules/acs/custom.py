@@ -106,6 +106,7 @@ from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
 from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM, CONST_PRIVATE_DNS_ZONE_NONE
 from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
+from ._consts import DecoratorEarlyExitException
 
 logger = get_logger(__name__)
 
@@ -2099,8 +2100,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         raw_parameters=raw_parameters,
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
     )
-    # construct mc profile
-    mc = aks_create_decorator.construct_default_mc_profile()
+    try:
+        # construct mc profile
+        mc = aks_create_decorator.construct_default_mc_profile()
+    except DecoratorEarlyExitException:
+        # exit gracefully
+        return None
     # send request to create a real managed cluster
     return aks_create_decorator.create_mc(mc)
 
