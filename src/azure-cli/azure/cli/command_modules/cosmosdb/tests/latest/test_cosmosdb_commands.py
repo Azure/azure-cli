@@ -2086,11 +2086,17 @@ class CosmosDBTests(ScenarioTest):
         locations_list = self.cmd('az cosmosdb locations list').get_output_in_json()
         assert len(locations_list) > 0
         for location_val in locations_list:
+            assert location_val['id'] != None
+            assert location_val['name'] != None
+            assert location_val['type'] != None
             assert location_val['properties']['backupStorageRedundancies'] != None
             assert location_val['properties']['isResidencyRestricted'] != None
             assert location_val['properties']['supportsAvailabilityZone'] != None
 
         locations_show = self.cmd('az cosmosdb locations show --location {loc}').get_output_in_json()
+        assert locations_show['id'] != None
+        assert locations_show['name'] != None
+        assert locations_show['type'] != None
         assert locations_show['properties']['backupStorageRedundancies'] != None
         assert locations_show['properties']['isResidencyRestricted'] != None
         assert locations_show['properties']['supportsAvailabilityZone'] != None
