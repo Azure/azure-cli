@@ -4,32 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 import re
-import sys
 import time
 from distutils.version import StrictVersion
 from typing import Any, Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._consts import (
-    ADDONS,
-    CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
-    CONST_AZURE_POLICY_ADDON_NAME,
-    CONST_CONFCOM_ADDON_NAME,
-    CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
-    CONST_INGRESS_APPGW_ADDON_NAME,
-    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
-    CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
-    CONST_INGRESS_APPGW_SUBNET_CIDR,
-    CONST_INGRESS_APPGW_SUBNET_ID,
-    CONST_INGRESS_APPGW_WATCH_NAMESPACE,
-    CONST_KUBE_DASHBOARD_ADDON_NAME,
-    CONST_MONITORING_ADDON_NAME,
-    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
-    CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
-    CONST_VIRTUAL_NODE_ADDON_NAME,
-    CONST_VIRTUAL_NODE_SUBNET_NAME,
+    DecoratorEarlyExitException,
     DecoratorMode,
 )
 from azure.cli.command_modules.acs._loadbalancer import (
@@ -81,9 +65,9 @@ ManagedCluster = TypeVar("ManagedCluster")
 ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
 ManagedClusterPropertiesAutoScalerProfile = TypeVar("ManagedClusterPropertiesAutoScalerProfile")
 ResourceReference = TypeVar("ResourceReference")
+ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 
 # TODO
-# remove model loading for cluster_autoscaler_profile in _validators
 # add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
 
 
@@ -1358,7 +1342,7 @@ class AKSContext:
                 'Please run "az aks --update-cluster-autoscaler" '
                 "if you want to update min-count or max-count."
             )
-            sys.exit(0)
+            raise DecoratorEarlyExitException()
 
         if update_cluster_autoscaler and not agent_pool_profile.enable_auto_scaling:
             raise InvalidArgumentValueError(
@@ -1371,7 +1355,7 @@ class AKSContext:
             logger.warning(
                 "Cluster autoscaler is already disabled for this node pool."
             )
-            sys.exit(0)
+            raise DecoratorEarlyExitException()
 
         return update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler, min_count, max_count
 
@@ -2218,7 +2202,7 @@ class AKSContext:
 
     # pylint: disable=unused-argument
     def _get_network_plugin(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
-        """Internal function to Obtain the value of network_plugin.
+        """Internal function to obtain the value of network_plugin.
 
         Note: SDK provides default value "kubenet" for network_plugin.
 
@@ -2377,6 +2361,84 @@ class AKSContext:
                 )
         return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
 
+    # pylint: disable=no-self-use
+    def get_addon_consts(self) -> Dict[str, str]:
+        """Helper function to obtain the constants used by addons.
+
+        Note: This is not a parameter of aks commands.
+
+        :return: dict
+        """
+        from azure.cli.command_modules.acs._consts import (
+            ADDONS,
+            CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+            CONST_AZURE_POLICY_ADDON_NAME,
+            CONST_CONFCOM_ADDON_NAME,
+            CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+            CONST_INGRESS_APPGW_ADDON_NAME,
+            CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
+            CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
+            CONST_INGRESS_APPGW_SUBNET_CIDR,
+            CONST_INGRESS_APPGW_SUBNET_ID,
+            CONST_INGRESS_APPGW_WATCH_NAMESPACE,
+            CONST_KUBE_DASHBOARD_ADDON_NAME,
+            CONST_MONITORING_ADDON_NAME,
+            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+            CONST_OPEN_SERVICE_MESH_ADDON_NAME,
+            CONST_VIRTUAL_NODE_ADDON_NAME,
+            CONST_VIRTUAL_NODE_SUBNET_NAME,
+        )
+
+        addon_consts = {}
+        addon_consts["ADDONS"] = ADDONS
+        addon_consts[
+            "CONST_ACC_SGX_QUOTE_HELPER_ENABLED"
+        ] = CONST_ACC_SGX_QUOTE_HELPER_ENABLED
+        addon_consts[
+            "CONST_AZURE_POLICY_ADDON_NAME"
+        ] = CONST_AZURE_POLICY_ADDON_NAME
+        addon_consts["CONST_CONFCOM_ADDON_NAME"] = CONST_CONFCOM_ADDON_NAME
+        addon_consts[
+            "CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME"
+        ] = CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
+        addon_consts[
+            "CONST_INGRESS_APPGW_ADDON_NAME"
+        ] = CONST_INGRESS_APPGW_ADDON_NAME
+        addon_consts[
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID"
+        ] = CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID
+        addon_consts[
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME"
+        ] = CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME
+        addon_consts[
+            "CONST_INGRESS_APPGW_SUBNET_CIDR"
+        ] = CONST_INGRESS_APPGW_SUBNET_CIDR
+        addon_consts[
+            "CONST_INGRESS_APPGW_SUBNET_ID"
+        ] = CONST_INGRESS_APPGW_SUBNET_ID
+        addon_consts[
+            "CONST_INGRESS_APPGW_WATCH_NAMESPACE"
+        ] = CONST_INGRESS_APPGW_WATCH_NAMESPACE
+        addon_consts[
+            "CONST_KUBE_DASHBOARD_ADDON_NAME"
+        ] = CONST_KUBE_DASHBOARD_ADDON_NAME
+        addon_consts[
+            "CONST_MONITORING_ADDON_NAME"
+        ] = CONST_MONITORING_ADDON_NAME
+        addon_consts[
+            "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
+        ] = CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
+        addon_consts[
+            "CONST_OPEN_SERVICE_MESH_ADDON_NAME"
+        ] = CONST_OPEN_SERVICE_MESH_ADDON_NAME
+        addon_consts[
+            "CONST_VIRTUAL_NODE_ADDON_NAME"
+        ] = CONST_VIRTUAL_NODE_ADDON_NAME
+        addon_consts[
+            "CONST_VIRTUAL_NODE_SUBNET_NAME"
+        ] = CONST_VIRTUAL_NODE_SUBNET_NAME
+        return addon_consts
+
     # pylint: disable=unused-argument
     def _get_enable_addons(self, enable_validation: bool = False, **kwargs) -> List[str]:
         """Internal function to obtain the value of enable_addons.
@@ -2394,6 +2456,10 @@ class AKSContext:
 
         :return: empty list or list of strings
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        valid_addon_keys = addon_consts.get("ADDONS").keys()
+
         # read the original value passed by the command
         enable_addons = self.raw_param.get("enable_addons")
 
@@ -2416,7 +2482,7 @@ class AKSContext:
 
             # check unrecognized addons
             enable_addons_set = set(enable_addons)
-            invalid_addons_set = enable_addons_set.difference(ADDONS.keys())
+            invalid_addons_set = enable_addons_set.difference(valid_addon_keys)
             if len(invalid_addons_set) != 0:
                 raise InvalidArgumentValueError(
                     "'{}' {} not recognized by the --enable-addons argument.".format(
@@ -2475,6 +2541,13 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+        CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = addon_consts.get(
+            "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
+        )
+
         # read the original value passed by the command
         workspace_resource_id = self.raw_param.get("workspace_resource_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2547,6 +2620,11 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_VIRTUAL_NODE_ADDON_NAME = addon_consts.get("CONST_VIRTUAL_NODE_ADDON_NAME")
+        CONST_VIRTUAL_NODE_SUBNET_NAME = addon_consts.get("CONST_VIRTUAL_NODE_SUBNET_NAME")
+
         # read the original value passed by the command
         aci_subnet_name = self.raw_param.get("aci_subnet_name")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2575,6 +2653,13 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME = addon_consts.get(
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME"
+        )
+
         # read the original value passed by the command
         appgw_name = self.raw_param.get("appgw_name")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2599,6 +2684,11 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_SUBNET_CIDR = addon_consts.get("CONST_INGRESS_APPGW_SUBNET_CIDR")
+
         # read the original value passed by the command
         appgw_subnet_cidr = self.raw_param.get("appgw_subnet_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2623,6 +2713,11 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID = addon_consts.get("CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID")
+
         # read the original value passed by the command
         appgw_id = self.raw_param.get("appgw_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2647,6 +2742,11 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_SUBNET_ID = addon_consts.get("CONST_INGRESS_APPGW_SUBNET_ID")
+
         # read the original value passed by the command
         appgw_subnet_id = self.raw_param.get("appgw_subnet_id")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2671,6 +2771,11 @@ class AKSContext:
 
         :return: string or None
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get("CONST_INGRESS_APPGW_ADDON_NAME")
+        CONST_INGRESS_APPGW_WATCH_NAMESPACE = addon_consts.get("CONST_INGRESS_APPGW_WATCH_NAMESPACE")
+
         # read the original value passed by the command
         appgw_watch_namespace = self.raw_param.get("appgw_watch_namespace")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -2695,6 +2800,11 @@ class AKSContext:
 
         :return: bool
         """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_CONFCOM_ADDON_NAME = addon_consts.get("CONST_CONFCOM_ADDON_NAME")
+        CONST_ACC_SGX_QUOTE_HELPER_ENABLED = addon_consts.get("CONST_ACC_SGX_QUOTE_HELPER_ENABLED")
+
         # read the original value passed by the command
         enable_sgxquotehelper = self.raw_param.get("enable_sgxquotehelper")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -3120,7 +3230,7 @@ class AKSContext:
                     raise MutuallyExclusiveArgumentError(
                         "--dns-name-prefix and --fqdn-subdomain cannot be used at same time"
                     )
-                private_dns_zone = self.get_private_dns_zone()
+                private_dns_zone = self._get_private_dns_zone(enable_validation=False)
                 if private_dns_zone:
                     if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
                         if not is_valid_resource_id(private_dns_zone):
@@ -3154,7 +3264,7 @@ class AKSContext:
         This function supports the option of enable_validation. When enabled and enable_private_cluster is specified,
         if load_balancer_sku equals to basic, raise an InvalidArgumentValueError; if api_server_authorized_ip_ranges
         is assigned, raise an MutuallyExclusiveArgumentError; Otherwise when enable_private_cluster is not specified
-        and disable_public_fqdn or private_dns_zone is assigned, raise an InvalidArgumentValueError.
+        and disable_public_fqdn, enable_public_fqdn or private_dns_zone is assigned, raise an InvalidArgumentValueError.
 
         :return: bool
         """
@@ -3182,11 +3292,24 @@ class AKSContext:
                         "--api-server-authorized-ip-ranges is not supported for private cluster"
                     )
             else:
-                if self.get_disable_public_fqdn():
+                if self._get_disable_public_fqdn(enable_validation=False):
+                    if self.decorator_mode == DecoratorMode.UPDATE:
+                        raise InvalidArgumentValueError(
+                            "--disable-public-fqdn can only be used for private cluster"
+                        )
                     raise InvalidArgumentValueError(
                         "--disable-public-fqdn should only be used with --enable-private-cluster"
                     )
-                if self.get_private_dns_zone():
+                if self._get_enable_public_fqdn(enable_validation=False):
+                    if self.decorator_mode == DecoratorMode.UPDATE:
+                        raise InvalidArgumentValueError(
+                            "--enable-public-fqdn can only be used for private cluster"
+                        )
+                    # In fact, there is currently no such option in the create command
+                    raise InvalidArgumentValueError(
+                        "--enable-public-fqdn should only be used with --enable-private-cluster"
+                    )
+                if self._get_private_dns_zone(enable_validation=False):
                     raise InvalidArgumentValueError(
                         "Invalid private dns zone for public cluster. It should always be empty for public cluster"
                     )
@@ -3198,46 +3321,134 @@ class AKSContext:
         This function will verify the parameter by default. When enable_private_cluster is specified, if
         load_balancer_sku equals to basic, raise an InvalidArgumentValueError; if api_server_authorized_ip_ranges
         is assigned, raise an MutuallyExclusiveArgumentError; Otherwise when enable_private_cluster is not specified
-        and disable_public_fqdn or private_dns_zone is assigned, raise an InvalidArgumentValueError.
+        and disable_public_fqdn, enable_public_fqdn or private_dns_zone is assigned, raise an InvalidArgumentValueError.
 
         :return: bool
         """
 
         return self._get_enable_private_cluster(enable_validation=True)
 
-    def get_disable_public_fqdn(self) -> bool:
-        """Obtain the value of disable_public_fqdn.
+    def _get_disable_public_fqdn(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_public_fqdn.
 
-        This function will verify the parameter by default. If enable_private_cluster is not specified and
-        disable_public_fqdn is assigned, raise an InvalidArgumentValueError.
+        This function supports the option of enable_validation. When enabled, if enable_private_cluster is not specified
+        and disable_public_fqdn is assigned, raise an InvalidArgumentValueError. If both disable_public_fqdn and
+        enable_public_fqdn are assigned, raise a MutuallyExclusiveArgumentError. In update mode, if
+        disable_public_fqdn is assigned and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_NONE, raise an
+        InvalidArgumentValueError.
 
         :return: bool
         """
         # read the original value passed by the command
         disable_public_fqdn = self.raw_param.get("disable_public_fqdn")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.api_server_access_profile and
-            self.mc.api_server_access_profile.enable_private_cluster_public_fqdn is not None
-        ):
-            disable_public_fqdn = not self.mc.api_server_access_profile.enable_private_cluster_public_fqdn
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.api_server_access_profile and
+                self.mc.api_server_access_profile.enable_private_cluster_public_fqdn is not None
+            ):
+                disable_public_fqdn = not self.mc.api_server_access_profile.enable_private_cluster_public_fqdn
 
         # this parameter does not need dynamic completion
-
         # validation
-        enable_private_cluster = self._get_enable_private_cluster(enable_validation=False)
-        if disable_public_fqdn and not enable_private_cluster:
-            raise InvalidArgumentValueError("--disable-public-fqdn should only be used with --enable-private-cluster")
+        if enable_validation:
+            if disable_public_fqdn and self._get_enable_public_fqdn(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify '--enable-public-fqdn' and '--disable-public-fqdn' at the same time"
+                )
+            enable_private_cluster = self._get_enable_private_cluster(enable_validation=False)
+            if disable_public_fqdn and not enable_private_cluster:
+                if self.decorator_mode == DecoratorMode.UPDATE:
+                    raise InvalidArgumentValueError(
+                        "--disable-public-fqdn can only be used for private cluster"
+                    )
+                raise InvalidArgumentValueError(
+                    "--disable-public-fqdn should only be used with --enable-private-cluster"
+                )
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if disable_public_fqdn:
+                    private_dns_zone = self._get_private_dns_zone(enable_validation=False)
+                    if safe_lower(private_dns_zone) == CONST_PRIVATE_DNS_ZONE_NONE:
+                        raise InvalidArgumentValueError(
+                            "--disable-public-fqdn cannot be applied for none mode private dns zone cluster"
+                        )
         return disable_public_fqdn
 
-    def get_private_dns_zone(self) -> Union[str, None]:
-        """Obtain the value of private_dns_zone.
+    def get_disable_public_fqdn(self) -> bool:
+        """Obtain the value of disable_public_fqdn.
 
-        This function will verify the parameter by default. When private_dns_zone is assigned, if enable_private_cluster
-        is not specified raise an InvalidArgumentValueError. It will also check when both private_dns_zone and
-        fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM, raise an
-        InvalidArgumentValueError; Otherwise if the value of private_dns_zone is not a valid resource ID, raise an
+        This function will verify the parameter by default. If enable_private_cluster is not specified and
+        disable_public_fqdn is assigned, raise an InvalidArgumentValueError. If both disable_public_fqdn and
+        enable_public_fqdn are assigned, raise a MutuallyExclusiveArgumentError. In update mode, if
+        disable_public_fqdn is assigned and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_NONE, raise an
+        InvalidArgumentValueError.
+
+        :return: bool
+        """
+        return self._get_disable_public_fqdn(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_enable_public_fqdn(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of enable_public_fqdn.
+
+        This function supports the option of enable_validation. When enabled, if private cluster is not enabled and
+        enable_public_fqdn is assigned, raise an InvalidArgumentValueError. If both disable_public_fqdn and
+        enable_public_fqdn are assigned, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_public_fqdn = self.raw_param.get("enable_public_fqdn")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.api_server_access_profile and
+                self.mc.api_server_access_profile.enable_private_cluster_public_fqdn is not None
+            ):
+                enable_public_fqdn = self.mc.api_server_access_profile.enable_private_cluster_public_fqdn
+
+        # this parameter does not need dynamic completion
+        # validation
+        # Note: The parameter involved in the validation is not verified in its own getter.
+        if enable_validation:
+            if enable_public_fqdn and self._get_disable_public_fqdn(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify '--enable-public-fqdn' and '--disable-public-fqdn' at the same time"
+                )
+            enable_private_cluster = self._get_enable_private_cluster(enable_validation=False)
+            if enable_public_fqdn and not enable_private_cluster:
+                if self.decorator_mode == DecoratorMode.UPDATE:
+                    raise InvalidArgumentValueError(
+                        "--enable-public-fqdn can only be used for private cluster"
+                    )
+                # In fact, there is currently no such option in the create command
+                raise InvalidArgumentValueError(
+                    "--enable-public-fqdn should only be used with --enable-private-cluster"
+                )
+        return enable_public_fqdn
+
+    def get_enable_public_fqdn(self) -> bool:
+        """Obtain the value of enable_public_fqdn.
+
+        This function will verify the parameter by default. If private cluster is not enabled and enable_public_fqdn
+        is assigned, raise an InvalidArgumentValueError. If both disable_public_fqdn and enable_private_cluster are
+        assigned, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_public_fqdn(enable_validation=True)
+
+    def _get_private_dns_zone(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to obtain the value of private_dns_zone.
+
+        This function supports the option of enable_validation. When enabled and private_dns_zone is assigned, if
+        enable_private_cluster is not specified raise an InvalidArgumentValueError. It will also check when both
+        private_dns_zone and fqdn_subdomain are assigned, if the value of private_dns_zone is
+        CONST_PRIVATE_DNS_ZONE_SYSTEM or CONST_PRIVATE_DNS_ZONE_NONE, raise an InvalidArgumentValueError; Otherwise if
+        the value of private_dns_zone is not a valid resource ID, raise an InvalidArgumentValueError. In update mode,
+        if disable_public_fqdn is assigned and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_NONE, raise an
         InvalidArgumentValueError.
 
         :return: string or None
@@ -3255,22 +3466,46 @@ class AKSContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if private_dns_zone:
-            if not self._get_enable_private_cluster(enable_validation=False):
-                raise InvalidArgumentValueError(
-                    "Invalid private dns zone for public cluster. It should always be empty for public cluster"
-                )
-            if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
-                if not is_valid_resource_id(private_dns_zone):
+        if enable_validation:
+            if private_dns_zone:
+                if not self._get_enable_private_cluster(enable_validation=False):
                     raise InvalidArgumentValueError(
-                        private_dns_zone + " is not a valid Azure resource ID."
+                        "Invalid private dns zone for public cluster. It should always be empty for public cluster"
                     )
-            else:
-                if self._get_fqdn_subdomain(enable_validation=False):
-                    raise InvalidArgumentValueError(
-                        "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
-                    )
+                if (
+                    private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM and
+                    private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_NONE
+                ):
+                    if not is_valid_resource_id(private_dns_zone):
+                        raise InvalidArgumentValueError(
+                            private_dns_zone + " is not a valid Azure resource ID."
+                        )
+                else:
+                    if self._get_fqdn_subdomain(enable_validation=False):
+                        raise InvalidArgumentValueError(
+                            "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
+                        )
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if safe_lower(private_dns_zone) == CONST_PRIVATE_DNS_ZONE_NONE:
+                    if self._get_disable_public_fqdn(enable_validation=False):
+                        raise InvalidArgumentValueError(
+                            "--disable-public-fqdn cannot be applied for none mode private dns zone cluster"
+                        )
         return private_dns_zone
+
+    def get_private_dns_zone(self) -> Union[str, None]:
+        """Obtain the value of private_dns_zone.
+
+        This function will verify the parameter by default. When private_dns_zone is assigned, if enable_private_cluster
+        is not specified raise an InvalidArgumentValueError. It will also check when both private_dns_zone and
+        fqdn_subdomain are assigned, if the value of private_dns_zone is CONST_PRIVATE_DNS_ZONE_SYSTEM or
+        CONST_PRIVATE_DNS_ZONE_NONE, raise an InvalidArgumentValueError; Otherwise if the value of private_dns_zone is
+        not a valid resource ID, raise an InvalidArgumentValueError. In update mode, if disable_public_fqdn is assigned
+        and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_NONE, raise an InvalidArgumentValueError.
+
+        :return: string or None
+        """
+        return self._get_private_dns_zone(enable_validation=True)
 
     def get_assign_kubelet_identity(self) -> Union[str, None]:
         """Obtain the value of assign_kubelet_identity.
@@ -3853,7 +4088,7 @@ class AKSCreateDecorator:
                 if not self.context.get_yes() and not prompt_y_n(
                     msg, default="n"
                 ):
-                    return None
+                    raise DecoratorEarlyExitException()
                 need_post_creation_vnet_permission_granting = True
             else:
                 scope = vnet_subnet_id
@@ -3991,17 +4226,163 @@ class AKSCreateDecorator:
         mc.network_profile = network_profile
         return mc
 
+    def build_http_application_routing_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build http application routing addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        http_application_routing_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+        )
+        return http_application_routing_addon_profile
+
+    def build_kube_dashboard_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build kube dashboard addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        kube_dashboard_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+        )
+        return kube_dashboard_addon_profile
+
+    def build_monitoring_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build monitoring addon profile.
+
+        The function "_ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
+        the Container Insights solution to the Log Analytics workspace.
+        When workspace_resource_id is not assigned, function "_ensure_default_log_analytics_workspace_for_monitoring"
+        will be called to create a workspace, which internally used ResourceManagementClient to send the request.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = addon_consts.get(
+            "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
+        )
+
+        # TODO: can we help the user find a workspace resource ID?
+        monitoring_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={
+                CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id()
+            },
+        )
+        # post-process, create a deployment
+        _ensure_container_insights_for_monitoring(
+            self.cmd, monitoring_addon_profile
+        )
+        # set intermediate
+        self.context.set_intermediate("monitoring", True, overwrite_exists=True)
+        return monitoring_addon_profile
+
+    def build_azure_policy_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build azure policy addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        azure_policy_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+        )
+        return azure_policy_addon_profile
+
+    def build_virtual_node_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build virtual node addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_VIRTUAL_NODE_SUBNET_NAME = addon_consts.get(
+            "CONST_VIRTUAL_NODE_SUBNET_NAME"
+        )
+
+        virtual_node_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={CONST_VIRTUAL_NODE_SUBNET_NAME: self.context.get_aci_subnet_name()}
+        )
+        # set intermediate
+        self.context.set_intermediate("enable_virtual_node", True, overwrite_exists=True)
+        return virtual_node_addon_profile
+
+    def build_ingress_appgw_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build ingress appgw addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME = addon_consts.get(
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME"
+        )
+        CONST_INGRESS_APPGW_SUBNET_CIDR = addon_consts.get(
+            "CONST_INGRESS_APPGW_SUBNET_CIDR"
+        )
+        CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID = addon_consts.get(
+            "CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID"
+        )
+        CONST_INGRESS_APPGW_SUBNET_ID = addon_consts.get(
+            "CONST_INGRESS_APPGW_SUBNET_ID"
+        )
+        CONST_INGRESS_APPGW_WATCH_NAMESPACE = addon_consts.get(
+            "CONST_INGRESS_APPGW_WATCH_NAMESPACE"
+        )
+
+        ingress_appgw_addon_profile = self.models.ManagedClusterAddonProfile(enabled=True, config={})
+        appgw_name = self.context.get_appgw_name()
+        appgw_subnet_cidr = self.context.get_appgw_subnet_cidr()
+        appgw_id = self.context.get_appgw_id()
+        appgw_subnet_id = self.context.get_appgw_subnet_id()
+        appgw_watch_namespace = self.context.get_appgw_watch_namespace()
+        if appgw_name is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
+        if appgw_subnet_cidr is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
+        if appgw_id is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
+        if appgw_subnet_id is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
+        if appgw_watch_namespace is not None:
+            ingress_appgw_addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
+        # set intermediate
+        self.context.set_intermediate("ingress_appgw_addon_enabled", True, overwrite_exists=True)
+        return ingress_appgw_addon_profile
+
+    def build_confcom_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build confcom addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_ACC_SGX_QUOTE_HELPER_ENABLED = addon_consts.get(
+            "CONST_ACC_SGX_QUOTE_HELPER_ENABLED"
+        )
+
+        confcom_addon_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
+        if self.context.get_enable_sgxquotehelper():
+            confcom_addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+        return confcom_addon_profile
+
+    def build_open_service_mesh_profile(self) -> ManagedClusterAddonProfile:
+        """Build open service mesh addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        open_service_mesh_profile = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={},
+        )
+        return open_service_mesh_profile
+
     # pylint: disable=too-many-statements
     def set_up_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up addon profiles for the ManagedCluster object.
 
         This function will store following intermediates: monitoring, enable_virtual_node and
         ingress_appgw_addon_enabled.
-
-        The function "_ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
-        the Container Insights solution to the Log Analytics workspace.
-        When workspace_resource_id is not assigned, function "_ensure_default_log_analytics_workspace_for_monitoring"
-        will be called to create a workspace, which internally used ResourceManagementClient to send the request.
 
         :return: the ManagedCluster object
         """
@@ -4010,69 +4391,70 @@ class AKSCreateDecorator:
                 "Unexpected mc object with type '{}'.".format(type(mc))
             )
 
-        ManagedClusterAddonProfile = self.models.ManagedClusterAddonProfile
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_MONITORING_ADDON_NAME = addon_consts.get(
+            "CONST_MONITORING_ADDON_NAME"
+        )
+        CONST_VIRTUAL_NODE_ADDON_NAME = addon_consts.get(
+            "CONST_VIRTUAL_NODE_ADDON_NAME"
+        )
+        CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = addon_consts.get(
+            "CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME"
+        )
+        CONST_KUBE_DASHBOARD_ADDON_NAME = addon_consts.get(
+            "CONST_KUBE_DASHBOARD_ADDON_NAME"
+        )
+        CONST_AZURE_POLICY_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_POLICY_ADDON_NAME"
+        )
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get(
+            "CONST_INGRESS_APPGW_ADDON_NAME"
+        )
+        CONST_CONFCOM_ADDON_NAME = addon_consts.get("CONST_CONFCOM_ADDON_NAME")
+        CONST_OPEN_SERVICE_MESH_ADDON_NAME = addon_consts.get(
+            "CONST_OPEN_SERVICE_MESH_ADDON_NAME"
+        )
+
         addon_profiles = {}
         # error out if any unrecognized or duplicate addon provided
         # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
         # error out if '--enable-addons=virtual-node' is set but aci_subnet_name and vnet_subnet_id are not
         addons = self.context.get_enable_addons()
-        if 'http_application_routing' in addons:
-            addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
-                enabled=True)
-        if 'kube-dashboard' in addons:
-            addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(
-                enabled=True)
-        # TODO: can we help the user find a workspace resource ID?
-        if 'monitoring' in addons:
-            workspace_resource_id = self.context.get_workspace_resource_id()
-            addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
-                enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
-            # post-process, create a deployment
-            _ensure_container_insights_for_monitoring(self.cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
-            # set intermediate
-            self.context.set_intermediate("monitoring", True, overwrite_exists=True)
-        if 'azure-policy' in addons:
-            addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
-                enabled=True)
-        if 'virtual-node' in addons:
-            aci_subnet_name = self.context.get_aci_subnet_name()
+        if "http_application_routing" in addons:
+            addon_profiles[
+                CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
+            ] = self.build_http_application_routing_addon_profile()
+        if "kube-dashboard" in addons:
+            addon_profiles[
+                CONST_KUBE_DASHBOARD_ADDON_NAME
+            ] = self.build_kube_dashboard_addon_profile()
+        if "monitoring" in addons:
+            addon_profiles[
+                CONST_MONITORING_ADDON_NAME
+            ] = self.build_monitoring_addon_profile()
+        if "azure-policy" in addons:
+            addon_profiles[
+                CONST_AZURE_POLICY_ADDON_NAME
+            ] = self.build_azure_policy_addon_profile()
+        if "virtual-node" in addons:
             # TODO: how about aciConnectorwindows, what is its addon name?
             os_type = self.context.get_virtual_node_addon_os_type()
-            addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(
-                enabled=True,
-                config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
-            )
-            # set intermediate
-            self.context.set_intermediate("enable_virtual_node", True, overwrite_exists=True)
-        if 'ingress-appgw' in addons:
-            addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
-            appgw_name = self.context.get_appgw_name()
-            appgw_subnet_cidr = self.context.get_appgw_subnet_cidr()
-            appgw_id = self.context.get_appgw_id()
-            appgw_subnet_id = self.context.get_appgw_subnet_id()
-            appgw_watch_namespace = self.context.get_appgw_watch_namespace()
-            if appgw_name is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
-            if appgw_subnet_cidr is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
-            if appgw_id is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
-            if appgw_subnet_id is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
-            if appgw_watch_namespace is not None:
-                addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
-            addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
-            # set intermediate
-            self.context.set_intermediate("ingress_appgw_addon_enabled", True, overwrite_exists=True)
-        if 'confcom' in addons:
-            addon_profile = ManagedClusterAddonProfile(
-                enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
-            if self.context.get_enable_sgxquotehelper():
-                addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
-            addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
-        if 'open-service-mesh' in addons:
-            addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
-            addon_profiles[CONST_OPEN_SERVICE_MESH_ADDON_NAME] = addon_profile
+            addon_profiles[
+                CONST_VIRTUAL_NODE_ADDON_NAME + os_type
+            ] = self.build_virtual_node_addon_profile()
+        if "ingress-appgw" in addons:
+            addon_profiles[
+                CONST_INGRESS_APPGW_ADDON_NAME
+            ] = self.build_ingress_appgw_addon_profile()
+        if "confcom" in addons:
+            addon_profiles[
+                CONST_CONFCOM_ADDON_NAME
+            ] = self.build_confcom_addon_profile()
+        if "open-service-mesh" in addons:
+            addon_profiles[
+                CONST_OPEN_SERVICE_MESH_ADDON_NAME
+            ] = self.build_open_service_mesh_profile()
         mc.addon_profiles = addon_profiles
         return mc
 
@@ -4446,6 +4828,24 @@ class AKSUpdateDecorator:
                 '"--tags"'
             )
 
+    def _ensure_mc(self, mc: ManagedCluster) -> None:
+        """Internal function to ensure that the incoming `mc` object is valid and the same as the attached `mc` object
+        in the context.
+
+        If the incomding `mc` is not valid or is inconsistent with the `mc` in the context, raise a CLIInternalError.
+
+        :return: None
+        """
+        if not isinstance(mc, self.models.ManagedCluster):
+            raise CLIInternalError(
+                "Unexpected mc object with type '{}'.".format(type(mc))
+            )
+
+        if self.context.mc != mc:
+            raise CLIInternalError(
+                "Inconsistent state detected. The incoming `mc` is not the same as the `mc` in the context."
+            )
+
     def fetch_mc(self) -> ManagedCluster:
         """Get the ManagedCluster object currently in use and attach it to internal context.
 
@@ -4464,10 +4864,7 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
-        if not isinstance(mc, self.models.ManagedCluster):
-            raise CLIInternalError(
-                "Unexpected mc object with type '{}'.".format(type(mc))
-            )
+        self._ensure_mc(mc)
 
         tags = self.context.get_tags()
         if tags is not None:
@@ -4479,9 +4876,12 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
-        if not isinstance(mc, self.models.ManagedCluster):
-            raise CLIInternalError(
-                "Unexpected mc object with type '{}'.".format(type(mc))
+        self._ensure_mc(mc)
+
+        if not mc.agent_pool_profiles:
+            raise UnknownError(
+                "Encounter an unexpected error while getting agent pool profiles from the cluster in the process of "
+                "updating its auto scaler profile."
             )
 
         (
@@ -4518,10 +4918,7 @@ class AKSUpdateDecorator:
 
         :return: None
         """
-        if not isinstance(mc, self.models.ManagedCluster):
-            raise CLIInternalError(
-                "Unexpected mc object with type '{}'.".format(type(mc))
-            )
+        self._ensure_mc(mc)
 
         subscription_id = self.context.get_subscription_id()
         client_id = self.context.get_client_id_from_identity_or_sp_profile()
@@ -4546,10 +4943,7 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
-        if not isinstance(mc, self.models.ManagedCluster):
-            raise CLIInternalError(
-                "Unexpected mc object with type '{}'.".format(type(mc))
-            )
+        self._ensure_mc(mc)
 
         if self.context.get_uptime_sla():
             mc.sku = self.models.ManagedClusterSKU(
@@ -4569,15 +4963,12 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
-        if not isinstance(mc, self.models.ManagedCluster):
-            raise CLIInternalError(
-                "Unexpected mc object with type '{}'.".format(type(mc))
-            )
+        self._ensure_mc(mc)
 
         if not mc.network_profile:
             raise UnknownError(
                 "Encounter an unexpected error while getting network profile from the cluster in the process of "
-                "trying to update the load balancer profile."
+                "updating its load balancer profile."
             )
 
         load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
@@ -4603,16 +4994,45 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
-        if not isinstance(mc, self.models.ManagedCluster):
-            raise CLIInternalError(
-                "Unexpected mc object with type '{}'.".format(type(mc))
-            )
+        self._ensure_mc(mc)
 
         if self.context.get_disable_local_accounts():
             mc.disable_local_accounts = True
 
         if self.context.get_enable_local_accounts():
             mc.disable_local_accounts = False
+        return mc
+
+    def update_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update api server access profile and fqdn subdomain for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if mc.api_server_access_profile is None:
+            profile_holder = self.models.ManagedClusterAPIServerAccessProfile()
+        else:
+            profile_holder = mc.api_server_access_profile
+
+        api_server_authorized_ip_ranges = self.context.get_api_server_authorized_ip_ranges()
+        disable_public_fqdn = self.context.get_disable_public_fqdn()
+        enable_public_fqdn = self.context.get_enable_public_fqdn()
+        if api_server_authorized_ip_ranges is not None:
+            # empty string is valid as it disables ip whitelisting
+            profile_holder.authorized_ip_ranges = api_server_authorized_ip_ranges
+        if disable_public_fqdn:
+            profile_holder.enable_private_cluster_public_fqdn = False
+        if enable_public_fqdn:
+            profile_holder.enable_private_cluster_public_fqdn = True
+
+        # keep api_server_access_profile empty if none of its properties are updated
+        if (
+            profile_holder != mc.api_server_access_profile and
+            profile_holder == self.models.ManagedClusterAPIServerAccessProfile()
+        ):
+            profile_holder = None
+        mc.api_server_access_profile = profile_holder
         return mc
 
     def update_default_mc_profile(self) -> ManagedCluster:
@@ -4642,6 +5062,8 @@ class AKSUpdateDecorator:
         mc = self.update_load_balancer_profile(mc)
         # update disable/enable local accounts
         mc = self.update_disable_local_accounts(mc)
+        # update api server access profile
+        mc = self.update_api_server_access_profile(mc)
 
         return mc
 

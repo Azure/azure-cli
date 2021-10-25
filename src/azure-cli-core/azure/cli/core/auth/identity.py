@@ -8,16 +8,16 @@ import os
 import re
 
 from azure.cli.core._environment import get_config_dir
+from msal import PublicClientApplication
+
 from knack.log import get_logger
 from knack.util import CLIError
-
-from .msal_authentication import UserCredential, ServicePrincipalCredential
-from .util import check_result
-from .persistence import load_persisted_token_cache, file_extensions
-
 # Service principal entry properties
-from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION,\
+from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION, \
     _USE_CERT_SN_ISSUER
+from .msal_authentication import UserCredential, ServicePrincipalCredential
+from .persistence import load_persisted_token_cache, file_extensions
+from .util import check_result
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -31,15 +31,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         - service principal
         - TODO: managed identity
     """
-    # Whether token and secrets should be encrypted. Change its value to turn on/off token encryption.
-    token_encryption = False
-
     # HTTP cache for MSAL's tenant discovery, retry-after error cache, etc.
     # It must follow singleton pattern. Otherwise, a new dbm.dumb http_cache can read out-of-sync dat and dir.
     # https://github.com/AzureAD/microsoft-authentication-library-for-python/pull/407
     http_cache = None
 
-    def __init__(self, authority, tenant_id=None, client_id=None):
+    def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False):
         """
         :param authority: Authentication authority endpoint. For example,
             - AAD: https://login.microsoftonline.com
@@ -47,10 +44,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         :param tenant_id: Tenant GUID, like 00000000-0000-0000-0000-000000000000. If unspecified, default to
             'organizations'.
         :param client_id: Client ID of the CLI application.
+        :param encrypt:  Whether to encrypt token cache and service principal entries.
         """
         self.authority = authority
         self.tenant_id = tenant_id
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
+        self.encrypt = encrypt
 
         # Build the authority in MSAL style
         self._msal_authority, self._is_adfs = _get_authority_url(authority, tenant_id)
@@ -67,7 +66,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         self._msal_app_instance = None
         # Store for Service principal credential persistence
-        self._msal_secret_store = ServicePrincipalStore(self._secret_file, self.token_encryption)
+        self._msal_secret_store = ServicePrincipalStore(self._secret_file, self.encrypt)
         self._msal_app_kwargs = {
             "authority": self._msal_authority,
             "token_cache": self._load_msal_cache()
@@ -76,7 +75,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def _load_msal_cache(self):
         # Store for user token persistence
-        cache = load_persisted_token_cache(self._token_cache_file, self.token_encryption)
+        cache = load_persisted_token_cache(self._token_cache_file, self.encrypt)
         return cache
 
     def _load_http_cache(self):
@@ -98,7 +97,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def _build_persistent_msal_app(self):
         # Initialize _msal_app for login and logout
-        from msal import PublicClientApplication
         msal_app = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
         return msal_app
 
@@ -108,14 +106,15 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._msal_app_instance = self._build_persistent_msal_app()
         return self._msal_app_instance
 
-    def login_with_auth_code(self, scopes=None, **kwargs):
+    def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
         logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
-                       "with `az login --use-device-code`.", self._msal_authority)
+                       "with `az login --use-device-code`.", self.msal_app.authority.authorization_endpoint)
 
-        success_template, error_template = _read_response_templates()
+        from .util import read_response_templates
+        success_template, error_template = read_response_templates()
 
         # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
         # on port 8400 from the old design. However, ADFS only allows port 8400.
@@ -124,7 +123,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             success_template=success_template, error_template=error_template, **kwargs)
         return check_result(result)
 
-    def login_with_device_code(self, scopes=None, **kwargs):
+    def login_with_device_code(self, scopes, **kwargs):
         flow = self.msal_app.initiate_device_flow(scopes, **kwargs)
         if "user_code" not in flow:
             raise ValueError(
@@ -133,11 +132,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         result = self.msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
         return check_result(result)
 
-    def login_with_username_password(self, username, password, scopes=None, **kwargs):
+    def login_with_username_password(self, username, password, scopes, **kwargs):
         result = self.msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
         return check_result(result)
 
-    def login_with_service_principal(self, client_id, credential, scopes=None):
+    def login_with_service_principal(self, client_id, credential, scopes):
         """
         `credential` is a dict returned by ServicePrincipalAuth.build_credential
         """
@@ -267,7 +266,7 @@ class ServicePrincipalStore:
         matched = [x for x in self._entries if sp_id == x[_CLIENT_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
-                           "Please run `az login` for this service principal."
+                           "Run `az login` for this service principal."
                            .format(sp_id))
         matched_with_tenant = [x for x in matched if tenant == x[_TENANT]]
         if matched_with_tenant:
@@ -315,19 +314,6 @@ class ServicePrincipalStore:
 
     def _load_persistence(self):
         self._entries = self._secret_store.load()
-
-
-def _read_response_templates():
-    """Read from success.html and error.html to strings and pass them to MSAL. """
-    success_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'success.html')
-    with open(success_file) as f:
-        success_template = f.read()
-
-    error_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'error.html')
-    with open(error_file) as f:
-        error_template = f.read()
-
-    return success_template, error_template
 
 
 def _get_authority_url(authority_endpoint, tenant):
