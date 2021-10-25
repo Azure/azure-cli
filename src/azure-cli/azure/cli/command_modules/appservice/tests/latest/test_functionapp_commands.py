@@ -1075,7 +1075,6 @@ class FunctionAppKeysTests(ScenarioTest):
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('functionKeys.{}'.format(key_name), None)])
 
-    # @unittest.skip("Function app slot shouldn't use webapp")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_set_slot(self, resource_group, storage_account):
@@ -1136,14 +1135,12 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
 
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value)])
+                     JMESPathCheck('name', key_name)])
 
         key_value = "keyvalue1_changed"
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value)])
+                     JMESPathCheck('name', key_name)])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1234,6 +1231,11 @@ class FunctionAppFunctionTests(LiveScenarioTest):
         requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
         time.sleep(30)
 
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('kind', 'functionapp'),
+            JMESPathCheck('name', functionapp_name)
+        ])
+
         self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'ZipDeploy'),
@@ -1243,6 +1245,7 @@ class FunctionAppFunctionTests(LiveScenarioTest):
             JMESPathCheck('name', '{}/{}'.format(functionapp_name, function_name)),
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('scriptHref', 'https://{}.azurewebsites.net/admin/vfs/site/wwwroot/{}/run.csx'.format(functionapp_name, function_name))])
+
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1257,16 +1260,20 @@ class FunctionAppFunctionTests(LiveScenarioTest):
 
         requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
         time.sleep(30)
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('kind', 'functionapp'),
+            JMESPathCheck('name', functionapp_name)
+        ])
 
         self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'ZipDeploy'),
             JMESPathCheck('complete', True)])
 
-        self.cmd('functionapp function delete -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
-
         self.cmd('functionapp function show -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name)).assert_with_checks([
             JMESPathCheck('config.bindings[0].type', 'httpTrigger')])
+
+        self.cmd('functionapp function delete -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
 
 
 # LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
