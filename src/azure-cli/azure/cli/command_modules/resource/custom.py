@@ -59,8 +59,6 @@ from ._bicep import (
     validate_bicep_target_scope,
     supports_bicep_publish
 )
-from ._deployment_stack import DeploymentStack
-
 logger = get_logger(__name__)
 
 RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Microsoft.Datadog/agreements/default?api-version=2020-02-01-preview',
