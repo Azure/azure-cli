@@ -303,7 +303,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_function', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
+        g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -444,6 +444,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_staticsite_environments')
         g.custom_show_command('show', 'show_staticsite_environment')
         g.custom_command('functions', 'list_staticsite_functions')
+        g.custom_command('delete', 'delete_staticsite_environment', confirmation=True)
 
     with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_domains')
@@ -466,6 +467,9 @@ def load_command_table(self, _):
 
     with self.command_group('logicapp') as g:
         g.custom_command('delete', 'delete_function_app', confirmation=True)
+        g.custom_command('stop', 'stop_webapp')
+        g.custom_command('start', 'start_webapp')
+        g.custom_command('restart', 'restart_webapp')
 
     with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())

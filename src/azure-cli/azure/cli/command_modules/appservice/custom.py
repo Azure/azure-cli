@@ -7,10 +7,9 @@ import threading
 import time
 import ast
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
+from urllib.request import urlopen
+
 from binascii import hexlify
 from os import urandom
 import datetime
@@ -21,7 +20,6 @@ import uuid
 from functools import reduce
 from nacl import encoding, public
 
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
 from fabric import Connection
 
@@ -98,7 +96,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         parse_result = parse_resource_id(plan)
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
-        plan_info = client.app_service_plans.get(resource_group_name, plan)
+        plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist in the resource group '{}".format(plan, resource_group_name))
     is_linux = plan_info.reserved
@@ -603,16 +601,8 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             raise ex
 
 
-def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
-    webapp = app_instance
-    if not app_instance:  # when the routine is invoked as a help method, not through commands
-        webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    if not webapp:
-        raise ResourceNotFoundError("WebApp'{}', is not found on RG '{}'.".format(name, resource_group_name))
-    webapp.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
-    _rename_server_farm_props(webapp)
-    _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
-    return webapp
+def show_webapp(cmd, resource_group_name, name, slot=None):
+    return _show_app(cmd, resource_group_name, name, "webapp", slot)
 
 
 # for generic updater
@@ -706,6 +696,10 @@ def get_functionapp(cmd, resource_group_name, name, slot=None):
     return function_app
 
 
+def show_functionapp(cmd, resource_group_name, name, slot=None):
+    return _show_app(cmd, resource_group_name, name, 'functionapp', slot)
+
+
 def list_webapp(cmd, resource_group_name=None):
     full_list = _list_app(cmd.cli_ctx, resource_group_name)
     # ignore apps with kind==null & not functions apps
@@ -727,6 +721,41 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 def list_function_app(cmd, resource_group_name=None):
     return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
                        _list_app(cmd.cli_ctx, resource_group_name)))
+
+
+def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not app:
+        raise ResourceNotFoundError("Unable to find {} '{}', in RG '{}'.".format(
+                                    cmd_app_type, name, resource_group_name))
+    app_type = _kind_to_app_type(app.kind) if app else None
+    if app_type != cmd_app_type:
+        raise ResourceNotFoundError(
+            "Unable to find {} '{}', in RG '{}'".format(cmd_app_type.value, name, resource_group_name),
+            "Use 'az {} show' to show {}s".format(app_type.value, app_type.value))
+    app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    _rename_server_farm_props(app)
+    _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+    return app
+
+
+def _kind_to_app_type(kind):
+    if "workflow" in kind:
+        return "logicapp"
+    if "function" in kind:
+        return "functionapp"
+    return "webapp"
+
+
+def _list_app(cli_ctx, resource_group_name=None):
+    client = web_client_factory(cli_ctx)
+    if resource_group_name:
+        result = list(client.web_apps.list_by_resource_group(resource_group_name))
+    else:
+        result = list(client.web_apps.list())
+    for webapp in result:
+        _rename_server_farm_props(webapp)
+    return result
 
 
 def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
@@ -1735,7 +1764,7 @@ def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
 
 
 def list_backups(cmd, resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'get_backup_configuration', slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'list_backups', slot)
 
 
 def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
@@ -1914,8 +1943,8 @@ def _get_local_git_url(cli_ctx, client, resource_group_name, name, slot=None):
 
 def _get_scm_url(cmd, resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
-    webapp = show_webapp(cmd, resource_group_name, name, slot=slot)
-    for host in webapp.host_name_ssl_states or []:
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    for host in app.host_name_ssl_states or []:
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
 

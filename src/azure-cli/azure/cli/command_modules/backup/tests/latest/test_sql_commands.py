@@ -493,10 +493,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type SQLInstance --target-server-name {fname} --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_restore.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -507,10 +507,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container1} --rp-name {rp}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_restore.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -580,10 +580,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode RestoreAsFiles --rp-name {rp} --filepath "C:\" --target-container-name {container1} --item-name {item} --container-name {container1}  --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_raf.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_raf.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -637,10 +637,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         #SQL CRR ALR Restore
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type SQLInstance --target-server-name {tserver} --target-container-name {tcontainer} --workload-type {wt} --target-vault-name {tvault} --target-resource-group {trg}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_crr.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json --use-secondary-region', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_crr.json --use-secondary-region', checks=[
             self.check("properties.operation", "CrossRegionRestore"),
             self.check("properties.status", "InProgress")
         ]).get_output_in_json()
@@ -651,10 +651,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         #SQL CRR RAF Restore
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode restoreasfiles --rp-name {rp} --item-name {item} --container-name {container1} --target-container-name {tcontainer} --workload-type {wt} --target-vault-name {tvault} --target-resource-group {trg} --filepath "C:\"').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_crr.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json --use-secondary-region', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_sql_crr.json --use-secondary-region', checks=[
             self.check("properties.operation", "CrossRegionRestore"),
             self.check("properties.status", "InProgress")
         ]).get_output_in_json()
@@ -715,11 +715,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # # Integrated Restore
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container} --rp-name {rp_restore}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_sql_archive.json", "w") as f:
             f.write(self.kwargs['rc'])
 
         # # Trigger Restore
-        self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig.json --rehydration-priority High', checks=[
+        self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig_sql_archive.json --rehydration-priority High', checks=[
             self.check("properties.operation", "RestoreWithRehydrate"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')

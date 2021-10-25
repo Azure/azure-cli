@@ -35,7 +35,7 @@ def disconnect_staticsite(cmd, name, resource_group_name=None, no_wait=False):
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return sdk_no_wait(no_wait, client.detach_static_site,
+    return sdk_no_wait(no_wait, client.begin_detach_static_site,
                        resource_group_name=resource_group_name, name=name)
 
 
@@ -59,6 +59,15 @@ def list_staticsite_environments(cmd, name, resource_group_name=None):
     return client.get_static_site_builds(resource_group_name, name)
 
 
+def delete_staticsite_environment(cmd, name, environment_name='default', resource_group_name=None, no_wait=False):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return sdk_no_wait(no_wait, client.begin_delete_static_site_build,
+                       resource_group_name, name, environment_name)
+
+
 def show_staticsite_environment(cmd, name, environment_name='default', resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
@@ -80,7 +89,7 @@ def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    client.validate_custom_domain_can_be_added_to_static_site(resource_group_name, name, hostname)
+    client.begin_validate_custom_domain_can_be_added_to_static_site(resource_group_name, name, hostname)
 
     return sdk_no_wait(no_wait, client.create_or_update_static_site_custom_domain,
                        resource_group_name=resource_group_name, name=name, domain_name=hostname)
@@ -92,7 +101,7 @@ def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_w
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
     logger.warning("After deleting a custom domain, there can be a 15 minute delay for the change to propagate.")
-    return sdk_no_wait(no_wait, client.delete_static_site_custom_domain,
+    return sdk_no_wait(no_wait, client.begin_delete_static_site_custom_domain,
                        resource_group_name=resource_group_name, name=name, domain_name=hostname)
 
 
@@ -223,7 +232,7 @@ def create_staticsites(cmd, resource_group_name, name, location,
         sku=sku_def)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.create_or_update_static_site,
+    return sdk_no_wait(no_wait, client.begin_create_or_update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
 
@@ -264,7 +273,7 @@ def delete_staticsite(cmd, name, resource_group_name=None, no_wait=False):
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return sdk_no_wait(no_wait, client.delete_static_site,
+    return sdk_no_wait(no_wait, client.begin_delete_static_site,
                        resource_group_name=resource_group_name, name=name)
 
 
