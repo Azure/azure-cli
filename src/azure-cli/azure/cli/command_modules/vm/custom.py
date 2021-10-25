@@ -4143,10 +4143,7 @@ def gallery_application_version_update(client,
                                        gallery_application_version_name,
                                        location,
                                        package_file_link,
-                                       install_command,
-                                       remove_command,
                                        tags=None,
-                                       update_command=None,
                                        target_regions=None,
                                        default_file_link=None,
                                        end_of_life_date=None,
@@ -4162,18 +4159,14 @@ def gallery_application_version_update(client,
     if default_file_link is not None:
         source['default_configuration_link'] = default_file_link
     gallery_application_version['publishing_profile']['source'] = source
-    manage_actions = {}
-    if update_command is not None:
-        manage_actions['update'] = update_command
-    gallery_application_version['publishing_profile']['manage_actions'] = manage_actions
     if target_regions is not None:
-        gallery_application_version['publishing_profile']['target_regions'] = target_regions
+        gallery_application_version['publishing_profile']['target_regions'] = [target_regions]
     if exclude_from is not None:
         gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
     if end_of_life_date is not None:
         gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
     return sdk_no_wait(no_wait,
-                       client.begin_update,
+                       client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        gallery_name=gallery_name,
                        gallery_application_name=gallery_application_name,
