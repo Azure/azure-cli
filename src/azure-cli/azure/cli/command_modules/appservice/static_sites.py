@@ -84,15 +84,23 @@ def list_staticsite_domains(cmd, name, resource_group_name=None):
     return client.list_static_site_custom_domains(resource_group_name, name)
 
 
-def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False):
+# TODO need to implement a polling command to allow user to get the code for 'dns-txt-token' validation
+def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False,
+                          validation_method="cname-delegation"):
+    from azure.mgmt.web.models import StaticSiteCustomDomainRequestPropertiesARMResource
+
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    client.begin_validate_custom_domain_can_be_added_to_static_site(resource_group_name, name, hostname)
+    domain_envelope = StaticSiteCustomDomainRequestPropertiesARMResource(validation_method=validation_method)
 
-    return sdk_no_wait(no_wait, client.create_or_update_static_site_custom_domain,
-                       resource_group_name=resource_group_name, name=name, domain_name=hostname)
+    client.begin_validate_custom_domain_can_be_added_to_static_site(resource_group_name,
+                                                                    name, hostname, domain_envelope)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update_static_site_custom_domain,
+                       resource_group_name=resource_group_name, name=name, domain_name=hostname,
+                       static_site_custom_domain_request_properties_envelope=domain_envelope)
 
 
 def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False):
