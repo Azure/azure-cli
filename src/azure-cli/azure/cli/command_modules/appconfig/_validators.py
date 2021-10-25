@@ -13,7 +13,7 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
-from ._constants import FeatureFlagConstants
+from ._constants import FeatureFlagConstants, ImportExportProfiles
 from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)
@@ -250,11 +250,11 @@ def validate_feature_key(namespace):
 
 
 def validate_import_profile(namespace):
-    if namespace.profile == 'appconfig/kvset':
+    if namespace.profile == ImportExportProfiles.KVSET:
         if namespace.source != 'file':
-            raise InvalidArgumentValueError("Import profile 'appconfig/kvset' can only be used when importing from a JSON file.")
+            raise InvalidArgumentValueError("Import profile '{}' can only be used when importing from a JSON file.".format(ImportExportProfiles.KVSET))
         if namespace.format_ != 'json':
-            raise InvalidArgumentValueError("Import profile 'appconfig/kvset' can only be used when importing from a JSON format.")
+            raise InvalidArgumentValueError("Import profile '{}' can only be used when importing from a JSON format.".format(ImportExportProfiles.KVSET))
         if namespace.content_type is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='content-type')
         if namespace.label is not None:
@@ -270,11 +270,11 @@ def validate_import_profile(namespace):
 
 
 def validate_export_profile(namespace):
-    if namespace.profile == 'appconfig/kvset':
+    if namespace.profile == ImportExportProfiles.KVSET:
         if namespace.destination != 'file':
-            raise InvalidArgumentValueError("The profile 'appconfig/kvset' only supports exporting to a file.")
+            raise InvalidArgumentValueError("The profile '{}' only supports exporting to a file.".format(ImportExportProfiles.KVSET))
         if namespace.format_ != 'json':
-            raise CLIError("The profile 'appconfig/kvset' only supports exporting in the JSON format")
+            raise CLIError("The profile '{}' only supports exporting in the JSON format".format(ImportExportProfiles.KVSET))
         if namespace.prefix is not None and namespace.prefix != '':
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='prefix')
         if namespace.dest_label is not None:
@@ -283,8 +283,10 @@ def validate_export_profile(namespace):
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='resolve-keyvault')
         if namespace.separator is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='separator')
+        if namespace.naming_convention != 'pascal':
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='naming-convention')
 
 
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
     action = 'exporting' if is_exporting else 'importing'
-    return InvalidArgumentValueError("The option '{0}' is not supported when {1} using 'appconfig/kvset' profile".format(argument, action))
+    return InvalidArgumentValueError("The option '{0}' is not supported when {1} using '{2}' profile".format(argument, action, ImportExportProfiles.KVSET))

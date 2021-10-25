@@ -8,6 +8,7 @@
 import io
 import json
 from difflib import Differ
+from json import JSONDecodeError
 from urllib.parse import urlparse
 
 import chardet
@@ -20,8 +21,9 @@ from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import FileOperationError, AzureInternalError
+from azure.keyvault.key_vault_id import KeyVaultIdentifier
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles)
 from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
@@ -554,7 +556,7 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
     res = []
     for kv in keyvalues:
         # value
-        if profile is not None and profile == 'appconfig/kvset':
+        if profile == ImportExportProfiles.KVSET:
             kv_json = {'key': kv.key,
                        'value': kv.value,
                        'label': kv.label,
@@ -666,8 +668,8 @@ def __print_preview(old_json, new_json):
     return True
 
 
-def __print_preview_and_export_kvset(file_path, keyvalues, yes):
-    kvset = __serialize_kv_list_to_comparable_json_list(keyvalues, 'appconfig/kvset')
+def __export_kvset_to_file(file_path, keyvalues, yes):
+    kvset = __serialize_kv_list_to_comparable_json_list(keyvalues, ImportExportProfiles.KVSET)
     obj = {KVSetConstants.KVSETRootElementName: kvset}
     json_string = json.dumps(obj, indent=2, ensure_ascii=False)
     if not yes:
@@ -1024,7 +1026,7 @@ def __resolve_secret(keyvault_client, keyvault_reference):
 def __import_kvset_from_file(client, path, yes):
     new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
     if KVSetConstants.KVSETRootElementName not in new_kvset:
-        raise FileOperationError("file '{}' is not in a valid appconfig/kvset format.".format(path))
+        raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
 
     kvset_to_import = [ConfigurationSetting(key=kv['key'],
                                             label=kv['label'],
@@ -1043,10 +1045,12 @@ def __import_kvset_from_file(client, path, yes):
                                      any(kv_import.key == kv.key and kv_import.label == kv.label
                                          for kv_import in kvset_to_import), existing_kvset))
 
-        existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, 'appconfig/kvset')
-        kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, 'appconfig/kvset')
+        existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, ImportExportProfiles.KVSET)
+        kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
 
-        __print_preview_json_diff(existing_kvset_list, kvset_to_import_list)
+        needs_update = __print_preview_json_diff(existing_kvset_list, kvset_to_import_list)
+        if not needs_update:
+            return
 
         user_confirmation('Do you want to continue?\n')
 
@@ -1065,20 +1069,24 @@ def __import_kvset_from_file(client, path, yes):
 
 
 def __validate_import_keyvault_ref(kv):
-    if kv:
+    if kv and validate_import_key(kv.key):
         try:
             value = json.loads(kv.value)
-            if 'uri' in value:
-                parsed_url = urlparse(value['uri'])
-                # URL with a valid scheme and netloc is a valid url, but keyvault ref has path as well, so validate it
-                if parsed_url.scheme and parsed_url.netloc and parsed_url.path:
-                    return True
-
-            logger.warning("Keyvault reference with key '{%s}' is not a valid keyvault reference."
-                           "It will not be imported.", kv.key)
-
-        except Exception as exception:  # pylint: disable=broad-except
+        except JSONDecodeError as exception:
             logger.warning("An error occurred while importing keyvault reference with key '{%s}'\n{%s}", kv.key, str(exception))
+            return False
+
+        if 'uri' in value:
+            parsed_url = urlparse(value['uri'])
+            # URL with a valid scheme and netloc is a valid url, but keyvault ref has path as well, so validate it
+            if parsed_url.scheme and parsed_url.netloc and parsed_url.path:
+                try:
+                    KeyVaultIdentifier(uri=value['uri'])
+                    return True
+                except Exception:  # pylint: disable=broad-except
+                    pass
+
+        logger.warning("Keyvault reference with key '{%s}' is not a valid keyvault reference. It will not be imported.", kv.key)
     return False
 
 
@@ -1116,12 +1124,13 @@ def __print_preview_json_diff(old_obj, new_obj):
 
     if not any(line.startswith('-') or line.startswith('+') for line in diff):
         logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
-        return
+        return False
 
     # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
     logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
     # print newline for readability
     logger.warning('\n')
+    return True
 
 
 class Undef:  # pylint: disable=too-few-public-methods

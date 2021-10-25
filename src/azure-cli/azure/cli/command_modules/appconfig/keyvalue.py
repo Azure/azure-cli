@@ -22,7 +22,7 @@ from azure.core.exceptions import (HttpResponseError,
                                    ResourceModifiedError)
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
-                         SearchFilterOptions, StatusCodes)
+                         SearchFilterOptions, StatusCodes, ImportExportProfiles)
 from ._models import (convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding
@@ -32,7 +32,7 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv,
                           __read_kv_from_app_service, __write_kv_to_app_service, __print_restore_preview,
                           __serialize_kv_list_to_comparable_json_object, __print_preview,
-                          __serialize_features_from_kv_list_to_comparable_json_object, __print_preview_and_export_kvset,
+                          __serialize_features_from_kv_list_to_comparable_json_object, __export_kvset_to_file,
                           __serialize_feature_list_to_comparable_json_object, __print_features_preview,
                           __import_kvset_from_file)
 from .feature import list_feature
@@ -56,7 +56,7 @@ def import_config(cmd,
                   format_=None,
                   separator=None,
                   depth=None,
-                  profile='appconfig/default',
+                  profile=ImportExportProfiles.DEFAULT,
                   # from-configstore parameters
                   src_name=None,
                   src_connection_string=None,
@@ -78,7 +78,7 @@ def import_config(cmd,
 
     # fetch key values from source
     if source == 'file':
-        if profile == 'appconfig/kvset':
+        if profile == ImportExportProfiles.KVSET:
             __import_kvset_from_file(client=azconfig_client, path=path, yes=yes)
             return
         if format_ and content_type:
@@ -197,7 +197,7 @@ def export_config(cmd,
                   separator=None,
                   naming_convention='pascal',
                   resolve_keyvault=False,
-                  profile='appconfig/default',
+                  profile=ImportExportProfiles.DEFAULT,
                   # to-config-store parameters
                   dest_name=None,
                   dest_connection_string=None,
@@ -239,11 +239,11 @@ def export_config(cmd,
 
     # We need to separate KV from feature flags for the default export profile and only need to discard
     # if skip_features is true for the appconfig/kvset export profile.
-    if profile == 'appconfig/default' or (profile == 'appconfig/kvset' and skip_features):
+    if profile == ImportExportProfiles.DEFAULT or (profile == ImportExportProfiles.KVSET and skip_features):
         __discard_features_from_retrieved_kv(src_kvs)
 
-    if profile == 'appconfig/kvset':
-        __print_preview_and_export_kvset(file_path=path, keyvalues=src_kvs, yes=yes)
+    if profile == ImportExportProfiles.KVSET:
+        __export_kvset_to_file(file_path=path, keyvalues=src_kvs, yes=yes)
         return
 
     if not skip_features:

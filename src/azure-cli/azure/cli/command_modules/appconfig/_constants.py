@@ -62,3 +62,8 @@ class HttpHeaders:
 
 class KVSetConstants:
     KVSETRootElementName = "items"
+
+
+class ImportExportProfiles:
+    KVSET = "appconfig/kvset"
+    DEFAULT = "appconfig/default"

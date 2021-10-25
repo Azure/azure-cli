@@ -15,7 +15,7 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
-from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
+from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -705,7 +705,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         self.kwargs.update({
             'import_source': 'file',
             'imported_format': 'json',
-            'profile': 'appconfig/kvset',
+            'profile': ImportExportProfiles.KVSET,
             'imported_file_path': imported_file_path,
             'exported_file_path': exported_file_path
         })
