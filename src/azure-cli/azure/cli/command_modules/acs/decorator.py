@@ -3724,11 +3724,12 @@ class AKSContext:
         # this parameter does not need validation
         return cluster_autoscaler_profile
 
-    def get_uptime_sla(self) -> bool:
-        """Obtain the value of uptime_sla.
+    # pylint: disable=unused-argument
+    def _get_uptime_sla(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of uptime_sla.
 
-        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
-        a MutuallyExclusiveArgumentError.
+        This function supports the option of enable_validation. When enabled, if both uptime_sla and no_uptime_sla are
+        specified, raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
@@ -3746,11 +3747,22 @@ class AKSContext:
         # this parameter does not need dynamic completion
 
         # validation
-        if uptime_sla and self._get_no_uptime_sla(enable_validation=False):
-            raise MutuallyExclusiveArgumentError(
-                'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
-            )
+        if enable_validation:
+            if uptime_sla and self._get_no_uptime_sla(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
+                )
         return uptime_sla
+
+    def get_uptime_sla(self) -> bool:
+        """Obtain the value of uptime_sla.
+
+        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
+        a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_uptime_sla(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_no_uptime_sla(self, enable_validation: bool = False, **kwargs) -> bool:
@@ -3768,7 +3780,7 @@ class AKSContext:
 
         # validation
         if enable_validation:
-            if no_uptime_sla and self.get_uptime_sla():
+            if no_uptime_sla and self._get_uptime_sla(enable_validation=False):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
@@ -3861,11 +3873,12 @@ class AKSContext:
         # this parameter does not need validation
         return aks_custom_headers
 
-    def get_disable_local_accounts(self) -> bool:
-        """Obtain the value of disable_local_accounts.
+    # pylint: disable=unused-argument
+    def _get_disable_local_accounts(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_local_accounts.
 
-        This function will verify the parameter by default. If both disable_local_accounts and enable_local_accounts are
-        specified, raise a MutuallyExclusiveArgumentError.
+        This function supports the option of enable_validation. When enabled, if both disable_local_accounts and
+        enable_local_accounts are specified, raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
@@ -3878,13 +3891,24 @@ class AKSContext:
 
         # this parameter does not need dynamic completion
         # validation
-        if self.decorator_mode == DecoratorMode.UPDATE:
-            if disable_local_accounts and self._get_enable_local_accounts(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    "Cannot specify --disable-local-accounts and "
-                    "--enable-local-accounts at the same time."
-                )
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if disable_local_accounts and self._get_enable_local_accounts(enable_validation=False):
+                    raise MutuallyExclusiveArgumentError(
+                        "Cannot specify --disable-local-accounts and "
+                        "--enable-local-accounts at the same time."
+                    )
         return disable_local_accounts
+
+    def get_disable_local_accounts(self) -> bool:
+        """Obtain the value of disable_local_accounts.
+
+        This function will verify the parameter by default. If both disable_local_accounts and enable_local_accounts are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_local_accounts(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_enable_local_accounts(self, enable_validation: bool = False, **kwargs) -> bool:
@@ -3901,7 +3925,7 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            if enable_local_accounts and self.get_disable_local_accounts():
+            if enable_local_accounts and self._get_disable_local_accounts(enable_validation=False):
                 raise MutuallyExclusiveArgumentError(
                     "Cannot specify --disable-local-accounts and "
                     "--enable-local-accounts at the same time."
