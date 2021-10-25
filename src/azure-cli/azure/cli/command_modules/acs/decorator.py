@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import re
-import sys
 import time
 from distutils.version import StrictVersion
 from typing import Any, Dict, List, Tuple, TypeVar, Union
