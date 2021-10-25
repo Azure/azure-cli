@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 
 from knack.log import get_logger
 
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
 from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobStatus, CrrJobRequest
 
@@ -22,7 +22,7 @@ from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
     backup_operation_statuses_cf, protection_container_operation_results_cf,
     backup_crr_job_details_cf, crr_operation_status_cf)
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, InvalidArgumentValueError
 
 
 logger = get_logger(__name__)
@@ -90,8 +90,10 @@ def get_containers(client, container_type, status, resource_group_name, vault_na
 def get_resource_name_and_rg(resource_group_name, name_or_id):
     if is_valid_resource_id(name_or_id):
         id_parts = parse_resource_id(name_or_id)
-        name = id_parts['name']
-        resource_group = id_parts['resource_group']
+        name = id_parts.get('name')
+        resource_group = id_parts.get('resource_group')
+        if name is None or resource_group is None:
+            raise InvalidArgumentValueError("Please provide a valid resource id.")
     else:
         name = name_or_id
         resource_group = resource_group_name
@@ -173,6 +175,7 @@ def track_backup_crr_job(cli_ctx, result, azure_region, resource_id):
     crr_job_details_client = backup_crr_job_details_cf(cli_ctx)
     operation_status = track_backup_crr_operation(cli_ctx, result, azure_region)
     if operation_status.properties:
+        time.sleep(10)
         job_id = operation_status.properties.job_id
         job_details = crr_job_details_client.get(azure_region, CrrJobRequest(resource_id=resource_id,
                                                                              job_name=job_id))

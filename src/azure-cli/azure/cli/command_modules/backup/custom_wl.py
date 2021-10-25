@@ -26,7 +26,8 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
-    _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf
+    _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf, \
+    backup_protection_intent_cf
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
@@ -228,7 +229,7 @@ def create_policy(client, resource_group_name, vault_name, policy_name, policy, 
     workload_type = _check_map(workload_type, workload_type_map)
     policy_object = cust_help.get_policy_from_json(client, policy)
     policy_object.properties.backup_management_type = "AzureWorkload"
-    policy_object.properties.workload_type = workload_type
+    policy_object.properties.work_load_type = workload_type
     policy_object.name = policy_name
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
@@ -537,24 +538,32 @@ def auto_enable_for_azure_wl(client, resource_group_name, vault_name, policy_obj
         return {'status': False}
 
 
-def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name):
-    if not cust_help.is_native_name(item_name):
-        raise CLIError(
-            """
-            Protectable Item name must be native.
-            """)
-
-    protectable_item_type = item_name.split(';')[0]
+def disable_auto_for_azure_wl(cmd, client, resource_group_name, vault_name, protectable_item):
+    protectable_item_object = protectable_item
+    item_id = protectable_item_object.id
+    protectable_item_type = protectable_item_object.properties.protectable_item_type
+    protectable_item_name = protectable_item_object.properties.friendly_name
+    container_name = cust_help.get_protection_container_uri_from_id(item_id)
     if protectable_item_type.lower() != 'sqlinstance':
         raise CLIError(
             """
             Protectable Item can only be of type SQLInstance.
             """)
 
-    intent_object_name = str(uuid4())
+    filter_string = cust_help.get_filter_string({
+        'backupManagementType': "AzureWorkload",
+        'itemType': protectable_item_type,
+        'itemName': protectable_item_name,
+        'parentName': container_name})
+
+    protection_intents = backup_protection_intent_cf(cmd.cli_ctx).list(vault_name, resource_group_name, filter_string)
+    paged_protection_intents = cust_help.get_list_from_paged_response(protection_intents)
+
+    if len(paged_protection_intents) != 1:
+        raise InvalidArgumentValueError("A unique intent not found. Please check if the values provided are correct.")
 
     try:
-        client.delete(vault_name, resource_group_name, fabric_name, intent_object_name)
+        client.delete(vault_name, resource_group_name, fabric_name, paged_protection_intents[0].name)
         return {'status': True}
     except Exception:
         return {'status': False}

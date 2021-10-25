@@ -388,8 +388,14 @@ def auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, polic
                                               protectable_item)
 
 
-def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name):
-    return custom_wl.disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name)
+def disable_auto_for_azure_wl(cmd, client, resource_group_name, vault_name, protectable_item_name,
+                              protectable_item_type, server_name, workload_type):
+    protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
+    protectable_item = show_protectable_item(cmd, protectable_items_client, resource_group_name, vault_name,
+                                             protectable_item_name, server_name, protectable_item_type, workload_type)
+    custom_help.validate_protectable_item(protectable_item)
+
+    return custom_wl.disable_auto_for_azure_wl(cmd, client, resource_group_name, vault_name, protectable_item)
 
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,

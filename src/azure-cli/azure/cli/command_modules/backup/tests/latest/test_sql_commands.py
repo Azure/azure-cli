@@ -271,7 +271,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection auto-enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-name {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}')
 
-        self.cmd('backup protection auto-disable-for-azurewl -v {vault} -g {rg} --item-name {item}')
+        self.cmd('backup protection auto-disable-for-azurewl -v {vault} -g {rg} --protectable-item-name {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}')
 
         self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 

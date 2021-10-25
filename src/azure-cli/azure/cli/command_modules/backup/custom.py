@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 # pylint: disable=too-many-lines
 from knack.log import get_logger
 
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity
@@ -19,7 +19,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
-    CrossRegionRestoreRequest, BackupStatusRequest
+    CrossRegionRestoreRequest, BackupStatusRequest, CrrJobRequest
 
 import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
@@ -1080,7 +1080,8 @@ def list_jobs(cmd, client, resource_group_name, vault_name, status=None, operati
         vault_location = vault.location
         azure_region = secondary_region_map[vault_location]
         client = backup_crr_jobs_cf(cmd.cli_ctx)
-        return cust_help.get_list_from_paged_response(client.list(azure_region, filter_string, resource_id=vault.id))
+        return cust_help.get_list_from_paged_response(client.list(azure_region, CrrJobRequest(resource_id=vault.id),
+                                                                  filter_string))
 
     return cust_help.get_list_from_paged_response(client.list(vault_name, resource_group_name, filter_string))
 
@@ -1091,7 +1092,7 @@ def show_job(cmd, client, resource_group_name, vault_name, name, use_secondary_r
         vault_location = vault.location
         azure_region = secondary_region_map[vault_location]
         client = backup_crr_job_details_cf(cmd.cli_ctx)
-        return client.get(azure_region, vault.id, name)
+        return client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
     return client.get(vault_name, resource_group_name, name)
 
 
@@ -1109,7 +1110,7 @@ def wait_for_job(cmd, client, resource_group_name, vault_name, name, timeout=Non
         vault_location = vault.location
         azure_region = secondary_region_map[vault_location]
         client = backup_crr_job_details_cf(cmd.cli_ctx)
-        job_details = client.get(azure_region, vault.id, name)
+        job_details = client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
         while cust_help.job_in_progress(job_details.properties.status):
             if timeout:
                 elapsed_time = datetime.utcnow() - start_timestamp

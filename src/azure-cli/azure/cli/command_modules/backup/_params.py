@@ -267,7 +267,7 @@ def load_arguments(self, _):
         c.argument('policy_name', policy_name_type)
 
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
-    for command in ['backup-now', 'disable', 'auto-disable-for-azurewl', 'resume', 'undelete', 'update-for-vm']:
+    for command in ['backup-now', 'disable', 'resume', 'undelete', 'update-for-vm']:
         with self.argument_context('backup protection ' + command) as c:
             c.argument('container_name', container_name_type, id_part='child_name_2')
             c.argument('item_name', item_name_type, id_part='child_name_3')
@@ -303,7 +303,7 @@ def load_arguments(self, _):
         c.argument('azure_file_share', options_list=['--azure-file-share'], help='Name of the Azure FileShare.')
         c.argument('storage_account', options_list=['--storage-account'], help='Name of the Storage Account of the FileShare.')
 
-    for command in ["enable-for-azurewl", "auto-enable-for-azurewl"]:
+    for command in ["enable-for-azurewl", "auto-enable-for-azurewl", 'auto-disable-for-azurewl']:
         with self.argument_context('backup protection ' + command) as c:
             c.argument('vault_name', vault_name_type, id_part=None)
             c.argument('protectable_item_type', protectable_item_type)
