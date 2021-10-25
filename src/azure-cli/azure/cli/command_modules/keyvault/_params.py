@@ -82,6 +82,27 @@ def load_arguments(self, _):
          'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
          'NetworkRuleBypassOptions', 'NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
+    # Todo: Remove this after azure-mgmt-keyvault bumped to 2021-06-01-preview
+    class KeyPermissions(str, Enum):
+        ENCRYPT = "encrypt"
+        DECRYPT = "decrypt"
+        WRAP_KEY = "wrapKey"
+        UNWRAP_KEY = "unwrapKey"
+        SIGN = "sign"
+        VERIFY = "verify"
+        GET = "get"
+        LIST = "list"
+        CREATE = "create"
+        UPDATE = "update"
+        IMPORT_ENUM = "import"
+        DELETE = "delete"
+        BACKUP = "backup"
+        RESTORE = "restore"
+        RECOVER = "recover"
+        PURGE = "purge"
+        RELEASE = "release"
+        ROTATE = "rotate"
+
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
         help='Name of the Vault.', options_list=['--vault-name'], metavar='NAME', id_part=None,
