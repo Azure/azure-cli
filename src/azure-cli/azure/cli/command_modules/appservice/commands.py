@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_onedeploy_params
+from ._validators import validate_onedeploy_params, _validate_vnet_integration
 
 
 def output_slots_in_table(slots):
@@ -113,7 +113,7 @@ def load_command_table(self, _):
     logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
 
     with self.command_group('webapp', webapp_sdk) as g:
-        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=_validate_vnet_integration)
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)

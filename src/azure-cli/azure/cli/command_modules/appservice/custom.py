@@ -132,17 +132,13 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         site_config.always_on = True
 
     if subnet or vnet:
-        if not subnet:
-            raise CLIError("Cannot use --vnet without --subnet")
-        if not is_valid_resource_id(subnet) and not vnet:
-            raise CLIError("Must either specify subnet by resource ID or include --vnet argument")
         subnet_info = _get_subnet_info(cmd=cmd,
                                        resource_group_name=resource_group_name,
                                        subnet=subnet,
                                        vnet=vnet)
-        _validate_webapp_create_vnet(cmd=cmd, sku_name=plan_info.sku.name, webapp_location=plan_info.location,
-                                     subnet_resource_group=subnet_info["resource_group_name"],
-                                     vnet_name=subnet_info["vnet_name"])
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"])
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
@@ -254,12 +250,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     return webapp
 
 
-def _validate_webapp_create_vnet(cmd, subnet_resource_group, vnet_name, sku_name, webapp_location):
-    allowed_skus = {'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3'}
-    if sku_name.upper() not in allowed_skus:
-        raise CLIError("App Service Plan has invalid sku for vnet integration: {}."
-                       "Plan sku must be one of: {}.".format(sku_name, allowed_skus))
-
+def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location):
     vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
     vnet_location = vnet_client.get(resource_group_name=subnet_resource_group,
                                     virtual_network_name=vnet_name).location
@@ -2910,6 +2901,7 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
     return value
 
 
+# TODO complete vnet/subnet integration
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, functions_version=None, runtime=None, runtime_version=None,
                     consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -2917,7 +2909,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
                     deployment_container_image_name=None, tags=None, assign_identities=None,
-                    role='Contributor', scope=None):
+                    role='Contributor', scope=None, vnet=None, subnet=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 2. In the future, specifying a version will "
@@ -3689,9 +3681,9 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
     parsed_plan = parse_resource_id(app.app_service_plan_id)
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
 
-    _validate_webapp_create_vnet(cmd=cmd, sku_name=plan_info.sku.name, webapp_location=plan_info.location,
-                                 subnet_resource_group=subnet_info["resource_group_name"],
-                                 vnet_name=subnet_info["vnet_name"])
+    _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
+                                        subnet_resource_group=subnet_info["resource_group_name"],
+                                        vnet_name=subnet_info["vnet_name"])
 
     if skip_delegation_check:
         logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
