@@ -29,6 +29,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
+    DecoratorEarlyExitException,
     DecoratorMode,
 )
 from azure.cli.command_modules.acs.decorator import (
@@ -1052,7 +1053,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_4.attach_mc(mc_4)
         # fail on cluster autoscaler already enabled
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(DecoratorEarlyExitException):
             ctx_4.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
 
         # custom value
@@ -1105,7 +1106,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_6.attach_mc(mc_6)
         # fail on cluster autoscaler already disabled
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(DecoratorEarlyExitException):
             ctx_6.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
 
     def test_get_admin_username(self):
@@ -4300,7 +4301,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.prompt_y_n",
             return_value=False,
         ):
-            dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
+            with self.assertRaises(DecoratorEarlyExitException):
+                dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
         self.assertEqual(
             dec_3.context.get_intermediate(
                 "need_post_creation_vnet_permission_granting"
