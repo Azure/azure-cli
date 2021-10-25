@@ -41,7 +41,6 @@ from azure.cli.command_modules.acs.decorator import (
     format_parameter_name_to_option_name,
     safe_list_get,
     safe_lower,
-    validate_counts_in_autoscaler,
     validate_decorator_mode,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import (
@@ -116,39 +115,6 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
             identity=self.models.ManagedClusterIdentity(type="Test"),
         )
         self.assertEqual(check_is_msi_cluster(mc_3), False)
-
-    def test_validate_counts_in_autoscaler(self):
-        # default
-        validate_counts_in_autoscaler(
-            3, False, None, None, DecoratorMode.CREATE
-        )
-
-        # custom value
-        validate_counts_in_autoscaler(5, True, 1, 10, DecoratorMode.CREATE)
-
-        # fail on min_count/max_count not specified
-        with self.assertRaises(RequiredArgumentMissingError):
-            validate_counts_in_autoscaler(
-                5, True, None, None, DecoratorMode.CREATE
-            )
-
-        # fail on min_count > max_count
-        with self.assertRaises(InvalidArgumentValueError):
-            validate_counts_in_autoscaler(5, True, 3, 1, DecoratorMode.CREATE)
-
-        # fail on node_count < min_count in create mode
-        with self.assertRaises(InvalidArgumentValueError):
-            validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.CREATE)
-
-        # skip node_count check in update mode
-        validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.UPDATE)
-        validate_counts_in_autoscaler(None, True, 7, 10, DecoratorMode.UPDATE)
-
-        # fail on enable_cluster_autoscaler not specified
-        with self.assertRaises(RequiredArgumentMissingError):
-            validate_counts_in_autoscaler(
-                5, False, 3, None, DecoratorMode.UPDATE
-            )
 
 
 class AKSModelsTestCase(unittest.TestCase):
@@ -246,11 +212,6 @@ class AKSModelsTestCase(unittest.TestCase):
             models.ExtendedLocationTypes,
             getattr(module, "ExtendedLocationTypes"),
         )
-        self.assertEqual(
-            models.ManagedClusterAPIServerAccessProfile,
-            getattr(module, "ManagedClusterAPIServerAccessProfile"),
-        )
-        # not directly used
         self.assertEqual(
             models.ManagedClusterPropertiesAutoScalerProfile,
             getattr(module, "ManagedClusterPropertiesAutoScalerProfile"),
@@ -361,6 +322,42 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_1.remove_intermediate("test-intermediate")
         self.assertEqual(ctx_1.get_intermediate("test-intermediate"), None)
+
+    def test_validate_counts_in_autoscaler(self):
+        ctx = AKSContext(
+            self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
+        )
+        # default
+        ctx.validate_counts_in_autoscaler(
+            3, False, None, None, DecoratorMode.CREATE
+        )
+
+        # custom value
+        ctx.validate_counts_in_autoscaler(5, True, 1, 10, DecoratorMode.CREATE)
+
+        # fail on min_count/max_count not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.validate_counts_in_autoscaler(
+                5, True, None, None, DecoratorMode.CREATE
+            )
+
+        # fail on min_count > max_count
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx.validate_counts_in_autoscaler(5, True, 3, 1, DecoratorMode.CREATE)
+
+        # fail on node_count < min_count in create mode
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx.validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.CREATE)
+
+        # skip node_count check in update mode
+        ctx.validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.UPDATE)
+        ctx.validate_counts_in_autoscaler(None, True, 7, 10, DecoratorMode.UPDATE)
+
+        # fail on enable_cluster_autoscaler not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.validate_counts_in_autoscaler(
+                5, False, 3, None, DecoratorMode.UPDATE
+            )
 
     def test_get_subscription_id(self):
         ctx_1 = AKSContext(
@@ -3132,7 +3129,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        # fail on mutially exclusive enable_private_cluster and api_server_authorized_ip_ranges
+        # fail on mutually exclusive enable_private_cluster and api_server_authorized_ip_ranges
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_3.get_enable_private_cluster()
 
@@ -3163,6 +3160,49 @@ class AKSContextTestCase(unittest.TestCase):
         # fail on private_dns_zone specified when enable_private_cluster is not specified
         with self.assertRaises(InvalidArgumentValueError):
             ctx_5.get_enable_private_cluster()
+
+        # custom value
+        ctx_6 = AKSContext(
+            self.cmd,
+            {
+                "enable_private_cluster": False,
+                "disable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on disable_public_fqdn specified when enable_private_cluster is not specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_6.get_enable_private_cluster()
+
+        # custom value
+        # In fact, there is currently no such option in the create command
+        ctx_7 = AKSContext(
+            self.cmd,
+            {
+                "enable_private_cluster": False,
+                "enable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        # fail on enable_public_fqdn specified when enable_private_cluster is not specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_7.get_enable_private_cluster()
+
+        # custom value
+        ctx_8 = AKSContext(
+            self.cmd,
+            {
+                "enable_private_cluster": False,
+                "enable_public_fqdn": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on enable_public_fqdn specified when enable_private_cluster is not specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_8.get_enable_private_cluster()
 
     def test_get_disable_public_fqdn(self):
         # default
@@ -3199,7 +3239,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        # fail on mutially exclusive disable_public_fqdn and enable_public_fqdn
+        # fail on mutually exclusive disable_public_fqdn and enable_public_fqdn
         with self.assertRaises(MutuallyExclusiveArgumentError):
             self.assertEqual(ctx_2.get_disable_public_fqdn(), True)
 
@@ -3276,6 +3316,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
+        # fail on mutually exclusive disable_public_fqdn and enable_public_fqdn
         with self.assertRaises(MutuallyExclusiveArgumentError):
             self.assertEqual(ctx_2.get_enable_public_fqdn(), True)
 
