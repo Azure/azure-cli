@@ -3699,8 +3699,6 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
                                     slot=slot,
                                     site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
 
-
-
     # Enable Route All configuration
     config = get_site_configs(cmd, resource_group_name, name, slot)
     if config.vnet_route_all_enabled is not True:
