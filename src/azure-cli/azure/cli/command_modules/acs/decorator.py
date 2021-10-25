@@ -295,6 +295,46 @@ class AKSModels:
         #     setattr(self, model_name, model_type)
 
 
+class AKSParamDict:
+    """Store the original parameters passed in by the command as an internal dictionary.
+
+    Only expose the "get" method externally for obtaining parameter values. At the same time records the usage of
+    parameters.
+    """
+    def __init__(self, param_dict):
+        if not isinstance(param_dict, dict):
+            raise CLIInternalError(
+                "Unexpected param_dict object with type '{}'.".format(
+                    type(param_dict)
+                )
+            )
+        self.__store = param_dict.copy()
+        self.__count = {}
+
+    @property
+    def __class__(self):
+        return dict
+
+    def __increase(self, key):
+        self.__count[key] = self.__count.get(key, 0) + 1
+
+    def get(self, key):
+        self.__increase(key)
+        return self.__store.get(key)
+
+    def __format_count(self):
+        untouched_keys = [x for x in self.__store.keys() if x not in self.__count.keys()]
+        for k in untouched_keys:
+            self.__count[k] = 0
+
+    def print_usage_statistics(self):
+        self.__format_count()
+        print("\nParameter usage statistics:")
+        for k, v in self.__count.items():
+            print(k, v)
+        print("Total: {}".format(len(self.__count.keys())))
+
+
 # pylint: disable=too-many-public-methods
 class AKSContext:
     """Implement getter functions for all parameters in aks_create and aks_update.
