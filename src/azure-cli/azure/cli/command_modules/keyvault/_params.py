@@ -142,11 +142,10 @@ def load_arguments(self, _):
                         'will be set to true by default. Once set to true, it cannot be reverted to false.')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag())
         c.argument('public_network_access', arg_type=get_enum_type(PublicNetworkAccess),
-                   help="Property to specify whether the vault will accept traffic from public"
-                                                 " internet. If set to 'disabled' all traffic except private endpoint "
-                                                 "traffic and that originates from trusted services will be "
-                                                 "blocked. This will override the set firewall rules, meaning that even"
-                                                 " if the firewall rules are present we will not honor the rules.")
+                   help="Property to specify whether the vault will accept traffic from public internet. If set to "
+                        "'disabled' all traffic except private endpoint traffic and that originates from trusted "
+                        "services will be blocked. This will override the set firewall rules, meaning that even if the "
+                        "firewall rules are present we will not honor the rules.")
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions),
