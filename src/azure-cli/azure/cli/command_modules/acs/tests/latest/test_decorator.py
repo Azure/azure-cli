@@ -3129,7 +3129,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        # fail on mutially exclusive enable_private_cluster and api_server_authorized_ip_ranges
+        # fail on mutually exclusive enable_private_cluster and api_server_authorized_ip_ranges
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_3.get_enable_private_cluster()
 
@@ -3239,7 +3239,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        # fail on mutially exclusive disable_public_fqdn and enable_public_fqdn
+        # fail on mutually exclusive disable_public_fqdn and enable_public_fqdn
         with self.assertRaises(MutuallyExclusiveArgumentError):
             self.assertEqual(ctx_2.get_disable_public_fqdn(), True)
 
@@ -3316,7 +3316,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        # fail on mutially exclusive disable_public_fqdn and enable_public_fqdn
+        # fail on mutually exclusive disable_public_fqdn and enable_public_fqdn
         with self.assertRaises(MutuallyExclusiveArgumentError):
             self.assertEqual(ctx_2.get_enable_public_fqdn(), True)
 
