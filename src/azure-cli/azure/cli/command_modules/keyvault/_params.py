@@ -82,6 +82,29 @@ def load_arguments(self, _):
          'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
          'NetworkRuleBypassOptions', 'NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
+    # Todo: Remove this after azure-mgmt-keyvault bumped to 2021-06-01-preview
+    class CLIKeyPermissions(str, Enum):
+        ENCRYPT = "encrypt"
+        DECRYPT = "decrypt"
+        WRAP_KEY = "wrapKey"
+        UNWRAP_KEY = "unwrapKey"
+        SIGN = "sign"
+        VERIFY = "verify"
+        GET = "get"
+        LIST = "list"
+        CREATE = "create"
+        UPDATE = "update"
+        IMPORT_ENUM = "import"
+        DELETE = "delete"
+        BACKUP = "backup"
+        RESTORE = "restore"
+        RECOVER = "recover"
+        PURGE = "purge"
+        RELEASE = "release"
+        ROTATE = "rotate"
+
+    KeyPermissions = CLIKeyPermissions
+
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
         help='Name of the Vault.', options_list=['--vault-name'], metavar='NAME', id_part=None,
@@ -443,7 +466,7 @@ def load_arguments(self, _):
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
                 help='Include managed keys. Default: false')
 
-    for scope in ['create', 'import', 'set-attributes', 'show']:
+    for scope in ['create', 'import', 'set-attributes', 'show', 'rotate', 'rotation-policy show', 'rotation-policy update']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
                        required=False, completer=get_keyvault_name_completion_list('key'),
@@ -476,6 +499,23 @@ def load_arguments(self, _):
                 help='The policy rules under which the key can be exported. '
                      'Policy definition as JSON, or a path to a file containing JSON policy definition.')
         c.extra('tags', tags_type)
+
+    with self.argument_context('keyvault key rotation-policy update') as c:
+        c.argument('notify_after_creation',
+                   help='Time after creation to attempt notifying, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
+                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
+        c.argument('notify_before_expiry',
+                   help='Time before expiry to attempt notifying, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
+                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
+        c.argument('rotate_after_creation',
+                   help='Time after creation to attempt rotating, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
+                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
+        c.argument('rotate_before_expiry',
+                   help='Time before expiry to attempt rotating, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
+                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
+        c.argument('expires_in',
+                   help='The expiry time of the policy that will be applied on new key versions, '
+                        'defined as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS). For example, 90 days is "P90D" and 48 hours is "PT48H"')
     # endregion
 
     # region KeyVault Secret
