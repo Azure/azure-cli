@@ -4466,15 +4466,18 @@ class VMGalleryApplication(ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus')
     def test_gallery_application_version(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'app_name': self.create_random_name('app', 10),
             'gallery': self.create_random_name('gellery', 15),
             'ver_name': "1.0.0",
             'account': self.create_random_name('account', 15),
             'container': self.create_random_name('container', 15),
-            'blob': self.create_random_name('blob', 15)
+            'blob': self.create_random_name('blob', 15),
+            'f1': os.path.join(curr_dir, 'MyAppInstaller.config').replace('\\', '\\\\'),
+            'f2': os.path.join(curr_dir, 'MyAppInstaller.ps1').replace('\\', '\\\\'),
+            'f3': os.path.join(curr_dir, 'Copylt.bat').replace('\\', '\\\\')
         })
-
         self.cmd('sig create -r {gallery} -g {rg}')
         self.cmd('sig gallery-application create -n {app_name} -r {gallery} --os-type windows -g {rg}', checks=[
             self.check('name', '{app_name}'),
@@ -4483,12 +4486,13 @@ class VMGalleryApplication(ScenarioTest):
             self.check('tags', None),
             self.check('type', 'Microsoft.Compute/galleries/applications')
         ])
-        self.cmd('sig create -r {gallery} -g {rg}')
         self.cmd('storage account create -n {account} -g {rg}')
-        self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob')
-        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file "D://MyAppInstaller.config" --type page')
-        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file "D://MyAppInstaller.ps1" --type page')
-        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file "D://Copylt.bat" --type page')
+        self.kwargs['storage_key'] = str(
+            self.cmd('az storage account keys list -n {account} -g {rg} --query "[0].value"').output)
+        self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob --account-key {storage_key}')
+        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
+        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f2} --type page --account-key {storage_key}')
+        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f3} --type page --account-key {storage_key}')
         self.cmd('sig gallery-application-version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
              self.check('name', '1.0.0'),
              self.check('publishingProfile.manageActions.install', 'install'),

@@ -4049,7 +4049,6 @@ def gallery_application_create(client,
                                location,
                                tags=None,
                                description=None,
-                               eula=None,
                                no_wait=False):
     gallery_application = {}
     gallery_application['location'] = location
@@ -4103,7 +4102,7 @@ def gallery_application_version_create(client,
                                        target_regions=None,
                                        default_file_link=None,
                                        end_of_life_date=None,
-                                       exclude_from_latest=None,
+                                       exclude_from=None,
                                        no_wait=False):
     gallery_application_version = {}
     gallery_application_version['publishing_profile'] = {}
@@ -4123,8 +4122,8 @@ def gallery_application_version_create(client,
     gallery_application_version['publishing_profile']['manage_actions'] = manage_actions
     if target_regions is not None:
         gallery_application_version['publishing_profile']['target_regions'] = target_regions
-    if exclude_from_latest is not None:
-        gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from_latest
+    if exclude_from is not None:
+        gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
     if end_of_life_date is not None:
         gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
     return sdk_no_wait(no_wait,

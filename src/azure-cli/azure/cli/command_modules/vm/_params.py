@@ -1124,6 +1124,7 @@ def load_arguments(self, _):
                    help='The name of the gallery Application')
         c.argument('gallery_application_version_name', options_list=['--name', '-n', '--version-name'],
                    help='The name of the gallery Application Version')
+
     for scope in ['create', 'update']:
         with self.argument_context('sig gallery-application-version {}'.format(scope)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
