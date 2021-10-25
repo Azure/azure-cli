@@ -1231,7 +1231,7 @@ def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unuse
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
         raise ArgumentUsageError('usage error: --app-config-overrides should have the same number of items as'
-                       ' --application-version-ids')
+                                 ' --application-version-ids')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
