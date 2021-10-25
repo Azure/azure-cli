@@ -3662,7 +3662,17 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
     return mod_list
 
 
-def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
+def add_webapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, True)
+
+
+def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None,
+                                     skip_delegation_check=False):
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, False)
+
+
+def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False,
+                          is_webapp=True):
     from azure.mgmt.web.models import SitePatchResource
 
     subnet_info = _get_subnet_info(cmd=cmd,
@@ -3671,8 +3681,12 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
                                    vnet=vnet)
     client = web_client_factory(cmd.cli_ctx)
 
-    webapp = show_webapp(cmd, resource_group_name, name, slot)
-    parsed_plan = parse_resource_id(webapp.app_service_plan_id)
+    if is_webapp:
+        app = show_webapp(cmd, resource_group_name, name, slot)
+    else:
+        app = show_functionapp(cmd, resource_group_name, name, slot)
+
+    parsed_plan = parse_resource_id(app.app_service_plan_id)
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
 
     _validate_webapp_create_vnet(cmd=cmd, sku_name=plan_info.sku.name, webapp_location=plan_info.location,

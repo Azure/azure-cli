@@ -275,12 +275,12 @@ def load_command_table(self, _):
         g.custom_command('set-key', 'set_hc_key')
 
     with self.command_group('webapp vnet-integration') as g:
-        g.custom_command('add', 'add_vnet_integration')
+        g.custom_command('add', 'add_webapp_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
 
     with self.command_group('functionapp vnet-integration') as g:
-        g.custom_command('add', 'add_vnet_integration')
+        g.custom_command('add', 'add_functionapp_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
 
