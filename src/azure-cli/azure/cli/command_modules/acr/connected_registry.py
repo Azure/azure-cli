@@ -23,20 +23,18 @@ from ._utils import (
 
 
 class ConnectedRegistryModes(Enum):
-    MIRROR = 'Mirror'
-    REGISTRY = 'Registry'
-
-
-class ConnectedRegistryActivationStatus(Enum):
-    ACTIVE = 'Active'
-    INACTIVE = 'Inactive'
+    READONLY = 'readonly'
+    READWRITE = 'readwrite'
 
 
 DEFAULT_GATEWAY_SCOPE = ['config/read', 'config/write', 'message/read', 'message/write']
 REPO_SCOPES_BY_MODE = {
-    ConnectedRegistryModes.MIRROR.value: ['content/read', 'metadata/read'],
-    ConnectedRegistryModes.REGISTRY.value: ['content/read', 'content/write', 'content/delete',
-                                            'metadata/read', 'metadata/write']
+    ConnectedRegistryModes.READONLY.value: ['content/read', 'metadata/read'],
+    ConnectedRegistryModes.READWRITE.value: ['content/read', 'content/write', 'content/delete',
+                                            'metadata/read', 'metadata/write'],
+    # Remove next release
+    "mirror": ['content/read', 'metadata/read'],
+    "registry": ['content/read', 'content/write', 'content/delete', 'metadata/read', 'metadata/write'],
 }
 REPOSITORY = "repositories/"
 GATEWAY = "gateway/"
@@ -76,7 +74,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
 
     from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None
-    mode = mode.capitalize()
+    mode = mode.lower()
     if parent_name:
         try:
             parent = acr_connected_registry_show(cmd, client, parent_name, registry_name, resource_group_name)
@@ -86,7 +84,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             if ex.response.status_code == 404:
                 raise CLIError("The parent connected registry '{}' could not be found.".format(parent_name))
             raise CLIError(ex)
-        if parent.mode != ConnectedRegistryModes.REGISTRY.value and parent.mode != mode:
+        parent_mode = parent.mode.lower()
+        if parent_mode != ConnectedRegistryModes.READWRITE.value and parent_mode != mode:
             raise CLIError("Can't create the registry '{}' with mode '{}' ".format(connected_registry_name, mode) +
                            "when the connected registry parent '{}' mode is '{}'. ".format(parent_name, parent.mode) +
                            "For more information on connected registries " +
@@ -333,9 +332,8 @@ def _create_sync_token(cmd,
                        mode):
     token_client = cf_acr_tokens(cmd.cli_ctx)
 
-    mode = mode.capitalize()
     if not any(option for option in ConnectedRegistryModes if option.value == mode):
-        raise CLIError("usage error: --mode supports only 'registry' and 'mirror' values.")
+        raise CLIError("usage error: --mode supports only 'ReadWrite' and 'ReadOnly' values.")
     repository_actions_list = [[repo] + REPO_SCOPES_BY_MODE[mode] for repo in repositories]
     gateway_actions_list = [[connected_registry_name.lower()] + DEFAULT_GATEWAY_SCOPE]
     try:
@@ -600,7 +598,7 @@ def acr_connected_registry_permissions_update(cmd,
         raise CLIError("Connected registry '{}' doesn't exist.".format(connected_registry_name))
 
     # remove repo permissions from connected registry descendants.
-    remove_actions = REPO_SCOPES_BY_MODE[ConnectedRegistryModes.REGISTRY.value]
+    remove_actions = REPO_SCOPES_BY_MODE[ConnectedRegistryModes.READWRITE.value]
     if remove_repos is not None:
         remove_repos_txt = ", ".join(remove_repos)
         remove_repos_set = _get_scope_map_actions_set(remove_repos, remove_actions)
@@ -613,7 +611,7 @@ def acr_connected_registry_permissions_update(cmd,
         remove_repos_set = set()
 
     # add repo permissions to ancestors.
-    add_actions = REPO_SCOPES_BY_MODE[target_connected_registry.mode]
+    add_actions = REPO_SCOPES_BY_MODE[target_connected_registry.mode.lower()]
     if add_repos is not None:
         add_repos_txt = ", ".join(add_repos)
         add_repos_set = _get_scope_map_actions_set(add_repos, add_actions)

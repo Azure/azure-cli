@@ -1228,14 +1228,14 @@ examples:
     text: |
         az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
             --repository "app/hello-world" "service/mycomponent"
-  - name: Create a mirror connected registry with only read permissions and pass the sync token
+  - name: Create a read only connected registry with only read permissions and pass the sync token
     text: |
-        az acr connected-registry create --registry mycloudregistry  --name mymirroracr \\
-            --mode mirror --parent myconnectedregistry --sync-token mySyncTokenName
-  - name: Create a mirror connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
+        az acr connected-registry create --registry mycloudregistry  --name myreadonlyacr \\
+            --mode readonly --parent myconnectedregistry --sync-token mySyncTokenName
+  - name: Create a read only connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
     text: |
-        az acr connected-registry create -r mycloudregistry -n mymirroracr -p myconnectedregistry \\
-            --repository "app/mycomponent" -m mirror -s "0 12 * * *" -w PT4H \\
+        az acr connected-registry create -r mycloudregistry -n myreadonlyacr -p myconnectedregistry \\
+            --repository "app/mycomponent" -m ReadOnly -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
 """
 
@@ -1243,10 +1243,10 @@ helps['acr connected-registry delete'] = """
 type: command
 short-summary: Delete a connected registry from Azure Container Registry.
 examples:
-  - name: Delete a mirror connected registry 'myconnectedregistry' from parent registry 'mycloudregistry'.
+  - name: Delete a read only connected registry 'myconnectedregistry' from parent registry 'mycloudregistry'.
     text: >
         az acr connected-registry delete --registry mycloudregistry --name myconnectedregistry
-  - name: Delete a mirror connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry'.
+  - name: Delete a read only connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry'.
     text: >
         az acr connected-registry delete -r mycloudregistry -n myconnectedregistry --cleanup
 """
@@ -1279,18 +1279,18 @@ helps['acr connected-registry list-client-tokens'] = """
 type: command
 short-summary: Lists all the client tokens associated to a specific connected registries.
 examples:
-  - name: Lists all client tokens of 'mymirroracr'.
+  - name: Lists all client tokens of 'myreadonlyacr'.
     text: >
-        az acr connected-registry list-client-tokens -r mycloudregistry -n mymirroracr -o table
+        az acr connected-registry list-client-tokens -r mycloudregistry -n myreadonlyacr -o table
 """
 
 helps['acr connected-registry show'] = """
 type: command
 short-summary: Show connected registry details.
 examples:
-  - name: Show all the details of the 'mymirroracr' registry in table form.
+  - name: Show all the details of the 'myreadonlyacr' registry in table form.
     text: >
-        az acr connected-registry show --registry mycloudregistry --name mymirroracr --output table
+        az acr connected-registry show --registry mycloudregistry --name myreadonlyacr --output table
 """
 
 helps['acr connected-registry update'] = """
@@ -1304,18 +1304,18 @@ examples:
 
   - name: Update the sync and window time of a connected registry.
     text: |
-        az acr connected-registry update --registry mycloudregistry --name mymirroracr \\
+        az acr connected-registry update --registry mycloudregistry --name myreadonlyacr \\
             --sync-schedule "0 12 * * *" --sync-window PT4H
 """
 
 helps['acr connected-registry get-settings'] = """
 type: command
-short-summary: Retrieves information required to activate a connected registry, and renews the sync token credentials.
+short-summary: Retrieves information required to activate a connected registry, and creates or rotates the sync token credentials.
 examples:
   - name: Gets the settings information required to install a connected registry without the password.
     text: >
         az acr connected-registry get-settings -r mycloudregistry -n myconnectedregistry --parent-protocol http
-  - name: Generates a new sync token password 1 and gets the settings information required to install a connected registry.
+  - name: Generates a new sync token password 1 or rotates the password if it already exists, and gets the settings information required to install a connected registry.
     text: >
         az acr connected-registry get-settings -r mycloudregistry -n myconnectedregistry --generate-password 1 --parent-protocol https
 """
@@ -1327,7 +1327,7 @@ short-summary: Helps manage the repository permissions accross multiple connecte
 
 helps['acr connected-registry permissions update'] = """
 type: command
-short-summary: Adds and removes repository permissiones accross all the necessary connected registry sync scope maps.
+short-summary: Adds and removes repository permissions accross all the necessary connected registry sync scope maps.
 examples:
   - name: Adds permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
     text: >

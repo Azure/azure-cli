@@ -41,7 +41,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         # Create a default connected registry.
         self.cmd('acr connected-registry create -n {cr_name1} -r {registry_name} --repository {repo1} {repo2}',
                  checks=[self.check('name', '{cr_name1}'),
-                         self.check('mode', 'Registry'),
+                         self.check('mode', 'ReadWrite'),
                          self.check('logging.logLevel', 'Information'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('resourceGroup', '{rg}')])
@@ -49,9 +49,9 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         # Create a custom connected-registry with a previously created token.
         self.cmd('acr token create -r {registry_name} -n {syncToken} --repository {repo1} content/read metadata/read --gateway {cr_name2} config/read config/write message/read message/write --no-passwords')
         self.cmd('acr token create -r {registry_name} -n {clientToken} --repository {repo1} content/read --no-passwords')
-        self.cmd('acr connected-registry create -n {cr_name2} -r {registry_name} --sync-token {syncToken} -m mirror --log-level Warning -s "{syncSchedule}" -w PT4H --client-tokens {clientToken}',
+        self.cmd('acr connected-registry create -n {cr_name2} -r {registry_name} --sync-token {syncToken} -m ReadOnly --log-level Warning -s "{syncSchedule}" -w PT4H --client-tokens {clientToken}',
                  checks=[self.check('name', '{cr_name2}'),
-                         self.check('mode', 'Mirror'),
+                         self.check('mode', 'ReadOnly'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('logging.logLevel', 'Warning'),
                          self.check('parent.syncProperties.schedule', '{syncSchedule}'),

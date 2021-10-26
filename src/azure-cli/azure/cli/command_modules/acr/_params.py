@@ -413,12 +413,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('no_children', help='Used to remove all children from the list.', required=False, action='store_true')
         c.argument('sync_audit_logs_enabled', options_list=['--audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
 
-        c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Required parameter to specify the parent protocol.', required=True)
+        c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Specifies the protocol used to communicate with its parent.', required=True)
         c.argument('generate_password', arg_type=get_enum_type(['1', '2']), options_list=['--generate-password'], help='Select which password you want to generate, and it is required to retrieve the password from the sync token.', required=False)
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
-        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry (read/write mode) or mirror (read-only mode).', required=False, default="Registry")
+        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: ReadWrite or ReadOnly.', required=False, default="ReadWrite")
         c.argument('client_token_list', options_list=['--client-tokens'], nargs='+', help='Specifies the client access to the repositories in the connected registry. It can be in the format [TOKEN_NAME01] [TOKEN_NAME02]...', required=False)
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
