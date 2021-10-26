@@ -5755,3 +5755,133 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('addonProfiles.openServiceMesh.enabled', False),
             self.check('addonProfiles.openServiceMesh.config', None)
         ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_azurekeyvaultsecretsprovider_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '-a azure-keyvault-secrets-provider --ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "false"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "2m")
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_addon_with_azurekeyvaultsecretsprovider_with_secret_rotation(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '-a azure-keyvault-secrets-provider --enable-secret-rotation --rotation-poll-interval 30m ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "true"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "30m")
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_enable_addon_with_azurekeyvaultsecretsprovider(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.azureKeyvaultSecretsProvider', None)
+        ])
+
+        enable_cmd = 'aks enable-addons --addons azure-keyvault-secrets-provider --resource-group={resource_group} --name={name} -o json'
+        self.cmd(enable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "false")
+        ])
+
+        update_enable_cmd = 'aks update --resource-group={resource_group} --name={name} --enable-secret-rotation --rotation-poll-interval 120s -o json'
+        self.cmd(update_enable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "true"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "120s")
+        ])
+
+        update_disable_cmd = 'aks update --resource-group={resource_group} --name={name} --disable-secret-rotation -o json'
+        self.cmd(update_disable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "false"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "120s")
+        ])
+
+        disable_cmd = 'aks disable-addons --addons azure-keyvault-secrets-provider --resource-group={resource_group} --name={name} -o json'
+        self.cmd(disable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', False),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config', None)
+        ])
+
+        enable_with_secret_rotation_cmd = 'aks enable-addons --addons azure-keyvault-secrets-provider --enable-secret-rotation --rotation-poll-interval 1h --resource-group={resource_group} --name={name} -o json'
+        self.cmd(enable_with_secret_rotation_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "true"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "1h")
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
