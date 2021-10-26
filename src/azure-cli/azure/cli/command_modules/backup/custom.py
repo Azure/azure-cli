@@ -1117,7 +1117,7 @@ def wait_for_job(cmd, client, resource_group_name, vault_name, name, timeout=Non
                 if elapsed_time.seconds > timeout:
                     logger.warning("Command timed out while waiting for job '%s'", name)
                     break
-            job_details = client.get(azure_region, vault.id, name)
+            job_details = client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
             time.sleep(30)
     else:
         job_details = client.get(vault_name, resource_group_name, name)

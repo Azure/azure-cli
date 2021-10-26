@@ -648,7 +648,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
-        self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
+        self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
         #SQL CRR RAF Restore
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode restoreasfiles --rp-name {rp} --item-name {item} --container-name {container1} --target-container-name {tcontainer} --workload-type {wt} --target-vault-name {tvault} --target-resource-group {trg} --filepath "C:\"').get_output_in_json(), separators=(',', ':'))
@@ -662,7 +662,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
-        self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
+        self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
     @record_only()
     def test_backup_wl_sql_archive (self):
