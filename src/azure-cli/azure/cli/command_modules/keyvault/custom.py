@@ -1429,28 +1429,32 @@ def get_policy_template():
     return policy
 
 
-def update_key_rotation_policy(cmd, client, key_name=None, expires_in=None,
-                               notify_after_creation=None, notify_before_expiry=None,
-                               rotate_after_creation=None, rotate_before_expiry=None):
-    lifetime_actions = []
-    KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction',
-                                                   resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
-    KeyRotationPolicyAction = cmd.loader.get_sdk('KeyRotationPolicyAction',
-                                                 resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
-    if notify_after_creation or notify_before_expiry:
-        lifetime_action = KeyRotationLifetimeAction(KeyRotationPolicyAction.notify,
-                                                    time_after_create=notify_after_creation,
-                                                    time_before_expiry=notify_before_expiry)
-        lifetime_actions.append(lifetime_action)
-    if rotate_after_creation or rotate_before_expiry:
-        lifetime_action = KeyRotationLifetimeAction(KeyRotationPolicyAction.rotate,
-                                                    time_after_create=rotate_after_creation,
-                                                    time_before_expiry=rotate_before_expiry)
-        lifetime_actions.append(lifetime_action)
+def update_key_rotation_policy(cmd, client, value, key_name=None):
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    if os.path.exists(value):
+        policy = get_file_json(value)
+    else:
+        policy = shell_safe_json_parse(value)
+    if not policy:
+        raise InvalidArgumentValueError("Please specify a valid policy")
 
-    return client.update_key_rotation_policy(name=key_name,
-                                             lifetime_actions=lifetime_actions,
-                                             expires_in=expires_in)
+    KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', mod='_models',
+                                                   resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    lifetime_actions = []
+    if policy.get('lifetime_actions', None):
+        for action in policy['lifetime_actions']:
+            action_type = action['action'].get('type', None) if action.get('action', None) else None
+            time_after_create = action['trigger'].get('time_after_create', None) \
+                if action.get('trigger', None) else None
+            time_before_expiry = action['trigger'].get('time_before_expiry', None) \
+                if action.get('trigger', None) else None
+            lifetime_action = KeyRotationLifetimeAction(action_type,
+                                                        time_after_create=time_after_create,
+                                                        time_before_expiry=time_before_expiry)
+            lifetime_actions.append(lifetime_action)
+
+    expires_in = policy['attributes'].get('expires_in', None) if policy.get('attributes', None) else None
+    return client.update_key_rotation_policy(name=key_name, lifetime_actions=lifetime_actions, expires_in=expires_in)
 # endregion
 
 
