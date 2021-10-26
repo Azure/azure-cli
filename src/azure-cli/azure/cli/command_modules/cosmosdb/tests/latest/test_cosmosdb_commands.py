@@ -1972,9 +1972,7 @@ class CosmosDBTests(ScenarioTest):
         assert backup_info is not None
         assert backup_info['continuousBackupInformation'] is not None
 
-        oldTime = datetime.now() - timedelta(hours=1, minutes=00)
         backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
-        assert backup_time > oldTime
 
         # Update container
         # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl1}').get_output_in_json()
@@ -2046,9 +2044,7 @@ class CosmosDBTests(ScenarioTest):
         assert backup_info is not None
         assert backup_info['continuousBackupInformation'] is not None
 
-        oldTime = datetime.now() - timedelta(hours=1, minutes=00)
         backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
-        assert backup_time > oldTime
 
         # Update collection
         # collection_update = self.cmd('az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl1}').get_output_in_json()
