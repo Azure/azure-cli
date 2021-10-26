@@ -374,9 +374,9 @@ def load_command_table(self, _):
         g.command('list', 'list')
 
     # Retrieve backup info for sql
-    with self.command_group('cosmosdb sql container', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
+    with self.command_group('cosmosdb sql', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('retrieve-latest-backup-time', 'cli_sql_retrieve_latest_backup_time')
 
     # Retrieve backup info for mongodb
-    with self.command_group('cosmosdb mongodb collection', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
+    with self.command_group('cosmosdb mongodb', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
         g.custom_command('retrieve-latest-backup-time', 'cli_mongo_db_retrieve_latest_backup_time')

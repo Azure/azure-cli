@@ -361,14 +361,14 @@ def load_arguments(self, _):
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
 
     # Retrive Sql Container Backup Info
-    with self.argument_context('cosmosdb sql container retrieve-latest-backup-time') as c:
+    with self.argument_context('cosmosdb sql retrieve-latest-backup-time') as c:
         c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the CosmosDB database account')
         c.argument('database_name', database_name_type, required=True, help='Name of the CosmosDB Sql database name')
         c.argument('container_name', container_name_type, required=True, help='Name of the CosmosDB Sql container name')
         c.argument('location', options_list=['--location', '-l'], help="Location of the account", required=True)
 
     # Retrive MongoDB Collection Backup Info
-    with self.argument_context('cosmosdb mongodb collection retrieve-latest-backup-time') as c:
+    with self.argument_context('cosmosdb mongodb retrieve-latest-backup-time') as c:
         c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the CosmosDB database account')
         c.argument('database_name', database_name_type, required=True, help='Name of the CosmosDB MongoDB database name')
         c.argument('collection_name', options_list=['--collection-name', '-c'], required=True, help='Name of the CosmosDB MongoDB collection name')
