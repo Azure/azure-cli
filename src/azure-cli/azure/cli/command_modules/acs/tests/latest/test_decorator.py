@@ -4937,7 +4937,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             confcom_addon_profile, ground_truth_confcom_addon_profile
         )
 
-    def test_build_open_service_mesh_profile(self):
+    def test_build_open_service_mesh_addon_profile(self):
         # default
         dec_1 = AKSCreateDecorator(
             self.cmd,
@@ -4946,15 +4946,15 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             ResourceType.MGMT_CONTAINERSERVICE,
         )
 
-        open_service_mesh_profile = dec_1.build_open_service_mesh_profile()
-        ground_truth_open_service_mesh_profile = (
+        open_service_mesh_addon_profile = dec_1.build_open_service_mesh_addon_profile()
+        ground_truth_open_service_mesh_addon_profile = (
             self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={},
             )
         )
         self.assertEqual(
-            open_service_mesh_profile, ground_truth_open_service_mesh_profile
+            open_service_mesh_addon_profile, ground_truth_open_service_mesh_addon_profile
         )
 
     def test_build_azure_keyvault_secrets_provider_addon_profile(self):
