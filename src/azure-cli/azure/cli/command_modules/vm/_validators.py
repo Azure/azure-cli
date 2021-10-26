@@ -1467,78 +1467,32 @@ def process_vmss_create_namespace(cmd, namespace):
 
         namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
         # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
-        # namespace.disable_overprovision = True  # overprovisioning must be false for vmss flex preview
-        # namespace.single_placement_group = False  # SPG must be false for VMSS flex
+
+        if namespace.disable_overprovision is False:
+            raise ArgumentUsageError('usage error: --disable-overprovision can only be set to True in Flexible VMSS.')
+        namespace.disable_overprovision = True
+
+        if namespace.single_placement_group:
+            raise ArgumentUsageError('usage error: --single-placement-group can only be set to False for Flex mode')
+        namespace.single_placement_group = False
+
         namespace.upgrade_policy_mode = None
         namespace.use_unmanaged_disk = None
 
-        banned_params = [
-            # namespace.accelerated_networking,
-            # namespace.admin_password,
-            # namespace.admin_username,
-            # namespace.application_gateway,
-            # namespace.app_gateway_capacity,
-            # namespace.app_gateway_sku,
-            # namespace.app_gateway_subnet_address_prefix,
-            # namespace.application_security_groups,
-            # namespace.assign_identity,
-            # namespace.authentication_type,
-            # namespace.backend_pool_name,
-            # namespace.backend_port,
-            # namespace.computer_name_prefix,
-            # namespace.custom_data,
-            # namespace.data_caching,
-            # namespace.data_disk_sizes_gb,
-            # namespace.disable_overprovision,
-            # namespace.dns_servers,
-            # namespace.ephemeral_os_disk,
-            # namespace.eviction_policy,
-            # namespace.generate_ssh_keys,
-            namespace.health_probe,
-            namespace.host_group,
-            # namespace.image,
-            # namespace.instance_count,
-            # namespace.load_balancer,
-            namespace.nat_pool_name,
-            # namespace.load_balancer_sku,
-            # namespace.license_type,
-            # namespace.max_price,
-            # namespace.nsg,
-            # namespace.os_caching,
-            # namespace.os_disk_name,
-            # namespace.os_type,
-            # namespace.plan_name,
-            # namespace.plan_product,
-            # namespace.plan_promotion_code,
-            # namespace.plan_publisher,
-            # namespace.priority,
-            # namespace.public_ip_address,
-            # namespace.public_ip_address_allocation,
-            # namespace.public_ip_address_dns_name,
-            # namespace.public_ip_per_vm,
-            # namespace.identity_role,
-            # namespace.identity_scope,
-            namespace.scale_in_policy,
-            # namespace.secrets,
-            # namespace.ssh_dest_key_path,
-            # namespace.ssh_key_value,
-            # namespace.storage_container_name,
-            # namespace.storage_sku,
-            # namespace.subnet,
-            # namespace.subnet_address_prefix,
-            # namespace.terminate_notification_time,
-            # namespace.ultra_ssd_enabled,
-            # namespace.upgrade_policy_mode,
-            # namespace.use_unmanaged_disk,
-            # namespace.vm_domain_name,
-            # namespace.vm_sku,
-            # namespace.vnet_address_prefix,
-            # namespace.vnet_name,
-            namespace.user_data
-        ]
-        if any(param is not None for param in banned_params):
-            raise CLIError('usage error: In VM mode, only name, resource-group, location, '
-                           'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
+        if namespace.health_probe is not None:
+            raise ArgumentUsageError('usage error: --health-probe is not supported for Flex mode')
+
+        if namespace.host_group is not None:
+            raise ArgumentUsageError('usage error: --host-group is not supported for Flex mode')
+
+        if namespace.nat_pool_name is not None:
+            raise ArgumentUsageError('usage error: --nat-pool-name is not supported for Flex mode')
+
+        if namespace.scale_in_policy is not None:
+            raise ArgumentUsageError('usage error: --scale-in-policy is not supported for Flex mode')
+
+        if namespace.user_data is not None:
+            raise ArgumentUsageError('usage error: --user-data is not supported for Flex mode')
 
         if namespace.image:
 
@@ -1548,11 +1502,6 @@ def process_vmss_create_namespace(cmd, namespace):
                     namespace.vm_sku = 'Standard_DS1_v2'
                 else:
                     namespace.vm_sku = 'Standard_D1_v2'
-
-            if namespace.single_placement_group:
-                raise ArgumentUsageError(
-                    'usage error: single placement group can only be set to False in Flexible VMSS')
-            namespace.single_placement_group = False
 
             if namespace.network_api_version is None:
                 namespace.network_api_version = '2020-11-01'
@@ -1644,10 +1593,10 @@ def process_vmss_create_namespace(cmd, namespace):
         _validate_secrets(namespace.secrets, namespace.os_type)
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
-        raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+        raise ArgumentUsageError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
     if namespace.eviction_policy and not namespace.priority:
-        raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+        raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
 
     _validate_capacity_reservation_group(cmd, namespace)
 
