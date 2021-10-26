@@ -345,6 +345,7 @@ def load_arguments(self, _):
                    help='Enable secure boot.')
         c.argument('enable_vtpm', arg_type=get_three_state_flag(), min_api='2020-12-01',
                    help='Enable vTPM.')
+        c.argument('size', help='The VM size to be updated. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -675,6 +676,7 @@ def load_arguments(self, _):
                    help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
         c.argument('spot_restore_timeout', min_api='2021-04-01',
                    help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
+        c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')

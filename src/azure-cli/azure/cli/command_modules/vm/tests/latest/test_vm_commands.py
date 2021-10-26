@@ -1304,6 +1304,56 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
         ])
 
 
+class VMUpdateTests(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_update_size_', location='westus2')
+    def test_vm_update_size(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'base': 'cli-test-vm-local-base',
+            'base2': 'cli-test-vm-local-base2',
+            'image': 'UbuntuLTS',
+            'loc': resource_group_location,
+            'size': 'Standard_DS5_v2',
+        })
+
+        # check base
+        self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc}')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update a vm to another size.
+        # self.cmd('vm update --resource-group {rg} --name {base} --size {size}')
+        self.cmd('vm update --resource-group {rg} --name {base} --size {size} --set tags.tagName=tagValue')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('hardwareProfile.vmSize', '{size}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check not modify size value
+        # self.cmd('vm update --resource-group {rg} --name {base} --size {size}')
+        self.cmd('vm update --resource-group {rg} --name {base} --size {size} --set tags.tagName=tagValue')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('hardwareProfile.vmSize', '{size}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check create with default size
+        self.cmd('vm create -n {base2} -g {rg} --image {image}  --location {loc}')
+        self.cmd('vm show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update a vm from default size.
+        self.cmd('vm update --resource-group {rg} --name {base2} --size {size}')
+        self.cmd('vm show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('hardwareProfile.vmSize', '{size}'),
+        ])
+
+
 class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_multi_nic_vm')
@@ -2710,6 +2760,51 @@ class VMSSUpdateTests(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image {image_id}')
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[
             self.check('tags.foo', 'bar')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_vm_sku_', location='westus2')
+    def test_vmss_update_vm_sku(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'base': 'cli-test-vmss-local-base',
+            'base2': 'cli-test-vmss-local-base2',
+            'image': 'UbuntuLTS',
+            'vm_sku': 'Standard_DS5_v2',
+            'loc': resource_group_location,
+        })
+
+        # check base
+        self.cmd('vmss create -n {base} -g {rg} --image {image} --vm-sku Standard_DS4_v2')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update vmss to another size.
+        self.cmd('vmss update --resource-group {rg} --name {base} --vm-sku {vm_sku} --set tags.tagName=tagValue')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{vm_sku}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check not modify size value
+        self.cmd('vmss update --resource-group {rg} --name {base} --vm-sku {vm_sku} --set tags.tagName=tagValue')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{vm_sku}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check create with default size
+        self.cmd('vmss create -n {base2} -g {rg} --image {image}  --location {loc}')
+        self.cmd('vmss show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update a vmss from default size.
+        self.cmd('vmss update --resource-group {rg} --name {base2} --vm-sku {vm_sku}')
+        self.cmd('vmss show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{vm_sku}'),
         ])
 
 
