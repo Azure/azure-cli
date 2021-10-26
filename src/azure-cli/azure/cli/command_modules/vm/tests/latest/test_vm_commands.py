@@ -4060,6 +4060,25 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
+
+    @ResourceGroupPreparer(location='eastus')
+    def test_shared_gallery_community(self, resource_group):
+        self.kwargs.update({
+            'gallery': self.create_random_name('gellery', 16),
+        })
+        self.cmd('sig create -r {gallery} -g{rg} --permissions Community --publisher-uri puburi --publisher-email abc@123 --eula eula --public-name-prefix pubname', checks=[
+            self.check('name', '{gallery}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('sharingProfile.permissions', 'Community'),
+            self.check('sharingProfile.communityGalleryInfo.publisherUri', 'puburi'),
+            self.check('sharingProfile.communityGalleryInfo.publisherContact', 'abc@123'),
+            self.check('sharingProfile.communityGalleryInfo.eula', 'eula'),
+            self.check("sharingProfile.communityGalleryInfo.publicNames[0].starts_with(@, 'pubname')", True)
+        ])
+        self.cmd('sig share reset -r {gallery} -g {rg}')
+        self.cmd('sig delete -r {gallery} -g {rg}')
+
+
     @ResourceGroupPreparer(location='eastus2')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true --enable-soft-delete true')
     def test_gallery_e2e(self, resource_group, resource_group_location, key_vault):

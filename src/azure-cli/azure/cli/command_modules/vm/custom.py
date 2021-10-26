@@ -3493,7 +3493,8 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None):
+                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None,
+                         publisher_uri=None, publisher_contact=None, eula=None, public_name_prefix=None):
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     gallery = Gallery(description=description, location=location, tags=(tags or {}))
@@ -3503,6 +3504,12 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
     if permissions:
         SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
         gallery.sharing_profile = SharingProfile(permissions=permissions)
+        if permissions == 'Community':
+            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo')
+            gallery.sharing_profile.community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
+                                                                                  publisher_contact=publisher_contact,
+                                                                                  eula=eula,
+                                                                                  public_name_prefix=public_name_prefix)
 
     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
 
