@@ -2901,7 +2901,6 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
     return value
 
 
-# TODO complete vnet/subnet integration
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, functions_version=None, runtime=None, runtime_version=None,
                     consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -2919,14 +2918,44 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
-    SiteConfig, Site, NameValuePair = cmd.get_models('SiteConfig', 'Site', 'NameValuePair')
+    from azure.mgmt.web.models import Site
+    SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
-    functionapp_def = Site(location=None, site_config=site_config, tags=tags)
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
     client = web_client_factory(cmd.cli_ctx)
+
+    if vnet or subnet:
+        if plan:
+            if is_valid_resource_id(plan):
+                parse_result = parse_resource_id(plan)
+                plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+            else:
+                plan_info = client.app_service_plans.get(resource_group_name, plan)
+            webapp_location = plan_info.location
+        else:
+            webapp_location = consumption_plan_location
+
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=resource_group_name,
+                                       subnet=subnet,
+                                       vnet=vnet)
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=webapp_location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        site_config.vnet_route_all_enabled = True
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+    else:
+        subnet_resource_id = None
+
+    functionapp_def = Site(location=None, site_config=site_config, tags=tags,
+                           virtual_network_subnet_id=subnet_resource_id)
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
     plan_info = None
     if runtime is not None:
         runtime = runtime.lower()
