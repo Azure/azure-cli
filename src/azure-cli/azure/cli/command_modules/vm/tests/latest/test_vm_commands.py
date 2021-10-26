@@ -16,7 +16,6 @@ import uuid
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_only
-from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
@@ -1318,11 +1317,6 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
             'placement2': 'CacheDisk',
         })
 
-        # check usage error
-        message = 'usage error: --ephemeral-os-disk-placement is only configurable when --ephemeral-os-disk is specified.'
-        with self.assertRaisesRegexp(ArgumentUsageError, message):
-            self.cmd('vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk-placement {placement2} --os-disk-caching ReadOnly --admin-username {user} --nsg-rule NONE')
-
         # check base
         self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement1}')
         self.cmd('vm show -g {rg} -n {base}', checks=[
@@ -2533,13 +2527,6 @@ class VMSSCreateOptions(ScenarioTest):
             'placement1': 'ResourceDisk',
             'placement2': 'CacheDisk',
         })
-
-        # check usage error
-        message = 'usage error: --ephemeral-os-disk-placement is only configurable when --ephemeral-os-disk is specified.'
-        with self.assertRaisesRegexp(ArgumentUsageError, message):
-            self.cmd(
-                'vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk-placement {placement2} '
-                '--os-disk-caching {caching} --disable-overprovision --instance-count {count} --admin-username {user} --admin-password {password}')
 
         # check base
         self.cmd(
