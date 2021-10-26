@@ -3481,6 +3481,7 @@ class AKSContext:
 
         return self._get_enable_private_cluster(enable_validation=True)
 
+    # pylint: disable=unused-argument
     def _get_disable_public_fqdn(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of disable_public_fqdn.
 
@@ -3593,6 +3594,7 @@ class AKSContext:
         """
         return self._get_enable_public_fqdn(enable_validation=True)
 
+    # pylint: disable=unused-argument
     def _get_private_dns_zone(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         """Internal function to obtain the value of private_dns_zone.
 
