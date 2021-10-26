@@ -371,6 +371,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                   deprecate_info=self.deprecate(redirect='permissions update', hide=True))
 
     with self.command_group('acr connected-registry install', acr_connected_registry_util,
-                            deprecate_info=self.deprecate(redirect='acr connected-registry get-settings', hide=True)) as g:
+                            deprecate_info=self.deprecate(redirect='acr connected-registry get-settings',
+                                                          hide=True)) as g:
         g.command('info', 'acr_connected_registry_install_info')
         g.command('renew-credentials', 'acr_connected_registry_install_renew_credentials')
