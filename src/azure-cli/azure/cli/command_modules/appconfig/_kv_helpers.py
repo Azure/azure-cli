@@ -673,12 +673,11 @@ def __export_kvset_to_file(file_path, keyvalues, yes):
     obj = {KVSetConstants.KVSETRootElementName: kvset}
     json_string = json.dumps(obj, indent=2, ensure_ascii=False)
     if not yes:
-        logger.warning('\n---------------- Key Values Preview (Beta) ----------------')
+        logger.warning('\n---------------- KVSet Preview (Beta) ----------------')
         if len(kvset) == 0:
             logger.warning('\nSource configuration is empty. Nothing to export.')
             return
-        logger.warning(json_string)
-        logger.warning("")  # printing an empty line for formatting purpose
+        __print_preview_json_diff(new_obj=obj)
         user_confirmation('Do you want to continue? \n')
     try:
         with open(file_path, 'w', encoding='utf-8') as fp:
@@ -1048,8 +1047,10 @@ def __import_kvset_from_file(client, path, yes):
         existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, ImportExportProfiles.KVSET)
         kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
 
-        needs_update = __print_preview_json_diff(existing_kvset_list, kvset_to_import_list)
-        if not needs_update:
+        logger.warning('\n---------------- KVSet Preview (Beta) ----------------')
+        changes_detected = __print_preview_json_diff(existing_kvset_list, kvset_to_import_list)
+        if not changes_detected:
+            logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
             return
 
         user_confirmation('Do you want to continue?\n')
@@ -1073,7 +1074,7 @@ def __validate_import_keyvault_ref(kv):
         try:
             value = json.loads(kv.value)
         except JSONDecodeError as exception:
-            logger.warning("An error occurred while importing keyvault reference with key '{%s}'\n{%s}", kv.key, str(exception))
+            logger.warning("The keyvault reference with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.key, str(exception))
             return False
 
         if 'uri' in value:
@@ -1117,13 +1118,16 @@ def __write_configuration_setting_to_config_store(azconfig_client, configuration
         raise AzureInternalError(str(exception))
 
 
-def __print_preview_json_diff(old_obj, new_obj):
+def __print_preview_json_diff(old_obj=None, new_obj=None):
+    # prints the json diff if two objects differ, returns whether the diff was found.
+
+    old_json = "" if old_obj is None else json.dumps(old_obj, indent=2, ensure_ascii=False).splitlines(True)
+    new_json = "" if new_obj is None else json.dumps(new_obj, indent=2, ensure_ascii=False).splitlines(True)
+
     differ = Differ()
-    diff = list(differ.compare(json.dumps(old_obj, indent=2, ensure_ascii=False).splitlines(True),
-                               json.dumps(new_obj, indent=2, ensure_ascii=False).splitlines(True)))
+    diff = list(differ.compare(old_json, new_json))
 
     if not any(line.startswith('-') or line.startswith('+') for line in diff):
-        logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
         return False
 
     # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
