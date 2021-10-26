@@ -1323,7 +1323,6 @@ class VMUpdateTests(ScenarioTest):
         ])
 
         # check that we can update a vm to another size.
-        # self.cmd('vm update --resource-group {rg} --name {base} --size {size}')
         self.cmd('vm update --resource-group {rg} --name {base} --size {size} --set tags.tagName=tagValue')
         self.cmd('vm show -g {rg} -n {base}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -1332,7 +1331,6 @@ class VMUpdateTests(ScenarioTest):
         ])
 
         # check not modify size value
-        # self.cmd('vm update --resource-group {rg} --name {base} --size {size}')
         self.cmd('vm update --resource-group {rg} --name {base} --size {size} --set tags.tagName=tagValue')
         self.cmd('vm show -g {rg} -n {base}', checks=[
             self.check('provisioningState', 'Succeeded'),
