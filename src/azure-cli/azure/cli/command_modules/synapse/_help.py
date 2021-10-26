@@ -2047,22 +2047,11 @@ examples:
 
 helps['synapse sql-script create'] = """
 type: command
-short-summary: Create a SQL script.
+short-summary: Create or update a SQL script.
 examples:
   - name: Create a SQL script.
     text: |-
         az synapse sql-script create --workspace-name testsynapseworkspace \\
-          --name testsqlscriptname \\
-          --file 'path/test.sql'
-"""
-
-helps['synapse sql-script update'] = """
-type: command
-short-summary: Update a SQL script.
-examples:
-  - name: Update a SQL script.
-    text: |-
-        az synapse sql-script update --workspace-name testsynapseworkspace \\
           --name testsqlscriptname \\
           --file 'path/test.sql'
 """

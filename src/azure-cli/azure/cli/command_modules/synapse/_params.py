@@ -963,15 +963,14 @@ def load_arguments(self, _):
     with self.argument_context('synapse sql-script list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
-    for scope in ['create', 'update']:
-        with self.argument_context('synapse sql-script ' + scope) as c:
-            c.argument('definition_file', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(), help='The SQL query file path')
-            c.argument('result_limit', arg_type=get_enum_type([5000, -1]), help="The SQL query results limit. Default is 5000. '-1' is no limit.")
-            c.argument('folder_name', help='The folder that this SQL script is in. If not specified, this SQL script will appear at the root level. Eg: folder/subfolder1')
-            c.argument('description', help='The SQL script description')
-            c.argument('sql_pool_name', help='The SQL pool name')
-            c.argument('sql_database_name', help='The SQL database name')
-            c.argument('additional_properties', help='The SQL script additional properties')
+    with self.argument_context('synapse sql-script create') as c:
+        c.argument('definition_file', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(), help='The SQL query file path')
+        c.argument('result_limit', arg_type=get_enum_type([5000, -1]), help="The SQL query results limit. Default is 5000. '-1' is no limit.")
+        c.argument('folder_name', help='The folder that this SQL script is in. If not specified, this SQL script will appear at the root level. Eg: folder/subfolder1')
+        c.argument('description', help='The SQL script description')
+        c.argument('sql_pool_name', help='The SQL pool name')
+        c.argument('sql_database_name', help='The SQL database name')
+        c.argument('additional_properties', help='The SQL script additional properties')
 
     with self.argument_context('synapse sql-script export') as c:
         c.argument('output_folder', help='The SQL script export path')

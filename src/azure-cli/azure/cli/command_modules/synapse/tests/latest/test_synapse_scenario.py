@@ -1813,7 +1813,7 @@ class SynapseScenarioTests(ScenarioTest):
         # create sqlscript
         self.cmd(
             'az synapse sql-script create --workspace-name {workspace} --name {name} --file "{file}" '
-            ' --folder-name {folder_name}',
+            '--sql-pool-name {sql_pool_name} --sql-database-name {data_base_name} --folder-name {folder_name}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -1830,14 +1830,6 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse sql-script list --workspace-name {workspace}',
             checks=[
                 self.check('[0].type', 'Microsoft.Synapse/workspaces/sqlscripts')
-            ])
-        
-        # update sqlscript
-        self.cmd(
-            'az synapse sql-script update --workspace-name {workspace} --name {name} --file "{file}" '
-            '--sql-pool-name {sql_pool_name} --sql-database-name {data_base_name} --folder-name {folder_name}',
-            checks=[
-                self.check('name', self.kwargs['name'])
             ])
 
         # export sqlscript

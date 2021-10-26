@@ -534,9 +534,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_sql_scripts')
         g.custom_show_command('show', 'get_sql_script')
         g.custom_command('delete', 'delete_sql_script', supports_no_wait=True)
-        g.custom_command('create', 'create_or_update_sql_script', supports_no_wait=True)
+        g.custom_command('create', 'create_sql_script', supports_no_wait=True)
         g.custom_wait_command('wait', 'get_sql_script')
-        g.custom_command('update', 'create_or_update_sql_script', supports_no_wait=True)
         g.custom_show_command('export', 'export_sql_script')
 
     with self.command_group('synapse', is_preview=True):
