@@ -339,10 +339,34 @@ helps['keyvault key rotation-policy update'] = """
 type: command
 short-summary: Update the rotation policy of a Key Vault key.
 examples:
-  - name: Set notify trigger to notify 7 days before expiry
-    text: az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --notify-before-expiry P7D --expires-in P30D
-  - name: Set rotate trigger to rotate 15 days after creation
-    text: az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --rotate-after-creation P15D
+  - name: Set rotation policy using json file
+    text: |
+        az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --value path/to/policy.json
+        A valid example for policy.json is:
+        {
+          "lifetime_actions": [
+            {
+              "trigger": {
+                "time_after_create": "P90D", // ISO 8601 duration. For example: 90 days is "P90D", 3 months is "P3M", and 48 hours is "PT48H".
+                "time_before_expiry" : null
+              },
+              "action": {
+                "type": "Rotate"
+              }
+            },
+            {
+              "trigger": {
+                "time_before_expiry" : "P30D" // ISO 8601 duration.
+              },
+              "action": {
+                "type": "Notify"
+              }
+            }
+          ],
+          "attributes": {
+            "expires_in": "P2Y" // ISO 8601 duration.
+          }
+        }
 """
 
 helps['keyvault key rotation-policy show'] = """
