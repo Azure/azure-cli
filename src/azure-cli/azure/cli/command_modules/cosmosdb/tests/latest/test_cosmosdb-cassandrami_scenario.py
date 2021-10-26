@@ -72,6 +72,28 @@ class ManagedCassandraScenarioTest(ScenarioTest):
         clusters_sub = self.cmd('az managed-cassandra cluster list').get_output_in_json()
         assert len(clusters_sub) >= 1
 
+        # Deallocate cluster
+        self.cmd('az managed-cassandra cluster deallocate -c {c} -g {rg}')
+        cluster = self.cmd('az managed-cassandra cluster show -c {c} -g {rg}').get_output_in_json()
+        assert cluster['properties']['deallocated'] == True
+
+        # Start cluster
+        self.cmd('az managed-cassandra cluster start -c {c} -g {rg}')
+        cluster = self.cmd('az managed-cassandra cluster show -c {c} -g {rg}').get_output_in_json()
+        assert cluster['properties']['deallocated'] == False
+
+        # invoke-command
+        self.kwargs.update({
+            'host': datacenters[0]['properties']['seedNodes'][0]['ipAddress']
+        })
+
+        invoke_command = self.cmd('az managed-cassandra cluster invoke-command -c {c} -g {rg} --host {host} --command-name "nodetool" --arguments status=""').get_output_in_json()
+        assert len(invoke_command["commandOutput"]) >= 1
+
+        # status command
+        status = self.cmd('az managed-cassandra cluster status -c {c} -g {rg}').get_output_in_json()
+        assert status["reaperStatus"]["Healthy"] == True
+
         # Delete Cluster
         try:
             self.cmd('az managed-cassandra cluster delete -c {c} -g {rg} --yes')
