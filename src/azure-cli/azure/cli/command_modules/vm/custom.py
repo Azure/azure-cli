@@ -2490,7 +2490,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
                                     vmss.identity.user_assigned_identities)
 
 
-# pylint: disable=too-many-locals, too-many-statements, line-too-long
+# pylint: disable=too-many-locals, too-many-statements
 def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 disable_overprovision=None, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
@@ -2517,7 +2517,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
-                application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
+                application_security_groups=None, ultra_ssd_enabled=None,
+                ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='Uniform', scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
