@@ -2563,6 +2563,8 @@ class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
                  checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
         self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --public-network-access Disabled',
                  checks=[self.check('properties.publicNetworkAccess', 'Disabled')])
+        self.cmd('keyvault update -g {rg} -n {kv3} --public-network-access Enabled',
+                 checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
 
 
 if __name__ == '__main__':
